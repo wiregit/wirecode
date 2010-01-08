@@ -41,6 +41,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
+import com.limegroup.gnutella.malware.VirusDefinitionDownloaderKeys;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
@@ -354,6 +355,9 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;
             
+        case APPLYING_ANTIVIRUS_DEFINITION_UPDATE:
+            return DownloadState.APPLYING_DEFINITION_UPDATE;
+            
         default:
             throw new IllegalStateException("Unknown State: " + state);
         }
@@ -550,6 +554,20 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
 
     @Override
     public Object getDownloadProperty(DownloadPropertyKey key) {
+        if(key == DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE && downloadItemType == DownloadItemType.ANTIVIRUS) {
+            return downloader.getAttribute(VirusDefinitionDownloaderKeys.TYPE);
+        }
+
+        if(key == DownloadPropertyKey.ANTIVIRUS_INCREMENT_COUNT && downloadItemType == DownloadItemType.ANTIVIRUS) {
+            Object count = downloader.getAttribute(VirusDefinitionDownloaderKeys.COUNT);
+            return count == null ? Integer.valueOf(0) : count;
+        }
+        
+        if(key == DownloadPropertyKey.ANTIVIRUS_INCREMENT_INDEX && downloadItemType == DownloadItemType.ANTIVIRUS) {
+            Object index = downloader.getAttribute(VirusDefinitionDownloaderKeys.INDEX);
+            return index == null ? Integer.valueOf(0) : index;
+        }
+        
         if(key == DownloadPropertyKey.TORRENT && DownloadItemType.BITTORRENT == downloadItemType) {
             BTDownloader btDownloader = (BTDownloader)downloader;
             return btDownloader.getTorrent();

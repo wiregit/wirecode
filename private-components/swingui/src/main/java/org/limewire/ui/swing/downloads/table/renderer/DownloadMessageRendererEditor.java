@@ -14,9 +14,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.malware.AntivirusUpdateType;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
@@ -124,7 +126,8 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         if (percent == 0 || state.isFinished() ||
                 state == DownloadState.DOWNLOADING ||
                 state == DownloadState.ERROR ||
-                state == DownloadState.SCANNING) {
+                state == DownloadState.SCANNING || 
+                state == DownloadState.APPLYING_DEFINITION_UPDATE) {
             return "";
         }
         return percent + "% - ";    
@@ -203,6 +206,12 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case SCAN_FAILED:
         case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return I18n.tr("Done, but unable to scan for viruses");
+        case APPLYING_DEFINITION_UPDATE:
+            AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);
+            if (type == AntivirusUpdateType.CHECKING) {
+                return I18n.tr("Checking...");
+            }
+       return I18n.tr("Applying update...");
         default:
             return null;
         }

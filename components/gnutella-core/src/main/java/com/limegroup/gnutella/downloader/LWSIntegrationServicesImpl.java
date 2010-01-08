@@ -136,7 +136,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 put(DownloadState.SCANNING, "Scanning");
                 put(DownloadState.THREAT_FOUND, "Threat found");
                 put(DownloadState.SCAN_FAILED, "Scan failed");
-                put(DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS, "Scan failed");    
+                put(DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS, "Scan failed");  
+                put(DownloadState.APPLYING_ANTIVIRUS_DEFINITION_UPDATE, "Applying anti-virus definition update");    
             
                 assert isComplete();
             }

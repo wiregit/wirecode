@@ -4,7 +4,9 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.core.api.malware.AntivirusUpdateType;
 import org.limewire.ui.swing.transfer.TransferTitleRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -71,13 +73,35 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         DownloadItem item = (DownloadItem) value;
         
         switch (item.getDownloadItemType()) {
-        case ANTIVIRUS:
-            return I18n.tr("Updating AVG Anti-Virus definitions...");
+        case ANTIVIRUS:          
+            return getAntivirusText(item);
         case BITTORRENT:
             return I18n.tr("{0} (torrent)", PropertiableFileUtils.getNameProperty(item, true));
         case GNUTELLA:
         default:
             return PropertiableFileUtils.getNameProperty(item, true);
         }
+    }
+    
+    private String getAntivirusText(DownloadItem item) {
+        AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);
+
+        switch (type) {
+        case CHECKING:
+            return I18n.tr("Checking for AVG Anti-Virus updates");
+            
+        case FULL:
+            return I18n.tr("Updating AVG Anti-Virus");
+            
+        case INCREMENTAL:
+            Integer index = (Integer) item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_INCREMENT_INDEX);
+            Integer count = (Integer) item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_INCREMENT_COUNT);
+            // {0}: current update, {1} total number of updates
+            return I18n.tr("Updating AVG Anti-Virus definitions - {0} of {1}", index, count);
+            
+        default:
+            return I18n.tr("Updating AVG Anti-Virus definitions");
+        }
+
     }
 }
