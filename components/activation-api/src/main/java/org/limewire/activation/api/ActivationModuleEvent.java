@@ -1,18 +1,19 @@
 package org.limewire.activation.api;
 
+import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.listener.DefaultDataEvent;
 
 public class ActivationModuleEvent extends DefaultDataEvent<ActivationID> {
 
-    private final boolean isActive;
+    private final Status status;
     
-    public ActivationModuleEvent(ActivationID moduleID, boolean isActive) {
+    public ActivationModuleEvent(ActivationID moduleID, Status status) {
         super(moduleID);
         
-        this.isActive = isActive;
+        this.status = status;
     }
     
-    public boolean isActive() {
-        return isActive;
+    public Status getStatus() {
+        return status;
     }
 }

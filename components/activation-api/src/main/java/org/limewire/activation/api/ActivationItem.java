@@ -5,6 +5,10 @@ package org.limewire.activation.api;
 //      needed to be retrieved from the server and stored on the server.
 public interface ActivationItem {
 
+    static enum Status {
+        ACTIVE, EXPIRED, CANCELLED
+    }
+    
     public ActivationID getModuleID();
     
     /**
@@ -23,16 +27,22 @@ public interface ActivationItem {
     public long getDateExpired();
     
     /**
-     * Returns true if this item was purchased but is now
-     * expired, false otherwise.
+     * Returns the status that this module is in for this ActivationKey.
+     * @return
      */
-    public boolean isActive();
+    public Status getStatus();
     
-    /**
-     * Returns true if this item can be used in this
-     * version of LimeWire, false otherwise.
-     */
-    public boolean isUseable();
+//    /**
+//     * Returns true if this item was purchased but is now
+//     * expired, false otherwise.
+//     */
+//    public boolean isActive();
+//    
+//    /**
+//     * Returns true if this item can be used in this
+//     * version of LimeWire, false otherwise.
+//     */
+//    public boolean isUseable();
 
     /**
      * Returns a URL related to this feature.

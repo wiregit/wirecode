@@ -18,6 +18,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -88,7 +89,7 @@ class ActivationTable extends MouseableTable {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             
             ActivationItem item = model.getElementAt(adapter.row);
-            return !item.isUseable();
+            return item.getStatus() == Status.CANCELLED;
 //            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
 //            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
 //            if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))
@@ -267,7 +268,7 @@ class ActivationTable extends MouseableTable {
         }
         
         private String getText(ActivationItem item) {
-            if(item.isUseable()) {
+            if(item.getStatus() != Status.CANCELLED) {
                 return item.getLicenseName();
             } else {
                 return "<html><s>" + item.getLicenseName() + "</s></html>";
@@ -336,9 +337,9 @@ class ActivationTable extends MouseableTable {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-                iconButton.setVisible(!item.isUseable());
                 renewAction.setURL(item.getURL());
-                renewButton.setVisible(!item.isActive());
+                iconButton.setVisible(item.getStatus() == Status.CANCELLED);
+                renewButton.setVisible(item.getStatus() == Status.EXPIRED);
                 cellEditorValue = item;
             } else {
                 dateLabel.setText("");
@@ -356,8 +357,8 @@ class ActivationTable extends MouseableTable {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-                iconButton.setVisible(!item.isUseable());
-                renewButton.setVisible(!item.isActive());
+                iconButton.setVisible(item.getStatus() == Status.CANCELLED);
+                renewButton.setVisible(item.getStatus() == Status.EXPIRED);
             } else {
                 dateLabel.setText("");
                 iconButton.setVisible(false);

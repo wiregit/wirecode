@@ -2,9 +2,7 @@ package org.limewire.activation.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
@@ -13,6 +11,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
@@ -34,6 +33,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     private final ActivationModel activationModel;
     
+    @Inject
     public ActivationManagerImpl(ActivationModel activationModel) {
         this.activationModel = activationModel;
     }
@@ -64,9 +64,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     
                     // this is temporary
                     List<ActivationItem> list = new ArrayList<ActivationItem>();
-                    list.add(new ActivationItemTest(0, "Test Active", false, true));
-                    list.add(new ActivationItemTest(1, "Test Inactive", false, false));
-                    list.add(new ActivationItemTest(2, "Test Expired", true, true));  
+                    list.add(new ActivationItemTest(0, "Test Active", Status.ACTIVE));
+                    list.add(new ActivationItemTest(1, "Test Inactive", Status.CANCELLED));
+                    list.add(new ActivationItemTest(2, "Test Expired", Status.EXPIRED));  
                     setActivationItems(list);
                     
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
@@ -219,14 +219,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
         private ActivationID moduelID;
         private String name;
-        private boolean isExpired;
-        private boolean isActivate;
+        private Status status;
         
-        public ActivationItemTest(int id, String name, boolean isExpired, boolean isActive) {
+        public ActivationItemTest(int id, String name, Status status) {
             this.moduelID = ActivationID.getActivationID(id);
             this.name = name;
-            this.isExpired = isExpired;
-            this.isActivate = isActive;
+            this.status = status;
         }
         
         @Override
@@ -251,19 +249,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
 
         @Override
-        public boolean isUseable() {
-            return isActivate;
-        }
-
-        @Override
-        public boolean isActive() {
-            return !isExpired;
-        }
-
-        @Override
         public ActivationID getModuleID() {
             return moduelID;
         }
-        
+
+        @Override
+        public Status getStatus() {
+            return status;
+        }
     }
 }

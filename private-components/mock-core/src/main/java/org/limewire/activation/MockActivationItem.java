@@ -28,18 +28,6 @@ public class MockActivationItem implements ActivationItem {
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public boolean isUseable() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isActive() {
-        // TODO Auto-generated method stub
-        return false;
-    }
 //
 //    @Override
 //    public boolean isSubscription() {
@@ -56,6 +44,11 @@ public class MockActivationItem implements ActivationItem {
     @Override
     public ActivationID getModuleID() {
         return ActivationID.PRO_MODULE;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.EXPIRED;
     }
 
 }

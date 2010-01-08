@@ -32,18 +32,13 @@ public class LostLicenseItem implements ActivationItem {
     }
 
     @Override
-    public boolean isUseable() {
-        return false;
-    }
-
-    @Override
-    public boolean isActive() {
-        return false;
-    }
-
-    @Override
     public ActivationID getModuleID() {
         return ActivationID.UNKNOWN_MODULE;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.CANCELLED;
     }
 
 //    @Override

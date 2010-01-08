@@ -8,6 +8,7 @@ import java.util.Map;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationModuleEvent;
+import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -40,12 +41,12 @@ public class ActivationModelImpl implements ActivationModel {
         // we need to disable anything that may have been previously active
         for(ActivationItem item : oldItems) {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
-                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), false));
+                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), Status.EXPIRED));
         }
         // activate any new items that were added
         for(ActivationItem item : items) {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
-                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.isActive()));
+                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.getStatus()));
         }
     }
     
@@ -68,7 +69,7 @@ public class ActivationModelImpl implements ActivationModel {
         if(item == null)
             return false;
         else
-            return item.isActive();
+            return item.getStatus() == Status.ACTIVE;
     }
     
     @Override
