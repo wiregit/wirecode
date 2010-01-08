@@ -244,6 +244,7 @@ public class CoreSearch implements Search {
         }
     }
     
+    @Override
     public GUID getQueryGuid() {
         return new GUID(searchGuid);
     }

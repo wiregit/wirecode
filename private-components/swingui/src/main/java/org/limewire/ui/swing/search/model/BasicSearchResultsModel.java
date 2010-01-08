@@ -18,7 +18,9 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResultList;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -27,12 +29,15 @@ import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransactionList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
@@ -59,6 +64,12 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     /** Search request object. */
     private final Search search;
+    
+    /** Search manager. */
+    private final SearchManager searchManager;
+    
+    /** Search result list. */
+    private final SearchResultList searchResultList;
 
     /** Core download manager. */
     private final DownloadListManager downloadListManager;
@@ -79,7 +90,8 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     private final FilterList<VisualSearchResult> filteredResultList;
 
     /** Listener to handle search request events. */
-    private SearchListener searchListener;
+//    private SearchListener searchListener;
+    private ListEventListener<SearchResult> resultListener;
 
     /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
@@ -128,10 +140,13 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     public BasicSearchResultsModel(SearchInfo searchInfo, Search search, 
             Provider<PropertiableHeadings> propertiableHeadings,
             DownloadListManager downloadListManager,
-            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
+            SearchManager searchManager) {
         
         this.searchInfo = searchInfo;
         this.search = search;
+        this.searchManager = searchManager;
+        this.searchResultList = searchManager.addSearch(search);
         this.downloadListManager = downloadListManager;
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.propertiableHeadings = propertiableHeadings;
@@ -180,8 +195,27 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }
         
         // Install search listener.
-        this.searchListener = searchListener;
-        search.addSearchListener(searchListener);
+//        this.searchListener = searchListener;
+//        search.addSearchListener(searchListener);
+        this.resultListener = new ListEventListener<SearchResult>() {
+            @Override
+            public void listChanged(ListEvent listChanges) {
+                while (listChanges.next()) {
+                    switch (listChanges.getType()) {
+                    case ListEvent.INSERT:
+                        int index = listChanges.getIndex();
+                        final SearchResult result = (SearchResult) listChanges.getSourceList().get(index);
+                        SwingUtils.invokeNowOrLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                addSearchResult(result);
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        searchResultList.getSearchResults().addListEventListener(resultListener);
         
         // Start search.
         search.start();
@@ -196,10 +230,15 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         search.stop();
         
         // Remove search listener.
-        if (searchListener != null) {
-            search.removeSearchListener(searchListener);
-            searchListener = null;
+//        if (searchListener != null) {
+//            search.removeSearchListener(searchListener);
+//            searchListener = null;
+//        }
+        if (resultListener != null) {
+            searchResultList.getSearchResults().removeListEventListener(resultListener);
+            resultListener = null;
         }
+        searchManager.removeSearch(search);
         
         groupedUrnResults.dispose();
         

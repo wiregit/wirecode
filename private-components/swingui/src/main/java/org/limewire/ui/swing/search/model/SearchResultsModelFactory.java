@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.model;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -16,6 +17,8 @@ import com.google.inject.Provider;
  * Implements a factory for creating the search results data model.
  */
 public class SearchResultsModelFactory {
+
+    private final SearchManager searchManager;
     
     private final SpamManager spamManager;
 
@@ -34,11 +37,13 @@ public class SearchResultsModelFactory {
      * managers, and property values.
      */
     @Inject
-    public SearchResultsModelFactory(SimilarResultsDetectorFactory similarResultsDetectorFactory,
+    public SearchResultsModelFactory(SearchManager searchManager,
+            SimilarResultsDetectorFactory similarResultsDetectorFactory,
             SpamManager spamManager, LibraryManager libraryManager,
             DownloadListManager downloadListManager,
             Provider<PropertiableHeadings> propertiableHeadings,
             Provider<DownloadExceptionHandler> downloadExceptionHandler) {
+        this.searchManager = searchManager;
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
@@ -54,7 +59,7 @@ public class SearchResultsModelFactory {
         // Create search result model.
         BasicSearchResultsModel searchResultsModel = new BasicSearchResultsModel(
                 searchInfo, search, propertiableHeadings, downloadListManager, 
-                downloadExceptionHandler);
+                downloadExceptionHandler, searchManager);
 
         // Create detector to find similar results.
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory.newSimilarResultsDetector();
