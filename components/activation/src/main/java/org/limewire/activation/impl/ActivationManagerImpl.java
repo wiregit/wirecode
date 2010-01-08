@@ -40,12 +40,15 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     @Override
     public void activateKey(final String key) {
-        if (!isValidKey(key)) {
-            currentState = ActivationState.NOT_ACTIVATED;
-            activationError = ActivationError.INVALID_KEY;
-            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
-            return;
-        }
+    //NOTE: DO NOT DELETE THIS!!
+    // temporary commented out to allow more keys to be entered
+//        if (!isValidKey(key)) {
+//            currentState = ActivationState.NOT_ACTIVATED;
+//            activationError = ActivationError.INVALID_KEY;
+//            setActivationItems(Collections.EMPTY_LIST);
+//            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
+//            return;
+//        }
         
         //TODO: this sould hit the real server
         Thread t = new Thread(new Runnable(){
@@ -196,12 +199,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void addModuleListener(EventListener<ActivationModuleEvent> listener) {
-        activationModel.addModuleListener(listener);
+        activationModel.addListener(listener);
     }
     
     @Override
     public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) {
-        return activationModel.removeModuleListener(listener);
+        return activationModel.removeListener(listener);
     }
         
     @Override

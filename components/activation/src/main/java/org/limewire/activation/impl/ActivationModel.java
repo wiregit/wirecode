@@ -19,7 +19,7 @@ public interface ActivationModel {
     
     public boolean isActive(ActivationID id);
     
-    public void addModuleListener(EventListener<ActivationModuleEvent> listener);
+    public void addListener(EventListener<ActivationModuleEvent> listener);
     
-    public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener);
+    public boolean removeListener(EventListener<ActivationModuleEvent> listener);
 }
