@@ -19,8 +19,8 @@ import ca.odell.glazedlists.EventList;
 class CoreSearchResultList implements SearchResultList {
 
     private final Search search;
-    
     private final EventList<SearchResult> threadSafeResultList;
+    private final SearchListener searchListener;
     
     /**
      * Constructs a SearchResultList for the specified search.
@@ -28,10 +28,12 @@ class CoreSearchResultList implements SearchResultList {
     public CoreSearchResultList(Search search) {
         this.search = search;
         
+        // Create list of results.
         this.threadSafeResultList = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
         
         // Add search listener.
-        search.addSearchListener(new SearchListenerImpl());
+        searchListener = new SearchListenerImpl();
+        search.addSearchListener(searchListener);
     }
     
     @Override
@@ -42,6 +44,11 @@ class CoreSearchResultList implements SearchResultList {
     @Override
     public EventList<SearchResult> getSearchResults() {
         return threadSafeResultList;
+    }
+
+    @Override
+    public void dispose() {
+        search.removeSearchListener(searchListener);
     }
     
     /**

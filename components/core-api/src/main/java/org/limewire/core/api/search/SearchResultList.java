@@ -16,4 +16,9 @@ public interface SearchResultList {
      * Returns the list of search results.
      */
     EventList<SearchResult> getSearchResults();
+    
+    /**
+     * Disposes of resources and removes listeners.
+     */
+    void dispose();
 }

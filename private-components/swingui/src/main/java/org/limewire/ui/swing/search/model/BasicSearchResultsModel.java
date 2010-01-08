@@ -90,7 +90,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     private final FilterList<VisualSearchResult> filteredResultList;
 
     /** Listener to handle search request events. */
-//    private SearchListener searchListener;
+    private SearchListener searchListener;
     private ListEventListener<SearchResult> resultListener;
 
     /** Current list of sorted and filtered results. */
@@ -195,8 +195,10 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }
         
         // Install search listener.
-//        this.searchListener = searchListener;
-//        search.addSearchListener(searchListener);
+        this.searchListener = searchListener;
+        search.addSearchListener(searchListener);
+        
+        // Install search result listener.
         this.resultListener = new ListEventListener<SearchResult>() {
             @Override
             public void listChanged(ListEvent listChanges) {
@@ -230,10 +232,12 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         search.stop();
         
         // Remove search listener.
-//        if (searchListener != null) {
-//            search.removeSearchListener(searchListener);
-//            searchListener = null;
-//        }
+        if (searchListener != null) {
+            search.removeSearchListener(searchListener);
+            searchListener = null;
+        }
+        
+        // Remove search result listener.
         if (resultListener != null) {
             searchResultList.getSearchResults().removeListEventListener(resultListener);
             resultListener = null;

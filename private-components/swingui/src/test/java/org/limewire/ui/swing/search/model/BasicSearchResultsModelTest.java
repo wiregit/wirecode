@@ -804,7 +804,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public List<Search> getSearches() {
+        public List<Search> getActiveSearches() {
             return null;
         }
 

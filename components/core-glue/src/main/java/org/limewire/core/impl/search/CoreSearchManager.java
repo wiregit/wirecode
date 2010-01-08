@@ -38,13 +38,11 @@ public class CoreSearchManager implements SearchManager {
 
     @Override
     public void removeSearch(Search search) {
-        // Stop search.
-        search.stop();
-        
-        // Remove result list from collection.
+        // Dispose of result list and remove from collection.
         for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
             SearchResultList resultList = iter.next();
             if (search.equals(resultList.getSearch())) {
+                resultList.dispose();
                 threadSafeSearchList.remove(resultList);
                 break;
             }
@@ -52,12 +50,15 @@ public class CoreSearchManager implements SearchManager {
     }
 
     @Override
-    public List<Search> getSearches() {
+    public List<Search> getActiveSearches() {
         List<Search> list = new ArrayList<Search>();
         
+        // Add active searches to list.
         for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
             SearchResultList resultList = iter.next();
-            list.add(resultList.getSearch());
+            if (resultList.getSearch().getQueryGuid() != null) {
+                list.add(resultList.getSearch());
+            }
         }
         
         return list;

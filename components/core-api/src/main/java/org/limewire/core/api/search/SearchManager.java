@@ -18,9 +18,10 @@ public interface SearchManager {
     void removeSearch(Search search);
     
     /**
-     * Returns a list of all searches.
+     * Returns a list of active searches.  An active search has been assigned
+     * a GUID, which excludes unstarted searches and browse searches.
      */
-    List<Search> getSearches();
+    List<Search> getActiveSearches();
     
     /**
      * Returns the result list for the specified search.
