@@ -28,12 +28,16 @@ import com.google.inject.Inject;
 public class ActivationManagerImpl implements ActivationManager, Service {
 
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
-    private final EventListenerList<ActivationModuleEvent> moduleListeners = new EventListenerList<ActivationModuleEvent>();
-    private final Map<ActivationID, ActivationItem> itemMap = new HashMap<ActivationID, ActivationItem>(4);
 
     private volatile ActivationState currentState = ActivationState.UNINITIALIZED;
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
 
+    private final ActivationModel activationModel;
+    
+    public ActivationManagerImpl(ActivationModel activationModel) {
+        this.activationModel = activationModel;
+    }
+    
     @Override
     public void activateKey(final String key) {
         if (!isValidKey(key)) {
@@ -119,49 +123,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public List<ActivationItem> getActivationItems() {
-        synchronized (this) {
-            return new ArrayList<ActivationItem>(itemMap.values());            
-        }
-//        if(currentState == ActivationState.ACTIVATED) {
-//            List<ActivationItem> list = new ArrayList<ActivationItem>();
-//            list.add(new ActivationItemTest("Test Active", false, true));
-//            list.add(new ActivationItemTest("Test Inactive", false, false));
-//            list.add(new ActivationItemTest("Test Expired", true, true));   
-//            return list;
-//        } else {
-//            return Collections.emptyList();
-//        }
+        return activationModel.getActivationItems();
     }
     
     public void setActivationItems(List<ActivationItem> items) {
-        List<ActivationItem> oldItems;
-        synchronized (this) {
-            oldItems = new ArrayList<ActivationItem>(itemMap.values());
-            itemMap.clear();
-            for(ActivationItem item : items) {
-                itemMap.put(item.getModuleID(), item);
-            }
-        }
-        save();
-        // we need to disable anything that may have been previously active
-        for(ActivationItem item : oldItems) {
-            if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
-                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), false));
-        }
-        // activate any new items that were added
-        for(ActivationItem item : items) {
-            if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
-                moduleListeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.isActive()));
-        }
-    }
-    
-    
-    public void load() {
-        
-    }
-    
-    public void save() {
-        
+        activationModel.setActivationItems(items);
     }
 
     @Override
@@ -200,14 +166,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public boolean isActive(ActivationID id) {
-        ActivationItem item;
-        synchronized (itemMap) {
-            item = itemMap.get(id);            
-        }
-        if(item == null)
-            return false;
-        else
-            return item.isActive();
+        return activationModel.isActive(id);
     }
     
 
@@ -223,7 +182,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void initialize() {
-        load();
+        activationModel.load();
     }
 
     @Override
@@ -237,12 +196,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void addModuleListener(EventListener<ActivationModuleEvent> listener) {
-        moduleListeners.addListener(listener);
+        activationModel.addModuleListener(listener);
     }
     
     @Override
     public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) {
-        return moduleListeners.removeListener(listener);
+        return activationModel.removeModuleListener(listener);
     }
         
     @Override
@@ -300,12 +259,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         public boolean isActive() {
             return !isExpired;
         }
-
-//        @Override
-//        public boolean isSubscription() {
-//            // TODO Auto-generated method stub
-//            return false;
-//        }
 
         @Override
         public ActivationID getModuleID() {
