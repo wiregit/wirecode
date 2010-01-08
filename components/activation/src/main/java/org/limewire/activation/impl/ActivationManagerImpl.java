@@ -40,15 +40,35 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     @Override
     public void activateKey(final String key) {
-    //NOTE: DO NOT DELETE THIS!!
-    // temporary commented out to allow more keys to be entered
-//        if (!isValidKey(key)) {
-//            currentState = ActivationState.NOT_ACTIVATED;
-//            activationError = ActivationError.INVALID_KEY;
-//            setActivationItems(Collections.EMPTY_LIST);
-//            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
-//            return;
-//        }
+        /** Some keys that are valid
+         *  ADXU-8ZND-JGU8: 198 => 6 => 8
+            J8SV-KC4Y-FLBE: 172 => 12 => E
+            4PVV-CDDA-8T8U: 154 => 26 => U
+            Q9DP-UGFY-CRTC: 202 => 10 => C
+            MQDH-SC24-C6NB: 137 => 9 => B
+            QT5J-KANU-PJ7M: 179 => 19 => M
+            RZCL-CZPX-PFVC: 234 => 10 => C
+            CT3Y-NPVM-8MN8: 198 => 6 => 8
+            DDHN-SUN9-GV4K: 177 => 17 => K
+            ZATY-QEWF-4RQS: 216 => 24 => S
+            6JZY-DN7V-PX79: 199 => 7 => 9
+            4E2C-QF7S-4X4T: 121 => 25 => T
+            K4W5-K3BL-WBZ5: 163 => 3 => 5
+            NJ26-KPWW-HQAM: 179 => 19 => M
+            GN2G-32U2-N827: 101 => 5 => 7
+            S3H6-QCSN-UGQQ: 182 => 22 => Q
+            J8Q4-UJNK-LFVR: 183 => 23 => R
+            8M5W-YHKA-NKEH: 175 => 15 => H
+            9GX5-F2B3-782R: 87 => 23 => R
+            SFG6-P97K-9Q8E: 140 => 12 => E
+         */
+        if (!isValidKey(key)) {
+            currentState = ActivationState.NOT_ACTIVATED;
+            activationError = ActivationError.INVALID_KEY;
+            setActivationItems(Collections.EMPTY_LIST);
+            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
+            return;
+        }
         
         //TODO: this sould hit the real server
         Thread t = new Thread(new Runnable(){
