@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.limewire.util.StringUtils;
 
 /**
@@ -93,5 +95,55 @@ public final class HTTPUtils {
      */
     public static String encode(String name, String encoding) throws IOException {
         return StringUtils.replace(URLEncoder.encode(name, encoding), "+", "%20");
+    }
+    
+    /**
+     * Returns the offset at which content starts in the HttpResponse,
+     * based on the 'Content-Range' header.
+     */
+    public static long getStartPoint(HttpResponse response) throws IOException {
+//      LOG.debugf("Looking at response of {0}, {1}", response.getStatusLine(), Arrays.asList(response.getAllHeaders()));
+      Header header = response.getFirstHeader(HTTPHeaderName.CONTENT_RANGE.httpStringValue());
+      if(header == null) {
+          return 0;
+      } else {
+//          Content-Range = "Content-Range" ":" content-range-spec
+//
+//          content-range-spec      = byte-content-range-spec
+//          byte-content-range-spec = bytes-unit SP
+//                                    byte-range-resp-spec "/"
+//                                    ( instance-length | "*" )
+//
+//          byte-range-resp-spec = (first-byte-pos "-" last-byte-pos)
+//                                         | "*"
+//          instance-length           = 1*DIGIT
+          String value = header.getValue();
+          // Skip past the 'bytes ' prefix.
+          if(!value.startsWith("bytes ")) {
+              throw new IOException("invalid content range: " + value);
+          }
+          value = value.substring("bytes ".length()).trim();
+          if(value.startsWith("*")) {
+              // They're returning everything!
+              return 0;
+          } else {
+              // There's got to be a dash in there, we want before the dash.
+              int dashIdx = value.indexOf('-');
+              if(dashIdx < 0) {
+                  throw new IOException("invalid content range: " + value);
+              } else {
+                  value = value.substring(0, dashIdx).trim();
+                  try {
+                      long start = Long.parseLong(value);
+                      if(start < 0) {
+                          throw new IOException("invalid start: " + start);
+                      }
+                      return start;
+                  } catch(NumberFormatException nfe) {
+                      throw new IOException("invalid content range", nfe);
+                    }
+                }
+            }
+        }
     }
 }
