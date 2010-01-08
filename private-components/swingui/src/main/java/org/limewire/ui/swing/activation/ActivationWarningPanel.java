@@ -32,7 +32,6 @@ public class ActivationWarningPanel {
         
         panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
-        busyLabel = new ColoredBusyLabel(new Dimension(20,20));
 
         ResizeUtils.forceSize(panel, new Dimension(20, 20));
     }
@@ -47,6 +46,7 @@ public class ActivationWarningPanel {
         }
         if(currentMode == Mode.SPINNER) {
             busyLabel.setBusy(false);
+            busyLabel = null;
         }
         currentMode = mode;
         
@@ -57,6 +57,7 @@ public class ActivationWarningPanel {
             panel.add(new JLabel(warningIcon), BorderLayout.CENTER);
             break;
         case SPINNER:
+            busyLabel = new ColoredBusyLabel(new Dimension(20,20));
             panel.add(busyLabel, BorderLayout.CENTER);
             panel.revalidate();
             busyLabel.setBusy(true);
