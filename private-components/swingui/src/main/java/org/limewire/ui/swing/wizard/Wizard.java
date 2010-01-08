@@ -221,6 +221,13 @@ public class Wizard extends JPanel {
         footer.setText(page.getFooter());
     }
     
+    private void updateForwardButton(WizardPage page) {
+        if (finishButton.isVisible() && !finishButton.getText().equals(page.getForwardButtonText()))
+            finishButton.setText(page.getForwardButtonText());
+        if (continueButton.isVisible() && !continueButton.getText().equals(page.getForwardButtonText()))
+            continueButton.setText(page.getForwardButtonText());
+    }
+    
     public void setCurrentPage(int step){
         if(step >= 0 && step < pageList.size()) {
             currentPage = step;
@@ -229,6 +236,7 @@ public class Wizard extends JPanel {
             continueButton.setVisible(!finishButton.isVisible());
             backButton.setVisible(currentPage != 0);
             updateTitle(pageList.get(currentPage));
+            updateForwardButton(pageList.get(currentPage));
         }
     }
  

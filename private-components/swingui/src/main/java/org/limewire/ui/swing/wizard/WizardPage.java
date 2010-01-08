@@ -5,12 +5,17 @@ import java.awt.Component;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Application;
+import org.limewire.ui.swing.action.UrlAction;
+import org.limewire.ui.swing.activation.LicenseKeyTextField;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ToggleExtenderListener;
 import org.limewire.ui.swing.options.LearnMoreButton;
+import org.limewire.ui.swing.util.I18n;
 
 public abstract class WizardPage extends JPanel {
     
@@ -26,6 +31,10 @@ public abstract class WizardPage extends JPanel {
     public abstract String getLine1();
     public abstract String getLine2();
     public abstract String getFooter();
+    
+    protected String getForwardButtonText() {
+        return I18n.tr("Continue");
+    }
     
     protected JLabel createAndDecorateHeader(String text) {
         JLabel label = new JLabel("<html>"+text+"</html>");
@@ -63,5 +72,24 @@ public abstract class WizardPage extends JPanel {
         HyperlinkButton learnMoreButton = new LearnMoreButton(url, application);
         decorator.decorateLink(learnMoreButton);
         return learnMoreButton;
+    }
+
+    protected HyperlinkButton createAndDecorateHyperlink(final String url, String text) {
+        UrlAction urlAction = new UrlAction(text, url);
+        HyperlinkButton hyperlinkButton = new HyperlinkButton(urlAction);
+        decorator.decorateLink(hyperlinkButton);
+        return hyperlinkButton;
+    }
+    
+    protected JTextField createAndDecorateLicenseKeyField() {
+        LicenseKeyTextField textField = new LicenseKeyTextField();
+        decorator.decorateLicenseKeyField(textField);
+        return textField;
+    }
+
+    protected JXButton createAndDecorateButton(String text) {
+        JXButton button = new JXButton(text);
+        decorator.decorateGreyButton(button);
+        return button;
     }
 }

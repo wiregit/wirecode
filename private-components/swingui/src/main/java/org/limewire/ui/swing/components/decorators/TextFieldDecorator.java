@@ -6,6 +6,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import org.limewire.ui.swing.activation.LicenseKeyTextField;
 import org.limewire.ui.swing.components.PromptPasswordField;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
@@ -61,6 +62,14 @@ public class TextFieldDecorator {
         decorateGeneralText(field);
     }
    
+    public void decorateLicenseField(LicenseKeyTextField field, AccentType accent) {
+        field.setBackgroundPainter(getTextFieldFactory().createBasicBackgroundPainter(accent));
+        decorateGeneral(field);
+    }
+    
+    public void decorateTextField(JTextField field, AccentType accent) {
+    }
+    
     /**
      * Applies the LimeWire look and feel to a password prompt text field, however allows the accent
      *  and border to be overridden for allowing it to blend in and be used on non default panels.

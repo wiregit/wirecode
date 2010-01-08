@@ -13,8 +13,17 @@ public interface ActivationManager {
     
     public String getLicenseKey();
     
+    /**
+     * This activates a key that has been newly entered by the user.
+     */
     public void activateKey(String key);
     
+    /**
+     * This uses the key entered previously by the user to check whether
+     * his modules have expired.
+     */
+    public void revalidateKey(String key);
+
     /**
      * Returns the current state of the ActivationManager.
      */

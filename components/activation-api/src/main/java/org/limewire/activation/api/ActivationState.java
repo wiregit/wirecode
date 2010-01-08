@@ -13,6 +13,11 @@ package org.limewire.activation.api;
  *    V                    |
  *    @--------------------|
  *   NOT_ACTIVATED
+ *   
+ *   or
+ *   
+ *   PROVISIONALLY_ACTIVATED 
+ *   
  */
 public enum ActivationState {
     
@@ -30,6 +35,13 @@ public enum ActivationState {
      */
     NOT_ACTIVATED,
     
+    /**
+     * Same state as ACTIVATED except the server could not be contacted.
+     * So, the last saved state was read from disk and we continue to 
+     * try to contact the server to verify the client's activation.
+     */
+    PROVISIONALLY_ACTIVATED,
+
     /**
      * ActivationManager is attempting to validate the key. If the key is valid,
      * this will transition to a ACTIVATED state or a NOT_ACTIVATED state.

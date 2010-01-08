@@ -2,11 +2,10 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.Frame;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.settings.InstallSettings;
-import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -16,13 +15,17 @@ public class SetupWizard {
     private Wizard wizard;
     private final Application application;
     private final LibraryData libraryData;
-
+    private final Provider<ActivationManager> activationManagerProvider;
+    
     @Inject
     public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
-            Provider<LibraryManager> libraryManagerProvider, Application application) {
+                      Provider<LibraryManager> libraryManagerProvider, 
+                      Application application,
+                      Provider<ActivationManager> activationManagerProvider) {
         
         this.application = application;
         this.libraryData = libraryManagerProvider.get().getLibraryData();        
+        this.activationManagerProvider = activationManagerProvider;
         
         createWizard(decoratorFactory.get(), libraryData);
     }
@@ -47,9 +50,12 @@ public class SetupWizard {
         }
         
         wizard.addPage(new SetupPage2(decorator, application, libraryData));
+
+        wizard.addPage(new SetupPage3(decorator, application, libraryData, activationManagerProvider.get()));
     }
 
     private static boolean shouldShowPage1() {
+        /*
         if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
             return true;
         }
@@ -62,8 +68,9 @@ public class SetupWizard {
         if (!InstallSettings.START_STARTUP.getValue()) {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
-
-        return false;
+        */
+        
+        return true;
     }
 
 }

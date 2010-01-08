@@ -34,9 +34,15 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private volatile ActivationState currentState = ActivationState.UNINITIALIZED;
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
 
-    
     @Override
     public void activateKey(final String key) {
+        if (!isValidKey(key)) {
+            currentState = ActivationState.NOT_ACTIVATED;
+            activationError = ActivationError.INVALID_KEY;
+            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
+            return;
+        }
+        
         //TODO: this sould hit the real server
         Thread t = new Thread(new Runnable(){
             public void run() {
@@ -44,11 +50,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 activationError = ActivationError.NO_ERROR;
                 listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(2000);
                 } catch(InterruptedException e) {
                     
                 }
-                if(key.equals("12345")) {
+                if(key.equals("ADXU8ZNDJGU8")) {
                     currentState = ActivationState.ACTIVATED;
                     activationError = ActivationError.NO_ERROR;
                     
@@ -77,7 +83,30 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         });
         t.start();
     }
-    
+
+    @Override
+    public void revalidateKey(final String key) {
+        //TODO: this should hit the real server
+        Thread t = new Thread(new Runnable(){
+            public void run() {
+                currentState = ActivationState.ACTIVATING;
+                activationError = ActivationError.NO_ERROR;
+                listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
+
+                try {
+                    
+                    
+                    
+                } catch(Exception e) {
+                    
+                    // if there's a communication exception then we need to keep trying to contact the server from a thread.
+                    
+                }
+            }
+        });
+        t.start();
+    }
+
     @Override
     public ActivationState getActivationState() {
         return currentState;
@@ -126,6 +155,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
     
+    
     public void load() {
         
     }
@@ -141,7 +171,31 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public boolean isValidKey(String key) {
-        return true;
+        if (key.length() != 12)
+            return false;
+        
+        String givenChecksum = key.substring(key.length()-1, key.length());
+        String keyPart = key.substring(0, key.length()-1);
+
+        String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+        
+        int sum = 0;
+        for (int counter = 0; counter < keyPart.length(); counter++)
+        {
+            char currentChar = keyPart.charAt(counter);
+            int positionInValidChars = validChars.indexOf(currentChar);
+            
+            if (positionInValidChars == -1) {
+                return false;
+            } else {
+                sum += positionInValidChars;
+            }
+        }
+
+        int modulusOfSum = sum % validChars.length();
+        char correctChecksum = validChars.charAt(modulusOfSum);
+
+        return givenChecksum.equals(""+correctChecksum);
     }
 
     @Override
@@ -202,7 +256,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     //NOTE: for testing only
-    private class ActivationItemTest implements ActivationItem {
+    public static class ActivationItemTest implements ActivationItem {
 
         private ActivationID moduelID;
         private String name;
@@ -251,11 +305,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 //        public boolean isSubscription() {
 //            // TODO Auto-generated method stub
 //            return false;
-//        }
-//
-//        @Override
-//        public String getFirstSupportedVersion() {
-//            return "5.5";
 //        }
 
         @Override
