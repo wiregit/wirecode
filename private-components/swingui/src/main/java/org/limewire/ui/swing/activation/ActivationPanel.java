@@ -34,7 +34,7 @@ import org.limewire.activation.api.ActivationState;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.components.ColoredBusyLabel;
+import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
@@ -59,8 +59,6 @@ public class ActivationPanel {
     private Color fontColor;
     @Resource
     private Color errorColor;
-    @Resource 
-    private Icon licenseErrorIcon;
     @Resource
     private Icon unsupportedIcon;
     
@@ -75,8 +73,7 @@ public class ActivationPanel {
     private JPanel activationPanel;
     private JDialog dialog;
     private JTextField licenseField;
-    private ColoredBusyLabel busyLabel;
-    private JLabel licenseErrorLabel;
+    private ActivationWarningPanel warningPanel;
     private JButton editButton;
     private ActivationTable table;
     private JLabel licenseKeyErrorLabel;
@@ -127,11 +124,7 @@ public class ActivationPanel {
         });
         TextFieldClipboardControl.install(licenseField);
         
-        busyLabel = new ColoredBusyLabel(new Dimension(20,20));
-        busyLabel.setVisible(false);
-        
-        licenseErrorLabel = new JLabel(licenseErrorIcon);
-        licenseErrorLabel.setVisible(false);
+        warningPanel = new ActivationWarningPanel();
         
         editButton = new JButton(new EditAction());
         
@@ -153,8 +146,7 @@ public class ActivationPanel {
         
         activationPanel.add(licenseKey, "gapright 10");
         activationPanel.add(licenseField, "grow, push");
-        activationPanel.add(busyLabel, "gapleft 6, aligny 50%, hidemode 2");
-        activationPanel.add(licenseErrorLabel, "gapleft 6, aligny 50%, hidemode 2");
+        activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%");
         activationPanel.add(editButton, "gapleft 40, wrap");
         
         activationPanel.add(licenseExpirationLabel, "span, growx, gaptop 6, gapbottom 6, wrap");
@@ -234,13 +226,13 @@ public class ActivationPanel {
         case NOT_ACTIVATED:
             editButton.setVisible(false);
             licenseField.setEditable(true);
-            setBusyLabel(false);
+            warningPanel.setActivationMode(Mode.EMPTY);
             selectCard(NO_LICENSE_PANEL);
             return;
         case ACTIVATING:
             editButton.setVisible(false);
             licenseField.setEditable(false);
-            setBusyLabel(true);
+            warningPanel.setActivationMode(Mode.SPINNER);
             if(!selectedCard.equals(NO_LICENSE_PANEL) && !selectedCard.equals(EDIT_PANEL)) {
                 selectCard(NO_LICENSE_PANEL);
             }
@@ -248,7 +240,7 @@ public class ActivationPanel {
         case ACTIVATED:
             editButton.setVisible(true);
             licenseField.setEditable(false);
-            setBusyLabel(false);
+            warningPanel.setActivationMode(Mode.EMPTY);
             selectCard(OK_PANEL);
 
             eventList.clear();
@@ -263,30 +255,28 @@ public class ActivationPanel {
         case NO_ERROR:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(false);
-            licenseErrorLabel.setVisible(false);
             return;
         case NO_KEY:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(false);
-            licenseErrorLabel.setVisible(false);
             return;
         case EXPIRED_KEY:
             setLicenseKeyErrorVisible(false);
             setLicenseExperiationVisible(true);
-            licenseErrorLabel.setVisible(false);
             return;
         case INVALID_KEY:
             clearTable();
             licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
             setLicenseKeyErrorVisible(true);
             setLicenseExperiationVisible(false);
+            warningPanel.setActivationMode(Mode.WARNING);
             return;
         case BLOCKED_KEY:
             clearTable();
             licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
             setLicenseKeyErrorVisible(true);
             setLicenseExperiationVisible(false);
-            licenseErrorLabel.setVisible(true);
+            warningPanel.setActivationMode(Mode.WARNING);
             return;
         }
         throw new IllegalStateException("Unknown state: " + error);
@@ -302,7 +292,8 @@ public class ActivationPanel {
         licenseField.setEditable(true);
         licenseField.requestFocusInWindow();
         licenseField.selectAll();
-        setBusyLabel(false);
+        warningPanel.setActivationMode(Mode.EMPTY);
+
         selectCard(EDIT_PANEL);
     }
     
@@ -324,11 +315,6 @@ public class ActivationPanel {
         }
         selectedCard = card;
         cardLayout.show(cardPanel, card);
-    }
-    
-    private void setBusyLabel(boolean isVisible) {
-        busyLabel.setVisible(isVisible);
-        busyLabel.setBusy(isVisible);
     }
     
     private void setLicenseKeyErrorVisible(boolean isVisible) {
