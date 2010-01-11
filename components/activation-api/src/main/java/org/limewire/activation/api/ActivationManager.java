@@ -16,12 +16,6 @@ public interface ActivationManager {
     public void activateKey(String key);
     
     /**
-     * This uses the key entered previously by the user to check whether
-     * his modules have expired.
-     */
-    public void revalidateKey(String key);
-
-    /**
      * Returns the current state of the ActivationManager.
      */
     public ActivationState getActivationState();

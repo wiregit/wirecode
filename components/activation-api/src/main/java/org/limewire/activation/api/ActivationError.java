@@ -7,4 +7,5 @@ public enum ActivationError {
     INVALID_KEY,
     EXPIRED_KEY,
     BLOCKED_KEY,
+    COMMUNICATION_ERROR,
 }

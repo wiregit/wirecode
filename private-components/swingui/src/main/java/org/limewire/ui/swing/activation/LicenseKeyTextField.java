@@ -64,10 +64,6 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
         }
     }
 
-    @Override
-    public String getText() {
-        return super.getText().replaceAll("-", "");
-    }
     
     /**
      * Returns the effective insets rendered by a custom painter.  This can be

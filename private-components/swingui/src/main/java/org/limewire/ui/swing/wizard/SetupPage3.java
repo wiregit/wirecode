@@ -98,6 +98,7 @@ public class SetupPage3 extends WizardPage {
         
         outerPanel.add(createAndDecorateHeader(I18n.tr("License Key") + ":"), "aligny 50%");
         licenseField = createAndDecorateLicenseKeyField();
+        licenseField.addActionListener(new EnterActionListener());
         outerPanel.add(licenseField, "cell 2 6, aligny 50%");
 
         JXButton okButton = createAndDecorateButton(I18n.tr("Activate") );

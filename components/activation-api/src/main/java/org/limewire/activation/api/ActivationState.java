@@ -47,7 +47,7 @@ public enum ActivationState {
      * this will transition to a ACTIVATED state or a NOT_ACTIVATED state.
      */
     ACTIVATING,
-    
+
     /**
      * ActivationManager has successfully authenticated the key for this session.
      */

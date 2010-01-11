@@ -114,29 +114,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
 
     @Override
-    public void revalidateKey(final String key) {
-        //TODO: this should hit the real server
-        Thread t = new Thread(new Runnable(){
-            public void run() {
-                currentState = ActivationState.ACTIVATING;
-                activationError = ActivationError.NO_ERROR;
-                listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
-
-                try {
-                    
-                    
-                    
-                } catch(Exception e) {
-                    
-                    // if there's a communication exception then we need to keep trying to contact the server from a thread.
-                    
-                }
-            }
-        });
-        t.start();
-    }
-
-    @Override
     public ActivationState getActivationState() {
         return currentState;
     }
