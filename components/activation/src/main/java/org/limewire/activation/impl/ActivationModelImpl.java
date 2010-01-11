@@ -14,6 +14,7 @@ import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.activation.serial.ActivationMemento;
 import org.limewire.activation.serial.ActivationSerializer;
+import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -29,10 +30,12 @@ public class ActivationModelImpl implements ActivationModel {
     private AtomicBoolean hasContactedServer = new AtomicBoolean(false);
     
     private final ActivationSerializer serializer;
+    private final ActivationItemFactory activationItemFactory;
     
     @Inject
-    public ActivationModelImpl(ActivationSerializer serializer) {
+    public ActivationModelImpl(ActivationSerializer serializer, ActivationItemFactory activationItemFactory) {
         this.serializer = serializer;
+        this.activationItemFactory = activationItemFactory;
     }
     
     @Override
@@ -92,17 +95,39 @@ public class ActivationModelImpl implements ActivationModel {
         if(mementos.size() > 0) {
             List<ActivationItem> activationItems = new ArrayList<ActivationItem>(mementos.size());
             for(ActivationMemento memento : mementos) {
-                // create ActivationItem
-                // add it to activationItems list
+                try {
+                    // create ActivationItem
+                    // add it to activationItems list
+                    ActivationItem item = activationItemFactory.createActivationItem(memento);
+                    activationItems.add(item);
+                } catch (InvalidDataException e) {
+                    
+                }
             }
-            
             // add this list to the 
+            setActivationItems(activationItems, true);
         }
     }
     
     @Override
     public void save() {
+        if(!hasContactedServer.get())
+            return;
         
+        List<ActivationMemento> mementos;
+        synchronized (this) {
+            mementos = new ArrayList<ActivationMemento>(itemMap.size());
+            for(ActivationItem item : itemMap.values()) {
+                if(item instanceof ActivationItemImpl) {
+                    ActivationItemImpl itemImpl = (ActivationItemImpl) item;
+                    if(itemImpl.isMementoSupported()) {
+                        mementos.add(itemImpl.toActivationMemento());
+                    }
+                }
+            }
+        }
+        
+        serializer.writeToDisk(mementos);
     }
     
     @Override

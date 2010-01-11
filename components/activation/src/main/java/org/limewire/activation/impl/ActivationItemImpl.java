@@ -1,7 +1,9 @@
 package org.limewire.activation.impl;
 
-import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.serial.ActivationMemento;
+import org.limewire.activation.serial.ActivationMementoImpl;
 import org.limewire.setting.ActivationSettings;
 
 public class ActivationItemImpl implements ActivationItem {
@@ -68,5 +70,19 @@ public class ActivationItemImpl implements ActivationItem {
     @Override
     public Status getStatus() {
         return currentStatus;
+    }
+    
+    public boolean isMementoSupported() {
+        return true;
+    }
+    
+    public ActivationMemento toActivationMemento() {
+        ActivationMemento memento = new ActivationMementoImpl();
+        memento.setID(intID);
+        memento.setDatePurchased(datePurchased);
+        memento.setDateExpired(dateExpired);
+        memento.setLicenseName(licenseName);
+        memento.setStatus(currentStatus);
+        return memento;
     }
 }

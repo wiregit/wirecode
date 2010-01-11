@@ -8,6 +8,8 @@ import org.limewire.activation.impl.ActivationModel;
 import org.limewire.activation.impl.ActivationModelImpl;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.activation.serial.ActivationSerializerImpl;
+import org.limewire.activation.serial.ActivationSerializerSettings;
+import org.limewire.activation.serial.ActivationSerializerSettingsImpl;
 
 import com.google.inject.AbstractModule;
 
@@ -19,5 +21,6 @@ public class CoreGlueActivationModule extends AbstractModule {
         bind(ActivationModel.class).to(ActivationModelImpl.class);
         bind(ActivationSerializer.class).to(ActivationSerializerImpl.class);
         bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
+        bind(ActivationSerializerSettings.class).to(ActivationSerializerSettingsImpl.class);
     }
 }
