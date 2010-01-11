@@ -5,9 +5,6 @@ import java.util.List;
 import org.limewire.listener.EventListener;
 
 public interface ActivationManager {
-
-    public static final int PRO_MODULE_ID = 0;
-    public static final int AVG_MODULE_ID = 1;
     
     public List<ActivationItem> getActivationItems();
     
