@@ -57,13 +57,13 @@ public class ActivationModelImpl implements ActivationModel {
         setActivationItems(items, false);
     }
     
-    private void setActivationItems(List<ActivationItem> items, boolean loadedFromDisk) {
+    private boolean setActivationItems(List<ActivationItem> items, boolean loadedFromDisk) {
         List<ActivationItem> oldItems;
         synchronized (this) {
             // if the server has already been contacted, don't override the with old data
             // from disk.
             if(loadedFromDisk && hasContactedServer.get())
-                return;
+                return false;
             if(!loadedFromDisk)
                 hasContactedServer.set(true);
 
@@ -85,6 +85,8 @@ public class ActivationModelImpl implements ActivationModel {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
                 listeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.getStatus()));
         }
+        
+        return true;
     }
     
     @Override
@@ -99,6 +101,7 @@ public class ActivationModelImpl implements ActivationModel {
             mementos = Collections.emptyList();
         }
         
+        boolean added = false;
         if(mementos.size() > 0) {
             List<ActivationItem> activationItems = new ArrayList<ActivationItem>(mementos.size());
             for(ActivationMemento memento : mementos) {
@@ -112,9 +115,9 @@ public class ActivationModelImpl implements ActivationModel {
                 }
             }
             // add this list to the 
-            setActivationItems(activationItems, true);
+            added = setActivationItems(activationItems, true);
         }
-        return new SimpleFuture<Boolean>(true);
+        return new SimpleFuture<Boolean>(added);
     }
     
     @Override
