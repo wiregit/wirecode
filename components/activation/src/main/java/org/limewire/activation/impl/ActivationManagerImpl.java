@@ -32,10 +32,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
 
     private final ActivationModel activationModel;
+    private final ActivationItemFactory activationItemFactory;
     
     @Inject
-    public ActivationManagerImpl(ActivationModel activationModel) {
+    public ActivationManagerImpl(ActivationModel activationModel, ActivationItemFactory activationItemFactory) {
         this.activationModel = activationModel;
+        this.activationItemFactory = activationItemFactory;
     }
     
     @Override
@@ -87,9 +89,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     
                     // this is temporary
                     List<ActivationItem> list = new ArrayList<ActivationItem>();
-                    list.add(new ActivationItemTest(0, "Test Active", Status.ACTIVE));
-                    list.add(new ActivationItemTest(1, "Test Inactive", Status.CANCELLED));
-                    list.add(new ActivationItemTest(2, "Test Expired", Status.EXPIRED));  
+                    list.add(activationItemFactory.createActivationItem(0, "Test Active", 0, 1000012112, Status.ACTIVE));
+                    list.add(activationItemFactory.createActivationItem(1, "Test Inactive", 0, 1000012112, Status.CANCELLED));
+                    list.add(activationItemFactory.createActivationItem(2, "Test Expired", 0, 1000012112, Status.EXPIRED));
                     setActivationItems(list);
                     
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
@@ -235,50 +237,5 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Override
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
-    }
-    
-    //NOTE: for testing only
-    public static class ActivationItemTest implements ActivationItem {
-
-        private ActivationID moduelID;
-        private String name;
-        private Status status;
-        
-        public ActivationItemTest(int id, String name, Status status) {
-            this.moduelID = ActivationID.getActivationID(id);
-            this.name = name;
-            this.status = status;
-        }
-        
-        @Override
-        public long getDateExpired() {
-            return 100010101;
-        }
-
-        @Override
-        public long getDatePurchased() {
-            return 100010101;
-        }
-
-        @Override
-        public String getLicenseName() {
-            return name;
-        }
-
-        @Override
-        public String getURL() {
-            // TODO Auto-generated method stub
-            return "http://www.google.com";
-        }
-
-        @Override
-        public ActivationID getModuleID() {
-            return moduelID;
-        }
-
-        @Override
-        public Status getStatus() {
-            return status;
-        }
     }
 }

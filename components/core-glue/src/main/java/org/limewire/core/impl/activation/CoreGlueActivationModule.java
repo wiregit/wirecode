@@ -1,6 +1,8 @@
 package org.limewire.core.impl.activation;
 
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.impl.ActivationItemFactory;
+import org.limewire.activation.impl.ActivationItemFactoryImpl;
 import org.limewire.activation.impl.ActivationManagerImpl;
 import org.limewire.activation.impl.ActivationModel;
 import org.limewire.activation.impl.ActivationModelImpl;
@@ -16,5 +18,6 @@ public class CoreGlueActivationModule extends AbstractModule {
         bind(ActivationManager.class).to(ActivationManagerImpl.class);
         bind(ActivationModel.class).to(ActivationModelImpl.class);
         bind(ActivationSerializer.class).to(ActivationSerializerImpl.class);
+        bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
     }
 }
