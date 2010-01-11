@@ -90,4 +90,9 @@ class CoreSearchResultList implements SearchResultList {
         public void searchStopped(Search search) {
         }
     }
+    
+    //TODO just stubbing this out here for tests, delete later when its coded above for real
+    public void addSearchResult(SearchResult result) {
+        threadSafeResultList.add(result);
+    }
 }
