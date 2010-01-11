@@ -27,8 +27,12 @@ public class MockActivationManager implements ActivationManager {
 
     @Override
     public String getLicenseKey() {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
+    }
+    
+    @Override
+    public String getMCode() {
+        return "";
     }
 
     @Override

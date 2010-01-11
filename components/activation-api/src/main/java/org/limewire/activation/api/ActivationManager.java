@@ -10,6 +10,8 @@ public interface ActivationManager {
     
     public String getLicenseKey();
     
+    public String getMCode();
+    
     /**
      * This activates a key that has been newly entered by the user.
      */

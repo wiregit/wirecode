@@ -137,6 +137,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     public String getLicenseKey() {
         return ActivationSettings.ACTIVATION_KEY.getValueAsString();
     }
+    
+    @Override
+    public String getMCode() {
+        return ActivationSettings.M_CODE.getValueAsString();
+    }
 
     @Override
     public boolean isValidKey(String key) {
@@ -189,6 +194,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             @Override
             public void handleEvent(FutureEvent<Boolean> event) {
                 if(event.getResult() == true) {
+                    //TODO: check if PKey exists, check expiration dates, check current state
+                    // before setting state and error message, server may have already set
+                    // these
                     if(activationModel.size() > 0) {
                         List<ActivationItem> items = activationModel.getActivationItems();
                         for(ActivationItem item : items) {

@@ -24,4 +24,7 @@ public class ActivationSettings extends LimeProps {
     
     public static final StringSetting ACTIVATION_KEY = FACTORY.createStringSetting(
             "ACTIVATION_KEY", "");
+    
+    public static final StringSetting M_CODE = FACTORY.createStringSetting(
+            "M_CODE", "");
 }
