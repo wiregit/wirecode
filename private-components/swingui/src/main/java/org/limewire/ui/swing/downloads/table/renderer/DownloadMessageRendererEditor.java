@@ -209,7 +209,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case APPLYING_DEFINITION_UPDATE:
             AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);
             if (type == AntivirusUpdateType.CHECKING) {
-                return I18n.tr("Checking...");
+                return I18n.tr("Evaluating...");
             }
        return I18n.tr("Applying update...");
         default:
