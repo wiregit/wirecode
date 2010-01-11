@@ -14,6 +14,8 @@ import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.activation.serial.ActivationMemento;
 import org.limewire.activation.serial.ActivationSerializer;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -43,6 +45,11 @@ public class ActivationModelImpl implements ActivationModel {
         synchronized (this) {
             return new ArrayList<ActivationItem>(itemMap.values());            
         }
+    }
+    
+    @Override
+    public int size() {
+        return itemMap.size();
     }
     
     @Override
@@ -81,9 +88,9 @@ public class ActivationModelImpl implements ActivationModel {
     }
     
     @Override
-    public void load() {
+    public ListeningFuture<Boolean> load() {
         if(hasContactedServer.get())
-            return;
+            return new SimpleFuture<Boolean>(false);
         List<ActivationMemento> mementos;
         
         try {
@@ -107,6 +114,7 @@ public class ActivationModelImpl implements ActivationModel {
             // add this list to the 
             setActivationItems(activationItems, true);
         }
+        return new SimpleFuture<Boolean>(true);
     }
     
     @Override

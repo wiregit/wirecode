@@ -5,6 +5,7 @@ import java.util.List;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationModuleEvent;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 
 public interface ActivationModel {
@@ -13,7 +14,9 @@ public interface ActivationModel {
     
     public void setActivationItems(List<ActivationItem> items);
     
-    public void load();
+    public int size();
+    
+    public ListeningFuture<Boolean> load();
     
     public void save();
     

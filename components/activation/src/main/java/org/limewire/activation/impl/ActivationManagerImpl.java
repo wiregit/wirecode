@@ -12,6 +12,7 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
@@ -184,7 +185,27 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void initialize() {
-        activationModel.load();
+        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
+            @Override
+            public void handleEvent(FutureEvent<Boolean> event) {
+                if(event.getResult() == true) {
+                    if(activationModel.size() > 0) {
+                        List<ActivationItem> items = activationModel.getActivationItems();
+                        for(ActivationItem item : items) {
+                            //need to check expiration time against system time
+                            if(item.getStatus() == Status.ACTIVE) {
+                                currentState = ActivationState.ACTIVATED;
+                                activationError = ActivationError.NO_ERROR;
+                                break;
+                            }
+                        }
+                    } else {
+                        currentState = ActivationState.NOT_ACTIVATED;
+                        activationError = ActivationError.NO_ERROR;
+                    }
+                }
+            }
+        });
     }
 
     @Override
