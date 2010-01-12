@@ -40,10 +40,6 @@ public class MockActivationManager implements ActivationManager {
         // TODO Auto-generated method stub
         return false;
     }
-    
-    public String getMcode() {
-        return "test mcode";
-    }
 
     @Override
     public void addListener(EventListener<ActivationEvent> listener) {

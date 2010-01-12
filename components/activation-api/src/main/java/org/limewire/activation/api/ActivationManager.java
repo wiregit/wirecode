@@ -37,9 +37,6 @@ public interface ActivationManager {
         
     public boolean isActive(ActivationID id);
     
-    // todo: document this
-    public String getMcode();
-    
     /**
      * This returns true any of the following are active: 
      *          ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE isActive ||

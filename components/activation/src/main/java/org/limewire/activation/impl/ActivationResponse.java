@@ -46,7 +46,7 @@ public class ActivationResponse {
         return (validFlag.equals(SUCCESSFUL_IS_VALID));
     }
     
-    public String getMcode() {
+    public String getMCode() {
         return mcode;
     }
     

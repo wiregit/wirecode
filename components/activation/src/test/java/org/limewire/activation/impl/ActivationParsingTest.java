@@ -61,7 +61,7 @@ public class ActivationParsingTest extends LimeTestCase {
 
         assertEquals("DAVV-XXME-BWU3", response.getLid());
         assertTrue(response.isValidResponse());
-        assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMcode());
+        assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
         assertEquals(1440, response.getRefreshInterval());
         assertEquals(3, response.getActivationItems().size());
 
@@ -103,7 +103,7 @@ public class ActivationParsingTest extends LimeTestCase {
 
         assertEquals("DAVV-XXME-BWU3", response.getLid());
         assertTrue(response.isValidResponse());
-        assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMcode());
+        assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
         assertEquals(1440, response.getRefreshInterval());
         assertEquals(0, response.getActivationItems().size());
         
