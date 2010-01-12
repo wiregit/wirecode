@@ -134,7 +134,7 @@ public class AnnotationsCheckTest extends BaseTestCase {
                 Injector injector = Guice.createInjector(
                         Modules.providersFrom(coreInjector),
                         new LimeWireInjectModule(),
-                        new LimeWireSwingUiModule(false),
+                        new LimeWireSwingUiModule(),
                         new AbstractModule() {
                             @Override
                             protected void configure() {

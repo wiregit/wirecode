@@ -12,7 +12,7 @@ public class AllLimeWireModules__DO_NOT_USE extends AbstractModule {
     @Override
     protected void configure() {
         install(new LimeWireModule());
-        install(new LimeWireSwingUiModule(false));
+        install(new LimeWireSwingUiModule());
         bind(AppFrame.class).in(Scopes.SINGLETON);
     }
 
