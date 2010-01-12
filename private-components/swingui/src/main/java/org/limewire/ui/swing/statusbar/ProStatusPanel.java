@@ -13,7 +13,6 @@ import javax.swing.Timer;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
-import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.core.api.Application;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.listener.EventListener;
@@ -112,7 +111,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
                 if(event.getData() == ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE ||
                         event.getData() == ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE ||
                         event.getData() == ActivationID.TECH_SUPPORT_MODULE) {
-                    if(event.getStatus() == Status.ACTIVE) {
+                    if(activationManager.isProActive()) {
                         addCondition(InvisibilityCondition.IS_PRO);
                     } else {
                         removeCondition(InvisibilityCondition.IS_PRO);
