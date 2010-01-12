@@ -18,7 +18,7 @@ public class ActivationItemImpl implements ActivationItem {
     
     public ActivationItemImpl(int intID, String licenseName, long datePurchased, long dateExpired,
             Status currentStatus) {
-        this(intID, licenseName, dateExpired, dateExpired, currentStatus, false);
+        this(intID, licenseName, datePurchased, dateExpired, currentStatus, false);
     }
     
     public ActivationItemImpl(int intID, String licenseName, long datePurchased, long dateExpired,
