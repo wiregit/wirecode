@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+//temp calendar for license expiration examples - remove after live server
+import java.util.Calendar;
+
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -84,13 +87,18 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 } catch(InterruptedException e) {
                     
                 }
+                
+                // get tomorrows date in ms since 1970
+                Calendar tomorrow = Calendar.getInstance();
+                tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+                
                 if(key.equals("ADXU8ZNDJGU8")) {
                     currentState = ActivationState.ACTIVATED;
                     activationError = ActivationError.NO_ERROR;
                     
-                    // this is temporary
+
                     List<ActivationItem> list = new ArrayList<ActivationItem>();
-                    list.add(activationItemFactory.createActivationItem(0, "Test Active", 0, 1000012112, Status.ACTIVE));
+                    list.add(activationItemFactory.createActivationItem(0, "Test Active", 0, tomorrow.getTimeInMillis(), Status.ACTIVE));
                     list.add(activationItemFactory.createActivationItem(1, "Test Removed", 0, 1000012112, Status.UNAVAILABLE));
                     list.add(activationItemFactory.createActivationItem(2, "Test Expired", 0, 1000012112, Status.EXPIRED));
                     list.add(activationItemFactory.createActivationItem(3, "Test Wrong LW", 0, 1000012112, Status.UNUSEABLE_LW));
