@@ -91,8 +91,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     // this is temporary
                     List<ActivationItem> list = new ArrayList<ActivationItem>();
                     list.add(activationItemFactory.createActivationItem(0, "Test Active", 0, 1000012112, Status.ACTIVE));
-                    list.add(activationItemFactory.createActivationItem(1, "Test Inactive", 0, 1000012112, Status.CANCELLED));
+                    list.add(activationItemFactory.createActivationItem(1, "Test Removed", 0, 1000012112, Status.UNAVAILABLE));
                     list.add(activationItemFactory.createActivationItem(2, "Test Expired", 0, 1000012112, Status.EXPIRED));
+                    list.add(activationItemFactory.createActivationItem(3, "Test Wrong LW", 0, 1000012112, Status.UNUSEABLE_LW));
+                    list.add(activationItemFactory.createActivationItem(4, "Test Wrong OS", 0, 1000012112, Status.UNUSEABLE_OS));
                     setActivationItems(list);
                     
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));

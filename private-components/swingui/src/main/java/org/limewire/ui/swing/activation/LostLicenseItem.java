@@ -38,7 +38,7 @@ public class LostLicenseItem implements ActivationItem {
 
     @Override
     public Status getStatus() {
-        return Status.CANCELLED;
+        return Status.UNAVAILABLE;
     }
 
 //    @Override

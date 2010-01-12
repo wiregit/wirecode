@@ -5,6 +5,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.serial.ActivationMemento;
 import org.limewire.activation.serial.ActivationMementoImpl;
 import org.limewire.setting.ActivationSettings;
+import org.limewire.util.OSUtils;
 
 public class ActivationItemImpl implements ActivationItem {
 
@@ -22,7 +23,7 @@ public class ActivationItemImpl implements ActivationItem {
         this.licenseName = licenseName;
         this.datePurchased = datePurchased;
         this.dateExpired = dateExpired;
-        this.currentStatus = currentStatus;   
+        this.currentStatus = updateActivationStatus(currentStatus);   
         
         // when loaded from disk, we compare the date expired with the current time of the system
         // if the user's system clock is in a different time zone or extremely messed up this might
@@ -58,14 +59,6 @@ public class ActivationItemImpl implements ActivationItem {
     public String getURL() {
         return ActivationSettings.ACTIVATION_RENEWAL_HOST + Integer.toString(intID);
     }
-//    @Override
-//    public boolean isUseable() {
-//        return moduleID != ActivationID.UNKNOWN_MODULE;
-//    }
-//    @Override
-//    public boolean isActive() {
-//        return !isExpired;
-//    }
 
     @Override
     public Status getStatus() {
@@ -84,5 +77,20 @@ public class ActivationItemImpl implements ActivationItem {
         memento.setLicenseName(licenseName);
         memento.setStatus(currentStatus);
         return memento;
+    }
+    
+    /**
+     * This allows the status to be changed depending on the OS, LW version installed.
+     */
+    private Status updateActivationStatus(Status status) {
+        if(status == Status.ACTIVE) {
+            if(moduleID == ActivationID.UNKNOWN_MODULE)
+                return Status.UNUSEABLE_LW;
+            if(moduleID == ActivationID.AVG_MODULE && !OSUtils.isAVGCompatibleWindows())
+                return Status.UNUSEABLE_OS;
+            return status;
+        } else {
+            return status;
+        }
     }
 }

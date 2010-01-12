@@ -89,7 +89,7 @@ class ActivationTable extends MouseableTable {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             
             ActivationItem item = model.getElementAt(adapter.row);
-            return item.getStatus() == Status.CANCELLED;
+            return item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
 //            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
 //            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
 //            if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))
@@ -268,7 +268,7 @@ class ActivationTable extends MouseableTable {
         }
         
         private String getText(ActivationItem item) {
-            if(item.getStatus() != Status.CANCELLED) {
+            if(item.getStatus() == Status.ACTIVE || item.getStatus() == Status.EXPIRED) {
                 return item.getLicenseName();
             } else {
                 return "<html><s>" + item.getLicenseName() + "</s></html>";
@@ -338,7 +338,7 @@ class ActivationTable extends MouseableTable {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
                 renewAction.setURL(item.getURL());
-                iconButton.setVisible(item.getStatus() == Status.CANCELLED);
+                iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
                 renewButton.setVisible(item.getStatus() == Status.EXPIRED);
                 cellEditorValue = item;
             } else {
@@ -357,7 +357,7 @@ class ActivationTable extends MouseableTable {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-                iconButton.setVisible(item.getStatus() == Status.CANCELLED);
+                iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
                 renewButton.setVisible(item.getStatus() == Status.EXPIRED);
             } else {
                 dateLabel.setText("");
@@ -380,7 +380,7 @@ class ActivationTable extends MouseableTable {
         public void actionPerformed(ActionEvent e) {
             ActivationItem item = expiredRenderer.getCellEditorValue();
             if (item != null) {
-                String message = I18n.tr("{0} is not supported in this LimeWire version. Please upgrade LimeWire to access this featured.", item.getLicenseName());
+                String message = ActivationUtilities.getStatusMessage(item);
                 FocusJOptionPane.showMessageDialog(ActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
                 expiredRenderer.cancelCellEditing();
             }

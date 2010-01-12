@@ -61,7 +61,7 @@ public class ActivationSerializerTest extends LimeTestCase {
 
         List<ActivationMemento> mementos = new ArrayList<ActivationMemento>();
         ActivationItem item1 = factory.createActivationItem(1, "Test Module1", 1, 1, Status.ACTIVE);
-        ActivationItem item2 = factory.createActivationItem(2, "Test Module2", 2, 2, Status.CANCELLED);
+        ActivationItem item2 = factory.createActivationItem(2, "Test Module2", 2, 2, Status.UNAVAILABLE);
         ActivationItem item3 = factory.createActivationItem(3, "Test Module3", 3, 3, Status.EXPIRED);
         
         ActivationMemento memento1 = ((ActivationItemImpl)item1).toActivationMemento();

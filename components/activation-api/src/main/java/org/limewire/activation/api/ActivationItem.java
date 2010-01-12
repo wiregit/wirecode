@@ -6,7 +6,7 @@ package org.limewire.activation.api;
 public interface ActivationItem {
 
     static enum Status {
-        ACTIVE, EXPIRED, CANCELLED
+        ACTIVE, EXPIRED, UNUSEABLE_OS, UNUSEABLE_LW, UNAVAILABLE
     }
     
     public ActivationID getModuleID();
@@ -31,28 +31,9 @@ public interface ActivationItem {
      * @return
      */
     public Status getStatus();
-    
-//    /**
-//     * Returns true if this item was purchased but is now
-//     * expired, false otherwise.
-//     */
-//    public boolean isActive();
-//    
-//    /**
-//     * Returns true if this item can be used in this
-//     * version of LimeWire, false otherwise.
-//     */
-//    public boolean isUseable();
 
     /**
      * Returns a URL related to this feature.
      */
     public String getURL();
-    
-//    /**
-//     * Returns the first version that this feature is enabled in.
-//     * @return
-//     */
-//    public String getFirstSupportedVersion();
-
 }
