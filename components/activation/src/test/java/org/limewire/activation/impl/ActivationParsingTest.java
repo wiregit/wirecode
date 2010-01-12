@@ -22,7 +22,8 @@ public class ActivationParsingTest extends LimeTestCase {
             new ActivationItemFactoryImpl());
     }
 
-    // Test a successful activation string 
+    // Test a successful activation string with 3 modules, 2 of which
+    // are active, and 1 of which is unavailable.
     //
     public void testSuccessfulActivationString() throws Exception {
 
@@ -41,8 +42,8 @@ public class ActivationParsingTest extends LimeTestCase {
                 "        \"status\":active\n" +
                 "      },\n" +
                 "      {\n" +
-                "        \"id\":3,\n" +
-                "        \"name\":\"AVG Anti Virus Protection\",\n" +
+                "        \"id\":1,\n" +
+                "        \"name\":\"Optimized Search Results\",\n" +
                 "        \"pur\":\"20091001\",\n" +
                 "        \"exp\":\"20101231\",\n" +
                 "        \"status\":active\n" +
@@ -74,8 +75,8 @@ public class ActivationParsingTest extends LimeTestCase {
         assertEquals("20101001", format.format(new Date(item.getDateExpired())));
 
         item = response.getActivationItems().get(1);
-        assertEquals(ActivationID.AVG_MODULE, item.getModuleID());
-        assertEquals("AVG Anti Virus Protection", item.getLicenseName());
+        assertEquals(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE, item.getModuleID());
+        assertEquals("Optimized Search Results", item.getLicenseName());
         assertEquals(ActivationItem.Status.ACTIVE, item.getStatus());
         assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
         assertEquals("20101231", format.format(new Date(item.getDateExpired())));
@@ -88,6 +89,8 @@ public class ActivationParsingTest extends LimeTestCase {
         assertEquals("20501001", format.format(new Date(item.getDateExpired())));
     }
 
+    // test a JSON response which contains no modules
+    //
     public void testActivationResponseNoModules() throws Exception {
         
         String json = "{\n" +
@@ -109,6 +112,46 @@ public class ActivationParsingTest extends LimeTestCase {
         
     }
     
+    // test with an unknown module.  An unknown module should return
+    // a status of "unuseable_lw", regardless of the status of the 
+    // module returned in the JSON
+    public void testUnknownModule() throws Exception {
+
+        String json = "{\n" +
+                "  \"lid\":\"DAVV-XXME-BWU3\",\n" +
+                "  \"response\":\"valid\",\n" +
+                "  \"mcode\":\"0pd15.1xM6.2xM6.3xM6\",\n" +
+                "  \"refresh\":1440,\n" +
+                "  \"modules\":\n" +
+                "    [\n" +
+                "      {\n" +
+                "        \"id\":12,\n" +
+                "        \"name\":\"Turbo-charged downloads\",\n" +
+                "        \"pur\":\"20091001\",\n" +
+                "        \"exp\":\"20501001\",\n" +
+                "        \"status\":active\n" +
+                "      }\n" +
+                "    ]\n" +
+                "}";
+
+        ActivationResponse response = parser.createFromJson(json);
+        assertEquals("DAVV-XXME-BWU3", response.getLid());
+        assertTrue(response.isValidResponse());
+        assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
+        assertEquals(1440, response.getRefreshInterval());
+        assertEquals(1, response.getActivationItems().size());
+        
+        ActivationItem item = response.getActivationItems().get(0);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        assertEquals(ActivationID.UNKNOWN_MODULE, item.getModuleID());
+        assertEquals("Turbo-charged downloads", item.getLicenseName());
+        assertEquals(ActivationItem.Status.UNUSEABLE_LW, item.getStatus());
+        assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
+        assertEquals("20501001", format.format(new Date(item.getDateExpired())));
+    }
+    
+    // test a json which has an invalid status in one of its modules.
+    //
     public void testBadActivationItemStatus() throws Exception {
         String json = "{\n" +
                 "  \"lid\":\"DAVV-XXME-BWU3\",\n" +
@@ -128,7 +171,20 @@ public class ActivationParsingTest extends LimeTestCase {
                 "}";
 
         try {
-            ActivationResponse response = parser.createFromJson(json);
+            parser.createFromJson(json);
+            fail("Expected InvalidDataException");
+        } catch (InvalidDataException e) {
+            // Received InvalidDataException as expected 
+        }
+    }
+    
+    // test Strings which are not JSON.
+    //
+    public void testNonJsonInputError() throws Exception {
+        String json = "non-json-string-test";
+
+        try {
+            parser.createFromJson(json);
             fail("Expected InvalidDataException");
         } catch (InvalidDataException e) {
             // Received InvalidDataException as expected 
