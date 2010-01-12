@@ -24,7 +24,6 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.updates.UpdateStyle;
@@ -452,7 +451,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
-                    activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE),
+                    activationManager.isProActive(),
 //                    LimeWireUtils.isPro(),
                     style,
                     javaV);
@@ -549,7 +548,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)));
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isProActive()));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

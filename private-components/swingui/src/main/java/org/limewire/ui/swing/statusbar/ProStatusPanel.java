@@ -99,7 +99,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         this.activationManager = activationManager;
         
         setName("ProStatusPanel");        
-        if (activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)) {
+        if (activationManager.isProActive()) {
             addCondition(InvisibilityCondition.IS_PRO);
         }
     }
@@ -109,7 +109,9 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
             @Override
             public void handleEvent(ActivationModuleEvent event) {
-                if(event.getData() == ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) {
+                if(event.getData() == ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE ||
+                        event.getData() == ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE ||
+                        event.getData() == ActivationID.TECH_SUPPORT_MODULE) {
                     if(event.getStatus() == Status.ACTIVE) {
                         addCondition(InvisibilityCondition.IS_PRO);
                     } else {

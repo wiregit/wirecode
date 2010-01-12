@@ -25,7 +25,6 @@ import org.jdesktop.application.SessionStorage;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
@@ -402,7 +401,7 @@ public class AppFrame extends SingleFrameApplication {
                     Modules.providersFrom(injector),
                     new LimeWireInjectModule(),
                     thiz,
-                    new LimeWireSwingUiModule(injector.getInstance(ActivationManager.class).isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)),
+                    new LimeWireSwingUiModule(injector.getInstance(ActivationManager.class).isProActive()),
                     new AbstractModule() {
                         @Override
                         protected void configure() {                            

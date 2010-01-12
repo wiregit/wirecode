@@ -1,6 +1,5 @@
 package org.limewire.core.impl;
 
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
@@ -29,7 +28,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
-        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
+        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isProActive());
     }
     
     @Override

@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -299,7 +298,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
+        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isProActive());
         data.setUpdateURL(url);
         
         try {

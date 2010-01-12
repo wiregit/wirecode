@@ -178,6 +178,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     public boolean isActive(ActivationID id) {
         return activationModel.isActive(id);
     }
+    
+    @Override
+    public boolean isProActive() {
+        return activationModel.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ||
+               activationModel.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE) ||
+               activationModel.isActive(ActivationID.TECH_SUPPORT_MODULE);
+    }
 
     @Override
     public String getServiceName() {

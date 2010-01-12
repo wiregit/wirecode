@@ -37,6 +37,15 @@ public interface ActivationManager {
         
     public boolean isActive(ActivationID id);
     
+    /**
+     * This returns true any of the following are active: 
+     *          ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE isActive ||
+     *          ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE isActive ||
+     *          ActivationID.TECH_SUPPORT_MODULE isActive
+     * @return
+     */
+    public boolean isProActive();
+    
     public void addModuleListener(EventListener<ActivationModuleEvent> listener);
     
     public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener);

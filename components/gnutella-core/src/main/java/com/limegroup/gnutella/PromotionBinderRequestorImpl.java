@@ -9,7 +9,6 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.params.HttpParams;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.promotion.AbstractPromotionBinderRequestor;
@@ -55,6 +54,6 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     
     @Override
     public String alterUrl(String url) {
-        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
+        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isProActive());
     } 
 }

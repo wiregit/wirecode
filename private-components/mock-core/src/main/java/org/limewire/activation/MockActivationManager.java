@@ -82,4 +82,10 @@ public class MockActivationManager implements ActivationManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public boolean isProActive() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
