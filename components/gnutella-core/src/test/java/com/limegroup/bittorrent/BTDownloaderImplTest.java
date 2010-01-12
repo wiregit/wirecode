@@ -33,6 +33,7 @@ import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
+import com.limegroup.gnutella.util.FileServer;
 
 /**
  * Test cases for the BTDownloader.

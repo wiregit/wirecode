@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.gnutella.util;
 
 import java.io.File;
 

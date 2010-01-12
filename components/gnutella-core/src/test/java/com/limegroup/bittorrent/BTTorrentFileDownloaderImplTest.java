@@ -50,6 +50,7 @@ import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.malware.VirusScanException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.FileServer;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.mozilla.MozillaDownload;
 
