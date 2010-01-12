@@ -18,7 +18,6 @@ import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.io.GUID;
 
 
 public class MockSearch implements Search {
@@ -42,11 +41,6 @@ public class MockSearch implements Search {
     // TODO: RMV What should this method do?
     @Override
     public SearchCategory getCategory() {
-        return null;
-    }
-    
-    @Override
-    public GUID getQueryGuid() {
         return null;
     }
     

@@ -146,7 +146,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         this.searchInfo = searchInfo;
         this.search = search;
         this.searchManager = searchManager;
-        this.searchResultList = searchManager.addSearch(search);
+        this.searchResultList = searchManager.addSearch(search, searchInfo);
         this.downloadListManager = downloadListManager;
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.propertiableHeadings = propertiableHeadings;

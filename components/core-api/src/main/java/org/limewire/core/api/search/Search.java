@@ -1,7 +1,5 @@
 package org.limewire.core.api.search;
 
-import org.limewire.io.GUID;
-
 /**
  * A single search.
  */
@@ -24,8 +22,5 @@ public interface Search {
     
     /** Stops the search. */
     void stop();
-    
-    /** Returns the GUID associated with the query. */
-    GUID getQueryGuid();
 
 }

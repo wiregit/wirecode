@@ -1,5 +1,7 @@
 package org.limewire.core.api.search;
 
+import org.limewire.io.GUID;
+
 import ca.odell.glazedlists.EventList;
 
 /**
@@ -7,6 +9,16 @@ import ca.odell.glazedlists.EventList;
  */
 public interface SearchResultList {
 
+    /**
+     * Returns the GUID associated with the search.
+     */
+    GUID getGuid();
+    
+    /**
+     * Returns the total number of results found.
+     */
+    int getResultCount();
+    
     /**
      * Returns the search associated with this list.
      */
@@ -16,6 +28,23 @@ public interface SearchResultList {
      * Returns the list of search results.
      */
     EventList<SearchResult> getSearchResults();
+    
+    /**
+     * Returns the list of search results grouped by URN.
+     */
+    EventList<GroupedSearchResult> getGroupedResults();
+    
+    /**
+     * Adds the specified listener to the list that receives list change
+     * events.
+     */
+    void addListListener(SearchResultListListener listener);
+    
+    /**
+     * Removes the specified listener from the list that receives list change
+     * events.
+     */
+    void removeListListener(SearchResultListListener listener);
     
     /**
      * Disposes of resources and removes listeners.

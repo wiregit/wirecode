@@ -135,7 +135,9 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
             boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
 
             if (anonymous1 == anonymous2) {
-                compare = o1.getFriendPresence().getFriend().getRenderName().compareToIgnoreCase(o2.getFriendPresence().getFriend().getRenderName());
+                String name1 = o1.getFriendPresence().getFriend().getRenderName();
+                String name2 = o2.getFriendPresence().getFriend().getRenderName();
+                compare = name1.compareToIgnoreCase(name2);
             } else if (anonymous1) {
                 compare = 1;
             } else if (anonymous2) {

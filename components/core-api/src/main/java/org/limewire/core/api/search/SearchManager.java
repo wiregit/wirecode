@@ -9,17 +9,20 @@ public interface SearchManager {
 
     /**
      * Adds the specified search to the manager and returns its result list.
+     * This method should be called before starting the search.
      */
-    SearchResultList addSearch(Search search);
+    SearchResultList addSearch(Search search, SearchDetails searchDetails);
     
     /**
-     * Removes the specified search from the manager.
+     * Removes the specified search from the manager.  This method should be
+     * called after stopping a search to dispose of resources.
      */
     void removeSearch(Search search);
     
     /**
      * Returns a list of active searches.  An active search has been assigned
-     * a GUID, which excludes unstarted searches and browse searches.
+     * a GUID, which includes network searches started but excludes unstarted
+     * searches and browse searches.
      */
     List<Search> getActiveSearches();
     

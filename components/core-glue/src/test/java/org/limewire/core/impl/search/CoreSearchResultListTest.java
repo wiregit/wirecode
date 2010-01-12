@@ -1,21 +1,35 @@
 package org.limewire.core.impl.search;
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import com.limegroup.gnutella.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.GUID;
+import org.limewire.friend.api.Friend;
+import org.limewire.friend.api.FriendPresence;
+import org.limewire.friend.api.IncomingChatListener;
+import org.limewire.friend.api.MessageReader;
+import org.limewire.friend.api.MessageWriter;
+import org.limewire.friend.api.Network;
+import org.limewire.friend.api.PresenceEvent;
+import org.limewire.friend.api.feature.Feature;
+import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Provider;
+import com.limegroup.gnutella.URN;
 
 public class CoreSearchResultListTest extends BaseTestCase {
     /** Instance of class being tested. */
@@ -36,7 +50,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
         context = new Mockery();
         provider = context.mock(Provider.class);
         // Create test instance.
-        model = new CoreSearchResultList(new TestSearch());
+        model = new CoreSearchResultList(new TestSearch(), new TestSearchDetails());
     }
     
     @Override
@@ -54,7 +68,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
     /** Make a search that gets a result, and see it there. */
     public void testSearchThenResult() throws Exception {
         SearchResult result = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        model.addSearchResult(result);
+        model.addResult(result);
         assertEquals(1, model.getSearchResults().size()); // confirm the result is in there
     }
     
@@ -62,8 +76,8 @@ public class CoreSearchResultListTest extends BaseTestCase {
     public void testSearchTwoDifferentResults() throws Exception {
         SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
-        model.addSearchResult(result1);
-        model.addSearchResult(result2);
+        model.addResult(result1);
+        model.addResult(result2);
         assertEquals(2, model.getSearchResults().size()); // different, so both listed separately
     }
     
@@ -71,10 +85,14 @@ public class CoreSearchResultListTest extends BaseTestCase {
     public void testSearchTwoIdenticalResults() throws Exception {
         SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
-        model.addSearchResult(result1);
-        model.addSearchResult(result2);
+        model.addResult(result1);
+        model.addResult(result2);
         //TODO remove Not below when grouping is implemented
         assertNotEquals(1, model.getSearchResults().size()); // same file hash, so both were combined
+        // Verify grouped results count.
+        assertEquals(1, model.getGroupedResults().size()); // same file hash, so both were combined
+        // Verify total results count.
+        assertEquals(2, model.getResultCount());
     }
 
     
@@ -103,11 +121,6 @@ public class CoreSearchResultListTest extends BaseTestCase {
         }
 
         @Override
-        public GUID getQueryGuid() {
-            return null;
-        }
-
-        @Override
         public void repeat() {
         }
 
@@ -117,6 +130,32 @@ public class CoreSearchResultListTest extends BaseTestCase {
 
         @Override
         public void stop() {
+        }
+    }
+    
+    /**
+     * Test implementation of SearchDetails.
+     */
+    private static class TestSearchDetails implements SearchDetails {
+
+        @Override
+        public Map<FilePropertyKey, String> getAdvancedDetails() {
+            return null;
+        }
+
+        @Override
+        public SearchCategory getSearchCategory() {
+            return null;
+        }
+
+        @Override
+        public String getSearchQuery() {
+            return null;
+        }
+
+        @Override
+        public SearchType getSearchType() {
+            return null;
         }
     }
     
@@ -182,8 +221,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
 
         @Override
         public List<RemoteHost> getSources() {
-            // TODO Auto-generated method stub
-            return null;
+            return Collections.<RemoteHost>singletonList(new TestRemoteHost());
         }
 
         @Override
@@ -200,6 +238,169 @@ public class CoreSearchResultListTest extends BaseTestCase {
         @Override
         public boolean isSpam() {
             // TODO Auto-generated method stub
+            return false;
+        }
+    }
+    
+    private static class TestRemoteHost implements RemoteHost {
+        
+        @Override
+        public FriendPresence getFriendPresence() {
+            return new FriendPresence() {
+                @Override
+                public void addFeature(Feature feature) {
+                }
+
+                @Override
+                public <D, F extends Feature<D>> void addTransport(Class<F> clazz,
+                        FeatureTransport<D> transport) {
+                }
+
+                @Override
+                public Feature getFeature(URI id) {
+                    return null;
+                }
+
+                @Override
+                public Collection<Feature> getFeatures() {
+                    return null;
+                }
+
+                @Override
+                public Friend getFriend() {
+                    return new Friend() {
+                        @Override
+                        public void addPresenceListener(
+                                EventListener<PresenceEvent> presenceListener) {
+                        }
+
+                        @Override
+                        public MessageWriter createChat(MessageReader reader) {
+                            return null;
+                        }
+
+                        @Override
+                        public FriendPresence getActivePresence() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getFirstName() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getId() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getName() {
+                            return null;
+                        }
+
+                        @Override
+                        public Network getNetwork() {
+                            return null;
+                        }
+
+                        @Override
+                        public Map<String, FriendPresence> getPresences() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getRenderName() {
+                            return "test";
+                        }
+
+                        @Override
+                        public boolean hasActivePresence() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isAnonymous() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isSignedIn() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isSubscribed() {
+                            return false;
+                        }
+
+                        @Override
+                        public void removeChatListener() {
+                        }
+
+                        @Override
+                        public void setChatListenerIfNecessary(IncomingChatListener listener) {
+                        }
+
+                        @Override
+                        public void setName(String name) {
+                        }
+                    };
+                }
+
+                @Override
+                public Mode getMode() {
+                    return null;
+                }
+
+                @Override
+                public String getPresenceId() {
+                    return null;
+                }
+
+                @Override
+                public int getPriority() {
+                    return 0;
+                }
+
+                @Override
+                public String getStatus() {
+                    return null;
+                }
+
+                @Override
+                public <F extends Feature<D>, D> FeatureTransport<D> getTransport(Class<F> feature) {
+                    return null;
+                }
+
+                @Override
+                public Type getType() {
+                    return null;
+                }
+
+                @Override
+                public boolean hasFeatures(URI... id) {
+                    return false;
+                }
+
+                @Override
+                public void removeFeature(URI id) {
+                }
+            };
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharingEnabled() {
             return false;
         }
     }

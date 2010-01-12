@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.inject.EagerSingleton;
@@ -26,9 +27,9 @@ public class CoreSearchManager implements SearchManager {
     }
     
     @Override
-    public SearchResultList addSearch(Search search) {
+    public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
         // Create result list.
-        SearchResultList resultList = new CoreSearchResultList(search);
+        SearchResultList resultList = new CoreSearchResultList(search, searchDetails);
         
         // Add result list to collection.
         threadSafeSearchList.add(resultList);
@@ -56,7 +57,7 @@ public class CoreSearchManager implements SearchManager {
         // Add active searches to list.
         for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
             SearchResultList resultList = iter.next();
-            if (resultList.getSearch().getQueryGuid() != null) {
+            if (resultList.getGuid() != null) {
                 list.add(resultList.getSearch());
             }
         }

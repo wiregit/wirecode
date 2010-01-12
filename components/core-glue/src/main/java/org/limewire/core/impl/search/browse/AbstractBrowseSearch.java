@@ -6,7 +6,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
-import org.limewire.io.GUID;
 
 abstract class AbstractBrowseSearch implements BrowseSearch {
     protected final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
@@ -36,11 +35,6 @@ abstract class AbstractBrowseSearch implements BrowseSearch {
     @Override
     public SearchCategory getCategory() {
         return SearchCategory.ALL;
-    }
-    
-    @Override
-    public GUID getQueryGuid() {
-        return null;
     }
 
 }

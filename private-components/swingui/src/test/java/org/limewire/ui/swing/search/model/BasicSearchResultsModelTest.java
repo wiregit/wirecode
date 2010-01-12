@@ -11,11 +11,11 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.io.GUID;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -743,11 +743,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public GUID getQueryGuid() {
-            return null;
-        }
-
-        @Override
         public void repeat() {
         }
 
@@ -794,7 +789,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     private static class TestSearchManager implements SearchManager {
 
         @Override
-        public SearchResultList addSearch(Search search) {
+        public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
             return null;
         }
 
