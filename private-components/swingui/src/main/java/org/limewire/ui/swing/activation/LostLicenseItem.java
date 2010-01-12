@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.activation;
 
+import java.util.Date;
+
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.util.I18n;
@@ -7,13 +9,13 @@ import org.limewire.ui.swing.util.I18n;
 public class LostLicenseItem implements ActivationItem {
 
     @Override
-    public long getDateExpired() {
-        return -1;
+    public Date getDateExpired() {
+        return null;
     }
 
     @Override
-    public long getDatePurchased() {
-        return -1;
+    public Date getDatePurchased() {
+        return null;
     }
 //
 //    @Override

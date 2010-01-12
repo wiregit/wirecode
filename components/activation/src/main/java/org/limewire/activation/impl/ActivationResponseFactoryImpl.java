@@ -2,6 +2,7 @@ package org.limewire.activation.impl;
 
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -47,8 +48,10 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 String expDate = obj.getString("exp");
                 ActivationItem.Status status = ActivationItem.Status.valueOf(obj.getString("status").toUpperCase());
                 
-                long pur = formatter.parse(purchaseDate).getTime();
-                long exp = formatter.parse(expDate).getTime();
+                Date pur = formatter.parse(purchaseDate);
+                Date exp = formatter.parse(expDate);
+//                long pur = formatter.parse(purchaseDate).getTime();
+//                long exp = formatter.parse(expDate).getTime();
                 ActivationItem item = activationItemFactory.createActivationItem(moduleId, 
                     moduleName, pur, exp, status);
                 items.add(item);

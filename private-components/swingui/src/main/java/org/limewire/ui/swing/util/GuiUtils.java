@@ -294,6 +294,10 @@ public class GuiUtils {
         return DATE_FORMAT.format(date);
     }
     
+    public static String msec2Date(Date date) {
+        return DATE_FORMAT.format(date);
+    }
+    
     /**
      * Returns the application's default frame.
      */

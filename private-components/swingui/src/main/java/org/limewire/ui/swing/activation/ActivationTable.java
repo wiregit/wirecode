@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -282,10 +283,10 @@ class ActivationTable extends MouseableTable {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
-            if(!(value instanceof Long) || (Long)value < 0) {
+            if(!(value instanceof Date)) {
                 setText("");
             } else {
-                setText(GuiUtils.msec2Date((Long)value)); 
+                setText(GuiUtils.msec2Date((Date)value)); 
             }
             return this;
         }
@@ -334,7 +335,7 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
+            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
                 renewAction.setURL(item.getURL());
@@ -354,7 +355,7 @@ class ActivationTable extends MouseableTable {
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() > 0) {
+            if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
                 iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);

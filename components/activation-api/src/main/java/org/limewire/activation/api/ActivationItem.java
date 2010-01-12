@@ -1,5 +1,7 @@
 package org.limewire.activation.api;
 
+import java.util.Date;
+
 
 //TODO: This API may change, these methods are partly brainstorming for items
 //      needed to be retrieved from the server and stored on the server.
@@ -19,12 +21,12 @@ public interface ActivationItem {
     /**
      * Returns the date that this item was purchased.
      */
-    public long getDatePurchased();
+    public Date getDatePurchased();
     
     /**
      * Returns the date that this item expires.
      */
-    public long getDateExpired();
+    public Date getDateExpired();
     
     /**
      * Returns the status that this module is in for this ActivationKey.

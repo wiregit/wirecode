@@ -70,22 +70,22 @@ public class ActivationParsingTest extends LimeTestCase {
         assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, item.getModuleID());
         assertEquals("Turbo-charged downloads", item.getLicenseName());
         assertEquals(ActivationItem.Status.ACTIVE, item.getStatus());
-        assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
-        assertEquals("20101001", format.format(new Date(item.getDateExpired())));
+        assertEquals("20091001", format.format(item.getDatePurchased()));
+        assertEquals("20101001", format.format(item.getDateExpired()));
 
         item = response.getActivationItems().get(1);
         assertEquals(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE, item.getModuleID());
         assertEquals("Optimized Search Results", item.getLicenseName());
         assertEquals(ActivationItem.Status.ACTIVE, item.getStatus());
-        assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
-        assertEquals("20101231", format.format(new Date(item.getDateExpired())));
+        assertEquals("20091001", format.format(item.getDatePurchased()));
+        assertEquals("20101231", format.format(item.getDateExpired()));
 
         item = response.getActivationItems().get(2);
         assertEquals(ActivationID.TECH_SUPPORT_MODULE, item.getModuleID());
         assertEquals("Tech support", item.getLicenseName());
         assertEquals(ActivationItem.Status.UNAVAILABLE, item.getStatus());
-        assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
-        assertEquals("20501001", format.format(new Date(item.getDateExpired())));
+        assertEquals("20091001", format.format(item.getDatePurchased()));
+        assertEquals("20501001", format.format(item.getDateExpired()));
     }
 
     // test a JSON response which contains no modules
@@ -145,8 +145,8 @@ public class ActivationParsingTest extends LimeTestCase {
         assertEquals(ActivationID.UNKNOWN_MODULE, item.getModuleID());
         assertEquals("Turbo-charged downloads", item.getLicenseName());
         assertEquals(ActivationItem.Status.UNUSEABLE_LW, item.getStatus());
-        assertEquals("20091001", format.format(new Date(item.getDatePurchased())));
-        assertEquals("20501001", format.format(new Date(item.getDateExpired())));
+        assertEquals("20091001", format.format(item.getDatePurchased()));
+        assertEquals("20501001", format.format(item.getDateExpired()));
     }
     
     // test a json which has an invalid status in one of its modules.

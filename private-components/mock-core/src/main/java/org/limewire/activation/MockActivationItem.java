@@ -1,20 +1,22 @@
 package org.limewire.activation;
 
+import java.util.Date;
+
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 
 public class MockActivationItem implements ActivationItem {
 
     @Override
-    public long getDateExpired() {
+    public Date getDateExpired() {
         // TODO Auto-generated method stub
-        return 0;
+        return null;
     }
 
     @Override
-    public long getDatePurchased() {
+    public Date getDatePurchased() {
         // TODO Auto-generated method stub
-        return 0;
+        return null;
     }
 
     @Override

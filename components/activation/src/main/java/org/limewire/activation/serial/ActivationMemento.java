@@ -1,5 +1,7 @@
 package org.limewire.activation.serial;
 
+import java.util.Date;
+
 import org.limewire.activation.api.ActivationItem.Status;
 
 public interface ActivationMemento {
@@ -18,9 +20,9 @@ public interface ActivationMemento {
     
     public String getLicenseName();
     
-    public long getDatePurchased();
+    public Date getDatePurchased();
     
-    public long getDateExpired();
+    public Date getDateExpired();
     
     public Status getStatus();
 }

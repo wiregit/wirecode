@@ -1,5 +1,7 @@
 package org.limewire.activation.impl;
 
+import java.util.Date;
+
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.serial.ActivationMemento;
@@ -12,16 +14,16 @@ public class ActivationItemImpl implements ActivationItem {
     private final int intID;
     private final ActivationID moduleID;
     private final String licenseName;
-    private final long datePurchased;
-    private final long dateExpired;
+    private final Date datePurchased;
+    private final Date dateExpired;
     private final Status currentStatus;
     
-    public ActivationItemImpl(int intID, String licenseName, long datePurchased, long dateExpired,
+    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, Date dateExpired,
             Status currentStatus) {
         this(intID, licenseName, datePurchased, dateExpired, currentStatus, false);
     }
     
-    public ActivationItemImpl(int intID, String licenseName, long datePurchased, long dateExpired,
+    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, Date dateExpired,
             Status currentStatus, boolean isLoadedFromDisk) {
         this.intID = intID;
         this.moduleID = ActivationID.getActivationID(intID);
@@ -37,12 +39,12 @@ public class ActivationItemImpl implements ActivationItem {
     }
     
     @Override
-    public long getDateExpired() {
+    public Date getDateExpired() {
         return dateExpired;
     }
     
     @Override
-    public long getDatePurchased() {
+    public Date getDatePurchased() {
         return datePurchased;
     }
     
@@ -68,8 +70,8 @@ public class ActivationItemImpl implements ActivationItem {
     public ActivationMemento toActivationMemento() {
         ActivationMemento memento = new ActivationMementoImpl();
         memento.setID(intID);
-        memento.setDatePurchased(datePurchased);
-        memento.setDateExpired(dateExpired);
+        memento.setDatePurchased(datePurchased.getTime());
+        memento.setDateExpired(dateExpired.getTime());
         memento.setLicenseName(licenseName);
         memento.setStatus(currentStatus);
         return memento;
@@ -84,7 +86,7 @@ public class ActivationItemImpl implements ActivationItem {
                 return Status.UNUSEABLE_LW;
             if(moduleID == ActivationID.AVG_MODULE && !OSUtils.isAVGCompatibleWindows())
                 return Status.UNUSEABLE_OS;
-            if(isLoadedFromDisk && System.currentTimeMillis() > dateExpired)
+            if(isLoadedFromDisk && System.currentTimeMillis() > dateExpired.getTime())
                 return Status.EXPIRED;
             return status;
         } else {

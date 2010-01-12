@@ -1,6 +1,7 @@
 package org.limewire.activation.serial;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,21 +14,21 @@ public class ActivationMementoImpl implements ActivationMemento, Serializable {
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
     
     @Override
-    public long getDateExpired() {
+    public Date getDateExpired() {
        Long value = (Long)serialObjects.get("expired");
        if(value == null)
-           return -1;
+           return null;
        else
-           return value;
+           return new Date(value);
     }
 
     @Override
-    public long getDatePurchased() {
+    public Date getDatePurchased() {
         Long value = (Long)serialObjects.get("purchased");
         if(value == null)
-            return -1;
+            return null;
         else
-            return value;
+            return new Date(value);
     }
 
     @Override

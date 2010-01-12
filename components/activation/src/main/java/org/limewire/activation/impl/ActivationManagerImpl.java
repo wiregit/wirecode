@@ -1,7 +1,10 @@
 package org.limewire.activation.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 //temp calendar for license expiration examples - remove after live server
@@ -87,23 +90,24 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 } catch(InterruptedException e) {
                     
                 }
-                
-                // get tomorrows date in ms since 1970
-                Calendar tomorrow = Calendar.getInstance();
-                tomorrow.add(Calendar.DAY_OF_MONTH, 1);
-                
+                                
                 if(key.equals("ADXU8ZNDJGU8")) {
                     currentState = ActivationState.ACTIVATED;
                     activationError = ActivationError.NO_ERROR;
                     
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
-                    List<ActivationItem> list = new ArrayList<ActivationItem>();
-                    list.add(activationItemFactory.createActivationItem(0, "Test Active", 0, tomorrow.getTimeInMillis(), Status.ACTIVE));
-                    list.add(activationItemFactory.createActivationItem(1, "Test Removed", 0, 1000012112, Status.UNAVAILABLE));
-                    list.add(activationItemFactory.createActivationItem(2, "Test Expired", 0, 1000012112, Status.EXPIRED));
-                    list.add(activationItemFactory.createActivationItem(3, "Test Wrong LW", 0, 1000012112, Status.UNUSEABLE_LW));
-                    list.add(activationItemFactory.createActivationItem(4, "Test Wrong OS", 0, 1000012112, Status.UNUSEABLE_OS));
-                    setActivationItems(list);
+                    try {
+                        List<ActivationItem> list = new ArrayList<ActivationItem>();
+                        list.add(activationItemFactory.createActivationItem(0, "Test Active", new Date(1), formatter.parse("20100218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(1, "Test Removed", new Date(1), formatter.parse("20100218"), Status.UNAVAILABLE));
+                        list.add(activationItemFactory.createActivationItem(2, "Test Expired", new Date(1), formatter.parse("20090218"), Status.EXPIRED));
+                        list.add(activationItemFactory.createActivationItem(3, "Test Wrong LW", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_LW));
+                        list.add(activationItemFactory.createActivationItem(4, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
+                        setActivationItems(list);
+                    } catch(ParseException e) {
+                        
+                    }
                     
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
                     ActivationSettings.ACTIVATION_KEY.set(key);

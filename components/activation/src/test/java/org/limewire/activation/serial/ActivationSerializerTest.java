@@ -2,6 +2,7 @@ package org.limewire.activation.serial;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.Test;
@@ -39,7 +40,7 @@ public class ActivationSerializerTest extends LimeTestCase {
         
         ActivationItemFactory factory = new ActivationItemFactoryImpl();
         
-        ActivationItem item = factory.createActivationItem(0, "Test Module", 0, 0, Status.ACTIVE);
+        ActivationItem item = factory.createActivationItem(0, "Test Module", new Date(), new Date(), Status.ACTIVE);
         ActivationMemento memento = ((ActivationItemImpl)item).toActivationMemento();
         List<ActivationMemento> mementos = new ArrayList<ActivationMemento>();
         mementos.add(memento);
@@ -60,9 +61,9 @@ public class ActivationSerializerTest extends LimeTestCase {
         ActivationItemFactory factory = new ActivationItemFactoryImpl();
 
         List<ActivationMemento> mementos = new ArrayList<ActivationMemento>();
-        ActivationItem item1 = factory.createActivationItem(1, "Test Module1", 1, 1, Status.ACTIVE);
-        ActivationItem item2 = factory.createActivationItem(2, "Test Module2", 2, 2, Status.UNAVAILABLE);
-        ActivationItem item3 = factory.createActivationItem(3, "Test Module3", 3, 3, Status.EXPIRED);
+        ActivationItem item1 = factory.createActivationItem(1, "Test Module1", new Date(1), new Date(1), Status.ACTIVE);
+        ActivationItem item2 = factory.createActivationItem(2, "Test Module2", new Date(2), new Date(2), Status.UNAVAILABLE);
+        ActivationItem item3 = factory.createActivationItem(3, "Test Module3", new Date(3), new Date(3), Status.EXPIRED);
         
         ActivationMemento memento1 = ((ActivationItemImpl)item1).toActivationMemento();
         mementos.add(memento1);
