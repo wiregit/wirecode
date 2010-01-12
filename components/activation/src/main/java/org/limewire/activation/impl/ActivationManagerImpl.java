@@ -179,6 +179,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         return activationModel.isActive(id);
     }
     
+    // todo: call activation communicator and get the mcode (and other things) from the activation response 
+    public String getMcode() {
+        return "dummy mcode";
+    }
+    
     @Override
     public boolean isProActive() {
         return activationModel.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ||

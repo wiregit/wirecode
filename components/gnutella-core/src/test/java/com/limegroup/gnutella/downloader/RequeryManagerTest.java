@@ -84,8 +84,10 @@ public class RequeryManagerTest extends LimeTestCase {
     
     private void setPro(boolean pro) throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", pro);
-        //TODO: fix this
 //        assertEquals(pro, LimeWireUtils.isPro());
+        // todo: activation: fix me: fix this unit test
+        fail("This used to call assertEquals(pro, LimeWireUtils.isPro()), and LimeWireUtils.isPro()" +
+                " is not going to exist anymore!");
     }
     
     public void testRegistersWithDHTManager() throws Exception {

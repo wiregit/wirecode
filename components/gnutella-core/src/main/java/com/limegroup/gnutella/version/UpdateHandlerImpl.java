@@ -548,7 +548,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isProActive()));
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
+            activationManager.isProActive(), activationManager.getMcode()));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

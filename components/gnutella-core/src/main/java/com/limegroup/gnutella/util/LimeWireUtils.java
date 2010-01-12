@@ -422,13 +422,21 @@ public final class LimeWireUtils {
     /**
      * Updates a URL to contain common information about the LW installation.
      */
-    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro) {
+    // TODO: ACTIVATION: REFACTOR!  If possible, Put logic inside ApplicationImpl instead of here
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String mcode) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
-        url += "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
+        url += getLWInfoQueryString(myClientGUID, isPro, mcode);
+               
+        return url;
+    }
+    
+    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String mcode) {
+        return "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
             "&pro="   + isPro + 
+            "&mcode=" + mcode + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
             "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
@@ -436,9 +444,7 @@ public final class LimeWireUtils {
             "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
             "&sc="   + ApplicationSettings.SESSIONS.getValue() +
             "&al="   + autoStartupLaunch + 
-            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch());
-               
-        return url;
+            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch());    
     }
 
     /** Returns whether or not a temporary directory is in use. */

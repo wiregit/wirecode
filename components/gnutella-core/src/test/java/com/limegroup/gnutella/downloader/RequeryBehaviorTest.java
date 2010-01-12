@@ -229,8 +229,10 @@ public class RequeryBehaviorTest extends LimeTestCase {
      */
     public void testProRequeryBehavior() throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
-        //TODO: fix this
-//        assertTrue(LimeWireUtils.isPro());
+        //assertTrue(LimeWireUtils.isPro());
+        
+        // todo: activation: fix me: fix this unit test
+        fail("This used to call assertTrue(LimeWireUtils.isPro()), which is not going to exist anymore!");
         
         ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
         downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
