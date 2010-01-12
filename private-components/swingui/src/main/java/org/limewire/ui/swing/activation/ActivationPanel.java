@@ -186,7 +186,7 @@ public class ActivationPanel {
         dialog = new LimeJDialog();
         dialog.setModal(true);
         dialog.setResizable(false);
-        dialog.setTitle(I18n.tr("Limewire"));
+        dialog.setTitle(I18n.tr("LimeWire"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.add(activationPanel);
         dialog.pack();
