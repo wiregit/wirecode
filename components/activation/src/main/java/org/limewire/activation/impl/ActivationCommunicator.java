@@ -1,4 +1,4 @@
-package org.limewire.activation.api;
+package org.limewire.activation.impl;
 
 import java.util.List;
 import java.io.IOException;

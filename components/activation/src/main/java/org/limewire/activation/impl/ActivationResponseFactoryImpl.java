@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.limewire.activation.api.ActivationResponseFactory;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.io.InvalidDataException;
 import org.json.JSONTokener;

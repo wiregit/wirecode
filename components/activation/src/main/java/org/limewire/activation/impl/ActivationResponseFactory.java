@@ -1,6 +1,5 @@
-package org.limewire.activation.api;
+package org.limewire.activation.impl;
 
-import org.limewire.activation.impl.ActivationResponse;
 import org.limewire.io.InvalidDataException;
 
 /**

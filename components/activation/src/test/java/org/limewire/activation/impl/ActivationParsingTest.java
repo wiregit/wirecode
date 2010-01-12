@@ -6,7 +6,6 @@ import java.util.Date;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
-import org.limewire.activation.api.ActivationResponseFactory;
 import org.limewire.io.InvalidDataException;
 
 /**
