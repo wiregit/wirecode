@@ -441,25 +441,25 @@ class LibTorrentWrapper {
 
     public void set_peer_proxy(LibTorrentProxySetting proxySetting) {
         LOG.debugf("before set_peer_proxy: {0}", proxySetting);
-     //   catchWrapperException(libTorrent.set_peer_proxy(proxySetting));
+        catchWrapperException(libTorrent.set_peer_proxy(proxySetting));
         LOG.debugf("after set_peer_proxy: {0}", proxySetting);
     }
 
     public void set_dht_proxy(LibTorrentProxySetting proxySetting) {
         LOG.debugf("before set_dht_proxy: {0}", proxySetting);
-    //    catchWrapperException(libTorrent.set_dht_proxy(proxySetting));
+        catchWrapperException(libTorrent.set_dht_proxy(proxySetting));
         LOG.debugf("after set_dht_proxy: {0}", proxySetting);
     }
 
     public void set_tracker_proxy(LibTorrentProxySetting proxySetting) {
         LOG.debugf("before set_tracker_proxy: {0}", proxySetting);
-     //   catchWrapperException(libTorrent.set_tracker_proxy(proxySetting));
+        catchWrapperException(libTorrent.set_tracker_proxy(proxySetting));
         LOG.debugf("after set_tracker_proxy: {0}", proxySetting);
     }
 
     public void set_web_seed_proxy(LibTorrentProxySetting proxySetting) {
         LOG.debugf("before set_web_seed_proxy: {0}", proxySetting);
-     //   catchWrapperException(libTorrent.set_web_seed_proxy(proxySetting));
+        catchWrapperException(libTorrent.set_web_seed_proxy(proxySetting));
         LOG.debugf("after set_web_seed_proxy: {0}", proxySetting);
     }
        

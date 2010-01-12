@@ -7,15 +7,15 @@ import com.sun.jna.Structure;
 
 public class LibTorrentProxySetting extends Structure implements ProxySetting {
 
-    public final String hostname;
+    public String hostname;
 
-    public final int port;
+    public int port;
 
-    public final String username;
+    public String username;
 
-    public final String password;
+    public String password;
 
-    public final int type;
+    public int type;
 
     public LibTorrentProxySetting(LibTorrentProxySettingType type, String hostname, int port) {
         this.hostname = hostname;
