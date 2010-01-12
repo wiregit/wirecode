@@ -199,15 +199,16 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     // before setting state and error message, server may have already set
                     // these
                     if(activationModel.size() > 0) {
-                        List<ActivationItem> items = activationModel.getActivationItems();
-                        for(ActivationItem item : items) {
-                            //need to check expiration time against system time
-                            if(item.getStatus() == Status.ACTIVE) {
+                        //NOTE: this is commented out because this won't update the UI if everything has already expired
+//                        List<ActivationItem> items = activationModel.getActivationItems();
+//                        for(ActivationItem item : items) {
+//                            //need to check expiration time against system time
+//                            if(item.getStatus() == Status.ACTIVE) {
                                 currentState = ActivationState.ACTIVATED;
                                 activationError = ActivationError.NO_ERROR;
-                                break;
-                            }
-                        }
+//                                break;
+//                            }
+//                        }
                     } else {
                         currentState = ActivationState.NOT_ACTIVATED;
                         activationError = ActivationError.NO_ERROR;

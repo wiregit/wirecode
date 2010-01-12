@@ -111,7 +111,6 @@ public class ActivationModelImpl implements ActivationModel {
                     ActivationItem item = activationItemFactory.createActivationItem(memento);
                     activationItems.add(item);
                 } catch (InvalidDataException e) {
-                    
                 }
             }
             // add this list to the 

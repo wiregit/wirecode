@@ -18,7 +18,7 @@ public class ActivationItemFactoryImpl implements ActivationItemFactory {
 
     @Override
     public ActivationItem createActivationItem(ActivationMemento memento) throws InvalidDataException {
-        try {
+        try { 
             if(memento.getDateExpired() == -1)
                 throw new InvalidDataException("must have date expired");
             if(memento.getDatePurchased() == -1)
@@ -27,7 +27,7 @@ public class ActivationItemFactoryImpl implements ActivationItemFactory {
                 throw new InvalidDataException("must have id");
             
             return new ActivationItemImpl(memento.getID(), memento.getLicenseName(), memento.getDatePurchased(),
-                    memento.getDateExpired(), memento.getStatus());
+                    memento.getDateExpired(), memento.getStatus(), true);
         } catch (Throwable t) {
             throw new InvalidDataException("invalid memento!", t);
         }
