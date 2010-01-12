@@ -43,7 +43,7 @@ public class MockActivationItem implements ActivationItem {
 
     @Override
     public ActivationID getModuleID() {
-        return ActivationID.PRO_MODULE;
+        return ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE;
     }
 
     @Override

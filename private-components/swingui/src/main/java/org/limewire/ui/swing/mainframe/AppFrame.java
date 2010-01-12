@@ -402,7 +402,7 @@ public class AppFrame extends SingleFrameApplication {
                     Modules.providersFrom(injector),
                     new LimeWireInjectModule(),
                     thiz,
-                    new LimeWireSwingUiModule(injector.getInstance(ActivationManager.class).isActive(ActivationID.PRO_MODULE)),
+                    new LimeWireSwingUiModule(injector.getInstance(ActivationManager.class).isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)),
                     new AbstractModule() {
                         @Override
                         protected void configure() {                            

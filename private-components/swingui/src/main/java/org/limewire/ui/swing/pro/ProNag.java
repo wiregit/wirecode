@@ -202,7 +202,7 @@ class ProNag extends JXPanel {
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
         // Pro has no default page.
         // TODO: this will change to display an add possibly
-        if(activationManager.isActive(ActivationID.PRO_MODULE)) {
+        if(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)) {
             return "";
         }
         

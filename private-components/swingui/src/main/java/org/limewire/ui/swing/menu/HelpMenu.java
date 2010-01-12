@@ -68,7 +68,7 @@ class HelpMenu extends MnemonicMenu {
             add(new UrlAction(I18n.tr("&Give Feedback"), "http://www.limewire.com/client_redirect/?page=betaTesting", application));
         }
         
-        if(!activationManager.isActive(ActivationID.PRO_MODULE)) {
+        if(!activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)) {
             addSeparator();
             add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
         }

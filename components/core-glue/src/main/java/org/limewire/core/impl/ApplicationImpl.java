@@ -29,7 +29,7 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
-        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.PRO_MODULE));
+        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
     }
     
     @Override

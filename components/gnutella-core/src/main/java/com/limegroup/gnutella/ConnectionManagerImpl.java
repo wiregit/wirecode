@@ -2235,7 +2235,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
             //TODO: revert this to a method call, install script change
-            setPreferredConnections(activationManager.isActive(ActivationID.PRO_MODULE) ? 5 : 3);
+            setPreferredConnections(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? 5 : 3);
     }
     
     /**

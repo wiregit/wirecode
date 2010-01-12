@@ -181,7 +181,7 @@ public class GnutellaConnectionManagerImpl
             int preferred = connectionManager.getPreferredConnectionCount();
             // account for pro having more connections.
 //            if(LimeWireUtils.isPro()) {
-            if(activationManager.isActive(ActivationID.PRO_MODULE)) {
+            if(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE)) {
                 preferred -= 2;
             }
             

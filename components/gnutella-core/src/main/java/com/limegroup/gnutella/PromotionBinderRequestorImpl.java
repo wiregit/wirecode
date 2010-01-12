@@ -55,6 +55,6 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     
     @Override
     public String alterUrl(String url) {
-        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.PRO_MODULE));
+        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
     } 
 }

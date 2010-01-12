@@ -176,7 +176,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     public boolean isActive(ActivationID id) {
         return activationModel.isActive(id);
     }
-    
 
     @Override
     public String getServiceName() {
