@@ -7,9 +7,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-//temp calendar for license expiration examples - remove after live server
-import java.util.Calendar;
-
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -98,11 +95,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
                     try {
                         List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(0, "Test Active", new Date(1), formatter.parse("20100218"), Status.ACTIVE));
-                        list.add(activationItemFactory.createActivationItem(1, "Test Removed", new Date(1), formatter.parse("20100218"), Status.UNAVAILABLE));
-                        list.add(activationItemFactory.createActivationItem(2, "Test Expired", new Date(1), formatter.parse("20090218"), Status.EXPIRED));
-                        list.add(activationItemFactory.createActivationItem(3, "Test Wrong LW", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_LW));
-                        list.add(activationItemFactory.createActivationItem(4, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
+                        list.add(activationItemFactory.createActivationItem(1, "Test Active", new Date(1), formatter.parse("20100218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(2, "Test Removed", new Date(1), formatter.parse("20100218"), Status.UNAVAILABLE));
+                        list.add(activationItemFactory.createActivationItem(3, "Test Expired", new Date(1), formatter.parse("20090218"), Status.EXPIRED));
+                        list.add(activationItemFactory.createActivationItem(4, "Test Wrong LW", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_LW));
+                        list.add(activationItemFactory.createActivationItem(5, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
                         setActivationItems(list);
                     } catch(ParseException e) {
                         
@@ -118,10 +115,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
                         try {
                             List<ActivationItem> list = new ArrayList<ActivationItem>();
-                            list.add(activationItemFactory.createActivationItem(0, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(1, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(2, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(3, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(4, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
                             setActivationItems(list);
                         } catch(ParseException e) {
                             
@@ -138,7 +135,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     try {
                         // this is temporary
                         List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(0, "LimeWire PRO Extended", new Date(), formatter.parse("20100218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(1, "LimeWire PRO Extended", new Date(), formatter.parse("20100218"), Status.ACTIVE));
                         setActivationItems(list);
                     } catch (ParseException e) {
                         // TODO Auto-generated catch block
