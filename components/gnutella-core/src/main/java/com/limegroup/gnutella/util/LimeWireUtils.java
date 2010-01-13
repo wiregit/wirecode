@@ -406,6 +406,27 @@ public final class LimeWireUtils {
         return settingsDir;
     }
     
+    public static boolean shouldShowProSplashScreen() {
+        File userSettings = getRequestedUserSettingsLocation();
+        File showProSplashScreenFile = new File(userSettings + System.getProperty("file.separator") + "showprosplash.txt");
+        return showProSplashScreenFile.exists();
+    }
+
+    public static void setShouldShowProSplashScreen(boolean shouldShowProSplash) {
+        File userSettings = getRequestedUserSettingsLocation();
+        File showProSplashScreenFile = new File(userSettings + System.getProperty("file.separator") + "showprosplash.txt");
+        if (!shouldShowProSplash) {
+            if (showProSplashScreenFile.exists()) {
+                showProSplashScreenFile.delete();
+            }
+        } else {
+            try {
+                showProSplashScreenFile.createNewFile();
+            } catch (IOException e) {
+            }
+        }
+    }
+
     /** Strips out any quotes that we left on the data. */
     private static String stripQuotes(String incoming) {
         if (incoming == null || incoming.length() <= 2)

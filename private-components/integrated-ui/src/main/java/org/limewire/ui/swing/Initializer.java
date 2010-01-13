@@ -160,8 +160,9 @@ final class Initializer {
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
 //        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
-        switchSplashes(awtSplash, ActivationSettings.LAST_START_WAS_PRO.getValue() ? getProSplashImage() : splashImage, 
-                ActivationSettings.LAST_START_WAS_PRO.getValue());
+        //ActivationSettings.LAST_START_WAS_PRO.getValue() ? getProSplashImage() : 
+        switchSplashes(awtSplash, splashImage, 
+                       ActivationSettings.LAST_START_WAS_PRO.getValue());
         
         startEarlyCore();
         

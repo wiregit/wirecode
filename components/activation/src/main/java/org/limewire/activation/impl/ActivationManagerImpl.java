@@ -68,10 +68,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             9GX5-F2B3-782R: 87 => 23 => R
             SFG6-P97K-9Q8E: 140 => 12 => E
          */
+
         if (!isValidKey(key)) {
             setActivationFailed(ActivationError.INVALID_KEY);
             return;
         }
+
         
         if (currentState == ActivationState.ACTIVATING) {
             return;
@@ -87,7 +89,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 } catch(InterruptedException e) {
                     
                 }
-                if(key.equals("ADXU8ZNDJGU8")) {                    
+                if(key.equals("ADXU8ZNDJGU8")) {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
                     try {
@@ -99,6 +101,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                         list.add(activationItemFactory.createActivationItem(5, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
                         setActivationItems(list);
                     } catch(ParseException e) {
+                        
                     }
                     
                     setActivated(key);
@@ -155,6 +158,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         if(error == ActivationError.INVALID_KEY) {
             ActivationSettings.ACTIVATION_KEY.revertToDefault();
         }
+        ActivationSettings.LAST_START_WAS_PRO.set(false);
         currentState = ActivationState.NOT_ACTIVATED;
         activationError = error;
         setActivationItems(Collections.EMPTY_LIST);
