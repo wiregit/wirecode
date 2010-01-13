@@ -90,7 +90,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 } catch(InterruptedException e) {
                     
                 }
-                                
                 if(key.equals("ADXU8ZNDJGU8")) {
                     currentState = ActivationState.ACTIVATED;
                     activationError = ActivationError.NO_ERROR;
@@ -130,6 +129,23 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                         
                         listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
                         ActivationSettings.ACTIVATION_KEY.set(key);
+             } else if (key.equals("4PVVCDDA8T8U")) {
+                    currentState = ActivationState.ACTIVATED;
+                    activationError = ActivationError.NO_ERROR;
+                    
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+                    try {
+                        // this is temporary
+                        List<ActivationItem> list = new ArrayList<ActivationItem>();
+                        list.add(activationItemFactory.createActivationItem(0, "LimeWire PRO Extended", new Date(), formatter.parse("20100218"), Status.ACTIVE));
+                        setActivationItems(list);
+                    } catch (ParseException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                    listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
                 } else if (key.equals("54321")) {
                     currentState = ActivationState.NOT_ACTIVATED;
                     activationError = ActivationError.BLOCKED_KEY;

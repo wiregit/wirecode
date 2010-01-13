@@ -6,8 +6,6 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.settings.InstallSettings;
-import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -53,10 +51,11 @@ public class SetupWizard {
         
         wizard.addPage(new SetupPage2(decorator, application, libraryData));
 
-        wizard.addPage(new SetupPage3(decorator, application, libraryData, activationManagerProvider.get()));
+        wizard.addPage(new SetupPage3(decorator, application, libraryData, activationManagerProvider.get(), wizard));
     }
 
     private static boolean shouldShowPage1() {
+        /*
         if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
             return true;
         }
@@ -69,8 +68,9 @@ public class SetupWizard {
         if (!InstallSettings.START_STARTUP.getValue()) {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
+        */
         
-        return false;
+        return true;
     }
 
 }

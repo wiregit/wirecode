@@ -221,22 +221,30 @@ public class Wizard extends JPanel {
         footer.setText(page.getFooter());
     }
     
-    private void updateForwardButton(WizardPage page) {
+    public void updateForwardButton(WizardPage page) {
         if (finishButton.isVisible() && !finishButton.getText().equals(page.getForwardButtonText()))
             finishButton.setText(page.getForwardButtonText());
         if (continueButton.isVisible() && !continueButton.getText().equals(page.getForwardButtonText()))
             continueButton.setText(page.getForwardButtonText());
     }
     
+    public void updateBackButton(WizardPage page) {
+        backButton.setVisible(currentPage == pageList.size() - 1 && page.hasBackButton());
+    }
+    
+    public void updateFooter(WizardPage page) {
+        footer.setText(page.getFooter());
+    }
+
     public void setCurrentPage(int step){
         if(step >= 0 && step < pageList.size()) {
             currentPage = step;
             cardLayout.show(mainPanel, currentPage + "");
             finishButton.setVisible(currentPage == pageList.size() - 1);
             continueButton.setVisible(!finishButton.isVisible());
-            backButton.setVisible(currentPage != 0);
             updateTitle(pageList.get(currentPage));
             updateForwardButton(pageList.get(currentPage));
+            updateBackButton(pageList.get(currentPage));
         }
     }
  

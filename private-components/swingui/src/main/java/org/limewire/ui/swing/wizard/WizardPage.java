@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.wizard;
 
-import java.awt.Component;
-
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,6 +34,10 @@ public abstract class WizardPage extends JPanel {
         return I18n.tr("Continue");
     }
     
+    protected boolean hasBackButton() {
+        return true;
+    }
+    
     protected JLabel createAndDecorateHeader(String text) {
         JLabel label = new JLabel("<html>"+text+"</html>");
         decorator.decorateHeadingText(label);
@@ -49,13 +51,13 @@ public abstract class WizardPage extends JPanel {
         return label;
     }
     
-    protected Component createAndDecorateMultiLine(String text) {
+    protected JLabel createAndDecorateMultiLine(String text) {
         JLabel label = new MultiLineLabel(text, 500);
         decorator.decorateNormalText(label);
         return label;
     }
     
-    protected Component createAndDecorateSubHeading(String text) {
+    protected JLabel createAndDecorateSubHeading(String text) {
         JLabel label = new MultiLineLabel(text, 500);
         decorator.decorateSubHeading(label);
         return label;
