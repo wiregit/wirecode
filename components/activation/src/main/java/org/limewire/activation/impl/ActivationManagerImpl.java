@@ -131,7 +131,40 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     }
                     
                     setActivated(key);
-                } else if (key.equals("54321")) {
+                } else if(key.equals("Q9DPUGFYCRTC")) {    // QA Test -  Turbo-changed downloads (only)                    
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+                    try {
+                        List<ActivationItem> list = new ArrayList<ActivationItem>();
+                        list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                        setActivationItems(list);
+                    } catch(ParseException e) {
+                    }
+                    
+                    setActivated(key);
+             }  else if(key.equals("MQDHSC24C6NB")) {    // QA Test -  Optimized search results (only)                   
+                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+                 try {
+                     List<ActivationItem> list = new ArrayList<ActivationItem>();
+                     list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                     setActivationItems(list);
+                 } catch(ParseException e) {
+                 }
+                 
+                 setActivated(key);
+          }  else if(key.equals("QT5JKANUPJ7M")) {    // QA Test -  Tech Support (only)                  
+              SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+              try {
+                  List<ActivationItem> list = new ArrayList<ActivationItem>();
+                  list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                  setActivationItems(list);
+              } catch(ParseException e) {
+              }
+              
+              setActivated(key);
+       }    else if (key.equals("54321")) {
                     setActivationFailed(ActivationError.BLOCKED_KEY);
                 } else {
                     setActivationFailed(ActivationError.INVALID_KEY);
