@@ -12,6 +12,7 @@ import javax.swing.text.PlainDocument;
 
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.components.Paintable;
+import org.limewire.ui.swing.components.TextFieldClipboardControl;
 
 import com.google.inject.Inject;
 
@@ -23,6 +24,8 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
     @Inject
     public LicenseKeyTextField() {
         super(15);
+        
+        TextFieldClipboardControl.install(this);
     }
     
     @Override
