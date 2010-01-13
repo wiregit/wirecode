@@ -3,14 +3,35 @@ package org.limewire.activation.api;
 import java.util.Date;
 
 
-//TODO: This API may change, these methods are partly brainstorming for items
-//      needed to be retrieved from the server and stored on the server.
+/**
+ * An ActivationItem represents a single Module. This item represents 
+ * data retrieved from the server and whether this module can be
+ * currently used.
+ */
 public interface ActivationItem {
 
     static enum Status {
-        ACTIVE, EXPIRED, UNUSEABLE_OS, UNUSEABLE_LW, UNAVAILABLE
+        
+        /** ActivationItem can be used. */
+        ACTIVE, 
+        
+        /** ActivationItem expired and must be repurchased for continued use. */
+        EXPIRED, 
+        
+        /** ActivationItem is Active but can't be used by this Operating System. */
+        UNUSEABLE_OS, 
+        
+        /** ActivationItem is Active but can't be used by this version of LW. */
+        UNUSEABLE_LW, 
+        
+        /** ActivationItem is no longer supported by LW. */
+        UNAVAILABLE
     }
     
+    /**
+     * Returns the ActivationID associated with this item.
+     * @return
+     */
     public ActivationID getModuleID();
     
     /**
@@ -30,7 +51,6 @@ public interface ActivationItem {
     
     /**
      * Returns the status that this module is in for this ActivationKey.
-     * @return
      */
     public Status getStatus();
 
