@@ -73,6 +73,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             return;
         }
         
+        if (currentState == ActivationState.ACTIVATING) {
+            return;
+        }
+        
         //TODO: this sould hit the real server
         Thread t = new Thread(new Runnable(){
             public void run() {
@@ -148,6 +152,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void setActivationFailed(ActivationError error) {
+        if(error == ActivationError.INVALID_KEY) {
+            ActivationSettings.ACTIVATION_KEY.revertToDefault();
+        }
         currentState = ActivationState.NOT_ACTIVATED;
         activationError = error;
         setActivationItems(Collections.EMPTY_LIST);
