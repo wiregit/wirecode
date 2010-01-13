@@ -69,28 +69,21 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             SFG6-P97K-9Q8E: 140 => 12 => E
          */
         if (!isValidKey(key)) {
-            currentState = ActivationState.NOT_ACTIVATED;
-            activationError = ActivationError.INVALID_KEY;
-            setActivationItems(Collections.EMPTY_LIST);
-            listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
+            setActivationFailed(ActivationError.INVALID_KEY);
             return;
         }
         
         //TODO: this sould hit the real server
         Thread t = new Thread(new Runnable(){
             public void run() {
-                currentState = ActivationState.ACTIVATING;
-                activationError = ActivationError.NO_ERROR;
-                listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
+                startActivating();
+
                 try {
                     Thread.sleep(2000);
                 } catch(InterruptedException e) {
                     
                 }
-                if(key.equals("ADXU8ZNDJGU8")) {
-                    currentState = ActivationState.ACTIVATED;
-                    activationError = ActivationError.NO_ERROR;
-                    
+                if(key.equals("ADXU8ZNDJGU8")) {                    
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
                     try {
@@ -102,34 +95,24 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                         list.add(activationItemFactory.createActivationItem(5, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
                         setActivationItems(list);
                     } catch(ParseException e) {
-                        
                     }
                     
-                    listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
-                    ActivationSettings.ACTIVATION_KEY.set(key);
-                } else if(key.equals("J8SVKC4YFLBE")) {
-                        currentState = ActivationState.ACTIVATED;
-                        activationError = ActivationError.NO_ERROR;
-                        
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                    setActivated(key);
+                } else if(key.equals("J8SVKC4YFLBE")) {                        
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
-                        try {
-                            List<ActivationItem> list = new ArrayList<ActivationItem>();
-                            list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            list.add(activationItemFactory.createActivationItem(4, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                            setActivationItems(list);
-                        } catch(ParseException e) {
-                            
-                        }
-                        
-                        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
-                        ActivationSettings.ACTIVATION_KEY.set(key);
-             } else if (key.equals("4PVVCDDA8T8U")) {
-                    currentState = ActivationState.ACTIVATED;
-                    activationError = ActivationError.NO_ERROR;
+                    try {
+                        List<ActivationItem> list = new ArrayList<ActivationItem>();
+                        list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                        list.add(activationItemFactory.createActivationItem(4, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                        setActivationItems(list);
+                    } catch(ParseException e) {
+                    }
                     
+                    setActivated(key);
+             } else if (key.equals("4PVVCDDA8T8U")) {                   
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
                     try {
@@ -138,22 +121,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                         list.add(activationItemFactory.createActivationItem(1, "LimeWire PRO Extended", new Date(), formatter.parse("20100218"), Status.ACTIVE));
                         setActivationItems(list);
                     } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
                     
-                    listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
+                    setActivated(key);
                 } else if (key.equals("54321")) {
-                    currentState = ActivationState.NOT_ACTIVATED;
-                    activationError = ActivationError.BLOCKED_KEY;
-                    setActivationItems(Collections.EMPTY_LIST);
-                    listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.BLOCKED_KEY));
+                    setActivationFailed(ActivationError.BLOCKED_KEY);
                 } else {
-                    currentState = ActivationState.NOT_ACTIVATED;
-                    activationError = ActivationError.INVALID_KEY;
-                    setActivationItems(Collections.EMPTY_LIST);
-                    listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, ActivationError.INVALID_KEY));
-//                    ActivationSettings.ACTIVATION_KEY.set("");
+                    setActivationFailed(ActivationError.INVALID_KEY);
                 }
             }
         });
@@ -166,7 +140,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
     }
     
-    private void setActivated() {
+    private void setActivated(String key) {
+        ActivationSettings.ACTIVATION_KEY.set(key);
         currentState = ActivationState.ACTIVATED;
         activationError = ActivationError.NO_ERROR;
         listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
@@ -178,6 +153,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         setActivationItems(Collections.EMPTY_LIST);
         listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, error));
     }
+    
+//    private void updateState(ActivationState state, ActivationError error, List<ActivationItem> items) {
+//        
+//    }
 
     @Override
     public ActivationState getActivationState() {

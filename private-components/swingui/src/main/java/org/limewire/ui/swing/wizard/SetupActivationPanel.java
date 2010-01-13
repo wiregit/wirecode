@@ -27,7 +27,6 @@ import org.limewire.ui.swing.util.I18n;
 
 public class SetupActivationPanel extends JPanel {
 
-    private final WizardPage wizardPage;
     private final ActivationManager activationManager;
     
     private JTextField licenseField;
@@ -43,7 +42,6 @@ public class SetupActivationPanel extends JPanel {
         
         GuiUtils.assignResources(this);
 
-        this.wizardPage = wizardPage;
         this.activationManager = activationManager;
 
         add(Box.createVerticalStrut(18), "spanx 1, growx, cell 2 1"); //wrap

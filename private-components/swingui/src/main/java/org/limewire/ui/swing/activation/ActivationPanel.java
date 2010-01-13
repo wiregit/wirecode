@@ -355,10 +355,6 @@ public class ActivationPanel {
         licenseTableErrorLabel.setVisible(isVisible);
     }   
     
-    private void setEnterActionsEnabled(boolean enabled) {
-        
-    }
-    
     private abstract class ButtonPanel extends JPanel {
         
         public ButtonPanel() {
