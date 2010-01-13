@@ -35,7 +35,7 @@ final class GuiLoader {
      * @param frame the splash screen; null, if no splash is displayed
      */
     public void load(String args[], Frame splashFrame, Image splashImage) {
-        try {  System.out.println("splash shown? " + splashFrame.isVisible() + " ");
+        try {  //System.out.println("splash shown? " + splashFrame.isVisible() + " ");
             //sanityCheck();
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
