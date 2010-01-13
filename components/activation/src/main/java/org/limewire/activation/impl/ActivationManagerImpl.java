@@ -149,6 +149,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     private void setActivated(String key) {
         ActivationSettings.ACTIVATION_KEY.set(key);
+        ActivationSettings.LAST_START_WAS_PRO.set(true);
         currentState = ActivationState.ACTIVATED;
         activationError = ActivationError.NO_ERROR;
         listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
