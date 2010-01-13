@@ -159,6 +159,25 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         });
         t.start();
     }
+    
+    private void startActivating() {
+        currentState = ActivationState.ACTIVATING;
+        activationError = ActivationError.NO_ERROR;
+        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
+    }
+    
+    private void setActivated() {
+        currentState = ActivationState.ACTIVATED;
+        activationError = ActivationError.NO_ERROR;
+        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
+    }
+    
+    private void setActivationFailed(ActivationError error) {
+        currentState = ActivationState.NOT_ACTIVATED;
+        activationError = error;
+        setActivationItems(Collections.EMPTY_LIST);
+        listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, error));
+    }
 
     @Override
     public ActivationState getActivationState() {
@@ -200,8 +219,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
         
         int sum = 0;
-        for (int counter = 0; counter < keyPart.length(); counter++)
-        {
+        for (int counter = 0; counter < keyPart.length(); counter++) {
             char currentChar = keyPart.charAt(counter);
             int positionInValidChars = validChars.indexOf(currentChar);
             
@@ -215,7 +233,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         int modulusOfSum = sum % validChars.length();
         char correctChecksum = validChars.charAt(modulusOfSum);
 
-        return givenChecksum.equals(""+correctChecksum);
+        return givenChecksum.equals(String.valueOf(correctChecksum));
     }
 
     @Override
