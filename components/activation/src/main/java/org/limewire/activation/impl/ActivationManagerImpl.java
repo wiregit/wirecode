@@ -111,6 +111,25 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     
                     listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
                     ActivationSettings.ACTIVATION_KEY.set(key);
+                } else if(key.equals("J8SVKC4YFLBE")) {
+                        currentState = ActivationState.ACTIVATED;
+                        activationError = ActivationError.NO_ERROR;
+                        
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+                        try {
+                            List<ActivationItem> list = new ArrayList<ActivationItem>();
+                            list.add(activationItemFactory.createActivationItem(0, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(1, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(2, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            list.add(activationItemFactory.createActivationItem(3, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
+                            setActivationItems(list);
+                        } catch(ParseException e) {
+                            
+                        }
+                        
+                        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
+                        ActivationSettings.ACTIVATION_KEY.set(key);
                 } else if (key.equals("54321")) {
                     currentState = ActivationState.NOT_ACTIVATED;
                     activationError = ActivationError.BLOCKED_KEY;
