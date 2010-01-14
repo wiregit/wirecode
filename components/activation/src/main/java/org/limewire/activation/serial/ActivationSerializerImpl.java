@@ -107,10 +107,10 @@ public class ActivationSerializerImpl implements ActivationSerializer {
     
     private synchronized String getEncryptionKey() {
         String key = ActivationSettings.PASS_KEY.get();
-        if(key == null || ActivationSettings.PASS_KEY.isDefault()) {
-            key = generateEncryptionKey();
-            ActivationSettings.PASS_KEY.set(key);
-        }
+//        if(key == null || ActivationSettings.PASS_KEY.isDefault()) {
+//            key = generateEncryptionKey();
+//            ActivationSettings.PASS_KEY.set(key);
+//        }
         return key;
     }
     
@@ -122,48 +122,48 @@ public class ActivationSerializerImpl implements ActivationSerializer {
           
             SecretKey key = kgen.generateKey();
             byte[] raw = key.getEncoded();
-            return asHex(raw);
+            return new BigInteger(16, raw).toString();//(raw);
         } catch(NoSuchAlgorithmException e) {
             // use the default key if it can't be generated
             return ActivationSettings.PASS_KEY.get();
         }
     }
-    
-    public static String asHex(byte[] data) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]).toUpperCase());
-        }
-        return (buf.toString());
-    }
-
-
-    /**
-     *  method to convert a byte to a hex string.
-     *
-     * @param  data  the byte to convert
-     * @return String the converted byte
-     */
-    public static String byteToHex(byte data) {
-        StringBuffer buf = new StringBuffer();
-        buf.append(toHexChar((data >>> 4) & 0x0F));
-        buf.append(toHexChar(data & 0x0F));
-        return buf.toString();
-    }
-    
-    /**
-     *  Convenience method to convert an int to a hex char.
-     *
-     * @param  i  the int to convert
-     * @return char the converted char
-     */
-    public static char toHexChar(int i) {
-        if ((0 <= i) && (i <= 9)) {
-            return (char) ('0' + i);
-        } else {
-            return (char) ('a' + (i - 10));
-        }
-    }
+//    
+//    public static String asHex(byte[] data) {
+//        StringBuffer buf = new StringBuffer();
+//        for (int i = 0; i < data.length; i++) {
+//            buf.append(byteToHex(data[i]).toUpperCase());
+//        }
+//        return (buf.toString());
+//    }
+//
+//
+//    /**
+//     *  method to convert a byte to a hex string.
+//     *
+//     * @param  data  the byte to convert
+//     * @return String the converted byte
+//     */
+//    public static String byteToHex(byte data) {
+//        StringBuffer buf = new StringBuffer();
+//        buf.append(toHexChar((data >>> 4) & 0x0F));
+//        buf.append(toHexChar(data & 0x0F));
+//        return buf.toString();
+//    }
+//    
+//    /**
+//     *  Convenience method to convert an int to a hex char.
+//     *
+//     * @param  i  the int to convert
+//     * @return char the converted char
+//     */
+//    public static char toHexChar(int i) {
+//        if ((0 <= i) && (i <= 9)) {
+//            return (char) ('0' + i);
+//        } else {
+//            return (char) ('a' + (i - 10));
+//        }
+//    }
 
 //
 //    
