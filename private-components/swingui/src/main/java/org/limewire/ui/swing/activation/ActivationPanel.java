@@ -238,6 +238,7 @@ public class ActivationPanel {
             warningPanel.setActivationMode(Mode.EMPTY);
             selectCard(NO_LICENSE_PANEL);
             isRefreshing = false;
+            eventList.clear();
             return;
         case ACTIVATING:
             if (!isRefreshing)
