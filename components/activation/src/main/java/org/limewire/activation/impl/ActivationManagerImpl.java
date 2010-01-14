@@ -37,6 +37,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
 
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
+    
+    private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
@@ -93,8 +95,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 try {
                     ActivationResponse response = activationCommunicator.activate(key);
 
-//                    setActivated(response, false);
-
                     ACTIVATED_FROM_SERVER.enterState(response);
 
                     
@@ -118,26 +118,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         
         activationContactor.rescheduleIfSooner(refreshIntervalSeconds);
     }
-//    
-//    private void setActivated(final ActivationResponse response, boolean activatedFromDisk) {
-//        if(!activatedFromDisk) {
-//            ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-//            ActivationSettings.LAST_START_WAS_PRO.set(true);
-//            BackgroundExecutorService.execute(new Runnable(){
-//                public void run() {
-//                    try {
-//                        activationSerializer.writeToDisk(response.getJSONString());                        
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//         }
-//        setActivationItems(response.getActivationItems());
-//        currentState = ActivationState.ACTIVATED;
-//        activationError = ActivationError.NO_ERROR;
-//        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
-//    }
 
     @Override
     public ActivationState getActivationState() {
@@ -170,13 +150,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public boolean isValidKey(String key) {
-        if (key.length() != 12)
+        if (key == null || key.length() != 12)
             return false;
         
         String givenChecksum = key.substring(key.length()-1, key.length());
         String keyPart = key.substring(0, key.length()-1);
-
-        String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
         
         int sum = 0;
         for (int counter = 0; counter < keyPart.length(); counter++) {
@@ -220,33 +198,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void initialize() {
-//<<<<<<< ActivationManagerImpl.java
         loadFromDisk();
-//        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
-//            @Override
-//            public void handleEvent(FutureEvent<Boolean> event) {
-//                if(event.getResult() == true) {
-//                    //TODO: check if PKey exists, check expiration dates, check current state
-//                    // before setting state and error message, server may have already set
-//                    // these
-//                    if(activationModel.size() > 0) {
-//                        //NOTE: this is commented out because this won't update the UI if everything has already expired
-////                        List<ActivationItem> items = activationModel.getActivationItems();
-////                        for(ActivationItem item : items) {
-////                            //need to check expiration time against system time
-////                            if(item.getStatus() == Status.ACTIVE) {
-//                                currentState = ActivationState.ACTIVATED;
-//                                activationError = ActivationError.NO_ERROR;
-////                                break;
-////                            }
-////                        }
-//                    } else {
-//                        currentState = ActivationState.NOT_ACTIVATED;
-//                        activationError = ActivationError.NO_ERROR;
-//                    }
-//                }
-//            }
-//        });
     }
     
     private void loadFromDisk() {
@@ -353,7 +305,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             }
             activationError = error;
             ActivationSettings.LAST_START_WAS_PRO.set(false);
-            setActivationItems(Collections.EMPTY_LIST);
+            setActivationItems(Collections.<ActivationItem>emptyList());
             listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
             currentState = this;
         }
@@ -386,7 +338,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if (currentState == ACTIVATED_FROM_SERVER) {
                 return;
             } else {
-//                ActivationSettings.ACTIVATION_KEY.set(response.getLid());
                 ActivationSettings.LAST_START_WAS_PRO.set(true);
                 setActivationItems(response.getActivationItems());
                 activationError = ActivationError.NO_ERROR;
