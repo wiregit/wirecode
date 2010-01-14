@@ -35,7 +35,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
 
-    private volatile ActivationState currentState = ActivationState.UNINITIALIZED;
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
 
     private final ActivationModel activationModel;
@@ -60,12 +59,18 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
         // cancel any existing activation currently taking place.
         if (activationContactor != null) {
-            if(currentState == ActivationState.ACTIVATING)
+            if(currentState == ACTIVATING)
                 return;
             else
                 activationContactor.unschedule();
         }
-        startActivating();
+
+        if (!isValidKey(key)) {
+            NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+            return;
+        }
+
+        ACTIVATING.enterState();
 
         activationContactor = new Periodic(new Runnable() {
             
@@ -77,7 +82,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     ActivationResponse response = activationCommunicator.activate(key);
-                    setActivated(response);
+                    ACTIVATED_FROM_SERVER.enterState(response.getLid(), response.getActivationItems());
                     
                     // todo: process the contents of the ActivationResponse, esp if there are errors
                     // todo: update refreshInterval and reschedule the next one.
@@ -87,12 +92,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     if (tries-- > 0) {
                         activationContactor.rescheduleIfSooner(25000 - tries*5000);    
                     } else {
-                        setActivationFailed(ActivationError.COMMUNICATION_ERROR);
+                        NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
                     }
                 } catch (InvalidDataException e) {
-                    setActivationFailed(ActivationError.COMMUNICATION_ERROR);
+                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
                 } catch (Throwable e) {
-                    setActivationFailed(ActivationError.COMMUNICATION_ERROR);    
+                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
                 }
             }
         }, scheduler);
@@ -100,50 +105,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         activationContactor.rescheduleIfSooner(refreshIntervalSeconds);
     }
     
-    private void startActivating() {
-        currentState = ActivationState.ACTIVATING;
-        activationError = ActivationError.NO_ERROR;
-        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
-    }
-    
-    private void setActivated(ActivationResponse response) {
-        ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-        setActivationItems(response.getActivationItems());
-        ActivationSettings.LAST_START_WAS_PRO.set(true);
-        currentState = ActivationState.ACTIVATED;
-        activationError = ActivationError.NO_ERROR;
-        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
-    }
-    
-    private void setActivationFailed(ActivationError error) {
-        if(error == ActivationError.INVALID_KEY) {
-            ActivationSettings.ACTIVATION_KEY.revertToDefault();
-        }
-        ActivationSettings.LAST_START_WAS_PRO.set(false);
-        currentState = ActivationState.NOT_ACTIVATED;
-        activationError = error;
-        setActivationItems(Collections.EMPTY_LIST);
-        listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, error));
-    }
-    
-    private void transitionState(ActivationState state, ActivationError error, List<ActivationItem> items) {
-        switch(currentState) {
-        case UNINITIALIZED:
-            break;
-        case ACTIVATING:
-            break;
-        case ACTIVATED:
-            break;
-        case PROVISIONALLY_ACTIVATED:
-            break;
-        case NOT_ACTIVATED:
-            break;
-        }
-    }
 
     @Override
     public ActivationState getActivationState() {
-        return currentState;
+        return currentState.getActivationState();
     }
     
     @Override
@@ -235,14 +200,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 //                        for(ActivationItem item : items) {
 //                            //need to check expiration time against system time
 //                            if(item.getStatus() == Status.ACTIVE) {
-                                currentState = ActivationState.ACTIVATED;
-                                activationError = ActivationError.NO_ERROR;
+//                                activationError = ActivationError.NO_ERROR;
+//                                ACTIVATED.enterState(ActivationError.NO_ERROR);
 //                                break;
 //                            }
 //                        }
                     } else {
-                        currentState = ActivationState.NOT_ACTIVATED;
-                        activationError = ActivationError.NO_ERROR;
+                        NOT_ACTIVATED.enterState(ActivationError.NO_ERROR);
                     }
                 }
             }
@@ -283,4 +247,97 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
     }
+    
+    private class ActivationStateImpl {
+    
+        private ActivationState state;
+        
+        private ActivationStateImpl(ActivationState state) {
+            this.state = state;
+        }
+        
+        public ActivationState getActivationState() {
+            return this.state;
+        }
+    }
+    
+    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.UNINITIALIZED);
+    
+    private class NotActivated extends ActivationStateImpl 
+    {
+        private NotActivated(ActivationState state) {
+            super(state);
+        }
+
+        public void enterState(ActivationError error) {
+            if(error == ActivationError.INVALID_KEY) {
+                ActivationSettings.ACTIVATION_KEY.revertToDefault();
+            }
+            activationError = error;
+            ActivationSettings.LAST_START_WAS_PRO.set(false);
+            setActivationItems(Collections.EMPTY_LIST);
+            listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
+            currentState = this;
+        }
+    }
+
+    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_ACTIVATED);
+    
+    private class Activating extends ActivationStateImpl 
+    {
+        private Activating(ActivationState state) {
+            super(state);
+        }
+
+        public void enterState() {
+            activationError = ActivationError.NO_ERROR;
+            listeners.broadcast(new ActivationEvent(getActivationState()));
+            currentState = this;
+        }
+    }
+
+    private final Activating ACTIVATING = new Activating(ActivationState.ACTIVATING);
+
+    private class ActivatedFromCache extends ActivationStateImpl 
+    {
+        private ActivatedFromCache(ActivationState state) {
+            super(state);
+        }
+
+        public void enterState(String key, List<ActivationItem> items) {
+            if (currentState == ACTIVATED_FROM_SERVER) {
+                return;
+            } else {
+                ActivationSettings.ACTIVATION_KEY.set(key);
+                ActivationSettings.LAST_START_WAS_PRO.set(true);
+                setActivationItems(items);
+                activationError = ActivationError.NO_ERROR;
+                listeners.broadcast(new ActivationEvent(getActivationState()));
+                currentState = this;
+            }
+        }
+    }
+
+    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.ACTIVATED);
+
+    private class ActivatedFromServer extends ActivationStateImpl 
+    {
+        private ActivatedFromServer(ActivationState state) {
+            super(state);
+        }
+
+        public void enterState(String key, List<ActivationItem> items) {
+            ActivationSettings.ACTIVATION_KEY.set(key);
+            ActivationSettings.LAST_START_WAS_PRO.set(true);
+            setActivationItems(items);
+            activationError = ActivationError.NO_ERROR;
+            listeners.broadcast(new ActivationEvent(getActivationState()));
+            currentState = this;
+        }
+    }
+    
+    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.ACTIVATED);
+
+    private volatile ActivationStateImpl currentState = UNINITIALIZED;
+
 }
