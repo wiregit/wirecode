@@ -46,14 +46,14 @@ public class CoreSearchResultListTest extends BaseTestCase {
     /** Make a search that has no results. */
     public void testEmptySearch() {
         // model is already the CoreSearchResultList, made from a TestSearch
-        assertEquals(0, model.getSearchResults().size()); // should be 0 results
+        assertEquals(0, model.getGroupedResults().size()); // should be 0 results
     }
     
     /** Make a search that gets a result, and see it there. */
     public void testSearchThenResult() throws Exception {
         SearchResult result = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         model.addResult(result);
-        assertEquals(1, model.getSearchResults().size()); // confirm the result is in there
+        assertEquals(1, model.getGroupedResults().size()); // confirm the result is in there
     }
     
     /** A search gets two different results. */
@@ -62,7 +62,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
         model.addResult(result1);
         model.addResult(result2);
-        assertEquals(2, model.getSearchResults().size()); // different, so both listed separately
+        assertEquals(2, model.getGroupedResults().size()); // different, so both listed separately
     }
     
     /** A search gets two results that share the same URN, and get grouped together. */
@@ -71,8 +71,6 @@ public class CoreSearchResultListTest extends BaseTestCase {
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
         model.addResult(result1);
         model.addResult(result2);
-        //TODO remove Not below when grouping is implemented
-        assertNotEquals(1, model.getSearchResults().size()); // same file hash, so both were combined
         // Verify grouped results count.
         assertEquals(1, model.getGroupedResults().size()); // same file hash, so both were combined
         // Verify total results count.

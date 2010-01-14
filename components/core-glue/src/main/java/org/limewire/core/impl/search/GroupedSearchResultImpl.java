@@ -1,12 +1,13 @@
 package org.limewire.core.impl.search;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -50,7 +51,7 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
             coreResults = Collections.singletonList(result);
         } else {
             if (coreResults.size() == 1) {
-                coreResults = new ArrayList<SearchResult>(coreResults);
+                coreResults = new CopyOnWriteArrayList<SearchResult>(coreResults);
             }
             coreResults.add(result);
         }
@@ -66,13 +67,13 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
             if (friend.isAnonymous()) {
                 anonymous = true;
             } else {
-                if(friends == null) {
+                if (friends == null) {
                     // optimize for a single friend having it
                     friends = Collections.singleton(friend);
                 } else {
-                    // convert to TreeSet if we need to.
-                    if (!(friends instanceof TreeSet)) {
-                        Set<Friend> newFriends = new TreeSet<Friend>(FRIEND_COMPARATOR);
+                    // convert to CopyOnWriteArraySet if we need to.
+                    if (!(friends instanceof CopyOnWriteArraySet)) {
+                        Set<Friend> newFriends = new CopyOnWriteArraySet<Friend>();
                         newFriends.addAll(friends);
                         friends = newFriends;
                     }
@@ -94,7 +95,13 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
 
     @Override
     public Collection<Friend> getFriends() {
-        return friends == null ? Collections.<Friend>emptySet() : friends;
+        if (friends == null) {
+            return Collections.<Friend>emptySet();
+        } else {
+            Set<Friend> newFriends = new TreeSet<Friend>(FRIEND_COMPARATOR);
+            newFriends.addAll(friends);
+            return newFriends;
+        }
     }
 
     @Override

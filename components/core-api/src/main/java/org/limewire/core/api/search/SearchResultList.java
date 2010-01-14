@@ -25,12 +25,7 @@ public interface SearchResultList {
     Search getSearch();
     
     /**
-     * Returns the list of search results.
-     */
-    EventList<SearchResult> getSearchResults();
-    
-    /**
-     * Returns the list of search results grouped by URN.
+     * Returns the list of search results sorted and grouped by URN.
      */
     EventList<GroupedSearchResult> getGroupedResults();
     

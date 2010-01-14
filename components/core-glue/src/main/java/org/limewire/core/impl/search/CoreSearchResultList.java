@@ -36,7 +36,6 @@ class CoreSearchResultList implements SearchResultList {
     private final SearchListener searchListener;
     
     private final EventList<GroupedSearchResult> groupedUrnResultList;
-    private final EventList<SearchResult> threadSafeResultList;
     
     private int resultCount;
     
@@ -50,9 +49,6 @@ class CoreSearchResultList implements SearchResultList {
         listListeners = new CopyOnWriteArrayList<SearchResultListListener>();
         resultFinder = new UrnResultFinder();
         searchListener = new SearchListenerImpl();
-        
-        // Create list of results.
-        threadSafeResultList = GlazedListsFactory.threadSafeList(new BasicEventList<SearchResult>());
         
         // Create list of grouped results.
         groupedUrnResultList = GlazedListsFactory.threadSafeList(
@@ -79,11 +75,6 @@ class CoreSearchResultList implements SearchResultList {
     @Override
     public Search getSearch() {
         return search;
-    }
-    
-    @Override
-    public EventList<SearchResult> getSearchResults() {
-        return threadSafeResultList;
     }
     
     @Override
@@ -118,15 +109,6 @@ class CoreSearchResultList implements SearchResultList {
      * Adds the specified collection of results to the list.
      */
     void addResults(Collection<? extends SearchResult> results) {
-        for (SearchResult result : results) {
-            // Some results can be missing a URN, specifically secure results.
-            // For now, we drop these.  We should figure out a way to show 
-            // them later on.
-            if (result.getUrn() != null) {
-                threadSafeResultList.add(result);
-            }
-        }
-        
         // Add results to grouped results.
         // TODO maybe create distinct Thread and use ListQueuer?
         addResultsInternal(results);
