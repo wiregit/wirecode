@@ -300,6 +300,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
+    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     @Inject
@@ -2235,6 +2236,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
             //TODO: revert this to a method call, install script change
+            //setPreferredConnections(3);
             setPreferredConnections(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? 5 : 3);
     }
     

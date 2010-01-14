@@ -19,7 +19,6 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.activation.api.ActivationItemComparator;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;

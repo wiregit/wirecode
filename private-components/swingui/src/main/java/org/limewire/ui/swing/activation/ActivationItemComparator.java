@@ -1,7 +1,8 @@
-package org.limewire.activation.api;
+package org.limewire.ui.swing.activation;
 
 import java.util.Comparator;
 
+import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
 
 public class ActivationItemComparator implements Comparator<ActivationItem> {

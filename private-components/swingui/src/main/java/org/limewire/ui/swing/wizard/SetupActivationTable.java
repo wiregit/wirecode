@@ -22,8 +22,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.activation.api.ActivationItemComparator;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.ui.swing.activation.ActivationItemComparator;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;

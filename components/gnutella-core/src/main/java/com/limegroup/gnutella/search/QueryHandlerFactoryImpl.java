@@ -41,21 +41,24 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
     private final Provider<ConnectionManager> connectionManager;
 
     private final Provider<MessageRouter> messageRouter;
+    private final QuerySettings querySettings;
 
     @Inject
     public QueryHandlerFactoryImpl(QueryRequestFactory queryRequestFactory,
             ForMeReplyHandler forMeReplyHandler,
             Provider<ConnectionManager> connectionManager,
-            Provider<MessageRouter> messageRouter) {
+            Provider<MessageRouter> messageRouter,
+            QuerySettings querySettings) {
         this.queryRequestFactory = queryRequestFactory;
         this.forMeReplyHandler = forMeReplyHandler;
         this.connectionManager = connectionManager;
         this.messageRouter = messageRouter;
+        this.querySettings = querySettings;
     }
 
     public QueryHandlerImpl createHandler(QueryRequest query, ReplyHandler handler,
             ResultCounter counter) {
-        return new QueryHandlerImpl(query, QueryHandler.ULTRAPEER_RESULTS, handler,
+        return new QueryHandlerImpl(query, querySettings.getUltrapeerResults(), handler,
                 counter, queryRequestFactory, connectionManager.get(), messageRouter.get());
     }
 
@@ -64,7 +67,7 @@ public class QueryHandlerFactoryImpl implements QueryHandlerFactory {
         // because UPs seem to get less results, give them more than usual
         return new QueryHandlerImpl(
                 query,
-                (int) (QueryHandler.ULTRAPEER_RESULTS * UP_RESULT_BUMP),
+                (int) (querySettings.getUltrapeerResults() * UP_RESULT_BUMP),
                 forMeReplyHandler, counter, queryRequestFactory, connectionManager.get(),
                 messageRouter.get());
     }

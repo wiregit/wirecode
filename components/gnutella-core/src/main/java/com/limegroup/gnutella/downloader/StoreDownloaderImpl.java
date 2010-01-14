@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -96,7 +97,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
-            BandwidthCollector bandwidthCollector) {
+            BandwidthCollector bandwidthCollector, ActivationManager activationManager) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -107,7 +108,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, virusScanner, spamManager, library,
-                categoryManager, bandwidthCollector);
+                categoryManager, bandwidthCollector, activationManager);
         this.metaDataFactory = metaDataFactory;
         this.categoryManager = categoryManager;
     }
