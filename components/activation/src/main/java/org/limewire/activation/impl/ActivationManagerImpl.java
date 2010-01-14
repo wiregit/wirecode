@@ -12,6 +12,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.inject.EagerSingleton;
@@ -22,6 +23,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.ActivationSettings;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -40,6 +42,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
     private final ActivationCommunicator activationCommunicator;
+    private final ActivationSerializer activationSerializer;
+    private final ActivationResponseFactory activationResponseFactory;
     private Periodic activationContactor = null;
     
     // interval in seconds between successive hits to the activation server
@@ -48,10 +52,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Inject
     public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
                                  ActivationCommunicator activationCommunicator,
-                                 ActivationModel activationModel) {
+                                 ActivationModel activationModel, ActivationSerializer activationSerializer,
+                                 ActivationResponseFactory activationReponseFactory) {
         this.activationModel = activationModel;
         this.scheduler = scheduler;
         this.activationCommunicator = activationCommunicator;
+        this.activationSerializer = activationSerializer;
+        this.activationResponseFactory = activationReponseFactory;
     }
     
     @Override
@@ -82,7 +89,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     ActivationResponse response = activationCommunicator.activate(key);
-                    ACTIVATED_FROM_SERVER.enterState(response.getLid(), response.getActivationItems());
+
+//                    setActivated(response, false);
+
+                    ACTIVATED_FROM_SERVER.enterState(response);
+
                     
                     // todo: process the contents of the ActivationResponse, esp if there are errors
                     // todo: update refreshInterval and reschedule the next one.
@@ -104,7 +115,26 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         
         activationContactor.rescheduleIfSooner(refreshIntervalSeconds);
     }
-    
+//    
+//    private void setActivated(final ActivationResponse response, boolean activatedFromDisk) {
+//        if(!activatedFromDisk) {
+//            ActivationSettings.ACTIVATION_KEY.set(response.getLid());
+//            ActivationSettings.LAST_START_WAS_PRO.set(true);
+//            BackgroundExecutorService.execute(new Runnable(){
+//                public void run() {
+//                    try {
+//                        activationSerializer.writeToDisk(response.getJSONString());                        
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//         }
+//        setActivationItems(response.getActivationItems());
+//        currentState = ActivationState.ACTIVATED;
+//        activationError = ActivationError.NO_ERROR;
+//        listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATED));
+//    }
 
     @Override
     public ActivationState getActivationState() {
@@ -187,27 +217,72 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void initialize() {
-        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
-            @Override
-            public void handleEvent(FutureEvent<Boolean> event) {
-                if(event.getResult() == true) {
-                    //TODO: check if PKey exists, check expiration dates, check current state
-                    // before setting state and error message, server may have already set
-                    // these
-                    if(activationModel.size() > 0) {
-                        //NOTE: this is commented out because this won't update the UI if everything has already expired
-//                        List<ActivationItem> items = activationModel.getActivationItems();
-//                        for(ActivationItem item : items) {
-//                            //need to check expiration time against system time
-//                            if(item.getStatus() == Status.ACTIVE) {
+//<<<<<<< ActivationManagerImpl.java
+        loadFromDisk();
+//        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
+//            @Override
+//            public void handleEvent(FutureEvent<Boolean> event) {
+//                if(event.getResult() == true) {
+//                    //TODO: check if PKey exists, check expiration dates, check current state
+//                    // before setting state and error message, server may have already set
+//                    // these
+//                    if(activationModel.size() > 0) {
+//                        //NOTE: this is commented out because this won't update the UI if everything has already expired
+////                        List<ActivationItem> items = activationModel.getActivationItems();
+////                        for(ActivationItem item : items) {
+////                            //need to check expiration time against system time
+////                            if(item.getStatus() == Status.ACTIVE) {
+//                                currentState = ActivationState.ACTIVATED;
 //                                activationError = ActivationError.NO_ERROR;
-//                                ACTIVATED.enterState(ActivationError.NO_ERROR);
-//                                break;
-//                            }
-//                        }
-                    } else {
-                        NOT_ACTIVATED.enterState(ActivationError.NO_ERROR);
+////                                break;
+////                            }
+////                        }
+//                    } else {
+//                        currentState = ActivationState.NOT_ACTIVATED;
+//                        activationError = ActivationError.NO_ERROR;
+//                    }
+//                }
+//            }
+//        });
+    }
+    
+    private void loadFromDisk() {
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    String jsonString = activationSerializer.readFromDisk();
+                    if(jsonString != null) {
+                        ActivationResponse response = activationResponseFactory.createFromJson(jsonString);
+                        ACTIVATED_FROM_CACHE.enterState(response);
+//=======
+//        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
+//            @Override
+//            public void handleEvent(FutureEvent<Boolean> event) {
+//                if(event.getResult() == true) {
+//                    //TODO: check if PKey exists, check expiration dates, check current state
+//                    // before setting state and error message, server may have already set
+//                    // these
+//                    if(activationModel.size() > 0) {
+//                        //NOTE: this is commented out because this won't update the UI if everything has already expired
+////                        List<ActivationItem> items = activationModel.getActivationItems();
+////                        for(ActivationItem item : items) {
+////                            //need to check expiration time against system time
+////                            if(item.getStatus() == Status.ACTIVE) {
+////                                activationError = ActivationError.NO_ERROR;
+////                                ACTIVATED.enterState(ActivationError.NO_ERROR);
+////                                break;
+////                            }
+////                        }
+//                    } else {
+//                        NOT_ACTIVATED.enterState(ActivationError.NO_ERROR);
+//>>>>>>> 1.1.2.35
                     }
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvalidDataException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
             }
         });
@@ -304,13 +379,13 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             super(state);
         }
 
-        public void enterState(String key, List<ActivationItem> items) {
+        public void enterState(ActivationResponse response) {
             if (currentState == ACTIVATED_FROM_SERVER) {
                 return;
             } else {
-                ActivationSettings.ACTIVATION_KEY.set(key);
+//                ActivationSettings.ACTIVATION_KEY.set(response.getLid());
                 ActivationSettings.LAST_START_WAS_PRO.set(true);
-                setActivationItems(items);
+                setActivationItems(response.getActivationItems());
                 activationError = ActivationError.NO_ERROR;
                 listeners.broadcast(new ActivationEvent(getActivationState()));
                 currentState = this;
@@ -326,10 +401,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             super(state);
         }
 
-        public void enterState(String key, List<ActivationItem> items) {
-            ActivationSettings.ACTIVATION_KEY.set(key);
+        public void enterState(final ActivationResponse response) {
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    try {
+                        activationSerializer.writeToDisk(response.getJSONString());                        
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            ActivationSettings.ACTIVATION_KEY.set(response.getLid());
             ActivationSettings.LAST_START_WAS_PRO.set(true);
-            setActivationItems(items);
+            setActivationItems(response.getActivationItems());
             activationError = ActivationError.NO_ERROR;
             listeners.broadcast(new ActivationEvent(getActivationState()));
             currentState = this;

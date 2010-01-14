@@ -23,14 +23,16 @@ public class ActivationResponse {
     
     private static final String SUCCESSFUL_IS_VALID = "valid";
     
+    private final String jsonString;
     private final String lid;
     private final String validFlag;
     private final String mcode;
     private final int refreshSeconds;
     private final List<ActivationItem> activationItems; 
     
-    public ActivationResponse(String lid, String validFlag, String mcode, 
+    public ActivationResponse(String jsonString, String lid, String validFlag, String mcode, 
                               int refreshSeconds, List<ActivationItem> activationItems) {
+        this.jsonString = jsonString;
         this.lid = lid;
         this.validFlag = validFlag;
         this.mcode = mcode;
@@ -38,6 +40,10 @@ public class ActivationResponse {
         this.activationItems = Collections.unmodifiableList(new ArrayList<ActivationItem>(activationItems));
     }
 
+    public String getJSONString() {
+        return jsonString;
+    }
+    
     public String getLid() {
         return lid;
     }

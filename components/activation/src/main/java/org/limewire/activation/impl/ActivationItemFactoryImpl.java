@@ -4,8 +4,6 @@ import java.util.Date;
 
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
-import org.limewire.activation.serial.ActivationMemento;
-import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Singleton;
 
@@ -16,22 +14,5 @@ public class ActivationItemFactoryImpl implements ActivationItemFactory {
     public ActivationItem createActivationItem(int intID, String licenseName, Date datePurchased,
             Date dateExpired, Status currentStatus) {
         return new ActivationItemImpl(intID, licenseName, datePurchased, dateExpired, currentStatus);
-    }
-
-    @Override
-    public ActivationItem createActivationItem(ActivationMemento memento) throws InvalidDataException {
-        try { 
-            if(memento.getDateExpired() == null)
-                throw new InvalidDataException("must have date expired");
-            if(memento.getDatePurchased() == null)
-                throw new InvalidDataException("must have date purchased");
-            if(memento.getID() == -1)
-                throw new InvalidDataException("must have id");
-            
-            return new ActivationItemImpl(memento.getID(), memento.getLicenseName(), memento.getDatePurchased(),
-                    memento.getDateExpired(), memento.getStatus(), true);
-        } catch (Throwable t) {
-            throw new InvalidDataException("invalid memento!", t);
-        }
     }
 }

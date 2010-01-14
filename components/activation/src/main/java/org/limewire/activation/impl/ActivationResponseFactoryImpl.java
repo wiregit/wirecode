@@ -56,7 +56,7 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                     moduleName, pur, exp, status);
                 items.add(item);
             }
-            return new ActivationResponse(lid, response, mcode, refresh, items);
+            return new ActivationResponse(json, lid, response, mcode, refresh, items);
         } catch (JSONException e) {
             throw new InvalidDataException("Error parsing JSON String " + json, e);
         } catch (ParseException e) {

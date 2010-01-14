@@ -1,14 +1,15 @@
 package org.limewire.activation.serial;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
- * Saves and loads ActivationModules to and from disk.
+ * Saves and loads Activation JSON strings to disk. The JSON string
+ * allows ActivationItems to be recreated from disk if the server
+ * cannot be contacted.
  */
 public interface ActivationSerializer {
-
-    public List<ActivationMemento> readFromDisk() throws IOException;
     
-    public boolean writeToDisk(List<ActivationMemento> momentos);
+    public String readFromDisk() throws IOException;
+    
+    public boolean writeToDisk(String jsonString) throws Exception;
 }
