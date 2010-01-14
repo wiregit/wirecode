@@ -14,7 +14,6 @@ import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
-import org.limewire.concurrent.FutureEvent;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.InvalidDataException;
 import org.limewire.lifecycle.Service;
@@ -63,6 +62,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     @Override
     public void activateKey(final String key) {
+        activateKey(key, 0);
+    }
+
+    public void activateKey(final String key, final int numberOfRetries) {
 
         // cancel any existing activation currently taking place.
         if (activationContactor != null) {
@@ -81,7 +84,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
         activationContactor = new Periodic(new Runnable() {
             
-            private int tries = 5;
+            private int tries = numberOfRetries;
             
             // todo: improve the retry stuff so it's not hard coded
             // todo: ensure thread safety (error, activation, activation items consist of object state)
