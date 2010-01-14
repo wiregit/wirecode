@@ -4,14 +4,14 @@ import junit.framework.TestCase;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.impl.search.MockSearchResult;
+import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Provider;
 
 public class SearchResultAdapterTest extends TestCase {
     
-    private MockSearchResult result;
+    private GroupedSearchResult groupedResult;
     private MockPropertiableHeadings propertiableHeadings;
     private SearchResultAdapter adapter;
     private Provider<PropertiableHeadings> provider;
@@ -20,16 +20,16 @@ public class SearchResultAdapterTest extends TestCase {
     @SuppressWarnings("unchecked")
     @Override
     protected void setUp() {
-        result = new MockSearchResult();
+        groupedResult = new MockGroupedSearchResult();
         propertiableHeadings = new MockPropertiableHeadings();
         context = new Mockery();
         provider = context.mock(Provider.class);
-        adapter = new SearchResultAdapter(result, provider,
+        adapter = new SearchResultAdapter(groupedResult, provider,
                 new VisualSearchResultStatusListener() {
             @Override public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {}
             @Override public void resultCreated(VisualSearchResult vsr) {}
             @Override public void resultsCleared() {}
-        }, "foo bar");
+        });
     }
 
     public void testHeadingAndSubHeadingCached() {

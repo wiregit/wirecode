@@ -46,14 +46,10 @@ class SwingSearchListener implements SearchListener {
 
     @Override
     public void handleSearchResult(Search search, SearchResult searchResult) {
-        // passthrough immediately.
-        //searchResultsModel.addSearchResult(searchResult);
     }
     
     @Override
     public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
-        // passthrough immediately.
-        //searchResultsModel.addSearchResults(searchResults);
     }
 
     @Override

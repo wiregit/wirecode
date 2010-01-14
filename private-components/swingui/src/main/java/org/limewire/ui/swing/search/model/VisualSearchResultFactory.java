@@ -5,25 +5,28 @@ import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Provider;
 
-import ca.odell.glazedlists.FunctionList.Function;
-
 /**
- * A function to transform a grouped search result into a visual search result.
+ * A factory to create instances of VisualSearchResult.
  */
-class VisualSearchResultFunction implements Function<GroupedSearchResult, VisualSearchResult> {
+class VisualSearchResultFactory {
 
     private final Provider<PropertiableHeadings> propertiableHeadings;
     private final VisualSearchResultStatusListener changeListener;
     
-    public VisualSearchResultFunction(
+    /**
+     * Constructs a VisualSearchResultFactory with the specified services.
+     */
+    public VisualSearchResultFactory(
             Provider<PropertiableHeadings> propertiableHeadings,
             VisualSearchResultStatusListener changeListener) {
         this.propertiableHeadings = propertiableHeadings;
         this.changeListener = changeListener;
     }
     
-    @Override
-    public VisualSearchResult evaluate(GroupedSearchResult sourceValue) {
-        return new VisualSearchResultImpl(sourceValue, propertiableHeadings, changeListener);
+    /**
+     * Creates a visual search result for the specified grouped search result.
+     */
+    public VisualSearchResult create(GroupedSearchResult sourceValue) {
+        return new SearchResultAdapter(sourceValue, propertiableHeadings, changeListener);
     }
 }
