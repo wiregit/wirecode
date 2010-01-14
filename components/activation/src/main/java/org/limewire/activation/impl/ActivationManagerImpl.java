@@ -123,9 +123,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         listeners.broadcast(new ActivationEvent(ActivationState.NOT_ACTIVATED, error));
     }
     
-//    private void updateState(ActivationState state, ActivationError error, List<ActivationItem> items) {
-//        
-//    }
+    private void transitionState(ActivationState state, ActivationError error, List<ActivationItem> items) {
+        switch(currentState) {
+        case UNINITIALIZED:
+            break;
+        case ACTIVATING:
+            break;
+        case ACTIVATED:
+            break;
+        case PROVISIONALLY_ACTIVATED:
+            break;
+        case NOT_ACTIVATED:
+            break;
+        }
+    }
 
     @Override
     public ActivationState getActivationState() {
@@ -238,8 +249,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Override
     public void start() {
         // if a PKey exists, start the server and try contacting the authentication server
-         String storedLicenseKey = "L4RXLP28XVQ5";    // test working key
-//        String storedLicenseKey = getLicenseKey();
+//         String storedLicenseKey = "L4RXLP28XVQ5";    // test working key
+        String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
             activateKey(storedLicenseKey);
         }
