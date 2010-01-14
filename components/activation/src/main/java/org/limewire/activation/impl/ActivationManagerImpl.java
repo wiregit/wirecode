@@ -32,6 +32,7 @@ import com.google.inject.name.Named;
 // it waits for user action.
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
+    
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
@@ -209,28 +210,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     if(jsonString != null) {
                         ActivationResponse response = activationResponseFactory.createFromJson(jsonString);
                         ACTIVATED_FROM_CACHE.enterState(response);
-//=======
-//        activationModel.load().addFutureListener(new EventListener<FutureEvent<Boolean>>(){
-//            @Override
-//            public void handleEvent(FutureEvent<Boolean> event) {
-//                if(event.getResult() == true) {
-//                    //TODO: check if PKey exists, check expiration dates, check current state
-//                    // before setting state and error message, server may have already set
-//                    // these
-//                    if(activationModel.size() > 0) {
-//                        //NOTE: this is commented out because this won't update the UI if everything has already expired
-////                        List<ActivationItem> items = activationModel.getActivationItems();
-////                        for(ActivationItem item : items) {
-////                            //need to check expiration time against system time
-////                            if(item.getStatus() == Status.ACTIVE) {
-////                                activationError = ActivationError.NO_ERROR;
-////                                ACTIVATED.enterState(ActivationError.NO_ERROR);
-////                                break;
-////                            }
-////                        }
-//                    } else {
-//                        NOT_ACTIVATED.enterState(ActivationError.NO_ERROR);
-//>>>>>>> 1.1.2.35
                     }
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -338,8 +317,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if (currentState == ACTIVATED_FROM_SERVER) {
                 return;
             } else {
-                ActivationSettings.LAST_START_WAS_PRO.set(true);
                 setActivationItems(response.getActivationItems());
+                ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
                 activationError = ActivationError.NO_ERROR;
                 listeners.broadcast(new ActivationEvent(getActivationState()));
                 currentState = this;
@@ -367,8 +346,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             });
 
             ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-            ActivationSettings.LAST_START_WAS_PRO.set(true);
             setActivationItems(response.getActivationItems());
+            ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
             activationError = ActivationError.NO_ERROR;
             listeners.broadcast(new ActivationEvent(getActivationState()));
             currentState = this;
