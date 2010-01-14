@@ -50,8 +50,6 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 
                 Date pur = formatter.parse(purchaseDate);
                 Date exp = formatter.parse(expDate);
-//                long pur = formatter.parse(purchaseDate).getTime();
-//                long exp = formatter.parse(expDate).getTime();
                 ActivationItem item = activationItemFactory.createActivationItem(moduleId, 
                     moduleName, pur, exp, status);
                 items.add(item);

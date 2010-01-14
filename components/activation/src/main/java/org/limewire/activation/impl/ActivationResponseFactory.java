@@ -7,6 +7,9 @@ import org.limewire.io.InvalidDataException;
  */
 public interface ActivationResponseFactory {
     
-    // todo: doc
+    /**
+     * Takes a json String and attempts to parse it into an ActivationResponse. If
+     * the String is not a valid json String an InvalidDataException will be thrown.
+     */
     public ActivationResponse createFromJson(String json) throws InvalidDataException;
 }

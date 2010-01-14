@@ -1,10 +1,8 @@
 package org.limewire.activation.impl;
 
-import java.util.List;
 import java.io.IOException;
 
 import org.limewire.io.InvalidDataException;
-import org.limewire.activation.impl.ActivationResponse;
 
 /**
  * Communicates with activation server to determine which modules

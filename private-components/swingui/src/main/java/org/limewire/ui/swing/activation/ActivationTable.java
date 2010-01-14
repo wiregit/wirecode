@@ -48,7 +48,7 @@ class ActivationTable extends MouseableTable {
     public ActivationTable(EventList<ActivationItem> eventList) {
         GuiUtils.assignResources(this);
 
-        model = new DefaultEventTableModel<ActivationItem>(new SortedList(eventList, new ActivationItemComparator()), new ActivationTableFormat());
+        model = new DefaultEventTableModel<ActivationItem>(new SortedList<ActivationItem>(eventList, new ActivationItemComparator()), new ActivationTableFormat());
         setModel(model);
 
         setShowHorizontalLines(false);
