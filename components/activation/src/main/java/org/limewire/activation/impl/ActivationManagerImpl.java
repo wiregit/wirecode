@@ -207,7 +207,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     String jsonString = activationSerializer.readFromDisk();
-                    if(jsonString != null) {
+                    if(jsonString != null && jsonString.length() > 0) {
                         ActivationResponse response = activationResponseFactory.createFromJson(jsonString);
                         ACTIVATED_FROM_CACHE.enterState(response);
                     }
@@ -282,6 +282,15 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if(error == ActivationError.INVALID_KEY) {
                 ActivationSettings.ACTIVATION_KEY.revertToDefault();
             }
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    try {
+                        activationSerializer.writeToDisk("");                        
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             activationError = error;
             ActivationSettings.LAST_START_WAS_PRO.set(false);
             setActivationItems(Collections.<ActivationItem>emptyList());
