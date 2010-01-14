@@ -23,6 +23,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationItemComparator;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -72,17 +73,6 @@ public class SetupActivationTable extends JPanel {
 
         setMinimumSize(new Dimension(350, 27 + activationItems.size() * 29 + 10));
         setPreferredSize(new Dimension(350, 27 + activationItems.size() * 29 + 10));
-    }
-
-    private class ActivationItemComparator implements Comparator<ActivationItem> {
-        public int compare(ActivationItem itemA, ActivationItem itemB) {
-            if (itemA.getStatus() == Status.ACTIVE && itemB.getStatus() != Status.ACTIVE)
-                return -1;
-            if (itemA.getStatus() != Status.ACTIVE && itemB.getStatus() == Status.ACTIVE)
-                return 1;
-            else 
-                return 0;
-        }
     }
     
     private class ActivationTableModel extends AbstractTableModel {
