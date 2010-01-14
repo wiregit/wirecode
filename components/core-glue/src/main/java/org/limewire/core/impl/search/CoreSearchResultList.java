@@ -110,7 +110,6 @@ class CoreSearchResultList implements SearchResultList {
      */
     void addResults(Collection<? extends SearchResult> results) {
         // Add results to grouped results.
-        // TODO maybe create distinct Thread and use ListQueuer?
         addResultsInternal(results);
     }
     
@@ -152,82 +151,6 @@ class CoreSearchResultList implements SearchResultList {
         }
     }
     
-    // TODO uncomment or delete
-    /**
-     * Task for aggregating search results and adding them to the list.
-     */
-//    private class ListQueuer implements Runnable {
-//        private final Object LOCK = new Object();
-//        private final List<SearchResult> queue = new ArrayList<SearchResult>();
-//        private final ArrayList<SearchResult> transferQ = new ArrayList<SearchResult>();
-//        private boolean scheduled = false;
-//        
-//        void add(SearchResult result) {
-//            synchronized(LOCK) {
-//                queue.add(result);
-//                schedule();
-//            }
-//        }
-//        
-//        void addAll(Collection<? extends SearchResult> results) {
-//            synchronized(LOCK) {
-//                queue.addAll(results);
-//                schedule();
-//            }
-//        }
-//        
-//        void clear() {
-//            synchronized(LOCK) {
-//                queue.clear();
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-////                        cleared = true;
-//                        groupedUrnResultList.clear();
-////                        for (SearchResultListListener listener : listListeners) {
-////                            listener.resultsCleared();
-////                        }
-//                    }
-//                });
-//            }
-//        }
-//        
-//        private void schedule() {
-//            if(!scheduled) {
-//                scheduled = true;
-//                // purposely SwingUtilities & not SwingUtils so
-//                // that we force it to the back of the stack
-//                SwingUtilities.invokeLater(this);
-//            }
-//        }
-//        
-//        @Override
-//        public void run() {
-//            // move to transferQ inside lock
-//            transferQ.clear();
-//            synchronized(LOCK) {
-//                transferQ.addAll(queue);
-//                queue.clear();
-//            }
-//            
-//            // move to searchResults outside lock,
-//            // so we don't hold a lock while allSearchResults
-//            // triggers events.
-//            addResultsInternal(transferQ);
-//            transferQ.clear();
-//            
-//            synchronized(LOCK) {
-//                scheduled = false;
-//                // If the queue wasn't empty, we need to reschedule
-//                // ourselves, because something got added to the queue
-//                // without scheduling itself, since we had scheduled=true
-//                if(!queue.isEmpty()) {
-//                    schedule();
-//                }
-//            }
-//        }
-//    }
-
     /**
      * Handler for search events to add results to the list.
      */

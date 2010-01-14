@@ -98,6 +98,7 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
         if (friends == null) {
             return Collections.<Friend>emptySet();
         } else {
+            // Create sorted set of friends.
             Set<Friend> newFriends = new TreeSet<Friend>(FRIEND_COMPARATOR);
             newFriends.addAll(friends);
             return newFriends;
