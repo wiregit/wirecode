@@ -406,6 +406,27 @@ public final class UpdateCollectionTest extends LimeTestCase {
         assertEquals("\"name with spaces\" after quote", data.getUpdateCommand());
         
     }
+
+    /**
+     * Test to ensure that the update collection parser in use before the deployment
+     * of the new update key scheme gracefully ignores extra elements in the xml of
+     * the update message.
+     */
+    public void testUpdateCollectionParserIgnoresNewXMLElements() {
+       String xmlWithExtraElements = "<update id=\"16\" timestamp=\"1262110452904\">" +
+       "<newVersion>4545</newVersion>" +
+       "<msg from=\"4.16.7\" to=\"5.4.6\" for=\"5.4.6\" url=\"http://www.limewire.com/download/update?fc=4\" style=\"2\" os=\"mac,windows,linux,unix,other\" osv=\"10.5,*,*,*,*,*,*,*,*,*\">" + 
+       "<lang id='en' title='LimeWire 5.4'>" + 
+       "<![CDATA[<html>LimeWire 5.4 is here!<ul><li>Follow downloads with BitTorrent visualization</li><li>Built-in video player</li><li>Improved network connectivity</li></ul>Update Now</html>]]>" +
+       "</lang>" +
+       "</msg>" +
+       "<cert>4039485045|3|3049540584059</cert>" +
+       "</update>";
+       UpdateCollection updateCollection = updateCollectionFactory.createUpdateCollection(xmlWithExtraElements);
+       assertEquals(16, updateCollection.getId());
+       assertEquals(1262110452904L, updateCollection.getTimestamp());
+       assertEquals(1, updateCollection.getUpdateData().size());
+    }
     
     
     private static void setOSName(String name) throws Exception {
