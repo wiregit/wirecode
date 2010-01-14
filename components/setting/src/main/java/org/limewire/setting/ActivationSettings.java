@@ -10,8 +10,9 @@ public class ActivationSettings extends LimeProps {
 
     private ActivationSettings() {}
 
+    //TODO: set the correct link here. This is a working test
     public static final StringSetting ACTIVATION_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_HOST", "www.limewire.com", "ActivationSettings.activationHost");
+            "ACTIVATION_HOST", "http://dbillingham.limewire.int:8089/lookup", "ActivationSettings.activationHost");
     
     //TODO: set the correct link here. This will be used to determine what location a given module
     // should use for renewing. 

@@ -1,7 +1,6 @@
 package org.limewire.activation.impl;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.activation.api.ActivationItem;

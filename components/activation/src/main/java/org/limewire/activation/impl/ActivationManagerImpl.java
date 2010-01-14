@@ -1,11 +1,9 @@
 package org.limewire.activation.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
@@ -14,21 +12,26 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
-import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.collection.Periodic;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.io.InvalidDataException;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.setting.ActivationSettings;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 //TODO: this needs to be a service, within the service start call 
 // we attempt to authenticate the key if the key exists. otherwise
 // it waits for user action.
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
+    private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
 
@@ -36,142 +39,63 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
 
     private final ActivationModel activationModel;
-    private final ActivationItemFactory activationItemFactory;
+    private final ScheduledExecutorService scheduler;
+    private final ActivationCommunicator activationCommunicator;
+    private Periodic activationContactor = null;
+    
+    // interval in seconds between successive hits to the activation server
+    private long refreshIntervalSeconds = 0;
     
     @Inject
-    public ActivationManagerImpl(ActivationModel activationModel, ActivationItemFactory activationItemFactory) {
+    public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
+                                 ActivationCommunicator activationCommunicator,
+                                 ActivationModel activationModel) {
         this.activationModel = activationModel;
-        this.activationItemFactory = activationItemFactory;
+        this.scheduler = scheduler;
+        this.activationCommunicator = activationCommunicator;
     }
     
     @Override
     public void activateKey(final String key) {
-        /** Some keys that are valid
-         *  ADXU-8ZND-JGU8: 198 => 6 => 8
-            J8SV-KC4Y-FLBE: 172 => 12 => E
-            4PVV-CDDA-8T8U: 154 => 26 => U
-            Q9DP-UGFY-CRTC: 202 => 10 => C
-            MQDH-SC24-C6NB: 137 => 9 => B
-            QT5J-KANU-PJ7M: 179 => 19 => M
-            RZCL-CZPX-PFVC: 234 => 10 => C
-            CT3Y-NPVM-8MN8: 198 => 6 => 8
-            DDHN-SUN9-GV4K: 177 => 17 => K
-            ZATY-QEWF-4RQS: 216 => 24 => S
-            6JZY-DN7V-PX79: 199 => 7 => 9
-            4E2C-QF7S-4X4T: 121 => 25 => T
-            K4W5-K3BL-WBZ5: 163 => 3 => 5
-            NJ26-KPWW-HQAM: 179 => 19 => M
-            GN2G-32U2-N827: 101 => 5 => 7
-            S3H6-QCSN-UGQQ: 182 => 22 => Q
-            J8Q4-UJNK-LFVR: 183 => 23 => R
-            8M5W-YHKA-NKEH: 175 => 15 => H
-            9GX5-F2B3-782R: 87 => 23 => R
-            SFG6-P97K-9Q8E: 140 => 12 => E
-         */
 
-        if (!isValidKey(key)) {
-            setActivationFailed(ActivationError.INVALID_KEY);
-            return;
+        // cancel any existing activation currently taking place.
+        if (activationContactor != null) {
+            activationContactor.unschedule();
         }
+        startActivating();
 
-        
-        if (currentState == ActivationState.ACTIVATING) {
-            return;
-        }
-        
-        //TODO: this sould hit the real server
-        Thread t = new Thread(new Runnable(){
+        activationContactor = new Periodic(new Runnable() {
+            
+            private int tries = 5;
+            
+            // todo: improve the retry stuff so it's not hard coded
+            // todo: ensure thread safety (error, activation, activation items consist of object state)
+            @Override
             public void run() {
-                startActivating();
-
                 try {
-                    Thread.sleep(2000);
-                } catch(InterruptedException e) {
+                    ActivationResponse response = activationCommunicator.activate(key);
+                    setActivationItems(response.getActivationItems());
+                    setActivated(response.getLid());
                     
-                }
-                if(key.equals("ADXU8ZNDJGU8")) {
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-                    try {
-                        List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(1, "Test Active", new Date(1), formatter.parse("20100218"), Status.ACTIVE));
-                        list.add(activationItemFactory.createActivationItem(2, "Test Removed", new Date(1), formatter.parse("20100218"), Status.UNAVAILABLE));
-                        list.add(activationItemFactory.createActivationItem(3, "Test Expired", new Date(1), formatter.parse("20090218"), Status.EXPIRED));
-                        list.add(activationItemFactory.createActivationItem(4, "Test Wrong LW", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_LW));
-                        list.add(activationItemFactory.createActivationItem(5, "Test Wrong OS", new Date(1), formatter.parse("20100218"), Status.UNUSEABLE_OS));
-                        setActivationItems(list);
-                    } catch(ParseException e) {
-                        
+                    // todo: process the contents of the ActivationResponse, esp if there are errors
+                    // todo: update refreshInterval and reschedule the next one.
+                    // todo: test parsing of erroneous responses (INVALID_KEY), {"lid":"DAVV-XXME-BWU3","response":"notfound","refresh":0,"message":"ID not found"}
+                    // todo: add unit tests for this (mock out ActivationCommunicator)
+                } catch (IOException e) {
+                    if (tries-- > 0) {
+                        activationContactor.rescheduleIfSooner(25000 - tries*5000);    
+                    } else {
+                        setActivationFailed(ActivationError.COMMUNICATION_ERROR);
                     }
-                    
-                    setActivated(key);
-                } else if(key.equals("J8SVKC4YFLBE")) {                        
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-                    try {
-                        List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                        list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                        list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                        list.add(activationItemFactory.createActivationItem(4, "AVG", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                        setActivationItems(list);
-                    } catch(ParseException e) {
-                    }
-                    
-                    setActivated(key);
-             } else if (key.equals("4PVVCDDA8T8U")) {                   
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-                    try {
-                        // this is temporary
-                        List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(1, "LimeWire PRO Extended", new Date(), formatter.parse("20100218"), Status.ACTIVE));
-                        setActivationItems(list);
-                    } catch (ParseException e) {
-                    }
-                    
-                    setActivated(key);
-                } else if(key.equals("Q9DPUGFYCRTC")) {    // QA Test -  Turbo-changed downloads (only)                    
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-                    try {
-                        List<ActivationItem> list = new ArrayList<ActivationItem>();
-                        list.add(activationItemFactory.createActivationItem(1, "Turbo Charged Downloads", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                        setActivationItems(list);
-                    } catch(ParseException e) {
-                    }
-                    
-                    setActivated(key);
-             }  else if(key.equals("MQDHSC24C6NB")) {    // QA Test -  Optimized search results (only)                   
-                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-                 try {
-                     List<ActivationItem> list = new ArrayList<ActivationItem>();
-                     list.add(activationItemFactory.createActivationItem(2, "Optimized Search Results", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                     setActivationItems(list);
-                 } catch(ParseException e) {
-                 }
-                 
-                 setActivated(key);
-          }  else if(key.equals("QT5JKANUPJ7M")) {    // QA Test -  Tech Support (only)                  
-              SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-              try {
-                  List<ActivationItem> list = new ArrayList<ActivationItem>();
-                  list.add(activationItemFactory.createActivationItem(3, "Tech Support", new Date(1), formatter.parse("20200218"), Status.ACTIVE));
-                  setActivationItems(list);
-              } catch(ParseException e) {
-              }
-              
-              setActivated(key);
-       }    else if (key.equals("54321")) {
-                    setActivationFailed(ActivationError.BLOCKED_KEY);
-                } else {
-                    setActivationFailed(ActivationError.INVALID_KEY);
+                } catch (InvalidDataException e) {
+                    setActivationFailed(ActivationError.COMMUNICATION_ERROR);
+                } catch (Throwable e) {
+                    setActivationFailed(ActivationError.COMMUNICATION_ERROR);    
                 }
             }
-        });
-        t.start();
+        }, scheduler);
+        
+        activationContactor.rescheduleIfSooner(refreshIntervalSeconds);
     }
     
     private void startActivating() {
@@ -278,7 +202,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     @Inject
-    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+    public void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
     }
 
@@ -313,11 +237,17 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void start() {
-        //TODO: if a PKey exists, start the server and try contacting the authentication server
+        // if a PKey exists, start the server and try contacting the authentication server
+         String storedLicenseKey = "L4RXLP28XVQ5";    // test working key
+//        String storedLicenseKey = getLicenseKey();
+        if (!storedLicenseKey.isEmpty()) {
+            activateKey(storedLicenseKey);
+        }
     }
 
     @Override
     public void stop() {
+        // todo: cancel all background stuff still running
     }
 
     @Override
