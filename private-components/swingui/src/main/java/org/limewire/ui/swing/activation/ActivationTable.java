@@ -19,6 +19,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationItemComparator;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
@@ -34,6 +35,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 class ActivationTable extends MouseableTable {
@@ -45,8 +47,8 @@ class ActivationTable extends MouseableTable {
     
     public ActivationTable(EventList<ActivationItem> eventList) {
         GuiUtils.assignResources(this);
-        
-        model = new DefaultEventTableModel<ActivationItem>(eventList, new ActivationTableFormat());
+
+        model = new DefaultEventTableModel<ActivationItem>(new SortedList(eventList, new ActivationItemComparator()), new ActivationTableFormat());
         setModel(model);
 
         setShowHorizontalLines(false);
