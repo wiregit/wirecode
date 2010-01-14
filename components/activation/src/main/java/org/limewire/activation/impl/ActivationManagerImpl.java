@@ -60,7 +60,10 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
         // cancel any existing activation currently taking place.
         if (activationContactor != null) {
-            activationContactor.unschedule();
+            if(currentState == ActivationState.ACTIVATING)
+                return;
+            else
+                activationContactor.unschedule();
         }
         startActivating();
 
@@ -74,8 +77,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     ActivationResponse response = activationCommunicator.activate(key);
-                    setActivationItems(response.getActivationItems());
-                    setActivated(response.getLid());
+                    setActivated(response);
                     
                     // todo: process the contents of the ActivationResponse, esp if there are errors
                     // todo: update refreshInterval and reschedule the next one.
@@ -104,8 +106,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         listeners.broadcast(new ActivationEvent(ActivationState.ACTIVATING));
     }
     
-    private void setActivated(String key) {
-        ActivationSettings.ACTIVATION_KEY.set(key);
+    private void setActivated(ActivationResponse response) {
+        ActivationSettings.ACTIVATION_KEY.set(response.getLid());
+        setActivationItems(response.getActivationItems());
         ActivationSettings.LAST_START_WAS_PRO.set(true);
         currentState = ActivationState.ACTIVATED;
         activationError = ActivationError.NO_ERROR;
