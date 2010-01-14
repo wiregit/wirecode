@@ -92,7 +92,7 @@ class ActivationTable extends MouseableTable {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             
             ActivationItem item = model.getElementAt(adapter.row);
-            return item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
+            return item.getStatus() == Status.EXPIRED || item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
 //            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
 //            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
 //            if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))

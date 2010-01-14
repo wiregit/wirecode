@@ -82,6 +82,7 @@ public class ActivationPanel {
     ColoredBusyLabel tableOverlayBusyLabel;
     private JLabel licenseKeyErrorLabel;
     private JLabel licenseTableErrorLabel;
+    private JLabel licenseTableInfoLabel;
     private UnsupportedMessagePanel unsupportedMessagePanel;
     private JPanel cardPanel;
     private CardLayout cardLayout;
@@ -131,17 +132,24 @@ public class ActivationPanel {
         licenseKeyErrorLabel.setFont(font);
         licenseKeyErrorLabel.setForeground(errorColor);
         
-        licenseTableErrorLabel = new JLabel("");
+        licenseTableErrorLabel = new JLabel();
         licenseTableErrorLabel.setFont(font);
         licenseTableErrorLabel.setForeground(errorColor);
-        licenseTableErrorLabel.setVisible(false);
+        
+        licenseTableInfoLabel = new JLabel(I18n.tr("Some modules have not been activated."));
+        licenseTableInfoLabel.setFont(font);
+        licenseTableInfoLabel.setForeground(Color.GRAY);
+        licenseTableInfoLabel.setVisible(areThereProblematicModules());
         
         unsupportedMessagePanel = new UnsupportedMessagePanel();
         unsupportedMessagePanel.setVisible(false);
         
         table = new ActivationTable(eventList);
+        table.setFillsViewportHeight(true);
         JScrollPane scrollPane = new JScrollPane(table);
         tableJXLayer = new JXLayer<JComponent>(scrollPane);
+        scrollPane.setMinimumSize(new Dimension(350, 75 + eventList.size() * 29));
+        scrollPane.setPreferredSize(new Dimension(350, 75 + eventList.size() * 29));
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
         busyLabelPanel.add(Box.createVerticalStrut(10), "wrap");
@@ -158,17 +166,18 @@ public class ActivationPanel {
         activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%");
         activationPanel.add(editButton, "gapleft 40, wrap");
         
-        activationPanel.add(licenseTableErrorLabel, "span, growx, gaptop 6, gapbottom 6, wrap");
+        activationPanel.add(licenseTableErrorLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 3");
+        activationPanel.add(licenseTableInfoLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 0, wrap");
         
-        activationPanel.add(tableJXLayer, "span, grow, wrap, gapbottom 20");
+        activationPanel.add(tableJXLayer, "span, grow, wrap, gapbottom 10");
         
-        activationPanel.add(unsupportedMessagePanel, "hidemode 3, span, grow, wrap");
+        //activationPanel.add(unsupportedMessagePanel, "hidemode 3, span, grow, wrap");
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         
-        activationPanel.add(cardPanel, "span, growx, wrap");
+        activationPanel.add(cardPanel, "span, growx, wrap, gapbottom 20");
     }
     
     @Inject
@@ -237,16 +246,17 @@ public class ActivationPanel {
             licenseKeyPanel.setEditable(true);
             warningPanel.setActivationMode(Mode.EMPTY);
             selectCard(NO_LICENSE_PANEL);
-            isRefreshing = false;
+            setRefreshing(false);
             eventList.clear();
             return;
         case ACTIVATING:
+            licenseTableInfoLabel.setVisible(false);
             if (!isRefreshing)
             {
                 editButton.setVisible(false);
                 licenseKeyPanel.setEditable(false);
                 warningPanel.setActivationMode(Mode.SPINNER);
-                if(!selectedCard.equals(NO_LICENSE_PANEL) && !selectedCard.equals(EDIT_PANEL)) {
+                if(selectedCard != null && !selectedCard.equals(NO_LICENSE_PANEL) && !selectedCard.equals(EDIT_PANEL)) {
                     selectCard(NO_LICENSE_PANEL);
                 }
                 return;
@@ -269,7 +279,11 @@ public class ActivationPanel {
 
             eventList.clear();
             eventList.addAll(activationManager.getActivationItems());
-            isRefreshing = false;
+            
+            setRefreshing(false);
+            
+            licenseTableInfoLabel.setVisible(areThereProblematicModules());
+
             return;
         }
         throw new IllegalStateException("Unknown state: " + state);
@@ -287,6 +301,7 @@ public class ActivationPanel {
             return;
         case EXPIRED_KEY:
             licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
+            licenseTableErrorLabel.setForeground(errorColor);
             setLicenseKeyErrorVisible(false);
             setLicenseTableErrorVisible(true);
             return;
@@ -306,11 +321,31 @@ public class ActivationPanel {
             return;
         case COMMUNICATION_ERROR:
             licenseTableErrorLabel.setText(I18n.tr("There was an error refreshing. Please try again."));
+            licenseTableErrorLabel.setForeground(errorColor);
             setLicenseKeyErrorVisible(false);
             setLicenseTableErrorVisible(true);
             return;
         }
         throw new IllegalStateException("Unknown state: " + error);
+    }
+    
+    private boolean areThereProblematicModules() {
+        for (ActivationItem item : activationManager.getActivationItems()) {
+            if (item.getStatus() != ActivationItem.Status.ACTIVE) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void setRefreshing(boolean refreshing) {
+        if (refreshing) {
+            
+        } else {
+            tableOverlayBusyLabel.setBusy(false);
+            tableJXLayer.getGlassPane().setVisible(false);
+        }
+        this.isRefreshing = refreshing;
     }
     
     private void clearTable() {
