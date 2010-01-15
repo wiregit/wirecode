@@ -12,12 +12,14 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
@@ -63,6 +65,24 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         
         this.visible = true;
         this.childrenVisible = false;
+    }
+    
+    /**
+     * Initializes adapter to listen for new sources added.
+     */
+    void initialize() {
+        groupedSearchResult.addResultListener(new GroupedSearchResultListener() {
+            @Override
+            public void sourceAdded() {
+                // Forward source added event to UI change listener.
+                SwingUtils.invokeNowOrLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        firePropertyChange("new-sources");
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -337,6 +357,10 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         
         SearchResultAdapter sra = (SearchResultAdapter) o;
         return getHeading().compareTo(sra.getHeading());
+    }
+
+    private void firePropertyChange(String propertyName) {
+        changeListener.resultChanged(this, propertyName, null, null);
     }
 
     private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {

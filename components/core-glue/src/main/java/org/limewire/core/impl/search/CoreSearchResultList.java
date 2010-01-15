@@ -4,18 +4,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.io.GUID;
@@ -31,13 +30,12 @@ class CoreSearchResultList implements SearchResultList {
     private final Search search;
     private final SearchDetails searchDetails;
     
-    private final List<SearchResultListListener> listListeners;
     private final Comparator<GroupedSearchResult> resultFinder;
     private final SearchListener searchListener;
     
     private final EventList<GroupedSearchResult> groupedUrnResultList;
     
-    private int resultCount;
+    private volatile int resultCount;
     
     /**
      * Constructs a SearchResultList for the specified search.
@@ -46,7 +44,6 @@ class CoreSearchResultList implements SearchResultList {
         this.search = search;
         this.searchDetails = searchDetails;
         
-        listListeners = new CopyOnWriteArrayList<SearchResultListListener>();
         resultFinder = new UrnResultFinder();
         searchListener = new SearchListenerImpl();
         
@@ -81,21 +78,16 @@ class CoreSearchResultList implements SearchResultList {
     public EventList<GroupedSearchResult> getGroupedResults() {
         return groupedUrnResultList;
     }
-
-    @Override
-    public void addListListener(SearchResultListListener listener) {
-        listListeners.add(listener);
-    }
     
     @Override
-    public void removeListListener(SearchResultListListener listener) {
-        listListeners.remove(listener);
+    public void clear() {
+        groupedUrnResultList.clear();
+        resultCount = 0;
     }
     
     @Override
     public void dispose() {
         search.removeSearchListener(searchListener);
-        listListeners.clear();
     }
     
     /**
@@ -130,9 +122,7 @@ class CoreSearchResultList implements SearchResultList {
                     gsr.addNewSource(result, searchDetails.getSearchQuery());
                     groupedUrnResultList.set(idx, gsr);
                     // Notify listeners that result changed.
-                    for (SearchResultListListener listener : listListeners) {
-                        listener.resultChanged(gsr, "new-sources", null, null);
-                    }
+                    gsr.notifyNewSource();
                     
                 } else {
                     // URN not found so add new result at insertion point.
@@ -140,10 +130,6 @@ class CoreSearchResultList implements SearchResultList {
                     GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
                             searchDetails.getSearchQuery());
                     groupedUrnResultList.add(idx, gsr);
-                    // Notify listeners that new result was created.
-                    for (SearchResultListListener listener : listListeners) {
-                        listener.resultCreated(gsr);
-                    }
                 }
                 
                 resultCount += result.getSources().size();
@@ -228,6 +214,14 @@ class CoreSearchResultList implements SearchResultList {
         @Override
         public boolean isAnonymous() {
             return true;
+        }
+
+        @Override
+        public void addResultListener(GroupedSearchResultListener listener) {
+        }
+
+        @Override
+        public void removeResultListener(GroupedSearchResultListener listener) {
         }
     }
 }

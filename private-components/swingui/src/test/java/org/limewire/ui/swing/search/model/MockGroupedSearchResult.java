@@ -6,10 +6,21 @@ import java.util.List;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 
 class MockGroupedSearchResult implements GroupedSearchResult {
+
+    @Override
+    public void addResultListener(GroupedSearchResultListener listener) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void removeResultListener(GroupedSearchResultListener listener) {
+        // TODO Auto-generated method stub
+    }
 
     @Override
     public List<SearchResult> getCoreSearchResults() {

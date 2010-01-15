@@ -17,7 +17,6 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.io.GUID;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
@@ -817,13 +816,9 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     private static class TestSearchResultList implements SearchResultList {
         private final EventList<GroupedSearchResult> groupedUrnResultList = 
             new BasicEventList<GroupedSearchResult>();
-        
-        @Override
-        public void addListListener(SearchResultListListener listener) {
-        }
 
         @Override
-        public void removeListListener(SearchResultListListener listener) {
+        public void clear() {
         }
 
         @Override

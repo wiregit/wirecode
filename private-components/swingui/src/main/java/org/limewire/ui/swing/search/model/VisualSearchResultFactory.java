@@ -27,6 +27,8 @@ class VisualSearchResultFactory {
      * Creates a visual search result for the specified grouped search result.
      */
     public VisualSearchResult create(GroupedSearchResult sourceValue) {
-        return new SearchResultAdapter(sourceValue, propertiableHeadings, changeListener);
+        SearchResultAdapter vsr = new SearchResultAdapter(sourceValue, propertiableHeadings, changeListener);
+        vsr.initialize();
+        return vsr;
     }
 }

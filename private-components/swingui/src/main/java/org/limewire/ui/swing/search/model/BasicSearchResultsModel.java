@@ -20,7 +20,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -29,7 +28,6 @@ import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.PropertiableHeadings;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -91,9 +89,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
 
     /** Listener to handle grouped search result list events. */
     private ListEventListener<GroupedSearchResult> groupedCoreListener;
-
-    /** Listener to handle search result list events. */
-    private SearchResultListListener resultListListener;
 
     /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
@@ -203,33 +198,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         };
         groupedCoreResults.addListEventListener(groupedCoreListener);
         
-        // Install result list listener.
-        resultListListener = new SearchResultListListener() {
-            @Override
-            public void resultChanged(final GroupedSearchResult gsr, String propertyName,
-                    Object oldValue, Object newValue) {
-                SwingUtils.invokeNowOrLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Find visual result and notify listeners.
-                        VisualSearchResult vsr = findVisualResult(gsr);
-                        for (VisualSearchResultStatusListener listener : changeListeners) {
-                            listener.resultChanged(vsr, "new-sources", null, null);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void resultCreated(final GroupedSearchResult gsr) {
-            }
-
-            @Override
-            public void resultsCleared() {
-            }
-        };
-        searchResultList.addListListener(resultListListener);
-        
         // Start search.
         search.start();
     }
@@ -250,10 +218,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         if (groupedCoreListener != null) {
             groupedCoreResults.removeListEventListener(groupedCoreListener);
             groupedCoreListener = null;
-        }
-        if (resultListListener != null) {
-            searchResultList.removeListListener(resultListListener);
-            resultListListener = null;
         }
         
         // Remove search from core management.
@@ -415,21 +379,34 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
-        // Scan through the list & find the item.
-        URN urn = vsr.getUrn();
-        int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
-        //TODO clean up, see comment about cleared variable, and why it should be removed.
-        assert cleared || idx >= 0;
+        if ("new-sources".equals(propertyName)) {
+            // Notify change listeners about new sources.  This event is
+            // handled by the grouping listener to update similar results.
+            for (VisualSearchResultStatusListener listener : changeListeners) {
+                listener.resultChanged(vsr, "new-sources", null, null);
+            }
+            
+        } else {
+            // Scan through the list & find the item.
+            URN urn = vsr.getUrn();
+            int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+            //TODO clean up, see comment about cleared variable, and why it should be removed.
+            assert cleared || idx >= 0;
 
-        if(idx >=0) {
-        
-            VisualSearchResult existing = groupedUrnResults.get(idx);
-            VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
-            assert cleared || replaced == vsr;
-            if(replaced == vsr) {
-                for(VisualSearchResultStatusListener listener : changeListeners) {
-                    listener.resultChanged(vsr, propertyName, oldValue, newValue);
+            if (idx >=0) {
+                VisualSearchResult existing = groupedUrnResults.get(idx);
+                VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
+                assert cleared || replaced == vsr;
+                if(replaced == vsr) {
+                    for(VisualSearchResultStatusListener listener : changeListeners) {
+                        listener.resultChanged(vsr, propertyName, oldValue, newValue);
+                    }
                 }
+            }
+            
+            // Reapply sort when similarity parent changed.
+            if ("similarityParent".equals(propertyName) && sortedResultList != null) {
+                sortedResultList.setComparator(sortedResultList.getComparator());
             }
         }
     }
@@ -438,7 +415,17 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * Removes all results from the model
      */
     @Override
-    public void clear(){
+    public void clear() {
+        cleared = true;
+        
+        // Clear result list.
+        searchResultList.clear();
+        groupedUrnResults.clear();
+        
+        // Notify change listeners that results are cleared.
+        for (VisualSearchResultStatusListener listener : changeListeners) {
+            listener.resultsCleared();
+        }
     }
     
     /**
@@ -518,16 +505,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             return filterEditor.getMatcher().matches(vsr);
         }
         return true;
-    }
-    
-    /**
-     * Returns the visual search result whose URN matches the specified grouped
-     * search result.
-     */
-    private VisualSearchResult findVisualResult(GroupedSearchResult gsr) {
-        URN urn = gsr.getUrn();
-        int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
-        return (idx >= 0) ? groupedUrnResults.get(idx) : null;
     }
 
     /**

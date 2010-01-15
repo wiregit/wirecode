@@ -14,6 +14,16 @@ import org.limewire.friend.api.Friend;
 public interface GroupedSearchResult {
 
     /**
+     * Adds the specified listener to the list that handles change events.
+     */
+    void addResultListener(GroupedSearchResultListener listener);
+    
+    /**
+     * Adds the specified listener to the list that handles change events.
+     */
+    void removeResultListener(GroupedSearchResultListener listener);
+    
+    /**
      * Returns an indicator that determines if the item is from an anonymous
      * source.
      */
