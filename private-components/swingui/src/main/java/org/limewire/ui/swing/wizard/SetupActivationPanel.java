@@ -89,6 +89,7 @@ public class SetupActivationPanel extends JPanel {
     }
     
     private void setActivationState(ActivationState state) {
+        System.out.println("SetupActivationPanel; activation state: " + activationManager.getActivationState());
         switch(state) 
         {
         case UNINITIALIZED:

@@ -220,19 +220,25 @@ public class Wizard extends JPanel {
         
         footer.setText(page.getFooter());
     }
+
+    public void updateControls() {
+        updateForwardButton(pageList.get(currentPage));
+        updateBackButton(pageList.get(currentPage));
+        updateFooter(pageList.get(currentPage));
+    }
     
-    public void updateForwardButton(WizardPage page) {
+    private void updateForwardButton(WizardPage page) {
         if (finishButton.isVisible() && !finishButton.getText().equals(page.getForwardButtonText()))
             finishButton.setText(page.getForwardButtonText());
         if (continueButton.isVisible() && !continueButton.getText().equals(page.getForwardButtonText()))
             continueButton.setText(page.getForwardButtonText());
     }
     
-    public void updateBackButton(WizardPage page) {
+    private void updateBackButton(WizardPage page) {
         backButton.setVisible(currentPage == pageList.size() - 1 && page.hasBackButton());
     }
     
-    public void updateFooter(WizardPage page) {
+    private void updateFooter(WizardPage page) {
         footer.setText(page.getFooter());
     }
 

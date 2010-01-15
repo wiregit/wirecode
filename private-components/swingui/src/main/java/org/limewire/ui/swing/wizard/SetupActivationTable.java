@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -24,7 +26,11 @@ import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.ui.swing.activation.ActivationItemComparator;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.activation.ActivationUtilities;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -36,6 +42,7 @@ public class SetupActivationTable extends JPanel {
     @Resource private Icon checkIcon;
     @Resource private Color headerBackgroundColor;
     @Resource private Font headerFont;
+    @Resource private Icon infoIcon;
     
     private JTable table;
     
@@ -53,7 +60,9 @@ public class SetupActivationTable extends JPanel {
         table.getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
         table.getTableHeader().setMinimumSize(new Dimension(100, 50));
 
-        table.getColumn(columnNames[0]).setCellRenderer(new LicenseTypeRenderer());
+        LicenseTypeRendererEditor licenseRendererEditor = new LicenseTypeRendererEditor();
+        table.getColumn(columnNames[0]).setCellRenderer(licenseRendererEditor);
+        table.getColumn(columnNames[0]).setCellEditor(licenseRendererEditor);
         table.getColumn(columnNames[0]).setMinWidth(200);
         table.getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
         table.getColumn(columnNames[1]).setMinWidth(100);
@@ -66,12 +75,13 @@ public class SetupActivationTable extends JPanel {
         setLayout(new BorderLayout()); 
         add(header, BorderLayout.NORTH); 
         add(table, BorderLayout.CENTER); 
-        add(Box.createVerticalStrut(10), BorderLayout.SOUTH); 
+        //add(Box.createVerticalStrut(5), BorderLayout.SOUTH); 
         
         setBorder(BorderFactory.createLineBorder(columnNameColor));
 
-        setMinimumSize(new Dimension(350, 27 + activationItems.size() * 29 + 10));
-        setPreferredSize(new Dimension(350, 27 + activationItems.size() * 29 + 10));
+        int numberOfItemsVisible = (activationItems.size() > 4) ? 4 : activationItems.size();
+        setMinimumSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
+        setPreferredSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
     }
     
     private class ActivationTableModel extends AbstractTableModel {
@@ -95,47 +105,101 @@ public class SetupActivationTable extends JPanel {
 
         @Override
         public boolean isCellEditable(int row, int col) { 
-            return false; 
+            return activationItems.get(row).getStatus() != ActivationItem.Status.ACTIVE;
         }
     }
 
-    private class LicenseTypeRenderer extends JPanel implements TableCellRenderer {
+    private class LicenseTypeRendererEditor extends TableRendererEditor {
 
-        private final IconButton checkMark;
+        private final IconButton checkMarkButton;
         private final JLabel nameLabel;
-        private final Component strut;
+        private final Component strut1;
+        private final Component strut2;
+        private final IconButton infoButton;
+        private ActivationItem cellEditorValue = null;
         
-        public LicenseTypeRenderer() {
+        public LicenseTypeRendererEditor() {
             nameLabel = wizardPage.createAndDecorateMultiLine("");
             nameLabel.setVisible(true);
             
-            checkMark = new IconButton(checkIcon);
-            checkMark.setVisible(false);
+            checkMarkButton = new IconButton(checkIcon);
+            checkMarkButton.setVisible(false);
             
-            strut = Box.createHorizontalStrut(17);
-            strut.setVisible(false);
+            strut1 = Box.createHorizontalStrut(1);
+            strut1.setVisible(false);
+
+            strut2 = Box.createHorizontalStrut(0);
+            strut2.setVisible(false);
+            
+            infoButton = new IconButton(infoIcon);
+            infoButton.addActionListener(new InfoAction(this));
+            infoButton.setVisible(false);
             
             setLayout(new MigLayout("filly, insets 0 5 0 5, hidemode 3"));
-            add(checkMark, "align 0% 50%");
-            add(strut, "align 0% 50%");
+            add(checkMarkButton, "align 0% 50%");
+            add(strut1, "align 0% 50%, hidemode 3");
+            add(infoButton, "align 0% 50%, hidemode 3");
+            add(strut2, "align 0% 50%, hidemode 3");
             add(nameLabel, "align 0% 50%");
         }
         
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, 
-                                                       int row, int column) {
+        protected Component doTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
             ActivationItem item = (ActivationItem) value;
             
-            checkMark.setVisible(item.getStatus() == Status.ACTIVE);
-            strut.setVisible(item.getStatus() != Status.ACTIVE);
-            nameLabel.setEnabled(item.getStatus() == Status.ACTIVE);
-            nameLabel.setText(item.getLicenseName());
-            if (item.getStatus() != Status.ACTIVE) {
-                nameLabel.setForeground(Color.LIGHT_GRAY);
-            }
+            updateComponents(item);
 
             return this;
+        }
+        
+        @Override
+        protected Component doTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            cellEditorValue = (ActivationItem) value;
+
+            updateComponents(cellEditorValue);
+
+            return this;
+        }
+
+        private void updateComponents(ActivationItem item) {
+            checkMarkButton.setVisible(item.getStatus() == Status.ACTIVE);
+            strut1.setVisible(item.getStatus() != Status.ACTIVE);
+            infoButton.setVisible(item.getStatus() != Status.ACTIVE);
+            strut2.setVisible(item.getStatus() != Status.ACTIVE);
+            
+            if (item.getStatus() == Status.ACTIVE) {
+                nameLabel.setText(item.getLicenseName());
+                nameLabel.setForeground(Color.BLACK);
+            } else {
+                nameLabel.setText("* " + item.getLicenseName());
+                nameLabel.setForeground(Color.GRAY);
+            }
+        }
+        
+        @Override
+        public ActivationItem getCellEditorValue() {
+            return cellEditorValue;
+        }
+    }
+    
+    private class InfoAction extends AbstractAction {
+
+        private final LicenseTypeRendererEditor licenseRenderer;
+
+        public InfoAction(LicenseTypeRendererEditor licenseRenderer) {
+            this.licenseRenderer = licenseRenderer;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ActivationItem item = licenseRenderer.getCellEditorValue();
+            if (item != null) {
+                String message = ActivationUtilities.getStatusMessage(item);
+                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
+                licenseRenderer.cancelCellEditing();
+            }
         }
     }
 
@@ -160,7 +224,7 @@ public class SetupActivationTable extends JPanel {
             nameLabel.setEnabled(item.getStatus() == Status.ACTIVE);
 
             if (item.getStatus() != Status.ACTIVE) {
-                nameLabel.setForeground(Color.LIGHT_GRAY);
+                nameLabel.setForeground(Color.GRAY);
             }
 
             return this;

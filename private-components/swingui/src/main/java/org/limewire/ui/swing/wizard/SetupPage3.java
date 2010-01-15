@@ -106,13 +106,10 @@ public class SetupPage3 extends WizardPage {
                         add(new SetupActivationThankYouPanel(SetupPage3.this, activationManager.getActivationItems()));
 
                         footerText = I18n.tr("You can edit your licenses from File > License...");
-                        wizard.updateFooter(SetupPage3.this);
-
                         forwardText = I18n.tr("Done");
-                        wizard.updateForwardButton(SetupPage3.this);
-                        
                         hasBackButton = false;
-                        wizard.updateBackButton(SetupPage3.this);
+
+                        wizard.updateControls();
                     }
                 }
             });
