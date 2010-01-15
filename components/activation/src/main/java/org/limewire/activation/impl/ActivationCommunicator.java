@@ -17,7 +17,7 @@ public interface ActivationCommunicator {
      * This information is typically stored on the server side.
      *
      * @param key key for activation
-     * @return List<ActivationItem> activation items associated with key.
+     * @return activation response data object from activation server.
      */
     public ActivationResponse activate(final String key) throws IOException, InvalidDataException;
 }
