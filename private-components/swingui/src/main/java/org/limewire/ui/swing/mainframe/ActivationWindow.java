@@ -1,12 +1,14 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import net.miginfocom.swing.MigLayout;
@@ -15,6 +17,7 @@ import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.ActivationTest;
+import org.limewire.setting.ActivationSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -39,7 +42,7 @@ public class ActivationWindow {
         this.activationTest = activationTest;
         
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
-        dialog.setSize(new Dimension(450, 400));            
+        dialog.setSize(new Dimension(550, 720));            
         dialog.setTitle(I18n.tr("Activation Dump Test"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         
@@ -61,23 +64,27 @@ public class ActivationWindow {
         public ActivationPanel() {
             super(new MigLayout(""));
             
-            add(new JLabel("Version:"));
-            add(new JLabel(LimeWireUtils.getLimeWireVersion()), "wrap");
+            add(createField("Version:"));
             
-            add(new JLabel("HTTP Server Name:"));
-            add(new JLabel(LimeWireUtils.getHttpServer()), "wrap");
+            add(createField(LimeWireUtils.getLimeWireVersion()), "wrap");
             
-            add(new JLabel("Vendor:"));
-            add(new JLabel(LimeWireUtils.getVendor()), "wrap");
+            add(createField("HTTP Server Name:"));
+            add(createField(LimeWireUtils.getHttpServer()), "wrap");
             
-            add(new JLabel("mCode:"));
-            add(new JLabel(activationManager.getMCode()), "wrap");
+            add(createField("Vendor:"));
+            add(createField(LimeWireUtils.getVendor()), "wrap");
             
-            add(new JLabel("lid:"));
-            add(new JLabel(activationManager.getLicenseKey()), "wrap");
+            add(createField("mCode:"));
+            add(createField(activationManager.getMCode()), "wrap");
             
-            add(new JLabel("URL info"));
-            add(new JLabel(LimeWireUtils.addLWInfoToUrl("", applicationServices.getMyGUID(), 
+            add(createField("lid:"));
+            add(createField(activationManager.getLicenseKey()), "wrap");
+            
+            add(createField("Host:"));
+            add(createField(ActivationSettings.ACTIVATION_HOST.toString()), "wrap");
+            
+            add(createField("URL info"));
+            add(createField(LimeWireUtils.addLWInfoToUrl("", applicationServices.getMyGUID(), 
                     activationManager.isProActive(), activationManager.getLicenseKey(), activationManager.getMCode())), "wrap");
             
             addActivationModuleInformation(activationManager.getActivationItems());
@@ -88,65 +95,78 @@ public class ActivationWindow {
             addAVGSupportInfo();
         }
         
+        
+        
         private void addActivationModuleInformation(List<ActivationItem> items) {
-            add(new JLabel("MODULES"), "gaptop 20, span, wrap");
+            add(createField("MODULES"), "gaptop 20, span, wrap");
             
             for(ActivationItem item : items) {
-                add(new JLabel("Name:"), "gapleft 20, gaptop 20");
-                add(new JLabel(item.getLicenseName()), "gaptop 20, wrap");
+                add(createField("Name:"), "gapleft 20, gaptop 20");
+                add(createField(item.getLicenseName()), "gaptop 20, wrap");
                 
-                add(new JLabel("ID:"), "gapleft 20");
-                add(new JLabel(item.getModuleID().toString()), "wrap");
-                add(new JLabel("Expires:"), "gapleft 20");
-                add(new JLabel(item.getDateExpired().toString()), "wrap");
-                add(new JLabel("Purchased:"), "gapleft 20");
-                add(new JLabel(item.getDatePurchased().toString()), "wrap");
-                add(new JLabel("Status:"), "gapleft 20");
-                add(new JLabel(item.getStatus().toString()), "wrap");
-                add(new JLabel("URL:"), "gapleft 20");
-                add(new JLabel(item.getURL()), "wrap");
+                add(createField("ID:"), "gapleft 20");
+                add(createField(item.getModuleID().toString()), "wrap");
+                add(createField("Expires:"), "gapleft 20");
+                add(createField(item.getDateExpired().toString()), "wrap");
+                add(createField("Purchased:"), "gapleft 20");
+                add(createField(item.getDatePurchased().toString()), "wrap");
+                add(createField("Status:"), "gapleft 20");
+                add(createField(item.getStatus().toString()), "wrap");
+                add(createField("URL:"), "gapleft 20");
+                add(createField(item.getURL()), "wrap");
             }
         }
         
         private void addTurboChargedDownloadInfo() {
-            add(new JLabel("TURBO DOWNLOAD MODULE"), "gaptop 20, span, wrap");
+            add(createField("TURBO DOWNLOAD MODULE"), "gaptop 20, span, wrap");
 
-            add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
-            add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE))), "gaptop 10, wrap");
-            add(new JLabel("# UltraPeers:"), "gapleft 20");
-            add(new JLabel(String.valueOf(activationTest.getNumUltraPeers())), "wrap");
-            add(new JLabel("SWARM:"), "gapleft 20");
-            add(new JLabel(""), "wrap");            
+            add(createField("Is Active?"), "gapleft 20, gaptop 10");
+            add(createField(String.valueOf(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE))), "gaptop 10, wrap");
+            add(createField("# UltraPeers:"), "gapleft 20");
+            add(createField(String.valueOf(activationTest.getNumUltraPeers())), "wrap");
+            add(createField("SWARM:"), "gapleft 20");
+            add(createField(""), "wrap");            
         }
         
         private void addOptimizedSearchInfo() {
-            add(new JLabel("OPTIMIZED SEARCH MODULE"), "gaptop 20, span, wrap");
+            add(createField("OPTIMIZED SEARCH MODULE"), "gaptop 20, span, wrap");
             
-            add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
-            add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE))), "gaptop 10, wrap");
-            add(new JLabel("# Search Results:"), "gapleft 20");
-            add(new JLabel(String.valueOf(activationTest.getNumResults())), "wrap");
-            add(new JLabel("Can query DHT:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
-            add(new JLabel("What is New Request:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
+            add(createField("Is Active?"), "gapleft 20, gaptop 10");
+            add(createField(String.valueOf(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE))), "gaptop 10, wrap");
+            add(createField("# Search Results:"), "gapleft 20");
+            add(createField(String.valueOf(activationTest.getNumResults())), "wrap");
+            add(createField("Can query DHT:"), "gapleft 20");
+            add(createField(""), "wrap");
+            add(createField("What is New Request:"), "gapleft 20");
+            add(createField(""), "wrap");
         
         }
         
         private void addTechSupportInfo() {
-            add(new JLabel("TECH SUPPORT MODULE"), "gaptop 20, span, wrap");
+            add(createField("TECH SUPPORT MODULE"), "gaptop 20, span, wrap");
             
-            add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
-            add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.TECH_SUPPORT_MODULE))), "gaptop 10, wrap");
+            add(createField("Is Active?"), "gapleft 20, gaptop 10");
+            add(createField(String.valueOf(activationManager.isActive(ActivationID.TECH_SUPPORT_MODULE))), "gaptop 10, wrap");
         }
         
         private void addAVGSupportInfo() {
-            add(new JLabel("AVG MODULE"), "gaptop 20, span, wrap");
+            add(createField("AVG MODULE"), "gaptop 20, span, wrap");
             
-            add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
-            add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.AVG_MODULE))), "gaptop 10, wrap");
+            add(createField("Is Active?"), "gapleft 20, gaptop 10");
+            add(createField(String.valueOf(activationManager.isActive(ActivationID.AVG_MODULE))), "gaptop 10, wrap");
         }
         
-        
     }
+    
+    private static JTextField createField(String text) {
+        
+        JTextField text1 = new JTextField(text);
+        text1.setOpaque(false);
+        text1.setBorder(BorderFactory.createEmptyBorder());
+        text1.setEditable(false);
+        text1.setCaretPosition(0);
+        text1.setMargin(new Insets(0,4,0,4));
+        return text1;
+    }
+    
 }
