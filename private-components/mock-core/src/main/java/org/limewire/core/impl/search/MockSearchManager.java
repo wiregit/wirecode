@@ -1,0 +1,57 @@
+package org.limewire.core.impl.search;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchDetails;
+import org.limewire.core.api.search.SearchManager;
+import org.limewire.core.api.search.SearchResultList;
+
+/**
+ * Implementation of SearchManager for the mock core.
+ */
+public class MockSearchManager implements SearchManager {
+
+    private final List<SearchResultList> threadSafeSearchList;
+
+    public MockSearchManager() {
+        this.threadSafeSearchList = new CopyOnWriteArrayList<SearchResultList>();
+    }
+    
+    @Override
+    public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
+        // Create result list.
+        SearchResultList resultList = new MockSearchResultList(search, searchDetails);
+        
+        // Add result list to collection.
+        threadSafeSearchList.add(resultList);
+        
+        return resultList;
+    }
+
+    @Override
+    public void removeSearch(Search search) {
+        // Dispose of result list and remove from collection.
+        for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
+            SearchResultList resultList = iter.next();
+            if (search.equals(resultList.getSearch())) {
+                resultList.dispose();
+                threadSafeSearchList.remove(resultList);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public List<Search> getActiveSearches() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public SearchResultList getSearchResultList(Search search) {
+        return null;
+    }
+}
