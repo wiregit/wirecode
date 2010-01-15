@@ -70,54 +70,37 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     public void activateKey(final String key, final int numberOfRetries) {
 
-        // cancel any existing activation currently taking place.
+        if (!activateKeyInitAndValidate(key)) {
+            return;    
+        }
+        ACTIVATING.enterState();
+        activationContactor = new Periodic(new ActivationTask(key, numberOfRetries), scheduler);
+        activationContactor.rescheduleIfSooner(0);
+    }
+
+    /**
+     * Initialize and validate key before activating at server.
+     * 
+     * @param key activation key
+     * @return true if the activation manager should continue to 
+     * activate at the server, false otherwise
+     */
+    private boolean activateKeyInitAndValidate(String key) {
+        // cancel any existing scheduled activation 
+        // which is currently not contacting the server
         if (activationContactor != null) {
             if(currentState == ACTIVATING)
-                return;
+                return false;
             else
                 activationContactor.unschedule();
         }
 
         if (!isValidKey(key)) {
             NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
-            return;
+            return false;
         }
-
-        ACTIVATING.enterState();
-
-        activationContactor = new Periodic(new Runnable() {
-            
-            private int tries = numberOfRetries;
-            
-            // todo: improve the retry stuff so it's not hard coded
-            // todo: ensure thread safety (error, activation, activation items consist of object state)
-            @Override
-            public void run() {
-                try {
-                    ActivationResponse response = activationCommunicator.activate(key);
-
-                    ACTIVATED_FROM_SERVER.enterState(response);
-
-                    
-                    // todo: process the contents of the ActivationResponse, esp if there are errors
-                    // todo: update refreshInterval and reschedule the next one.
-                    // todo: test parsing of erroneous responses (INVALID_KEY), {"lid":"DAVV-XXME-BWU3","response":"notfound","refresh":0,"message":"ID not found"}
-                    // todo: add unit tests for this (mock out ActivationCommunicator)
-                } catch (IOException e) {
-                    if (tries-- > 0) {
-                        activationContactor.rescheduleIfSooner(25000 - tries*5000);    
-                    } else {
-                        NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
-                    }
-                } catch (InvalidDataException e) {
-                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
-                } catch (Throwable e) {
-                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
-                }
-            }
-        }, scheduler);
-        
-        activationContactor.rescheduleIfSooner(refreshIntervalSeconds);
+        refreshIntervalSeconds = 0;
+        return true;
     }
 
     @Override
@@ -228,7 +211,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 //         String storedLicenseKey = "L4RXLP28XVQ5";    // test working key
         String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
-            activateKey(storedLicenseKey);
+            activateKey(storedLicenseKey, 5);
         }
     }
 
@@ -255,6 +238,72 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Override
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
+    }
+            
+    private class ActivationResponseProcessor {
+        private final static int MAX_ATTEMPTS = 5;
+        private int numAttempted = 0;
+        private final int numRetries;
+        
+        ActivationResponseProcessor(int numRetries) {
+            this.numRetries = numRetries;    
+        }
+        
+        public void processResponse(ActivationResponse response, Throwable error) {
+            if (error != null) {
+                if (numRetries > 0) {
+                    if (error instanceof IOException) {
+                        if (++numAttempted <= MAX_ATTEMPTS) {
+                            int nextDelay = numAttempted * 5000;
+                            activationContactor.rescheduleIfSooner(nextDelay);
+                            return;
+                        }
+                    }
+                }
+                NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+                return;
+            }
+            if (response != null) {
+                successfulResponse(response);
+            } else {
+                NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+            }
+        }
+        
+        private void successfulResponse(ActivationResponse response) {
+            // reset counter
+            numAttempted = 0;
+            ACTIVATED_FROM_SERVER.enterState(response);
+            
+            // reschedule next ping of activation server
+            refreshIntervalSeconds = response.getRefreshInterval();
+            activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+        }
+    }
+    
+    private class ActivationTask implements Runnable {
+        
+        private final ActivationResponseProcessor responseProcessor;
+        private final String key;
+
+        ActivationTask(final String key, int numRetries) {
+            this.responseProcessor = new ActivationResponseProcessor(numRetries);
+            this.key = key;
+        }
+
+        @Override
+        public void run() {
+            ActivationResponse response = null;
+            Throwable error = null;
+            try {
+                response = activationCommunicator.activate(key);
+            } catch (Throwable e) {
+                error = e;
+            } finally {
+                responseProcessor.processResponse(response, error);
+            }
+        }
+        
     }
     
     private class ActivationStateImpl {
