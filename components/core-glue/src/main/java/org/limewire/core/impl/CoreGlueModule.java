@@ -1,5 +1,6 @@
 package org.limewire.core.impl;
 
+import org.limewire.core.api.ActivationTest;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
@@ -44,6 +45,7 @@ public class CoreGlueModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        bind(ActivationTest.class).to(ActivationTestImpl.class);
         bind(ActivityCallback.class).to(GlueActivityCallback.class);
         bind(GuiCallbackService.class).to(GlueActivityCallback.class);
         bind(QueryReplyListenerList.class).to(GlueActivityCallback.class);

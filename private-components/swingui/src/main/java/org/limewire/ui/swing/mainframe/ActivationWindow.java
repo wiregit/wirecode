@@ -14,6 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.core.api.ActivationTest;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -26,13 +27,16 @@ public class ActivationWindow {
 
     private final ActivationManager activationManager;
     private final ApplicationServices applicationServices;
+    private final ActivationTest activationTest;
     
     private final JDialog dialog;
 
     @Inject
-    public ActivationWindow(ActivationManager activationManager, ApplicationServices applicationServices) {
+    public ActivationWindow(ActivationManager activationManager, ApplicationServices applicationServices,
+            ActivationTest activationTest) {
         this.activationManager = activationManager;
         this.applicationServices = applicationServices;
+        this.activationTest = activationTest;
         
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setSize(new Dimension(450, 400));            
@@ -110,14 +114,9 @@ public class ActivationWindow {
             add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
             add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE))), "gaptop 10, wrap");
             add(new JLabel("# UltraPeers:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
-            add(new JLabel("MODEM_SWARM:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
-            add(new JLabel("T1_SWARM:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
-            add(new JLabel("T3_SWARM:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
-            
+            add(new JLabel(String.valueOf(activationTest.getNumUltraPeers())), "wrap");
+            add(new JLabel("SWARM:"), "gapleft 20");
+            add(new JLabel(""), "wrap");            
         }
         
         private void addOptimizedSearchInfo() {
@@ -126,7 +125,7 @@ public class ActivationWindow {
             add(new JLabel("Is Active?"), "gapleft 20, gaptop 10");
             add(new JLabel(String.valueOf(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE))), "gaptop 10, wrap");
             add(new JLabel("# Search Results:"), "gapleft 20");
-            add(new JLabel(""), "wrap");
+            add(new JLabel(String.valueOf(activationTest.getNumResults())), "wrap");
             add(new JLabel("Can query DHT:"), "gapleft 20");
             add(new JLabel(""), "wrap");
             add(new JLabel("What is New Request:"), "gapleft 20");
