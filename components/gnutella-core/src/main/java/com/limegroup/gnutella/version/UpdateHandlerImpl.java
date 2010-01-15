@@ -549,7 +549,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             return;
         LOG.debug("about to issue http request method");
         HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getMCode()));
+            activationManager.isProActive(), activationManager.getLicenseKey(), activationManager.getMCode()));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

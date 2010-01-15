@@ -10,6 +10,7 @@ import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.mainframe.AboutAction;
+import org.limewire.ui.swing.mainframe.ActivationWindow;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
@@ -29,6 +30,7 @@ class HelpMenu extends MnemonicMenu {
     private final Provider<HomeMediator> homeMediatorProvider;
     private final Provider<AboutAction> aboutAction;
     private final ActivationManager activationManager;
+    private final Provider<ActivationWindow> activationWindow;
     
     @Inject
     public HelpMenu(Application application, 
@@ -36,7 +38,8 @@ class HelpMenu extends MnemonicMenu {
             Provider<Navigator> navigatorProvider, 
             Provider<HomeMediator> homeMediatorProvider,
             Provider<AboutAction> aboutAction,
-            ActivationManager activationManager) {
+            ActivationManager activationManager,
+            Provider<ActivationWindow> activationWindow) {
         
         super(I18n.tr("&Help"));
 
@@ -47,6 +50,7 @@ class HelpMenu extends MnemonicMenu {
         this.homeMediatorProvider = homeMediatorProvider;
         this.aboutAction = aboutAction;
         this.activationManager = activationManager;
+        this.activationWindow = activationWindow;
     }
 
     @Override
@@ -103,6 +107,13 @@ class HelpMenu extends MnemonicMenu {
                         Notification notification = new Notification("Short Title", "Short message.", this);
                         trayNotifierProvider.get().showMessage(notification);
                     }
+                }
+            });
+            add(new AbstractAction("Dump Activation Test") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ActivationWindow window = activationWindow.get();
+                    window.showDialog();
                 }
             });
         }

@@ -28,7 +28,7 @@ public final class LimeWireUtils {
 	 * Constant for the current version of LimeWire.
 	 */
     @InspectablePrimitive("limewire version")
-	private static final String LIMEWIRE_VERSION = "@version@";
+	private static String LIMEWIRE_VERSION = "@version@";
     
     /**
      * The current revision of the BitTorrent protocol implementation.
@@ -98,15 +98,16 @@ public final class LimeWireUtils {
 	/**
 	 * Cached constant for the HTTP Server: header value.
 	 */
-	private static final String HTTP_SERVER;
+	private static String HTTP_SERVER;
 
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
-//    /**
-//     * Variable for whether or not this is a PRO version of LimeWire. 
-//     */
-//    @InspectablePrimitive("pro")
-//    private static boolean _isPro = false;
+    /**
+     * Variable for whether or not this is a PRO version of LimeWire. 
+     */
+    @SuppressWarnings("unused")
+    @InspectablePrimitive("pro")
+    private static boolean _isPro = false;
 
     /** Whether or not a temporary directory is in use. */
     private static boolean temporaryDirectoryInUse;
@@ -119,18 +120,45 @@ public final class LimeWireUtils {
 	 */
 	private LimeWireUtils() {}
     
+	
+	public static void setIsPro(boolean isPro) {
+	    if(!isTestingVersion()) {
+	        if(isPro) {
+	             if(!LIMEWIRE_VERSION.endsWith("Pro"))
+	                 LIMEWIRE_VERSION += " Pro";
+	        } else {
+                if(LIMEWIRE_VERSION.endsWith("Pro"))
+                    LIMEWIRE_VERSION = LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4);
+	        }
+	        setHTTPVersion();
+	        _isPro = isPro;
+	    }
+	}
+	
+	public static void setHTTPVersion() {
+	       if(!LIMEWIRE_VERSION.endsWith("Pro")) {
+	            HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
+	        }
+	        else {
+	            HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
+	                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
+//	            _isPro = true;
+	        }
+	}
+	
 	/**
 	 * Initialize the settings statically. 
 	 */
 	static {
-		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
-			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
-		}
-		else {
-			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
-                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-//            _isPro = true;
-		}
+	    setHTTPVersion();
+//		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
+//			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
+//		}
+//		else {
+//			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
+//                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
+////            _isPro = true;
+//		}
 	}
     
     /** Returns true if we're a beta. */
@@ -444,20 +472,19 @@ public final class LimeWireUtils {
      * Updates a URL to contain common information about the LW installation.
      */
     // TODO: ACTIVATION: REFACTOR!  If possible, Put logic inside ApplicationImpl instead of here
-    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String mcode) {
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String lid, String mcode) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
-        url += getLWInfoQueryString(myClientGUID, isPro, mcode);
+        url += getLWInfoQueryString(myClientGUID, isPro, lid, mcode);
                
         return url;
     }
     
-    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String mcode) {
+    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String lid, String mcode) {
         return "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
             "&pro="   + isPro + 
-            "&mcode=" + mcode + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
             "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
@@ -465,7 +492,9 @@ public final class LimeWireUtils {
             "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
             "&sc="   + ApplicationSettings.SESSIONS.getValue() +
             "&al="   + autoStartupLaunch + 
-            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch());    
+            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch() +
+            "&lid="  + EncodingUtils.encode(lid) +
+            "&mcode=" + EncodingUtils.encode(mcode));    
     }
 
     /** Returns whether or not a temporary directory is in use. */

@@ -26,6 +26,7 @@ import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 //TODO: this needs to be a service, within the service start call 
 // we attempt to authenticate the key if the key exists. otherwise
@@ -345,6 +346,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             setActivationItems(Collections.<ActivationItem>emptyList());
             listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
             currentState = this;
+            LimeWireUtils.setIsPro(isProActive());
         }
     }
 
@@ -380,6 +382,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 activationError = ActivationError.NO_ERROR;
                 listeners.broadcast(new ActivationEvent(getActivationState()));
                 currentState = this;
+                LimeWireUtils.setIsPro(isProActive());
             }
         }
     }
@@ -409,6 +412,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             activationError = ActivationError.NO_ERROR;
             listeners.broadcast(new ActivationEvent(getActivationState()));
             currentState = this;
+            LimeWireUtils.setIsPro(isProActive());
         }
     }
     
