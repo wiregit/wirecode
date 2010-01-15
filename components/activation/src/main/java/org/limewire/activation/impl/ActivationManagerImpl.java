@@ -343,9 +343,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             });
             activationError = error;
             ActivationSettings.LAST_START_WAS_PRO.set(false);
+            ActivationSettings.M_CODE.set("");
             setActivationItems(Collections.<ActivationItem>emptyList());
             listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
             currentState = this;
+            
             LimeWireUtils.setIsPro(isProActive());
         }
     }
@@ -407,6 +409,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             });
 
             ActivationSettings.ACTIVATION_KEY.set(response.getLid());
+            ActivationSettings.M_CODE.set(response.getMCode());
             setActivationItems(response.getActivationItems());
             ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
             activationError = ActivationError.NO_ERROR;

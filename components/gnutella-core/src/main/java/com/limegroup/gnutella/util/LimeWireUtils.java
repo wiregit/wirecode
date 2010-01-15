@@ -492,9 +492,9 @@ public final class LimeWireUtils {
             "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
             "&sc="   + ApplicationSettings.SESSIONS.getValue() +
             "&al="   + autoStartupLaunch + 
-            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch() +
+            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch()) +
             "&lid="  + EncodingUtils.encode(lid) +
-            "&mcode=" + EncodingUtils.encode(mcode));    
+            "&mcode=" + EncodingUtils.encode(mcode);    
     }
 
     /** Returns whether or not a temporary directory is in use. */
