@@ -1,7 +1,5 @@
 package org.limewire.core.impl;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.limewire.core.api.ActivationTest;
 import org.limewire.util.PrivateAccessor;
 

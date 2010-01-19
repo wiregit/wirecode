@@ -28,9 +28,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-//TODO: this needs to be a service, within the service start call 
-// we attempt to authenticate the key if the key exists. otherwise
-// it waits for user action.
+/**
+ * 
+ */
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
     
@@ -105,6 +105,14 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     // interval in seconds between successive hits to the activation server
     private long refreshIntervalSeconds = 0;
+
+    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.NOT_AUTHORIZED);
+    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_AUTHORIZED);
+    private final Activating ACTIVATING = new Activating(ActivationState.AUTHORIZING);
+    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.AUTHORIZED);
+    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.AUTHORIZED);
+    
+    private volatile ActivationStateImpl currentState = UNINITIALIZED;
     
     @Inject
     public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
@@ -240,6 +248,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         loadFromDisk();
     }
     
+    /**
+     * Attempts to load any serialized module on disk into the client. This will
+     * precede any communication with the server to try and enable any modules
+     * as quickly as possible. 
+     */
     private void loadFromDisk() {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {
@@ -250,11 +263,11 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                         ACTIVATED_FROM_CACHE.enterState(response);
                     }
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error reading serialized json string.");
                 } catch (InvalidDataException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error parsing json string.");
                 }
             }
         });
@@ -263,7 +276,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Override
     public void start() {
         // if a PKey exists, start the server and try contacting the authentication server
-//         String storedLicenseKey = "L4RXLP28XVQ5";    // test working key
         String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
             activateKey(storedLicenseKey, 5);
@@ -293,6 +305,67 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     @Override
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
+    }
+    
+    private void setActivating(ActivationStateImpl state) {
+        activationError = ActivationError.NO_ERROR;
+        listeners.broadcast(new ActivationEvent(getActivationState()));
+        currentState = state;
+    }
+    
+    private void setProvisionallyActivated(final ActivationResponse response, ActivationStateImpl state) {
+        setActivationItems(response.getActivationItems());
+        ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
+        activationError = ActivationError.NO_ERROR;
+        listeners.broadcast(new ActivationEvent(getActivationState()));
+        currentState = state;
+        LimeWireUtils.setIsPro(isProActive());
+    }
+    
+    private void setActivated(final ActivationResponse response, ActivationStateImpl state) {
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    activationSerializer.writeToDisk(response.getJSONString());                        
+                } catch (Exception e) {
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk.");
+                }
+            }
+        });
+
+        ActivationSettings.ACTIVATION_KEY.set(response.getLid());
+        ActivationSettings.M_CODE.set(response.getMCode());
+        setActivationItems(response.getActivationItems());
+        ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
+        activationError = ActivationError.NO_ERROR;
+        listeners.broadcast(new ActivationEvent(getActivationState()));
+        currentState = state;
+        LimeWireUtils.setIsPro(isProActive());
+    }
+    
+    private void setNotActivated(ActivationError error, ActivationStateImpl state) {
+        if(error == ActivationError.INVALID_KEY) {
+            ActivationSettings.ACTIVATION_KEY.revertToDefault();
+        }
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    activationSerializer.writeToDisk("");                        
+                } catch (Exception e) {
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk.");
+                }
+            }
+        });
+        activationError = error;
+        ActivationSettings.LAST_START_WAS_PRO.set(false);
+        ActivationSettings.M_CODE.set("");
+        setActivationItems(Collections.<ActivationItem>emptyList());
+        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
+        currentState = state;
+  
+        LimeWireUtils.setIsPro(isProActive());
     }
             
     private class ActivationResponseProcessor {
@@ -362,7 +435,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private class ActivationStateImpl {
-    
         private ActivationState state;
         
         private ActivationStateImpl(ActivationState state) {
@@ -374,57 +446,27 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
     
-    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.NOT_AUTHORIZED);
-    
-    private class NotActivated extends ActivationStateImpl 
-    {
+    private class NotActivated extends ActivationStateImpl  {
         private NotActivated(ActivationState state) {
             super(state);
         }
 
         public void enterState(ActivationError error) {
-            if(error == ActivationError.INVALID_KEY) {
-                ActivationSettings.ACTIVATION_KEY.revertToDefault();
-            }
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    try {
-                        activationSerializer.writeToDisk("");                        
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            activationError = error;
-            ActivationSettings.LAST_START_WAS_PRO.set(false);
-            ActivationSettings.M_CODE.set("");
-            setActivationItems(Collections.<ActivationItem>emptyList());
-            listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
-            currentState = this;
-            
-            LimeWireUtils.setIsPro(isProActive());
+            setNotActivated(error, this);
         }
     }
 
-    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_AUTHORIZED);
-    
-    private class Activating extends ActivationStateImpl 
-    {
+    private class Activating extends ActivationStateImpl {
         private Activating(ActivationState state) {
             super(state);
         }
 
         public void enterState() {
-            activationError = ActivationError.NO_ERROR;
-            listeners.broadcast(new ActivationEvent(getActivationState()));
-            currentState = this;
+            setActivating(this);
         }
     }
 
-    private final Activating ACTIVATING = new Activating(ActivationState.AUTHORIZING);
-
-    private class ActivatedFromCache extends ActivationStateImpl 
-    {
+    private class ActivatedFromCache extends ActivationStateImpl {
         private ActivatedFromCache(ActivationState state) {
             super(state);
         }
@@ -433,48 +475,18 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if (currentState == ACTIVATED_FROM_SERVER) {
                 return;
             } else {
-                setActivationItems(response.getActivationItems());
-                ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
-                activationError = ActivationError.NO_ERROR;
-                listeners.broadcast(new ActivationEvent(getActivationState()));
-                currentState = this;
-                LimeWireUtils.setIsPro(isProActive());
+                setProvisionallyActivated(response, this);
             }
         }
     }
 
-    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.AUTHORIZED);
-
-    private class ActivatedFromServer extends ActivationStateImpl 
-    {
+    private class ActivatedFromServer extends ActivationStateImpl {
         private ActivatedFromServer(ActivationState state) {
             super(state);
         }
 
         public void enterState(final ActivationResponse response) {
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    try {
-                        activationSerializer.writeToDisk(response.getJSONString());                        
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-            ActivationSettings.M_CODE.set(response.getMCode());
-            setActivationItems(response.getActivationItems());
-            ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
-            activationError = ActivationError.NO_ERROR;
-            listeners.broadcast(new ActivationEvent(getActivationState()));
-            currentState = this;
-            LimeWireUtils.setIsPro(isProActive());
+            setActivated(response, this);
         }
     }
-    
-    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.AUTHORIZED);
-
-    private volatile ActivationStateImpl currentState = UNINITIALIZED;
-
 }
