@@ -2653,7 +2653,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T1_SWARM + 2 : SpeedConstants.T1_SWARM;
         else // T3
 //            return SpeedConstants.T3_SWARM;
-            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T3_SWARM + 2 : SpeedConstants.T3_SWARM;
+            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T3_SWARM + 4 : SpeedConstants.T3_SWARM;
     }
 
     @Override
