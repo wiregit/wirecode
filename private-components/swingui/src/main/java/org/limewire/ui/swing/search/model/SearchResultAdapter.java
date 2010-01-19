@@ -28,7 +28,7 @@ import com.google.inject.Provider;
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
  */
-class SearchResultAdapter implements VisualSearchResult, Comparable {
+class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultListener, Comparable {
 
     private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
     
@@ -71,18 +71,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
      * Initializes adapter to listen for new sources added.
      */
     void initialize() {
-        groupedSearchResult.addResultListener(new GroupedSearchResultListener() {
-            @Override
-            public void sourceAdded() {
-                // Forward source added event to UI change listener.
-                SwingUtils.invokeNowOrLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        firePropertyChange("new-sources");
-                    }
-                });
-            }
-        });
+        groupedSearchResult.addResultListener(this);
     }
 
     @Override
@@ -348,6 +337,17 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
         this.preExistingDownload = preExistingDownload;
+    }
+
+    @Override
+    public void sourceAdded() {
+        // Forward source added event to UI change listener.
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            @Override
+            public void run() {
+                firePropertyChange("new-sources");
+            }
+        });
     }
 
     @Override

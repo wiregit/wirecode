@@ -7,16 +7,13 @@ import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
-import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.friend.api.Friend;
 import org.limewire.io.GUID;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -30,7 +27,7 @@ class CoreSearchResultList implements SearchResultList {
     private final Search search;
     private final SearchDetails searchDetails;
     
-    private final Comparator<GroupedSearchResult> resultFinder;
+    private final Comparator<Object> resultFinder;
     private final SearchListener searchListener;
     
     private final EventList<GroupedSearchResult> groupedUrnResultList;
@@ -48,8 +45,7 @@ class CoreSearchResultList implements SearchResultList {
         searchListener = new SearchListenerImpl();
         
         // Create list of grouped results.
-        groupedUrnResultList = GlazedListsFactory.threadSafeList(
-                GlazedListsFactory.sortedList(new BasicEventList<GroupedSearchResult>(), resultFinder));
+        groupedUrnResultList = GlazedListsFactory.threadSafeList(new BasicEventList<GroupedSearchResult>());
         
         // Add search listener.
         search.addSearchListener(searchListener);
@@ -115,7 +111,7 @@ class CoreSearchResultList implements SearchResultList {
             // For now, we drop these.  We should figure out a way to show 
             // them later on.
             if (urn != null) {
-                int idx = Collections.binarySearch(groupedUrnResultList, new UrnResult(urn), resultFinder);
+                int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
                 if (idx >= 0) {
                     // Found URN so add result to grouping.
                     GroupedSearchResultImpl gsr = (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
@@ -126,6 +122,7 @@ class CoreSearchResultList implements SearchResultList {
                     
                 } else {
                     // URN not found so add new result at insertion point.
+                    // This keeps the list in sorted order.
                     idx = -(idx + 1);
                     GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
                             searchDetails.getSearchQuery());
@@ -167,61 +164,14 @@ class CoreSearchResultList implements SearchResultList {
     }
     
     /**
-     * Comparator to order GroupedSearchResult objects by URN.
+     * Comparator to search for GroupedSearchResult objects by URN.  This is
+     * only used to perform a binary search by URN, never to perform the sort,
+     * so the compare() method does not need to be symmetric.
      */
-    private static class UrnResultFinder implements Comparator<GroupedSearchResult> {
+    private static class UrnResultFinder implements Comparator<Object> {
         @Override
-        public int compare(GroupedSearchResult o1, GroupedSearchResult o2) {
-            return o1.getUrn().compareTo(o2.getUrn());
-        }
-    }
-    
-    /**
-     * A wrapper result to compare URN values.
-     */
-    private static class UrnResult implements GroupedSearchResult {
-        private final URN urn;
-        
-        public UrnResult(URN urn) {
-            this.urn = urn;
-        }
-
-        @Override
-        public List<SearchResult> getCoreSearchResults() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public Collection<Friend> getFriends() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public float getRelevance() {
-            return 0;
-        }
-
-        @Override
-        public Collection<RemoteHost> getSources() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public URN getUrn() {
-            return urn;
-        }
-
-        @Override
-        public boolean isAnonymous() {
-            return true;
-        }
-
-        @Override
-        public void addResultListener(GroupedSearchResultListener listener) {
-        }
-
-        @Override
-        public void removeResultListener(GroupedSearchResultListener listener) {
+        public int compare(Object o1, Object o2) {
+            return ((GroupedSearchResult) o1).getUrn().compareTo((URN) o2);
         }
     }
 }
