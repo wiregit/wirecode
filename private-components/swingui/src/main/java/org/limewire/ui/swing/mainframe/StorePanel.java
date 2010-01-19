@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.browser.HistoryEntry;
 import org.limewire.ui.swing.nav.Navigator;
 import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
@@ -56,6 +57,14 @@ public class StorePanel extends JPanel {
                 }
             }
         });     
+    }
+    
+    public Iterable<HistoryEntry> getHistory() {
+        return browser.getHistory(10);
+    }
+    
+    public void loadHistoryEntry(HistoryEntry entry) {
+        browser.loadHistoryEntry(entry);
     }
     
     /**

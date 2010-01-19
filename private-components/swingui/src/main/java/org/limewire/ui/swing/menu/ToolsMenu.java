@@ -11,6 +11,7 @@ import javax.swing.event.MenuListener;
 
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
 import org.limewire.ui.swing.mainframe.OptionsAction;
@@ -28,7 +29,7 @@ import com.google.inject.Provider;
 /**
  * The Tools menu in the main menubar.
  */
-class ToolsMenu extends MnemonicMenu {
+class ToolsMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
 
     private final JMenu whatsNewSubmenu;
     
@@ -101,7 +102,7 @@ class ToolsMenu extends MnemonicMenu {
     }
 
     private JMenu createWhatsNewSubmenu() {
-        JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search")) {
+        JMenu menu = new DelayedMnemonicMenu(I18n.tr("&What's New Search")) {
             @Override
             public void createMenuItems() {
                 for (final SearchCategory category : SearchCategory.values()) {

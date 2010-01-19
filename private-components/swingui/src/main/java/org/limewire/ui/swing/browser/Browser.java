@@ -7,6 +7,10 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.swing.JLabel;
 
@@ -20,14 +24,18 @@ import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.mozilla.browser.MozillaException;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsIBaseWindow;
+import org.mozilla.interfaces.nsIHistoryEntry;
 import org.mozilla.interfaces.nsIRequest;
+import org.mozilla.interfaces.nsISHistory;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIURI;
+import org.mozilla.interfaces.nsIWebNavigation;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.interfaces.nsIWebProgressListener;
 import org.mozilla.xpcom.Mozilla;
@@ -65,6 +73,45 @@ public class Browser extends MozillaPanel {
     public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode, VisibilityMode loadingMode) {
         super(toolbarVisMode, statusbarVisMode);
         this.loadStatus = loadingMode;
+    }
+    
+    /**
+     * Returns an Iterable of HistoryEntry items that can be used
+     * to see what's previously been loaded in the browser.
+     */
+    public Iterable<HistoryEntry> getHistory(final int maxEntries) {
+        try {
+            return MozillaExecutor.mozSyncExec(new Callable<Iterable<HistoryEntry>>() {
+                @Override
+                public Iterable<HistoryEntry> call() throws Exception {
+                    nsIWebNavigation nav = XPCOMUtils.qi(getChromeAdapter().getWebBrowser(), nsIWebNavigation.class);
+                    nsISHistory history = nav.getSessionHistory();
+                    List<HistoryEntry> entries = new ArrayList<HistoryEntry>(maxEntries);
+                    if(history != null) {
+                        for(int i = history.getCount() - 1; entries.size() < maxEntries && i >= 0; i--) {
+                            nsIHistoryEntry entry = history.getEntryAtIndex(i, false);
+                            entries.add(new HistoryEntry(i, entry));
+                        }
+                    }
+                    return entries;
+                }
+            });
+        } catch (MozillaException e) {
+            return Collections.emptyList();
+        }
+    }
+    
+    /**
+     * Navigates to a specific item in the history.
+     */
+    public void loadHistoryEntry(final HistoryEntry entry) {
+        MozillaExecutor.mozAsyncExec(new Runnable() {            
+            @Override
+            public void run() {
+                nsIWebNavigation nav = XPCOMUtils.qi(getChromeAdapter().getWebBrowser(), nsIWebNavigation.class);
+                nav.gotoIndex(entry.getIndex());
+            }
+        });
     }
     
     @Override

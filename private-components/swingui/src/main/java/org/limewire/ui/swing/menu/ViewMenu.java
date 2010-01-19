@@ -11,7 +11,6 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventUtils;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
@@ -22,7 +21,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-class ViewMenu extends MnemonicMenu {
+class ViewMenu extends DelayedMnemonicMenu {
 
     private static final String visibleText = I18n.tr("Hide &Chat Window");
     private static final String notVisibleText = I18n.tr("Show &Chat Window");

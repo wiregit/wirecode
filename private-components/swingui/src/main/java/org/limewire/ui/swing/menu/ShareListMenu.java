@@ -9,7 +9,6 @@ import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventUtils;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.library.navigator.CreateListAction;
 import org.limewire.ui.swing.util.I18n;
@@ -17,7 +16,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class ShareListMenu extends MnemonicMenu {
+public class ShareListMenu extends DelayedMnemonicMenu {
 
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final Provider<SharedFileListManager> shareListManagerProvider;

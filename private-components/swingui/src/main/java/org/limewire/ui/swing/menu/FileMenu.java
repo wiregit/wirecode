@@ -3,6 +3,7 @@ package org.limewire.ui.swing.menu;
 import javax.swing.JMenu;
 import javax.swing.event.MenuListener;
 
+import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -10,7 +11,7 @@ import org.limewire.util.OSUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-class FileMenu extends MnemonicMenu {
+class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     private final JMenu recentDownloadsMenu;
     

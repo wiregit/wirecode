@@ -53,7 +53,7 @@ public class StoreMediator implements NavMediator<StorePanel> {
     }
     
     public void load(String url) {
-        if(canShowStoreButton()) {
+        if(canShowStoreMenu()) {
             navigator.getNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME).select();
             getComponent().load(url); 
         } else {
@@ -65,7 +65,7 @@ public class StoreMediator implements NavMediator<StorePanel> {
 	 * Returns true if the store button is visible or will become visible, 
      * false otherwise.
 	 */ 
-    public static boolean canShowStoreButton() {
+    public static boolean canShowStoreMenu() {
         return SwingUiSettings.SHOW_STORE_COMPONENTS.getValue() && MozillaInitialization.isInitialized();
     }
 }

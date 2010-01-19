@@ -16,14 +16,13 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
-class RecentDownloadsMenu extends MnemonicMenu {
+class RecentDownloadsMenu extends DelayedMnemonicMenu {
     private static final String emptyText = I18n.tr("(empty)");
     
     private final CategoryManager categoryManager;

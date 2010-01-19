@@ -149,7 +149,7 @@ public class SetupPage2 extends WizardPage {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         
         Icon myFilesIcon = null;
-        if (StoreMediator.canShowStoreButton()) {
+        if (StoreMediator.canShowStoreMenu()) {
             myFilesIcon = sharingMyFilesIcon;
         } else {
             myFilesIcon = sharingMyFilesNoStoreIcon;

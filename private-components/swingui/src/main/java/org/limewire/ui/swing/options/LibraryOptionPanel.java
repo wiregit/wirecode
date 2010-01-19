@@ -203,7 +203,7 @@ public class LibraryOptionPanel extends OptionPanel {
         private void addModifyInfo() {
             
             Icon myFilesIcon = null;
-            if (StoreMediator.canShowStoreButton()) {
+            if (StoreMediator.canShowStoreMenu()) {
                 myFilesIcon = sharingMyFilesIcon;
             } else {
                 myFilesIcon = sharingMyFilesNoStoreIcon;

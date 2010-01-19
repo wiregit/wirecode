@@ -12,7 +12,6 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -34,8 +33,6 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
@@ -70,7 +67,6 @@ import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
 import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
@@ -83,7 +79,6 @@ import com.google.inject.Singleton;
 class TopPanel extends JXPanel implements SearchNavigator {
     
     @Resource private Icon browseIcon;
-    @Resource private Icon storeIcon;
     
     private final JXButton friendButton;
     private final SearchBar searchBar;    
@@ -102,8 +97,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final Provider<AdvancedSearchPanel> advancedSearchPanel;
     private final SearchHandler searchHandler;
     private final HomeMediator homeMediator;
-    private final StoreMediator storeMediator;
-    private final ButtonDecorator buttonDecorator;
 
     private final String repeatSearchTitle = I18n.tr("Repeat Search");
     private final String refreshBrowseTitle = I18n.tr("Refresh");
@@ -112,10 +105,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @InspectablePrimitive(value = "maximum tab count", category = DataCategory.USAGE)
     private volatile long maxTabCount = 0;
 
-    private final AllFriendsRefreshManager allFriendsRefreshManager;        
-    
-    @InspectablePrimitive(value = "store visited", category = DataCategory.USAGE)
-    private int storeVisited;
+    private final AllFriendsRefreshManager allFriendsRefreshManager;    
     
     @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
     private int advancedSearches;
@@ -124,7 +114,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
                     final HomeMediator homeMediator,
-                    final StoreMediator storeMediator,
                     SearchBar searchBar,
                     FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
@@ -143,8 +132,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         this.advancedSearchPanel = advancedSearchPanel;
         this.homeMediator = homeMediator;
-        this.storeMediator = storeMediator;
-        this.buttonDecorator = buttonDecorator;
         this.allFriendsRefreshManager = allFriendsRefreshManager;        
         setName("WireframeTop");
         
@@ -176,26 +163,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapleft 5, gapbottom 2, gaptop 0");
-        if (StoreMediator.canShowStoreButton()) {
-            add(createStoreButton(), "gapleft 3, gapbottom 2, gaptop 0");
-        } else {
-        	// if the store button is not shown, add a listener in case the geo
-        	// needs to be updated.
-            SwingUiSettings.SHOW_STORE_COMPONENTS.addSettingListener(new SettingListener(){
-                @Override
-                public void settingChanged(SettingEvent evt) {
-                    if(StoreMediator.canShowStoreButton()) {
-                        SwingUtilities.invokeLater(new Runnable(){
-                            public void run() {
-                                JXButton storeButton = createStoreButton();
-                                add(storeButton, "cell 0 0, gapleft 3, gapbottom 2, gaptop 0");
-                                TopPanel.this.repaint();                                
-                            }
-                        });
-                    }
-                }
-            });
-        }
         add(friendButton, "gapleft 3, gapbottom 2, gaptop 0");
 
         add(searchBar, "gapleft 11, gapbottom 2, gaptop 1");
@@ -219,36 +186,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
             }
       });
-    }
-    
-    /**
-	 * Creates and initializes the store button and any
-     * necessary listeners/actions.
-	 */
-    private JXButton createStoreButton() {
-        NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StoreMediator.NAME, storeMediator);
-        JXButton storeButton = new SelectableJXButton(NavigatorUtils.getNavAction(storeNav));
-        
-        storeButton.setName("WireframeTop.storeButton");
-        storeButton.setIcon(storeIcon);
-        
-        storeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                storeVisited++;
-                if(storeMediator.getComponent().isVisible()) {
-                    storeMediator.getComponent().loadDefaultUrl();
-                } else {
-                    storeMediator.getComponent().loadCurrentUrl();
-                }
-            }
-        });
-        
-        storeButton.setText(I18n.tr("Store"));
-        buttonDecorator.decorateBasicHeaderButton(storeButton);
-        storeButton.setBorder(BorderFactory.createEmptyBorder(0,8,0,8));  
-        
-        return storeButton;
     }
     
     @Override

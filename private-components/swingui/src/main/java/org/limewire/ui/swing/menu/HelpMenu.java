@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.home.HomeMediator;
@@ -19,7 +20,7 @@ import org.limewire.util.OSUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-class HelpMenu extends MnemonicMenu {
+class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
 
     private final Application application;
     

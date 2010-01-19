@@ -9,6 +9,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.friends.actions.AddFriendAction;
 import org.limewire.ui.swing.friends.actions.BrowseFriendsAction;
@@ -21,7 +22,7 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-class FriendsMenu extends MnemonicMenu {
+class FriendsMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
    
     private final EventBean<FriendConnectionEvent> friendConnectionEventBean;
     private final Provider<AutoLoginService> autoLoginServiceProvider;
