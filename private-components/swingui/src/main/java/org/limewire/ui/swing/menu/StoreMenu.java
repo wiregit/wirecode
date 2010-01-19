@@ -75,7 +75,7 @@ class StoreMenu extends MnemonicMenu implements DelayedMenuItemCreator {
         genres.add(new StoreUrlAction(I18n.tr("&World"), "http://www.store.limewire.com/store/app/pages/genre/GenreHome/genreId/2/"));
         add(genres);
         
-        add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
+//        add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
         add(new StoreUrlAction(I18n.tr("LimeWire Store Hel&p"), "http://www.store.limewire.com/store/app/pages/help/Help/"));
         
         final JMenu history = new MnemonicMenu(I18n.tr("His&tory"));
