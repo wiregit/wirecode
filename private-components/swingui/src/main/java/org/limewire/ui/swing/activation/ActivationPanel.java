@@ -189,7 +189,14 @@ public class ActivationPanel {
         // fields and views before being shown.
         licenseField.setText(activationManager.getLicenseKey());
 
-        stateManager.setActivationState(activationManager.getActivationState(), activationManager.getActivationError());
+        // when we are initially opening the dialog don't show any error messages
+        // pertaining to fleeting states like communication errors or invalid keys
+        ActivationError error = ActivationError.NO_ERROR;
+        if (activationManager.getActivationError() != ActivationError.INVALID_KEY
+             && activationManager.getActivationError() != ActivationError.COMMUNICATION_ERROR) {
+            error = activationManager.getActivationError();
+        }
+        stateManager.setActivationState(activationManager.getActivationState(), ActivationError.NO_ERROR);
 
         dialog = new LimeJDialog();
         dialog.setModal(true);
@@ -215,7 +222,7 @@ public class ActivationPanel {
 //                    okButton.requestFocusInWindow();
             }
         }); 
-        
+
         dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         dialog.setVisible(true);
     }
