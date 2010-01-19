@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.text.SimpleDateFormat;
 
 import com.google.inject.Guice;
@@ -61,7 +62,7 @@ public class ActivationManagerTest extends LimeTestCase {
         return modules.toArray(new Module[modules.size()]);
     }
 
-    public void testGoodKeySuccessfulActivationWithServer() throws Exception {
+    public void testStartServiceSuccessfulActivationWithServer() throws Exception {
         
         String successfulLookupJson = "{\"response\":\"valid\",\"lid\":\"DAVVXXMEBWU3\"," +
                 "\"guid\":\"44444444444444444444444444444444\",\"refresh\":1440," +
@@ -113,7 +114,7 @@ public class ActivationManagerTest extends LimeTestCase {
         assertEquals("20100920", format.format(item.getDateExpired()));
     }
     
-    public void testInvalidKeyShouldNotEvenGoToServer() throws Exception {
+    public void testStartServiceInvalidKeyShouldNotEvenGoToServer() throws Exception {
         ActivationSettings.ACTIVATION_KEY.set("invalid Key");
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -125,6 +126,24 @@ public class ActivationManagerTest extends LimeTestCase {
         waitForActivationCompletion(activationManager, 5);
         assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
+        assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
+    }
+    
+    public void testStartServiceRetriesServerStaysDown() throws Exception {
+        ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
+        final AtomicInteger retriesCount = new AtomicInteger(0);
+        ActivationCommunicator comm = new ActivationCommunicator() {
+            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+                retriesCount.incrementAndGet();
+                throw new IOException("Server is down!");
+            }
+        };
+        ActivationManagerImpl activationManager = getActivationManager(comm);
+        activationManager.start();
+        waitForActivationCompletion(activationManager, 85);
+        assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
+        assertEquals(activationManager.getActivationError(), ActivationError.COMMUNICATION_ERROR);
+        assertEquals(5, retriesCount.get());
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
     }
     

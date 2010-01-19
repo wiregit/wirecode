@@ -21,23 +21,29 @@ import org.limewire.activation.api.ActivationItem;
  */
 public class ActivationResponse {
     
-    private static final String SUCCESSFUL_IS_VALID = "valid";
-    
+    public enum Type {
+        VALID,
+        NOTFOUND,
+        BLOCKED;
+    }
+        
     private final String jsonString;
     private final String lid;
-    private final String validFlag;
     private final String mcode;
     private final int refreshSeconds;
-    private final List<ActivationItem> activationItems; 
+    private final List<ActivationItem> activationItems;
+    private final Type type;
+    private final String message;
     
-    public ActivationResponse(String jsonString, String lid, String validFlag, String mcode, 
-                              int refreshSeconds, List<ActivationItem> activationItems) {
+    public ActivationResponse(String jsonString, String lid, Type type, String mcode, 
+                              int refreshSeconds, List<ActivationItem> activationItems, String message) {
         this.jsonString = jsonString;
         this.lid = lid;
-        this.validFlag = validFlag;
+        this.type = type;
         this.mcode = mcode;
         this.refreshSeconds = refreshSeconds;
         this.activationItems = Collections.unmodifiableList(new ArrayList<ActivationItem>(activationItems));
+        this.message = message;
     }
 
     public String getJSONString() {
@@ -48,8 +54,12 @@ public class ActivationResponse {
         return lid;
     }
     
-    public boolean isValidResponse() {
-        return (validFlag.equals(SUCCESSFUL_IS_VALID));
+    boolean isValidResponse() {
+        return type == Type.VALID;
+    }
+    
+    public Type getResponseType() {
+        return type;
     }
     
     public String getMCode() {
@@ -62,5 +72,9 @@ public class ActivationResponse {
     
     public List<ActivationItem> getActivationItems() {
         return activationItems;
+    }
+    
+    public String getMessage() {
+        return message;
     }
 }

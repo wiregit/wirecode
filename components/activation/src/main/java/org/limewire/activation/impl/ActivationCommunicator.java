@@ -18,6 +18,8 @@ public interface ActivationCommunicator {
      *
      * @param key key for activation
      * @return activation response data object from activation server.
+     * @throws java.io.IOException if the client is unable to contact the server
+     * @throws org.limewire.io.InvalidDataException if a problem occurs during parsing
      */
     public ActivationResponse activate(final String key) throws IOException, InvalidDataException;
 }

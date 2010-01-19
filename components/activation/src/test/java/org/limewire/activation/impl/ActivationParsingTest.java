@@ -177,6 +177,22 @@ public class ActivationParsingTest extends LimeTestCase {
         }
     }
     
+    public void testIdNotInActivationServer() throws Exception {
+        String json = "{\"lid\":\"DAVV-XXME-BWU3\",\"response\":\"notfound\",\"refresh\":0,\"message\":\"ID not found\"}";
+        ActivationResponse response = parser.createFromJson(json);
+        assertEquals(ActivationResponse.Type.NOTFOUND, response.getResponseType());
+        assertEquals(0, response.getActivationItems().size());
+        assertEquals("DAVV-XXME-BWU3", response.getLid());
+    }
+    
+    public void testIdBlockedForAbuse() throws Exception {
+        String json = "{\"response\":\"blocked\",\"lid\":\"DA6QCXY96HN2\",\"guid\":\"587D340C9C51080E5C16BE65EBF60F92\",\"duration\":\"0.001526\",\"installations\":5}";   
+        ActivationResponse response = parser.createFromJson(json);
+        assertEquals(ActivationResponse.Type.BLOCKED, response.getResponseType());
+        assertEquals(0, response.getActivationItems().size());
+        assertEquals("DA6QCXY96HN2", response.getLid());
+    }
+    
     // test Strings which are not JSON.
     //
     public void testNonJsonInputError() throws Exception {

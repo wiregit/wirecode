@@ -388,20 +388,31 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 return;
             }
             if (response != null) {
-                successfulResponse(response);
+                processActivationResponse(response);
             } else {
                 NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
             }
         }
         
-        private void successfulResponse(ActivationResponse response) {
+        private void processActivationResponse(ActivationResponse response) {
             // reset counter
             numAttempted = 0;
-            ACTIVATED_FROM_SERVER.enterState(response);
             
-            // reschedule next ping of activation server
-            refreshIntervalSeconds = response.getRefreshInterval();
-            activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+            // todo: maybe use enums to delegate logic, instead of if/else
+            if (response.getResponseType() == ActivationResponse.Type.VALID) {
+                ACTIVATED_FROM_SERVER.enterState(response);
+            } else if (response.getResponseType() == ActivationResponse.Type.NOTFOUND) {
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+            } else if (response.getResponseType() == ActivationResponse.Type.BLOCKED) {
+                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY);
+            }
+            
+            // reschedule next ping of activation server if necessary
+            long refreshVal = response.getRefreshInterval();
+            if (refreshVal > 0) {
+                refreshIntervalSeconds = refreshVal;
+                activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+            }
         }
     }
     
