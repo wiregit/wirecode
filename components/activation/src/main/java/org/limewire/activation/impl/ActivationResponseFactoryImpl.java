@@ -72,13 +72,38 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
     
     
     
-    interface ActivationResponseFactoryHelper {
-        ActivationResponse createFromJsonObject(String originalJson, 
-                                                JSONObject parentObj,
-                                                boolean loadedFromDisk) throws InvalidDataException;    
+    abstract class ActivationResponseFactoryHelper {
+        abstract ActivationResponse createFromJsonObject(String originalJson, 
+                                                         JSONObject parentObj,
+                                                         boolean loadedFromDisk) throws InvalidDataException;
+
+        List<ActivationItem> parseActivationItems(JSONObject parentObj,
+                                                  boolean loadedFromDisk) throws ParseException, JSONException {
+            List<ActivationItem> items = new ArrayList<ActivationItem>();
+            JSONArray array = parentObj.getJSONArray("modules");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+                int moduleId = Integer.parseInt(obj.getString("id"));
+                String moduleName = obj.getString("name");
+                String purchaseDate = obj.getString("pur");
+                String expDate = obj.getString("exp");
+                ActivationItem.Status status = ActivationItem.Status.valueOf(obj.getString("status").toUpperCase());
+
+                Date pur = formatter.parse(purchaseDate);
+                Date exp = formatter.parse(expDate);
+                ActivationItem item = null;
+                if (loadedFromDisk) {
+                    item = activationItemFactory.createActivationItem(moduleId, moduleName, pur, exp, status);
+                } else {
+                    item = activationItemFactory.createActivationItemFromDisk(moduleId, moduleName, pur, exp, status);
+                }
+                items.add(item);
+            }
+            return items;
+        }
     }
     
-    class ValidResponseFactory implements ActivationResponseFactoryHelper {
+    class ValidResponseFactory extends ActivationResponseFactoryHelper {
         @Override
         public ActivationResponse createFromJsonObject(String originalJson,
                                                        JSONObject parentObj,
@@ -88,27 +113,7 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 ActivationResponse.Type type = ActivationResponse.Type.VALID;
                 String mcode = parentObj.getString("mcode");
                 int refresh = parentObj.getInt("refresh");
-                List<ActivationItem> items = new ArrayList<ActivationItem>();
-                
-                JSONArray array = parentObj.getJSONArray("modules");
-                for (int i=0; i<array.length(); i++) {
-                    JSONObject obj = array.getJSONObject(i);
-                    int moduleId = Integer.parseInt(obj.getString("id"));
-                    String moduleName = obj.getString("name");
-                    String purchaseDate = obj.getString("pur");
-                    String expDate = obj.getString("exp");
-                    ActivationItem.Status status = ActivationItem.Status.valueOf(obj.getString("status").toUpperCase());
-                    
-                    Date pur = formatter.parse(purchaseDate);
-                    Date exp = formatter.parse(expDate);
-                    ActivationItem item = null;
-                    if(loadedFromDisk) {
-                        item = activationItemFactory.createActivationItem(moduleId, moduleName, pur, exp, status);
-                    } else {
-                        item = activationItemFactory.createActivationItemFromDisk(moduleId, moduleName, pur, exp, status);
-                    }
-                    items.add(item);
-                }
+                List<ActivationItem> items = parseActivationItems(parentObj, loadedFromDisk);
                 return new ActivationResponse(originalJson, lid, type, mcode, refresh, items, null);
             } catch (JSONException e) {
                 throw new InvalidDataException("Error parsing JSON String " + originalJson, e);
@@ -118,7 +123,7 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
         }
     }
     
-    class NotFoundResponseFactory implements ActivationResponseFactoryHelper {
+    class NotFoundResponseFactory extends ActivationResponseFactoryHelper {
         @Override
         public ActivationResponse createFromJsonObject(String originalJson,
                                                        JSONObject parentObj,
@@ -129,7 +134,6 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 String message = parentObj.has("message") ? parentObj.getString("message") : null;
                 String mcode = parentObj.has("mcode") ? parentObj.getString("mcode") : null;
                 int refresh = parentObj.has("refresh") ? parentObj.getInt("refresh") : 0;
-                
                 List<ActivationItem> items = Collections.emptyList();
 
                 return new ActivationResponse(originalJson, lid, type, mcode, refresh, items, message);
@@ -139,20 +143,23 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
         }
     }
     
-    class BlockedResponseFactory implements ActivationResponseFactoryHelper {
+    class BlockedResponseFactory extends ActivationResponseFactoryHelper {
         @Override
         public ActivationResponse createFromJsonObject(String originalJson,
                                                        JSONObject parentObj,
                                                        boolean loadedFromDisk) throws InvalidDataException {
             try {            
                 String lid = parentObj.getString("lid");
-                ActivationResponse.Type type = ActivationResponse.Type.BLOCKED;
                 String message = parentObj.has("message") ? parentObj.getString("message") : null;
-                List<ActivationItem> items = Collections.emptyList();
-
-                return new ActivationResponse(originalJson, lid, type, null, 0, items, message);
+                String mcode = parentObj.has("mcode") ? parentObj.getString("mcode") : null;
+                int refresh = parentObj.has("refresh") ? parentObj.getInt("refresh") : 0;
+                ActivationResponse.Type type = ActivationResponse.Type.BLOCKED;
+                List<ActivationItem> items = parseActivationItems(parentObj, loadedFromDisk);
+                return new ActivationResponse(originalJson, lid, type, mcode, refresh, items, message);
             } catch (JSONException e) {
                 throw new InvalidDataException("Error parsing JSON String " + originalJson, e);
+            } catch (ParseException e) {
+                throw new InvalidDataException("Invalid date in JSON String " + originalJson, e);
             }
         }
     }    
