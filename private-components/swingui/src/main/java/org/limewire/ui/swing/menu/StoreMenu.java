@@ -1,8 +1,10 @@
 package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -16,6 +18,7 @@ import org.limewire.ui.swing.browser.HistoryEntry;
 import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -87,8 +90,12 @@ class StoreMenu extends MnemonicMenu implements DelayedMenuItemCreator {
             }
             @Override
             public void menuSelected(MenuEvent e) {
-                for(HistoryEntry entry : storeMediator.getComponent().getHistory()) {
-                    history.add(new HistoryAction(entry));
+                AtomicReference<Integer> currentPosition = new AtomicReference<Integer>();
+                for(HistoryEntry entry : storeMediator.getComponent().getHistory(currentPosition)) {
+                    JMenuItem item = history.add(new HistoryAction(entry));
+                    if(entry.getIndex() == currentPosition.get()) {
+                        FontUtils.bold(item);
+                    }
                 }
             }
         });

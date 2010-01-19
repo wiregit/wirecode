@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JPanel;
 
@@ -59,8 +60,8 @@ public class StorePanel extends JPanel {
         });     
     }
     
-    public Iterable<HistoryEntry> getHistory() {
-        return browser.getHistory(10);
+    public Iterable<HistoryEntry> getHistory(AtomicReference<Integer> currentPosition) {
+        return browser.getHistory(10, currentPosition);
     }
     
     public void loadHistoryEntry(HistoryEntry entry) {

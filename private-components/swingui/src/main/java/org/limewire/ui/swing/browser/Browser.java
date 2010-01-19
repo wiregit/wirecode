@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JLabel;
 
@@ -79,7 +80,7 @@ public class Browser extends MozillaPanel {
      * Returns an Iterable of HistoryEntry items that can be used
      * to see what's previously been loaded in the browser.
      */
-    public Iterable<HistoryEntry> getHistory(final int maxEntries) {
+    public Iterable<HistoryEntry> getHistory(final int maxEntries, final AtomicReference<Integer> currentPosition) {
         try {
             return MozillaExecutor.mozSyncExec(new Callable<Iterable<HistoryEntry>>() {
                 @Override
@@ -91,6 +92,9 @@ public class Browser extends MozillaPanel {
                         for(int i = history.getCount() - 1; entries.size() < maxEntries && i >= 0; i--) {
                             nsIHistoryEntry entry = history.getEntryAtIndex(i, false);
                             entries.add(new HistoryEntry(i, entry));
+                        }
+                        if(currentPosition != null) {
+                            currentPosition.set(history.getIndex());
                         }
                     }
                     return entries;
