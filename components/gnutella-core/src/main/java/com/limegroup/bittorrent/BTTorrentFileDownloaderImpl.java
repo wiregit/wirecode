@@ -140,7 +140,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
             Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
             BTData btData = new BTDataImpl(torrentFileMap);
             try {
-                if (virusScanner.isSupported() &&
+                if (virusScanner.isEnabled() &&
                         virusScanner.isInfected(incompleteTorrentFile)) {
                     downloadStatus = DownloadState.THREAT_FOUND;
                     return false;

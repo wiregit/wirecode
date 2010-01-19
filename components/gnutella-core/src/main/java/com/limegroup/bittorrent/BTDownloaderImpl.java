@@ -218,7 +218,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * torrent, after stopping the download.
      */
     private boolean isInfectedOrDangerous() {
-        if(virusScanner.get().isSupported()) {
+        if(virusScanner.get().isEnabled()) {
             lastState.set(DownloadState.SCANNING);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.SCANNING));
             try {
@@ -247,7 +247,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * @return true if the file cannot be previewed.
      */
     private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
-        if(virusScanner.get().isSupported()) {
+        if(virusScanner.get().isEnabled()) {
             listener.scanStarted();
             try {
                 boolean infected = isInfected(fragment);
@@ -269,7 +269,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * Returns true if the given file is infected, after stopping the download.
      */
     private boolean isInfected(File file) throws VirusScanException {
-        if(virusScanner.get().isSupported() &&
+        if(virusScanner.get().isEnabled() &&
                 virusScanner.get().isInfected(file)) {
             lastState.set(DownloadState.THREAT_FOUND);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.THREAT_FOUND));

@@ -197,10 +197,10 @@ public class FilterSettings extends LimeProps {
         FACTORY.createLongSetting("NEXT_URN_BLACKLIST_UPDATE", 0L);
     
     /**
-     * Whether to enable the virus scanner.
+     * User setting to enable or disable the virus scanner.  This setting is only relevant if antivirus is activated. 
      */
-    public static final BooleanSetting USE_VIRUS_SCANNER =
-        FACTORY.createBooleanSetting("USE_VIRUS_SCANNER", true);
+    public static final BooleanSetting VIRUS_SCANNER_ENABLED =
+        FACTORY.createBooleanSetting("VIRUS_SCANNER_ENABLED", true);
     
     /**
      * Whether to enable the virus scanner for testing versions.

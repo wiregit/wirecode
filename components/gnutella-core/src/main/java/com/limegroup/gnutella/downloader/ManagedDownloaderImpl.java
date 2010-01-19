@@ -1866,7 +1866,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @return true if the file cannot be previewed.
      */
     private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
-        if(virusScanner.isSupported()) {
+        if(virusScanner.isEnabled()) {
             listener.scanStarted();
             try {
                 boolean infected = isInfected(fragment);
@@ -2029,7 +2029,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private DownloadState verifyAndSave() throws InterruptedException {
 
         // Scan the file for viruses
-        if(virusScanner.isSupported())
+        if(virusScanner.isEnabled())
             setState(DownloadState.SCANNING);
         DownloadState scanFailed = null;
         try {
@@ -2086,13 +2086,14 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * marking it as spam and deleting the file.
      */
     private boolean isInfected(File file) throws VirusScanException {
-        if(virusScanner.isSupported() && virusScanner.isInfected(file)) {
+        if(virusScanner.isEnabled() && virusScanner.isInfected(file)) {
             setState(DownloadState.THREAT_FOUND);
             // Mark the file as spam in future search results
             RemoteFileDesc[] type = new RemoteFileDesc[0];
             spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
             // Stop the download and delete the file
-            stop();
+            stop();                
+            library.remove(file);
             file.delete();
             return true;
         }

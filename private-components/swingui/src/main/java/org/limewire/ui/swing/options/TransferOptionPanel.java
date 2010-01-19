@@ -17,9 +17,12 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.malware.VirusEngine;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LabelTextField;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
@@ -28,6 +31,7 @@ import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
 
@@ -43,6 +47,10 @@ public class TransferOptionPanel extends OptionPanel {
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final TransferLimitsOptionPanel connectionsOptionPanel;
     private final BitTorrentOptionPanel bitTorrentOptionPanel;
+    private final VirusEngine virusEngine;    
+
+    //TODO: activation - URL needs to change
+    private final String avgUrl = "http://www.limewire.com/download/pro?p=avg";
 
     private DownloadsPanel downloadsPanel;
     private TrayPanel trayPanel;
@@ -52,11 +60,13 @@ public class TransferOptionPanel extends OptionPanel {
     public TransferOptionPanel(Provider<IconManager> iconManager,
             ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory,
             Provider<TransferLimitsOptionPanel> connectionOptionPanel,
-            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel) {
+            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel,
+            VirusEngine virusEngine) {
         this.iconManager = iconManager;
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.connectionsOptionPanel = connectionOptionPanel.get();
         this.bitTorrentOptionPanel = bitTorrentOptionPanel.get();
+        this.virusEngine = virusEngine;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap, gap 4"));
 
@@ -115,11 +125,13 @@ public class TransferOptionPanel extends OptionPanel {
         private final LabelTextField downloadSaveTextField;
         private final JButton browseSaveLocationButton;
         private final JCheckBox autoRenameDuplicateFilesCheckBox;
+        private final JCheckBox useAntivirusCheckBox;
         private final ManageSaveFoldersOptionPanel saveFolderPanel;
         private LWSFileNamingOptionPanel storeOptionPanel;
         private final JButton multiLocationConfigureButton;
         private final JRadioButton singleLocationButton;
         private final JRadioButton multiLocationButton;
+        private final HyperlinkButton buyAntivirusButton;
 
         public DownloadsPanel() {
             super(I18n.tr("Downloads"));
@@ -141,6 +153,18 @@ public class TransferOptionPanel extends OptionPanel {
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
 
+            useAntivirusCheckBox = new JCheckBox(I18n.tr("Scan files I download for viruses"));
+            useAntivirusCheckBox.setContentAreaFilled(false);
+            
+            //TODO: activation - text needs to change
+            buyAntivirusButton = new HyperlinkButton("Upgrade to scan files with AVG anti-virus");
+            buyAntivirusButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NativeLaunchUtils.openURL(avgUrl );
+                }
+            });
+
             add(singleLocationButton);
             add(downloadSaveTextField, "span, growx");
             add(browseSaveLocationButton, "wrap");
@@ -159,6 +183,7 @@ public class TransferOptionPanel extends OptionPanel {
             add(multiLocationConfigureButton, "wrap");
 
             add(autoRenameDuplicateFilesCheckBox, "wrap");
+            add(useAntivirusCheckBox, "hidemode 3, wrap");
 
             ActionListener downloadSwitchAction = new ActionListener() {
                 @Override
@@ -181,8 +206,9 @@ public class TransferOptionPanel extends OptionPanel {
             // can be used to purchase from the LWS
             if(SwingUiSettings.SHOW_STORE_COMPONENTS.get()) {
                 add(new JLabel(I18n.tr("Configure how LimeWire Store downloads are organized")));
-                add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))));
+                add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))), "wrap");
             }
+            add(buyAntivirusButton, "hidemode 3, wrap");
         }
 
         @Override
@@ -194,6 +220,16 @@ public class TransferOptionPanel extends OptionPanel {
 
             SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(autoRenameDuplicateFilesCheckBox
                     .isSelected());
+            
+            if(virusEngine.isSupported()){
+                if (useAntivirusCheckBox.isSelected() 
+                        && FilterSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()){
+                    //check for av updates if the user re-enabled the scanner.
+                    virusEngine.checkForUpdates();
+                }
+                FilterSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
+            }
+            
             final String save = downloadSaveTextField.getText();
             if (!save.equals(currentSaveDirectory)) {
                 try {
@@ -250,6 +286,7 @@ public class TransferOptionPanel extends OptionPanel {
                     || saveFolderPanel.hasChanged()
                     || singleLocationButton.isSelected()
                     && saveFolderPanel.isConfigCustom()
+                    ||FilterSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()
                     || SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox
                             .isSelected() || storeOptionPanel.hasChanged();
         }
@@ -258,6 +295,12 @@ public class TransferOptionPanel extends OptionPanel {
         public void initOptions() {
             autoRenameDuplicateFilesCheckBox
                     .setSelected(SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
+            
+            useAntivirusCheckBox.setSelected(FilterSettings.VIRUS_SCANNER_ENABLED.getValue());
+
+            useAntivirusCheckBox.setVisible(virusEngine.isSupported());
+            buyAntivirusButton.setVisible(!useAntivirusCheckBox.isVisible());
+            
             saveFolderPanel.initOptions();
 
             storeOptionPanel.initOptions();
