@@ -71,6 +71,10 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
             }
             
             super.insertString(offs, modifiedStringToInsert.toString(), a);
+            
+            if (getLength() > 14) {
+                remove(14, getLength()-14);
+            }
         }
     }
 
