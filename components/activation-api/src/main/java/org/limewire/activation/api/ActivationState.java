@@ -1,7 +1,10 @@
 package org.limewire.activation.api;
 
 /**
- * States the ActivationManager can cycle through.  
+ * States the ActivationManager can cycle through. These ActivationStates
+ * correspond directly to the state of a LicenseKey. This state has nothing
+ * to do with the state of a given Module that is associated with a given
+ * LicenseKey.
  */
 public enum ActivationState {
 

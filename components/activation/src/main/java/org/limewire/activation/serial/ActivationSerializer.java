@@ -9,7 +9,14 @@ import java.io.IOException;
  */
 public interface ActivationSerializer {
     
+    /**
+     * Reads the saved json response from disk and returns it. If no
+     * json String exists, returns null.
+     */
     public String readFromDisk() throws IOException;
     
+    /**
+     * Writes the json String to disk.
+     */
     public boolean writeToDisk(String jsonString) throws Exception;
 }

@@ -23,6 +23,7 @@ import org.limewire.setting.ActivationSettings;
 import org.limewire.util.Base32;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 
@@ -32,6 +33,7 @@ import com.google.inject.Inject;
 public class ActivationSerializerImpl implements ActivationSerializer {
 
     private static final String ENCRYPTION_ALGORITHM = "AES";
+    private static final CipherType CIPHER_TYPE = CipherType.AES;
     
     private static final Log LOG = LogFactory.getLog(ActivationSerializerImpl.class);
     
@@ -46,7 +48,7 @@ public class ActivationSerializerImpl implements ActivationSerializer {
 
     @Override
     public synchronized String readFromDisk() throws IOException {
-        if(!settings.getSaveFile().exists() && !settings.getSaveFile().exists())
+        if(!settings.getSaveFile().exists() && !settings.getBackupFile().exists())
             return null;
         
         Throwable exception;
@@ -66,10 +68,10 @@ public class ActivationSerializerImpl implements ActivationSerializer {
         
         try {
             in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(settings.getBackupFile())));
-            String line = (String) in.readObject();
-            return decrypt(line);
+            String encyrptedString = (String) in.readObject();
+            return decrypt(encyrptedString);
         } catch(Throwable ignored) {
-            LOG.warn("Error reading normal file.", ignored);
+            LOG.warn("Error reading backup file.", ignored);
         } finally {
             IOUtils.close(in);
         }
@@ -86,24 +88,33 @@ public class ActivationSerializerImpl implements ActivationSerializer {
         return FileUtils.writeWithBackupFile(encrypted, settings.getBackupFile(), settings.getSaveFile(), LOG);            
     }
     
+    /**
+     * Encrypts the given String.
+     */
     private String encrypt(String message) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
         String key = getEncryptionKey();
         SecretKeySpec keySpec = new SecretKeySpec(new BigInteger(key, 16).toByteArray(), ENCRYPTION_ALGORITHM);
 
-        byte[] bytes2 = cipherProvider.encrypt(message.getBytes("UTF-8"), keySpec, CipherType.AES);
-        return Base32.encode(bytes2);
+        byte[] encryptedBytes = cipherProvider.encrypt(StringUtils.toUTF8Bytes(message), keySpec, CIPHER_TYPE);
+        return Base32.encode(encryptedBytes);
     }
     
+    /**
+     * Decrypts the given String.
+     */
     private String decrypt(String encryptedString) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IOException {
         String key = getEncryptionKey();
         SecretKeySpec keySpec = new SecretKeySpec(new BigInteger(key, 16).toByteArray() , ENCRYPTION_ALGORITHM);
 
-        byte[] answer = cipherProvider.decrypt(Base32.decode(encryptedString), keySpec, CipherType.AES);
+        byte[] decryptedBytes = cipherProvider.decrypt(Base32.decode(encryptedString), keySpec, CIPHER_TYPE);
 
-        return new String(answer);
+        return new String(decryptedBytes);
     }
     
-    private synchronized String getEncryptionKey() {
+    /**
+     * Returns the encryption/decryption key.
+     */
+    private String getEncryptionKey() {
         String key = ActivationSettings.PASS_KEY.get();
         return key;
     }
