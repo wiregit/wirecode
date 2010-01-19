@@ -309,17 +309,17 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     private void setActivating(ActivationStateImpl state) {
         activationError = ActivationError.NO_ERROR;
-        listeners.broadcast(new ActivationEvent(getActivationState()));
         currentState = state;
+        listeners.broadcast(new ActivationEvent(getActivationState()));
     }
     
     private void setProvisionallyActivated(final ActivationResponse response, ActivationStateImpl state) {
         setActivationItems(response.getActivationItems());
         ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
         activationError = ActivationError.NO_ERROR;
-        listeners.broadcast(new ActivationEvent(getActivationState()));
         currentState = state;
         LimeWireUtils.setIsPro(isProActive());
+        listeners.broadcast(new ActivationEvent(getActivationState()));
     }
     
     private void setActivated(final ActivationResponse response, ActivationStateImpl state) {
@@ -336,12 +336,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
         ActivationSettings.ACTIVATION_KEY.set(response.getLid());
         ActivationSettings.M_CODE.set(response.getMCode());
-        setActivationItems(response.getActivationItems());
-        ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
-        activationError = ActivationError.NO_ERROR;
-        listeners.broadcast(new ActivationEvent(getActivationState()));
-        currentState = state;
-        LimeWireUtils.setIsPro(isProActive());
+        
+        setProvisionallyActivated(response, state);
     }
     
     private void setNotActivated(ActivationError error, ActivationStateImpl state) {
@@ -358,14 +354,14 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 }
             }
         });
-        activationError = error;
-        ActivationSettings.LAST_START_WAS_PRO.set(false);
-        ActivationSettings.M_CODE.set("");
         setActivationItems(Collections.<ActivationItem>emptyList());
-        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
+        ActivationSettings.LAST_START_WAS_PRO.set(false);
+        activationError = error;
+        ActivationSettings.M_CODE.set("");
         currentState = state;
-  
         LimeWireUtils.setIsPro(isProActive());
+        
+        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
     }
             
     private class ActivationResponseProcessor {
