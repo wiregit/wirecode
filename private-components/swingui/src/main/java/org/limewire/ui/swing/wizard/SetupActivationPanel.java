@@ -92,14 +92,13 @@ public class SetupActivationPanel extends JPanel {
         System.out.println("SetupActivationPanel; activation state: " + activationManager.getActivationState());
         switch(state) 
         {
-        case UNINITIALIZED:
-        case NOT_ACTIVATED:
+        case NOT_AUTHORIZED:
             iconPanel.showErrorIcon();
             return;
-        case ACTIVATING:
+        case AUTHORIZING:
             iconPanel.showBusyIcon();
             return;
-        case ACTIVATED:
+        case AUTHORIZED:
             iconPanel.showNoIcon();
             return;
         }

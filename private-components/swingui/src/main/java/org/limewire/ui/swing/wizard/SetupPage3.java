@@ -101,7 +101,7 @@ public class SetupPage3 extends WizardPage {
         public void handleEvent(final ActivationEvent event) {
             SwingUtilities.invokeLater(new Runnable(){
                 public void run() {
-                    if (event.getData() == ActivationState.ACTIVATED) {
+                    if (event.getData() == ActivationState.AUTHORIZED) {
                         removeAll();
                         add(new SetupActivationThankYouPanel(SetupPage3.this, activationManager.getActivationItems()));
 

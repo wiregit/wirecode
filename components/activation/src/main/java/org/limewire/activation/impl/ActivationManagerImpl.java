@@ -34,13 +34,67 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
     
+    
+//    /**
+//     * States the ActivationManager can cycle through. 
+//     * 
+//     * The state machine behaves this way:
+//     * 
+//     *       UNINITIALIZED
+//     *            @------------|
+//     *                         V  ACTIVATING
+//     *    |--------------------@---------------->@  ACTIVATED
+//     *    | ActivationError    ^
+//     *    V                    |
+//     *    @--------------------|
+//     *   NOT_ACTIVATED
+//     *   
+//     *   or
+//     *   
+//     *   PROVISIONALLY_ACTIVATED 
+//     *   
+//     */
+//    private enum ActivatorState {
+//        /**
+//         * State when program starts. If a key already exists it has not yet
+//         * attempted to contact the server. Once an activation is attempted,
+//         * this state can never be returned to unless the program is restarted.
+//         */
+//        UNINITIALIZED,
+//        
+//        /**
+//         * Same state as UNINITIALIZED except the server has already been contacted,
+//         * with the key information and has failed. Unless a new key is entered or the
+//         * user takes some action, the state will remain here.
+//         */
+//        NOT_ACTIVATED,
+//        
+//        /**
+//         * Same state as ACTIVATED except the server could not be contacted.
+//         * So, the last saved state was read from disk and we continue to 
+//         * try to contact the server to verify the client's activation.
+//         */
+//        PROVISIONALLY_ACTIVATED,
+//
+//        /**
+//         * ActivationManager is attempting to validate the key. If the key is valid,
+//         * this will transition to a ACTIVATED state or a NOT_ACTIVATED state.
+//         */
+//        ACTIVATING,
+//
+//        /**
+//         * ActivationManager has successfully authenticated the key for this session.
+//         */
+//        ACTIVATED;   
+//    }
+    
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
+    private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+    
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
 
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
-    
-    private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
@@ -320,7 +374,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
     
-    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.UNINITIALIZED);
+    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.NOT_AUTHORIZED);
     
     private class NotActivated extends ActivationStateImpl 
     {
@@ -352,7 +406,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
 
-    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_ACTIVATED);
+    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_AUTHORIZED);
     
     private class Activating extends ActivationStateImpl 
     {
@@ -367,7 +421,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
 
-    private final Activating ACTIVATING = new Activating(ActivationState.ACTIVATING);
+    private final Activating ACTIVATING = new Activating(ActivationState.AUTHORIZING);
 
     private class ActivatedFromCache extends ActivationStateImpl 
     {
@@ -389,7 +443,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
 
-    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.ACTIVATED);
+    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.AUTHORIZED);
 
     private class ActivatedFromServer extends ActivationStateImpl 
     {
@@ -419,7 +473,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
     
-    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.ACTIVATED);
+    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.AUTHORIZED);
 
     private volatile ActivationStateImpl currentState = UNINITIALIZED;
 

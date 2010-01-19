@@ -123,7 +123,7 @@ public class ActivationManagerTest extends LimeTestCase {
         ActivationManagerImpl activationManager = getActivationManager(comm);
         activationManager.start();
         waitForActivationCompletion(activationManager, 5);
-        assertEquals(activationManager.getActivationState(), ActivationState.NOT_ACTIVATED);
+        assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
     }
@@ -173,7 +173,7 @@ public class ActivationManagerTest extends LimeTestCase {
     }
         
     private boolean isTerminalState(ActivationState state) {
-        return (state == ActivationState.ACTIVATED || state == ActivationState.NOT_ACTIVATED);
+        return (state == ActivationState.AUTHORIZED || state == ActivationState.NOT_AUTHORIZED);
     }
     
 }

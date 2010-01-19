@@ -237,11 +237,10 @@ public class ActivationPanel {
      */
     private void setActivationState(ActivationState state) {
         if(selectedCard != null) {
-            cardMap.get(selectedCard).setActivationEnabled(state != ActivationState.ACTIVATING);
+            cardMap.get(selectedCard).setActivationEnabled(state != ActivationState.AUTHORIZING);
         }
         switch(state) {
-        case UNINITIALIZED:
-        case NOT_ACTIVATED:
+        case NOT_AUTHORIZED:
             editButton.setVisible(false);
             licenseKeyPanel.setEditable(true);
             warningPanel.setActivationMode(Mode.EMPTY);
@@ -249,7 +248,7 @@ public class ActivationPanel {
             setRefreshing(false);
             eventList.clear();
             return;
-        case ACTIVATING:
+        case AUTHORIZING:
             licenseTableInfoLabel.setVisible(false);
             if (!isRefreshing)
             {
@@ -268,7 +267,7 @@ public class ActivationPanel {
                 tableJXLayer.getGlassPane().setVisible(true);
                 return;
             }
-        case ACTIVATED:
+        case AUTHORIZED:
             editButton.setVisible(true);
             licenseKeyPanel.setEditable(false);
             warningPanel.setActivationMode(Mode.EMPTY);
@@ -482,7 +481,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            setActivationState(ActivationState.ACTIVATED);
+            setActivationState(ActivationState.AUTHORIZED);
         }
     }
     
