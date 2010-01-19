@@ -110,7 +110,7 @@ public class ActivationPanel {
     private void initComponents() {
         GuiUtils.assignResources(this);   
         
-        activationPanel = new JPanel(new MigLayout("debug, gap 0, fillx, insets 10 20 10 20"));
+        activationPanel = new JPanel(new MigLayout("gap 0, fillx, insets 10 20 10 20"));
 
         activationPanel.setBackground(GuiUtils.getMainFrame().getBackground());
         
