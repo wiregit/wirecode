@@ -120,7 +120,10 @@ public final class LimeWireUtils {
 	 */
 	private LimeWireUtils() {}
     
-	
+	/**
+     * Updates various settings when Pro is activated or 
+     * deactivated. 
+     */
 	public static void setIsPro(boolean isPro) {
 	    if(!isTestingVersion()) {
 	        if(isPro) {
@@ -142,7 +145,6 @@ public final class LimeWireUtils {
 	        else {
 	            HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
 	                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-//	            _isPro = true;
 	        }
 	}
 	
@@ -151,14 +153,6 @@ public final class LimeWireUtils {
 	 */
 	static {
 	    setHTTPVersion();
-//		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
-//			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
-//		}
-//		else {
-//			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
-//                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-////            _isPro = true;
-//		}
 	}
     
     /** Returns true if we're a beta. */
@@ -236,16 +230,7 @@ public final class LimeWireUtils {
         // in case this is a mainline version or NFE was caught (strange)
         return 2;
     }
-
-//    /**
-//     * Accessor for whether or not this is LimeWire pro.
-//     *
-//     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
-//     */
-//    public static boolean isPro() {
-//        return _isPro;
-//    }
-    
+   
     /**
      * Accessor for whether or not this is a testing version
      * (@version@) of LimeWire.

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.file.CategoryManager;
@@ -62,6 +63,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ScheduledExecutorService scheduler;
     private final CategoryManager categoryManager;
+    private final ActivationManager activationManager;
     
     /**
      * Maintain a map from downloader IDs to progress bar IDs, because the client sometimes
@@ -156,8 +158,9 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             DownloadServices downloadServices,
             LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
             RemoteFileDescFactory remoteFileDescFactory,
-            @Named("backgroundExecutor") ScheduledExecutorService scheduler, CategoryManager categoryManager) {
-        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.get(), categoryManager);
+            @Named("backgroundExecutor") ScheduledExecutorService scheduler, CategoryManager categoryManager,
+            ActivationManager activationManager) {
+        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.get(), categoryManager, activationManager);
     }    
     
     /** For testing. */
@@ -167,7 +170,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                                RemoteFileDescFactory remoteFileDescFactory,
                                ScheduledExecutorService scheduler,
                                String downloadPrefix,
-                               CategoryManager categoryManager) {
+                               CategoryManager categoryManager,
+                               ActivationManager activationManager) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
@@ -175,6 +179,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
         this.scheduler = scheduler;
         this.downloadPrefix = downloadPrefix;
         this.categoryManager = categoryManager;
+        this.activationManager = activationManager;
     }
     
     @Inject
@@ -491,7 +496,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 add(res, "service.version.number"   ,LimeWireUtils.getServiceVersionNumber());
                 add(res, "is.alpha.release"         ,LimeWireUtils.isAlphaRelease());
                 add(res, "is.beta.release"          ,LimeWireUtils.isBetaRelease());
-//                add(res, "is.pro"                   ,LimeWireUtils.isPro());
+                add(res, "is.pro"                   ,activationManager.isProActive());
                 add(res, "is.testing.version"       ,LimeWireUtils.isTestingVersion());
                 return res.toString();
             }

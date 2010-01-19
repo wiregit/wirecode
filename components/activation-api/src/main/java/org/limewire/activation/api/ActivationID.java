@@ -37,8 +37,6 @@ public enum ActivationID {
     
     /**
      * Returns an ActivationID for a given int.
-     * @param id
-     * @return
      */
     public static ActivationID getActivationID(int id) {
         switch(id) {

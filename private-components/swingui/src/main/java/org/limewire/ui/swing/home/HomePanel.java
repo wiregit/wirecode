@@ -53,7 +53,7 @@ public class HomePanel extends JXPanel {
     private int retryCount = 0;
     private boolean firstRequest = true;
     private long initialLoadTime = -1;
-    private boolean isPro = false;
+    private boolean isProLoadState = false;
 
     @Inject
     public HomePanel(Application application, final Navigator navigator, GnutellaConnectionManager gnutellaConnectionManager) {
@@ -124,7 +124,7 @@ public class HomePanel extends JXPanel {
     }
     
     @Inject void register(final ActivationManager activationManager) {        
-        isPro = activationManager.isProActive();
+        isProLoadState = activationManager.isProActive();
         
         gnutellaConnectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -149,8 +149,8 @@ public class HomePanel extends JXPanel {
     private void handleProStateChange(boolean currentState) {
         // if the homepanel is visible and pro was enabled or disabled,
         // try reloading the homepage
-        if(HomePanel.this.isVisible() && currentState != isPro) {
-            isPro = currentState;
+        if(HomePanel.this.isVisible() && currentState != isProLoadState) {
+            isProLoadState = currentState;
             reloadDefaultUrlIfPossibleAndNeeded();
         }
     }

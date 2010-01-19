@@ -452,7 +452,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
                     activationManager.isProActive(),
-//                    LimeWireUtils.isPro(),
                     style,
                     javaV);
 

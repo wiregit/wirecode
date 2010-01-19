@@ -9,6 +9,9 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Displays the ActivationPanel when selected.
+ */
 public class ActivationAction extends AbstractAction {
 
     private Provider<ActivationPanel> activationPanelProvider;

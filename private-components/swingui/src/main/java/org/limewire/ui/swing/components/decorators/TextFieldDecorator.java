@@ -67,9 +67,6 @@ public class TextFieldDecorator {
         decorateGeneral(field);
     }
     
-    public void decorateTextField(JTextField field, AccentType accent) {
-    }
-    
     /**
      * Applies the LimeWire look and feel to a password prompt text field, however allows the accent
      *  and border to be overridden for allowing it to blend in and be used on non default panels.

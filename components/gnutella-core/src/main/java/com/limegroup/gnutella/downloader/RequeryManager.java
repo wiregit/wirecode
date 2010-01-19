@@ -148,7 +148,6 @@ class RequeryManager implements DHTEventListener {
     /** Returns true if a query can be sent right now. */
     boolean canSendQueryNow() {
         // PRO users can always send the DHT query, but only Gnutella after activate.
-//        if(LimeWireUtils.isPro())
         if(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE))
             return canSendDHTQueryNow() || (activated && canSendQueryAfterActivate());
         else

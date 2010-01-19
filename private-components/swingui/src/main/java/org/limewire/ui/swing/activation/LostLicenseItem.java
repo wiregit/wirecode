@@ -17,11 +17,6 @@ public class LostLicenseItem implements ActivationItem {
     public Date getDatePurchased() {
         return null;
     }
-//
-//    @Override
-//    public String getFirstSupportedVersion() {
-//        return null;
-//    }
 
     @Override
     public String getLicenseName() {
@@ -42,10 +37,4 @@ public class LostLicenseItem implements ActivationItem {
     public Status getStatus() {
         return Status.UNAVAILABLE;
     }
-
-//    @Override
-//    public boolean isSubscription() {
-//        return false;
-//    }
-
 }
