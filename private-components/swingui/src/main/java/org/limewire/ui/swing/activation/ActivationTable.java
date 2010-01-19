@@ -123,85 +123,8 @@ class ActivationTable extends MouseableTable {
             }
             throw new IllegalStateException("Unknown column: " + column);
         }
-//
-//        @Override
-//        public Class getColumnClass(int column) {
-//            // TODO Auto-generated method stub
-//            return null;
-//        }
-//
-//        @Override
-//        public Comparator getColumnComparator(int column) {
-//            // TODO Auto-generated method stub
-//            return null;
-//        }
-        
     }
-    
-//    private class LicenseTest extends ComponentProvider<JXPanel> {
-//
-//        JXPanel panel;
-//        private JLabel nameLabel;
-//        private HyperlinkButton licenseButton;
-//        
-//        @Override
-//        protected void configureState(CellContext context) {
-//            getDefaultVisuals().configureVisuals(panel, context);
-////            System.out.println("\t" + context.getComponent().getForeground());
-//        }
-//
-//        @Override
-//        protected JXPanel createRendererComponent() { WrappingIconPanel pane;
-//            panel = new JXPanel(new MigLayout("fill, insets 0 5 0 5, hidemode 3")){
-//                @Override
-//                public void setForeground(Color bg) {
-//                    if(nameLabel != null)
-//                        nameLabel.setForeground(bg);
-////                    System.out.println("update " + bg);
-//                }
-//            };
-////            panel.setFocusP
-//            panel.setBorder(BorderFactory.createEmptyBorder());
-//            nameLabel = new JLabel();
-//            nameLabel.setBorder(BorderFactory.createEmptyBorder());
-//            nameLabel.setVisible(false);
-////            nameLabel.setFocusP
-//            licenseButton = new HyperlinkButton(I18n.tr("Lost your license?"));
-//            licenseButton.setVisible(false);
-//            
-//            
-//            panel.add(nameLabel);
-//            panel.add(licenseButton);
-//            
-//            return panel;
-//        }
-//
-//        @Override
-//        protected void format(CellContext context) {
-////            System.out.println(context.getComponent().getForeground());
-//            Object value = context.getValue();
-//            if(value instanceof ActivationItem) {
-//                nameLabel.setText(getText((ActivationItem) value));
-//                nameLabel.setVisible(true);
-//                nameLabel.setForeground(getForeground());
-//                licenseButton.setVisible(false);
-//                
-//            } else {
-//                nameLabel.setVisible(false);
-//                licenseButton.setVisible(false);
-//            }
-//        }
-//        
-//        private String getText(ActivationItem item) {
-//            if(item.isActiveVersion()) {
-//                return item.getLicenseName();
-//            } else {
-//                return "<html><s>" + item.getLicenseName() + "</s></html>";
-//            }
-//        }
-//
-//    }
-    
+
     private class LicenseTypeEditorRenderer extends TableRendererEditor {
 
         private final JLabel nameLabel;

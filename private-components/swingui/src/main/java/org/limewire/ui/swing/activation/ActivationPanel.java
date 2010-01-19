@@ -17,11 +17,14 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -38,11 +41,11 @@ import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
-import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -82,26 +85,24 @@ public class ActivationPanel {
     ColoredBusyLabel tableOverlayBusyLabel;
     private JLabel licenseKeyErrorLabel;
     private JLabel licenseTableErrorLabel;
-    private JLabel licenseTableInfoLabel;
-    private UnsupportedMessagePanel unsupportedMessagePanel;
+    private UnderneathModuleTableMessagePanel underneathModuleTableMessagePanel;
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
     private EventList<ActivationItem> eventList;
     
     Map<String, ButtonPanel> cardMap = new HashMap<String, ButtonPanel>();
-    private String selectedCard = null;
-    private boolean isRefreshing = false;
     
+    private final StateManager stateManager;
+
     @Inject
     public ActivationPanel(ActivationManager activationManager) {
         this.activationManager = activationManager;
         listener = new ActivationListener();
         
         eventList = new BasicEventList<ActivationItem>();
-        clearTable();
         
-        activationPanel = new JPanel(new MigLayout("fill, gap 0, insets 10 20 18 20"));
+        stateManager = new StateManager();
         
         initComponents();
     }
@@ -109,14 +110,16 @@ public class ActivationPanel {
     private void initComponents() {
         GuiUtils.assignResources(this);   
         
+        activationPanel = new JPanel(new MigLayout("gap 0, fillx, insets 10 20 10 20"));
+        
         activationPanel.setPreferredSize(new Dimension(width, height));
         activationPanel.setBackground(GuiUtils.getMainFrame().getBackground());
         
-        JLabel licenseKey = new JLabel(I18n.tr("License Key" + ":"));
-        licenseKey.setFont(font);
-        licenseKey.setForeground(fontColor);
+        JLabel licenseKeyLabel = new JLabel(I18n.tr("License Key" + ":"));
+        licenseKeyLabel.setFont(font);
+        licenseKeyLabel.setForeground(fontColor);
         
-        licenseField = new LicenseKeyTextField();
+        licenseField = new LicenseKeyTextField(25);
         licenseField.setFont(font);
         licenseField.setForeground(fontColor);
         licenseField.addActionListener(new ActivateAction("", ""));
@@ -128,28 +131,23 @@ public class ActivationPanel {
         
         editButton = new JButton(new EditAction());
         
-        licenseKeyErrorLabel = new JLabel(" ");
+        licenseKeyErrorLabel = new JLabel("This text is to allow miglayout to position this component.");
         licenseKeyErrorLabel.setFont(font);
         licenseKeyErrorLabel.setForeground(errorColor);
         
-        licenseTableErrorLabel = new JLabel();
+        licenseTableErrorLabel = new JLabel("This text is to allow miglayout to position this component.");
         licenseTableErrorLabel.setFont(font);
         licenseTableErrorLabel.setForeground(errorColor);
         
-        licenseTableInfoLabel = new JLabel(I18n.tr("Some modules have not been activated."));
-        licenseTableInfoLabel.setFont(font);
-        licenseTableInfoLabel.setForeground(Color.GRAY);
-        licenseTableInfoLabel.setVisible(areThereProblematicModules());
-        
-        unsupportedMessagePanel = new UnsupportedMessagePanel();
-        unsupportedMessagePanel.setVisible(false);
+        underneathModuleTableMessagePanel = new UnderneathModuleTableMessagePanel();
+        underneathModuleTableMessagePanel.setVisible(false);
         
         table = new ActivationTable(eventList);
         table.setFillsViewportHeight(true);
         JScrollPane scrollPane = new JScrollPane(table);
         tableJXLayer = new JXLayer<JComponent>(scrollPane);
-        scrollPane.setMinimumSize(new Dimension(350, 75 + eventList.size() * 29));
-        scrollPane.setPreferredSize(new Dimension(350, 75 + eventList.size() * 29));
+        scrollPane.setMinimumSize(new Dimension(350, 4 * 25));
+        scrollPane.setPreferredSize(new Dimension(350, 4 * 25));
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
         busyLabelPanel.add(Box.createVerticalStrut(10), "wrap");
@@ -161,23 +159,24 @@ public class ActivationPanel {
 
         activationPanel.add(licenseKeyErrorLabel, "skip 1, span, wrap");
         
-        activationPanel.add(licenseKey, "gapright 10");
-        activationPanel.add(licenseKeyPanel, "grow, push");
-        activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%");
-        activationPanel.add(editButton, "gapleft 40, wrap");
+        activationPanel.add(licenseKeyLabel, "gapright 10, growy 0");
+        activationPanel.add(licenseKeyPanel, "pushy, growy 0");
+        activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%, growy 0");
+        activationPanel.add(editButton, "gapleft 40, align 100% 50%, growy 0, wrap");
         
-        activationPanel.add(licenseTableErrorLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 3");
-        activationPanel.add(licenseTableInfoLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 0, wrap");
+        activationPanel.add(licenseTableErrorLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 0");
         
-        activationPanel.add(tableJXLayer, "span, grow, wrap, gapbottom 10");
+        activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, gpy 200, wrap");
         
-        //activationPanel.add(unsupportedMessagePanel, "hidemode 3, span, grow, wrap");
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 0, span, grow, wrap");
         
+        activationPanel.add(Box.createVerticalStrut(10), "hidemode 0, span, growy, wrap");
+
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         
-        activationPanel.add(cardPanel, "span, growx, wrap, gapbottom 20");
+        activationPanel.add(cardPanel, "span, growx, wrap");
     }
     
     @Inject
@@ -189,9 +188,9 @@ public class ActivationPanel {
         // Setting the ActivationState and ErrorState initialize all of the
         // fields and views before being shown.
         licenseField.setText(activationManager.getLicenseKey());
-        setActivationState(activationManager.getActivationState());
-        setActivationError(activationManager.getActivationError());
-        
+
+        stateManager.setActivationState(activationManager.getActivationState(), activationManager.getActivationError());
+
         dialog = new LimeJDialog();
         dialog.setModal(true);
         dialog.setResizable(false);
@@ -230,138 +229,7 @@ public class ActivationPanel {
             dialog = null;
         }
     }
-        
-    /**
-     * Updates the UI information based on the current state of the 
-     * ActivationManager.
-     */
-    private void setActivationState(ActivationState state) {
-        if(selectedCard != null) {
-            cardMap.get(selectedCard).setActivationEnabled(state != ActivationState.AUTHORIZING);
-        }
-        switch(state) {
-        case NOT_AUTHORIZED:
-            editButton.setVisible(false);
-            licenseKeyPanel.setEditable(true);
-            warningPanel.setActivationMode(Mode.EMPTY);
-            selectCard(NO_LICENSE_PANEL);
-            setRefreshing(false);
-            eventList.clear();
-            return;
-        case AUTHORIZING:
-            licenseTableInfoLabel.setVisible(false);
-            if (!isRefreshing)
-            {
-                editButton.setVisible(false);
-                licenseKeyPanel.setEditable(false);
-                warningPanel.setActivationMode(Mode.SPINNER);
-                if(selectedCard != null && !selectedCard.equals(NO_LICENSE_PANEL) && !selectedCard.equals(EDIT_PANEL)) {
-                    selectCard(NO_LICENSE_PANEL);
-                }
-                return;
-            }
-            else
-            {
-                eventList.clear();
-                tableOverlayBusyLabel.setBusy(true);
-                tableJXLayer.getGlassPane().setVisible(true);
-                return;
-            }
-        case AUTHORIZED:
-            editButton.setVisible(true);
-            licenseKeyPanel.setEditable(false);
-            warningPanel.setActivationMode(Mode.EMPTY);
-            selectCard(OK_PANEL);
-            
-            tableOverlayBusyLabel.setBusy(false);
-            tableJXLayer.getGlassPane().setVisible(false);
 
-            eventList.clear();
-            eventList.addAll(activationManager.getActivationItems());
-            
-            setRefreshing(false);
-            
-            licenseTableInfoLabel.setVisible(areThereProblematicModules());
-
-            return;
-        }
-        throw new IllegalStateException("Unknown state: " + state);
-    }
-    
-    private void setActivationError(ActivationError error) {
-        switch(error) {
-        case NO_ERROR:
-            setLicenseKeyErrorVisible(false);
-            setLicenseTableErrorVisible(false);
-            return;
-        case NO_KEY:
-            setLicenseKeyErrorVisible(false);
-            setLicenseTableErrorVisible(false);
-            return;
-        case EXPIRED_KEY:
-            licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
-            licenseTableErrorLabel.setForeground(errorColor);
-            setLicenseKeyErrorVisible(false);
-            setLicenseTableErrorVisible(true);
-            return;
-        case INVALID_KEY:
-            clearTable();
-            licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
-            setLicenseKeyErrorVisible(true);
-            setLicenseTableErrorVisible(false);
-            warningPanel.setActivationMode(Mode.WARNING);
-            return;
-        case BLOCKED_KEY:
-            clearTable();
-            licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
-            setLicenseKeyErrorVisible(true);
-            setLicenseTableErrorVisible(false);
-            warningPanel.setActivationMode(Mode.WARNING);
-            return;
-        case COMMUNICATION_ERROR:
-            licenseTableErrorLabel.setText(I18n.tr("There was an error refreshing. Please try again."));
-            licenseTableErrorLabel.setForeground(errorColor);
-            setLicenseKeyErrorVisible(false);
-            setLicenseTableErrorVisible(true);
-            return;
-        }
-        throw new IllegalStateException("Unknown state: " + error);
-    }
-    
-    private boolean areThereProblematicModules() {
-        for (ActivationItem item : activationManager.getActivationItems()) {
-            if (item.getStatus() != ActivationItem.Status.ACTIVE) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private void setRefreshing(boolean refreshing) {
-        if (refreshing) {
-            
-        } else {
-            tableOverlayBusyLabel.setBusy(false);
-            tableJXLayer.getGlassPane().setVisible(false);
-        }
-        this.isRefreshing = refreshing;
-    }
-    
-    private void clearTable() {
-        eventList.clear();
-        eventList.add(new LostLicenseItem());
-    }
-    
-    private void enterEditState() {
-        editButton.setVisible(false);
-        licenseKeyPanel.setEditable(true);
-        licenseField.requestFocusInWindow();
-        licenseField.selectAll();
-        warningPanel.setActivationMode(Mode.EMPTY);
-
-        selectCard(EDIT_PANEL);
-    }
-    
     private void selectCard(String card) {
         if(!cardMap.containsKey(card)) {
             if(card.equals(NO_LICENSE_PANEL)) {
@@ -378,17 +246,178 @@ public class ActivationPanel {
                 cardPanel.add(panel, card);
             }
         }
-        selectedCard = card;
+
         cardLayout.show(cardPanel, card);
     }
-    
-    private void setLicenseKeyErrorVisible(boolean isVisible) {
-        licenseKeyErrorLabel.setVisible(isVisible);
+
+    private class StateManager {
+        // unfortunately if the user presses the refresh button and there is an error due to a server communication problem
+        // we have to handle the error differently then we would if there was an error with a first time activation.
+        // so, we track whether the refresh button was pressed with this flag.
+        private boolean refreshing = false;
+        private boolean editingLicense = true;
+        private ActivationState state = ActivationState.NOT_AUTHORIZED;
+        private ActivationError error = ActivationError.NO_ERROR;
+
+        public void setRefreshing(boolean refreshing) {
+            this.refreshing = refreshing;
+        }
+
+        public void setEditingLicense(boolean editingLicense) {
+            editButton.setVisible(false);
+            licenseKeyPanel.setEditable(true);
+            licenseField.requestFocusInWindow();
+            licenseField.selectAll();
+            warningPanel.setActivationMode(Mode.EMPTY);
+            selectCard(EDIT_PANEL);
+
+            this.editingLicense = editingLicense;
+        }
+
+        public void setActivationState(ActivationState state, ActivationError error) {
+            this.state = state;
+           this.error = error;
+
+           if (state == ActivationState.AUTHORIZED) {
+               editingLicense = false;
+               refreshing = false;
+           }
+
+           // let's clear the event list used to populate the module table and repopulate it if we're activated
+           if (!refreshing) {
+               eventList.clear();
+           }
+
+           if (state == ActivationState.AUTHORIZED) {
+               eventList.addAll(activationManager.getActivationItems());
+           } else if ((state == ActivationState.NOT_AUTHORIZED && !refreshing)) {
+               eventList.add(new LostLicenseItem());
+           }
+
+           update();
+        }
+        
+        public void update() {
+            // here we go through row by row of the activation dialog controlling the visibility and state of individual gui components.
+
+            // row 1: error message for license key
+
+            // here we control the visibility and the text of the error message above the license key field.
+            boolean isLicenseKeyErrorLabelVisible = false;
+            if (error == ActivationError.INVALID_KEY) {
+                licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
+                isLicenseKeyErrorLabelVisible = true;
+            } else if (error == ActivationError.BLOCKED_KEY) {
+                licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
+                isLicenseKeyErrorLabelVisible = true;
+            }
+            licenseKeyErrorLabel.setVisible(isLicenseKeyErrorLabelVisible);
+            
+            // row 2: license field, icon panel, edit button
+            
+            // normally, we would make the license field editable if the state was uninitialized, not activated, or activating but not refreshing
+            // and it would not be editable if they were already activated or if they were activating b/c they hit the refresh button.
+            // but if the user hits the edit button, then this field becomes editable regardless of the activation state
+            
+            boolean isEditMode = editingLicense || state == ActivationState.NOT_AUTHORIZED
+                                  || (state == ActivationState.AUTHORIZING && !refreshing);
+            
+            // let's set whether the license should be shown as a text field or as a none editable label.
+            licenseKeyPanel.setEditable( isEditMode );
+
+            // let's set whether there is an icon next to the license field and whether it shows an error icon or a spinner
+            Mode warningPanelMode = Mode.EMPTY;
+            if (state == ActivationState.AUTHORIZING) {
+                if (!refreshing) {
+                    warningPanelMode = Mode.SPINNER;
+                }
+            } else if (state == ActivationState.NOT_AUTHORIZED) {
+                if (error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY) {
+                    warningPanelMode = Mode.WARNING;
+                }
+            }
+            warningPanel.setActivationMode(warningPanelMode);
+
+            // let's set the visibility of the edit button next to the license field
+            editButton.setVisible( !isEditMode );
+
+            // row 3: error message for module table
+
+            // here we control the visibility and the text of the error message above the module table
+            boolean isLicenseTableErrorLabelVisible = false;
+            if (error == ActivationError.EXPIRED_KEY) {
+                licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
+                isLicenseTableErrorLabelVisible = true;
+            } else if (refreshing && error == ActivationError.COMMUNICATION_ERROR) {
+                licenseTableErrorLabel.setText(I18n.tr("There was an error refreshing. Please try again."));
+                isLicenseTableErrorLabelVisible = true;
+            }
+            licenseTableErrorLabel.setVisible(isLicenseTableErrorLabelVisible);
+
+            // row 4: the module table
+
+            // here we set whether the busy spinner should show over the module table b/c we're refreshing the module list.
+            if (state == ActivationState.AUTHORIZING && refreshing) {
+                tableOverlayBusyLabel.setBusy(true);
+                tableJXLayer.getGlassPane().setVisible(true);
+            } else {
+                tableOverlayBusyLabel.setBusy(false);
+                tableJXLayer.getGlassPane().setVisible(false);
+            }
+
+            // row 5: the info message below the module table
+            
+            // here we control the visibility and the text of the error message that appears below the module table
+            boolean isUnderneathModuleTableMessagePanelVisible = false;
+// TODO implement the blocked modules method
+/*            if (areThereBlockedModules()) {
+                underneathModuleTableMessagePanel.showBlockedModulesMessage();
+                isUnderneathModuleTableMessagePanelVisible = true;
+            } else
+*/ 
+            if (areThereNonFunctionalModules()) {
+                underneathModuleTableMessagePanel.showUnsupportedModulesMessage();
+                isUnderneathModuleTableMessagePanelVisible = true;
+            }
+            underneathModuleTableMessagePanel.setVisible(isUnderneathModuleTableMessagePanelVisible);
+            
+            // row 6: the button panel
+            
+            // let's set which panel of buttons is showing underneath the module table
+            String cardName = NO_LICENSE_PANEL;
+            if (state == ActivationState.AUTHORIZED) {
+                if (isEditMode) {
+                    cardName = EDIT_PANEL;
+                } else {
+                    cardName = OK_PANEL;
+                }
+            } else if (refreshing) {
+                cardName = OK_PANEL;
+            }
+            
+            selectCard(cardName);
+
+            activationPanel.repaint();
+        }
+        
+        private boolean areThereExpiredModules() {
+            for (ActivationItem item : activationManager.getActivationItems()) {
+                if (item.getStatus() == ActivationItem.Status.EXPIRED) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean areThereNonFunctionalModules() {
+            for (ActivationItem item : activationManager.getActivationItems()) {
+                if (item.getStatus() == ActivationItem.Status.UNAVAILABLE || item.getStatus() == ActivationItem.Status.UNUSEABLE_LW || item.getStatus() == ActivationItem.Status.UNUSEABLE_OS) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
-    
-    private void setLicenseTableErrorVisible(boolean isVisible) {
-        licenseTableErrorLabel.setVisible(isVisible);
-    }   
     
     private abstract class ButtonPanel extends JPanel {
         
@@ -452,11 +481,50 @@ public class ActivationPanel {
         }
     }
     
-    private class UnsupportedMessagePanel extends JPanel {
-        public UnsupportedMessagePanel() {
-            
-            add(new JLabel(unsupportedIcon), "aligny 50%, spany");
-            add(new MultiLineLabel(I18n.tr("You're current version of LimeWire does not support one or more of your purchased features.")),"grow");
+    private class UnderneathModuleTableMessagePanel extends JPanel {
+        JEditorPane textLabel;
+        
+        public UnderneathModuleTableMessagePanel() {
+            showUnsupportedModulesMessage();
+        }
+
+        public void showUnsupportedModulesMessage() {
+            removeAll();
+            setLayout(new MigLayout("insets 0 0 10 0, gap 0", "[]", "[]"));
+            setOpaque(false);
+            add(new JLabel(unsupportedIcon), "align 0% 0%, split");
+            textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("One or more of your licenses is currently not supported. For more help please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a></html>");
+            textLabel.setEditable(false);
+            textLabel.setOpaque(false);
+            textLabel.addHyperlinkListener(new HyperlinkListener() {
+                @Override
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        NativeLaunchUtils.openURL(e.getURL().toExternalForm());
+                    }
+                }
+            });
+            add(textLabel,"align 0% 0%");
+        }
+
+        public void showBlockedModulesMessage() {
+            removeAll();
+            setLayout(new MigLayout("insets 0 0 10 0, gap 0", "[]", "[]"));
+            setOpaque(false);
+            add(new JLabel(unsupportedIcon), "align 0% 0%, split");
+            textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("Oh no! It appears that your license key has been subject to abuse. Please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a>" 
+                                        + I18n.tr(" to resolve the situation.") + "</html>");
+            textLabel.setEditable(false);
+            textLabel.setOpaque(false);
+            textLabel.addHyperlinkListener(new HyperlinkListener() {
+                @Override
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        NativeLaunchUtils.openURL(e.getURL().toExternalForm());
+                    }
+                }
+            });
+            add(textLabel,"align 0% 0%");
         }
     }
     
@@ -469,7 +537,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            enterEditState();
+            stateManager.setEditingLicense(true);
         }
     }
     
@@ -481,7 +549,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            setActivationState(ActivationState.AUTHORIZED);
+            stateManager.setActivationState(ActivationState.AUTHORIZED, ActivationError.NO_ERROR);
         }
     }
     
@@ -505,7 +573,7 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            ActivationPanel.this.isRefreshing = true;
+            stateManager.setRefreshing(true);
             activationManager.activateKey(licenseField.getText().trim().replaceAll("-", ""));
         }
     }
@@ -515,8 +583,7 @@ public class ActivationPanel {
         public void handleEvent(final ActivationEvent event) {
             SwingUtilities.invokeLater(new Runnable(){
                 public void run() {
-                    setActivationState(event.getData());
-                    setActivationError(event.getError());                  
+                    stateManager.setActivationState(event.getData(), event.getError());
                 }
             });
         }

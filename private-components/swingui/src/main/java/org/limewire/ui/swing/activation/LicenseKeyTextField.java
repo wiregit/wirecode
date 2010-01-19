@@ -28,6 +28,13 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
         TextFieldClipboardControl.install(this);
     }
     
+    @Inject
+    public LicenseKeyTextField(int columns) {
+        super(columns);
+        
+        TextFieldClipboardControl.install(this);
+    }
+
     @Override
     protected Document createDefaultModel() {
         return new LicenseKeyDocument();
