@@ -29,6 +29,15 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
     
     @Override
     public ActivationResponse createFromJson(String json) throws InvalidDataException {
+        return createJson(json, false);
+    }
+
+    @Override
+    public ActivationResponse createFromDiskJson(String json) throws InvalidDataException {
+        return createJson(json, true);
+    }
+    
+    private ActivationResponse createJson(String json, boolean loadedFromDisk) throws InvalidDataException {
         
         JSONTokener tokener = new JSONTokener(json);
         try {
@@ -50,8 +59,12 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 
                 Date pur = formatter.parse(purchaseDate);
                 Date exp = formatter.parse(expDate);
-                ActivationItem item = activationItemFactory.createActivationItem(moduleId, 
-                    moduleName, pur, exp, status);
+                ActivationItem item;
+                if(loadedFromDisk) {
+                    item = activationItemFactory.createActivationItem(moduleId, moduleName, pur, exp, status);
+                } else {
+                    item = activationItemFactory.createActivationItemFromDisk(moduleId, moduleName, pur, exp, status);
+                }
                 items.add(item);
             }
             return new ActivationResponse(json, lid, response, mcode, refresh, items);

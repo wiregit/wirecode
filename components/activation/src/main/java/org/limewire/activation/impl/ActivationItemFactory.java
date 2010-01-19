@@ -9,4 +9,7 @@ public interface ActivationItemFactory {
 
     public ActivationItem createActivationItem(int intID, String licenseName, Date datePurchased, Date dateExpired,
             Status currentStatus);    
+    
+    public ActivationItem createActivationItemFromDisk(int intID, String licenseName, Date datePurchased,
+            Date dateExpired, Status currentStatus);
 }

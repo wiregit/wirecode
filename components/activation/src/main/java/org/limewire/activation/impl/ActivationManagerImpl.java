@@ -259,7 +259,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 try {
                     String jsonString = activationSerializer.readFromDisk();
                     if(jsonString != null && jsonString.length() > 0) {
-                        ActivationResponse response = activationResponseFactory.createFromJson(jsonString);
+                        ActivationResponse response = activationResponseFactory.createFromDiskJson(jsonString);
                         ACTIVATED_FROM_CACHE.enterState(response);
                     }
                 } catch (IOException e) {

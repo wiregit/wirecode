@@ -12,4 +12,11 @@ public interface ActivationResponseFactory {
      * the String is not a valid json String an InvalidDataException will be thrown.
      */
     public ActivationResponse createFromJson(String json) throws InvalidDataException;
+    
+    /** 
+     * Takes a json String that was saved on disk from the last startup and 
+     * attempts to parse it into an ActivationRepsonse. If the String is not 
+     * a valid json String an InvalidDataException will be thrown.
+     */
+    public ActivationResponse createFromDiskJson(String json) throws InvalidDataException;
 }

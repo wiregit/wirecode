@@ -12,14 +12,14 @@ import com.limegroup.gnutella.search.QuerySettings;
 public class ActivationTestImpl implements ActivationTest {
 
     private final QuerySettings querySetting;
-    private final ManagedDownloader managedDownloader;
+//    private final ManagedDownloader managedDownloader;
     private final ConnectionManager connectionManager;
     
     @Inject
     public ActivationTestImpl(QuerySettings querySetting, ManagedDownloader managedDownloader,
             ConnectionManager connectionManager) {
         this.querySetting = querySetting;
-        this.managedDownloader = managedDownloader;
+//        this.managedDownloader = managedDownloader;
         this.connectionManager = connectionManager;
     }
 

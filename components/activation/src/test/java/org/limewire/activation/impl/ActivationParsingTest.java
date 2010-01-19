@@ -9,6 +9,7 @@ import org.limewire.io.InvalidDataException;
 
 /**
  * Unit test for {@link org.limewire.activation.impl.ActivationItemFactory}
+ * TODO: test loading from disk with expired time
  */
 public class ActivationParsingTest extends LimeTestCase {
 

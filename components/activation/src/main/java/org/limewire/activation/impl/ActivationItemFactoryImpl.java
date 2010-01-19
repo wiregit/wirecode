@@ -15,4 +15,10 @@ public class ActivationItemFactoryImpl implements ActivationItemFactory {
             Date dateExpired, Status currentStatus) {
         return new ActivationItemImpl(intID, licenseName, datePurchased, dateExpired, currentStatus);
     }
+    
+    @Override
+    public ActivationItem createActivationItemFromDisk(int intID, String licenseName, Date datePurchased,
+            Date dateExpired, Status currentStatus) {
+        return new ActivationItemImpl(intID, licenseName, datePurchased, dateExpired, currentStatus, true);
+    }
 }
