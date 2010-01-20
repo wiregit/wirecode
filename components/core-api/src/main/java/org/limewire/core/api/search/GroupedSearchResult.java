@@ -24,19 +24,18 @@ public interface GroupedSearchResult {
     void removeResultListener(GroupedSearchResultListener listener);
     
     /**
-     * Returns an indicator that determines if the item is from an anonymous
-     * source.
+     * Returns true if at least one source is anonymous (not a friend).
      */
     boolean isAnonymous();
     
     /**
-     * Returns a list of core SearchResult values associated with this visual 
-     * result.
+     * Returns the complete file name including extension.
      */
-    List<SearchResult> getCoreSearchResults();
+    String getFileName();
     
     /**
-     * Returns a Collection of friends that are sources for the item.
+     * Returns a Collection of friends that are sources for the item.  The
+     * method returns an empty collection if there are no friends.
      */
     Collection<Friend> getFriends();
     
@@ -44,6 +43,12 @@ public interface GroupedSearchResult {
      * Returns the relevance value of the search result.  
      */
     float getRelevance();
+    
+    /**
+     * Returns a list of SearchResult values associated with this grouped 
+     * result.
+     */
+    List<SearchResult> getSearchResults();
     
     /**
      * Returns a Collection of sources that support the search result.  Each

@@ -9,14 +9,14 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.inject.EagerSingleton;
+import org.limewire.inject.LazySingleton;
 
 import com.google.inject.Inject;
 
 /**
  * Implementation of SearchManager for the live core.
  */
-@EagerSingleton
+@LazySingleton
 public class CoreSearchManager implements SearchManager {
 
     private final List<SearchResultList> threadSafeSearchList;
@@ -40,8 +40,7 @@ public class CoreSearchManager implements SearchManager {
     @Override
     public void removeSearch(Search search) {
         // Dispose of result list and remove from collection.
-        for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
-            SearchResultList resultList = iter.next();
+        for (SearchResultList resultList : threadSafeSearchList) {
             if (search.equals(resultList.getSearch())) {
                 resultList.dispose();
                 threadSafeSearchList.remove(resultList);
@@ -55,8 +54,7 @@ public class CoreSearchManager implements SearchManager {
         List<Search> list = new ArrayList<Search>();
         
         // Add active searches to list.
-        for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
-            SearchResultList resultList = iter.next();
+        for (SearchResultList resultList : threadSafeSearchList) {
             if (resultList.getGuid() != null) {
                 list.add(resultList.getSearch());
             }

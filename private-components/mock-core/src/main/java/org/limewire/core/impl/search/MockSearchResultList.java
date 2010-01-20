@@ -159,8 +159,8 @@ class MockSearchResultList implements SearchResultList {
         }
 
         @Override
-        public List<SearchResult> getCoreSearchResults() {
-            return Collections.emptyList();
+        public String getFileName() {
+            return null;
         }
 
         @Override
@@ -171,6 +171,11 @@ class MockSearchResultList implements SearchResultList {
         @Override
         public float getRelevance() {
             return 0;
+        }
+
+        @Override
+        public List<SearchResult> getSearchResults() {
+            return Collections.emptyList();
         }
 
         @Override

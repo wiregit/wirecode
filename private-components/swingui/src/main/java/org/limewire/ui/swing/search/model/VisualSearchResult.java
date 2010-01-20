@@ -17,6 +17,12 @@ import org.limewire.ui.swing.nav.NavSelectable;
  */
 public interface VisualSearchResult extends NavSelectable, PropertiableFile, FilterableItem {
 
+    /** Name for new sources property change event. */
+    public static final String NEW_SOURCES = "new-sources";
+    
+    /** Name for similarity parent property change event. */
+    public static final String SIMILARITY_PARENT = "similarityParent";
+    
     /**
      * Returns a list of core SearchResult values associated with this visual 
      * result.

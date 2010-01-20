@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.search.model;
 
+import static org.limewire.ui.swing.search.model.VisualSearchResult.NEW_SOURCES;
+import static org.limewire.ui.swing.search.model.VisualSearchResult.SIMILARITY_PARENT;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -379,11 +382,11 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
-        if ("new-sources".equals(propertyName)) {
+        if (NEW_SOURCES.equals(propertyName)) {
             // Notify change listeners about new sources.  This event is
             // handled by the grouping listener to update similar results.
             for (VisualSearchResultStatusListener listener : changeListeners) {
-                listener.resultChanged(vsr, "new-sources", null, null);
+                listener.resultChanged(vsr, NEW_SOURCES, null, null);
             }
             
         } else {
@@ -405,7 +408,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             }
             
             // Reapply sort when similarity parent changed.
-            if ("similarityParent".equals(propertyName) && sortedResultList != null) {
+            if (SIMILARITY_PARENT.equals(propertyName) && sortedResultList != null) {
                 sortedResultList.setComparator(sortedResultList.getComparator());
             }
         }

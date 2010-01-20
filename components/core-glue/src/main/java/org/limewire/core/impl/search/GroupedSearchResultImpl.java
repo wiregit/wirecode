@@ -19,9 +19,8 @@ import org.limewire.util.Objects;
 
 /**
  * An implementation of GroupedSearchResult for grouping search results.  The
- * instance values in GroupedSearchResultImpl may be updated in a background
- * thread as search results are received, and retrieved by the UI or REST 
- * threads.
+ * instance values in GroupedSearchResultImpl are updated in a background
+ * thread as search results are received.
  */
 class GroupedSearchResultImpl implements GroupedSearchResult {
 
@@ -31,8 +30,8 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
     private final List<GroupedSearchResultListener> resultListeners;
     private final Set<RemoteHost> remoteHosts;
     
-    private List<SearchResult> coreResults;
-    private Set<Friend> friends;
+    private volatile List<SearchResult> coreResults;
+    private volatile Set<Friend> friends;
     private volatile boolean anonymous;
     private volatile float relevance = 0;    
     
@@ -48,7 +47,9 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
 
     /**
      * Adds the specified search result to the grouping.  The specified query
-     * text is used to adjust the relevance score.
+     * text is used to adjust the relevance score.  This method is only called 
+     * by CoreSearchResultList after a write lock is obtained on the parent 
+     * list.
      */
     void addNewSource(SearchResult result, String query) {
         // Optimize for only having a single result.
@@ -89,7 +90,8 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
     }
     
     /**
-     * Notifies result listeners that new sources have been added.
+     * Notifies result listeners that new sources have been added.  This method
+     * is usually called by a background thread when sources are added.
      */
     void notifyNewSource() {
         for (GroupedSearchResultListener listener : resultListeners) {
@@ -111,10 +113,10 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
     public boolean isAnonymous() {
         return anonymous;
     }
-    
+
     @Override
-    public List<SearchResult> getCoreSearchResults() {
-        return coreResults;
+    public String getFileName() {
+        return coreResults.get(0).getFileName();
     }
 
     @Override
@@ -133,17 +135,18 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
     public float getRelevance() {
         return relevance;
     }
+    
+    @Override
+    public List<SearchResult> getSearchResults() {
+        return coreResults;
+    }
 
     @Override
     public Collection<RemoteHost> getSources() {
-        if (remoteHosts.size() == 0) {
-            return Collections.<RemoteHost>emptySet();
-        } else {
-            // Create sorted set of sources.
-            Set<RemoteHost> sources = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
-            sources.addAll(remoteHosts);
-            return sources;
-        }
+        // Create sorted set of sources.
+        Set<RemoteHost> sources = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
+        sources.addAll(remoteHosts);
+        return sources;
     }
 
     @Override

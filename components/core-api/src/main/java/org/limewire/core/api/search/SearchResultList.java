@@ -10,7 +10,8 @@ import ca.odell.glazedlists.EventList;
 public interface SearchResultList {
 
     /**
-     * Returns the GUID associated with the search.
+     * Returns the GUID associated with the search.  May be null if the search
+     * has not started, or if the search is a browse.
      */
     GUID getGuid();
     
@@ -20,7 +21,7 @@ public interface SearchResultList {
     int getResultCount();
     
     /**
-     * Returns the search associated with this list.
+     * Returns the search associated with this list.  Never null.
      */
     Search getSearch();
     

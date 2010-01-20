@@ -27,7 +27,8 @@ public interface SearchManager {
     List<Search> getActiveSearches();
     
     /**
-     * Returns the result list for the specified search.
+     * Returns the result list for the specified search.  The method returns 
+     * null if there is no list associated with the search.
      */
     SearchResultList getSearchResultList(Search search);
 }

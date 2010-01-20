@@ -86,7 +86,7 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
 
     @Override
     public List<SearchResult> getCoreSearchResults() {
-        return groupedSearchResult.getCoreSearchResults();
+        return groupedSearchResult.getSearchResults();
     }
 
     @Override
@@ -96,7 +96,7 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
     
     @Override
     public String getFileName() {
-        return getCoreSearchResults().get(0).getFileName();
+        return groupedSearchResult.getFileName();
     }
     
     @Override
@@ -156,7 +156,7 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
     public void setSimilarityParent(VisualSearchResult parent) {
         VisualSearchResult oldParent = this.similarityParent;
         this.similarityParent = parent;
-        firePropertyChange("similarityParent", oldParent, parent);
+        firePropertyChange(SIMILARITY_PARENT, oldParent, parent);
     }
 
     @Override
@@ -345,7 +345,7 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
         SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
-                firePropertyChange("new-sources");
+                firePropertyChange(NEW_SOURCES);
             }
         });
     }

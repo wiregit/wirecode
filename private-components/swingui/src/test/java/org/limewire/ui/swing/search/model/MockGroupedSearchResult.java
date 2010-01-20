@@ -23,7 +23,7 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     }
 
     @Override
-    public List<SearchResult> getCoreSearchResults() {
+    public String getFileName() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -38,6 +38,12 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     public float getRelevance() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public List<SearchResult> getSearchResults() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
