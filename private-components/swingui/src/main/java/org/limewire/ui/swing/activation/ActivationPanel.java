@@ -506,7 +506,7 @@ public class ActivationPanel {
             textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("One or more of your licenses is currently not supported. For more help please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a></html>");
             textLabel.setEditable(false);
             textLabel.setOpaque(false);
-            textLabel.setPreferredSize(new Dimension(width - 75, 50));
+            textLabel.setPreferredSize(new Dimension(440 - 25, 50));
 //            textLabel.setMaximumSize(new Dimension(width-75, 10000));
 //            // TODO calculate the pixel width of the translated text, divide it by (width-75) and set the height by multiplying the result by 15.
 //            textLabel.setPreferredSize(new Dimension(width-75, 30));
@@ -519,7 +519,7 @@ public class ActivationPanel {
                     }
                 }
             });
-            add(textLabel,"growx");//"align 0% 0%");
+            add(textLabel, "growx");//"align 0% 0%");
         }
 
         public void showBlockedModulesMessage() {
