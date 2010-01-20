@@ -572,6 +572,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }
         @Override
         public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }
+        @Override
+        public void refreshKey(String key) {}
     }
 
 }

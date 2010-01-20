@@ -88,4 +88,10 @@ public class MockActivationManager implements ActivationManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void refreshKey(String key) {
+        // TODO Auto-generated method stub
+        
+    }
 }
