@@ -13,7 +13,7 @@ public class ActivationUtilities {
         case UNAVAILABLE:
             return I18n.tr("{0} is no longer supported by LimeWire.", item.getLicenseName());
         case UNUSEABLE_LW:
-            return I18n.tr("{0} is not supported in this LimeWire version. Please upgrade LimeWire to access this featured.", item.getLicenseName());
+            return I18n.tr("{0} is not supported in this LimeWire version. Please upgrade LimeWire to access this feature.", item.getLicenseName());
         case UNUSEABLE_OS:
             return I18n.tr("{0} is not supported for this Operating System.", item.getLicenseName());
         default:
