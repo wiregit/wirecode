@@ -85,7 +85,7 @@ public class ActivationWindow {
             
             add(createField("URL info"));
             add(createField(LimeWireUtils.addLWInfoToUrl("", applicationServices.getMyGUID(), 
-                    activationManager.isProActive(), activationManager.getLicenseKey(), activationManager.getMCode())), "wrap");
+                    activationManager.isProActive(), activationManager.getMCode())), "wrap");
             
             addActivationModuleInformation(activationManager.getActivationItems());
             

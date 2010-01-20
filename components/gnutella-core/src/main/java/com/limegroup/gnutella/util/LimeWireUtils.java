@@ -457,17 +457,17 @@ public final class LimeWireUtils {
      * Updates a URL to contain common information about the LW installation.
      */
     // TODO: ACTIVATION: REFACTOR!  If possible, Put logic inside ApplicationImpl instead of here
-    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String lid, String mcode) {
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String mcode) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
-        url += getLWInfoQueryString(myClientGUID, isPro, lid, mcode);
+        url += getLWInfoQueryString(myClientGUID, isPro, mcode);
                
         return url;
     }
     
-    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String lid, String mcode) {
+    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String mcode) {
         return "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
             "&pro="   + isPro + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
@@ -478,7 +478,6 @@ public final class LimeWireUtils {
             "&sc="   + ApplicationSettings.SESSIONS.getValue() +
             "&al="   + autoStartupLaunch + 
             "&arch=" + EncodingUtils.encode(OSUtils.getOSArch()) +
-            "&lid="  + EncodingUtils.encode(lid) +
             "&mcode=" + EncodingUtils.encode(mcode);    
     }
 

@@ -2,23 +2,23 @@ package org.limewire.activation.impl;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.ApplicationServices;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.limewire.activation.api.ActivationUrls;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.limewire.activation.api.ActivationManager;
-import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationUrls;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.InvalidDataException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.StringEntity;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Responsible for communicating with activation server.
@@ -56,8 +56,7 @@ public class ActivationCommunicatorImpl implements ActivationCommunicator {
 
         // get query string
         String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
-            activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE), key,
-            activationManager.getMCode());
+            activationManager.isProActive(), activationManager.getMCode());
 
         String jsonResult = sendToServer(query);
 
