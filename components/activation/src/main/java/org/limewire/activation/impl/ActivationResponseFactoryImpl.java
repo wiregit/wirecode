@@ -93,9 +93,9 @@ public class ActivationResponseFactoryImpl implements ActivationResponseFactory 
                 Date exp = formatter.parse(expDate);
                 ActivationItem item = null;
                 if (loadedFromDisk) {
-                    item = activationItemFactory.createActivationItem(moduleId, moduleName, pur, exp, status);
-                } else {
                     item = activationItemFactory.createActivationItemFromDisk(moduleId, moduleName, pur, exp, status);
+                } else {
+                    item = activationItemFactory.createActivationItem(moduleId, moduleName, pur, exp, status);
                 }
                 items.add(item);
             }
