@@ -151,10 +151,10 @@ public class TransferOptionPanel extends OptionPanel {
             downloadSaveTextField.addMouseListener(directoryAction);
             browseSaveLocationButton = new JButton(directoryAction);
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
-            autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
+            autoRenameDuplicateFilesCheckBox.setOpaque(false);
 
             useAntivirusCheckBox = new JCheckBox(I18n.tr("Scan files I download for viruses"));
-            useAntivirusCheckBox.setContentAreaFilled(false);
+            useAntivirusCheckBox.setOpaque(false);
             
             //TODO: activation - text needs to change
             buyAntivirusButton = new HyperlinkButton("Upgrade to scan files with AVG anti-virus");
@@ -222,12 +222,15 @@ public class TransferOptionPanel extends OptionPanel {
                     .isSelected());
             
             if(virusEngine.isSupported()){
-                if (useAntivirusCheckBox.isSelected() 
-                        && FilterSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()){
+                boolean isReEnable = useAntivirusCheckBox.isSelected()
+                        && FilterSettings.VIRUS_SCANNER_ENABLED.getValue() == false;
+                
+                FilterSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
+                
+                if (isReEnable){
                     //check for av updates if the user re-enabled the scanner.
                     virusEngine.checkForUpdates();
                 }
-                FilterSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
             }
             
             final String save = downloadSaveTextField.getText();
@@ -344,22 +347,22 @@ public class TransferOptionPanel extends OptionPanel {
         public TrayPanel() {
             super(I18n.tr("Tray"));
             closeTrayCheckBox = new JCheckBox(I18n.tr("Close tray when there are no transfers"));
-            closeTrayCheckBox.setContentAreaFilled(false);
+            closeTrayCheckBox.setOpaque(false);
 
             showBandwidthCheckBox = new JCheckBox(I18n.tr("Show total bandwidth"));
-            showBandwidthCheckBox.setContentAreaFilled(false);
+            showBandwidthCheckBox.setOpaque(false);
 
             clearDownloadsCheckBox = new JCheckBox(I18n
                     .tr("Clear downloads from list when finished"));
-            clearDownloadsCheckBox.setContentAreaFilled(false);
+            clearDownloadsCheckBox.setOpaque(false);
 
             clearUploadCheckBox = new JCheckBox(I18n.tr("Clear uploads from list when finished"));
-            clearUploadCheckBox.setContentAreaFilled(false);
+            clearUploadCheckBox.setOpaque(false);
 
             // we aren't using deleteFileOnCancelCheckBox yet
             // deleteFileOnCancelCheckBox = new
             // JCheckBox(I18n.tr("When I cancel a download, delete the file"));
-            // deleteFileOnCancelCheckBox.setContentAreaFilled(false);
+            // deleteFileOnCancelCheckBox.setOpaque(false);
             // deleteFileOnCancelCheckBox.setVisible(false);
 
             add(closeTrayCheckBox, "wrap");
