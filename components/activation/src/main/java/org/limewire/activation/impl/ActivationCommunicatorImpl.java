@@ -56,7 +56,7 @@ public class ActivationCommunicatorImpl implements ActivationCommunicator {
 
         // get query string
         String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getMCode());
+            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;;
 
         String jsonResult = sendToServer(query);
 
