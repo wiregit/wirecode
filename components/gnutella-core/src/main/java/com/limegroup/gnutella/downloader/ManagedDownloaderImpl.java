@@ -2075,6 +2075,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
             // Stop the download and delete the file
             stop();
+            library.remove(file);
             file.delete();
             return true;
         }
