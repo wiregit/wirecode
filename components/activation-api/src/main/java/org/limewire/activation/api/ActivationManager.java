@@ -35,6 +35,13 @@ public interface ActivationManager {
     public void activateKey(String key);
     
     /**
+     * This refreshes the module list for a key that has already been entered by the user.
+     * If there's a communication error, this will preserve the list of activation items that
+     * were loaded from disk.
+     */
+    public void refreshKey(String key);
+    
+    /**
      * Returns the current state of the ActivationManager.
      */
     public ActivationState getActivationState();

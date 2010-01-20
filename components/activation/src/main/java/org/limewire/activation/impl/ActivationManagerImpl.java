@@ -108,7 +108,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.NOT_AUTHORIZED);
     private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_AUTHORIZED);
-    private final Activating ACTIVATING = new Activating(ActivationState.AUTHORIZING);
+    private final Activating ACTIVATING_NEW_LICENSE = new Activating(ActivationState.AUTHORIZING);
+    private final Activating REFRESHING_EXISTING_LICENSE = new Activating(ActivationState.REFRESHING);
     private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.AUTHORIZED);
     private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.AUTHORIZED);
     
@@ -128,15 +129,31 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     
     @Override
     public void activateKey(final String key) {
-        activateKey(key, 0);
-    }
-
-    public void activateKey(final String key, final int numberOfRetries) {
-
         if (!activateKeyInitAndValidate(key)) {
             return;    
         }
-        ACTIVATING.enterState();
+
+        ACTIVATING_NEW_LICENSE.enterState();
+
+        scheduleServerQueriesForKey(key, 0);
+    }
+
+    @Override
+    public void refreshKey(final String key) {
+        refreshKey(key, 0);
+    }
+
+    private void refreshKey(final String key, final int numberOfRetries) {
+        if (!activateKeyInitAndValidate(key)) {
+            return;    
+        }
+
+        REFRESHING_EXISTING_LICENSE.enterState();
+
+        scheduleServerQueriesForKey(key, numberOfRetries);
+    }
+
+    private void scheduleServerQueriesForKey(final String key, final int numberOfRetries) {
         activationContactor = new Periodic(new ActivationTask(key, numberOfRetries), scheduler);
         activationContactor.rescheduleIfSooner(0);
     }
@@ -152,7 +169,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         // cancel any existing scheduled activation 
         // which is currently not contacting the server
         if (activationContactor != null) {
-            if(currentState == ACTIVATING)
+            if(currentState == ACTIVATING_NEW_LICENSE || currentState == REFRESHING_EXISTING_LICENSE)
                 return false;
             else
                 activationContactor.unschedule();
@@ -278,7 +295,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         // if a PKey exists, start the server and try contacting the authentication server
         String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
-            activateKey(storedLicenseKey, 5);
+            refreshKey(storedLicenseKey, 5);
         }
     }
 
@@ -379,18 +396,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     if (error instanceof IOException) {
                         if (++numAttempted <= MAX_ATTEMPTS) {
                             int nextDelay = numAttempted * 5000;
+                            activationError = ActivationError.COMMUNICATION_ERROR;
                             activationContactor.rescheduleIfSooner(nextDelay);
                             return;
                         }
                     }
                 }
-                NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+
+                handleError(ActivationError.COMMUNICATION_ERROR);
                 return;
             }
             if (response != null) {
                 processActivationResponse(response);
             } else {
-                NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+                handleError(ActivationError.COMMUNICATION_ERROR);
             }
         }
         
@@ -402,9 +421,9 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if (response.getResponseType() == ActivationResponse.Type.VALID) {
                 ACTIVATED_FROM_SERVER.enterState(response);
             } else if (response.getResponseType() == ActivationResponse.Type.NOTFOUND) {
-                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                handleError(ActivationError.INVALID_KEY);
             } else if (response.getResponseType() == ActivationResponse.Type.BLOCKED) {
-                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY);
+                handleError(ActivationError.BLOCKED_KEY);
             }
             
             // reschedule next ping of activation server if necessary
@@ -412,6 +431,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             if (refreshVal > 0) {
                 refreshIntervalSeconds = refreshVal;
                 activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+            }
+        }
+        
+        private void handleError(ActivationError error) {
+            // If we're refreshing the module list for a license and there is a communication error,
+            // then we need to rollback to whatever the previous state was whether that be
+            // ACTIVATED_FROM_SERVER or ACTIVATED_FROM_CACHE. 
+            // If we're authorizing a new license, then we need to enter a NOT_ACTIVATED state,
+            // or if we're refreshing and we got a blocked key error, then we need to enter a NOT_ACTIVATED state.
+            if (error == ActivationError.COMMUNICATION_ERROR && currentState == REFRESHING_EXISTING_LICENSE) {
+                activationError = ActivationError.COMMUNICATION_ERROR;
+                REFRESHING_EXISTING_LICENSE.rollback();
+            } else {
+                NOT_ACTIVATED.enterState(error);
             }
         }
     }
@@ -464,12 +497,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
 
     private class Activating extends ActivationStateImpl {
+        private ActivationStateImpl previousState;
+
         private Activating(ActivationState state) {
             super(state);
         }
 
         public void enterState() {
+            previousState = currentState;
             setActivating(this);
+        }
+        
+        public void rollback() {
+            currentState = previousState;
+            listeners.broadcast(new ActivationEvent(previousState.getActivationState(), getActivationError()));
         }
     }
 

@@ -191,11 +191,10 @@ public class ActivationPanel {
         // when we are initially opening the dialog don't show any error messages
         // pertaining to fleeting states like communication errors or invalid keys
         ActivationError error = ActivationError.NO_ERROR;
-        if (activationManager.getActivationError() != ActivationError.INVALID_KEY
-             && activationManager.getActivationError() != ActivationError.COMMUNICATION_ERROR) {
+        if (activationManager.getActivationState() != ActivationState.NOT_AUTHORIZED) {
             error = activationManager.getActivationError();
         }
-        stateManager.setActivationState(activationManager.getActivationState(), ActivationError.NO_ERROR);
+        stateManager.setActivationState(activationManager.getActivationState(), error);
 
         dialog = new LimeJDialog();
         dialog.setModal(true);
@@ -236,20 +235,24 @@ public class ActivationPanel {
         }
     }
 
+    private NoLicenseButtonPanel noLicenseButtonPanel;
+    private ActivatedButtonPanel activatedButtonPanel;
+    private EditButtonPanel editButtonPanel;
+    
     private void selectCard(String card) {
         if(!cardMap.containsKey(card)) {
             if(card.equals(NO_LICENSE_PANEL)) {
-                ButtonPanel panel = new NoLicenseButtonPanel();
-                cardMap.put(card, panel);
-                cardPanel.add(panel, card);
+                noLicenseButtonPanel = new NoLicenseButtonPanel();
+                cardMap.put(card, noLicenseButtonPanel);
+                cardPanel.add(noLicenseButtonPanel, card);
             } else if(card.equals(OK_PANEL)) {
-                ButtonPanel panel = new ActivatedButtonPanel();
-                cardMap.put(card, panel);
-                cardPanel.add(panel, card);
+                activatedButtonPanel = new ActivatedButtonPanel();
+                cardMap.put(card, activatedButtonPanel);
+                cardPanel.add(activatedButtonPanel, card);
             } else if(card.equals(EDIT_PANEL)) {
-                ButtonPanel panel = new EditButtonPanel();
-                cardMap.put(card, panel);
-                cardPanel.add(panel, card);
+                editButtonPanel = new EditButtonPanel();
+                cardMap.put(card, editButtonPanel);
+                cardPanel.add(editButtonPanel, card);
             }
         }
 
@@ -260,14 +263,9 @@ public class ActivationPanel {
         // unfortunately if the user presses the refresh button and there is an error due to a server communication problem
         // we have to handle the error differently then we would if there was an error with a first time activation.
         // so, we track whether the refresh button was pressed with this flag.
-        private boolean refreshing = false;
         private boolean editingLicense = true;
         private ActivationState state = ActivationState.NOT_AUTHORIZED;
         private ActivationError error = ActivationError.NO_ERROR;
-
-        public void setRefreshing(boolean refreshing) {
-            this.refreshing = refreshing;
-        }
 
         public void setEditingLicense(boolean editingLicense) {
             editButton.setVisible(false);
@@ -282,23 +280,20 @@ public class ActivationPanel {
 
         public void setActivationState(ActivationState state, ActivationError error) {
             this.state = state;
-           this.error = error;
+            this.error = error;
 
-           if (state == ActivationState.AUTHORIZED) {
-               editingLicense = false;
-               refreshing = false;
-           }
+            if (state == ActivationState.AUTHORIZED) {
+                editingLicense = false;
+            }
 
-           // let's clear the event list used to populate the module table and repopulate it if we're activated
-           if (!refreshing) {
-               eventList.clear();
-           }
+            // let's clear the event list used to populate the module table and repopulate it if we're activated
+            eventList.clear();
 
-           if (state == ActivationState.AUTHORIZED) {
-               eventList.addAll(activationManager.getActivationItems());
-           } else if ((state == ActivationState.NOT_AUTHORIZED && !refreshing)) {
-               eventList.add(new LostLicenseItem());
-           }
+            if (state == ActivationState.AUTHORIZED || state == ActivationState.REFRESHING) {
+                eventList.addAll(activationManager.getActivationItems());
+            } else if ((state == ActivationState.NOT_AUTHORIZED)) {
+                eventList.add(new LostLicenseItem());
+            }
 
            update();
         }
@@ -326,7 +321,7 @@ public class ActivationPanel {
             // but if the user hits the edit button, then this field becomes editable regardless of the activation state
             
             boolean isEditMode = editingLicense || state == ActivationState.NOT_AUTHORIZED
-                                  || (state == ActivationState.AUTHORIZING && !refreshing);
+                                  || (state == ActivationState.AUTHORIZING);
             
             // let's set whether the license should be shown as a text field or as a none editable label.
             licenseKeyPanel.setEditable( isEditMode );
@@ -334,9 +329,7 @@ public class ActivationPanel {
             // let's set whether there is an icon next to the license field and whether it shows an error icon or a spinner
             Mode warningPanelMode = Mode.EMPTY;
             if (state == ActivationState.AUTHORIZING) {
-                if (!refreshing) {
-                    warningPanelMode = Mode.SPINNER;
-                }
+                warningPanelMode = Mode.SPINNER;
             } else if (state == ActivationState.NOT_AUTHORIZED) {
                 if (error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY) {
                     warningPanelMode = Mode.WARNING;
@@ -354,8 +347,9 @@ public class ActivationPanel {
             if (error == ActivationError.EXPIRED_KEY) {
                 licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
                 isLicenseTableErrorLabelVisible = true;
-            } else if (refreshing && error == ActivationError.COMMUNICATION_ERROR) {
-                licenseTableErrorLabel.setText(I18n.tr("There was an error refreshing. Please try again."));
+            } else if ( (state == ActivationState.REFRESHING || state == ActivationState.AUTHORIZED) 
+                            && error == ActivationError.COMMUNICATION_ERROR) {
+                licenseTableErrorLabel.setText(I18n.tr("There was an error communicating with the activation server."));
                 isLicenseTableErrorLabelVisible = true;
             }
             licenseTableErrorLabel.setVisible(isLicenseTableErrorLabelVisible);
@@ -363,7 +357,7 @@ public class ActivationPanel {
             // row 4: the module table
 
             // here we set whether the busy spinner should show over the module table b/c we're refreshing the module list.
-            if (state == ActivationState.AUTHORIZING && refreshing) {
+            if (state == ActivationState.REFRESHING) {
                 tableOverlayBusyLabel.setBusy(true);
                 tableJXLayer.getGlassPane().setVisible(true);
             } else {
@@ -397,11 +391,18 @@ public class ActivationPanel {
                 } else {
                     cardName = OK_PANEL;
                 }
-            } else if (refreshing) {
+            } else if (state == ActivationState.REFRESHING) {
                 cardName = OK_PANEL;
             }
             
             selectCard(cardName);
+            
+            // and let's update the button states
+            if (state == ActivationState.REFRESHING) {
+                activatedButtonPanel.setRefreshEnabled(false);
+            } else if (state == ActivationState.AUTHORIZED) {
+                activatedButtonPanel.setRefreshEnabled(true);
+            }
 
             activationPanel.validate();
             activationPanel.repaint();
@@ -473,9 +474,10 @@ public class ActivationPanel {
     }
 
     private class ActivatedButtonPanel extends ButtonPanel {
-
+        JButton refreshButton;
+        
         public ActivatedButtonPanel() {
-            JButton refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of modules associated with the key")));
+            refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of modules associated with the key")));
             JButton okButton = new JButton(new OKDialogAction());
             
             add(refreshButton, "push");
@@ -485,6 +487,11 @@ public class ActivationPanel {
         @Override
         public void setActivationEnabled(boolean enabled){
             //NO STATE CHANGE
+        }
+
+        public void setRefreshEnabled(boolean enabled){
+            //NO STATE CHANGE
+            refreshButton.setEnabled(enabled);
         }
     }
     
@@ -601,8 +608,8 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            stateManager.setRefreshing(true);
-            activationManager.activateKey(licenseField.getText().trim().replaceAll("-", ""));
+//            stateManager.setRefreshing(true);
+            activationManager.refreshKey(licenseField.getText().trim().replaceAll("-", ""));
         }
     }
 

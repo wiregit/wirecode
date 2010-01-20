@@ -15,9 +15,15 @@ public enum ActivationState {
     NOT_AUTHORIZED,
     
     /**
-     * The License Key that exists is currently being authenticated. 
+     * A new License Key is currently being authenticated. 
      */
     AUTHORIZING,
+
+    /**
+     * The License Key that exists is currently being re-authenticated. 
+     */
+    REFRESHING,
+
     
     /**
      * The License Key entered has been authenticated and any modules 
