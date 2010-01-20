@@ -167,15 +167,13 @@ public class ActivationPanel {
         
         activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, gpy 200, wrap");
         
-        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, span, grow, wrap");
-        
-        activationPanel.add(Box.createVerticalStrut(10), "hidemode 0, span, growy, wrap");
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, span, growx, wrap");
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         
-        activationPanel.add(cardPanel, "span, growx, wrap");
+        activationPanel.add(cardPanel, "span, gaptop 10, gapbottom 10, growx, wrap");
     }
     
     @Inject
@@ -198,7 +196,7 @@ public class ActivationPanel {
 
         dialog = new LimeJDialog();
         dialog.setModal(true);
-        dialog.setResizable(true);
+        dialog.setResizable(false);
         dialog.setTitle(I18n.tr("LimeWire"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.add(activationPanel);
@@ -216,8 +214,6 @@ public class ActivationPanel {
             public void componentResized(ComponentEvent e) {}
             @Override
             public void componentShown(ComponentEvent e) {
-//                if(okButton != null)
-//                    okButton.requestFocusInWindow();
             }
         }); 
 
@@ -296,6 +292,9 @@ public class ActivationPanel {
             }
 
            update();
+           
+           if(dialog != null)
+               dialog.pack();
         }
         
         public void update() {
@@ -368,18 +367,15 @@ public class ActivationPanel {
             // row 5: the info message below the module table
             
             // here we control the visibility and the text of the error message that appears below the module table
-            boolean isUnderneathModuleTableMessagePanelVisible = false;
+//            boolean isUnderneathModuleTableMessagePanelVisible = false;
 // TODO implement the blocked modules method
 /*            if (areThereBlockedModules()) {
                 underneathModuleTableMessagePanel.showBlockedModulesMessage();
                 isUnderneathModuleTableMessagePanelVisible = true;
             } else
 */ 
-            if (areThereNonFunctionalModules()) {
-                underneathModuleTableMessagePanel.showUnsupportedModulesMessage();
-                isUnderneathModuleTableMessagePanelVisible = true;
-            }
-            underneathModuleTableMessagePanel.setVisible(isUnderneathModuleTableMessagePanelVisible);
+
+            underneathModuleTableMessagePanel.setVisible(areThereNonFunctionalModules());
             
             // row 6: the button panel
             
@@ -499,21 +495,22 @@ public class ActivationPanel {
         JEditorPane textLabel;
         
         public UnderneathModuleTableMessagePanel() {
-            showUnsupportedModulesMessage();
+            init();
         }
 
-        public void showUnsupportedModulesMessage() {
+        private void init() {
             removeAll();
-            setLayout(new MigLayout("insets 0 0 10 0, gap 0", "[]", "[]"));
+            setLayout(new MigLayout("insets 0 0 0 0, gap 0"));//, "[]", "[]"));
             setOpaque(false);
-            add(new JLabel(unsupportedIcon), "align 0% 0%, split");
+            add(new JLabel(unsupportedIcon), "gap right 5, aligny 50%");//, split");
             textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("One or more of your licenses is currently not supported. For more help please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a></html>");
             textLabel.setEditable(false);
             textLabel.setOpaque(false);
-            textLabel.setMaximumSize(new Dimension(width-75, 10000));
-            // TODO calculate the pixel width of the translated text, divide it by (width-75) and set the height by multiplying the result by 15.
-            textLabel.setPreferredSize(new Dimension(width-75, 30));
-            textLabel.setMinimumSize(new Dimension(width-75, 1));
+            textLabel.setPreferredSize(new Dimension(width - 75, 50));
+//            textLabel.setMaximumSize(new Dimension(width-75, 10000));
+//            // TODO calculate the pixel width of the translated text, divide it by (width-75) and set the height by multiplying the result by 15.
+//            textLabel.setPreferredSize(new Dimension(width-75, 30));
+//            textLabel.setMinimumSize(new Dimension(width-75, 1));
             textLabel.addHyperlinkListener(new HyperlinkListener() {
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -522,10 +519,7 @@ public class ActivationPanel {
                     }
                 }
             });
-            add(textLabel,"align 0% 0%");
-            if (dialog != null) {
-                dialog.pack();
-            }
+            add(textLabel,"growx");//"align 0% 0%");
         }
 
         public void showBlockedModulesMessage() {
