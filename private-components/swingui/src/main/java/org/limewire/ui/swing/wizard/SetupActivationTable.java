@@ -34,7 +34,7 @@ import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-public class SetupActivationTable extends JPanel {
+public class SetupActivationTable extends JTable {
 
     private final String[] columnNames = new String[] {I18n.tr("License Type"), I18n.tr("Expires")};
     
@@ -44,44 +44,39 @@ public class SetupActivationTable extends JPanel {
     @Resource private Font headerFont;
     @Resource private Icon infoIcon;
     
-    private JTable table;
-    
     private WizardPage wizardPage;
 
     public SetupActivationTable(WizardPage wizardPage, List<ActivationItem> activationItems) {
+        super();
+        
         GuiUtils.assignResources(this);
 
+        setModel(new ActivationTableModel(activationItems));
+        
         this.wizardPage = wizardPage;
         
         Collections.sort(activationItems, new ActivationItemComparator());
 
-        table = new JTable(new ActivationTableModel(activationItems));
-
-        table.getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
-        table.getTableHeader().setMinimumSize(new Dimension(100, 50));
+        getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
+        getTableHeader().setMinimumSize(new Dimension(100, 50));
 
         LicenseTypeRendererEditor licenseRendererEditor = new LicenseTypeRendererEditor();
-        table.getColumn(columnNames[0]).setCellRenderer(licenseRendererEditor);
-        table.getColumn(columnNames[0]).setCellEditor(licenseRendererEditor);
-        table.getColumn(columnNames[0]).setMinWidth(200);
-        table.getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
-        table.getColumn(columnNames[1]).setMinWidth(100);
-        table.getColumn(columnNames[1]).setMaxWidth(150);
-        table.setRowHeight( 29 );
+        getColumn(columnNames[0]).setCellRenderer(licenseRendererEditor);
+        getColumn(columnNames[0]).setCellEditor(licenseRendererEditor);
+        getColumn(columnNames[0]).setMinWidth(200);
+        getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
+        getColumn(columnNames[1]).setMinWidth(100);
+        getColumn(columnNames[1]).setMaxWidth(150);
+        setRowHeight( 29 );
+        setBorder(BorderFactory.createEmptyBorder());
 
-        JTableHeader header = table.getTableHeader();
+        JTableHeader header = getTableHeader();
         header.setMinimumSize(new Dimension(350, 27));
         header.setPreferredSize(new Dimension(350, 27));
-        setLayout(new BorderLayout()); 
-        add(header, BorderLayout.NORTH); 
-        add(table, BorderLayout.CENTER); 
-        //add(Box.createVerticalStrut(5), BorderLayout.SOUTH); 
         
-        setBorder(BorderFactory.createLineBorder(columnNameColor));
-
-        int numberOfItemsVisible = (activationItems.size() > 4) ? 4 : activationItems.size();
-        setMinimumSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
-        setPreferredSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
+        setBorder(BorderFactory.createEmptyBorder());
+        // let's erase the cell borders by making them transparent
+        setGridColor(new Color(0, 0, 0, 0));
     }
     
     private class ActivationTableModel extends AbstractTableModel {
@@ -141,6 +136,8 @@ public class SetupActivationTable extends JPanel {
             add(infoButton, "align 0% 50%, hidemode 3");
             add(strut2, "align 0% 50%, hidemode 3");
             add(nameLabel, "align 0% 50%");
+
+            setBorder(BorderFactory.createEmptyBorder());
         }
         
         @Override
@@ -197,7 +194,7 @@ public class SetupActivationTable extends JPanel {
             ActivationItem item = licenseRenderer.getCellEditorValue();
             if (item != null) {
                 String message = ActivationUtilities.getStatusMessage(item);
-                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
+                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
                 licenseRenderer.cancelCellEditing();
             }
         }
@@ -212,6 +209,8 @@ public class SetupActivationTable extends JPanel {
 
             setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
             add(nameLabel, "align 0% 50%");
+            
+            setBorder(BorderFactory.createEmptyBorder());
         }
 
         @Override

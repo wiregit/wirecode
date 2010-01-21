@@ -1,12 +1,15 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -36,11 +39,16 @@ public class SetupActivationThankYouPanel extends JPanel {
         add(Box.createVerticalStrut(10), "wrap");
 
         SetupActivationTable table = new SetupActivationTable(wizardPage, eventList);
-
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
+        int numberOfItemsVisible = (eventList.size() > 4) ? 4 : eventList.size();
+        scrollPane.setMinimumSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
+        scrollPane.setPreferredSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
+        
         if (areThereProblematicModules(eventList)) {
             JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, gapy 0", "[]", "[][][]"));
             
-            innerPanel.add(table, "align 50% 50%, wrap");
+            innerPanel.add(scrollPane, "align 50% 50%, wrap");
 
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
@@ -54,7 +62,7 @@ public class SetupActivationThankYouPanel extends JPanel {
             
             add(innerPanel, "align 50% 0%, wrap");
         } else {
-            add(table, "align 50% 0%, wrap");
+            add(scrollPane, "align 50% 0%, wrap");
 
             add(Box.createVerticalStrut(10), "wrap");
     
