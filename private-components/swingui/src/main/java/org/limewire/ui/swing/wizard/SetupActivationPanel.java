@@ -98,6 +98,9 @@ public class SetupActivationPanel extends JPanel {
         case AUTHORIZING:
             iconPanel.showBusyIcon();
             return;
+        case REFRESHING:
+            iconPanel.showBusyIcon();
+            return;
         case AUTHORIZED:
             iconPanel.showNoIcon();
             return;
