@@ -38,6 +38,10 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeWireUtils;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
 
 public class RequeryBehaviorTest extends LimeTestCase {
 
@@ -55,10 +59,25 @@ public class RequeryBehaviorTest extends LimeTestCase {
     private DownloadManager downloadManager;
     private MyAltLocFinder myAltFinder;
     private MyDHTManager myDHTManager;
+    private ActivationManager activationManager;
     private Runnable pump;
     
     @Override
     public void setUp() throws Exception {
+      Mockery context = new Mockery();
+      activationManager = context.mock(ActivationManager.class);
+      context.checking(new Expectations() {{
+            allowing(activationManager).isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE);
+            will(returnValue(true));
+            allowing(activationManager).isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE);
+            will(returnValue(true));
+            allowing(activationManager).isProActive();
+            will(returnValue(true));
+            allowing(activationManager).isValidKey(with(any(String.class)));
+            will(returnValue(true));
+        }});
+ 
+        
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
       DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
@@ -70,6 +89,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
             protected void configure() {
                 bind(DHTManager.class).toInstance(myDHTManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
+                bind(ActivationManager.class).toInstance(activationManager);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).to(MyExecutor.class);
             }
         };
@@ -229,10 +249,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
      */
     public void testProRequeryBehavior() throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
-        //assertTrue(LimeWireUtils.isPro());
-        
-        // todo: activation: fix me: fix this unit test
-        fail("This used to call assertTrue(LimeWireUtils.isPro()), which is not going to exist anymore!");
+        assertTrue(activationManager.isProActive());
+        assertTrue(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
+        assertTrue(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE));
         
         ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
         downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
