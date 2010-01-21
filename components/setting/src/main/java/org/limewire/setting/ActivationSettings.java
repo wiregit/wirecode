@@ -6,6 +6,9 @@ import org.limewire.setting.evt.SettingListener;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ * Settings for handling Activation.
+ */
 public class ActivationSettings extends LimeProps {
 
     private ActivationSettings() {}
@@ -42,15 +45,21 @@ public class ActivationSettings extends LimeProps {
         });
     }
 
-    public static final BooleanSetting CONTACT_SERVER_ON_STARTUP = FACTORY.createBooleanSetting(
-            "CONTACT_SERVER_ON_STARTUP", true);
-    
+    /**
+     * License Key for activation. If not License Key exists will return empty String.
+     */
     public static final StringSetting ACTIVATION_KEY = FACTORY.createStringSetting(
             "ACTIVATION_KEY", "");
     
+    /**
+     * Saved mcode from the last json String.
+     */
     public static final StringSetting M_CODE = FACTORY.createStringSetting(
             "M_CODE", "");
     
+    /**
+     * Encryption key for saving the json message.
+     */
     public static final StringSetting PASS_KEY = FACTORY.createStringSetting(
             "PASS_KEY", "3A931AF193AC44F66540CFFC57C3978D");
 }

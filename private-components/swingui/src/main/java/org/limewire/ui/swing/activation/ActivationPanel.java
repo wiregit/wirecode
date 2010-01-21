@@ -558,7 +558,6 @@ public class ActivationPanel {
     }
     
     private class EditAction extends AbstractAction {
-
         public EditAction() {
             putValue(Action.NAME, I18n.tr("Edit Key"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Edit the saved License Key"));
@@ -582,6 +581,9 @@ public class ActivationPanel {
         }
     }
     
+    /**
+     * Attempts to activate a new License Key.
+     */
     private class ActivateAction extends AbstractAction {
         public ActivateAction(String name, String description) {
             putValue(Action.NAME, name);
@@ -594,6 +596,11 @@ public class ActivationPanel {
         }
     }
     
+    /**
+     * Attempts to refresh the currently loaded License Key. The Activation Server
+     * will be contacted and the list of active and deactive modules will be 
+     * reloaded. 
+     */
     private class RefreshAction extends AbstractAction {
         public RefreshAction(String name, String description) {
             putValue(Action.NAME, name);
