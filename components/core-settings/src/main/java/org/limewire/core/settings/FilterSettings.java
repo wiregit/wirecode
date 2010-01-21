@@ -178,10 +178,13 @@ public class FilterSettings extends LimeProps {
 
     /**
      * The URLs to check for URN blacklist updates.
+     *
+     * !!! NOTE: 5.4 and before have 'FilterSettings.urnBlacklistUpdateUrls' as their SIMPP key!!!
+     *
      */
     public static final StringArraySetting URN_BLACKLIST_UPDATE_URLS =
         FACTORY.createRemoteStringArraySetting("URN_BLACKLIST_UPDATE_URLS",
-                new String[0], "FilterSettings.urnBlacklistUpdateUrls");
+                new String[]{"http://static.list.limewire.com/list/2"}, "FilterSettings.urnBlacklistUpdateUrls30KMax");
 
     /**
      * The local time of the last check for URN blacklist updates.

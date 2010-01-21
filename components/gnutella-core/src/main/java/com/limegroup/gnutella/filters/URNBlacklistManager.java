@@ -9,7 +9,7 @@ import org.limewire.util.Visitor;
  */
 public interface URNBlacklistManager {
     /** The maximum length of the blacklist in bytes (20 bytes per URN). */
-    static final int MAX_LENGTH = 200000; // Ten thousand URNs
+    static final int MAX_LENGTH = 600000; // 30 thousand URNs
     /** The length of the signature in bytes. */
     static final int SIG_LENGTH = 46;
     /** The algorithm for verifying the signature. */
