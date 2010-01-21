@@ -33,7 +33,7 @@ import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-public class SetupActivationTable extends JTable {
+class SetupActivationTable extends JTable {
 
     private final String[] columnNames = new String[] {I18n.tr("License Type"), I18n.tr("Expires")};
     
@@ -43,7 +43,7 @@ public class SetupActivationTable extends JTable {
     @Resource private Font headerFont;
     @Resource private Icon infoIcon;
     
-    private WizardPage wizardPage;
+    private final WizardPage wizardPage;
 
     public SetupActivationTable(WizardPage wizardPage, List<ActivationItem> activationItems) {
         super();
@@ -200,14 +200,14 @@ public class SetupActivationTable extends JTable {
     }
 
     private class DateRenderer extends JPanel implements TableCellRenderer {        
-        private final JLabel nameLabel;
+        private final JLabel dateLabel;
 
         public DateRenderer() {
-            nameLabel = wizardPage.createAndDecorateMultiLine("");
-            nameLabel.setVisible(true);
+            dateLabel = wizardPage.createAndDecorateLabel("");
+            dateLabel.setVisible(true);
 
             setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
-            add(nameLabel, "align 0% 50%");
+            add(dateLabel, "align 0% 50%");
             
             setBorder(BorderFactory.createEmptyBorder());
         }
@@ -218,13 +218,13 @@ public class SetupActivationTable extends JTable {
 
             ActivationItem item = (ActivationItem) value;
 
-            nameLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-            nameLabel.setEnabled(item.getStatus() == Status.ACTIVE);
+            dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
+            dateLabel.setEnabled(item.getStatus() == Status.ACTIVE);
 
             if (item.getStatus() != Status.ACTIVE) {
-                nameLabel.setForeground(Color.GRAY);
+                dateLabel.setForeground(Color.GRAY);
             } else {
-                nameLabel.setForeground(Color.BLACK);
+                dateLabel.setForeground(Color.BLACK);
             }
 
             return this;
