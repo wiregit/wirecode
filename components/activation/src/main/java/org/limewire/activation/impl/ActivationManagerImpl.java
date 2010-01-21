@@ -129,7 +129,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
 
         if (!isValidKey(key)) {
-            NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+            NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
             return false;
         }
         refreshIntervalSeconds = 0;
@@ -310,14 +310,16 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         setProvisionallyActivated(response, state);
     }
     
-    private void setNotActivated(ActivationError error, ActivationStateImpl state) {
+    private void setNotActivated(ActivationError error, ActivationStateImpl state, boolean removeAllData) {
+        if(error == ActivationError.INVALID_KEY)
+            removeData(removeAllData);
         activationError = error;
         currentState = state;
         LimeWireUtils.setIsPro(isProActive());
         
         listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
     }
-        
+    
     private void removeData(boolean removeMCode) {
         ActivationSettings.ACTIVATION_KEY.revertToDefault();
         BackgroundExecutorService.execute(new Runnable(){
@@ -361,29 +363,26 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 handleError(ActivationResponse.Type.ERROR);
                 return;
             }
-            if (response != null) {
-                processActivationResponse(response);
-            } else {
-                handleError(ActivationResponse.Type.ERROR);
-            }
+            processActivationResponse(response);
         }
         
         private void processActivationResponse(ActivationResponse response) {
-            // reset counter
-            numAttempted = 0;
-            
-            // todo: maybe use enums to delegate logic, instead of if/else
-            if (response.getResponseType() == ActivationResponse.Type.VALID) {
+            if (response != null && response.getResponseType() == ActivationResponse.Type.VALID) {
                 ACTIVATED_FROM_SERVER.enterState(response);
-            } else {
+                
+                // reset counter
+                numAttempted = 0;
+                
+                // reschedule next ping of activation server if necessary
+                long refreshVal = response.getRefreshInterval();
+                if (refreshVal > 0) {
+                    refreshIntervalSeconds = refreshVal;
+                    activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+                }
+            } else if(response != null){
                 handleError(response.getResponseType());
-            }
-            
-            // reschedule next ping of activation server if necessary
-            long refreshVal = response.getRefreshInterval();
-            if (refreshVal > 0) {
-                refreshIntervalSeconds = refreshVal;
-                activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
+            } else {
+                handleError(ActivationResponse.Type.ERROR);
             }
         }
         
@@ -395,23 +394,21 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     activationError = ActivationError.COMMUNICATION_ERROR;
                     REFRESHING_EXISTING_LICENSE.rollback();
                 } else {
-                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR, false);
                 }
                 break;
 
             case REMOVE:
-                removeData(true);
-                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
                 break;
             case STOP:
-                removeData(false);
-                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, false);
                 break;
             case NOTFOUND:
-                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
                 break;
             case BLOCKED:
-                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY);
+                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY, false);
                 break;
             }
         }
@@ -458,12 +455,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             super(state);
         }
 
-        public void enterState(ActivationError error) {
+        public void enterState(ActivationError error, boolean removeAllData) {
             if(currentState.getActivationState() == ActivationState.AUTHORIZED && error == ActivationError.COMMUNICATION_ERROR) {
                 listeners.broadcast(new ActivationEvent(currentState.getActivationState(),getActivationError()));
                 return;
             } else {
-                setNotActivated(error, this);
+                setNotActivated(error, this, removeAllData);
             }
         }
     }
