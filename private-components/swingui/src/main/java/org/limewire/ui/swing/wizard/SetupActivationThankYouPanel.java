@@ -27,14 +27,20 @@ public class SetupActivationThankYouPanel extends JPanel {
     @Resource
     private Icon infoIcon;
     
-    public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList) {
+    public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense) {
         super(new MigLayout("fill, insets 50 15 0 15, gap 0, gapy 0", "[]", "[][][][][][]"));
         
         GuiUtils.assignResources(this);
         
-        JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! Your license has been successfully activated."));
-        thankYouLabel.setForeground(thankYouColor);
-        add(thankYouLabel, "align 50% 50%, wrap");
+        if (userHasPreexistingLicense) {
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your pro features have been successfully activated."));
+            thankYouLabel.setForeground(thankYouColor);
+            add(thankYouLabel, "align 50% 50%, wrap");
+        } else {
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! Your license has been successfully activated."));
+            thankYouLabel.setForeground(thankYouColor);
+            add(thankYouLabel, "align 50% 50%, wrap");
+        }
 
         add(Box.createVerticalStrut(10), "wrap");
 
