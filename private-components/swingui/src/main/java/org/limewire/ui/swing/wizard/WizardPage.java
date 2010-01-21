@@ -58,7 +58,7 @@ public abstract class WizardPage extends JPanel {
     }
 
     protected JLabel createAndDecorateLabel(String text) {
-        JLabel label = new JLabel(text, 500);
+        JLabel label = new JLabel(text);
         decorator.decorateNormalText(label);
         return label;
     }
