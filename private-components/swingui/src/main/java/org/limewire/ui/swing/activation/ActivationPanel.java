@@ -159,7 +159,7 @@ public class ActivationPanel {
         activationPanel.add(licenseKeyErrorLabel, "skip 1, span, wrap");
         
         activationPanel.add(licenseKeyLabel, "gapright 10, growy 0");
-        activationPanel.add(licenseKeyPanel, "pushy, growy 0");
+        activationPanel.add(licenseKeyPanel.getComponent(), "pushy, growy 0");
         activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%, growy 0");
         activationPanel.add(editButton, "gapleft 40, align 100% 50%, growy 0, wrap");
         
@@ -278,6 +278,7 @@ public class ActivationPanel {
 
             if (state == ActivationState.AUTHORIZED) {
                 editingLicense = false;
+                licenseKeyPanel.setKey(activationManager.getLicenseKey());
             }
 
             // let's clear the event list used to populate the module table and repopulate it if we're activated

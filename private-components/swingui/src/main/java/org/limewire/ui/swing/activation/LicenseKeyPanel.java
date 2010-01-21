@@ -2,41 +2,50 @@ package org.limewire.ui.swing.activation;
 
 import java.awt.CardLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class LicenseKeyPanel extends JPanel {
+public class LicenseKeyPanel {
     
     final static String LICENSE_KEY_TEXT_FIELD = "text field";
     final static String LICENSE_KEY_LABEL = "label";
     
+    private final JPanel licensePanel;
     private final LicenseKeyTextField licenseKeyTextField;
     private final JLabel licenseKeyLabel;
+    private final CardLayout cardLayout;
     
-    public LicenseKeyPanel(LicenseKeyTextField licenseKeyTextField) {
-        super(new CardLayout());
-        
-        setOpaque(false);
-        
+    public LicenseKeyPanel(LicenseKeyTextField licenseKeyTextField) {   
         this.licenseKeyTextField = licenseKeyTextField;
         
-        add(LICENSE_KEY_TEXT_FIELD, licenseKeyTextField);
+        cardLayout = new CardLayout();
+        licensePanel = new JPanel(cardLayout);
+        licensePanel.setOpaque(false);
 
         licenseKeyLabel = new JLabel(licenseKeyTextField.getText());
-        add(LICENSE_KEY_LABEL, licenseKeyLabel);
+        
+        licensePanel.add(LICENSE_KEY_TEXT_FIELD, licenseKeyTextField);
+        licensePanel.add(LICENSE_KEY_LABEL, licenseKeyLabel);
 
-        CardLayout cardLayout = (CardLayout) (getLayout());
-        cardLayout.show(this, LICENSE_KEY_TEXT_FIELD);
+        cardLayout.show(licensePanel, LICENSE_KEY_TEXT_FIELD);
+    }
+    
+    public JComponent getComponent() {
+        return licensePanel;
     }
     
     public void setEditable(boolean editable) {
         if (editable) {
-            CardLayout cardLayout = (CardLayout) (getLayout());
-            cardLayout.show(this, LICENSE_KEY_TEXT_FIELD);
+            cardLayout.show(licensePanel, LICENSE_KEY_TEXT_FIELD);
         } else {
             licenseKeyLabel.setText(licenseKeyTextField.getText());
-            CardLayout cardLayout = (CardLayout) (getLayout());
-            cardLayout.show(this, LICENSE_KEY_LABEL);
+            cardLayout.show(licensePanel, LICENSE_KEY_LABEL);
         }
+    }
+    
+    public void setKey(String key) {
+        licenseKeyTextField.setText(key);
+        licenseKeyLabel.setText(key);
     }
 }
