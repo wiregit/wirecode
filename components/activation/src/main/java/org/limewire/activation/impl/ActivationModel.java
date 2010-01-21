@@ -13,7 +13,7 @@ import org.limewire.listener.EventListener;
  * using the ActivationID. Events are fired when changes to the
  * model occur. 
  */
-public interface ActivationModel {
+interface ActivationModel {
 
     /**
      * Returns a copy of the List of ActivationItems loaded by LimeWire. A loaded

@@ -19,7 +19,7 @@ import org.limewire.activation.api.ActivationItem;
  * - modules listing  (list of activation items)
  *    
  */
-public class ActivationResponse {
+class ActivationResponse {
     
     public enum Type {
         VALID,

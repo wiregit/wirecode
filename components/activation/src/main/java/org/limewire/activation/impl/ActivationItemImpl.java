@@ -7,7 +7,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.setting.ActivationSettings;
 import org.limewire.util.OSUtils;
 
-public class ActivationItemImpl implements ActivationItem {
+class ActivationItemImpl implements ActivationItem {
 
     private final int intID;
     private final ActivationID moduleID;

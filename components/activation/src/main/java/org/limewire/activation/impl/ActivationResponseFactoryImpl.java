@@ -19,7 +19,7 @@ import com.google.inject.Singleton;
 import com.google.inject.Inject;
 
 @Singleton
-public class ActivationResponseFactoryImpl implements ActivationResponseFactory {
+class ActivationResponseFactoryImpl implements ActivationResponseFactory {
     
     private static SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
     

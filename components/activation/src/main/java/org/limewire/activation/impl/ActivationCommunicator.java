@@ -8,7 +8,7 @@ import org.limewire.io.InvalidDataException;
  * Communicates with activation server to determine which modules
  * should be activated based on certain conditions (such as a key)
  */
-public interface ActivationCommunicator {
+interface ActivationCommunicator {
 
     
     /**

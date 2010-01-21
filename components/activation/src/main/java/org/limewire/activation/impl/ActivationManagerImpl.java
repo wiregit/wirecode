@@ -32,7 +32,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * 
  */
 @EagerSingleton
-public class ActivationManagerImpl implements ActivationManager, Service {
+class ActivationManagerImpl implements ActivationManager, Service {
     
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 

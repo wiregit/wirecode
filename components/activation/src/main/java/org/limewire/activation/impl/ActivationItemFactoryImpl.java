@@ -8,7 +8,7 @@ import org.limewire.activation.api.ActivationItem.Status;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ActivationItemFactoryImpl implements ActivationItemFactory {
+class ActivationItemFactoryImpl implements ActivationItemFactory {
 
     @Override
     public ActivationItem createActivationItem(int intID, String licenseName, Date datePurchased,

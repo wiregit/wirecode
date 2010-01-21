@@ -29,7 +29,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  *   in favor of new one.
  */
 // todo: write tests
-public class ActivationCommunicatorImpl implements ActivationCommunicator {
+class ActivationCommunicatorImpl implements ActivationCommunicator {
     
     private final Provider<String> activationUrlProvider;
     private final ActivationResponseFactory activationFactory;

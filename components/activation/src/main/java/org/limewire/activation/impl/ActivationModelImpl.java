@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ActivationModelImpl implements ActivationModel {
+class ActivationModelImpl implements ActivationModel {
 
     private final Map<ActivationID, ActivationItem> itemMap = new HashMap<ActivationID, ActivationItem>(4);
     private final EventListenerList<ActivationModuleEvent> listeners = new EventListenerList<ActivationModuleEvent>();
