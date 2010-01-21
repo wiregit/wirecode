@@ -37,11 +37,9 @@ import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
-import com.limegroup.gnutella.util.LimeWireUtils;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.impl.LegacyProActivationManager;
 
 public class RequeryBehaviorTest extends LimeTestCase {
 
@@ -59,24 +57,12 @@ public class RequeryBehaviorTest extends LimeTestCase {
     private DownloadManager downloadManager;
     private MyAltLocFinder myAltFinder;
     private MyDHTManager myDHTManager;
-    private ActivationManager activationManager;
+    private LegacyProActivationManager activationManager;
     private Runnable pump;
     
     @Override
     public void setUp() throws Exception {
-      Mockery context = new Mockery();
-      activationManager = context.mock(ActivationManager.class);
-      context.checking(new Expectations() {{
-            allowing(activationManager).isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE);
-            will(returnValue(true));
-            allowing(activationManager).isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE);
-            will(returnValue(true));
-            allowing(activationManager).isProActive();
-            will(returnValue(true));
-            allowing(activationManager).isValidKey(with(any(String.class)));
-            will(returnValue(true));
-        }});
- 
+      activationManager = new LegacyProActivationManager();
         
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
@@ -116,6 +102,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
      * fall back into the appropriate state.
      */
     public void testWaitingForResults() throws Exception {        
+        assertFalse(activationManager.isProActive());
         ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
             downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
@@ -165,7 +152,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
      * Prior to a dht or gnet query it goes to QUEUED and very quickly to CONNECTED.
      */
     public void testBasicRequeryBehavior() throws Exception {
-        
+        assertFalse(activationManager.isProActive());
         ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
         downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
@@ -248,7 +235,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
      * Prior to a dht or gnet query it goes to QUEUED and very quickly to CONNECTED.
      */
     public void testProRequeryBehavior() throws Exception {
-        PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
+        activationManager.setLegacyPro(true);
         assertTrue(activationManager.isProActive());
         assertTrue(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
         assertTrue(activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE));
