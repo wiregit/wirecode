@@ -53,7 +53,8 @@ public class ActivationItemImpl implements ActivationItem {
     
     @Override
     public String getURL() {
-        return ActivationSettings.ACTIVATION_RENEWAL_HOST + Integer.toString(intID);
+        return ActivationSettings.ACTIVATION_RENEWAL_HOST.getValueAsString() 
+                + "?" + ActivationSettings.MODULE_KEY_IDENTIFIER.getValueAsString() + Integer.toString(intID);
     }
 
     @Override

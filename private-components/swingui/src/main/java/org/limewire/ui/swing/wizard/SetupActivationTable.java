@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.wizard;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -194,7 +193,7 @@ public class SetupActivationTable extends JTable {
             ActivationItem item = licenseRenderer.getCellEditorValue();
             if (item != null) {
                 String message = ActivationUtilities.getStatusMessage(item);
-                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
+                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
                 licenseRenderer.cancelCellEditing();
             }
         }
@@ -224,6 +223,8 @@ public class SetupActivationTable extends JTable {
 
             if (item.getStatus() != Status.ACTIVE) {
                 nameLabel.setForeground(Color.GRAY);
+            } else {
+                nameLabel.setForeground(Color.BLACK);
             }
 
             return this;

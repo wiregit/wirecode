@@ -189,7 +189,9 @@ public class ActivationPanel {
         // when we are initially opening the dialog don't show any error messages
         // pertaining to fleeting states like communication errors or invalid keys
         ActivationError error = ActivationError.NO_ERROR;
-        if (activationManager.getActivationState() != ActivationState.NOT_AUTHORIZED) {
+        if (activationManager.getActivationState() != ActivationState.NOT_AUTHORIZED
+             || (activationManager.getActivationState() == ActivationState.NOT_AUTHORIZED 
+                  && (error != ActivationError.INVALID_KEY || error != ActivationError.COMMUNICATION_ERROR))) {
             error = activationManager.getActivationError();
         }
         stateManager.setActivationState(activationManager.getActivationState(), error);
@@ -284,7 +286,11 @@ public class ActivationPanel {
             if (state == ActivationState.AUTHORIZED || state == ActivationState.REFRESHING) {
                 eventList.addAll(activationManager.getActivationItems());
             } else if ((state == ActivationState.NOT_AUTHORIZED)) {
-                eventList.add(new LostLicenseItem());
+                if (error == ActivationError.BLOCKED_KEY) {
+                    // do nothing
+                } else {
+                    eventList.add(new LostLicenseItem());
+                }
             }
 
            update();
@@ -364,15 +370,17 @@ public class ActivationPanel {
             // row 5: the info message below the module table
             
             // here we control the visibility and the text of the error message that appears below the module table
-//            boolean isUnderneathModuleTableMessagePanelVisible = false;
-// TODO implement the blocked modules method
-/*            if (areThereBlockedModules()) {
-                underneathModuleTableMessagePanel.showBlockedModulesMessage();
-                isUnderneathModuleTableMessagePanelVisible = true;
-            } else
-*/ 
 
-            underneathModuleTableMessagePanel.setVisible(areThereNonFunctionalModules());
+            // here we check to see if the license key has been blocked
+            if (state == ActivationState.NOT_AUTHORIZED && error == ActivationError.BLOCKED_KEY) {
+                underneathModuleTableMessagePanel.showBlockedModulesMessage();
+                underneathModuleTableMessagePanel.setVisible(true);
+            } else if (areThereNonFunctionalModules() || areThereExpiredModules()) {
+                underneathModuleTableMessagePanel.showNonFunctionalModulesMessage();
+                underneathModuleTableMessagePanel.setVisible(true);
+            } else {
+                underneathModuleTableMessagePanel.setVisible(false);
+            }
             
             // row 6: the button panel
             
@@ -400,15 +408,15 @@ public class ActivationPanel {
             activationPanel.validate();
             activationPanel.repaint();
         }
-//        
-//        private boolean areThereExpiredModules() {
-//            for (ActivationItem item : activationManager.getActivationItems()) {
-//                if (item.getStatus() == ActivationItem.Status.EXPIRED) {
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
+        
+        private boolean areThereExpiredModules() {
+            for (ActivationItem item : activationManager.getActivationItems()) {
+                if (item.getStatus() == ActivationItem.Status.EXPIRED) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         private boolean areThereNonFunctionalModules() {
             for (ActivationItem item : activationManager.getActivationItems()) {
@@ -492,14 +500,14 @@ public class ActivationPanel {
         JEditorPane textLabel;
         
         public UnderneathModuleTableMessagePanel() {
-            init();
         }
 
-        private void init() {
+        public void showNonFunctionalModulesMessage() {
+            removeAll();
             setLayout(new MigLayout("insets 0, gap 0"));
             setOpaque(false);
-            add(new JLabel(unsupportedIcon), "gap right 5, aligny 50%");
-            textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("One or more of your licenses is currently not supported. For more help please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a></html>");
+            add(new JLabel(unsupportedIcon), "gap right 5, align 0% 0%");
+            textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("One or more of your licenses is currently not active. For more help please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a></html>");
             textLabel.setEditable(false);
             textLabel.setOpaque(false);
             textLabel.setPreferredSize(new Dimension(440 - 25, 50));
@@ -518,16 +526,14 @@ public class ActivationPanel {
 
         public void showBlockedModulesMessage() {
             removeAll();
-            setLayout(new MigLayout("insets 0 0 10 0, gap 0", "[]", "[]"));
+            setLayout(new MigLayout("insets 0 0 0 0, gap 0"));
             setOpaque(false);
             add(new JLabel(unsupportedIcon), "align 0% 0%, split");
             textLabel = new JEditorPane("text/html", "<html>" + I18n.tr("Oh no! It appears that your license key has been subject to abuse. Please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a>" 
                                         + I18n.tr(" to resolve the situation.") + "</html>");
             textLabel.setEditable(false);
             textLabel.setOpaque(false);
-            textLabel.setMaximumSize(new Dimension(width-75, 10000));
-            textLabel.setPreferredSize(new Dimension(width-75, 30));
-            textLabel.setMinimumSize(new Dimension(width-75, 1));
+            textLabel.setPreferredSize(new Dimension(440 - 25, 50));
             textLabel.addHyperlinkListener(new HyperlinkListener() {
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {

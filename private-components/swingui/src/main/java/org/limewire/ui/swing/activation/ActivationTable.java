@@ -193,7 +193,7 @@ class ActivationTable extends MouseableTable {
         }
         
         private String getText(ActivationItem item) {
-            if(item.getStatus() == Status.ACTIVE || item.getStatus() == Status.EXPIRED) {
+            if(item.getStatus() == Status.ACTIVE) {
                 return item.getLicenseName();
             } else {
                 return "<html><s>" + item.getLicenseName() + "</s></html>";

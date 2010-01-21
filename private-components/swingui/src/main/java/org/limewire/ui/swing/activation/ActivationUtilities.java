@@ -16,6 +16,8 @@ public class ActivationUtilities {
             return I18n.tr("{0} is not supported in this LimeWire version. Please upgrade LimeWire to access this feature.", item.getLicenseName());
         case UNUSEABLE_OS:
             return I18n.tr("{0} is not supported for this Operating System.", item.getLicenseName());
+        case EXPIRED:
+            return I18n.tr("{0} is expired.", item.getLicenseName());
         default:
             return "";
         }
