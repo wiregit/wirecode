@@ -22,7 +22,12 @@ public class SystemUtils {
     /**
      * Whether or not the native libraries could be loaded.
      */
-    private static boolean isLoaded;
+    private static final boolean isLoaded;
+    
+    /**
+     * Used by test cases to turn idle time support off.
+     */
+    private static boolean supportsIdleTime = true;
     
     static {
         boolean canLoad;
@@ -65,10 +70,11 @@ public class SystemUtils {
      * operating system.
      * 
      * @return <tt>true</tt> if we're able to determine the idle time on this
-     *  operating system, otherwise <tt>false</tt>
+     *  operating system, otherwise <tt>false</tt> if we can't determine, or 
+     *  if idle time has been turned off through the setSupportsIdleTime method.
      */
     public static boolean supportsIdleTime() {
-        if(isLoaded) {
+        if(supportsIdleTime && isLoaded) {
             if(OSUtils.isGoodWindows())
                 return true;
             else if(OSUtils.isMacOSX())

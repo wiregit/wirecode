@@ -151,13 +151,13 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     public static void beforeAllTestsSetUp() throws Throwable {        
         setupUniqueDirectories();
         setupSettings();
-        // SystemUtils must pretend to not be loaded, so the idle
+        // SystemUtils must supportsIdleTime to false, so the idle
         // time isn't counted.
-        // For tests that are testing SystemUtils specifically, they can
-        // set loaded to true.
+        // For tests that are testing IdleTime specifically, they can
+        // set support to true.
         SystemUtils.getIdleTime(); // make it loaded.
         // then unload it.
-        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
+        PrivilegedAccessor.setValue(SystemUtils.class, "supportsIdleTime", Boolean.FALSE);
     }
     
     /**
