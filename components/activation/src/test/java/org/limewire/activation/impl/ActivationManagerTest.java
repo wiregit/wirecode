@@ -143,8 +143,56 @@ public class ActivationManagerTest extends LimeTestCase {
         waitForActivationCompletion(activationManager, 85);
         assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.COMMUNICATION_ERROR);
-        assertEquals(5, retriesCount.get());
+        assertEquals(6, retriesCount.get());
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
+    }
+    
+    public void testStartServiceRetriesServerReturnsResponseAfterFewRetries() throws Exception {
+        
+        final String json = "{\n" +
+                "   \"response\":\"valid\",\n" +
+                "   \"lid\":\"L4RXLP28XVQ5\",\n" +
+                "   \"guid\":\"B3CCBED9E255F33F84F2D2111331256D\",\n" +
+                "   \"refresh\":1440,\n" +
+                "   \"mcode\":\"20140920|1xm7,2xm7,3xm7,4xm7\",\n" +
+                "   \"installations\":1,\n" +
+                "   \"modules\":[\n" +
+                "      {\n" +
+                "         \"id\":1,\n" +
+                "         \"name\":\"Turbo-charged downloads\",\n" +
+                "         \"pur\":\"20090920\",\n" +
+                "         \"exp\":\"20140920\",\n" +
+                "         \"status\":\"active\"\n" +
+                "      },\n" +
+                "   ],\n" +
+                "   \"duration\":\"0.005184\"\n" +
+                "}";
+        
+        ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
+        final AtomicInteger retriesCount = new AtomicInteger(0);
+        ActivationCommunicator comm = new ActivationCommunicator() {
+            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+                int currentCount = retriesCount.incrementAndGet();
+                if (currentCount < 3) {
+                    throw new IOException("Server is down!");
+                }
+                return responseFactory.createFromJson(json);
+            }
+        };
+        ActivationManagerImpl activationManager = getActivationManager(comm);
+        activationManager.start();
+        waitForActivationCompletion(activationManager, 40);
+        assertEquals(activationManager.getActivationState(), ActivationState.AUTHORIZED);
+        assertEquals(activationManager.getActivationError(), ActivationError.NO_ERROR);
+        assertEquals(3, retriesCount.get());
+        List<ActivationItem> items = activationManager.getActivationItems();
+        assertEquals(items.size(), 1);
+        ActivationItem item = items.get(0);
+        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, item.getModuleID());
+        assertEquals("Turbo-charged downloads", item.getLicenseName());
+        assertEquals(ActivationItem.Status.ACTIVE, item.getStatus());
+        assertEquals("20090920", format.format(item.getDatePurchased()));
+        assertEquals("20140920", format.format(item.getDateExpired()));
     }
     
     private void waitForActivationCompletion(final ActivationManagerImpl activationManager,
