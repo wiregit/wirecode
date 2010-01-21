@@ -39,6 +39,9 @@ public class ActivationSettings extends LimeProps {
         });
     }
 
+    public static final BooleanSetting CONTACT_SERVER_ON_STARTUP = FACTORY.createBooleanSetting(
+            "CONTACT_SERVER_ON_STARTUP", true);
+    
     public static final StringSetting ACTIVATION_KEY = FACTORY.createStringSetting(
             "ACTIVATION_KEY", "");
     
