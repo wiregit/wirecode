@@ -230,23 +230,19 @@ public class ActivationPanel {
             dialog = null;
         }
     }
-
-    private NoLicenseButtonPanel noLicenseButtonPanel;
-    private ActivatedButtonPanel activatedButtonPanel;
-    private EditButtonPanel editButtonPanel;
     
     private void selectCard(String card) {
         if(!cardMap.containsKey(card)) {
             if(card.equals(NO_LICENSE_PANEL)) {
-                noLicenseButtonPanel = new NoLicenseButtonPanel();
+                NoLicenseButtonPanel noLicenseButtonPanel = new NoLicenseButtonPanel();
                 cardMap.put(card, noLicenseButtonPanel);
                 cardPanel.add(noLicenseButtonPanel, card);
             } else if(card.equals(OK_PANEL)) {
-                activatedButtonPanel = new ActivatedButtonPanel();
+                ActivatedButtonPanel activatedButtonPanel = new ActivatedButtonPanel();
                 cardMap.put(card, activatedButtonPanel);
                 cardPanel.add(activatedButtonPanel, card);
             } else if(card.equals(EDIT_PANEL)) {
-                editButtonPanel = new EditButtonPanel();
+                EditButtonPanel editButtonPanel = new EditButtonPanel();
                 cardMap.put(card, editButtonPanel);
                 cardPanel.add(editButtonPanel, card);
             }
@@ -395,9 +391,9 @@ public class ActivationPanel {
             
             // and let's update the button states
             if (state == ActivationState.REFRESHING) {
-                activatedButtonPanel.setRefreshEnabled(false);
+                ((ActivatedButtonPanel)cardMap.get(OK_PANEL)).setRefreshEnabled(false);
             } else if (state == ActivationState.AUTHORIZED) {
-                activatedButtonPanel.setRefreshEnabled(true);
+                ((ActivatedButtonPanel)cardMap.get(OK_PANEL)).setRefreshEnabled(true);
             }
 
             activationPanel.validate();
