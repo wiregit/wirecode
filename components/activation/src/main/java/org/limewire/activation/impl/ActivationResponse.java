@@ -24,7 +24,10 @@ public class ActivationResponse {
     public enum Type {
         VALID,
         NOTFOUND,
-        BLOCKED;
+        BLOCKED,
+        ERROR,
+        REMOVE,
+        STOP;        
     }
         
     private final String jsonString;
