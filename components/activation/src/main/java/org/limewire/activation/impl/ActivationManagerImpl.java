@@ -34,60 +34,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
     
-    
-//    /**
-//     * States the ActivationManager can cycle through. 
-//     * 
-//     * The state machine behaves this way:
-//     * 
-//     *       UNINITIALIZED
-//     *            @------------|
-//     *                         V  ACTIVATING
-//     *    |--------------------@---------------->@  ACTIVATED
-//     *    | ActivationError    ^
-//     *    V                    |
-//     *    @--------------------|
-//     *   NOT_ACTIVATED
-//     *   
-//     *   or
-//     *   
-//     *   PROVISIONALLY_ACTIVATED 
-//     *   
-//     */
-//    private enum ActivatorState {
-//        /**
-//         * State when program starts. If a key already exists it has not yet
-//         * attempted to contact the server. Once an activation is attempted,
-//         * this state can never be returned to unless the program is restarted.
-//         */
-//        UNINITIALIZED,
-//        
-//        /**
-//         * Same state as UNINITIALIZED except the server has already been contacted,
-//         * with the key information and has failed. Unless a new key is entered or the
-//         * user takes some action, the state will remain here.
-//         */
-//        NOT_ACTIVATED,
-//        
-//        /**
-//         * Same state as ACTIVATED except the server could not be contacted.
-//         * So, the last saved state was read from disk and we continue to 
-//         * try to contact the server to verify the client's activation.
-//         */
-//        PROVISIONALLY_ACTIVATED,
-//
-//        /**
-//         * ActivationManager is attempting to validate the key. If the key is valid,
-//         * this will transition to a ACTIVATED state or a NOT_ACTIVATED state.
-//         */
-//        ACTIVATING,
-//
-//        /**
-//         * ActivationManager has successfully authenticated the key for this session.
-//         */
-//        ACTIVATED;   
-//    }
-    
+   
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
     private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -140,17 +87,24 @@ public class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void refreshKey(final String key) {
-        refreshKey(key, 0);
-    }
-
-    private void refreshKey(final String key, final int numberOfRetries) {
         if (!activateKeyInitAndValidate(key)) {
             return;    
         }
 
         REFRESHING_EXISTING_LICENSE.enterState();
 
-        scheduleServerQueriesForKey(key, numberOfRetries);
+        scheduleServerQueriesForKey(key, 0);
+    }
+    
+    private void activateKeyAtStartup(final String key) {
+        if (!activateKeyInitAndValidate(key)) {
+            return;    
+        }
+
+        if(currentState != ACTIVATED_FROM_CACHE)
+            REFRESHING_EXISTING_LICENSE.enterState();
+        
+        scheduleServerQueriesForKey(key, 5);
     }
 
     private void scheduleServerQueriesForKey(final String key, final int numberOfRetries) {
@@ -275,7 +229,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     String jsonString = activationSerializer.readFromDisk();
-                    if(jsonString != null && jsonString.length() > 0) {
+                    if(jsonString != null && jsonString.length() > 0) { 
                         ActivationResponse response = activationResponseFactory.createFromDiskJson(jsonString);
                         ACTIVATED_FROM_CACHE.enterState(response);
                     }
@@ -295,7 +249,7 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         // if a PKey exists, start the server and try contacting the authentication server
         String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
-            refreshKey(storedLicenseKey, 5);
+            activateKeyAtStartup(storedLicenseKey);
         }
     }
 
@@ -360,17 +314,17 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     private void setNotActivated(ActivationError error, ActivationStateImpl state) {
         if(error == ActivationError.INVALID_KEY) {
             ActivationSettings.ACTIVATION_KEY.revertToDefault();
-        }
-        BackgroundExecutorService.execute(new Runnable(){
-            public void run() {
-                try {
-                    activationSerializer.writeToDisk("");                        
-                } catch (Exception e) {
-                    if(LOG.isErrorEnabled())
-                        LOG.error("Error saving json string to disk.");
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    try {
+                        activationSerializer.writeToDisk("");                        
+                    } catch (Exception e) {
+                        if(LOG.isErrorEnabled())
+                            LOG.error("Error saving json string to disk.");
+                    }
                 }
-            }
-        });
+            });
+        }
         setActivationItems(Collections.<ActivationItem>emptyList());
         ActivationSettings.LAST_START_WAS_PRO.set(false);
         activationError = error;
@@ -492,7 +446,12 @@ public class ActivationManagerImpl implements ActivationManager, Service {
         }
 
         public void enterState(ActivationError error) {
-            setNotActivated(error, this);
+            if(currentState.getActivationState() == ActivationState.AUTHORIZED && error == ActivationError.COMMUNICATION_ERROR) {
+                listeners.broadcast(new ActivationEvent(currentState.getActivationState(),getActivationError()));
+                return;
+            } else {
+                setNotActivated(error, this);
+            }
         }
     }
 

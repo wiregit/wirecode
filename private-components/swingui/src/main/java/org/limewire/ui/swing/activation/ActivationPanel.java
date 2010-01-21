@@ -599,7 +599,6 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-//            stateManager.setRefreshing(true);
             activationManager.refreshKey(licenseField.getText().trim().replaceAll("-", ""));
         }
     }
