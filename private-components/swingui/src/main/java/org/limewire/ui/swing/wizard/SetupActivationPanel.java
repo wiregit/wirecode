@@ -113,9 +113,9 @@ public class SetupActivationPanel extends JPanel {
         case NO_KEY:
             errorMessageLabel.setVisible(false);
             return;
-        case EXPIRED_KEY:
-            errorMessageLabel.setVisible(false);
-            return;
+//        case EXPIRED_KEY:
+//            errorMessageLabel.setVisible(false);
+//            return;
         case INVALID_KEY:
             errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
             errorMessageLabel.setVisible(true);

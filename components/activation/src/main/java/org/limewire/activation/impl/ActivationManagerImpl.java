@@ -34,7 +34,6 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @EagerSingleton
 public class ActivationManagerImpl implements ActivationManager, Service {
     
-   
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
     private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -312,27 +311,29 @@ public class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void setNotActivated(ActivationError error, ActivationStateImpl state) {
-        if(error == ActivationError.INVALID_KEY) {
-            ActivationSettings.ACTIVATION_KEY.revertToDefault();
-            BackgroundExecutorService.execute(new Runnable(){
-                public void run() {
-                    try {
-                        activationSerializer.writeToDisk("");                        
-                    } catch (Exception e) {
-                        if(LOG.isErrorEnabled())
-                            LOG.error("Error saving json string to disk.");
-                    }
-                }
-            });
-        }
-        setActivationItems(Collections.<ActivationItem>emptyList());
-        ActivationSettings.LAST_START_WAS_PRO.set(false);
         activationError = error;
-        ActivationSettings.M_CODE.set("");
         currentState = state;
         LimeWireUtils.setIsPro(isProActive());
         
         listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
+    }
+        
+    private void removeData(boolean removeMCode) {
+        ActivationSettings.ACTIVATION_KEY.revertToDefault();
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    activationSerializer.writeToDisk("");                        
+                } catch (Exception e) {
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk.");
+                }
+            }
+        });
+        setActivationItems(Collections.<ActivationItem>emptyList());
+        ActivationSettings.LAST_START_WAS_PRO.set(false);
+        if(removeMCode)
+            ActivationSettings.M_CODE.set("");
     }
             
     private class ActivationResponseProcessor {
@@ -350,20 +351,20 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                     if (error instanceof IOException) {
                         if (++numAttempted <= MAX_ATTEMPTS) {
                             int nextDelay = numAttempted * 5000;
-                            activationError = ActivationError.COMMUNICATION_ERROR;
+                            handleError(ActivationResponse.Type.ERROR);
                             activationContactor.rescheduleIfSooner(nextDelay);
                             return;
                         }
                     }
                 }
 
-                handleError(ActivationError.COMMUNICATION_ERROR);
+                handleError(ActivationResponse.Type.ERROR);
                 return;
             }
             if (response != null) {
                 processActivationResponse(response);
             } else {
-                handleError(ActivationError.COMMUNICATION_ERROR);
+                handleError(ActivationResponse.Type.ERROR);
             }
         }
         
@@ -374,10 +375,8 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             // todo: maybe use enums to delegate logic, instead of if/else
             if (response.getResponseType() == ActivationResponse.Type.VALID) {
                 ACTIVATED_FROM_SERVER.enterState(response);
-            } else if (response.getResponseType() == ActivationResponse.Type.NOTFOUND) {
-                handleError(ActivationError.INVALID_KEY);
-            } else if (response.getResponseType() == ActivationResponse.Type.BLOCKED) {
-                handleError(ActivationError.BLOCKED_KEY);
+            } else {
+                handleError(response.getResponseType());
             }
             
             // reschedule next ping of activation server if necessary
@@ -388,17 +387,32 @@ public class ActivationManagerImpl implements ActivationManager, Service {
             }
         }
         
-        private void handleError(ActivationError error) {
-            // If we're refreshing the module list for a license and there is a communication error,
-            // then we need to rollback to whatever the previous state was whether that be
-            // ACTIVATED_FROM_SERVER or ACTIVATED_FROM_CACHE. 
-            // If we're authorizing a new license, then we need to enter a NOT_ACTIVATED state,
-            // or if we're refreshing and we got a blocked key error, then we need to enter a NOT_ACTIVATED state.
-            if (error == ActivationError.COMMUNICATION_ERROR && currentState == REFRESHING_EXISTING_LICENSE) {
-                activationError = ActivationError.COMMUNICATION_ERROR;
-                REFRESHING_EXISTING_LICENSE.rollback();
-            } else {
-                NOT_ACTIVATED.enterState(error);
+        private void handleError(ActivationResponse.Type error) {
+            switch(error) {
+            case ERROR:
+                if(currentState == REFRESHING_EXISTING_LICENSE) {
+                    //TODO: this is kind of bad, escaping the scope here
+                    activationError = ActivationError.COMMUNICATION_ERROR;
+                    REFRESHING_EXISTING_LICENSE.rollback();
+                } else {
+                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR);
+                }
+                break;
+
+            case REMOVE:
+                removeData(true);
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                break;
+            case STOP:
+                removeData(false);
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                break;
+            case NOTFOUND:
+                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY);
+                break;
+            case BLOCKED:
+                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY);
+                break;
             }
         }
     }
@@ -425,7 +439,6 @@ public class ActivationManagerImpl implements ActivationManager, Service {
                 responseProcessor.processResponse(response, error);
             }
         }
-        
     }
     
     private class ActivationStateImpl {

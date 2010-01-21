@@ -339,10 +339,11 @@ public class ActivationPanel {
 
             // here we control the visibility and the text of the error message above the module table
             boolean isLicenseTableErrorLabelVisible = false;
-            if (error == ActivationError.EXPIRED_KEY) {
-                licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
-                isLicenseTableErrorLabelVisible = true;
-            } else if ( (state == ActivationState.REFRESHING || state == ActivationState.AUTHORIZED) 
+//            if (error == ActivationError.EXPIRED_KEY) {
+//                licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
+//                isLicenseTableErrorLabelVisible = true;
+//            } else 
+                if ( (state == ActivationState.REFRESHING || state == ActivationState.AUTHORIZED) 
                             && error == ActivationError.COMMUNICATION_ERROR) {
                 licenseTableErrorLabel.setText(I18n.tr("There was an error communicating with the activation server."));
                 isLicenseTableErrorLabelVisible = true;
@@ -399,15 +400,15 @@ public class ActivationPanel {
             activationPanel.validate();
             activationPanel.repaint();
         }
-        
-        private boolean areThereExpiredModules() {
-            for (ActivationItem item : activationManager.getActivationItems()) {
-                if (item.getStatus() == ActivationItem.Status.EXPIRED) {
-                    return true;
-                }
-            }
-            return false;
-        }
+//        
+//        private boolean areThereExpiredModules() {
+//            for (ActivationItem item : activationManager.getActivationItems()) {
+//                if (item.getStatus() == ActivationItem.Status.EXPIRED) {
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
 
         private boolean areThereNonFunctionalModules() {
             for (ActivationItem item : activationManager.getActivationItems()) {
