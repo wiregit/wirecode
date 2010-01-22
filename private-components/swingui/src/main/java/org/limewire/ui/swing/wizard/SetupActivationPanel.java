@@ -93,7 +93,6 @@ public class SetupActivationPanel extends JPanel {
     }
     
     private void setActivationState(ActivationState state) {
-        System.out.println("SetupActivationPanel; activation state: " + activationManager.getActivationState());
         switch(state) 
         {
         case NOT_AUTHORIZED:
@@ -129,6 +128,10 @@ public class SetupActivationPanel extends JPanel {
             return;
         case BLOCKED_KEY:
             errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
+            errorMessageLabel.setVisible(true);
+            return;
+        case COMMUNICATION_ERROR:
+            errorMessageLabel.setText(I18n.tr("Communication error. Please try again later."));
             errorMessageLabel.setVisible(true);
             return;
         }
