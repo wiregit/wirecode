@@ -40,6 +40,11 @@ class ActivationResponseFactoryImpl implements ActivationResponseFactory {
         return createJson(json, true);
     }
     
+    @Override
+    public ActivationResponse createErrorResponse(ActivationResponse.Type error) {
+        return new ActivationResponse(null, null, error, null, 0, Collections.<ActivationItem>emptyList(), null);
+    }
+    
     private ActivationResponse createJson(String json, boolean loadedFromDisk) throws InvalidDataException {
         
         JSONTokener tokener = new JSONTokener(json);

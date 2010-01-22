@@ -19,4 +19,6 @@ interface ActivationResponseFactory {
      * a valid json String an InvalidDataException will be thrown.
      */
     public ActivationResponse createFromDiskJson(String json) throws InvalidDataException;
+    
+    public ActivationResponse createErrorResponse(ActivationResponse.Type error);
 }
