@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
@@ -76,6 +77,11 @@ class SetupActivationTable extends JTable {
         setBorder(BorderFactory.createEmptyBorder());
         // let's erase the cell borders by making them transparent
         setGridColor(new Color(0, 0, 0, 0));
+        
+        setShowHorizontalLines(false);
+        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setColumnSelectionAllowed(false);
+        setFillsViewportHeight(true);
     }
     
     private class ActivationTableModel extends AbstractTableModel {
@@ -113,7 +119,7 @@ class SetupActivationTable extends JTable {
         private ActivationItem cellEditorValue = null;
         
         public LicenseTypeRendererEditor() {
-            nameLabel = wizardPage.createAndDecorateMultiLine("");
+            nameLabel = new JLabel();
             nameLabel.setVisible(true);
             
             checkMarkButton = new IconButton(checkIcon);
@@ -172,6 +178,7 @@ class SetupActivationTable extends JTable {
                 nameLabel.setText("* " + item.getLicenseName());
                 nameLabel.setForeground(Color.GRAY);
             }
+            nameLabel.setVisible(true);
         }
         
         @Override
