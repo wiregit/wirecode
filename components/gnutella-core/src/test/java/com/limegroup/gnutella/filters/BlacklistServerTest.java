@@ -20,7 +20,6 @@ import com.limegroup.gnutella.StubSpamServices;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 
-import junit.framework.TestCase;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
