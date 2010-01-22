@@ -53,7 +53,8 @@ public class BlacklistServerTest extends TestCase {
         }
     }
 
-    public void testAllSameTimestamps() throws DateParseException, IOException {
+    // TODO LWC-5012
+    public void xxtestAllSameTimestamps() throws DateParseException, IOException {
         // TODO programatically obtain these URLs in the test
         testAllSameTimestamps("http://10.0.0.58/list/1", "http://10.0.0.60/list/1");
         testAllSameTimestamps("http://10.0.0.58/list/2", "http://10.0.0.60/list/2");
