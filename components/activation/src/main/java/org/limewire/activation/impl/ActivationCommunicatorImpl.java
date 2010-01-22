@@ -35,28 +35,25 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
     private final ActivationResponseFactory activationFactory;
     private final Provider<LimeHttpClient> httpClientProvider;
     private final ApplicationServices applicationServices;
-    private final Provider<ActivationManager> activationManagerProvider;
-    
+    private final ActivationManager activationManager;
 
     @Inject
     public ActivationCommunicatorImpl(@ActivationUrls Provider<String> activationUrlProvider,
                                       ActivationResponseFactory activationFactory,
                                       Provider<LimeHttpClient> httpClientProvider,
                                       ApplicationServices applicationServices,
-                                      Provider<ActivationManager> activationManagerProvider) {
+                                      ActivationManager activationManager) {
         this.activationUrlProvider = activationUrlProvider;
         this.httpClientProvider = httpClientProvider;
         this.activationFactory = activationFactory;
         this.applicationServices = applicationServices;
-        this.activationManagerProvider = activationManagerProvider;
+        this.activationManager = activationManager;
     }
     
     public ActivationResponse activate(final String key) throws IOException, InvalidDataException {
-        ActivationManager activationManager = activationManagerProvider.get();
-
         // get query string
         String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;;
+            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;
 
         String jsonResult = sendToServer(query);
 
