@@ -276,6 +276,8 @@ public class ActivationPanel {
             this.state = state;
             this.error = error;
 
+            //System.out.println("state: " + state + ", error: " + error);
+            
             if (state == ActivationState.AUTHORIZED) {
                 editingLicense = false;
                 licenseKeyPanel.setKey(activationManager.getLicenseKey());
@@ -313,7 +315,7 @@ public class ActivationPanel {
             } else if (error == ActivationError.BLOCKED_KEY) {
                 licenseKeyErrorLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
                 isLicenseKeyErrorLabelVisible = true;
-            }
+            } 
             licenseKeyErrorLabel.setVisible(isLicenseKeyErrorLabelVisible);
             
             // row 2: license field, icon panel, edit button
@@ -350,8 +352,7 @@ public class ActivationPanel {
 //                licenseTableErrorLabel.setText(I18n.tr("Your license has expired. Click Renew to renew your license."));
 //                isLicenseTableErrorLabelVisible = true;
 //            } else 
-                if ( (state == ActivationState.REFRESHING || state == ActivationState.AUTHORIZED) 
-                            && error == ActivationError.COMMUNICATION_ERROR) {
+            if (error == ActivationError.COMMUNICATION_ERROR) {
                 licenseTableErrorLabel.setText(I18n.tr("There was an error communicating with the activation server."));
                 isLicenseTableErrorLabelVisible = true;
             }
