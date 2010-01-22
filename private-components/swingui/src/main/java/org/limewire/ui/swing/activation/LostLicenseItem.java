@@ -20,7 +20,7 @@ public class LostLicenseItem implements ActivationItem {
 
     @Override
     public String getLicenseName() {
-        return I18n.tr("Lost your License?");
+        return I18n.tr("Don't see your features?");
     }
 
     @Override

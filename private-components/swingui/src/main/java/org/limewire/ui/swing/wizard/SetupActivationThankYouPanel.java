@@ -33,11 +33,11 @@ public class SetupActivationThankYouPanel extends JPanel {
         GuiUtils.assignResources(this);
         
         if (userHasPreexistingLicense) {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your pro features have been successfully activated."));
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
             thankYouLabel.setForeground(thankYouColor);
             add(thankYouLabel, "align 50% 50%, wrap");
         } else {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! Your license has been successfully activated."));
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! You have successfully activated your license."));
             thankYouLabel.setForeground(thankYouColor);
             add(thankYouLabel, "align 50% 50%, wrap");
         }
@@ -58,7 +58,7 @@ public class SetupActivationThankYouPanel extends JPanel {
 
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
-            JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your licenses is currently not activated."));
+            JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not activated."));
             JLabel infoTextLine2a = wizardPage.createAndDecorateMultiLine(I18n.tr("Click on "));
             JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
             innerPanel.add(infoTextLine1, "align 0% 50%, wrap");

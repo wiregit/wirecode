@@ -60,10 +60,6 @@ class ActivationTable extends MouseableTable {
         getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(108);
         getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(108);
         
-//        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(135);
-//        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(135);
-        
-//        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellRenderer(new DefaultTableRenderer(new LicenseTest()));
         getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
         getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
         
@@ -92,12 +88,6 @@ class ActivationTable extends MouseableTable {
             
             ActivationItem item = model.getElementAt(adapter.row);
             return item.getStatus() == Status.EXPIRED || item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
-//            LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-//            LocalFileItem item = libraryTable.getLibraryTableModel().getElementAt(adapter.row);
-//            if( navItem.getType() == NavType.PUBLIC_SHARED || (navItem.getType() == NavType.LIST && ((SharedFileList)navItem.getLocalFileList()).getFriendIds().size() > 0))
-//                return !item.isShareable(); 
-//
-//            return !item.isLoaded();
         }
     }
     
@@ -108,7 +98,7 @@ class ActivationTable extends MouseableTable {
         private static final int DATE_EXPIRE_INDEX = 2;
         
         public ActivationTableFormat() {
-            super(I18n.tr("License Type"), I18n.tr("Date Registered"), I18n.tr("Expires"));
+            super(I18n.tr("Feature Type"), I18n.tr("Date Registered"), I18n.tr("Expires"));
         }
         
         @Override
@@ -134,7 +124,7 @@ class ActivationTable extends MouseableTable {
         public LicenseTypeEditorRenderer() {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
-            licenseAction = new UrlAction(I18n.tr("Lost your license?"), "http://www.limewire.com/client_redirect/?page=gopro");
+            licenseAction = new UrlAction(I18n.tr("Don't see your features?"), "http://www.limewire.com/client_redirect/?page=gopro");
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             
@@ -232,7 +222,6 @@ class ActivationTable extends MouseableTable {
             renewButton = new HyperlinkButton(renewAction);
 
             iconButton.setVisible(false);
-//            IconButton.setIconButtonProperties(iconButton);
             renewButton.setVisible(false);
             
             setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));

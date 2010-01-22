@@ -35,7 +35,7 @@ import org.limewire.ui.swing.util.I18n;
 
 class SetupActivationTable extends JTable {
 
-    private final String[] columnNames = new String[] {I18n.tr("License Type"), I18n.tr("Expires")};
+    private final String[] columnNames = new String[] {I18n.tr("Feature Type"), I18n.tr("Expires")};
     
     @Resource private Color columnNameColor;
     @Resource private Icon checkIcon;

@@ -124,11 +124,11 @@ public class SetupActivationPanel extends JPanel {
 //            errorMessageLabel.setVisible(false);
 //            return;
         case INVALID_KEY:
-            errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is invalid. Please try again."));
+            errorMessageLabel.setText(I18n.tr("Invalid license key."));
             errorMessageLabel.setVisible(true);
             return;
         case BLOCKED_KEY:
-            errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
+            errorMessageLabel.setText(I18n.tr("Your license key has been used on too many installations. Please contact customer support for more information."));
             errorMessageLabel.setVisible(true);
             return;
         }
