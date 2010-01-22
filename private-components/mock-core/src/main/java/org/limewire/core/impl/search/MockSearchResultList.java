@@ -15,6 +15,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
+import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.io.GUID;
@@ -73,6 +74,14 @@ class MockSearchResultList implements SearchResultList {
     @Override
     public Search getSearch() {
         return search;
+    }
+
+    @Override
+    public void addListListener(SearchResultListListener listener) {
+    }
+
+    @Override
+    public void removeListListener(SearchResultListListener listener) {
     }
     
     @Override

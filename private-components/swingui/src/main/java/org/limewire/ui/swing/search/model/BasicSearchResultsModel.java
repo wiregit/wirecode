@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.search.model;
 
 import static org.limewire.ui.swing.search.model.VisualSearchResult.NEW_SOURCES;
-import static org.limewire.ui.swing.search.model.VisualSearchResult.SIMILARITY_PARENT;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +23,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
+import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -36,8 +37,6 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
@@ -78,9 +77,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     /** Factory to create visual search results. */
     private final VisualSearchResultFactory vsrFactory;
 
-    /** List of core search results grouped and sorted by URN. */
-    private final EventList<GroupedSearchResult> groupedCoreResults;
-
     /** List of visual search results grouped and sorted by URN. */
     private final EventList<VisualSearchResult> groupedUrnResults;
 
@@ -90,8 +86,8 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     /** Listener to handle search request events. */
     private SearchListener searchListener;
 
-    /** Listener to handle grouped search result list events. */
-    private ListEventListener<GroupedSearchResult> groupedCoreListener;
+    /** Listener to handle search result list events. */
+    private SearchResultListListener searchListListener;
 
     /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
@@ -151,7 +147,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         
         // Create core list of grouped results.
         searchResultList = searchManager.addSearch(search, searchInfo);
-        groupedCoreResults = GlazedListsFactory.swingThreadProxyEventList(searchResultList.getGroupedResults());
         
         // Create local list of grouped visual results.
         groupedUrnResults = new BasicEventList<VisualSearchResult>();
@@ -178,31 +173,48 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         this.searchListener = searchListener;
         search.addSearchListener(searchListener);
         
-        // Install core results listener.
-        groupedCoreListener = new ListEventListener<GroupedSearchResult>() {
+        // Install listener for new results.
+        searchListListener = new SearchResultListListener() {
             @Override
-            public void listChanged(ListEvent<GroupedSearchResult> listChanges) {
-                while (listChanges.next()) {
-                    switch (listChanges.getType()) {
-                    case ListEvent.INSERT:
-                        // Create visual result.
-                        int idx = listChanges.getIndex();
-                        GroupedSearchResult gsr = listChanges.getSourceList().get(idx);
-                        VisualSearchResult vsr = vsrFactory.create(gsr);
-                        
-                        // Add visual result and notify listeners.
-                        groupedUrnResults.add(idx, vsr);
-                        for (VisualSearchResultStatusListener listener : changeListeners) {
-                            listener.resultCreated(vsr);
-                        }
+            public void resultsCreated(final Collection<GroupedSearchResult> results) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        addResultsInternal(results);
                     }
-                }
+                });
             }
         };
-        groupedCoreResults.addListEventListener(groupedCoreListener);
+        searchResultList.addListListener(searchListListener);
         
         // Start search.
         search.start();
+    }
+    
+    /**
+     * Adds the specified collection of grouped results to the list of visual
+     * results.
+     */
+    private void addResultsInternal(Collection<GroupedSearchResult> results) {
+        // Process results.
+        for (GroupedSearchResult gsr : results) {
+            URN urn = gsr.getUrn();
+            int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+            if (idx < 0) {
+                // URN not found so add visual result at insertion point.
+                // This keeps the list in sorted order.
+                idx = -(idx + 1);
+                VisualSearchResult vsr = vsrFactory.create(gsr);
+                groupedUrnResults.add(idx, vsr);
+                // Notify listeners to update result states.
+                for (VisualSearchResultStatusListener listener : changeListeners) {
+                    listener.resultCreated(vsr);
+                }
+            }
+        }
+        
+        // Reapply sort in case similarity parents have changed.
+        sortedResultList.setComparator(sortedResultList.getComparator());
     }
     
     /**
@@ -218,9 +230,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             search.removeSearchListener(searchListener);
             searchListener = null;
         }
-        if (groupedCoreListener != null) {
-            groupedCoreResults.removeListEventListener(groupedCoreListener);
-            groupedCoreListener = null;
+        if (searchListListener != null) {
+            searchResultList.removeListListener(searchListListener);
+            searchListListener = null;
         }
         
         // Remove search from core management.
@@ -405,11 +417,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
                         listener.resultChanged(vsr, propertyName, oldValue, newValue);
                     }
                 }
-            }
-            
-            // Reapply sort when similarity parent changed.
-            if (SIMILARITY_PARENT.equals(propertyName) && sortedResultList != null) {
-                sortedResultList.setComparator(sortedResultList.getComparator());
             }
         }
     }

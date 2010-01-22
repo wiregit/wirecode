@@ -31,6 +31,18 @@ public interface SearchResultList {
     EventList<GroupedSearchResult> getGroupedResults();
     
     /**
+     * Adds the specified listener to the list that is notified about
+     * list events.
+     */
+    void addListListener(SearchResultListListener listener);
+    
+    /**
+     * Removes the specified listener from the list that is notified about
+     * list events.
+     */
+    void removeListListener(SearchResultListListener listener);
+    
+    /**
      * Clears all results.
      */
     void clear();

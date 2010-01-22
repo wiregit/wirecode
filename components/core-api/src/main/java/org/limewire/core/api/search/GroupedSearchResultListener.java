@@ -5,5 +5,8 @@ package org.limewire.core.api.search;
  */
 public interface GroupedSearchResultListener {
 
+    /**
+     * Invoked when sources are added to the grouped result.
+     */
     void sourceAdded();
 }
