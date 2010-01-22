@@ -27,7 +27,7 @@ class ActivationResponse {
         BLOCKED,
         ERROR,
         REMOVE,
-        STOP;        
+        STOP        
     }
         
     private final String jsonString;

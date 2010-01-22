@@ -14,6 +14,8 @@ import org.limewire.activation.api.ActivationUrls;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.InvalidDataException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,6 +32,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 // todo: write tests
 class ActivationCommunicatorImpl implements ActivationCommunicator {
+    private static Log LOG = LogFactory.getLog(ActivationCommunicatorImpl.class);
     
     private final Provider<String> activationUrlProvider;
     private final ActivationResponseFactory activationFactory;
@@ -56,6 +59,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
             activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;
 
         String jsonResult = sendToServer(query);
+        LOG.debugf("Activation server response: " + jsonResult);
 
         return activationFactory.createFromJson(jsonResult);
     }

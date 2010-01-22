@@ -78,4 +78,17 @@ class ActivationItemImpl implements ActivationItem {
             return status;
         }
     }
+    
+    public boolean equals(Object object) {
+        if (!(object instanceof ActivationItemImpl)) {
+            return false;    
+        }
+        ActivationItemImpl item = (ActivationItemImpl)object;
+        return item.getDateExpired().equals(dateExpired) &&
+               item.getDatePurchased().equals(datePurchased) &&
+               item.getLicenseName().equals(licenseName) &&
+               item.getModuleID().equals(moduleID) &&
+               item.getStatus().equals(currentStatus) &&
+               item.getURL().equals(getURL());
+    }
 }
