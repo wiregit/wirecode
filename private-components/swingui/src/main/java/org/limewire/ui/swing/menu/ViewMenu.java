@@ -14,7 +14,10 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.friends.login.AutoLoginService;
 import org.limewire.ui.swing.friends.login.LoginPopupPanel;
+import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.mainframe.ChangeLanguageAction;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -35,6 +38,8 @@ class ViewMenu extends DelayedMnemonicMenu {
     private final Provider<ChatMediator> chatFrameProvider;
     private final Provider<ChangeLanguageAction> changeLanguageActionProvider;
     private final Provider<TransferTrayNavigator> transferTrayNavigator;
+    private final Provider<HomeMediator> homeMediatorProvider;
+    private final Provider<Navigator> navigatorProvider;
 
     @Inject
     public ViewMenu(Provider<LoginPopupPanel> friendsSignInPanel,
@@ -45,7 +50,9 @@ class ViewMenu extends DelayedMnemonicMenu {
             Provider<ShowUploadsTrayAction> uploadTrayActionProvider,
             Provider<ChatMediator> chatFrameProvider,
             Provider<ChangeLanguageAction> changeLanguageActionProvider,
-            Provider<TransferTrayNavigator> transferTrayNavigator) {
+            Provider<TransferTrayNavigator> transferTrayNavigator,
+            Provider<HomeMediator> homeMediatorProvider,
+            Provider<Navigator> navigatorProvider) {
 
         super(I18n.tr("&View"));
 
@@ -59,6 +66,8 @@ class ViewMenu extends DelayedMnemonicMenu {
         this.chatFrameProvider = chatFrameProvider;
         this.changeLanguageActionProvider = changeLanguageActionProvider;
         this.transferTrayNavigator = transferTrayNavigator;
+        this.homeMediatorProvider = homeMediatorProvider;
+        this.navigatorProvider = navigatorProvider;
     }
 
     @Override
@@ -80,8 +89,9 @@ class ViewMenu extends DelayedMnemonicMenu {
         group.add(hideTransferTray);
         group.add(showDownloads);
         group.add(showUploads);
-
+        
         add(buildShowHideChatWindowAction(chatFrameProvider));
+        add(buildShowHomeScreenAction());
         addSeparator();
         add(hideTransferTray);
         add(showDownloads);
@@ -128,5 +138,15 @@ class ViewMenu extends DelayedMnemonicMenu {
         };
         
         return action;
+    }
+    
+    private Action buildShowHomeScreenAction(){
+        return new AbstractAction(I18n.tr("&Home Screen")) {
+            @Override
+           public void actionPerformed(ActionEvent e) {
+                navigatorProvider.get().getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
+                homeMediatorProvider.get().getComponent().loadDefaultUrl();
+           }
+        };
     }
 }

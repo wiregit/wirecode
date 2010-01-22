@@ -8,10 +8,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.mainframe.AboutAction;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
@@ -25,15 +22,11 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
     private final Application application;
     
     private final Provider<TrayNotifier> trayNotifierProvider;
-    private final Provider<Navigator> navigatorProvider;
-    private final Provider<HomeMediator> homeMediatorProvider;
     private final Provider<AboutAction> aboutAction;
     
     @Inject
     public HelpMenu(Application application, 
             Provider<TrayNotifier> trayNotifierProvider,
-            Provider<Navigator> navigatorProvider, 
-            Provider<HomeMediator> homeMediatorProvider,
             Provider<AboutAction> aboutAction) {
         
         super(I18n.tr("&Help"));
@@ -41,20 +34,11 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
         this.application = application;
         
         this.trayNotifierProvider = trayNotifierProvider;
-        this.navigatorProvider = navigatorProvider;
-        this.homeMediatorProvider = homeMediatorProvider;
         this.aboutAction = aboutAction;
     }
 
     @Override
-    public void createMenuItems() {
-        add(new AbstractAction(I18n.tr("&Home Screen")) {
-            @Override
-           public void actionPerformed(ActionEvent e) {
-                navigatorProvider.get().getNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME).select();
-                homeMediatorProvider.get().getComponent().loadDefaultUrl();
-           }
-        });
+    public void createMenuItems() {       
         
         add(new UrlAction(I18n.tr("&Using LimeWire"), "http://www.limewire.com/client_redirect/?page=support", application));
         
