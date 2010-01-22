@@ -158,7 +158,7 @@ public class ActivationPanel {
         activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%, growy 0");
         activationPanel.add(editButton, "gapleft 40, align 100% 50%, growy 0, wrap");
         
-        activationPanel.add(licenseKeyErrorLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 0");
+        activationPanel.add(licenseTableErrorLabel, "span, growx, gaptop 6, gapbottom 6, hidemode 0");
         
         activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, gpy 200, wrap");
         
@@ -340,10 +340,10 @@ public class ActivationPanel {
 //                isLicenseTableErrorLabelVisible = true;
 //            } else 
             if (error == ActivationError.COMMUNICATION_ERROR) {
-                licenseKeyErrorLabel.setText(I18n.tr("Connection error. Please try again later."));
+                licenseTableErrorLabel.setText(I18n.tr("Connection error. Please try again later."));
                 isLicenseTableErrorLabelVisible = true;
             }
-            licenseKeyErrorLabel.setVisible(isLicenseTableErrorLabelVisible);
+            licenseTableErrorLabel.setVisible(isLicenseTableErrorLabelVisible);
 
             // row 4: the module table
 
