@@ -48,8 +48,8 @@ public class SetupActivationThankYouPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
         int numberOfItemsVisible = (eventList.size() > 4) ? 4 : eventList.size();
-        scrollPane.setMinimumSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
-        scrollPane.setPreferredSize(new Dimension(350, 27 + numberOfItemsVisible * 29 + 10));
+        scrollPane.setMinimumSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
+        scrollPane.setPreferredSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
         
         if (areThereProblematicModules(eventList)) {
             JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, gapy 0", "[]", "[][][]"));

@@ -58,7 +58,7 @@ public class SetupActivationPanel extends JPanel {
         add(wizardPage.createAndDecorateMultiLine(I18n.tr("Enter your activation key below. This was sent to the email address you used when purchasing. You can always do this later on from the File menu.")), 
                        "spanx 1, growx, cell 2 4, gapafter 20px"); //wrap
 
-        errorMessageLabel = new JLabel("");
+        errorMessageLabel = wizardPage.createAndDecorateMultiLine("");
         errorMessageLabel.setForeground(errorColor);
         errorMessageLabel.setVisible(false);
         add(errorMessageLabel, "spanx 1, growx, cell 2 5"); //wrap
@@ -128,7 +128,7 @@ public class SetupActivationPanel extends JPanel {
             errorMessageLabel.setVisible(true);
             return;
         case BLOCKED_KEY:
-            errorMessageLabel.setText(I18n.tr("Your license key has been used on too many installations. Please contact customer support for more information."));
+            errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
             errorMessageLabel.setVisible(true);
             return;
         }

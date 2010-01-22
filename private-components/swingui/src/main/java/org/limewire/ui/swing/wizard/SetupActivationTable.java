@@ -70,8 +70,8 @@ class SetupActivationTable extends JTable {
         setBorder(BorderFactory.createEmptyBorder());
 
         JTableHeader header = getTableHeader();
-        header.setMinimumSize(new Dimension(350, 27));
-        header.setPreferredSize(new Dimension(350, 27));
+        header.setMinimumSize(new Dimension(400, 27));
+        header.setPreferredSize(new Dimension(400, 27));
         
         setBorder(BorderFactory.createEmptyBorder());
         // let's erase the cell borders by making them transparent
