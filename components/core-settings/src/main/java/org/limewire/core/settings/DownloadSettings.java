@@ -150,9 +150,27 @@ public class DownloadSettings extends LimeProps {
     
     @InspectablePrimitive("num scanned infected")
     public static final IntSetting NUM_SCANNED_INFECTED = FACTORY.createIntSetting("NUM_SCANNED_INFECTED", 0);
-    
+
     @InspectionPoint("infected extensions")
     public static final PropertiesSetting INFECTED_EXTENSIONS = FACTORY.createPropertiesSetting("INFECTED_EXTENSIONS", new Properties());
+
+    @InspectionPoint("num scans failed")
+    public static final IntSetting NUM_SCANS_FAILED = FACTORY.createIntSetting("NUM_SCANS_FAILED", 0);
+    
+    @InspectionPoint("num av incremental updates failed")
+    public static final IntSetting NUM_AV_INCREMENTAL_UPDATES_FAILED = FACTORY.createIntSetting("NUM_AV_INCREMENTAL_UPDATES_FAILED", 0);
+    
+    @InspectionPoint("num av incremental updates succeeded")
+    public static final IntSetting NUM_AV_INCREMENTAL_UPDATES_SUCCEEDED = FACTORY.createIntSetting("NUM_AV_INCREMENTAL_UPDATES_SUCCEEDED", 0);
+    
+    @InspectionPoint("num av full updates failed")
+    public static final IntSetting NUM_AV_FULL_UPDATES_FAILED = FACTORY.createIntSetting("NUM_AV_FULL_UPDATES_FAILED", 0);
+    
+    @InspectionPoint("num av full updates succeeded")
+    public static final IntSetting NUM_AV_FULL_UPDATES_SUCCEEDED = FACTORY.createIntSetting("NUM_AV_FULL_UPDATES_SUCCEEDED", 0);
+    
+    @InspectionPoint("num av mementos resumed")
+    public static final IntSetting NUM_AV_MEMENTOS_RESUMED = FACTORY.createIntSetting("NUM_AV_MEMENTOS_RESUMED", 0);
                 
   
 }
