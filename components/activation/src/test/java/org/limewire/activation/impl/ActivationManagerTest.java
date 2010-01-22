@@ -1,28 +1,25 @@
 package org.limewire.activation.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.text.SimpleDateFormat;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.limegroup.gnutella.LimeWireCoreModule;
+import junit.framework.Test;
+
+import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
+import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
-import org.limewire.activation.api.ActivationID;
-import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.gnutella.tests.LimeTestCase;
@@ -30,6 +27,12 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.setting.ActivationSettings;
 import org.limewire.util.OSUtils;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.limegroup.gnutella.LimeWireCoreModule;
 
 public class ActivationManagerTest extends LimeTestCase {
     
@@ -49,6 +52,10 @@ public class ActivationManagerTest extends LimeTestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return buildTestSuite(ActivationManagerTest.class);
+    }
+    
     @Override
     protected void setUp() throws Exception {
         injector = Guice.createInjector(Stage.DEVELOPMENT, getModules());

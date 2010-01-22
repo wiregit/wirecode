@@ -1,5 +1,7 @@
 package org.limewire.activation.impl;
 
+import junit.framework.Test;
+
 import org.limewire.gnutella.tests.LimeTestCase;
 
 /**
@@ -12,4 +14,12 @@ import org.limewire.gnutella.tests.LimeTestCase;
  * 
  */
 public class ActivationCommunicatorTest extends LimeTestCase {
+    
+    public ActivationCommunicatorTest(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(ActivationCommunicatorTest.class);
+    }
 }

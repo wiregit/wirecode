@@ -705,17 +705,17 @@ final class Initializer {
         });
         return response.get() == JOptionPane.OK_OPTION;
     }
-    
-    /**
-     * Gets the image to be used as the splash.
-     */
-    private static Image getProSplashImage() {
-        URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
-        if (imageURL != null) {
-            return Toolkit.getDefaultToolkit().createImage(imageURL);
-        } else {
-            return null;
-        }
-    }
+//    
+//    /**
+//     * Gets the image to be used as the splash.
+//     */
+//    private static Image getProSplashImage() {
+//        URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
+//        if (imageURL != null) {
+//            return Toolkit.getDefaultToolkit().createImage(imageURL);
+//        } else {
+//            return null;
+//        }
+//    }
 }
 

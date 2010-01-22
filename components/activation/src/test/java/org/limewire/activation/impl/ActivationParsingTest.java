@@ -2,6 +2,8 @@ package org.limewire.activation.impl;
 
 import java.text.SimpleDateFormat;
 
+import junit.framework.Test;
+
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
@@ -14,6 +16,14 @@ import org.limewire.io.InvalidDataException;
 public class ActivationParsingTest extends LimeTestCase {
 
     private ActivationResponseFactory parser;
+    
+    public ActivationParsingTest(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(ActivationParsingTest.class);
+    }
 
     @Override
     protected void setUp() throws Exception {

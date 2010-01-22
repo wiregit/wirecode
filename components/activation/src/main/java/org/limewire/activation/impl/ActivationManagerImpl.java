@@ -390,14 +390,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
             switch(error) {
             case ERROR:
                 if(currentState == REFRESHING_EXISTING_LICENSE) {
-                    //TODO: this is kind of bad, escaping the scope here
-                    activationError = ActivationError.COMMUNICATION_ERROR;
-                    REFRESHING_EXISTING_LICENSE.rollback();
+                    REFRESHING_EXISTING_LICENSE.rollback(ActivationError.COMMUNICATION_ERROR);
                 } else {
                     NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR, false);
                 }
                 break;
-
             case REMOVE:
                 NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
                 break;
@@ -477,9 +474,10 @@ class ActivationManagerImpl implements ActivationManager, Service {
             setActivating(this);
         }
         
-        public void rollback() {
+        public void rollback(ActivationError errorState) {
             currentState = previousState;
-            listeners.broadcast(new ActivationEvent(previousState.getActivationState(), getActivationError()));
+            activationError = errorState;
+            listeners.broadcast(new ActivationEvent(previousState.getActivationState(), errorState));
         }
     }
 
