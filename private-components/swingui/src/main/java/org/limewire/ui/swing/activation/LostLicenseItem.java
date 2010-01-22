@@ -6,7 +6,11 @@ import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.util.I18n;
 
-public class LostLicenseItem implements ActivationItem {
+/**
+ * An ActivationItem that is used when no items exist in the
+ * ActivationTable.
+ */
+public final class LostLicenseItem implements ActivationItem {
 
     @Override
     public Date getDateExpired() {
@@ -25,6 +29,7 @@ public class LostLicenseItem implements ActivationItem {
 
     @Override
     public String getURL() {
+        //TODO: fix this url
         return "www.limewire.com";
     }
 

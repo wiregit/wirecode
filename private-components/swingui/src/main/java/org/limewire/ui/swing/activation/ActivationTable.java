@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -26,7 +25,7 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.AbstractTableFormat;
-import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableRendererEditor;
@@ -37,6 +36,10 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
+/**
+ * Displays information about the Modules that are associated with the 
+ * given License Key.
+ */
 class ActivationTable extends MouseableTable {
 
     @Resource
@@ -44,26 +47,24 @@ class ActivationTable extends MouseableTable {
     
     private final DefaultEventTableModel<ActivationItem> model;
     
-    public ActivationTable(EventList<ActivationItem> eventList) {
+    public ActivationTable(EventList<ActivationItem> eventList, CalendarRenderer calendarRenderer) {
         GuiUtils.assignResources(this);
 
         model = new DefaultEventTableModel<ActivationItem>(new SortedList<ActivationItem>(eventList, new ActivationItemComparator()), new ActivationTableFormat());
         setModel(model);
 
-        setShowHorizontalLines(false);
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        setColumnSelectionAllowed(false);
+        initTable();
         
-        getColumnExt(ActivationTableFormat.LICENSE_TYPE_INDEX).setMinWidth(195);
-        getColumnExt(ActivationTableFormat.LICENSE_TYPE_INDEX).setMaxWidth(195);
+        getColumnExt(ActivationTableFormat.MODULE_TYPE_INDEX).setMinWidth(195);
+        getColumnExt(ActivationTableFormat.MODULE_TYPE_INDEX).setMaxWidth(195);
         
         getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(108);
         getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(108);
         
-        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
-        getColumn(ActivationTableFormat.LICENSE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
+        getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
+        getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
         
-        getColumn(ActivationTableFormat.DATE_REGISTERED_INDEX).setCellRenderer(new DateRenderer());
+        getColumn(ActivationTableFormat.DATE_REGISTERED_INDEX).setCellRenderer(calendarRenderer);
         
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellRenderer(new ExpiredRenderer());
         ExpiredRenderer expiredRenderer = new ExpiredRenderer();
@@ -71,6 +72,13 @@ class ActivationTable extends MouseableTable {
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellEditor(expiredRenderer);
         
         setupHighlighters();
+    }
+    
+    private void initTable() {
+        setShowHorizontalLines(false);
+        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setColumnSelectionAllowed(false);
+        setFillsViewportHeight(true);
     }
     
     private void setupHighlighters() {
@@ -82,6 +90,9 @@ class ActivationTable extends MouseableTable {
         addHighlighter(unsupportedHighlighter);
     }
     
+    /**
+     * Highlights the text of a row gray when there is a problem with that Module.
+     */
     private class GrayHighlightPredicate implements HighlightPredicate {
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
@@ -91,20 +102,23 @@ class ActivationTable extends MouseableTable {
         }
     }
     
-    private class ActivationTableFormat extends AbstractTableFormat<ActivationItem> { //implements AdvancedTableFormat<ActivationItem> {
+    /**
+     * TableFormat for an ActivationTable.
+     */
+    private class ActivationTableFormat extends AbstractTableFormat<ActivationItem> {
 
-        private static final int LICENSE_TYPE_INDEX = 0;
+        private static final int MODULE_TYPE_INDEX = 0;
         private static final int DATE_REGISTERED_INDEX = 1;
         private static final int DATE_EXPIRE_INDEX = 2;
         
         public ActivationTableFormat() {
-            super(I18n.tr("Feature Type"), I18n.tr("Date Registered"), I18n.tr("Expires"));
+            super(I18n.tr("Feature"), I18n.tr("Registered"), I18n.tr("Expires"));
         }
         
         @Override
         public Object getColumnValue(ActivationItem baseObject, int column) {
             switch(column) {
-            case LICENSE_TYPE_INDEX:
+            case MODULE_TYPE_INDEX:
                 return baseObject;
             case DATE_REGISTERED_INDEX:
                 return baseObject.getDatePurchased();
@@ -115,6 +129,10 @@ class ActivationTable extends MouseableTable {
         }
     }
 
+    /**
+     * Renderers the Name of a the Module in the Table. If no Modules
+     * exist will render a hyperlink to purchase Pro.
+     */
     private class LicenseTypeEditorRenderer extends TableRendererEditor {
 
         private final JLabel nameLabel;
@@ -124,7 +142,7 @@ class ActivationTable extends MouseableTable {
         public LicenseTypeEditorRenderer() {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
-            licenseAction = new UrlAction(I18n.tr("Don't see your features?"), "http://www.limewire.com/client_redirect/?page=gopro");
+            licenseAction = new UrlAction(I18n.tr("Lost your license?"), "http://www.limewire.com/client_redirect/?page=gopro");
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             
@@ -133,36 +151,30 @@ class ActivationTable extends MouseableTable {
             add(licenseButton);
         }
         
+        /**
+         * This will update the foreground color to use any Highlighter that
+         * may be in effect.
+         */
         @Override
         public void setForeground(Color bg) {
             if(nameLabel != null)
                 nameLabel.setForeground(bg);
-//            System.out.println("update " + bg);
         }
         
         @Override
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            if(value instanceof LostLicenseItem) {
-                LostLicenseItem item = (LostLicenseItem) value;
-                nameLabel.setVisible(false);
-                licenseButton.setText(item.getLicenseName());
-                licenseButton.setVisible(true);
-            } else if(value instanceof ActivationItem) {
-                nameLabel.setText(getText((ActivationItem) value));
-                nameLabel.setVisible(true);
-                nameLabel.setForeground(getForeground());
-                licenseButton.setVisible(false);
-            } else {
-                nameLabel.setVisible(false);
-                licenseButton.setVisible(false);
-            }
-            return this;
+            return updateComponent(table, value, isSelected, false, row, column);
         }
 
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            return updateComponent(table, value, isSelected, hasFocus, row, column);
+        }
+        
+        private Component updateComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             if(value instanceof LostLicenseItem) {
                 LostLicenseItem item = (LostLicenseItem) value;
                 nameLabel.setVisible(false);
@@ -172,9 +184,8 @@ class ActivationTable extends MouseableTable {
             } else if(value instanceof ActivationItem) {
                 nameLabel.setText(getText((ActivationItem) value));
                 nameLabel.setVisible(true);
-//                nameLabel.setForeground(getForeground());
+                nameLabel.setForeground(getForeground());
                 licenseButton.setVisible(false);
-                
             } else {
                 nameLabel.setVisible(false);
                 licenseButton.setVisible(false);
@@ -191,23 +202,11 @@ class ActivationTable extends MouseableTable {
         }
     }
     
-    private class DateRenderer extends DefaultLimeTableCellRenderer {        
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            
-            if(!(value instanceof Date)) {
-                setText("");
-            } else {
-                setText(GuiUtils.msec2Date((Date)value)); 
-            }
-            return this;
-        }
-    }
-    
+    /**
+     * Renderers the date a Module expires. If there is a problem with this
+     * module will also renderer clickable items. 
+     */
     private class ExpiredRenderer extends TableRendererEditor {
-
         private final JLabel dateLabel;
         private final IconButton iconButton;
         private final HyperlinkButton renewButton;
@@ -249,28 +248,26 @@ class ActivationTable extends MouseableTable {
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
-                ActivationItem item = (ActivationItem) value;
-                dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-                renewAction.setURL(item.getURL());
-                iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
-                renewButton.setVisible(item.getStatus() == Status.EXPIRED);
-                cellEditorValue = item;
+                cellEditorValue = (ActivationItem) value;
             } else {
-                dateLabel.setText("");
-                iconButton.setVisible(false);
-                renewButton.setVisible(false);
                 cellEditorValue = null;
             }
             
-            return this;
+            return updateComponent(table, value, isSelected, row, column);
         }
 
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            return updateComponent(table, value, isSelected, row, column);
+        }
+        
+        private Component updateComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
+                renewAction.setURL(item.getURL());
                 iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
                 renewButton.setVisible(item.getStatus() == Status.EXPIRED);
             } else {
@@ -282,8 +279,11 @@ class ActivationTable extends MouseableTable {
         }
     }
     
+    /**
+     * When an info button is clicked, displays a popup message about
+     * the row selected.
+     */
     private class InfoAction extends AbstractAction {
-
         private final ExpiredRenderer expiredRenderer;
 
         public InfoAction(ExpiredRenderer expiredRenderer) {
@@ -295,6 +295,7 @@ class ActivationTable extends MouseableTable {
             ActivationItem item = expiredRenderer.getCellEditorValue();
             if (item != null) {
                 String message = ActivationUtilities.getStatusMessage(item);
+                //TODO: change this message Dialog to something more appropriate
                 FocusJOptionPane.showMessageDialog(ActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
                 expiredRenderer.cancelCellEditing();
             }
