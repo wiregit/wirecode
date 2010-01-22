@@ -176,11 +176,28 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         // Install listener for new results.
         searchListListener = new SearchResultListListener() {
             @Override
-            public void resultsCreated(final Collection<GroupedSearchResult> results) {
+            public void resultsCreated(Collection<GroupedSearchResult> results) {
+                // Create list of result lists.
+                final List<List<GroupedSearchResult>> resultLists = new ArrayList<List<GroupedSearchResult>>();
+                List<GroupedSearchResult> list = new ArrayList<GroupedSearchResult>();
+                resultLists.add(list);
+                
+                // Split collection into lists of 1000 results.  We process
+                // large result sets in groups so other UI events can also get 
+                // handled on the UI thread.
+                for (GroupedSearchResult gsr : results) {
+                    if (list.size() >= 1000) {
+                        list = new ArrayList<GroupedSearchResult>();
+                        resultLists.add(list);
+                    }
+                    list.add(gsr);
+                }
+                
+                // Post UI event to add result lists.
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        addResultsInternal(results);
+                        addResultsInternal(resultLists);
                     }
                 });
             }
@@ -195,8 +212,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * Adds the specified collection of grouped results to the list of visual
      * results.
      */
-    private void addResultsInternal(Collection<GroupedSearchResult> results) {
-        // Process results.
+    private void addResultsInternal(final List<List<GroupedSearchResult>> resultLists) {
+        // Process first list of results.
+        List<GroupedSearchResult> results = resultLists.get(0);
         for (GroupedSearchResult gsr : results) {
             URN urn = gsr.getUrn();
             int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
@@ -213,8 +231,23 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             }
         }
         
-        // Reapply sort in case similarity parents have changed.
-        sortedResultList.setComparator(sortedResultList.getComparator());
+        // Remove first list.
+        resultLists.remove(0);
+        
+        if (resultLists.size() > 0) {
+            // Post UI event to process next result list.  This allows other
+            // UI events to get handled in between lists.
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    addResultsInternal(resultLists);
+                }
+            });
+            
+        } else {
+            // Reapply sort in case similarity parents have changed.
+            sortedResultList.setComparator(sortedResultList.getComparator());
+        }
     }
     
     /**
