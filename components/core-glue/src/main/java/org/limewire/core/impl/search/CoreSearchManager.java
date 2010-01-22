@@ -1,7 +1,6 @@
 package org.limewire.core.impl.search;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -66,8 +65,7 @@ public class CoreSearchManager implements SearchManager {
     @Override
     public SearchResultList getSearchResultList(Search search) {
         // Return result list from collection.
-        for (Iterator<SearchResultList> iter = threadSafeSearchList.iterator(); iter.hasNext(); ) {
-            SearchResultList resultList = iter.next();
+        for (SearchResultList resultList : threadSafeSearchList) {
             if (search.equals(resultList.getSearch())) {
                 return resultList;
             }
