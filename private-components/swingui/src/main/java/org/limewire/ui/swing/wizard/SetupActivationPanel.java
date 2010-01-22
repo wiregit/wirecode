@@ -20,6 +20,7 @@ import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.listener.EventListener;
+import org.limewire.setting.ActivationSettings;
 import org.limewire.ui.swing.activation.ActivationStateIconPanel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -69,6 +70,9 @@ public class SetupActivationPanel extends JPanel {
         
         add(wizardPage.createAndDecorateHeader(I18n.tr("License Key") + ":"), "aligny 50%");
         licenseField = wizardPage.createAndDecorateLicenseKeyField();
+        if (!ActivationSettings.ACTIVATION_KEY.isDefault()) {
+            licenseField.setText(ActivationSettings.ACTIVATION_KEY.getValueAsString());
+        }
         licenseField.addActionListener(new EnterActionListener());
         add(licenseField, "cell 2 6, aligny 50%");
 
