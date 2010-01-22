@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
@@ -87,7 +88,8 @@ public class ActivationManagerTest extends LimeTestCase {
         
         ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
         activationManager.start();
-        waitForActivationCompletion(activationManager, 10);
+        assertTrue("Timed out waiting for activation competion.", 
+            waitForSuccessfulActivation(activationManager, 10));
         
         // check for activation items
         List<ActivationItem> items = activationManager.getActivationItems();
@@ -123,17 +125,21 @@ public class ActivationManagerTest extends LimeTestCase {
     
     public void testStartServiceInvalidKeyShouldNotEvenGoToServer() throws Exception {
         ActivationSettings.ACTIVATION_KEY.set("invalid Key");
+        final AtomicBoolean serverContacted = new AtomicBoolean(false);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
-                throw new RuntimeException("Should not get to activate in ActivationCommunicator!");
+                serverContacted.set(true);
+                return null;
             }
         };
         ActivationManagerImpl activationManager = getActivationManager(comm);
         activationManager.start();
-        waitForActivationCompletion(activationManager, 5);
+        assertFalse("Activation was successful, but an invalid key error was expected.", 
+            waitForSuccessfulActivation(activationManager, 5));
         assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
+        assertFalse(serverContacted.get());
     }
     
     public void testStartServiceRetriesServerStaysDown() throws Exception {
@@ -147,9 +153,10 @@ public class ActivationManagerTest extends LimeTestCase {
         };
         ActivationManagerImpl activationManager = getActivationManager(comm);
         activationManager.start();
-        waitForActivationCompletion(activationManager, 85);
-        assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
-        assertEquals(activationManager.getActivationError(), ActivationError.COMMUNICATION_ERROR);
+        assertFalse("Activation was successful, but a time out failure was expected.", 
+            waitForSuccessfulActivation(activationManager, 85));
+        assertEquals(ActivationState.NOT_AUTHORIZED, activationManager.getActivationState());
+        assertEquals(ActivationError.COMMUNICATION_ERROR, activationManager.getActivationError());
         assertEquals(6, retriesCount.get());
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
     }
@@ -188,9 +195,10 @@ public class ActivationManagerTest extends LimeTestCase {
         };
         ActivationManagerImpl activationManager = getActivationManager(comm);
         activationManager.start();
-        waitForActivationCompletion(activationManager, 40);
-        assertEquals(activationManager.getActivationState(), ActivationState.AUTHORIZED);
-        assertEquals(activationManager.getActivationError(), ActivationError.NO_ERROR);
+        assertTrue("Timed out waiting for activation competion.", 
+            waitForSuccessfulActivation(activationManager, 40));
+        assertEquals(ActivationState.AUTHORIZED, activationManager.getActivationState());
+        assertEquals(ActivationError.NO_ERROR, activationManager.getActivationError());
         assertEquals(3, retriesCount.get());
         List<ActivationItem> items = activationManager.getActivationItems();
         assertEquals(items.size(), 1);
@@ -202,7 +210,84 @@ public class ActivationManagerTest extends LimeTestCase {
         assertEquals("20140920", format.format(item.getDateExpired()));
     }
     
-    private void waitForActivationCompletion(final ActivationManagerImpl activationManager,
+    // tests the "notfound" json response.  In particular, tests to make sure that:
+    //
+    // 1. After receiving "notfound", LW should erase Mcode and License Key
+    // 2. Should not contact the activation server on startup
+    //
+    public void testNotFoundResponseErasesKeyAndMcodeNoAutoStart() throws Exception {
+        String KEY = "L4RXLP28XVQ5";
+        ActivationSettings.ACTIVATION_KEY.set(KEY);
+        final String json = "{\"response\":\"notfound\",\"lid\":\"HT5YXS7CWGRG\"," +
+                             "\"guid\":\"44444444444444444444444444444444\",\"refresh\":1440," +
+                             "\"mcode\":\"\",\"duration\":\"0.001737\"}";
+        
+        final AtomicInteger retriesCount = new AtomicInteger(0);
+        ActivationCommunicator comm = new ActivationCommunicator() {
+            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+                retriesCount.incrementAndGet();
+                return responseFactory.createFromJson(json);
+            }
+        };
+        ActivationManagerImpl activationManager = getActivationManager(comm);
+        activationManager.activateKey(KEY);
+        assertFalse(waitForSuccessfulActivation(activationManager, 5));
+        assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
+        assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
+        assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
+        assertEquals("", ActivationSettings.ACTIVATION_KEY.get());
+        assertEquals("", ActivationSettings.M_CODE.get());
+        
+        // after "notfound" is received and processed, calling start() on activation manager
+        // should not result in contacting the activation server
+        assertEquals(1, retriesCount.get());
+        activationManager = getActivationManager(comm);
+        activationManager.start();
+        waitForSuccessfulActivation(activationManager, 5);
+        assertEquals(1, retriesCount.get());
+    }
+    
+    // tests the "stop" json response.  In particular, tests to make sure that:
+    //
+    // 1. After receiving "stop", LW should erase License Key, but Mcode STILL EXISTS.
+    // 2. Should not contact the activation server on startup
+    //
+    public void testStopResponseErasesKeyButMcodeStaysNoAutoStart() throws Exception {
+        String KEY = "L4RXLP28XVQ5";
+        String MCODE = "cvnb";
+        ActivationSettings.ACTIVATION_KEY.set(KEY);
+        ActivationSettings.M_CODE.set(MCODE);
+        final String json = "{\"response\":\"stop\",\"lid\":" +
+                             "\"HT5YXS7CWGRG\",\"guid\":\"44444444444444444444444444444444\"," +
+                             "\"refresh\":0,\"mcode\":\"cvnb\",\"duration\":\"0.001739\"}";
+        
+        final AtomicInteger retriesCount = new AtomicInteger(0);
+        ActivationCommunicator comm = new ActivationCommunicator() {
+            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+                retriesCount.incrementAndGet();
+                return responseFactory.createFromJson(json);
+            }
+        };
+        ActivationManagerImpl activationManager = getActivationManager(comm);
+        activationManager.activateKey(KEY);
+        assertFalse(waitForSuccessfulActivation(activationManager, 5));
+        assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
+        assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
+        assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
+        assertEquals("", ActivationSettings.ACTIVATION_KEY.get());
+        assertEquals(MCODE, ActivationSettings.M_CODE.get());
+        
+        // after "stop" is received and processed, calling start() on activation manager
+        // should not result in contacting the activation server
+        assertEquals(1, retriesCount.get());
+        activationManager = getActivationManager(comm);
+        activationManager.start();
+        assertFalse(waitForSuccessfulActivation(activationManager, 5));
+        assertEquals(1, retriesCount.get());
+    }
+    
+    
+    private boolean waitForSuccessfulActivation(final ActivationManagerImpl activationManager,
                                              int delay) throws Exception {
 
        
@@ -211,18 +296,17 @@ public class ActivationManagerTest extends LimeTestCase {
             @Override
             public void handleEvent(ActivationEvent event) {
                 ActivationState state = event.getData();
-                if (isTerminalState(state)) {
+                if (isSuccessfulState(state)) {
                     latch.countDown();        
                 }
             }
         });
         // check if activation is done, before waiting for a state change.
         ActivationState state = activationManager.getActivationState();
-        if (isTerminalState(state)) {
-            return;
+        if (isSuccessfulState(state)) {
+            return true;
         }
-        assertTrue("Activation attempt timed out after " + delay + " seconds",
-                   latch.await(delay, TimeUnit.SECONDS));
+        return latch.await(delay, TimeUnit.SECONDS);        
     }
      
     
@@ -246,8 +330,8 @@ public class ActivationManagerTest extends LimeTestCase {
         return new ActivationManagerImpl(scheduler, comm, model, serializer, factory);
     }
         
-    private boolean isTerminalState(ActivationState state) {
-        return (state == ActivationState.AUTHORIZED || state == ActivationState.NOT_AUTHORIZED);
+    private boolean isSuccessfulState(ActivationState state) {
+        return (state == ActivationState.AUTHORIZED);
     }
-    
+
 }
