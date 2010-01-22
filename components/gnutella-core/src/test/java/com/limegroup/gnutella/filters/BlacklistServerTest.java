@@ -11,6 +11,7 @@ import java.util.HashSet;
 import org.limewire.util.Visitor;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.AbstractModule;
 
 import com.limegroup.gnutella.URN;
@@ -36,7 +37,7 @@ import com.google.inject.Injector;
 /**
  * functional test of the production blacklist server
  */
-public class BlacklistServerTest extends TestCase {
+public class BlacklistServerTest extends LimeTestCase {
     private Injector injector;
 
     public BlacklistServerTest(String name){
