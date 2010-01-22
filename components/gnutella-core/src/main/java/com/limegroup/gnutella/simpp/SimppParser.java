@@ -17,12 +17,28 @@ public class SimppParser {
     
     private static final Log LOG = LogFactory.getLog(SimppParser.class);
 
-    private static final String VERSION = "version";
+    public static final String VERSION = "version";
     
-    private static final String PROPS = "props";
+    public static final String PROPS = "props";
+    
+    public static final String KEY_VERSION = "keyversion";
+    
+    public static final String NEW_VERSION = "newversion";
+    
+    public static final String SIGNATURE = "signature";
+    
+    public static final String CERTIFICATE = "certificate";
 
     private int _version;
-    private String _propsData;    
+    private String _propsData;
+
+    private int keyVersion;
+
+    private int newVersion;
+
+    private String signature;
+
+    private String certificate;    
 
     //Format of dataBytes:
     //<xml for version related info with one tag containing all the props data>
@@ -34,7 +50,23 @@ public class SimppParser {
     public int getVersion() {
         return _version;
     }
+    
+    public int getKeyVersion() {
+        return keyVersion;
+    }
+    
+    public int getNewVersion() {
+        return newVersion;
+    }
+    
+    public String getSignature() {
+        return signature;
+    }
 
+    public String getCertificateString() {
+        return certificate;
+    }
+    
     public String getPropsData() {
         return _propsData;
     }
@@ -53,17 +85,27 @@ public class SimppParser {
             String nodeName = node.getNodeName().toLowerCase(Locale.US).trim();
             String value = LimeXMLUtils.getText(node.getChildNodes());
             if(nodeName.equals(VERSION)) {
-                String ver = value;
-                try {
-                    _version = Integer.parseInt(ver);
-                } catch(NumberFormatException nfx) {
-                    LOG.error("Unable to parse version number: " + nfx);
-                    _version = -1;
-                }
-            }
-            else if(nodeName.equals(PROPS)) {
+                _version = parseInteger(value, -1);
+            } else if (nodeName.equals(KEY_VERSION)) {
+                keyVersion = parseInteger(value, -1);
+            } else if (nodeName.equals(NEW_VERSION)) {
+                newVersion = parseInteger(value, -1);
+            } else if (nodeName.equals(SIGNATURE)) {
+                signature = value;
+            } else if (nodeName.equals(CERTIFICATE)) {
+                certificate = value;
+            } else if(nodeName.equals(PROPS)) {
                 _propsData = value;
             }
         }//end of for -- done all child nodes
+    }
+    
+    private int parseInteger(String integer, int defaultValue) {
+        try {
+            return Integer.parseInt(integer);
+        } catch(NumberFormatException nfx) {
+            LOG.error("Unable to parse number: " + integer, nfx);
+            return defaultValue;
+        }
     }
 }
