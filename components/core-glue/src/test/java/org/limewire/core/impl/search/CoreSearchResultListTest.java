@@ -1,25 +1,22 @@
 package org.limewire.core.impl.search;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import org.jmock.Mockery;
-import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.search.Search;
-import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.SearchDetails;
-import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.Provider;
 import com.limegroup.gnutella.URN;
 
+/**
+ * JUnit test case for CoreSearchResultList.
+ */
 public class CoreSearchResultListTest extends BaseTestCase {
     /** Instance of class being tested. */
-    private CoreSearchResultList model;
-    private Provider<PropertiableHeadings> provider;
-    private Mockery context;
+    private CoreSearchResultList resultList;
     
     /**
      * Constructs a test case for the specified method name.
@@ -31,113 +28,122 @@ public class CoreSearchResultListTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        context = new Mockery();
-        provider = context.mock(Provider.class);
         // Create test instance.
-        model = new CoreSearchResultList(new TestSearch(), new TestSearchDetails());
+        resultList = new CoreSearchResultList(new TestSearch(), new TestSearchDetails());
     }
     
     @Override
     protected void tearDown() throws Exception {
-        model = null;
+        resultList = null;
         super.tearDown();
     }
 
     /** Make a search that has no results. */
     public void testEmptySearch() {
         // model is already the CoreSearchResultList, made from a TestSearch
-        assertEquals(0, model.getGroupedResults().size()); // should be 0 results
+        assertEquals(0, resultList.getGroupedResults().size()); // should be 0 results
     }
     
     /** Make a search that gets a result, and see it there. */
-    public void testSearchThenResult() throws Exception {
+    public void testAddResult() throws Exception {
         SearchResult result = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        model.addResult(result);
-        assertEquals(1, model.getGroupedResults().size()); // confirm the result is in there
+        resultList.addResult(result);
+        
+        // confirm the result is in there
+        assertEquals(1, resultList.getGroupedResults().size());
+        assertEquals(1, resultList.getResultCount());
     }
     
     /** A search gets two different results. */
-    public void testSearchTwoDifferentResults() throws Exception {
+    public void testAddResultsTwoDifferent() throws Exception {
         SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
-        model.addResult(result1);
-        model.addResult(result2);
-        assertEquals(2, model.getGroupedResults().size()); // different, so both listed separately
+        
+        List<SearchResult> list = new ArrayList<SearchResult>();
+        list.add(result1);
+        list.add(result2);
+        resultList.addResults(list);
+        
+        // different, so both listed separately
+        assertEquals(2, resultList.getGroupedResults().size());
+        assertEquals(2, resultList.getResultCount());
     }
     
     /** A search gets two results that share the same URN, and get grouped together. */
-    public void testSearchTwoIdenticalResults() throws Exception {
+    public void testAddResultsWithSameUrn() throws Exception {
         SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
-        model.addResult(result1);
-        model.addResult(result2);
+        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
+        SearchResult result3 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
+        
+        List<SearchResult> list = new ArrayList<SearchResult>();
+        list.add(result1);
+        list.add(result2);
+        list.add(result3);
+        resultList.addResults(list);
+        
         // Verify grouped results count.
-        assertEquals(1, model.getGroupedResults().size()); // same file hash, so both were combined
+        assertEquals(2, resultList.getGroupedResults().size());
+        
         // Verify total results count.
-        assertEquals(2, model.getResultCount());
-    }
-
-    
-    
-    
-    
-    
-    
-    
-    /**
-     * Test implementation of Search.
-     */
-    private static class TestSearch implements Search {
-
-        @Override
-        public void addSearchListener(SearchListener searchListener) {
-        }
-
-        @Override
-        public void removeSearchListener(SearchListener searchListener) {
-        }
-
-        @Override
-        public SearchCategory getCategory() {
-            return null;
-        }
-
-        @Override
-        public void repeat() {
-        }
-
-        @Override
-        public void start() {
-        }
-
-        @Override
-        public void stop() {
-        }
+        assertEquals(3, resultList.getResultCount());
     }
     
+    /** Test method to clear results. */
+    public void testClear() throws Exception {
+        // Add two results.
+        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
+        
+        List<SearchResult> list = new ArrayList<SearchResult>();
+        list.add(result1);
+        list.add(result2);
+        resultList.addResults(list);
+        
+        // Verify results added.
+        assertEquals(2, resultList.getGroupedResults().size());
+        assertEquals(2, resultList.getResultCount());
+        
+        // Clear result list and verify.
+        resultList.clear();
+        assertEquals(0, resultList.getGroupedResults().size());
+        assertEquals(0, resultList.getResultCount());
+    }
+    
+    /** Tests event notification when results added. */
+    public void testListListener() throws Exception {
+        // Add listener to list.
+        TestSearchListListener listener = new TestSearchListListener();
+        resultList.addListListener(listener);
+        
+        // Add result and check listener.
+        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        resultList.addResult(result1);
+        assertEquals(1, listener.getCount());
+        
+        // Add result with same URN, and check listener.
+        listener.reset();
+        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        resultList.addResult(result2);
+        assertEquals(0, listener.getCount());
+    }
+    
     /**
-     * Test implementation of SearchDetails.
+     * Test implementation of SearchResultListListener.
      */
-    private static class TestSearchDetails implements SearchDetails {
+    private static class TestSearchListListener implements SearchResultListListener {
+        private int count = 0;
 
         @Override
-        public Map<FilePropertyKey, String> getAdvancedDetails() {
-            return null;
+        public void resultsCreated(Collection<GroupedSearchResult> results) {
+            count = results.size();
         }
-
-        @Override
-        public SearchCategory getSearchCategory() {
-            return null;
+        
+        public int getCount() {
+            return count;
         }
-
-        @Override
-        public String getSearchQuery() {
-            return null;
-        }
-
-        @Override
-        public SearchType getSearchType() {
-            return null;
+        
+        public void reset() {
+            count = 0;
         }
     }
 }

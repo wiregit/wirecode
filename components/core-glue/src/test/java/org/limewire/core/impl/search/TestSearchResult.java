@@ -29,9 +29,16 @@ class TestSearchResult implements SearchResult {
 
     /** The URN value is real. */
     private final URN urn;
+    private final RemoteHost remoteHost;
     
     public TestSearchResult(URN urn) {
         this.urn = urn;
+        this.remoteHost = new TestRemoteHost("test");
+    }
+    
+    public TestSearchResult(URN urn, String sourceName) {
+        this.urn = urn;
+        this.remoteHost = new TestRemoteHost(sourceName);
     }
     
     @Override
@@ -76,7 +83,7 @@ class TestSearchResult implements SearchResult {
 
     @Override
     public List<RemoteHost> getSources() {
-        return Collections.<RemoteHost>singletonList(new TestRemoteHost("test"));
+        return Collections.<RemoteHost>singletonList(remoteHost);
     }
 
     @Override
@@ -221,7 +228,7 @@ class TestSearchResult implements SearchResult {
 
         @Override
         public String getId() {
-            return null;
+            return name;
         }
 
         @Override

@@ -1,8 +1,13 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
@@ -12,56 +17,71 @@ import org.limewire.friend.api.Friend;
 
 class MockGroupedSearchResult implements GroupedSearchResult {
 
+    private final URN urn;
+    private final String fileName;
+    private final List<SearchResult> searchResults;
+    
+    public MockGroupedSearchResult(URN urn, String fileName) {
+        this.urn = urn;
+        this.fileName = fileName;
+        
+        searchResults = new ArrayList<SearchResult>();
+        searchResults.add(new TestSearchResult(urn.toString(), fileName));
+    }
+    
+    public MockGroupedSearchResult(URN urn, String fileName, Map<FilePropertyKey, Object> properties) {
+        this.urn = urn;
+        this.fileName = fileName;
+        
+        searchResults = new ArrayList<SearchResult>();
+        searchResults.add(new TestSearchResult(urn.toString(), fileName, properties));
+    }
+    
+    void setCategory(Category category) {
+        ((TestSearchResult) searchResults.get(0)).setCategory(category);
+    }
+    
     @Override
     public void addResultListener(GroupedSearchResultListener listener) {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void removeResultListener(GroupedSearchResultListener listener) {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public String getFileName() {
-        // TODO Auto-generated method stub
-        return null;
+        return fileName;
     }
 
     @Override
     public Collection<Friend> getFriends() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public float getRelevance() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public List<SearchResult> getSearchResults() {
-        // TODO Auto-generated method stub
-        return null;
+        return searchResults;
     }
 
     @Override
     public Collection<RemoteHost> getSources() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public URN getUrn() {
-        // TODO Auto-generated method stub
-        return null;
+        return urn;
     }
 
     @Override
     public boolean isAnonymous() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
 }

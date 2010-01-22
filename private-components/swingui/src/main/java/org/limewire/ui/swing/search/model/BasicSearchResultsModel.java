@@ -212,7 +212,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * Adds the specified collection of grouped results to the list of visual
      * results.
      */
-    private void addResultsInternal(final List<List<GroupedSearchResult>> resultLists) {
+    void addResultsInternal(final List<List<GroupedSearchResult>> resultLists) {
         // Process first list of results.
         List<GroupedSearchResult> results = resultLists.get(0);
         for (GroupedSearchResult gsr : results) {
@@ -246,7 +246,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             
         } else {
             // Reapply sort in case similarity parents have changed.
-            sortedResultList.setComparator(sortedResultList.getComparator());
+            if (sortedResultList != null) {
+                sortedResultList.setComparator(sortedResultList.getComparator());
+            }
         }
     }
     

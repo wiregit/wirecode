@@ -20,7 +20,7 @@ public class SearchResultAdapterTest extends TestCase {
     @SuppressWarnings("unchecked")
     @Override
     protected void setUp() {
-        groupedResult = new MockGroupedSearchResult();
+        groupedResult = new MockGroupedSearchResult(new MockURN("1"), "test");
         propertiableHeadings = new MockPropertiableHeadings();
         context = new Mockery();
         provider = context.mock(Provider.class);
