@@ -570,7 +570,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 activated(response);
                 break;
         }
-        listeners.broadcast(new ActivationEvent(getActivationState()));
+        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
     }
     
     private void notActivated(ActivationResponse response) {
