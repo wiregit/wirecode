@@ -30,7 +30,7 @@ public final class LostLicenseItem implements ActivationItem {
     @Override
     public String getURL() {
         //TODO: fix this url
-        return "www.limewire.com";
+        return "http://www.limewire.com/client_redirect/?page=gopro";
     }
 
     @Override

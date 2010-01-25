@@ -179,7 +179,7 @@ class ActivationTable extends MouseableTable {
                 LostLicenseItem item = (LostLicenseItem) value;
                 nameLabel.setVisible(false);
                 licenseButton.setText(item.getLicenseName());
-                licenseAction.setURL(item.getLicenseName());
+                licenseAction.setURL(item.getURL());
                 licenseButton.setVisible(true);
             } else if(value instanceof ActivationItem) {
                 nameLabel.setText(getText((ActivationItem) value));

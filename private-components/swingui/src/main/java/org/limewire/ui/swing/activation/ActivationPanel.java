@@ -184,11 +184,14 @@ public class ActivationPanel {
         // when we are initially opening the dialog don't show any error messages
         // pertaining to fleeting states like communication errors or invalid keys
         ActivationError error = ActivationError.NO_ERROR;
-        if (activationManager.getActivationState() != ActivationState.NOT_AUTHORIZED
-             || (activationManager.getActivationState() == ActivationState.NOT_AUTHORIZED 
-                  && (error != ActivationError.INVALID_KEY || error != ActivationError.COMMUNICATION_ERROR))) {
+        if(activationManager.getActivationError() == ActivationError.BLOCKED_KEY) {
             error = activationManager.getActivationError();
         }
+//        if (activationManager.getActivationState() != ActivationState.NOT_AUTHORIZED
+//             || (activationManager.getActivationState() == ActivationState.NOT_AUTHORIZED 
+//                  && (error != ActivationError.INVALID_KEY || error != ActivationError.COMMUNICATION_ERROR))) {
+//            error = activationManager.getActivationError();
+//        }
         stateManager.setActivationState(activationManager.getActivationState(), error);
 
         dialog = new LimeJDialog();
@@ -436,7 +439,7 @@ public class ActivationPanel {
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
             
             add(goProButton, "push");
-            add(activateButton, "split, tag ok");
+            add(activateButton, "split, gapright 10, tag ok");
             add(laterButton, "tag cancel, wrap");
         }
         
