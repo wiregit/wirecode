@@ -23,7 +23,6 @@ public enum ActivationState {
      * The License Key that exists is currently being re-authenticated. 
      */
     REFRESHING,
-
     
     /**
      * The License Key entered has been authenticated and any modules 

@@ -13,28 +13,32 @@ import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
-import org.limewire.ui.swing.activation.ActivationItemComparator;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.activation.ActivationItemComparator;
 import org.limewire.ui.swing.activation.ActivationUtilities;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-class SetupActivationTable extends JTable {
+class SetupActivationTable extends JXTable {
 
     private final String[] columnNames = new String[] {I18n.tr("Feature Type"), I18n.tr("Expires")};
     
@@ -43,17 +47,13 @@ class SetupActivationTable extends JTable {
     @Resource private Color headerBackgroundColor;
     @Resource private Font headerFont;
     @Resource private Icon infoIcon;
-    
-    private final WizardPage wizardPage;
 
-    public SetupActivationTable(WizardPage wizardPage, List<ActivationItem> activationItems) {
+    public SetupActivationTable(List<ActivationItem> activationItems) {
         super();
         
         GuiUtils.assignResources(this);
 
         setModel(new ActivationTableModel(activationItems));
-        
-        this.wizardPage = wizardPage;
         
         Collections.sort(activationItems, new ActivationItemComparator());
 
@@ -67,21 +67,45 @@ class SetupActivationTable extends JTable {
         getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
         getColumn(columnNames[1]).setMinWidth(100);
         getColumn(columnNames[1]).setMaxWidth(150);
-        setRowHeight( 29 );
         setBorder(BorderFactory.createEmptyBorder());
 
         JTableHeader header = getTableHeader();
         header.setMinimumSize(new Dimension(400, 27));
         header.setPreferredSize(new Dimension(400, 27));
         
-        setBorder(BorderFactory.createEmptyBorder());
-        // let's erase the cell borders by making them transparent
-        setGridColor(new Color(0, 0, 0, 0));
-        
-        setShowHorizontalLines(false);
+        initTable();
+        setupHighlighters();
+    }
+    
+    private void initTable() {
+        setRowHeight(29);
+        setShowGrid(false, false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setColumnSelectionAllowed(false);
         setFillsViewportHeight(true);
+        
+        getTableHeader().setReorderingAllowed(false);
+        getTableHeader().setResizingAllowed(false);
+    }
+    
+    private void setupHighlighters() {
+        TableColors tableColors = new TableColors();
+        ColorHighlighter unsupportedHighlighter = new ColorHighlighter(new GrayHighlightPredicate(), 
+                null, tableColors.getDisabledForegroundColor(), 
+                null, tableColors.getDisabledForegroundColor());
+        
+        addHighlighter(unsupportedHighlighter);
+    }
+    
+    /**
+     * Highlights the text of a row gray when there is a problem with that Module.
+     */
+    private class GrayHighlightPredicate implements HighlightPredicate {
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            ActivationItem item = (ActivationItem) getModel().getValueAt(adapter.row, 0);
+            return item.getStatus() != Status.ACTIVE;
+        }
     }
     
     private class ActivationTableModel extends AbstractTableModel {
@@ -108,7 +132,7 @@ class SetupActivationTable extends JTable {
             return activationItems.get(row).getStatus() != ActivationItem.Status.ACTIVE;
         }
     }
-
+    
     private class LicenseTypeRendererEditor extends TableRendererEditor {
 
         private final IconButton checkMarkButton;
@@ -120,7 +144,6 @@ class SetupActivationTable extends JTable {
         
         public LicenseTypeRendererEditor() {
             nameLabel = new JLabel();
-            nameLabel.setVisible(true);
             
             checkMarkButton = new IconButton(checkIcon);
             checkMarkButton.setVisible(false);
@@ -159,7 +182,6 @@ class SetupActivationTable extends JTable {
         protected Component doTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             cellEditorValue = (ActivationItem) value;
-
             updateComponents(cellEditorValue);
 
             return this;
@@ -178,7 +200,6 @@ class SetupActivationTable extends JTable {
                 nameLabel.setText("* " + item.getLicenseName());
                 nameLabel.setForeground(Color.GRAY);
             }
-            nameLabel.setVisible(true);
         }
         
         @Override
@@ -206,17 +227,8 @@ class SetupActivationTable extends JTable {
         }
     }
 
-    private class DateRenderer extends JPanel implements TableCellRenderer {        
-        private final JLabel dateLabel;
-
+    private class DateRenderer extends DefaultLimeTableCellRenderer {        
         public DateRenderer() {
-            dateLabel = wizardPage.createAndDecorateLabel("");
-            dateLabel.setVisible(true);
-
-            setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
-            add(dateLabel, "align 0% 50%");
-            
-            setBorder(BorderFactory.createEmptyBorder());
         }
 
         @Override
@@ -225,42 +237,23 @@ class SetupActivationTable extends JTable {
 
             ActivationItem item = (ActivationItem) value;
 
-            dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-            dateLabel.setEnabled(item.getStatus() == Status.ACTIVE);
-
-            if (item.getStatus() != Status.ACTIVE) {
-                dateLabel.setForeground(Color.GRAY);
-            } else {
-                dateLabel.setForeground(Color.BLACK);
-            }
+            setText(GuiUtils.msec2Date(item.getDateExpired())); 
 
             return this;
         }
     }
     
-    private class TableHeaderRenderer extends JPanel implements TableCellRenderer {        
-        JLabel nameLabel;
-
+    private class TableHeaderRenderer extends DefaultLimeTableCellRenderer {        
         public TableHeaderRenderer() {
-            nameLabel = wizardPage.createAndDecorateHeader("");
-            nameLabel.setFont(headerFont);
-            nameLabel.setForeground(columnNameColor);
-            
-            setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
-            add(nameLabel);
-
+            setFont(headerFont);
+            setForeground(columnNameColor);
             setBackground(headerBackgroundColor);
         }
         
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            
-            if (column == 0) {
-                nameLabel.setText(value.toString());
-            } else {
-                nameLabel.setText(value.toString());
-            }
+            setText(value.toString());
 
             return this;
         }

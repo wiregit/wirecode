@@ -3,6 +3,7 @@ package org.limewire.ui.swing.activation;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -25,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.table.JTableHeader;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -44,6 +46,7 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.CalendarRenderer;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -85,6 +88,7 @@ public class ActivationPanel {
     private JButton editButton;
     private JXLayer tableJXLayer;
     private ActivationTable table;
+    private JScrollPane scrollPane;
     private ColoredBusyLabel tableOverlayBusyLabel;
     private JLabel licenseKeyErrorLabel;
     private JLabel licenseTableErrorLabel;
@@ -138,8 +142,10 @@ public class ActivationPanel {
         
         table = new ActivationTable(eventList, calendarRenderer);
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane = new JScrollPane(table);
         ResizeUtils.forceSize(scrollPane, new Dimension(tableWidth, 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height));
+        configureEnclosingScrollPane(scrollPane);
+        
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
         busyLabelPanel.add(Box.createVerticalStrut(10), "wrap");
@@ -171,9 +177,25 @@ public class ActivationPanel {
         activationPanel.add(cardPanel, "span, gaptop 10, gapbottom 10, growx, wrap");
     }
     
+    
+    /**
+     * Fills in the top right corner if a scrollbar appears with an empty table
+     * header.
+     */
+    protected void configureEnclosingScrollPane(JScrollPane scrollPane) {
+        JTableHeader th = new JTableHeader();
+        th.setDefaultRenderer(new TableCellHeaderRenderer());
+        // Put a dummy header in the upper-right corner.
+        final Component renderer = th.getDefaultRenderer().getTableCellRendererComponent(null, "", false, false, -1, -1);
+        JPanel cornerComponent = new JPanel(new BorderLayout());
+        cornerComponent.add(renderer, BorderLayout.CENTER);
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
+    }    
+    
     @Inject
     public void register() {
         activationManager.addListener(listener);
+        configureEnclosingScrollPane(scrollPane);
     }
 
     public void show() {

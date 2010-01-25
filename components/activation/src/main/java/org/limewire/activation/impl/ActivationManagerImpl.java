@@ -41,8 +41,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
     
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
 
-    private volatile ActivationError activationError = ActivationError.NO_ERROR;
-
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
     private final ActivationCommunicator activationCommunicator;
@@ -52,15 +50,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
     
     // interval in seconds between successive hits to the activation server
     private long refreshIntervalSeconds = 0;
-
-//    private final ActivationStateImpl UNINITIALIZED = new ActivationStateImpl(ActivationState.NOT_AUTHORIZED);
-//    private final NotActivated NOT_ACTIVATED = new NotActivated(ActivationState.NOT_AUTHORIZED);
-//    private final Activating ACTIVATING_NEW_LICENSE = new Activating(ActivationState.AUTHORIZING);
-//    private final Activating REFRESHING_EXISTING_LICENSE = new Activating(ActivationState.REFRESHING);
-//    private final ActivatedFromServer ACTIVATED_FROM_SERVER = new ActivatedFromServer(ActivationState.AUTHORIZED);
-//    private final ActivatedFromCache ACTIVATED_FROM_CACHE = new ActivatedFromCache(ActivationState.AUTHORIZED);
-//    
-//    private volatile ActivationStateImpl currentState = UNINITIALIZED;
     
     private enum State {
         NOT_ACTIVATED(ActivationState.NOT_AUTHORIZED),
@@ -80,8 +69,10 @@ class ActivationManagerImpl implements ActivationManager, Service {
         }
     }
     
-    private State lastState = State.NOT_ACTIVATED;
-    private State currentState = State.NOT_ACTIVATED;
+
+    private volatile ActivationError activationError = ActivationError.NO_ERROR;
+    private volatile State lastState = State.NOT_ACTIVATED;
+    private volatile State currentState = State.NOT_ACTIVATED;
     
     @Inject
     public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
@@ -102,7 +93,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
         }
 
         transitionToState(State.ACTIVATING);
-//        ACTIVATING_NEW_LICENSE.enterState();
 
         scheduleServerQueriesForKey(key, 0);
     }
@@ -114,7 +104,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
         }
 
         transitionToState(State.REFRESHING);
-//        REFRESHING_EXISTING_LICENSE.enterState();
 
         scheduleServerQueriesForKey(key, 0);
     }
@@ -126,8 +115,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         if(currentState != State.ACTIVATED_FROM_DISK)
             transitionToState(State.REFRESHING);
-//        if(currentState != ACTIVATED_FROM_CACHE)
-//            REFRESHING_EXISTING_LICENSE.enterState();
         
         scheduleServerQueriesForKey(key, 5);
     }
@@ -149,14 +136,12 @@ class ActivationManagerImpl implements ActivationManager, Service {
         // which is currently not contacting the server
         if (activationContactor != null) {
             if(currentState == State.ACTIVATING || currentState == State.REFRESHING)
-//            if(currentState == ACTIVATING_NEW_LICENSE || currentState == REFRESHING_EXISTING_LICENSE)
                 return false;
             else
                 activationContactor.unschedule();
         }
 
         if (!isValidKey(key)) {
-//            NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
             transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.NOTFOUND));
             return false;
         }
@@ -264,7 +249,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     if(jsonString != null && jsonString.length() > 0) { 
                         ActivationResponse response = activationResponseFactory.createFromDiskJson(jsonString);
                         transitionToState(State.ACTIVATED_FROM_DISK, response);
-//                        ACTIVATED_FROM_CACHE.enterState(response);
                     }
                 } catch (IOException e) {
                     if(LOG.isErrorEnabled())
@@ -310,67 +294,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
     }
-    
-//    private void setActivating(ActivationStateImpl state) {
-//        activationError = ActivationError.NO_ERROR;
-//        currentState = state;
-//        listeners.broadcast(new ActivationEvent(getActivationState()));
-//    }
-//    
-//    private void setProvisionallyActivated(final ActivationResponse response, ActivationStateImpl state) {
-//        setActivationItems(response.getActivationItems());
-//        ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
-//        activationError = ActivationError.NO_ERROR;
-//        currentState = state;
-//        LimeWireUtils.setIsPro(isProActive());
-//        listeners.broadcast(new ActivationEvent(getActivationState()));
-//    }
-//    
-//    private void setActivated(final ActivationResponse response, ActivationStateImpl state) {
-//        BackgroundExecutorService.execute(new Runnable(){
-//            public void run() {
-//                try {
-//                    activationSerializer.writeToDisk(response.getJSONString());                        
-//                } catch (Exception e) {
-//                    if(LOG.isErrorEnabled())
-//                        LOG.error("Error saving json string to disk.");
-//                }
-//            }
-//        });
-//
-//        ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-//        ActivationSettings.M_CODE.set(response.getMCode());
-//        
-//        setProvisionallyActivated(response, state);
-//    }
-//    
-//    private void setNotActivated(ActivationError error, ActivationStateImpl state, boolean removeAllData) {
-//        if(error == ActivationError.INVALID_KEY)
-//            removeData(removeAllData);
-//        activationError = error;
-//        currentState = state;
-//        LimeWireUtils.setIsPro(isProActive());
-//        
-//        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
-//    }
-    
-    private void removeData(boolean removeMCode) {
-        ActivationSettings.ACTIVATION_KEY.revertToDefault();
-        BackgroundExecutorService.execute(new Runnable(){
-            public void run() {
-                try {
-                    activationSerializer.writeToDisk("");                        
-                } catch (Exception e) {
-                    if(LOG.isErrorEnabled())
-                        LOG.error("Error saving json string to disk.");
-                }
-            }
-        });
-        setActivationItems(Collections.<ActivationItem>emptyList());
-        ActivationSettings.LAST_START_WAS_PRO.set(false);
-        if(removeMCode)
-            ActivationSettings.M_CODE.set("");
-    }
             
     private class ActivationResponseProcessor {
         private final static int MAX_ATTEMPTS = 5;
@@ -388,7 +311,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
                         if (++numAttempted <= MAX_ATTEMPTS) {
                             int nextDelay = numAttempted * 5000;
                             transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-//                            handleError(ActivationResponse.Type.ERROR);
                             activationContactor.rescheduleIfSooner(nextDelay);
                             return;
                         }
@@ -396,7 +318,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 }
 
                 transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-//                handleError(ActivationResponse.Type.ERROR);
                 return;
             }
             processActivationResponse(response);
@@ -404,7 +325,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
         
         private void processActivationResponse(ActivationResponse response) {
             if (response != null && response.getResponseType() == ActivationResponse.Type.VALID) {
-//                ACTIVATED_FROM_SERVER.enterState(response);
                 transitionToState(State.ACTIVATED_FROM_SERVER, response);
                 
                 // reset counter
@@ -417,37 +337,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
                 }
             } else if(response != null){
-//                handleError(response.getResponseType());
                 transitionToState(State.NOT_ACTIVATED, response);
             } else {
                 transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-//                handleError(ActivationResponse.Type.ERROR);
             }
         }
-        
-//        private void handleError(ActivationResponse.Type error) {
-//            switch(error) {
-//            case ERROR:
-//                if(currentState == REFRESHING_EXISTING_LICENSE) {
-//                    REFRESHING_EXISTING_LICENSE.rollback(ActivationError.COMMUNICATION_ERROR);
-//                } else {
-//                    NOT_ACTIVATED.enterState(ActivationError.COMMUNICATION_ERROR, false);
-//                }
-//                break;
-//            case REMOVE:
-//                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
-//                break;
-//            case STOP:
-//                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, false);
-//                break;
-//            case NOTFOUND:
-//                NOT_ACTIVATED.enterState(ActivationError.INVALID_KEY, true);
-//                break;
-//            case BLOCKED:
-//                NOT_ACTIVATED.enterState(ActivationError.BLOCKED_KEY, false);
-//                break;
-//            }
-//        }
     }
     
     private class ActivationTask implements Runnable {
@@ -473,76 +367,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
             }
         }
     }
-    
-//    private class ActivationStateImpl {
-//        private ActivationState state;
-//        
-//        private ActivationStateImpl(ActivationState state) {
-//            this.state = state;
-//        }
-//        
-//        public ActivationState getActivationState() {
-//            return this.state;
-//        }
-//    }
-//    
-//    private class NotActivated extends ActivationStateImpl  {
-//        private NotActivated(ActivationState state) {
-//            super(state);
-//        }
-//
-//        public void enterState(ActivationError error, boolean removeAllData) {
-//            if(currentState.getActivationState() == ActivationState.AUTHORIZED && error == ActivationError.COMMUNICATION_ERROR) {
-//                listeners.broadcast(new ActivationEvent(currentState.getActivationState(),getActivationError()));
-//                return;
-//            } else {
-//                setNotActivated(error, this, removeAllData);
-//            }
-//        }
-//    }
-//
-//    private class Activating extends ActivationStateImpl {
-//        private ActivationStateImpl previousState;
-//
-//        private Activating(ActivationState state) {
-//            super(state);
-//        }
-//
-//        public void enterState() {
-//            previousState = currentState;
-//            setActivating(this);
-//        }
-//        
-//        public void rollback(ActivationError errorState) {
-//            currentState = previousState;
-//            activationError = errorState;
-//            listeners.broadcast(new ActivationEvent(previousState.getActivationState(), errorState));
-//        }
-//    }
-//
-//    private class ActivatedFromCache extends ActivationStateImpl {
-//        private ActivatedFromCache(ActivationState state) {
-//            super(state);
-//        }
-//
-//        public void enterState(ActivationResponse response) {
-//            if (currentState == ACTIVATED_FROM_SERVER) {
-//                return;
-//            } else {
-//                setProvisionallyActivated(response, this);
-//            }
-//        }
-//    }
-//
-//    private class ActivatedFromServer extends ActivationStateImpl {
-//        private ActivatedFromServer(ActivationState state) {
-//            super(state);
-//        }
-//
-//        public void enterState(final ActivationResponse response) {
-//            setActivated(response, this);
-//        }
-//    }
+
     private void transitionToState(State newState) {
         assert newState != State.ACTIVATED_FROM_DISK && newState != State.ACTIVATED_FROM_SERVER && 
                 newState != State.NOT_ACTIVATED;
@@ -550,25 +375,29 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void transitionToState(State newState, ActivationResponse response) {
-        switch(newState) {
-            case NOT_ACTIVATED:
-                notActivated(response);
-                break;
-            case ACTIVATING:
-                activating();
-                break;
-            case REFRESHING:
-                refreshing();
-                break;
-            case ACTIVATED_FROM_DISK:
-                if(currentState == State.ACTIVATED_FROM_SERVER)
-                    return;
-                else
-                    activatedFromDisk(response);
-                break;
-            case ACTIVATED_FROM_SERVER:
-                activated(response);
-                break;
+        synchronized(this) {
+            switch(newState) {
+                case NOT_ACTIVATED:
+                    notActivated(response);
+                    break;
+                case ACTIVATING:
+                    activating();
+                    break;
+                case REFRESHING:
+                    refreshing();
+                    break;
+                case ACTIVATED_FROM_DISK:
+                    if(currentState == State.ACTIVATED_FROM_SERVER)
+                        return;
+                    else
+                        activatedFromDisk(response);
+                    break;
+                case ACTIVATED_FROM_SERVER:
+                    activated(response);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown state " + newState);
+            }
         }
         listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
     }
@@ -577,54 +406,70 @@ class ActivationManagerImpl implements ActivationManager, Service {
         ActivationError error = ActivationError.NO_ERROR;
         boolean removeAllData = false;
         switch(response.getResponseType()) {
-        case ERROR:
-            if(currentState == State.REFRESHING) {
-                error = ActivationError.COMMUNICATION_ERROR;
-                setCurrentState(lastState);
-//              currentState = previousState;
-//                listeners.broadcast(new ActivationEvent(getActivationState(), error));
-                return;
-            } else {
-                error = ActivationError.COMMUNICATION_ERROR;
-            }
-            break;
-        case REMOVE:
-            error = ActivationError.INVALID_KEY;
-            removeAllData = true;
-            break;
-        case STOP:
-            error = ActivationError.INVALID_KEY;
-            break;
-        case NOTFOUND:
-            error = ActivationError.INVALID_KEY;
-            removeAllData = true;
-            break;
-        case BLOCKED:
-            error = ActivationError.BLOCKED_KEY;
-            break;
+            case ERROR:
+                if(currentState == State.REFRESHING) {
+                    activationError = ActivationError.COMMUNICATION_ERROR;
+                    setCurrentState(lastState);
+    //              currentState = previousState;
+    //                listeners.broadcast(new ActivationEvent(getActivationState(), error));
+                    return;
+                } else {
+                    error = ActivationError.COMMUNICATION_ERROR;
+                }
+                break;
+            case REMOVE:
+                error = ActivationError.INVALID_KEY;
+                removeAllData = true;
+                break;
+            case STOP:
+                error = ActivationError.INVALID_KEY;
+                break;
+            case NOTFOUND:
+                error = ActivationError.INVALID_KEY;
+                removeAllData = true;
+                break;
+            case BLOCKED:
+                error = ActivationError.BLOCKED_KEY;
+                break;
+            default:
+                throw new IllegalStateException("Unknown state " + response.getResponseType());
         }
-        if(currentState.getActivationState() == ActivationState.AUTHORIZED && error == ActivationError.COMMUNICATION_ERROR) {
-            
-        } else {
+        if(!(currentState.getActivationState() == ActivationState.AUTHORIZED 
+                && error == ActivationError.COMMUNICATION_ERROR)) {
             if(error == ActivationError.INVALID_KEY)
                 removeData(removeAllData);
             activationError = error;
             setCurrentState(State.NOT_ACTIVATED);
             LimeWireUtils.setIsPro(isProActive());
         }
-//        listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
+    }
+        
+    private void removeData(boolean removeMCode) {
+        ActivationSettings.ACTIVATION_KEY.revertToDefault();
+        BackgroundExecutorService.execute(new Runnable(){
+            public void run() {
+                try {
+                    activationSerializer.writeToDisk("");                        
+                } catch (Exception e) {
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk.");
+                }
+            }
+        });
+        setActivationItems(Collections.<ActivationItem>emptyList());
+        ActivationSettings.LAST_START_WAS_PRO.set(false);
+        if(removeMCode)
+            ActivationSettings.M_CODE.set("");
     }
     
     private void refreshing() {
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.REFRESHING);
-//        listeners.broadcast(new ActivationEvent(getActivationState()));
     }
     
     private void activating() {
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.ACTIVATING);
-//        listeners.broadcast(new ActivationEvent(getActivationState()));
     }
     
     private void activatedFromDisk(final ActivationResponse response) {
@@ -633,7 +478,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.ACTIVATED_FROM_DISK);
         LimeWireUtils.setIsPro(isProActive());
-//        listeners.broadcast(new ActivationEvent(getActivationState()));
     }
     
     private void activated(final ActivationResponse response) {

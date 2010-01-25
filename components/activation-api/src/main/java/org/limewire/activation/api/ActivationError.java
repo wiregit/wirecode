@@ -13,9 +13,6 @@ public enum ActivationError {
     
     /** The current Key is invalid. */
     INVALID_KEY,
-//    
-//    /** The current Key is expired. */
-//    EXPIRED_KEY,
     
     /** The current Key has been blocked by the server.  */
     BLOCKED_KEY,

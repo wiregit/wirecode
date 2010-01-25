@@ -79,6 +79,8 @@ class ActivationTable extends MouseableTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setColumnSelectionAllowed(false);
         setFillsViewportHeight(true);
+        getTableHeader().setReorderingAllowed(false);
+        getTableHeader().setResizingAllowed(false);
     }
     
     private void setupHighlighters() {
@@ -184,7 +186,6 @@ class ActivationTable extends MouseableTable {
             } else if(value instanceof ActivationItem) {
                 nameLabel.setText(getText((ActivationItem) value));
                 nameLabel.setVisible(true);
-                nameLabel.setForeground(getForeground());
                 licenseButton.setVisible(false);
             } else {
                 nameLabel.setVisible(false);

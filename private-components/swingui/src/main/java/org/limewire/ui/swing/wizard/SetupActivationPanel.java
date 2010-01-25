@@ -23,6 +23,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.setting.ActivationSettings;
 import org.limewire.ui.swing.activation.ActivationStateIconPanel;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -119,9 +120,6 @@ public class SetupActivationPanel extends JPanel {
         case NO_KEY:
             errorMessageLabel.setVisible(false);
             return;
-//        case EXPIRED_KEY:
-//            errorMessageLabel.setVisible(false);
-//            return;
         case INVALID_KEY:
             errorMessageLabel.setText(I18n.tr("Invalid license key."));
             errorMessageLabel.setVisible(true);
@@ -142,10 +140,13 @@ public class SetupActivationPanel extends JPanel {
     {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String key = licenseField.getText();
+            final String key = licenseField.getText();
             if (key != null) {
-                key = key.replaceAll("-", "");
-                activationManager.activateKey(key);
+                BackgroundExecutorService.execute(new Runnable(){
+                    public void run() {
+                        activationManager.activateKey(key.replaceAll("-", ""));                        
+                    }
+                });
             }
         }
     }

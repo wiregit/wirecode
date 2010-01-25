@@ -16,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -44,7 +43,7 @@ public class SetupActivationThankYouPanel extends JPanel {
 
         add(Box.createVerticalStrut(10), "wrap");
 
-        SetupActivationTable table = new SetupActivationTable(wizardPage, eventList);
+        SetupActivationTable table = new SetupActivationTable(eventList);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
         int numberOfItemsVisible = (eventList.size() > 4) ? 4 : eventList.size();
@@ -63,7 +62,7 @@ public class SetupActivationThankYouPanel extends JPanel {
             JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
             innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
             innerPanel.add(infoTextLine2a, "align 0% 50%, split, gapright 0");
-            innerPanel.add(new IconButton(infoIcon), "align 0% 50%, split, gapright 0");
+            innerPanel.add(new JLabel(infoIcon), "align 0% 50%, split, gapright 0");
             innerPanel.add(infoTextLine2b, "align 0% 50%, wrap");
             
             add(innerPanel, "align 50% 0%, wrap");
