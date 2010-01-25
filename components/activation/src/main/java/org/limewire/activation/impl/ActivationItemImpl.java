@@ -79,6 +79,7 @@ class ActivationItemImpl implements ActivationItem {
         }
     }
     
+    @Override
     public boolean equals(Object object) {
         if (!(object instanceof ActivationItemImpl)) {
             return false;    
