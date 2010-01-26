@@ -68,7 +68,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
             return state;
         }
     }
-    
 
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
     private volatile State lastState = State.NOT_ACTIVATED;
@@ -481,7 +480,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void activated(final ActivationResponse response) {
-        BackgroundExecutorService.execute(new Runnable(){
+        scheduler.execute(new Runnable(){
             public void run() {
                 try {
                     activationSerializer.writeToDisk(response.getJSONString());                        
