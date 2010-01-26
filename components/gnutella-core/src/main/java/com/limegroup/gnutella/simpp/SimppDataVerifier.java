@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.simpp;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.util.Base32;
-import org.limewire.util.FileUtils;
 
 public class SimppDataVerifier {
     
@@ -109,9 +107,5 @@ public class SimppDataVerifier {
         if(found)
             return i;
         return -1;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Base32.encode(FileUtils.readFileFully(new File("/home/fberger/.workspace/versioning/master.pub"))));
     }
 }
