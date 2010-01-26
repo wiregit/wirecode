@@ -102,7 +102,7 @@ public class CertificateProviderImpl implements CertificateProvider {
         }
         @Override
         public int getKeyVersion() {
-            return -2;
+            return -1;
         }
         @Override
         public PublicKey getPublicKey() {
