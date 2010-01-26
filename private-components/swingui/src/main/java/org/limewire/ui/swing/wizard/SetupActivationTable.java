@@ -17,11 +17,11 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -32,13 +32,14 @@ import org.limewire.ui.swing.activation.ActivationItemComparator;
 import org.limewire.ui.swing.activation.ActivationUtilities;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.table.BasicJXTable;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-class SetupActivationTable extends JXTable {
+class SetupActivationTable extends BasicJXTable {
 
     private final String[] columnNames = new String[] {I18n.tr("Feature Type"), I18n.tr("Expires")};
     
@@ -58,7 +59,6 @@ class SetupActivationTable extends JXTable {
         Collections.sort(activationItems, new ActivationItemComparator());
 
         getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
-        getTableHeader().setMinimumSize(new Dimension(100, 50));
 
         LicenseTypeRendererEditor licenseRendererEditor = new LicenseTypeRendererEditor();
         getColumn(columnNames[0]).setCellRenderer(licenseRendererEditor);
@@ -87,6 +87,7 @@ class SetupActivationTable extends JXTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setColumnSelectionAllowed(false);
         setFillsViewportHeight(true);
+        setSortable(false);
         
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
@@ -247,11 +248,15 @@ class SetupActivationTable extends JXTable {
         }
     }
     
-    private class TableHeaderRenderer extends DefaultLimeTableCellRenderer {        
+    private class TableHeaderRenderer extends JLabel implements TableCellRenderer {        
         public TableHeaderRenderer() {
             setFont(headerFont);
             setForeground(columnNameColor);
             setBackground(headerBackgroundColor);
+            setOpaque(true);
+            setHorizontalAlignment(JLabel.LEADING);
+            setHorizontalTextPosition(JLabel.LEFT);
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         }
         
         @Override
