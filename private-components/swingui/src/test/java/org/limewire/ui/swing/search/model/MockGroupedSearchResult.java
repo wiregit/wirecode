@@ -3,8 +3,10 @@ package org.limewire.ui.swing.search.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -19,22 +21,44 @@ class MockGroupedSearchResult implements GroupedSearchResult {
 
     private final URN urn;
     private final String fileName;
+    private final Set<RemoteHost> remoteHosts;
+    private final List<GroupedSearchResultListener> resultListeners;
     private final List<SearchResult> searchResults;
     
     public MockGroupedSearchResult(URN urn, String fileName) {
         this.urn = urn;
         this.fileName = fileName;
-        
+        remoteHosts = new HashSet<RemoteHost>();
+        resultListeners = new ArrayList<GroupedSearchResultListener>();
         searchResults = new ArrayList<SearchResult>();
-        searchResults.add(new TestSearchResult(urn.toString(), fileName));
+        
+        addSearchResult(new TestSearchResult(urn.toString(), fileName));
     }
     
     public MockGroupedSearchResult(URN urn, String fileName, Map<FilePropertyKey, Object> properties) {
         this.urn = urn;
         this.fileName = fileName;
-        
+        remoteHosts = new HashSet<RemoteHost>();
+        resultListeners = new ArrayList<GroupedSearchResultListener>();
         searchResults = new ArrayList<SearchResult>();
-        searchResults.add(new TestSearchResult(urn.toString(), fileName, properties));
+        
+        addSearchResult(new TestSearchResult(urn.toString(), fileName, properties));
+    }
+    
+    void addResult(URN urn, String fileName) {
+        assert this.urn.equals(urn);
+        addSearchResult(new TestSearchResult(urn.toString(), fileName));
+        
+        for (GroupedSearchResultListener listener : resultListeners) {
+            listener.sourceAdded();
+        }
+    }
+    
+    private void addSearchResult(SearchResult result) {
+        searchResults.add(result);
+        for (RemoteHost host : result.getSources()) {
+            remoteHosts.add(host);
+        }
     }
     
     void setCategory(Category category) {
@@ -43,10 +67,12 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     
     @Override
     public void addResultListener(GroupedSearchResultListener listener) {
+        resultListeners.add(listener);
     }
 
     @Override
     public void removeResultListener(GroupedSearchResultListener listener) {
+        resultListeners.add(listener);
     }
 
     @Override
@@ -71,7 +97,7 @@ class MockGroupedSearchResult implements GroupedSearchResult {
 
     @Override
     public Collection<RemoteHost> getSources() {
-        return Collections.emptyList();
+        return remoteHosts;
     }
 
     @Override

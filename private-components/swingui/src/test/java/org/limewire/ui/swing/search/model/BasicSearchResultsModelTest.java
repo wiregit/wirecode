@@ -82,22 +82,25 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         
         model.addResultsInternal(listOfLists);
     }
+    
+    private void addGroupedResult(MockGroupedSearchResult mockResult, String fileName) {
+        mockResult.addResult(mockResult.getUrn(), fileName);
+        waitForUiThread();
+    }
 
-    public void testGroupingByName2Urns() {
+    public void testGroupingByName2UrnsNameComesEarly() {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
         
-        // Model should ignore identical URNs because it assumes that 
-        // GroupedSearchResult handled the URN grouping. 
-        GroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "file name");
-        GroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("1"), "other file");
-        GroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "file name");
-        GroupedSearchResult testResult4 = new MockGroupedSearchResult(new MockURN("2"), "other file");
-
+        // Add two results grouped by URN. 
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "file name");
         addResult(model, testResult1);
-        addResult(model, testResult2);
+        addGroupedResult(testResult1, "other file");
+        // Add result for 2nd URN with matching name.
+        MockGroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "other file");
         addResult(model, testResult3);
-        addResult(model, testResult4);
+        // Add result for 1st URN.
+        addGroupedResult(testResult1, "file name");
 
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(2, results.size());
@@ -105,13 +108,91 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult vsr0 = results.get(0);
         List<VisualSearchResult> similarResults0 = vsr0.getSimilarResults();
         assertEquals(1, similarResults0.size()); // Parent with one child
+        List<SearchResult> coreResults0 = vsr0.getCoreSearchResults();
+        assertEquals(3, coreResults0.size());
 
         VisualSearchResult vsr1 = results.get(1);
         List<VisualSearchResult> similarResults1 = vsr1.getSimilarResults();
         assertEquals(0, similarResults1.size()); // Child
+        List<SearchResult> coreResults1 = vsr1.getCoreSearchResults();
+        assertEquals(1, coreResults1.size());
 
         assertNull(vsr0.getSimilarityParent()); // Parent has no parent
         assertEquals(vsr0, vsr1.getSimilarityParent());
+    }
+
+    public void testGroupingByName2UrnsNameComesLate() {
+
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+        
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "file name");
+        MockGroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("2"), "other file");
+
+        // Add results for two separate URNs.
+        addResult(model, testResult1);
+        addResult(model, testResult2);
+        // Add results for 1st URN including matching name.
+        addGroupedResult(testResult1, "file name");
+        addGroupedResult(testResult1, "other file");
+
+        List<VisualSearchResult> results = model.getUnfilteredList();
+        assertEquals(2, results.size());
+        
+        VisualSearchResult vsr0 = results.get(0);
+        List<VisualSearchResult> similarResults0 = vsr0.getSimilarResults();
+        assertEquals(1, similarResults0.size()); // Parent with one child
+        List<SearchResult> coreResults0 = vsr0.getCoreSearchResults();
+        assertEquals(3, coreResults0.size());
+
+        VisualSearchResult vsr1 = results.get(1);
+        List<VisualSearchResult> similarResults1 = vsr1.getSimilarResults();
+        assertEquals(0, similarResults1.size()); // Child
+        List<SearchResult> coreResults1 = vsr1.getCoreSearchResults();
+        assertEquals(1, coreResults1.size());
+
+        assertNull(vsr0.getSimilarityParent()); // Parent has no parent
+        assertEquals(vsr0, vsr1.getSimilarityParent());
+    }
+    
+    public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
+
+        model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
+
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "file name");
+        MockGroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("2"), "other file");
+
+        // Add results - multiple adds for same URN are ignored.
+        addResult(model, testResult1);
+        addResult(model, testResult2);
+        addGroupedResult(testResult1, "file name");
+        addGroupedResult(testResult1, "other file");
+        addResult(model, testResult1);
+        addResult(model, testResult2);
+        addGroupedResult(testResult1, "file name");
+        addGroupedResult(testResult1, "other file");
+        addResult(model, testResult1);
+        addResult(model, testResult2);
+        addGroupedResult(testResult1, "file name");
+        addGroupedResult(testResult1, "other file");
+
+        List<VisualSearchResult> results = model.getUnfilteredList();
+        assertEquals(2, results.size());
+        
+        VisualSearchResult vsr0 = results.get(0);
+        List<VisualSearchResult> similarResults1 = vsr0.getSimilarResults();
+        assertEquals(1, similarResults1.size()); // Parent with one child
+        List<SearchResult> coreResults1 = vsr0.getCoreSearchResults();
+        assertEquals(7, coreResults1.size());
+
+        VisualSearchResult vsr1 = results.get(1);
+        List<VisualSearchResult> similarResults0 = vsr1.getSimilarResults();
+        assertEquals(0, similarResults0.size()); // Child
+        List<SearchResult> coreResults0 = vsr1.getCoreSearchResults();
+        assertEquals(1, coreResults0.size());
+
+        assertNull(vsr0.getSimilarityParent()); // Parent has no parent
+        assertEquals(vsr0, vsr1.getSimilarityParent());
+
     }
 
     public void testGroupingByName4Urns() {
@@ -158,16 +239,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
-        GroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "other file");
-        GroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "other file");
-        GroupedSearchResult testResult4 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
-        GroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "other file");
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "other file");
+        MockGroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "other file");
+        MockGroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "other file");
 
         addResult(model, testResult1);
-        addResult(model, testResult2);
+        addGroupedResult(testResult1, "blah1 file");
         addResult(model, testResult3);
-        addResult(model, testResult4);
+        addGroupedResult(testResult3, "blah2 file");
         addResult(model, testResult5);
 
         List<VisualSearchResult> results = model.getUnfilteredList();
@@ -176,14 +255,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
         assertEquals(2, similarResults0.size()); // Parent with two children
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
         assertEquals(0, similarResults1.size()); // Child
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
         assertEquals(0, similarResults2.size()); // Child
+        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
+        assertEquals(1, coreResults2.size());
 
         assertNull(group0.getSimilarityParent()); // Parent has no parent
         assertEquals(group0, group1.getSimilarityParent());
@@ -195,38 +280,40 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
-        // Duplicate URNs should be ignored by model.
-        GroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
-        GroupedSearchResult testResult4 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
-        GroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
-        GroupedSearchResult testResult6 = new MockGroupedSearchResult(new MockURN("3"), "blah2 file");
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
+        MockGroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
+        MockGroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
 
         addResult(model, testResult1);
-        addResult(model, testResult2);
+        addGroupedResult(testResult1, "blah1 file");
         addResult(model, testResult3);
-        addResult(model, testResult4);
+        addGroupedResult(testResult3, "blah2 file");
         addResult(model, testResult5);
-        addResult(model, testResult6);
+        addGroupedResult(testResult5, "blah2 file");
 
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(3, results.size());
         
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(1, similarResults0.size()); // Parent with one child
+        assertEquals(2, similarResults0.size()); // Parent with two children
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
         assertEquals(0, similarResults1.size()); // Child
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
         assertEquals(0, similarResults2.size()); // Child
+        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
+        assertEquals(2, coreResults2.size());
 
         assertNull(group0.getSimilarityParent()); // Parent has no parent
-        assertNull(group1.getSimilarityParent());
+        assertEquals(group0, group1.getSimilarityParent());
         assertEquals(group0, group2.getSimilarityParent());
 
     }
@@ -235,41 +322,42 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
 
-        // Duplicate URNs should be ignored by model.
-        GroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
-        GroupedSearchResult testResult4 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
-        GroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
-        GroupedSearchResult testResult6 = new MockGroupedSearchResult(new MockURN("3"), "blah2 file");
-        GroupedSearchResult testResult7 = new MockGroupedSearchResult(new MockURN("3"), "blah3 file");
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
+        MockGroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "blah2 file");
+        MockGroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
 
         addResult(model, testResult1);
-        addResult(model, testResult2);
+        addGroupedResult(testResult1, "blah1 file");
         addResult(model, testResult3);
-        addResult(model, testResult4);
+        addGroupedResult(testResult3, "blah2 file");
         addResult(model, testResult5);
-        addResult(model, testResult6);
-        addResult(model, testResult7);
+        addGroupedResult(testResult5, "blah2 file");
+        addGroupedResult(testResult5, "blah3 file");
 
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(3, results.size());
         
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        assertEquals(1, similarResults0.size()); // Parent
+        assertEquals(0, similarResults0.size()); // Child
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        assertEquals(0, similarResults1.size());
+        assertEquals(0, similarResults1.size()); // Child
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        assertEquals(0, similarResults2.size()); // Child
+        assertEquals(2, similarResults2.size()); // Parent with two children
+        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
+        assertEquals(3, coreResults2.size());
 
-        assertNull(group0.getSimilarityParent()); // Parent has no parent
-        assertNull(group1.getSimilarityParent());
-        assertEquals(group0, group2.getSimilarityParent());
+        assertEquals(group2, group0.getSimilarityParent());
+        assertEquals(group2, group1.getSimilarityParent());
+        assertNull(group2.getSimilarityParent()); // Parent has no parent
 
     }
 
@@ -277,15 +365,13 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
         
-        // Set up one parent and two child results.
-        GroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
-        GroupedSearchResult testResult2 = new MockGroupedSearchResult(new MockURN("2"), "blah1 file");
-        GroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
+        MockGroupedSearchResult testResult1 = new MockGroupedSearchResult(new MockURN("1"), "blah1 file");
+        MockGroupedSearchResult testResult3 = new MockGroupedSearchResult(new MockURN("2"), "blah1 file");
+        MockGroupedSearchResult testResult5 = new MockGroupedSearchResult(new MockURN("3"), "blah1 file");
         
         addResult(model, testResult1);
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(1, results.size());
-        
         VisualSearchResult result0 = results.get(0);
         assertTrue(result0.isVisible());
         assertFalse(result0.isChildrenVisible());
@@ -293,7 +379,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertTrue(result0.isVisible());
         assertTrue(result0.isChildrenVisible());
 
-        addResult(model, testResult2);
+        addGroupedResult(testResult1, "blah1 file");
         assertTrue(result0.isVisible());
         assertTrue(result0.isChildrenVisible());
 
@@ -301,7 +387,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertTrue(result0.isVisible());
         assertTrue(result0.isChildrenVisible());
         List<VisualSearchResult> children = result0.getSimilarResults();
-        assertEquals(2, children.size());
+        assertEquals(1, children.size());
         VisualSearchResult child = children.get(0);
         assertTrue(child.isVisible());
 
@@ -311,10 +397,24 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertFalse(child.isVisible());
         result0.setChildrenVisible(true);
 
+        addGroupedResult(testResult3, "blah2 file");
+        addResult(model, testResult5);
         children = result0.getSimilarResults();
         assertEquals(2, children.size());
         VisualSearchResult child0 = children.get(0);
         VisualSearchResult child1 = children.get(1);
+        assertTrue(child0.isVisible());
+        assertTrue(child1.isVisible());
+        result0.setChildrenVisible(false);
+
+        addGroupedResult(testResult5, "blah2 file");
+        children = result0.getSimilarResults();
+        assertEquals(2, children.size());
+        child0 = children.get(0);
+        child1 = children.get(1);
+        assertFalse(child0.isVisible());
+        assertFalse(child1.isVisible());
+        result0.setChildrenVisible(true);
         assertTrue(child0.isVisible());
         assertTrue(child1.isVisible());
 
@@ -323,14 +423,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
         assertEquals(2, similarResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
         assertEquals(0, similarResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
         assertEquals(0, similarResults2.size());
+        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
+        assertEquals(2, coreResults2.size());
 
         assertNull(group0.getSimilarityParent());
         assertEquals(group0, group2.getSimilarityParent());
