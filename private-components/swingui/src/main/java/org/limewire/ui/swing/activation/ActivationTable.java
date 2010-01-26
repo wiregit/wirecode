@@ -2,12 +2,10 @@ package org.limewire.ui.swing.activation;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
@@ -19,9 +17,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.AbstractTableFormat;
@@ -68,7 +64,7 @@ class ActivationTable extends MouseableTable {
         
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellRenderer(new ExpiredRenderer());
         ExpiredRenderer expiredRenderer = new ExpiredRenderer();
-        expiredRenderer.addActionListener(new InfoAction(expiredRenderer));
+        expiredRenderer.addActionListener(new ActivationInfoAction(expiredRenderer, this));
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellEditor(expiredRenderer);
         
         setupHighlighters();
@@ -277,29 +273,6 @@ class ActivationTable extends MouseableTable {
                 renewButton.setVisible(false);
             }
             return this;
-        }
-    }
-    
-    /**
-     * When an info button is clicked, displays a popup message about
-     * the row selected.
-     */
-    private class InfoAction extends AbstractAction {
-        private final ExpiredRenderer expiredRenderer;
-
-        public InfoAction(ExpiredRenderer expiredRenderer) {
-            this.expiredRenderer = expiredRenderer;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ActivationItem item = expiredRenderer.getCellEditorValue();
-            if (item != null) {
-                String message = ActivationUtilities.getStatusMessage(item);
-                //TODO: change this message Dialog to something more appropriate
-                FocusJOptionPane.showMessageDialog(ActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
-                expiredRenderer.cancelCellEditing();
-            }
         }
     }
 }

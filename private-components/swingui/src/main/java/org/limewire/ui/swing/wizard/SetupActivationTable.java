@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
@@ -16,7 +15,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
@@ -33,10 +31,8 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
-import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.activation.ActivationInfoAction;
 import org.limewire.ui.swing.activation.ActivationItemComparator;
-import org.limewire.ui.swing.activation.ActivationUtilities;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.BasicJXTable;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
@@ -161,6 +157,8 @@ class SetupActivationTable extends BasicJXTable {
 
         @Override
         public boolean isCellEditable(int row, int col) { 
+            if(col != 0)
+                return false;
             return activationItems.get(row).getStatus() != ActivationItem.Status.ACTIVE;
         }
     }
@@ -213,7 +211,7 @@ class SetupActivationTable extends BasicJXTable {
             strut2.setVisible(false);
             
             infoButton = new IconButton(infoIcon);
-            infoButton.addActionListener(new InfoAction(this));
+            infoButton.addActionListener(new ActivationInfoAction(this, SetupActivationTable.this));
             infoButton.setVisible(false);
             
             setLayout(new MigLayout("filly, insets 0 5 0 5, hidemode 3"));
@@ -272,25 +270,6 @@ class SetupActivationTable extends BasicJXTable {
             return cellEditorValue;
         }
     }
-    
-    private class InfoAction extends AbstractAction {
-
-        private final LicenseTypeRendererEditor licenseRenderer;
-
-        public InfoAction(LicenseTypeRendererEditor licenseRenderer) {
-            this.licenseRenderer = licenseRenderer;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ActivationItem item = licenseRenderer.getCellEditorValue();
-            if (item != null) {
-                String message = ActivationUtilities.getStatusMessage(item);
-                FocusJOptionPane.showMessageDialog(SetupActivationTable.this.getRootPane().getParent(), message, item.getLicenseName(), JOptionPane.OK_OPTION);
-                licenseRenderer.cancelCellEditing();
-            }
-        }
-    }
 
     private class DateRenderer extends DefaultLimeTableCellRenderer {        
         public DateRenderer() {
@@ -299,10 +278,12 @@ class SetupActivationTable extends BasicJXTable {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-
-            ActivationItem item = (ActivationItem) value;
-
-            setText(GuiUtils.msec2Date(item.getDateExpired())); 
+            if(value instanceof ActivationItem) {
+                ActivationItem item = (ActivationItem) value;
+                setText(GuiUtils.msec2Date(item.getDateExpired()));
+            } else {
+                setText("");
+            }
 
             return this;
         }

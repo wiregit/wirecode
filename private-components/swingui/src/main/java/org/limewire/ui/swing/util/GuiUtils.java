@@ -159,7 +159,7 @@ public class GuiUtils {
 
         DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, 
                 DateFormat.DEFAULT, locale);
-        DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+        DATE_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT, locale);
     }
     
     /**
