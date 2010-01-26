@@ -77,6 +77,10 @@ class SetupActivationTable extends JXTable {
         setupHighlighters();
     }
     
+    public Color getHeaderColor() {
+        return headerBackgroundColor;
+    }
+    
     private void initTable() {
         setRowHeight(29);
         setShowGrid(false, false);

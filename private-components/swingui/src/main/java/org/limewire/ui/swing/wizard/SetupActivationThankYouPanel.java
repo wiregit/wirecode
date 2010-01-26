@@ -10,6 +10,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -46,6 +47,7 @@ public class SetupActivationThankYouPanel extends JPanel {
         SetupActivationTable table = new SetupActivationTable(eventList);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
+        configureEnclosingScrollPane(scrollPane, table);
         int numberOfItemsVisible = (eventList.size() > 4) ? 4 : eventList.size();
         scrollPane.setMinimumSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
         scrollPane.setPreferredSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
@@ -93,5 +95,14 @@ public class SetupActivationThankYouPanel extends JPanel {
         }
         return false;
     }
-
+    
+    /**
+     * Fills in the top right corner if a scrollbar appears with an empty table
+     * header.
+     */
+    protected void configureEnclosingScrollPane(JScrollPane scrollPane, JTable table) {
+        JPanel cornerComponent = new JPanel();
+        cornerComponent.setBackground(((SetupActivationTable)table).getHeaderColor());
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
+    }   
 }

@@ -144,7 +144,6 @@ public class ActivationPanel {
 
         scrollPane = new JScrollPane(table);
         ResizeUtils.forceSize(scrollPane, new Dimension(tableWidth, 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height));
-        configureEnclosingScrollPane(scrollPane);
         
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
@@ -176,8 +175,7 @@ public class ActivationPanel {
         
         activationPanel.add(cardPanel, "span, gaptop 10, gapbottom 10, growx, wrap");
     }
-    
-    
+        
     /**
      * Fills in the top right corner if a scrollbar appears with an empty table
      * header.
@@ -195,7 +193,11 @@ public class ActivationPanel {
     @Inject
     public void register() {
         activationManager.addListener(listener);
-        configureEnclosingScrollPane(scrollPane);
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                configureEnclosingScrollPane(scrollPane);                
+            }
+        });
     }
 
     public void show() {
