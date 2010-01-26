@@ -4,7 +4,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,8 +19,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
@@ -48,6 +54,8 @@ class SetupActivationTable extends BasicJXTable {
     @Resource private Color headerBackgroundColor;
     @Resource private Font headerFont;
     @Resource private Icon infoIcon;
+    
+    protected MouseMotionListener mouseOverEditorListener;
 
     public SetupActivationTable(List<ActivationItem> activationItems) {
         super();
@@ -60,9 +68,8 @@ class SetupActivationTable extends BasicJXTable {
 
         getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
 
-        LicenseTypeRendererEditor licenseRendererEditor = new LicenseTypeRendererEditor();
-        getColumn(columnNames[0]).setCellRenderer(licenseRendererEditor);
-        getColumn(columnNames[0]).setCellEditor(licenseRendererEditor);
+        getColumn(columnNames[0]).setCellRenderer(new LicenseTypeRendererEditor());
+        getColumn(columnNames[0]).setCellEditor(new LicenseTypeRendererEditor());
         getColumn(columnNames[0]).setMinWidth(200);
         getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
         getColumn(columnNames[1]).setMinWidth(100);
@@ -91,6 +98,26 @@ class SetupActivationTable extends BasicJXTable {
         
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
+        
+        //so that mouseovers will work within table     
+        mouseOverEditorListener = new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                // Get the table cell that the mouse is over.
+                int row = rowAtPoint(e.getPoint());
+                int col = columnAtPoint(e.getPoint());
+                
+                // If the cell is editable and
+                // it's not already being edited ...
+                if (isCellEditable(row, col) && (row != getEditingRow() || col != getEditingColumn())) {
+                    editCellAt(row, col);
+                } else {
+                    maybeCancelEditing();
+                }
+            }
+        };
+        
+        addMouseMotionListener(mouseOverEditorListener);
     }
     
     private void setupHighlighters() {
@@ -138,6 +165,32 @@ class SetupActivationTable extends BasicJXTable {
         }
     }
     
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
+            return false;
+        }
+        return getColumnModel().getColumn(col).getCellEditor() != null;
+    }
+    
+    //Don't set the cell value when editing is cancelled
+    @Override
+    public void editingStopped(ChangeEvent e) {
+        TableCellEditor editor = getCellEditor();
+        if (editor != null) {          
+            removeEditor();
+        }
+    }
+    
+    //clears mouseover color
+    private void maybeCancelEditing() {
+        Point mousePosition = getMousePosition();
+        if (getCellEditor() != null && 
+                (mousePosition == null || rowAtPoint(mousePosition) == -1 || columnAtPoint(mousePosition) == -1)){
+            getCellEditor().cancelCellEditing();
+        } 
+    }
+    
     private class LicenseTypeRendererEditor extends TableRendererEditor {
 
         private final IconButton checkMarkButton;
@@ -172,6 +225,13 @@ class SetupActivationTable extends BasicJXTable {
 
             setBorder(BorderFactory.createEmptyBorder());
         }
+        
+//        @Override
+//        public void setForeground(Color color) {
+//            super.setForeground(color);
+//            if(nameLabel != null)
+//                nameLabel.setForeground(color);
+//        }
         
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
