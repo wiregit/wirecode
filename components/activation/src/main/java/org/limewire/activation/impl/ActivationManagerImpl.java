@@ -242,7 +242,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
      * as quickly as possible. 
      */
     private void loadFromDisk() {
-        BackgroundExecutorService.execute(new Runnable(){
+        scheduler.execute(new Runnable(){
             public void run() {
                 try {
                     String jsonString = activationSerializer.readFromDisk();

@@ -47,6 +47,7 @@ import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -613,7 +614,11 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            activationManager.activateKey(licenseField.getText().trim().replaceAll("-", ""));
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    activationManager.activateKey(licenseField.getText().trim().replaceAll("-", ""));
+                }
+            });
         }
     }
     
@@ -630,7 +635,11 @@ public class ActivationPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            activationManager.refreshKey(licenseField.getText().trim().replaceAll("-", ""));
+            BackgroundExecutorService.execute(new Runnable(){
+                public void run() {
+                    activationManager.refreshKey(licenseField.getText().trim().replaceAll("-", ""));                    
+                }
+            });
         }
     }
 
