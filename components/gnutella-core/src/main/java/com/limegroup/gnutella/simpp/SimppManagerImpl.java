@@ -3,6 +3,7 @@ package com.limegroup.gnutella.simpp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -37,6 +38,7 @@ import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -85,6 +87,8 @@ public class SimppManagerImpl implements SimppManager {
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
+
+    private final CertifiedMessageVerifier simppMessageVerifier;
     
     private static enum UpdateType {
         FROM_NETWORK, FROM_DISK, FROM_HTTP;
@@ -95,10 +99,12 @@ public class SimppManagerImpl implements SimppManager {
             ApplicationServices applicationServices, Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider) {
+            SimppDataProvider simppDataProvider,
+            @Simpp CertifiedMessageVerifier simppMessageVerifier) {
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
+        this.simppMessageVerifier = simppMessageVerifier;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         this.httpExecutor = httpExecutor;
         this.backgroundExecutor = backgroundExecutor;
@@ -213,6 +219,12 @@ public class SimppManagerImpl implements SimppManager {
         } catch(IOException iox) {
             LOG.error("IOX parsing simpp data", iox);
             return;
+        }
+        
+        try { 
+            simppMessageVerifier.verify(parser.getCertifiedMessage(), handler);
+        } catch (SignatureException se) {
+            LOG.error("message did not verify", se);
         }
         
         if(LOG.isDebugEnabled()) {

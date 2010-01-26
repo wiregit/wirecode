@@ -53,6 +53,22 @@ public class URIUtils {
         }
         return uri;
     }
+    
+    /**
+     * Creates a uri from an input string that is considered to be safe and
+     * not cause any {@link URISyntaxException}. If it does it will rethrow
+     * the exception as runtime exception.
+     * 
+     * @throws RuntimeException if <code>uriString</code> didn't represent
+     * as safe uri. 
+     */
+    public static URI toSafeUri(String uriString) {
+        try {
+            return toURI(uriString);
+        } catch (URISyntaxException use) {
+            throw new RuntimeException(use);
+        }
+    }
 
     /**
      * Returns the port for the given URI. If no port can be found, it checks the scheme.

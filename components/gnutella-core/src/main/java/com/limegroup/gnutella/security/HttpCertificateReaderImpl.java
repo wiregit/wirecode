@@ -9,7 +9,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.IpPort;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class HttpCertificateReaderImpl {
@@ -17,14 +19,18 @@ public class HttpCertificateReaderImpl {
     private final Provider<LimeHttpClient> httpClient;
     private final CertificateParser certificateParser;
 
+    @Inject
     public HttpCertificateReaderImpl(Provider<LimeHttpClient> httpClient, 
             CertificateParser certificateParser) {
         this.httpClient = httpClient;
         this.certificateParser = certificateParser;
     }
     
-    Certificate read(URI uri) throws IOException {
+    Certificate read(URI uri, IpPort messageSource) throws IOException {
         HttpGet get = new HttpGet(uri);
+        if (messageSource != null) {
+            get.addHeader("X-Message-Source", messageSource.getAddress() + ":" + messageSource.getPort());
+        }
         LimeHttpClient limeHttpClient = httpClient.get();
         HttpResponse response = null;
         try {

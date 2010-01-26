@@ -5,12 +5,17 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 import org.limewire.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.limegroup.gnutella.security.Certificate;
+import com.limegroup.gnutella.security.CertificateParserImpl;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class SimppParser {
@@ -36,9 +41,11 @@ public class SimppParser {
 
     private int newVersion;
 
-    private String signature;
+    private byte[] signature;
+    
+    private byte[] signedPayload;
 
-    private String certificate;    
+    private Certificate certificate;    
 
     //Format of dataBytes:
     //<xml for version related info with one tag containing all the props data>
@@ -51,20 +58,8 @@ public class SimppParser {
         return _version;
     }
     
-    public int getKeyVersion() {
-        return keyVersion;
-    }
-    
     public int getNewVersion() {
         return newVersion;
-    }
-    
-    public String getSignature() {
-        return signature;
-    }
-
-    public String getCertificateString() {
-        return certificate;
     }
     
     public String getPropsData() {
@@ -91,21 +86,48 @@ public class SimppParser {
             } else if (nodeName.equals(NEW_VERSION)) {
                 newVersion = parseInteger(value, -1);
             } else if (nodeName.equals(SIGNATURE)) {
-                signature = value;
+                signature = Base32.decode(value);
+                signedPayload = StringUtils.toUTF8Bytes(stripSignature(xmlStr));
             } else if (nodeName.equals(CERTIFICATE)) {
-                certificate = value;
+                certificate = new CertificateParserImpl().parseCertificate(value);
             } else if(nodeName.equals(PROPS)) {
                 _propsData = value;
             }
         }//end of for -- done all child nodes
+        // TODO fberger throw if necessary data is missing
     }
     
-    private int parseInteger(String integer, int defaultValue) {
+    public CertifiedMessage getCertifiedMessage() {
+        return new CertifiedMessage() {
+            @Override
+            public byte[] getSignature() {
+                return signature;
+            }
+            @Override
+            public byte[] getSignedPayload() {
+                return signedPayload;
+            }
+            @Override
+            public int getKeyVersion() {
+                return keyVersion;
+            }
+            @Override
+            public Certificate getCertificate() {
+                return certificate;
+            }
+        };
+    }
+    
+    static int parseInteger(String integer, int defaultValue) {
         try {
             return Integer.parseInt(integer);
         } catch(NumberFormatException nfx) {
             LOG.error("Unable to parse number: " + integer, nfx);
             return defaultValue;
         }
+    }
+    
+    static String stripSignature(String input) {
+        return input.replaceAll("<signature>[^<]*</signature>", "");
     }
 }

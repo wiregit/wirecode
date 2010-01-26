@@ -2,8 +2,10 @@ package com.limegroup.gnutella.security;
 
 import java.security.PublicKey;
 
+import org.limewire.util.Objects;
+
 /**
- * Immutable, threadsafe.
+ * Immutable, threadsafe, implements value equality.
  */
 public class CertificateImpl implements Certificate {
 
@@ -19,7 +21,7 @@ public class CertificateImpl implements Certificate {
         this.signedPayload = signedPayload;
         this.keyVersion = keyVersion;
         this.publicKey = publicKey;
-        this.certificateString = certificateString;
+        this.certificateString = Objects.nonNull(certificateString, "certificateString");
     }
     
     @Override
@@ -47,4 +49,16 @@ public class CertificateImpl implements Certificate {
         return certificateString;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Certificate)) {
+            return false;
+        }
+        return certificateString.equals(((Certificate)obj).getCertificateString()); 
+    }
+    
+    @Override
+    public int hashCode() {
+        return certificateString.hashCode();
+    }
 }

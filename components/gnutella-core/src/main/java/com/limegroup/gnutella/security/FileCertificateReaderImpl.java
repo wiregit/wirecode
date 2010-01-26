@@ -6,10 +6,13 @@ import java.io.IOException;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+
 public class FileCertificateReaderImpl {
         
     private final CertificateParser certificateParser;
 
+    @Inject
     public FileCertificateReaderImpl(CertificateParser certificateParser) {
         this.certificateParser = certificateParser;
     }
