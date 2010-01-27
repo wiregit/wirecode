@@ -131,7 +131,6 @@
 	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/jars/google-collect-1.0-rc2.jar" sourcepath="lib/sources/google-collect-src-1.0-rc2.zip"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jars/mime-util.jar" sourcepath="lib/sources/mime-util-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jxlayer-4.0.jar" sourcepath="lib/sources/jxlayer-4.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/miglayout-3.7-swing.jar" sourcepath="lib/sources/miglayout-3.7-sources.jar"/>
@@ -165,5 +164,6 @@
 	<classpathentry kind="lib" path="lib/jars/jna-3.2.4.jar" sourcepath="lib/sources/jna-3.2.4-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/AnimatedTransitions-0.11.jar" sourcepath="lib/sources/AnimatedTransitions-0.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

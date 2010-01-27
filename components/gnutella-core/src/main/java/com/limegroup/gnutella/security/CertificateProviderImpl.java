@@ -9,6 +9,7 @@ import java.security.SignatureException;
 import org.limewire.io.IpPort;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -53,8 +54,11 @@ public class CertificateProviderImpl implements CertificateProvider {
     @Override
     public void set(Certificate certificate) {
         try { 
-            validCertificate = certificateVerifier.verify(certificate);
-            // TODO fberger write to file
+            Certificate localCopy = validCertificate;
+            if (localCopy != null && !localCopy.equals(certificate) && certificate.getKeyVersion() > localCopy.getKeyVersion()) {
+                validCertificate = certificateVerifier.verify(certificate);
+                FileUtils.writeUtf8StringWithBackupFile(certificate.getCertificateString(), new File(file.getParentFile(), file.getName() + ".bak"), file, LOG);
+            }
         } catch (SignatureException se) {
             LOG.debugf(se, "certificate invalid {0} ", certificate);
         }
@@ -86,7 +90,8 @@ public class CertificateProviderImpl implements CertificateProvider {
         Certificate certificate = null;
         try {
             certificate = httpCertificateReader.read(uri, messageSource);
-            validCertificate = certificateVerifier.verify(certificate);
+            set(certificateVerifier.verify(certificate));
+            return certificate;
         } catch (IOException ie) {
             LOG.debugf(ie, "certificate from invalid url: {0}", uri);
         } catch (SignatureException e) {
