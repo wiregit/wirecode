@@ -1,5 +1,7 @@
 package org.limewire.core.impl.search;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResultList;
@@ -12,6 +14,8 @@ public class CoreSearchManagerTest extends BaseTestCase {
     /** Instance of class being tested. */
     CoreSearchManager searchManager;
 
+    private Mockery context = new Mockery();
+    
     /**
      * Constructs a test case for the specified method name.
      */
@@ -32,25 +36,38 @@ public class CoreSearchManagerTest extends BaseTestCase {
     }
     
     public void testAddSearch() {
-        Search search = new TestSearch();
-        SearchDetails searchDetails = new TestSearchDetails();
-        SearchResultList resultList = searchManager.addSearch(search, searchDetails);
+        // Create mock objects.
+        final Search mockSearch = context.mock(Search.class);
+        final SearchDetails mockDetails = context.mock(SearchDetails.class);
+        context.checking(new Expectations() {{
+            allowing(mockSearch);
+            allowing(mockDetails);
+        }});
+        
+        // Add search.
+        SearchResultList resultList = searchManager.addSearch(mockSearch, mockDetails);
         assertNotNull(resultList);
         
         // Verify search listed.
-        resultList = searchManager.getSearchResultList(search);
-        assertNotNull(resultList);
+        assertSame(resultList, searchManager.getSearchResultList(mockSearch));
     }
     
     public void testRemoveSearch() {
-        Search search = new TestSearch();
-        SearchDetails searchDetails = new TestSearchDetails();
-        SearchResultList resultList = searchManager.addSearch(search, searchDetails);
+        // Create mock objects.
+        final Search mockSearch = context.mock(Search.class);
+        final SearchDetails mockDetails = context.mock(SearchDetails.class);
+        context.checking(new Expectations() {{
+            allowing(mockSearch);
+            allowing(mockDetails);
+        }});
+        
+        // Add search.
+        SearchResultList resultList = searchManager.addSearch(mockSearch, mockDetails);
         assertNotNull(resultList);
         
         // Remove search and verify.
-        searchManager.removeSearch(search);
-        resultList = searchManager.getSearchResultList(search);
+        searchManager.removeSearch(mockSearch);
+        resultList = searchManager.getSearchResultList(mockSearch);
         assertNull(resultList);
     }
 

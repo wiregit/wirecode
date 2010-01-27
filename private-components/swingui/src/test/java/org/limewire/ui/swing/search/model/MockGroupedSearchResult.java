@@ -1,12 +1,12 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -17,6 +17,9 @@ import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 
+/**
+ * An implementation of GroupedSearchResult for unit tests.
+ */
 class MockGroupedSearchResult implements GroupedSearchResult {
 
     private final URN urn;
@@ -28,9 +31,9 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     public MockGroupedSearchResult(URN urn, String fileName) {
         this.urn = urn;
         this.fileName = fileName;
-        remoteHosts = new HashSet<RemoteHost>();
-        resultListeners = new ArrayList<GroupedSearchResultListener>();
-        searchResults = new ArrayList<SearchResult>();
+        remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
+        resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
+        searchResults = new CopyOnWriteArrayList<SearchResult>();
         
         addSearchResult(new TestSearchResult(urn.toString(), fileName));
     }
@@ -38,9 +41,9 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     public MockGroupedSearchResult(URN urn, String fileName, Map<FilePropertyKey, Object> properties) {
         this.urn = urn;
         this.fileName = fileName;
-        remoteHosts = new HashSet<RemoteHost>();
-        resultListeners = new ArrayList<GroupedSearchResultListener>();
-        searchResults = new ArrayList<SearchResult>();
+        remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
+        resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
+        searchResults = new CopyOnWriteArrayList<SearchResult>();
         
         addSearchResult(new TestSearchResult(urn.toString(), fileName, properties));
     }

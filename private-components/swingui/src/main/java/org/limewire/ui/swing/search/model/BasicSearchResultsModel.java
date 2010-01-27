@@ -23,15 +23,14 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.SearchDetails.SearchType;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
-import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -87,7 +86,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     private SearchListener searchListener;
 
     /** Listener to handle search result list events. */
-    private SearchResultListListener searchListListener;
+    private EventListener<Collection<GroupedSearchResult>> searchListListener;
 
     /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
@@ -128,19 +127,19 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * search request object, and services.
      */
     public BasicSearchResultsModel(SearchInfo searchInfo, Search search, 
-            Provider<PropertiableHeadings> propertiableHeadings,
+            VisualSearchResultFactory vsrFactory,
             DownloadListManager downloadListManager,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchManager searchManager) {
         
         this.searchInfo = searchInfo;
         this.search = search;
+        this.vsrFactory = vsrFactory;
         this.searchManager = searchManager;
         this.downloadListManager = downloadListManager;
         this.downloadExceptionHandler = downloadExceptionHandler;
         
         changeListeners = new ArrayList<VisualSearchResultStatusListener>(3);
-        vsrFactory = new VisualSearchResultFactory(propertiableHeadings, this);
         
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
@@ -173,56 +172,46 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         this.searchListener = searchListener;
         search.addSearchListener(searchListener);
         
-        // Install listener for new results.
-        searchListListener = new SearchResultListListener() {
+        // Install listener to handle new grouped results.  The event is 
+        // usually fired by a background thread.
+        searchListListener = new EventListener<Collection<GroupedSearchResult>>() {
             @Override
-            public void resultsCreated(Collection<GroupedSearchResult> results) {
-                // Create list of result lists.
-                final List<List<GroupedSearchResult>> resultLists = new ArrayList<List<GroupedSearchResult>>();
-                List<GroupedSearchResult> list = new ArrayList<GroupedSearchResult>();
-                resultLists.add(list);
+            public void handleEvent(Collection<GroupedSearchResult> results) {
+                // Create result list.
+                final List<GroupedSearchResult> resultList = new ArrayList<GroupedSearchResult>(results);
                 
-                // Split collection into lists of 1000 results.  We process
-                // large result sets in groups so other UI events can also get 
-                // handled on the UI thread.
-                for (GroupedSearchResult gsr : results) {
-                    if (list.size() >= 1000) {
-                        list = new ArrayList<GroupedSearchResult>();
-                        resultLists.add(list);
-                    }
-                    list.add(gsr);
-                }
-                
-                // Post UI event to add result lists.
+                // Post UI event to add result list.
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        addResultsInternal(resultLists);
+                        addResultsInternal(0, resultList);
                     }
                 });
             }
         };
-        searchResultList.addListListener(searchListListener);
+        searchResultList.addListener(searchListListener);
         
         // Start search.
         search.start();
     }
     
     /**
-     * Adds the specified collection of grouped results to the list of visual
+     * Adds the specified list of grouped results to the list of visual
      * results.
      */
-    void addResultsInternal(final List<List<GroupedSearchResult>> resultLists) {
-        // Process first list of results.
-        List<GroupedSearchResult> results = resultLists.get(0);
-        for (GroupedSearchResult gsr : results) {
+    void addResultsInternal(int startIdx, final List<GroupedSearchResult> resultList) {
+        // Process next group of results.  We process large result lists in
+        // groups of 1000 so other UI events can get handled on the UI thread.
+        final int endIdx = Math.min(startIdx + 1000, resultList.size());
+        for (int i = startIdx; i < endIdx; i++) {
+            GroupedSearchResult gsr = resultList.get(i);
             URN urn = gsr.getUrn();
             int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
             if (idx < 0) {
                 // URN not found so add visual result at insertion point.
                 // This keeps the list in sorted order.
                 idx = -(idx + 1);
-                VisualSearchResult vsr = vsrFactory.create(gsr);
+                VisualSearchResult vsr = vsrFactory.create(gsr, this);
                 groupedUrnResults.add(idx, vsr);
                 // Notify listeners to update result states.
                 for (VisualSearchResultStatusListener listener : changeListeners) {
@@ -231,16 +220,12 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             }
         }
         
-        // Remove first list.
-        resultLists.remove(0);
-        
-        if (resultLists.size() > 0) {
-            // Post UI event to process next result list.  This allows other
-            // UI events to get handled in between lists.
+        if (endIdx < resultList.size()) {
+            // Post UI event to process next group of results.
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    addResultsInternal(resultLists);
+                    addResultsInternal(endIdx, resultList);
                 }
             });
             
@@ -266,7 +251,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             searchListener = null;
         }
         if (searchListListener != null) {
-            searchResultList.removeListListener(searchListListener);
+            searchResultList.removeListener(searchListListener);
             searchListListener = null;
         }
         

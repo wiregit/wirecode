@@ -28,9 +28,9 @@ public class SearchResultsModelFactory {
 
     private final DownloadListManager downloadListManager;
 
-    private final Provider<PropertiableHeadings> propertiableHeadings;
-
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
+
+    private final VisualSearchResultFactory vsrFactory;
 
     /**
      * Constructs a SearchResultsModelFactory with the specified factories,
@@ -42,14 +42,15 @@ public class SearchResultsModelFactory {
             SpamManager spamManager, LibraryManager libraryManager,
             DownloadListManager downloadListManager,
             Provider<PropertiableHeadings> propertiableHeadings,
-            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
+            VisualSearchResultFactory vsrFactory) {
         this.searchManager = searchManager;
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
         this.downloadListManager = downloadListManager;
-        this.propertiableHeadings = propertiableHeadings;
         this.downloadExceptionHandler = downloadExceptionHandler;
+        this.vsrFactory = vsrFactory;
     }
 
     /**
@@ -58,7 +59,7 @@ public class SearchResultsModelFactory {
     public SearchResultsModel createSearchResultsModel(SearchInfo searchInfo, Search search) {
         // Create search result model.
         BasicSearchResultsModel searchResultsModel = new BasicSearchResultsModel(
-                searchInfo, search, propertiableHeadings, downloadListManager, 
+                searchInfo, search, vsrFactory, downloadListManager, 
                 downloadExceptionHandler, searchManager);
 
         // Create detector to find similar results.

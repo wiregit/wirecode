@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResultListListener;
+import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;
@@ -18,6 +22,8 @@ public class CoreSearchResultListTest extends BaseTestCase {
     /** Instance of class being tested. */
     private CoreSearchResultList resultList;
     
+    private Mockery context = new Mockery();
+    
     /**
      * Constructs a test case for the specified method name.
      */
@@ -28,8 +34,17 @@ public class CoreSearchResultListTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        
+        // Create mock search objects.
+        final Search mockSearch = context.mock(Search.class);
+        final SearchDetails mockDetails = context.mock(SearchDetails.class);
+        context.checking(new Expectations() {{
+            allowing(mockSearch);
+            allowing(mockDetails);
+        }});
+        
         // Create test instance.
-        resultList = new CoreSearchResultList(new TestSearch(), new TestSearchDetails());
+        resultList = new CoreSearchResultList(mockSearch, mockDetails);
     }
     
     @Override
@@ -113,7 +128,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
     public void testListListener() throws Exception {
         // Add listener to list.
         TestSearchListListener listener = new TestSearchListListener();
-        resultList.addListListener(listener);
+        resultList.addListener(listener);
         
         // Add result and check listener.
         SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
@@ -130,11 +145,11 @@ public class CoreSearchResultListTest extends BaseTestCase {
     /**
      * Test implementation of SearchResultListListener.
      */
-    private static class TestSearchListListener implements SearchResultListListener {
+    private static class TestSearchListListener implements EventListener<Collection<GroupedSearchResult>> {
         private int count = 0;
 
         @Override
-        public void resultsCreated(Collection<GroupedSearchResult> results) {
+        public void handleEvent(Collection<GroupedSearchResult> results) {
             count = results.size();
         }
         

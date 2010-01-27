@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +19,8 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.io.GUID;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -56,8 +57,8 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         context = new Mockery();
         provider = context.mock(Provider.class);
         // Create test instance.
-        model = new BasicSearchResultsModel(new TestSearchInfo(), 
-                new TestSearch(), provider, null, null, new TestSearchManager());
+        model = new BasicSearchResultsModel(new TestSearchInfo(), new TestSearch(),
+                new VisualSearchResultFactoryImpl(provider), null, null, new TestSearchManager());
     }
     
     @Override
@@ -75,12 +76,9 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     private void addResult(BasicSearchResultsModel model, GroupedSearchResult result) {
-        List<List<GroupedSearchResult>> listOfLists = new ArrayList<List<GroupedSearchResult>>();
         List<GroupedSearchResult> list = new ArrayList<GroupedSearchResult>();
         list.add(result);
-        listOfLists.add(list);
-        
-        model.addResultsInternal(listOfLists);
+        model.addResultsInternal(0, list);
     }
     
     private void addGroupedResult(MockGroupedSearchResult mockResult, String fileName) {
@@ -88,6 +86,23 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         waitForUiThread();
     }
 
+    public void testAddResultsInternal() {
+        // Create large result set to add.
+        List<GroupedSearchResult> list = new ArrayList<GroupedSearchResult>();
+        for (int i = 1; i <= 1005; i++) {
+            GroupedSearchResult result = new MockGroupedSearchResult(new MockURN(String.valueOf(i)), "file" + String.valueOf(i));
+            list.add(result);
+        }
+        
+        // Add results.
+        model.addResultsInternal(0, list);
+        waitForUiThread();
+        
+        // Verify results added.
+        List<VisualSearchResult> results = model.getUnfilteredList();
+        assertEquals(1005, results.size());
+    }
+    
     public void testGroupingByName2UrnsNameComesEarly() {
 
         model.addResultListener(new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -721,7 +736,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals("filtered list size", expectedSize, actualSize);
 
     }
-   
+    
     /**
      * Test implementation of Search.
      */
@@ -811,11 +826,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
             new BasicEventList<GroupedSearchResult>();
 
         @Override
-        public void addListListener(SearchResultListListener listener) {
+        public void addListener(EventListener<Collection<GroupedSearchResult>> listener) {
         }
 
         @Override
-        public void removeListListener(SearchResultListListener listener) {
+        public boolean removeListener(EventListener<Collection<GroupedSearchResult>> listener) {
+            return false;
         }
 
         @Override

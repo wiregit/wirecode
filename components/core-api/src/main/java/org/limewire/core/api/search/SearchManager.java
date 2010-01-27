@@ -9,7 +9,9 @@ public interface SearchManager {
 
     /**
      * Adds the specified search to the manager and returns its result list.
-     * This method should be called before starting the search.
+     * This method should be called before starting the search; otherwise, the
+     * result list may not contain results generated before the list was
+     * created.
      */
     SearchResultList addSearch(Search search, SearchDetails searchDetails);
     

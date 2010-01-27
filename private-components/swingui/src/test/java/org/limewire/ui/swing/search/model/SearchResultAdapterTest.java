@@ -14,6 +14,7 @@ public class SearchResultAdapterTest extends TestCase {
     private GroupedSearchResult groupedResult;
     private MockPropertiableHeadings propertiableHeadings;
     private SearchResultAdapter adapter;
+    private VisualSearchResultStatusListener listener;
     private Provider<PropertiableHeadings> provider;
     private Mockery context;
 
@@ -23,13 +24,9 @@ public class SearchResultAdapterTest extends TestCase {
         groupedResult = new MockGroupedSearchResult(new MockURN("1"), "test");
         propertiableHeadings = new MockPropertiableHeadings();
         context = new Mockery();
+        listener = context.mock(VisualSearchResultStatusListener.class);
         provider = context.mock(Provider.class);
-        adapter = new SearchResultAdapter(groupedResult, provider,
-                new VisualSearchResultStatusListener() {
-            @Override public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {}
-            @Override public void resultCreated(VisualSearchResult vsr) {}
-            @Override public void resultsCleared() {}
-        });
+        adapter = new SearchResultAdapter(groupedResult, provider, listener);
     }
 
     public void testHeadingAndSubHeadingCached() {
@@ -38,6 +35,7 @@ public class SearchResultAdapterTest extends TestCase {
         
         context.checking(new Expectations(){
             {
+                allowing(listener);
                 allowing(provider).get();
                 will(returnValue(propertiableHeadings));
             }
@@ -59,6 +57,7 @@ public class SearchResultAdapterTest extends TestCase {
         
         context.checking(new Expectations(){
             {
+                allowing(listener);
                 allowing(provider).get();
                 will(returnValue(propertiableHeadings));
             }
@@ -74,6 +73,7 @@ public class SearchResultAdapterTest extends TestCase {
         
         context.checking(new Expectations(){
             {
+                allowing(listener);
                 allowing(provider).get();
                 will(returnValue(propertiableHeadings));
             }
@@ -88,6 +88,7 @@ public class SearchResultAdapterTest extends TestCase {
         
         context.checking(new Expectations(){
             {
+                allowing(listener);
                 allowing(provider).get();
                 will(returnValue(propertiableHeadings));
             }

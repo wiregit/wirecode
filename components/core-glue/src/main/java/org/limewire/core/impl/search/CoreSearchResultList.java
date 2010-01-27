@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.URN;
@@ -15,9 +14,10 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.SearchResultListListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.io.GUID;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -33,7 +33,7 @@ class CoreSearchResultList implements SearchResultList {
     private final Search search;
     private final SearchDetails searchDetails;
     
-    private final List<SearchResultListListener> listListeners;
+    private final EventListenerList<Collection<GroupedSearchResult>> listListeners;
     private final Comparator<Object> resultFinder;
     private final SearchListener searchListener;
     
@@ -49,7 +49,7 @@ class CoreSearchResultList implements SearchResultList {
         this.search = search;
         this.searchDetails = searchDetails;
         
-        listListeners = new CopyOnWriteArrayList<SearchResultListListener>();
+        listListeners = new EventListenerList<Collection<GroupedSearchResult>>();
         resultFinder = new UrnResultFinder();
         searchListener = new SearchListenerImpl();
         
@@ -86,13 +86,13 @@ class CoreSearchResultList implements SearchResultList {
     }
     
     @Override
-    public void addListListener(SearchResultListListener listener) {
-        listListeners.add(listener);
+    public void addListener(EventListener<Collection<GroupedSearchResult>> listener) {
+        listListeners.addListener(listener);
     }
-    
+
     @Override
-    public void removeListListener(SearchResultListListener listener) {
-        listListeners.remove(listener);
+    public boolean removeListener(EventListener<Collection<GroupedSearchResult>> listener) {
+        return listListeners.removeListener(listener);
     }
     
     @Override
@@ -110,7 +110,6 @@ class CoreSearchResultList implements SearchResultList {
     @Override
     public void dispose() {
         search.removeSearchListener(searchListener);
-        listListeners.clear();
     }
     
     /**
@@ -175,7 +174,9 @@ class CoreSearchResultList implements SearchResultList {
         }
         
         // Forward new results to list listeners.
-        notifyResultsCreated(newResults);
+        if (newResults.size() > 0) {
+            notifyResultsCreated(newResults);
+        }
     }
     
     /**
@@ -183,9 +184,7 @@ class CoreSearchResultList implements SearchResultList {
      * listeners. 
      */
     private void notifyResultsCreated(Collection<GroupedSearchResult> results) {
-        for (SearchResultListListener listener : listListeners) {
-            listener.resultsCreated(results);
-        }
+        listListeners.broadcast(results);
     }
     
     /**
