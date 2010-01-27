@@ -2,13 +2,15 @@ package org.limewire.activation.impl;
 
 import java.util.Date;
 
+import org.limewire.activation.api.ActSettings;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.setting.ActivationSettings;
 import org.limewire.util.OSUtils;
 
 class ActivationItemImpl implements ActivationItem {
 
+    private final ActSettings activationSettings;
+    
     private final int intID;
     private final ActivationID moduleID;
     private final String licenseName;
@@ -16,13 +18,14 @@ class ActivationItemImpl implements ActivationItem {
     private final Date dateExpired;
     private final Status currentStatus;
     
-    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, Date dateExpired,
-            Status currentStatus) {
-        this(intID, licenseName, datePurchased, dateExpired, currentStatus, false);
+    public ActivationItemImpl(ActSettings activationSettings, int intID, String licenseName, Date datePurchased, 
+            Date dateExpired, Status currentStatus) {
+        this(activationSettings, intID, licenseName, datePurchased, dateExpired, currentStatus, false);
     }
     
-    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, Date dateExpired,
-            Status currentStatus, boolean isLoadedFromDisk) {
+    public ActivationItemImpl(ActSettings activationSettings, int intID, String licenseName, Date datePurchased, 
+            Date dateExpired, Status currentStatus, boolean isLoadedFromDisk) {
+        this.activationSettings = activationSettings;
         this.intID = intID;
         this.moduleID = ActivationID.getActivationID(intID);
         this.licenseName = licenseName;
@@ -53,8 +56,7 @@ class ActivationItemImpl implements ActivationItem {
     
     @Override
     public String getURL() {
-        return ActivationSettings.ACTIVATION_RENEWAL_HOST.getValueAsString() 
-                + "?" + ActivationSettings.MODULE_KEY_IDENTIFIER.getValueAsString() + Integer.toString(intID);
+        return activationSettings.getActivationRenewalHost() + Integer.toString(intID);
     }
 
     @Override

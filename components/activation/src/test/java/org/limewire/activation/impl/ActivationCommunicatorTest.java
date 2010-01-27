@@ -16,9 +16,9 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.core.impl.CoreGlueModule;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
-import org.limewire.setting.ActivationSettings;
 import org.limewire.util.PrivateAccessor;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
 import org.mortbay.http.handler.ResourceHandler;

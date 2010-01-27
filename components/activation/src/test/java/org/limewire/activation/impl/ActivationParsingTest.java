@@ -28,7 +28,7 @@ public class ActivationParsingTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         parser = new ActivationResponseFactoryImpl(
-            new ActivationItemFactoryImpl());
+            new ActivationItemFactoryImpl(new ActivationSettingStub()));
     }
 
     // Test a successful activation string with 3 modules, 2 of which

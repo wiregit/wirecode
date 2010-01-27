@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActSettings;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -22,12 +23,9 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.setting.ActivationSettings;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * 
@@ -46,6 +44,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationCommunicator activationCommunicator;
     private final ActivationSerializer activationSerializer;
     private final ActivationResponseFactory activationResponseFactory;
+    private final ActSettings activationSettings;
     private Periodic activationContactor = null;
     
     // interval in seconds between successive hits to the activation server
@@ -77,12 +76,14 @@ class ActivationManagerImpl implements ActivationManager, Service {
     public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
                                  ActivationCommunicator activationCommunicator,
                                  ActivationModel activationModel, ActivationSerializer activationSerializer,
-                                 ActivationResponseFactory activationReponseFactory) {
+                                 ActivationResponseFactory activationReponseFactory,
+                                 ActSettings activationSettings) {
         this.activationModel = activationModel;
         this.scheduler = scheduler;
         this.activationCommunicator = activationCommunicator;
         this.activationSerializer = activationSerializer;
         this.activationResponseFactory = activationReponseFactory;
+        this.activationSettings = activationSettings;
     }
     
     @Override
@@ -174,12 +175,12 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public String getLicenseKey() {
-        return ActivationSettings.ACTIVATION_KEY.getValueAsString();
+        return activationSettings.getActivationKey();
     }
     
     @Override
     public String getMCode() {
-        return ActivationSettings.M_CODE.getValueAsString();
+        return activationSettings.getMCode();
     }
 
     @Override
@@ -439,13 +440,13 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 removeData(removeAllData);
             activationError = error;
             setCurrentState(State.NOT_ACTIVATED);
-            LimeWireUtils.setIsPro(isProActive());
+            activationSettings.setLastStartPro(false);
         }
     }
         
     private void removeData(boolean removeMCode) {
-        ActivationSettings.ACTIVATION_KEY.revertToDefault();
-        BackgroundExecutorService.execute(new Runnable(){
+        activationSettings.setActivationKey("");
+        scheduler.execute(new Runnable(){
             public void run() {
                 try {
                     activationSerializer.writeToDisk("");                        
@@ -456,9 +457,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
             }
         });
         setActivationItems(Collections.<ActivationItem>emptyList());
-        ActivationSettings.LAST_START_WAS_PRO.set(false);
         if(removeMCode)
-            ActivationSettings.M_CODE.set("");
+            activationSettings.setMCode("");
     }
     
     private void refreshing() {
@@ -473,10 +473,9 @@ class ActivationManagerImpl implements ActivationManager, Service {
     
     private void activatedFromDisk(final ActivationResponse response) {
         setActivationItems(response.getActivationItems());
-        ActivationSettings.LAST_START_WAS_PRO.set(isProActive());
+        activationSettings.setLastStartPro(isProActive());
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.ACTIVATED_FROM_DISK);
-        LimeWireUtils.setIsPro(isProActive());
     }
     
     private void activated(final ActivationResponse response) {
@@ -491,8 +490,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
             }
         });
 
-        ActivationSettings.ACTIVATION_KEY.set(response.getLid());
-        ActivationSettings.M_CODE.set(response.getMCode());
+        activationSettings.setActivationKey(response.getLid());
+        activationSettings.setMCode(response.getMCode());
         activatedFromDisk(response);
     }
 }

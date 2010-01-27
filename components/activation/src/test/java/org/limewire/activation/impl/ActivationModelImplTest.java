@@ -28,7 +28,7 @@ public class ActivationModelImplTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         model = new ActivationModelImpl();
-        factory = new ActivationItemFactoryImpl();
+        factory = new ActivationItemFactoryImpl(new ActivationSettingStub());
     }
     
     public void testSingleModule() {

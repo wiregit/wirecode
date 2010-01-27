@@ -191,7 +191,7 @@ class SetupActivationTable extends BasicJXTable {
     
     private class LicenseTypeRendererEditor extends TableRendererEditor {
 
-        private final IconButton checkMarkButton;
+        private final JLabel checkMarkButton;
         private final JLabel nameLabel;
         private final Component strut1;
         private final Component strut2;
@@ -201,7 +201,7 @@ class SetupActivationTable extends BasicJXTable {
         public LicenseTypeRendererEditor() {
             nameLabel = new JLabel();
             
-            checkMarkButton = new IconButton(checkIcon);
+            checkMarkButton = new JLabel(checkIcon);
             checkMarkButton.setVisible(false);
             
             strut1 = Box.createHorizontalStrut(1);

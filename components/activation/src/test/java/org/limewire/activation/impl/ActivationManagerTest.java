@@ -23,10 +23,10 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.core.impl.CoreGlueModule;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.setting.ActivationSettings;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Guice;
@@ -327,7 +327,7 @@ public class ActivationManagerTest extends LimeTestCase {
         ActivationSerializer serializer = injector.getInstance(ActivationSerializer.class);
         ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
         ActivationResponseFactory factory = injector.getInstance(ActivationResponseFactory.class);
-        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory);
+        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, null);
     }
         
     private boolean isSuccessfulState(ActivationState state) {

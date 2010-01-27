@@ -22,7 +22,7 @@ public class ActivationItemImplTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        factory = new ActivationItemFactoryImpl();
+        factory = new ActivationItemFactoryImpl(new ActivationSettingStub());
     }
     
     public void testExpiredFromServer() throws Exception {

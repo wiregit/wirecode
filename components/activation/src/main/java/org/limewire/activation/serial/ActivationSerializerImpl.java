@@ -16,10 +16,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProvider.CipherType;
-import org.limewire.setting.ActivationSettings;
 import org.limewire.util.Base32;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
@@ -39,11 +39,14 @@ public class ActivationSerializerImpl implements ActivationSerializer {
     
     private final ActivationSerializerSettings settings;
     private final CipherProvider cipherProvider;
+    private final ActSettings activationSettings;
     
     @Inject
-    public ActivationSerializerImpl(ActivationSerializerSettings settings, CipherProvider cipherProvider){
+    public ActivationSerializerImpl(ActivationSerializerSettings settings, CipherProvider cipherProvider,
+            ActSettings activationSettings){
         this.settings = settings;
         this.cipherProvider = cipherProvider;
+        this.activationSettings = activationSettings;
     }
 
     @Override
@@ -115,7 +118,7 @@ public class ActivationSerializerImpl implements ActivationSerializer {
      * Returns the encryption/decryption key.
      */
     private String getEncryptionKey() {
-        String key = ActivationSettings.PASS_KEY.get();
+        String key = activationSettings.getPassKey();
         return key;
     }
 }

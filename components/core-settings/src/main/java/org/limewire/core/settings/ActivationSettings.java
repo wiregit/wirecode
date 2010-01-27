@@ -1,6 +1,7 @@
-package org.limewire.setting;
+package org.limewire.core.settings;
 
-import org.limewire.core.settings.LimeProps;
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.StringSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 

@@ -9,8 +9,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.limewire.activation.api.ActivationManager;
-import org.limewire.activation.api.ActivationUrls;
+import org.limewire.activation.api.ActSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.InvalidDataException;
@@ -19,8 +18,6 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Responsible for communicating with activation server.
@@ -34,29 +31,24 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 class ActivationCommunicatorImpl implements ActivationCommunicator {
     private static Log LOG = LogFactory.getLog(ActivationCommunicatorImpl.class);
     
-    private final Provider<String> activationUrlProvider;
     private final ActivationResponseFactory activationFactory;
     private final Provider<LimeHttpClient> httpClientProvider;
-    private final ApplicationServices applicationServices;
-    private final ActivationManager activationManager;
+    private final ActSettings activationSettings;
 
     @Inject
-    public ActivationCommunicatorImpl(@ActivationUrls Provider<String> activationUrlProvider,
+    public ActivationCommunicatorImpl(ActSettings activationSettings,
                                       ActivationResponseFactory activationFactory,
-                                      Provider<LimeHttpClient> httpClientProvider,
-                                      ApplicationServices applicationServices,
-                                      ActivationManager activationManager) {
-        this.activationUrlProvider = activationUrlProvider;
+                                      Provider<LimeHttpClient> httpClientProvider) {
+        this.activationSettings = activationSettings;
         this.httpClientProvider = httpClientProvider;
         this.activationFactory = activationFactory;
-        this.applicationServices = applicationServices;
-        this.activationManager = activationManager;
     }
     
     public ActivationResponse activate(final String key) throws IOException, InvalidDataException {
         // get query string
-        String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;
+        String query = activationSettings.getQueryString() + "&lid=" + key;;
+//        String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
+//            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;
 
         String jsonResult = sendToServer(query);
         LOG.debugf("Activation server response: " + jsonResult);
@@ -66,7 +58,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
 
 
     String sendToServer(String queryStringToPost) throws IOException {
-        String submitUrl = activationUrlProvider.get();
+        String submitUrl = activationSettings.getActivationHost();
         HttpEntity postContent = new StringEntity(queryStringToPost);
         HttpPost httpPost = new HttpPost(submitUrl);
         httpPost.addHeader("Connection", "close");

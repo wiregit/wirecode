@@ -17,7 +17,7 @@ import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.ActivationTest;
-import org.limewire.setting.ActivationSettings;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;

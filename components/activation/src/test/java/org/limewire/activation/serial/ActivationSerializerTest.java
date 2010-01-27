@@ -23,7 +23,7 @@ public class ActivationSerializerTest extends LimeTestCase {
         
         ActivationSerializerSettings settings  = new ActivationSerializerSettingsStub(tmp, tmp);
         CipherProvider cipherProvider = new CipherProviderImpl();
-        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider);
+        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, null);
         serializer.writeToDisk("");
         
         String json = serializer.readFromDisk();
@@ -36,7 +36,7 @@ public class ActivationSerializerTest extends LimeTestCase {
         
         ActivationSerializerSettings settings  = new ActivationSerializerSettingsStub(tmp, tmp);
         CipherProvider cipherProvider = new CipherProviderImpl();
-        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider);
+        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, null);
         
         serializer.writeToDisk(jsonString);
         

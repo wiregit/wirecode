@@ -11,8 +11,6 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.inject.MutableProvider;
 import org.limewire.inspection.InspectionsServerUrls;
 import org.limewire.setting.StringSetting;
-import org.limewire.setting.ActivationSettings;
-import org.limewire.activation.api.ActivationUrls;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
@@ -25,7 +23,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<MutableProvider<Properties>>(){}).annotatedWith(GeoLocation.class).toInstance(GeocodeSettings.GEO_LOCATION);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
         bind(new TypeLiteral<String>(){}).annotatedWith(VirusUpdatesURL.class).toProvider(DownloadSettings.VIRUS_UPDATES_SERVER);
-        bind(new TypeLiteral<String>(){}).annotatedWith(ActivationUrls.class).toProvider(ActivationSettings.ACTIVATION_HOST);        
+     
     }
 
     @Singleton
