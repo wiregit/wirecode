@@ -168,7 +168,7 @@ public class AVInfoPanel extends JPanel {
      */
     public void showFailureMessage(DownloadItem item, boolean showOption) {
         String heading = I18n.tr("Unable to Scan");
-        String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, showOption, true, 
                 SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
     }
@@ -182,7 +182,7 @@ public class AVInfoPanel extends JPanel {
      */
     public void showFailureMessageDefsDownloading(DownloadItem item, boolean autoNotify) {
         String heading = I18n.tr("Can't Scan Yet");
-        String message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire PRO Anti-Virus protection is powered by AVG.", item.getFileName());
+        String message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, autoNotify, true,
                 SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
     }
