@@ -11,6 +11,7 @@ import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -151,7 +152,11 @@ public class HomePanel extends JXPanel {
         // try reloading the homepage
         if(HomePanel.this.isVisible() && currentState != isProLoadState) {
             isProLoadState = currentState;
-            loadDefaultUrl();
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    loadDefaultUrl();                    
+                }
+            });
         }
     }
     
