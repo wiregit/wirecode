@@ -151,7 +151,7 @@ public class HomePanel extends JXPanel {
         // try reloading the homepage
         if(HomePanel.this.isVisible() && currentState != isProLoadState) {
             isProLoadState = currentState;
-            reloadDefaultUrlIfPossibleAndNeeded();
+            loadDefaultUrl();
         }
     }
     
