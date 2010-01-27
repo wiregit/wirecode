@@ -2,7 +2,12 @@ package org.limewire.activation.impl;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.net.SocketTimeoutException;
@@ -24,7 +29,6 @@ import org.mortbay.http.SocketListener;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -156,7 +160,8 @@ public class ActivationCommunicatorTest extends LimeTestCase {
         
         serverController.startServer(new AbstractHttpHandler() {
             @Override
-            public void handle(String s, String s1, HttpRequest httpRequest, HttpResponse httpResponse) throws HttpException, IOException {
+            public void handle(String s, String s1, 
+                               HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
                 // wait a long time to simulate swallowing packets
                 // client should timeout LONG before this interval
                 try {
@@ -174,6 +179,36 @@ public class ActivationCommunicatorTest extends LimeTestCase {
             assertTrue(e.getMessage().startsWith("read timed out"));
         }    
     }
+    
+    // test to make sure the LW client times out server cannot be reached 
+    // (such as if the address is unrouteable)
+    //
+    public void testUnreachableServerClientTimesOut() throws Exception {
+        String unreachableIpAddress = "172.16.0.253";
+        LimeWireHttpClientModule.class.getClass();
+        PrivateAccessor accessor = new PrivateAccessor(
+            Class.forName(LimeWireHttpClientModule.class.getName()), null, "CONNECTION_TIMEOUT");
+        final int timeout = ((Integer)accessor.getOriginalValue()) + 2000;
+        
+        ActivationSettings.ACTIVATION_HOST.set("http://" + unreachableIpAddress + ":8123/sfsdfs");
+
+        Callable<ActivationResponse> contactUnreachableServer = new Callable<ActivationResponse>() {
+            @Override
+            public ActivationResponse call() throws Exception {
+                return comm.activate("DAVV-XXME-BWU3");
+            }
+        };
+        ExecutorService poolForReachingServer = Executors.newSingleThreadExecutor();
+        Future<ActivationResponse> reachServerResult = poolForReachingServer.submit(contactUnreachableServer);
+        
+        try {
+            reachServerResult.get(timeout, TimeUnit.MILLISECONDS);
+            fail("Expected a SocketTimeoutException");
+        } catch (ExecutionException e) {
+            assertInstanceof(SocketTimeoutException.class, e.getCause());
+        }
+    }
+    
 
 
     private class ServerController extends ResourceHandler {
@@ -217,8 +252,7 @@ public class ActivationCommunicatorTest extends LimeTestCase {
         
         @Override
         public void handle(String s, String s1, HttpRequest httpRequest, HttpResponse httpResponse)
-        throws HttpException, java.io.IOException {
-            Set<String> params = httpRequest.getURI().getParameterNames();
+        throws IOException {
             String path = httpRequest.getURI().getPath();
             if (path.equals("/activate")) {
                 httpResponse.getOutputStream().write(serverReturn.getBytes());
