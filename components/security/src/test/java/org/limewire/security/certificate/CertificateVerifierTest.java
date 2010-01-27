@@ -42,8 +42,21 @@ public class CertificateVerifierTest extends BaseTestCase {
         ksp.invalidateKeyStore();
 
         KeyStore ks = ksp.getKeyStore();
+        Certificate certificate = ks.getCertificate("mojito.limewire.com");
+        // We know this is a valid cert, it came from the damn key store...
+        assertNotNull(certificate);
+        assertTrue(cv.isValid(certificate));
+    }
+    
+    public void testPromotionCertificateIsValid() throws IOException, KeyStoreException {
+        CertificateVerifier cv = injector.getInstance(CertificateVerifier.class);
+        KeyStoreProvider ksp = injector.getInstance(KeyStoreProvider.class);
+        ksp.invalidateKeyStore();
+
+        KeyStore ks = ksp.getKeyStore();
         Certificate certificate = ks.getCertificate("promotion.limewire.com");
         // We know this is a valid cert, it came from the damn key store...
+        assertNotNull(certificate);
         assertTrue(cv.isValid(certificate));
     }
 
@@ -55,6 +68,7 @@ public class CertificateVerifierTest extends BaseTestCase {
         KeyStore ks = ksp.getKeyStore();
         Certificate certificate = ks.getCertificate("unsigned.limewire.com");
         // We know this is a valid cert, but it shouldn't be valid since it's not signed...
+        assertNotNull(certificate);
         assertFalse(cv.isValid(certificate));
     }
 
