@@ -24,6 +24,9 @@ public class CertificateParserImpl implements CertificateParser {
             throw new IOException("Could not parse key version");
         }
         PublicKey publicKey = SignatureVerifier.readKey(parts[2], "DSA");
+        if (publicKey == null) {
+            throw new IOException("invalid public key");
+        }
         return new CertificateImpl(signature, signedPayload, keyVersion, publicKey, contents);
     }
 

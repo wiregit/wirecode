@@ -3,22 +3,19 @@ package com.limegroup.gnutella.security;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.security.PublicKey;
 import java.security.SignatureException;
 
 import org.limewire.io.IpPort;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.util.DataUtils;
 
 public class CertificateProviderImpl implements CertificateProvider {
 
     private static final Log LOG = LogFactory.getLog(CertificateProviderImpl.class);
     
-    private final FileCertificateReaderImpl fileCertificateReader;
-    private final HttpCertificateReaderImpl httpCertificateReader;
+    private final FileCertificateReader fileCertificateReader;
+    private final HttpCertificateReader httpCertificateReader;
     private final CertificateVerifier certificateVerifier;
     
     private volatile Certificate validCertificate;
@@ -27,8 +24,8 @@ public class CertificateProviderImpl implements CertificateProvider {
 
     private final URI uri;
     
-    public CertificateProviderImpl(FileCertificateReaderImpl fileCertificateReader,
-            HttpCertificateReaderImpl httpCertificateReader, 
+    public CertificateProviderImpl(FileCertificateReader fileCertificateReader,
+            HttpCertificateReader httpCertificateReader, 
             CertificateVerifier certificateVerifier,
             File file, URI uri) {
         this.fileCertificateReader = fileCertificateReader;
@@ -55,9 +52,9 @@ public class CertificateProviderImpl implements CertificateProvider {
     public void set(Certificate certificate) {
         try { 
             Certificate localCopy = validCertificate;
-            if (localCopy != null && !localCopy.equals(certificate) && certificate.getKeyVersion() > localCopy.getKeyVersion()) {
+            if (localCopy == null || (!localCopy.equals(certificate) && certificate.getKeyVersion() > localCopy.getKeyVersion())) {
                 validCertificate = certificateVerifier.verify(certificate);
-                FileUtils.writeUtf8StringWithBackupFile(certificate.getCertificateString(), file, file, LOG);
+                fileCertificateReader.write(certificate, file);
             }
         } catch (SignatureException se) {
             LOG.debugf(se, "certificate invalid {0} ", certificate);
@@ -98,42 +95,6 @@ public class CertificateProviderImpl implements CertificateProvider {
             LOG.debugf(e, "certificate from url {0} invalid {1} ", uri, certificate);
         }
         return validCertificate;
-    }
-
-    private static class NullCertificate implements Certificate {
-        @Override
-        public String getCertificateString() {
-            return null;
-        }
-        @Override
-        public int getKeyVersion() {
-            return -1;
-        }
-        @Override
-        public PublicKey getPublicKey() {
-            return new PublicKey() {
-                @Override
-                public String getFormat() {
-                    return "";
-                }
-                @Override
-                public byte[] getEncoded() {
-                    return DataUtils.EMPTY_BYTE_ARRAY;
-                }
-                @Override
-                public String getAlgorithm() {
-                    return "DSA";
-                }
-            };
-        }
-        @Override
-        public byte[] getSignature() {
-            return DataUtils.EMPTY_BYTE_ARRAY;
-        }
-        @Override
-        public byte[] getSignedPayload() {
-            return DataUtils.EMPTY_BYTE_ARRAY;
-        }
     }
     
 

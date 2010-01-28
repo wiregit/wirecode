@@ -13,8 +13,8 @@ import com.limegroup.gnutella.security.CertificateProviderImpl;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifierImpl;
-import com.limegroup.gnutella.security.FileCertificateReaderImpl;
-import com.limegroup.gnutella.security.HttpCertificateReaderImpl;
+import com.limegroup.gnutella.security.FileCertificateReader;
+import com.limegroup.gnutella.security.HttpCertificateReader;
 
 public class LimeWireSimppModule extends AbstractModule {
     
@@ -25,7 +25,7 @@ public class LimeWireSimppModule extends AbstractModule {
         bind(SimppSender.class);
     }
     
-    @Provides @LazySingleton @Simpp CertificateProvider simppCertificateProvider(FileCertificateReaderImpl fileCertificateReader, HttpCertificateReaderImpl httpCertificateReader,
+    @Provides @LazySingleton @Simpp CertificateProvider simppCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
             CertificateVerifier certificateVerifier) {
         return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URIUtils.toSafeUri("http://localhost/"));
     }

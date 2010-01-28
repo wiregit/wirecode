@@ -8,8 +8,8 @@ public class LimeWireSecurityModule extends AbstractModule {
     protected void configure() {
         bind(CertificateParser.class).to(CertificateParserImpl.class);
         bind(CertificateVerifier.class).to(CertificateVerifierImpl.class);
-        bind(FileCertificateReaderImpl.class);
-        bind(HttpCertificateReaderImpl.class);
+        bind(FileCertificateReader.class).to(FileCertificateReaderImpl.class);
+        bind(HttpCertificateReader.class).to(HttpCertificateReaderImpl.class);
     }
 
 }

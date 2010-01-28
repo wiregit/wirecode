@@ -14,7 +14,7 @@ import org.limewire.io.IpPort;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-public class HttpCertificateReaderImpl {
+public class HttpCertificateReaderImpl implements HttpCertificateReader {
 
     private final Provider<LimeHttpClient> httpClient;
     private final CertificateParser certificateParser;
@@ -26,7 +26,10 @@ public class HttpCertificateReaderImpl {
         this.certificateParser = certificateParser;
     }
     
-    Certificate read(URI uri, IpPort messageSource) throws IOException {
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.security.HttpCertificateReader#read(java.net.URI, org.limewire.io.IpPort)
+     */
+    public Certificate read(URI uri, IpPort messageSource) throws IOException {
         HttpGet get = new HttpGet(uri);
         if (messageSource != null) {
             get.addHeader("X-Message-Source", messageSource.getAddress() + ":" + messageSource.getPort());
