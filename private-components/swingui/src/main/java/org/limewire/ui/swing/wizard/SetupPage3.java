@@ -18,40 +18,34 @@ import org.limewire.util.OSUtils;
 public class SetupPage3 extends WizardPage {
 
     private final ActivationManager activationManager;
-
+    private final Wizard wizard;
+    private final boolean userHasPreexistingLicense;
+    
     private ActivationListener activationListener;
-
-    private Wizard wizard;
     
     private String footerText;
     private String forwardText;
     private boolean hasBackButton;
-    
-    private final boolean userHasPreexistingLicense;
     
     public SetupPage3(SetupComponentDecorator decorator, 
                       Application application, 
                       LibraryData libraryData,
                       ActivationManager activationManager,
                       Wizard wizard) {
-        
         super(decorator, application);
         
         GuiUtils.assignResources(this);
 
         this.activationManager = activationManager;
-
         this.wizard = wizard;
+        userHasPreexistingLicense = !ActivationSettings.ACTIVATION_KEY.isDefault();
         
         setOpaque(false);
         setLayout(new BorderLayout());
 
-        userHasPreexistingLicense = !ActivationSettings.ACTIVATION_KEY.isDefault();
-        
-        this.activationListener = new ActivationListener();
-        this.activationManager.addListener(activationListener);
-
-        if (activationManager.getActivationState() != ActivationState.AUTHORIZED) {
+        if (activationManager.getActivationState() != ActivationState.AUTHORIZED) {       
+            this.activationListener = new ActivationListener();
+            this.activationManager.addListener(activationListener);
             showLicenseEntryPage();
         } else {
             showModuleInfoPage();
@@ -60,8 +54,10 @@ public class SetupPage3 extends WizardPage {
     
     @Override
     public void finalize() {
-        activationManager.removeListener(activationListener);
-        activationListener = null;
+        if(activationListener != null) {
+            activationManager.removeListener(activationListener);
+            activationListener = null;
+        }
     }
 
     @Override
@@ -76,7 +72,6 @@ public class SetupPage3 extends WizardPage {
 
     @Override
     public void applySettings() {
-        // Auto-Sharing downloaded files Setting
     }
 
     @Override
@@ -114,15 +109,14 @@ public class SetupPage3 extends WizardPage {
     private class ActivationListener implements EventListener<ActivationEvent> {
         @Override
         public void handleEvent(final ActivationEvent event) {
-            SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
-                    if (event.getData() == ActivationState.AUTHORIZED) {
+            if (event.getData() == ActivationState.AUTHORIZED) {
+                activationManager.removeListener(activationListener);
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {
                         showModuleInfoPage();
                     }
-                }
-            });
+                });
+            }
         }
     }
-
-
 }
