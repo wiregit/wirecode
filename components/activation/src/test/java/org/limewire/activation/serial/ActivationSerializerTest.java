@@ -4,6 +4,7 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.activation.impl.ActivationSettingStub;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProviderImpl;
 import org.limewire.util.BaseTestCase;
@@ -23,7 +24,7 @@ public class ActivationSerializerTest extends BaseTestCase {
         
         ActivationSerializerSettings settings  = new ActivationSerializerSettingsStub(tmp, tmp);
         CipherProvider cipherProvider = new CipherProviderImpl();
-        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, null);
+        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, new ActivationSettingStub());
         serializer.writeToDisk("");
         
         String json = serializer.readFromDisk();
@@ -36,7 +37,7 @@ public class ActivationSerializerTest extends BaseTestCase {
         
         ActivationSerializerSettings settings  = new ActivationSerializerSettingsStub(tmp, tmp);
         CipherProvider cipherProvider = new CipherProviderImpl();
-        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, null);
+        ActivationSerializer serializer = new ActivationSerializerImpl(settings, cipherProvider, new ActivationSettingStub());
         
         serializer.writeToDisk(jsonString);
         

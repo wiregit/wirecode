@@ -4,6 +4,10 @@ import org.limewire.activation.api.ActSettings;
 
 public class ActivationSettingStub implements ActSettings {
 
+    private String activationKey = "";
+    private String mcode = "";
+    private boolean isLastStartPro = false;
+    
     @Override
     public String getActivationHost() {
         // TODO Auto-generated method stub
@@ -12,8 +16,7 @@ public class ActivationSettingStub implements ActSettings {
 
     @Override
     public String getActivationKey() {
-        // TODO Auto-generated method stub
-        return null;
+        return activationKey;
     }
 
     @Override
@@ -23,14 +26,12 @@ public class ActivationSettingStub implements ActSettings {
 
     @Override
     public String getMCode() {
-        // TODO Auto-generated method stub
-        return null;
+        return mcode;
     }
 
     @Override
     public String getPassKey() {
-        // TODO Auto-generated method stub
-        return null;
+        return "3A931AF193AC44F66540CFFC57C3978D";
     }
 
     @Override
@@ -41,26 +42,22 @@ public class ActivationSettingStub implements ActSettings {
 
     @Override
     public boolean isLastStartPro() {
-        // TODO Auto-generated method stub
-        return false;
+        return isLastStartPro;
     }
 
     @Override
     public void setActivationKey(String key) {
-        // TODO Auto-generated method stub
-        
+        this.activationKey = key;
     }
 
     @Override
     public void setLastStartPro(boolean value) {
-        // TODO Auto-generated method stub
-        
+        this.isLastStartPro = value;
     }
 
     @Override
     public void setMCode(String mCode) {
-        // TODO Auto-generated method stub
-        
+        this.mcode = mCode;
     }
 
 }

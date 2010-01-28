@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
+import org.limewire.activation.api.ActSettings;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -27,12 +28,15 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 
 public class ActivationManagerTest extends BaseTestCase {
+    
+    private ActivationSettingStub settingStub;
     
     protected Injector injector;
     private ActivationResponseFactory responseFactory;
@@ -62,8 +66,15 @@ public class ActivationManagerTest extends BaseTestCase {
     
     private Module[] getModules() {
         List<Module> modules = new ArrayList<Module>();
+        modules.add(new AbstractModule() {
+            @Override
+            public void configure(){
+                bind(ActSettings.class).to(ActivationSettingStub.class);
+            }
+        });
 //        modules.add(new LimeWireCoreModule());
 //        modules.add(new CoreGlueModule());
+        modules.add(new ActivationModule());
         return modules.toArray(new Module[modules.size()]);
     }
 
@@ -320,11 +331,12 @@ public class ActivationManagerTest extends BaseTestCase {
      * stub/mocked {@link ActivationCommunicator}
      */
     private ActivationManagerImpl getActivationManager(ActivationCommunicator comm) {
+        settingStub = new ActivationSettingStub();
         ActivationModel model = injector.getInstance(ActivationModel.class);
         ActivationSerializer serializer = injector.getInstance(ActivationSerializer.class);
         ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
         ActivationResponseFactory factory = injector.getInstance(ActivationResponseFactory.class);
-        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, null);
+        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, injector.getInstance(ActSettings.class));
     }
         
     private boolean isSuccessfulState(ActivationState state) {
