@@ -16,7 +16,7 @@ public class CertificateParserImpl implements CertificateParser {
             throw new IOException(parts.length + " invalid data format: " + contents);
         }
         byte[] signature = Base32.decode(parts[0]);
-        byte[] signedPayload = parsePayload(contents);
+        byte[] signedPayload = extractSignedPayload(contents);
         int keyVersion;
         try { 
             keyVersion = Integer.parseInt(parts[1]);
@@ -27,7 +27,7 @@ public class CertificateParserImpl implements CertificateParser {
         return new CertificateImpl(signature, signedPayload, keyVersion, publicKey, contents);
     }
 
-    byte[] parsePayload(String contents) throws IOException {
+    static byte[] extractSignedPayload(String contents) throws IOException {
         int pipe = contents.indexOf('|');
         if (pipe < 0 || pipe == contents.length() - 1) {
             throw new IOException("invalid contents: " + contents);

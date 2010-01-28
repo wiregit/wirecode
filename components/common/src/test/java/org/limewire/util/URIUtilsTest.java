@@ -62,5 +62,19 @@ public class URIUtilsTest extends BaseTestCase {
     public void testGetPort() throws Exception {
         assertEquals(80, URIUtils.getPort(new URI("HTTP://SOME.DOMAIN/")));
     }
+
+    public void testToSafeUriThrowsRuntimeExceptionOnInvalidInput() {
+        try {
+            URIUtils.toSafeUri("haha\\");
+        } catch (RuntimeException re) {
+        }
+        try {
+            URIUtils.toSafeUri("http%p://test.flix/");
+        } catch (RuntimeException re) {
+        }
+    }
     
+    public void testToSafeUriDoesNotThrowOnValidInput() throws URISyntaxException {
+        assertEquals(URIUtils.toURI("http://test.flix/"), URIUtils.toSafeUri("http://test.flix/"));
+    }
 }

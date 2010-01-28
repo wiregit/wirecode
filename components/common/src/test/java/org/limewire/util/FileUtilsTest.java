@@ -617,4 +617,34 @@ public final class FileUtilsTest extends BaseTestCase {
         FileUtils.deleteEmptyDirectories(dir1);
         assertFalse(dir1.exists());
     }
+    
+    public void testWriteUtf8StringWithoutBackup() throws Exception {
+        File tmpFile = File.createTempFile("tmp", "file");
+        File tmpDir = tmpFile.getParentFile();
+        tmpFile.delete();
+        File file = new File(tmpDir, "utf8string");
+        try {
+            String string = "hello \u30d5\u30a1\u30a4\u30eb\u30b7";
+            assertTrue(FileUtils.writeUtf8StringWithBackupFile(string, file, file, null));
+            assertEquals(string, StringUtils.getUTF8String(FileUtils.readFileFully(file)));
+        } finally {
+            file.delete();
+        }
+    }
+    
+    public void testWriteUtf8StringWithBackup() throws Exception {
+        File tmpFile = File.createTempFile("tmp", "file");
+        File tmpDir = tmpFile.getParentFile();
+        tmpFile.delete();
+        File file = new File(tmpDir, "utf8string");
+        File backup = new File(tmpDir, "utf8string.bak");
+        try {
+            String string = "hello \u30d5\u30a1\u30a4\u30eb\u30b7";
+            assertTrue(FileUtils.writeUtf8StringWithBackupFile(string, backup, file, null));
+            assertFalse(backup.exists());
+            assertEquals(string, StringUtils.getUTF8String(FileUtils.readFileFully(file)));
+        } finally {
+            file.delete();
+        }
+    }
 }

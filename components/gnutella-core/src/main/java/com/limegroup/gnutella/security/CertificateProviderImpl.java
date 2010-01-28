@@ -57,7 +57,7 @@ public class CertificateProviderImpl implements CertificateProvider {
             Certificate localCopy = validCertificate;
             if (localCopy != null && !localCopy.equals(certificate) && certificate.getKeyVersion() > localCopy.getKeyVersion()) {
                 validCertificate = certificateVerifier.verify(certificate);
-                FileUtils.writeUtf8StringWithBackupFile(certificate.getCertificateString(), new File(file.getParentFile(), file.getName() + ".bak"), file, LOG);
+                FileUtils.writeUtf8StringWithBackupFile(certificate.getCertificateString(), file, file, LOG);
             }
         } catch (SignatureException se) {
             LOG.debugf(se, "certificate invalid {0} ", certificate);
