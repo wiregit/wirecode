@@ -4,16 +4,16 @@ import java.text.SimpleDateFormat;
 
 import junit.framework.Test;
 
-import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationItem;
 import org.limewire.io.InvalidDataException;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Unit test for {@link org.limewire.activation.impl.ActivationItemFactory}
  * TODO: test loading from disk with expired time
  */
-public class ActivationParsingTest extends LimeTestCase {
+public class ActivationParsingTest extends BaseTestCase {
 
     private ActivationResponseFactory parser;
     

@@ -6,9 +6,9 @@ import junit.framework.Test;
 
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
-import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
-public class ActivationItemImplTest extends LimeTestCase {
+public class ActivationItemImplTest extends BaseTestCase {
 
     private ActivationItemFactory factory;
     

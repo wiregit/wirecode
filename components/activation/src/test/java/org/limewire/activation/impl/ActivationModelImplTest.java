@@ -9,10 +9,10 @@ import junit.framework.Test;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationModuleEvent;
-import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.listener.EventListener;
+import org.limewire.util.BaseTestCase;
 
-public class ActivationModelImplTest extends LimeTestCase {
+public class ActivationModelImplTest extends BaseTestCase {
     
     private ActivationModel model;
     private ActivationItemFactory factory;

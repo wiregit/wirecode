@@ -4,11 +4,11 @@ import java.io.File;
 
 import junit.framework.Test;
 
-import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProviderImpl;
+import org.limewire.util.BaseTestCase;
 
-public class ActivationSerializerTest extends LimeTestCase {
+public class ActivationSerializerTest extends BaseTestCase {
 
     public ActivationSerializerTest(String name) {
         super(name);

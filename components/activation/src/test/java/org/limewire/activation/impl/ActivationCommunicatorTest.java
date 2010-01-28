@@ -1,40 +1,38 @@
 package org.limewire.activation.impl;
 
-import java.util.List;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutionException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.net.SocketTimeoutException;
 
 import junit.framework.Test;
 
-import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.core.impl.CoreGlueModule;
-import org.limewire.core.settings.ActivationSettings;
-import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationID;
-import org.limewire.util.PrivateAccessor;
+import org.limewire.activation.api.ActivationItem;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.http.handler.NotFoundHandler;
-import org.mortbay.http.handler.AbstractHttpHandler;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.SocketListener;
+import org.limewire.util.BaseTestCase;
+import org.limewire.util.PrivateAccessor;
 import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.HttpHandler;
+import org.mortbay.http.HttpServer;
+import org.mortbay.http.SocketListener;
+import org.mortbay.http.handler.AbstractHttpHandler;
+import org.mortbay.http.handler.NotFoundHandler;
+import org.mortbay.http.handler.ResourceHandler;
+
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Guice;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.LimeWireCoreModule;
 
 /**
  * Test for {@link ActivationCommunicatorImpl}
@@ -49,7 +47,7 @@ import com.limegroup.gnutella.LimeWireCoreModule;
  *   - server times out, never sends anything back 
  * 
  */
-public class ActivationCommunicatorTest extends LimeTestCase {
+public class ActivationCommunicatorTest extends BaseTestCase {
     
     private ServerController serverController;
     private Injector injector;
@@ -68,7 +66,7 @@ public class ActivationCommunicatorTest extends LimeTestCase {
         injector = createInjector(getModules());
         serverController = new ServerController();
         comm = injector.getInstance(ActivationCommunicator.class);
-        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/activate");
+//        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/activate");
     }
     
     @Override
@@ -82,8 +80,8 @@ public class ActivationCommunicatorTest extends LimeTestCase {
     
     private Module[] getModules() {
         List<Module> modules = new ArrayList<Module>();
-        modules.add(new LimeWireCoreModule());
-        modules.add(new CoreGlueModule());
+//        modules.add(new LimeWireCoreModule());
+//        modules.add(new CoreGlueModule());
         return modules.toArray(new Module[modules.size()]);
     }
     
@@ -138,7 +136,7 @@ public class ActivationCommunicatorTest extends LimeTestCase {
     // test 404 file not found exception
     //
     public void test404ErrorResponse() throws Exception {
-        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/invalid");
+//        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/invalid");
         serverController.setSetServerReturn("dfgdfgd");
         serverController.startServer();
         try {
@@ -190,7 +188,7 @@ public class ActivationCommunicatorTest extends LimeTestCase {
             Class.forName(LimeWireHttpClientModule.class.getName()), null, "CONNECTION_TIMEOUT");
         final int timeout = ((Integer)accessor.getOriginalValue()) + 2000;
         
-        ActivationSettings.ACTIVATION_HOST.set("http://" + unreachableIpAddress + ":8123/sfsdfs");
+//        ActivationSettings.ACTIVATION_HOST.set("http://" + unreachableIpAddress + ":8123/sfsdfs");
 
         Callable<ActivationResponse> contactUnreachableServer = new Callable<ActivationResponse>() {
             @Override
@@ -213,7 +211,7 @@ public class ActivationCommunicatorTest extends LimeTestCase {
 
     private class ServerController extends ResourceHandler {
         
-        private final String SERVER_ROOT_DIR = _baseDir.getAbsolutePath();
+        private final String SERVER_ROOT_DIR = "";//_baseDir.getAbsolutePath();
         
         private final HttpServer server = new HttpServer();
         private String serverReturn;
