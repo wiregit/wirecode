@@ -11,6 +11,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -18,6 +19,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.friend.api.FriendConnectionEvent;
@@ -66,6 +69,7 @@ public class LimeWireSwingUI extends JPanel {
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
     private final BottomHeaderPanel bottomHeaderPanel;
+    private boolean isPro = false;
     
 	@Inject
     public LimeWireSwingUI(
@@ -125,7 +129,7 @@ public class LimeWireSwingUI extends JPanel {
     }
 	
 	@Inject
-	public void registerListener(){
+	public void registerListener(final ActivationManager activationManager){
 	    SwingUiSettings.SHOW_TRANSFERS_TRAY.addSettingListener(new SettingListener() {
 	       @Override
 	        public void settingChanged(SettingEvent evt) {
@@ -147,6 +151,7 @@ public class LimeWireSwingUI extends JPanel {
                 if (SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue()) {
                     setBottomTrayVisible(true);
                 }
+                updateTitle();
             }
             
             @Override
@@ -155,7 +160,44 @@ public class LimeWireSwingUI extends JPanel {
             @Override
             public void ancestorRemoved(AncestorEvent e) {}
         });
+        
+        isPro = activationManager.isProActive();
+        
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>() {
+            @Override
+            public void handleEvent(ActivationModuleEvent event) {
+                if(isPro != activationManager.isProActive()) {
+                    isPro = activationManager.isProActive();
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            updateTitle();
+                        }
+                    });
+                }
+            }
+        });
     }
+	
+	/**
+	 * Converts the title of the application from LimeWire to LimeWire Pro
+	 * when necessary.
+	 */
+	private void updateTitle() {
+	    if(getRootPane() == null)
+	        return;
+        JFrame frame = (JFrame)getRootPane().getParent();
+        String title = frame.getTitle();
+        if(title == null)
+            return;
+        if(isPro) {
+            if(!title.endsWith("Pro"))
+                title += " Pro";
+        } else {
+           if(title.endsWith("Pro"))
+               title = title.substring(0, title.length()-4);
+        }   
+        frame.setTitle(title);
+	}
     
 	void hideMainPanel() {
 	    layeredPane.setVisible(false);

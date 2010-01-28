@@ -15,6 +15,7 @@ public class ActivationSettings extends LimeProps {
     private ActivationSettings() {}
 
     //TODO: set the correct link here. This is a working test
+    //TODO: move this out of settings to prevent it being changed from props
     public static final StringSetting ACTIVATION_HOST = FACTORY.createRemoteStringSetting(
             "ACTIVATION_HOST", "http://activate.limewire.int/lookup", "ActivationSettings.activationHost");
     
