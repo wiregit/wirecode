@@ -70,7 +70,6 @@ class SetupActivationTable extends BasicJXTable {
         getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
         getColumn(columnNames[1]).setMinWidth(100);
         getColumn(columnNames[1]).setMaxWidth(150);
-        setBorder(BorderFactory.createEmptyBorder());
 
         JTableHeader header = getTableHeader();
         header.setMinimumSize(new Dimension(400, 27));
@@ -91,6 +90,7 @@ class SetupActivationTable extends BasicJXTable {
         setColumnSelectionAllowed(false);
         setFillsViewportHeight(true);
         setSortable(false);
+        setBorder(BorderFactory.createEmptyBorder());
         
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
