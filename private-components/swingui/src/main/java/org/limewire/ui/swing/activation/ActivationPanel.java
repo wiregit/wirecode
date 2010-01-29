@@ -219,7 +219,7 @@ public class ActivationPanel {
 //        }
         stateManager.setActivationState(activationManager.getActivationState(), error);
 
-        dialog = new LimeJDialog();
+        dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModal(true);
         dialog.setResizable(false);
         dialog.setTitle(I18n.tr("LimeWire"));
