@@ -2,6 +2,7 @@ package com.limegroup.gnutella.security;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import junit.framework.Test;
 
@@ -52,6 +53,25 @@ public class FileCertificateReaderImplTest extends LimeTestCase {
         fileCertificateReaderImpl.read(file);
         
         context.assertIsSatisfied();
+    }
+    
+    public void testReadEmptyFile() throws Exception {
+        assertTrue(file.createNewFile());
+        assertTrue(file.exists());
+        try {
+            fileCertificateReaderImpl.read(file);
+            fail("exception expected");
+        } catch (IOException ie) {
+        }
+    }
+    
+    public void testReadNonExistentFile() throws Exception {
+        assertFalse(file.exists());
+        try {
+            fileCertificateReaderImpl.read(file);
+            fail("exception expected");
+        } catch (IOException ie) {
+        }
     }
     
     public void testWrite() throws Exception {
