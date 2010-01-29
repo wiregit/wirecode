@@ -30,9 +30,8 @@ public class LimeWireSimppModule extends AbstractModule {
         return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URIUtils.toSafeUri("http://localhost/"));
     }
     
-    @Provides @Simpp CertifiedMessageVerifier simppMessageVerifier(@Simpp CertificateProvider certificateProvider,
-            CertificateVerifier certificateVerifier) {
-        return new CertifiedMessageVerifierImpl(certificateProvider, certificateVerifier);
+    @Provides @Simpp CertifiedMessageVerifier simppMessageVerifier(@Simpp CertificateProvider certificateProvider) {
+        return new CertifiedMessageVerifierImpl(certificateProvider);
     }
     
 }

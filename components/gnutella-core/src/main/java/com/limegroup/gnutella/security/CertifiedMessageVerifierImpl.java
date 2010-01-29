@@ -12,12 +12,9 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
     private static final Log LOG = LogFactory.getLog(CertifiedMessageVerifierImpl.class);
     
     private final CertificateProvider certificateProvider;
-    private final CertificateVerifier certificateVerifier;
 
-    public CertifiedMessageVerifierImpl(CertificateProvider certificateProvider,
-            CertificateVerifier certificateVerifier) {
+    public CertifiedMessageVerifierImpl(CertificateProvider certificateProvider) {
         this.certificateProvider = certificateProvider;
-        this.certificateVerifier = certificateVerifier;
     }
     
     @Override
@@ -26,19 +23,10 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         Certificate certificate = message.getCertificate();
         if (certificate != null) {
             LOG.debugf("message comes with new certificate: {0}", certificate);
-            certificate = certificateVerifier.verify(certificate);
-            LOG.debug("certificate verified successfully");
-            Certificate localCertificate = certificateProvider.get();
-            // update provider with new certificate after it verified and key version is greater
-            if (certificate.getKeyVersion() > localCertificate.getKeyVersion()) {
-                certificateProvider.set(certificate);
-            } else {
-                certificate = localCertificate;
-            }
-        } else {
-            LOG.debug("no certificate in message, fetch certificate from provider");
-            certificate = certificateProvider.get();
-        }
+            // try to set certificate, if it is older or invalid this will fail
+            certificateProvider.set(certificate);
+        } 
+        certificate = certificateProvider.get();
         if (message.getKeyVersion() < certificate.getKeyVersion()) {
             throw new SignatureException("message version less than certificate version");
         } else if (message.getKeyVersion() > certificate.getKeyVersion()) {
