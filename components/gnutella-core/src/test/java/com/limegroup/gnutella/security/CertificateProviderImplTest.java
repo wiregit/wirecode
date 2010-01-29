@@ -9,6 +9,8 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.URIUtils;
 
@@ -51,6 +53,8 @@ public class CertificateProviderImplTest extends BaseTestCase {
         }});
         
         assertSame(certificate, certificateProviderImpl.get());
+        // test again to ensure the same certificate is returned henceforth
+        assertSame(certificate, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
     }
@@ -67,6 +71,8 @@ public class CertificateProviderImplTest extends BaseTestCase {
             will(throwException(new IOException()));
         }});
         
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
+        // test again to ensure the same certificate is returned henceforth
         assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
@@ -90,6 +96,151 @@ public class CertificateProviderImplTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
+        assertSame(certificate, certificateProviderImpl.get());
+        // test again to ensure the same certificate is returned henceforth
+        assertSame(certificate, certificateProviderImpl.get());
+        
+        context.assertIsSatisfied();
+    }
+    
+    public void testSuccessfulHttpGetReplacesNullCertificate() throws Exception {
+        context.checking(new SequencedExpectations(context) {{
+            // fail
+            one(fileCertificateReader).read(file);
+            will(throwException(new IOException()));
+            
+            // fail
+            one(httpCertificateReader).read(uri, null);
+            will(throwException(new IOException()));
+
+            // successful http get
+            one(httpCertificateReader).read(uri, null);
+            will(returnValue(certificate));
+            
+            // successful verification
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            one(certificate).getKeyVersion();
+            will(returnValue(1));
+
+            // and another verification in set()
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            // write new certificate
+            one(fileCertificateReader).write(certificate, file);
+            will(returnValue(true));
+        }});
+        
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
+        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
+        // ensure null certificate was replaced
+        assertSame(certificate, certificateProviderImpl.get());
+        
+        context.assertIsSatisfied();
+    }
+    
+    public void testFailedGetFromHttpBeforeGetReturnsNullCertificate() throws Exception {
+        context.checking(new SequencedExpectations(context) {{
+            // failed http get
+            one(httpCertificateReader).read(uri, null);
+            will(throwException(new IOException()));
+        }});
+        
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.getFromHttp(null));
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
+        context.assertIsSatisfied();
+    }
+    
+    public void testSuccessfulGetFromHttpBeforeGet() throws Exception {
+        context.checking(new SequencedExpectations(context) {{
+            // successful http get
+            one(httpCertificateReader).read(uri, null);
+            will(returnValue(certificate));
+
+            exactly(2).of(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            one(fileCertificateReader).write(certificate, file);
+            will(returnValue(true));
+        }});
+        
+        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
+        assertSame(certificate, certificateProviderImpl.get());
+        
+        context.assertIsSatisfied();
+    }
+    
+    public void testMessageSourceIsReportedToHttpCertificateReader() throws Exception {
+        final IpPort messageSource = new IpPortImpl("192.168.0.1:4045");
+        context.checking(new SequencedExpectations(context) {{
+            one(httpCertificateReader).read(uri, messageSource);
+            will(throwException(new IOException()));
+        }});
+        
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.getFromHttp(messageSource));
+        
+        context.assertIsSatisfied();
+    }
+    
+    public void testSetBeforeGet() throws Exception {
+        context.checking(new Expectations() {{
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            one(fileCertificateReader).write(certificate, file);
+            will(returnValue(true));
+        }});
+        
+        certificateProviderImpl.set(certificate);
+        assertSame(certificate, certificateProviderImpl.get());
+        context.assertIsSatisfied();
+    }
+    
+    public void testSetInvalidCertifcateFails() throws Exception {
+        context.checking(new Expectations() {{
+            one(certificateVerifier).verify(certificate);
+            will(throwException(new SignatureException()));
+            
+            one(fileCertificateReader).read(file);
+            will(throwException(new IOException()));
+            
+            // fail
+            one(httpCertificateReader).read(uri, null);
+            will(throwException(new IOException()));
+        }});
+        
+        certificateProviderImpl.set(certificate);
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
+        
+        context.assertIsSatisfied();
+    }
+    
+    public void testSetOlderCertificateDoesNotOverrideNewerOne() throws Exception {
+        final Certificate olderCertificate = context.mock(Certificate.class);  
+        context.checking(new SequencedExpectations(context) {{
+            allowing(certificate).getKeyVersion();
+            will(returnValue(2));
+            allowing(olderCertificate).getKeyVersion();
+            will(returnValue(1));
+            
+            allowing(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            allowing(certificateVerifier).verify(olderCertificate);
+            will(returnValue(olderCertificate));
+            
+            allowing(fileCertificateReader).write(certificate, file);
+            will(returnValue(true));
+        }});
+        
+        certificateProviderImpl.set(certificate);
+        assertSame(certificate, certificateProviderImpl.get());
+        
+        // try to set older certificate
+        certificateProviderImpl.set(olderCertificate);
+        // still the same certificate
         assertSame(certificate, certificateProviderImpl.get());
         
         context.assertIsSatisfied();

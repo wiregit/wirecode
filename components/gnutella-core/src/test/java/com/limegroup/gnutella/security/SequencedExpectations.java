@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.Sequence;
+import org.jmock.syntax.ReceiverClause;
 
 public class SequencedExpectations extends Expectations {
     
@@ -17,11 +18,10 @@ public class SequencedExpectations extends Expectations {
     }
     
     @Override
-    public <T extends Object> T one(T mockObject) {
+    public ReceiverClause exactly(int count) {
         if (!firstTime.compareAndSet(true, false)) {
             inSequence(sequence);
         }
-        return super.one(mockObject);
+        return super.exactly(count);
     }
-
 }

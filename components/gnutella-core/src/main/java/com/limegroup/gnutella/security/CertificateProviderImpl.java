@@ -94,7 +94,13 @@ public class CertificateProviderImpl implements CertificateProvider {
         } catch (SignatureException e) {
             LOG.debugf(e, "certificate from url {0} invalid {1} ", uri, certificate);
         }
-        return validCertificate;
+        certificate = validCertificate;
+        if (certificate != null) {
+            return certificate;
+        }
+        certificate = new NullCertificate();
+        validCertificate = certificate;
+        return certificate;
     }
     
 
