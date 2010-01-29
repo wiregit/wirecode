@@ -23,6 +23,7 @@ public class LimeWireCoreSettingsModule extends AbstractModule {
         bind(new TypeLiteral<MutableProvider<Properties>>(){}).annotatedWith(GeoLocation.class).toInstance(GeocodeSettings.GEO_LOCATION);
         bind(new TypeLiteral<Map<String, StringSetting>>(){}).annotatedWith(InspectionsServerUrls.class).toProvider(InspectionsURLsMapProvider.class);
         bind(new TypeLiteral<String>(){}).annotatedWith(VirusUpdatesURL.class).toProvider(DownloadSettings.VIRUS_UPDATES_SERVER);
+     
     }
 
     @Singleton

@@ -9,12 +9,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 public interface QueryHandler {
 
     /**
-     * The number of results to try to get if we're an Ultrapeer originating
-     * the query.
-     */
-    public static final int ULTRAPEER_RESULTS = 150;
-
-    /**
      * Constant for the maximum number of milliseconds the entire query
      * can last.  The query expires when this limit is reached.
      */

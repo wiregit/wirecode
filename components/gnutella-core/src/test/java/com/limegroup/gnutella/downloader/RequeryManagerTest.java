@@ -11,6 +11,8 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.activation.impl.LegacyProActivationManager;
+import org.limewire.activation.api.ActivationManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -27,7 +29,6 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class RequeryManagerTest extends LimeTestCase {
 
@@ -46,6 +47,7 @@ public class RequeryManagerTest extends LimeTestCase {
     private MyAltLocFinder altLocFinder;
     private Mockery mockery;
     private Sequence sequence;
+    private LegacyProActivationManager activationManager;
     
     private URN sha1Urn;
     
@@ -53,6 +55,7 @@ public class RequeryManagerTest extends LimeTestCase {
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
+        activationManager = new LegacyProActivationManager();
         
         mockery = new Mockery();
         requeryListener = mockery.mock(RequeryListener.class);
@@ -65,6 +68,7 @@ public class RequeryManagerTest extends LimeTestCase {
                 bind(DHTManager.class).to(MyDHTManager.class);
                 bind(DownloadManager.class).toInstance(downloadManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
+                bind(ActivationManager.class).toInstance(activationManager);
             } 
         });
 
@@ -83,8 +87,8 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     private void setPro(boolean pro) throws Exception {
-        PrivilegedAccessor.setValue(LimeWireUtils.class, "_isPro", pro);
-        assertEquals(pro, LimeWireUtils.isPro());
+        activationManager.setLegacyPro(pro);
+        assertEquals(pro, activationManager.isProActive());
     }
     
     public void testRegistersWithDHTManager() throws Exception {

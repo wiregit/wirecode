@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.XMLUtils;
@@ -45,12 +46,15 @@ public class UpdateCollectionImpl implements UpdateCollection {
     private List<DownloadInformation> downloadDataList = new LinkedList<DownloadInformation>();
 
     private final ApplicationServices applicationServices;
+    private final ActivationManager activationManager;
     
     /**
      * Ensure that this is only created by using the factory constructor.
      */
-    UpdateCollectionImpl(String xml, ApplicationServices applicationServices) {
+    UpdateCollectionImpl(String xml, ApplicationServices applicationServices, 
+            ActivationManager activationManager) {
         this.applicationServices = applicationServices;
+        this.activationManager = activationManager;
         if(LOG.isTraceEnabled())
             LOG.trace("Parsing Update XML: " + xml);
         List<UpdateData> updateData = new ArrayList<UpdateData>();
@@ -294,7 +298,8 @@ public class UpdateCollectionImpl implements UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID());
+        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
+            activationManager.isProActive(), activationManager.getMCode());
         data.setUpdateURL(url);
         
         try {

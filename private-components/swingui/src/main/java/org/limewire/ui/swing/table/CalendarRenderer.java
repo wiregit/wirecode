@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.table;
 
 import java.awt.Component;
+import java.util.Date;
 
 import javax.swing.JTable;
 
@@ -24,10 +25,12 @@ public class CalendarRenderer extends DefaultLimeTableCellRenderer {
             boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        if(!(value instanceof Long)) {
-            setText("");
+        if(value instanceof Long) {
+            setText(GuiUtils.msec2Date((Long)value)); 
+        } else if(value instanceof Date) {
+            setText(GuiUtils.msec2Date((Date)value)); 
         } else {
-            setText(GuiUtils.msec2DateTime((Long)value)); 
+            setText("");
         }
         return this;
     }

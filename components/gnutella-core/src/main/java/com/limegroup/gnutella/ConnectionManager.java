@@ -59,9 +59,6 @@ import com.limegroup.gnutella.util.EventDispatcher;
 public interface ConnectionManager extends ConnectionAcceptor, 
         EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>, EventListener<GnutellaConnectionEvent> {
     
-
-    /** The number of connections leaves should maintain to Ultrapeers. */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
     /** How many connect back requests to send if we have a single connection */
     public static final int CONNECT_BACK_REDUNDANT_REQUESTS = 3;
     /**

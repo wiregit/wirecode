@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -54,6 +55,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.QuerySettings;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -100,7 +102,8 @@ public class MessageRouterStub extends StandardMessageRouter {
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
             SharedFilesKeywordIndex sharedFilesKeywordIndex, 
             QRPUpdater qrpUpdater, URNFilter urnFilter,
-            SpamServices spamServices) {
+            SpamServices spamServices, ActivationManager activationManager,
+            QuerySettings querySettings) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -117,7 +120,7 @@ public class MessageRouterStub extends StandardMessageRouter {
                 messageHandlerBinder, oobHandlerFactory, macManager,
                 limeACKHandler, outgoingQueryReplyFactory,
                 sharedFilesKeywordIndex, qrpUpdater, urnFilter,
-                spamServices);
+                spamServices, activationManager, querySettings);
     }
     
     @Override

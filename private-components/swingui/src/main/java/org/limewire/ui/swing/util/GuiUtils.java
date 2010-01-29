@@ -61,6 +61,7 @@ public class GuiUtils {
      * set at init time.
      */
     private static DateFormat DATETIME_FORMAT;
+    private static DateFormat DATE_FORMAT;
       
     private interface Unit {
         public String getFormatString();
@@ -158,6 +159,7 @@ public class GuiUtils {
 
         DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, 
                 DateFormat.DEFAULT, locale);
+        DATE_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT, locale);
     }
     
     /**
@@ -285,6 +287,15 @@ public class GuiUtils {
     public static String msec2DateTime(long milliseconds) {
         Date d = new Date(milliseconds);
         return DATETIME_FORMAT.format(d);
+    }
+    
+    public static String msec2Date(long milliseconds) {
+        Date date = new Date(milliseconds);
+        return DATE_FORMAT.format(date);
+    }
+    
+    public static String msec2Date(Date date) {
+        return DATE_FORMAT.format(date);
     }
     
     /**

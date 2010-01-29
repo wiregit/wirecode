@@ -14,6 +14,7 @@ import javax.swing.text.html.HTMLDocument;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.color.ColorUtil;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Application;
@@ -34,15 +35,17 @@ class ProNag extends JXPanel {
     
     private NagContainer container;
     private final Application application;
+    private final ActivationManager activationManager;
     private final HTMLPane editorPane;
     
     private long offlineShownAt = -1;
     
-    @Inject public ProNag(Application application, 
+    @Inject public ProNag(Application application, ActivationManager activationManager,
                           final GnutellaConnectionManager connectionManager) {
         super(new BorderLayout());
         
         this.application = application;        
+        this.activationManager = activationManager;
         this.editorPane = new HTMLPane();
         editorPane.putClientProperty(BasicHTML.documentBaseKey, "");
 
@@ -197,7 +200,8 @@ class ProNag extends JXPanel {
     
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
         // Pro has no default page.
-        if(application.isProVersion()) {
+        // TODO: this will change to display an add possibly
+        if(activationManager.isProActive()) {
             return "";
         }
         

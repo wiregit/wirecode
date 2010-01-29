@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.GuiceUtils;
@@ -62,9 +63,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActiveLimeWireCheck;
-import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
+import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.connection.ConnectionInspections;
@@ -156,7 +157,10 @@ final class Initializer {
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
-        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
+//        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
+        //ActivationSettings.LAST_START_WAS_PRO.getValue() ? getProSplashImage() : 
+        switchSplashes(awtSplash, splashImage, 
+                       ActivationSettings.LAST_START_WAS_PRO.getValue());
         
         startEarlyCore();
         
@@ -699,5 +703,17 @@ final class Initializer {
         });
         return response.get() == JOptionPane.OK_OPTION;
     }
+//    
+//    /**
+//     * Gets the image to be used as the splash.
+//     */
+//    private static Image getProSplashImage() {
+//        URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
+//        if (imageURL != null) {
+//            return Toolkit.getDefaultToolkit().createImage(imageURL);
+//        } else {
+//            return null;
+//        }
+//    }
 }
 

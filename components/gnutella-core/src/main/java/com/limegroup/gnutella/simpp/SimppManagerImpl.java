@@ -20,6 +20,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Clock;
@@ -71,6 +72,7 @@ public class SimppManagerImpl implements SimppManager {
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HttpParams> defaultParams;
     private final SimppDataProvider simppDataProvider;
+    private final ActivationManager activationManager;
     
     private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v2/simpp.def",
             "http://simpp2.limewire.com/v2/simpp.def",
@@ -95,7 +97,7 @@ public class SimppManagerImpl implements SimppManager {
             ApplicationServices applicationServices, Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider) {
+            SimppDataProvider simppDataProvider, ActivationManager activationManager) {
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
@@ -104,6 +106,7 @@ public class SimppManagerImpl implements SimppManager {
         this.backgroundExecutor = backgroundExecutor;
         this.defaultParams = defaultParams;
         this.simppDataProvider = simppDataProvider;
+        this.activationManager = activationManager;
     }
     
     List<String> getMaxUrls() {
@@ -294,7 +297,8 @@ public class SimppManagerImpl implements SimppManager {
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID()));
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
+            activationManager.isProActive(), activationManager.getMCode()));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.MockActivationModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
@@ -82,6 +83,7 @@ public class MockModule extends AbstractModule {
         install(new MockNetModule());
         install(new MockUploadModule());
         install(new MockUpdatesModule());
+        install(new MockActivationModule());
         install(new MockBittorrentModule());
         install(new MockFileModule());
         install(new MockMalwareModule());

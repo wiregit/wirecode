@@ -58,7 +58,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
      */
     public void testRegisterConnectionListener() {
         final GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, null);
+                connectionManager, null, null);
         
         context.checking(new Expectations() {{
             exactly(1).of(connectionManager).addEventListener(gnutellaConnectionManager);
@@ -76,7 +76,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     public void testRegisterService() {
         
         final GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, null);
+                connectionManager, null, null);
 
         final ServiceRegistry registry = context.mock(ServiceRegistry.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
@@ -183,7 +183,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionServices connectionServices = context.mock(ConnectionServices.class);
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices);
+                connectionManager, connectionServices, null);
 
         context.checking(new Expectations() {{
                 one(connectionServices).isConnected();
@@ -208,7 +208,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionServices connectionServices = context.mock(ConnectionServices.class);
                 
         GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices);
+                connectionManager, connectionServices, null);
         context.checking(new Expectations() {{
                 one(connectionManager).isSupernode();
                 will(returnValue(true));
@@ -238,7 +238,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionItem connectionItemToBrowse = context.mock(ConnectionItem.class);
         
         GnutellaConnectionManagerImpl gConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices);
+                connectionManager, connectionServices, null);
         
         context.checking(new Expectations() {{
             allowing(connectionItemToRemove);
@@ -278,7 +278,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     public void testHandleConnectionLifecycleEvent() {
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager
-            = new GnutellaConnectionManagerImpl(connectionManager, null);
+            = new GnutellaConnectionManagerImpl(connectionManager, null, null);
         
         EventList<ConnectionItem> list = gnutellaConnectionManager.getConnectionList();
         
@@ -439,7 +439,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
             final ConnectionLifecycleEventType lastStrengthRelatedEvent) throws Exception {
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager
-            = new GnutellaConnectionManagerImpl(connectionManager, null);
+            = new GnutellaConnectionManagerImpl(connectionManager, null, null);
         
         gnutellaConnectionManager.lastIdleTime = lastIdleTime;
         gnutellaConnectionManager.lastStrengthRelatedEvent = lastStrengthRelatedEvent;
@@ -461,6 +461,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
             will(returnValue(isSupernode));
         }});
         
+        //TODO: fix this 
         // LimeWireUtils.isPro() is hardcoded, use reflection to get it
         PrivateAccessor isProAccessor = new PrivateAccessor(LimeWireUtils.class, null, "_isPro");
         isProAccessor.setValue(isPro);

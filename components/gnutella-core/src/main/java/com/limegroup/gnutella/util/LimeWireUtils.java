@@ -28,7 +28,7 @@ public final class LimeWireUtils {
 	 * Constant for the current version of LimeWire.
 	 */
     @InspectablePrimitive("limewire version")
-	private static final String LIMEWIRE_VERSION = "@version@";
+	private static String LIMEWIRE_VERSION = "@version@";
     
     /**
      * The current revision of the BitTorrent protocol implementation.
@@ -98,13 +98,14 @@ public final class LimeWireUtils {
 	/**
 	 * Cached constant for the HTTP Server: header value.
 	 */
-	private static final String HTTP_SERVER;
+	private static String HTTP_SERVER;
 
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
     /**
      * Variable for whether or not this is a PRO version of LimeWire. 
      */
+    @SuppressWarnings("unused")
     @InspectablePrimitive("pro")
     private static boolean _isPro = false;
 
@@ -120,17 +121,38 @@ public final class LimeWireUtils {
 	private LimeWireUtils() {}
     
 	/**
-	 * Initialize the settings statically. 
+     * Updates various settings when Pro is activated or 
+     * deactivated. 
 	 */
-	static {
+	public static void setIsPro(boolean isPro) {
+	    if(!isTestingVersion()) {
+	        if(isPro) {
+	             if(!LIMEWIRE_VERSION.endsWith("Pro"))
+	                 LIMEWIRE_VERSION += " Pro";
+	        } else {
+                if(LIMEWIRE_VERSION.endsWith("Pro"))
+                    LIMEWIRE_VERSION = LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4);
+	        }
+	        setHTTPVersion();
+	        _isPro = isPro;
+	    }
+	}
+	
+	public static void setHTTPVersion() {
 		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
 			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
 		}
 		else {
 			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
                            substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-            _isPro = true;
 		}
+	}
+    
+	/**
+	 * Initialize the settings statically. 
+	 */
+	static {
+	    setHTTPVersion();
 	}
     
     /** Returns true if we're a beta. */
@@ -209,15 +231,6 @@ public final class LimeWireUtils {
         return 2;
     }
 
-    /**
-     * Accessor for whether or not this is LimeWire pro.
-     *
-     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
-     */
-    public static boolean isPro() {
-        return _isPro;
-    }
-    
     /**
      * Accessor for whether or not this is a testing version
      * (@version@) of LimeWire.
@@ -406,6 +419,27 @@ public final class LimeWireUtils {
         return settingsDir;
     }
     
+    public static boolean shouldShowProSplashScreen() {
+        File userSettings = getRequestedUserSettingsLocation();
+        File showProSplashScreenFile = new File(userSettings + System.getProperty("file.separator") + "showprosplash.txt");
+        return showProSplashScreenFile.exists();
+    }
+
+    public static void setShouldShowProSplashScreen(boolean shouldShowProSplash) {
+        File userSettings = getRequestedUserSettingsLocation();
+        File showProSplashScreenFile = new File(userSettings + System.getProperty("file.separator") + "showprosplash.txt");
+        if (!shouldShowProSplash) {
+            if (showProSplashScreenFile.exists()) {
+                showProSplashScreenFile.delete();
+            }
+        } else {
+            try {
+                showProSplashScreenFile.createNewFile();
+            } catch (IOException e) {
+            }
+        }
+    }
+
     /** Strips out any quotes that we left on the data. */
     private static String stripQuotes(String incoming) {
         if (incoming == null || incoming.length() <= 2)
@@ -422,13 +456,20 @@ public final class LimeWireUtils {
     /**
      * Updates a URL to contain common information about the LW installation.
      */
-    public static String addLWInfoToUrl(String url, byte[] myClientGUID) {
+    // TODO: ACTIVATION: REFACTOR!  If possible, Put logic inside ApplicationImpl instead of here
+    public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String mcode) {
         if(url.indexOf('?') == -1)
             url += "?";
         else
             url += "&";
-        url += "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
-            "&pro="   + LimeWireUtils.isPro() + 
+        url += getLWInfoQueryString(myClientGUID, isPro, mcode);
+               
+        return url;
+    }
+    
+    public static String getLWInfoQueryString(byte[] myClientGUID, boolean isPro, String mcode) {
+        return "guid=" + EncodingUtils.encode(new GUID(myClientGUID).toHexString())+ 
+            "&pro="   + isPro + 
             "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
             "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
             "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
@@ -436,9 +477,8 @@ public final class LimeWireUtils {
             "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
             "&sc="   + ApplicationSettings.SESSIONS.getValue() +
             "&al="   + autoStartupLaunch + 
-            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch());
-               
-        return url;
+            "&arch=" + EncodingUtils.encode(OSUtils.getOSArch()) +
+            "&mcode=" + EncodingUtils.encode(mcode);    
     }
 
     /** Returns whether or not a temporary directory is in use. */

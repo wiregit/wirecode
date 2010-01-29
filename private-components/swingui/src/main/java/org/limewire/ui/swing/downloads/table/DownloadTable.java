@@ -7,15 +7,19 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEditor;
@@ -66,6 +70,8 @@ public class DownloadTable extends TransferTable<DownloadItem> {
     private final DownloadActionHandler actionHandler;
     private final CategoryManager categoryManager;
     private final DownloadMessageRendererEditorFactory messageRendererEditorFactory;
+    private final DownloadProgressRenderer downloadProgressRenderer;
+    private boolean isPro = false;
 
     @Inject
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
@@ -77,6 +83,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
         this.actionHandler = actionHandler;
         this.categoryManager = categoryManager;
         this.messageRendererEditorFactory = messageRendererEditorFactory;
+        this.downloadProgressRenderer = downloadProgressRenderer;
         
         GuiUtils.assignResources(this);
                 
@@ -100,6 +107,25 @@ public class DownloadTable extends TransferTable<DownloadItem> {
         setRowHeight(rowHeight);        
     }
 	
+    @Inject
+    public void register(final ActivationManager activationManager) {
+        isPro = activationManager.isProActive();
+        
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>() {
+            @Override
+            public void handleEvent(ActivationModuleEvent event) {
+                if(isPro != activationManager.isProActive()) {
+                    isPro = activationManager.isProActive();
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            downloadProgressRenderer.updateColor();                            
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
 	public DownloadItem getDownloadItem(int row){
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}

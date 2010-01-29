@@ -1,5 +1,6 @@
 package org.limewire.core.impl;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 
@@ -14,17 +15,21 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
     
     private final ApplicationServices applicationServices;
     private final LifecycleManager lifecycleManager;
+    private final ActivationManager activationManager;
     private volatile String flag = null;
     
     @Inject
-    public ApplicationImpl(ApplicationServices applicationServices, LifecycleManager lifecycleManager) {
+    public ApplicationImpl(ApplicationServices applicationServices, LifecycleManager lifecycleManager,
+            ActivationManager activationManager) {
         this.applicationServices = applicationServices;
         this.lifecycleManager = lifecycleManager;
+        this.activationManager = activationManager;
     }
     
     @Override
     public String addClientInfoToUrl(String baseUrl) {
-        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID());
+        return LimeWireUtils.addLWInfoToUrl(baseUrl, applicationServices.getMyGUID(),
+            activationManager.isProActive(), activationManager.getMCode());
     }
     
     @Override
@@ -55,11 +60,6 @@ class ApplicationImpl implements Application, HttpClientInstanceUtils {
         return LimeWireUtils.getLimeWireVersion();
     }
 
-    @Override
-    public boolean isProVersion() {
-       return LimeWireUtils.isPro();
-    }
-    
     @Override
     public boolean isBetaVersion() {
         return LimeWireUtils.isBetaRelease();

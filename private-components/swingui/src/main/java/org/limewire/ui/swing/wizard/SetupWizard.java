@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.Frame;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
@@ -16,13 +17,17 @@ public class SetupWizard {
     private Wizard wizard;
     private final Application application;
     private final LibraryData libraryData;
+    private final Provider<ActivationManager> activationManagerProvider;
 
     @Inject
     public SetupWizard(Provider<SetupComponentDecoratorFactory> decoratorFactory,
-            Provider<LibraryManager> libraryManagerProvider, Application application) {
+                      Provider<LibraryManager> libraryManagerProvider, 
+                      Application application,
+                      Provider<ActivationManager> activationManagerProvider) {
         
         this.application = application;
         this.libraryData = libraryManagerProvider.get().getLibraryData();        
+        this.activationManagerProvider = activationManagerProvider;
         
         createWizard(decoratorFactory.get(), libraryData);
     }
@@ -47,6 +52,8 @@ public class SetupWizard {
         }
         
         wizard.addPage(new SetupPage2(decorator, application, libraryData));
+
+        wizard.addPage(new SetupPage3(decorator, application, libraryData, activationManagerProvider.get(), wizard));
     }
 
     private static boolean shouldShowPage1() {

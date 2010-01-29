@@ -590,7 +590,8 @@ public class PushUploadTest extends LimeTestCase {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
                     simppManager, capabilitiesVMFactory, managedConnectionFactory,
                     queryUnicaster, socketsManager, connectionServices,
-                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
+                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils,
+                    null);
         }
         
         @Override

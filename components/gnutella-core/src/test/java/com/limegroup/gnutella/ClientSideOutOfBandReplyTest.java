@@ -8,14 +8,23 @@ import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.activation.api.ActivationError;
+import org.limewire.activation.api.ActivationEvent;
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
+import org.limewire.activation.api.ActivationState;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -33,7 +42,7 @@ import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
-import com.limegroup.gnutella.search.QueryHandler;
+import com.limegroup.gnutella.search.QuerySettings;
 import com.limegroup.gnutella.search.SearchResultHandler;
 
 /**
@@ -67,6 +76,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     private PingReplyFactory pingReplyFactory;
     private SearchResultHandler searchResultHandler;
     private ApplicationServices applicationServices;
+    private QuerySettings querySettings;
 
     public ClientSideOutOfBandReplyTest(String name) {
         super(name);
@@ -305,6 +315,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
 
     public void testExpiredQuerySemantics() throws Exception {
+        querySettings = new QuerySettings(new ActivationManagerStub());
+        
         DatagramPacket pack = null;
         // send a query and make sure that after it is expired (i.e. enough
         // results are recieved) we don't request OOB replies for it
@@ -358,7 +370,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         assertEquals(10, ack.getNumResults());
 
         // now expire the query by routing hundreds of replies back
-        int respsPerUP = QueryHandler.ULTRAPEER_RESULTS/testUP.length + 5;
+        int respsPerUP = querySettings.getUltrapeerResults()/testUP.length + 5;
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[respsPerUP];
             for (int j = 0; j < res.length; j++)
@@ -531,6 +543,37 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
     private static byte[] myIP() {
         return new byte[] { (byte)127, (byte)0, 0, 1 };
+    }
+
+    private class ActivationManagerStub implements ActivationManager {
+        @Override
+        public void activateKey(String key) {}
+        @Override
+        public void addListener(EventListener<ActivationEvent> listener) {}
+        @Override
+        public void addModuleListener(EventListener<ActivationModuleEvent> listener) { }
+        @Override
+        public ActivationError getActivationError() { return null; }
+        @Override
+        public List<ActivationItem> getActivationItems() { return null; }
+        @Override
+        public ActivationState getActivationState() { return null; }
+        @Override
+        public String getLicenseKey() { return null; }
+        @Override
+        public String getMCode() { return null; }
+        @Override
+        public boolean isActive(ActivationID id) { return false; }
+        @Override
+        public boolean isProActive() { return false; }
+        @Override
+        public boolean isValidKey(String key) { return false; }
+        @Override
+        public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }
+        @Override
+        public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }
+        @Override
+        public void refreshKey(String key) {}
     }
 
 }

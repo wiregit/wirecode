@@ -21,6 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.collection.IntervalSet;
@@ -468,6 +470,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Library library;
     protected final CategoryManager categoryManager;
     private final BandwidthCollector bandwidthCollector;
+    @SuppressWarnings("unused")
+    private final ActivationManager activationManager;
     
     private final SocketsManager socketsManager;
 
@@ -515,7 +519,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
-            BandwidthCollector bandwidthCollector) {
+            BandwidthCollector bandwidthCollector,
+            ActivationManager activationManager) {
         super(saveLocationManager, categoryManager);
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
@@ -549,6 +554,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.library = library;
         this.categoryManager = categoryManager;
         this.bandwidthCollector = bandwidthCollector;
+        this.activationManager = activationManager;
     }
 
     @Override
@@ -2641,11 +2647,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         
         if (capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
-            return SpeedConstants.MODEM_SWARM;
+            //TODO: change this in the installer
+//            return SpeedConstants.MODEM_SWARM;
+            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.MODEM_SWARM + 2 : SpeedConstants.MODEM_SWARM;
         else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
-            return SpeedConstants.T1_SWARM;
+//            return SpeedConstants.T1_SWARM;
+            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T1_SWARM + 2 : SpeedConstants.T1_SWARM;
         else // T3
-            return SpeedConstants.T3_SWARM;
+//            return SpeedConstants.T3_SWARM;
+            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T3_SWARM + 4 : SpeedConstants.T3_SWARM;
     }
 
     @Override

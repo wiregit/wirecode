@@ -14,9 +14,12 @@ import javax.swing.JRadioButton;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.activation.LicenseKeyTextField;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
+import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
+import org.limewire.ui.swing.painter.LightButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -30,6 +33,7 @@ import com.google.inject.Inject;
 public class SetupComponentDecorator {
     
     private final ButtonDecorator plainButtonDecorator;
+    private final TextFieldDecorator textFieldDecorator;
     
     @Resource private Font headingFont;
     @Resource private Color headingFontColor;
@@ -59,11 +63,12 @@ public class SetupComponentDecorator {
     private final GenericBarPainter<JXPanel> pooledBarPainter;
     
     @Inject
-    SetupComponentDecorator(ButtonDecorator plainButtonDecorator) {
+    SetupComponentDecorator(ButtonDecorator plainButtonDecorator, TextFieldDecorator textFieldDecorator) {
         
         GuiUtils.assignResources(this);
         
         this.plainButtonDecorator = plainButtonDecorator;
+        this.textFieldDecorator = textFieldDecorator;
         
         pooledBarPainter = new GenericBarPainter<JXPanel>(
                 new GradientPaint(0,0, headerGradientTop, 0,1, headerGradientBottom, false),
@@ -75,6 +80,10 @@ public class SetupComponentDecorator {
         box.setSelectedIcon(largeBoxChecked);
         box.setOpaque(false);
         box.setFocusPainted(false);
+    }
+    
+    public void decorateLicenseKeyField(LicenseKeyTextField textField) {
+        textFieldDecorator.decorateLicenseField(textField, AccentType.BUBBLE);
     }
     
     public void decorateLargeRadioButton(JRadioButton box) {
@@ -96,6 +105,14 @@ public class SetupComponentDecorator {
         button.setMinimumSize(new Dimension(105, 32));
     }
     
+    public void decorateGreyButton(JXButton button) {
+        button.setBackgroundPainter(new LightButtonBackgroundPainter());
+        button.setOpaque(false);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(3,15,4,15));
+    }
+
     public void decorateBackButton(JComponent button) {
         button.setFont(backButtonFont);
         button.setBorder(BorderFactory.createEmptyBorder(0,10,3,10));

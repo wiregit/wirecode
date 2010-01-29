@@ -276,7 +276,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                     capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                     socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
-                    pingRequestFactory, networkInstanceUtils);
+                    pingRequestFactory, networkInstanceUtils, null);
             
         }
 

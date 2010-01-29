@@ -143,7 +143,7 @@ public class TestConnectionManager extends ConnectionManagerImpl {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                 capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                 socketsManager, connectionServices, nodeAssigner, ipFilter,
-                connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
+                connectionCheckerManager, pingRequestFactory, networkInstanceUtils, null);
         this.queryRequestFactory = queryRequestFactory;
         this.testConnectionFactory = testConnectionFactory;
         configureDefaultManager();
