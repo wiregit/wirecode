@@ -429,6 +429,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 removeAllData = true;
                 break;
             case BLOCKED:
+                activationSettings.setActivationKey(response.getLid());
                 error = ActivationError.BLOCKED_KEY;
                 break;
             default:
@@ -436,7 +437,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
         }
         if(!(currentState.getActivationState() == ActivationState.AUTHORIZED 
                 && error == ActivationError.COMMUNICATION_ERROR)) {
-            if(error == ActivationError.INVALID_KEY)
+            if(error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY)
                 removeData(removeAllData);
             activationError = error;
             setCurrentState(State.NOT_ACTIVATED);
@@ -445,7 +446,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
         
     private void removeData(boolean removeMCode) {
-        activationSettings.setActivationKey("");
+        if(removeMCode)
+            activationSettings.setActivationKey("");
         scheduler.execute(new Runnable(){
             public void run() {
                 try {
