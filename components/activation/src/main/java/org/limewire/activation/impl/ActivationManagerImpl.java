@@ -496,6 +496,9 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         activationSettings.setActivationKey(response.getLid());
         activationSettings.setMCode(response.getMCode());
-        activatedFromDisk(response);
+        setActivationItems(response.getActivationItems());
+        activationSettings.setLastStartPro(isProActive());
+        activationError = ActivationError.NO_ERROR;
+        setCurrentState(State.ACTIVATED_FROM_SERVER);
     }
 }

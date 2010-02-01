@@ -55,6 +55,7 @@ public class ActivationSettingsImpl implements ActSettings {
 
     @Override
     public void setLastStartPro(boolean value) {
+        ActivationSettings.LAST_START_WAS_PRO.setValue(value);
         LimeWireUtils.setIsPro(value);
     }
 
