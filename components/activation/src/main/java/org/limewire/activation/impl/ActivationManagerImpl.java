@@ -405,15 +405,14 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void notActivated(ActivationResponse response) {
-        ActivationError error = ActivationError.NO_ERROR;
-        boolean removeAllData = false;
+        ActivationError error;
+        boolean removeMcode = false;
+        boolean removeKey = false;
         switch(response.getResponseType()) {
             case ERROR:
                 if(currentState == State.REFRESHING) {
                     activationError = ActivationError.COMMUNICATION_ERROR;
                     setCurrentState(lastState);
-    //              currentState = previousState;
-    //                listeners.broadcast(new ActivationEvent(getActivationState(), error));
                     return;
                 } else {
                     error = ActivationError.COMMUNICATION_ERROR;
@@ -421,14 +420,17 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 break;
             case REMOVE:
                 error = ActivationError.INVALID_KEY;
-                removeAllData = true;
+                removeMcode = true;
+                removeKey = true;
                 break;
             case STOP:
                 error = ActivationError.INVALID_KEY;
+                removeKey = true;
                 break;
             case NOTFOUND:
                 error = ActivationError.INVALID_KEY;
-                removeAllData = true;
+                removeMcode = true;
+                removeKey = true;
                 break;
             case BLOCKED:
                 activationSettings.setActivationKey(response.getLid());
@@ -440,15 +442,15 @@ class ActivationManagerImpl implements ActivationManager, Service {
         if(!(currentState.getActivationState() == ActivationState.AUTHORIZED 
                 && error == ActivationError.COMMUNICATION_ERROR)) {
             if(error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY)
-                removeData(removeAllData);
+                removeData(removeMcode, removeKey);
             activationError = error;
             setCurrentState(State.NOT_ACTIVATED);
             activationSettings.setLastStartPro(false);
         }
     }
         
-    private void removeData(boolean removeMCode) {
-        if(removeMCode)
+    private void removeData(boolean removeMCode, boolean removeKey) {
+        if(removeKey)
             activationSettings.setActivationKey("");
         scheduler.execute(new Runnable(){
             public void run() {
