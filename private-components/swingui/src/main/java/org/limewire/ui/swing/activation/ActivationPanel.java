@@ -52,7 +52,6 @@ import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -140,7 +139,7 @@ public class ActivationPanel {
         table = new ActivationTable(eventList, calendarRenderer);
 
         scrollPane = new JScrollPane(table);
-        ResizeUtils.forceSize(scrollPane, new Dimension(tableWidth, 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 2));
+        int height = 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 2;
         
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
@@ -160,7 +159,7 @@ public class ActivationPanel {
         
         activationPanel.add(licenseErrorLabel, "span, growx, aligny 50%, height 27!, wrap");
         
-        activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, gpy 200, wrap");
+        activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + "!, gpy 200, wrap");
         
         activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, span, growx, wrap");
 
