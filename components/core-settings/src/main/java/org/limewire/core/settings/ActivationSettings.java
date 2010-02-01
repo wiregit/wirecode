@@ -24,6 +24,12 @@ public class ActivationSettings extends LimeProps {
     public static final StringSetting ACTIVATION_RENEWAL_HOST = FACTORY.createRemoteStringSetting(
             "ACTIVATION_RENEWAL_HOST", "http://www.limewire.com", "ActivationSettings.activationRenewalHost");
 
+    public static final StringSetting ACTIVATION_CUSTOMER_SUPPORT_HOST = FACTORY.createRemoteStringSetting(
+            "ACTIVATION_CUSTOMER_SUPPORT_HOST", "http://www.limewire.com/support", "ActivationSettings.activationCustomerSupportHost");
+
+    public static final StringSetting ACTIVATION_ACCOUNT_SETTINGS_HOST = FACTORY.createRemoteStringSetting(
+            "ACTIVATION_ACCOUNT_SETTINGS_HOST", "https://www.limewire.com/support/lookup", "ActivationSettings.activationAccountSettingsHost");
+
     public static final StringSetting MODULE_KEY_IDENTIFIER = FACTORY.createRemoteStringSetting(
             "MODULE_KEY_IDENTIFIER", "moduleId=", "ActivationSettings.moduleKeyIdentifier");
     

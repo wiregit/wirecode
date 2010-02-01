@@ -17,6 +17,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
@@ -140,7 +141,7 @@ class ActivationTable extends MouseableTable {
         public LicenseTypeEditorRenderer() {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
-            licenseAction = new UrlAction(I18n.tr("Lost your license?"), "http://www.limewire.com/client_redirect/?page=gopro");
+            licenseAction = new UrlAction(I18n.tr("Lost your license?"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get());
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             
@@ -206,24 +207,23 @@ class ActivationTable extends MouseableTable {
     private class ExpiredRenderer extends TableRendererEditor {
         private final JLabel dateLabel;
         private final IconButton iconButton;
-        private final HyperlinkButton renewButton;
-        private final UrlAction renewAction;
-        
+        private final JLabel expiredLabel;
+
         private ActivationItem cellEditorValue = null;
         
         public ExpiredRenderer() {
             dateLabel = new JLabel();
             iconButton = new IconButton(infoIcon);
-            renewAction = new UrlAction(I18n.tr("Renew"), "http://www.limewire.com/client_redirect/?page=gopro");
-            renewButton = new HyperlinkButton(renewAction);
+            expiredLabel = new JLabel(I18n.tr("Expired"));
+            expiredLabel.setForeground(Color.RED);
 
             iconButton.setVisible(false);
-            renewButton.setVisible(false);
+            expiredLabel.setVisible(false);
             
             setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
             add(dateLabel);
             add(iconButton);
-            add(renewButton);
+            add(expiredLabel);
         }
         
         public void addActionListener(ActionListener listener) {
@@ -264,13 +264,12 @@ class ActivationTable extends MouseableTable {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
                 dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
-                renewAction.setURL(item.getURL());
                 iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
-                renewButton.setVisible(item.getStatus() == Status.EXPIRED);
+                expiredLabel.setVisible(item.getStatus() == Status.EXPIRED);
             } else {
                 dateLabel.setText("");
                 iconButton.setVisible(false);
-                renewButton.setVisible(false);
+                expiredLabel.setVisible(false);
             }
             return this;
         }

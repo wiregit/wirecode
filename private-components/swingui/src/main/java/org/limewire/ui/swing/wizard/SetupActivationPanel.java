@@ -35,12 +35,13 @@ public class SetupActivationPanel extends JPanel {
     private ActivationStateIconPanel iconPanel;
     private JLabel errorMessageLabel;
     private ActivationListener activationListener;
+    private JPanel customerSupportLabel;
     
     @Resource
     private Color errorColor;
 
     public SetupActivationPanel(WizardPage wizardPage, ActivationManager activationManager) {
-        super(new MigLayout("fillx, insets 75, gap 0, gapy 0", "[][grow]", "[][][][][][][][]"));
+        super(new MigLayout("fillx, insets 75 60 10 60, gap 0, gapy 0", "[][grow][]", "[][][][][][][][][][]"));
         
         GuiUtils.assignResources(this);
 
@@ -68,7 +69,7 @@ public class SetupActivationPanel extends JPanel {
         iconPanel = new ActivationStateIconPanel();
         add(iconPanel, "cell 1 6, aligny 50%");
         add(Box.createHorizontalStrut(3), "cell 1 6, aligny 50%");
-        
+
         add(wizardPage.createAndDecorateHeader(I18n.tr("License Key") + ":"), "aligny 50%");
         licenseField = wizardPage.createAndDecorateLicenseKeyField();
         if (!ActivationSettings.ACTIVATION_KEY.isDefault()) {
@@ -81,14 +82,26 @@ public class SetupActivationPanel extends JPanel {
         okButton.addActionListener(new EnterActionListener());
         add(okButton, "cell 2 6, aligny 50%"); //wrap
 
+        add(Box.createRigidArea(new Dimension(19, 16)), "cell 3 6, aligny 50%");
+
         add(Box.createVerticalStrut(10), "spanx 1, growx, cell 2 7"); //wrap
 
         // TODO Change this link to point to the correct get key page.
         add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
         HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink("http://www.limewire.com/",
-                                                                      I18n.tr("I don't know my license key"));
+                                                                                 I18n.tr("I don't know my license key"));
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
+        add(Box.createVerticalStrut(40), "cell 2 9");
+
+        customerSupportLabel = new JPanel();
+        customerSupportLabel.add(wizardPage.createAndDecorateLabel(I18n.tr("Please contact")));
+        customerSupportLabel.add(wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get(),
+                                                                       I18n.tr("customer support")));
+        customerSupportLabel.add(wizardPage.createAndDecorateLabel(I18n.tr("for more information.")));
+        customerSupportLabel.setVisible(false);
+        add(customerSupportLabel, "align 25% 50%, spanx 1, cell 2 10, hidemode 3"); //wrap
+
         this.activationListener = new ActivationListener();
         this.activationManager.addListener(activationListener);
     }
@@ -113,6 +126,7 @@ public class SetupActivationPanel extends JPanel {
     }
 
     private void setActivationError(ActivationError error) {
+        customerSupportLabel.setVisible(false);
         switch(error) {
         case NO_ERROR:
             errorMessageLabel.setVisible(false);
@@ -125,8 +139,9 @@ public class SetupActivationPanel extends JPanel {
             errorMessageLabel.setVisible(true);
             return;
         case BLOCKED_KEY:
-            errorMessageLabel.setText(I18n.tr("Sorry, the key you entered is blocked. It's already in use."));
+            errorMessageLabel.setText(I18n.tr("Your license key has been used on too many installations."));
             errorMessageLabel.setVisible(true);
+            customerSupportLabel.setVisible(true);
             return;
         case COMMUNICATION_ERROR:
             errorMessageLabel.setText(I18n.tr("Communication error. Please try again later."));

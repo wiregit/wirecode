@@ -252,13 +252,17 @@ class SetupActivationTable extends BasicJXTable {
 
         private void updateComponents(ActivationItem item) {
             checkMarkButton.setVisible(item.getStatus() == Status.ACTIVE);
-            strut1.setVisible(item.getStatus() != Status.ACTIVE);
-            infoButton.setVisible(item.getStatus() != Status.ACTIVE);
-            strut2.setVisible(item.getStatus() != Status.ACTIVE);
+            boolean showInfoButton = item.getStatus() != Status.ACTIVE && item.getStatus() != Status.EXPIRED;
+            strut1.setVisible(showInfoButton);
+            infoButton.setVisible(showInfoButton);
+            strut2.setVisible(showInfoButton);
             
             if (item.getStatus() == Status.ACTIVE) {
                 nameLabel.setText(item.getLicenseName());
                 nameLabel.setForeground(Color.BLACK);
+            } else if (item.getStatus() == Status.EXPIRED) {
+                nameLabel.setText("<html><s>" + item.getLicenseName() + "</s></html>");
+                nameLabel.setForeground(Color.GRAY);
             } else {
                 nameLabel.setText("* " + item.getLicenseName());
                 nameLabel.setForeground(Color.GRAY);

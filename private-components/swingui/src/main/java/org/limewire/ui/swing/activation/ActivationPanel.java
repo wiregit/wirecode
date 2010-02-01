@@ -37,6 +37,7 @@ import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
@@ -462,12 +463,16 @@ public class ActivationPanel {
 
     private class ActivatedButtonPanel extends ButtonPanel {
         JButton refreshButton;
+        JButton editAccountButton;
         
         public ActivatedButtonPanel() {
             refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of features associated with the key")));
             JButton okButton = new JButton(new OKDialogAction());
             
-            add(refreshButton, "push");
+            editAccountButton = new JButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get()));
+            
+            add(refreshButton, "split");
+            add(editAccountButton, "push");
             add(okButton, "split, alignx 100%, tag ok, wrap");
         }
         
@@ -518,7 +523,7 @@ public class ActivationPanel {
         public void setState(MessageState state) {
             switch(state) {
             case BLOCKED:
-                textLabel.setText("<html>" + I18n.tr("Please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a>" + I18n.tr(" for more information.") + "</html>");
+                textLabel.setText("<html>" + I18n.tr("Please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a>" + I18n.tr(" to resolve the situation.") + "</html>");
                 iconLabel.setVisible(false);
                 textLabel.setVisible(true);
                 return;

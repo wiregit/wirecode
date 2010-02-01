@@ -32,7 +32,11 @@ public class SetupActivationThankYouPanel extends JPanel {
         
         GuiUtils.assignResources(this);
         
-        if (userHasPreexistingLicense) {
+        if (areSomeModulesExpired(eventList)) {
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that one or more of your features has expired."));
+            thankYouLabel.setForeground(thankYouColor);
+            add(thankYouLabel, "align 50% 50%, wrap");
+        } else if (userHasPreexistingLicense) {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
             thankYouLabel.setForeground(thankYouColor);
             add(thankYouLabel, "align 50% 50%, wrap");
@@ -74,28 +78,40 @@ public class SetupActivationThankYouPanel extends JPanel {
             add(Box.createVerticalStrut(10), "wrap");
     
             //JPanel customerSupportPanel = new JPanel();
-            JLabel questionsLabel = wizardPage.createAndDecorateMultiLine(I18n.tr("If you have any questions about your license, please contact "));
+            JLabel questionsLabelA = wizardPage.createAndDecorateLabel(I18n.tr("Please contact"));
             //customerSupportPanel.add(questionsLabel);
             HyperlinkButton customerSupportButton = wizardPage.createAndDecorateHyperlink("http://www.limewire.com/support",
                                                                                           I18n.tr("Customer Support"));
+            JLabel questionsLabelB = wizardPage.createAndDecorateLabel(I18n.tr("for more information."));
             
-            //customerSupportPanel.add(customerSupportButton);
-            //add(customerSupportPanel, "wrap");
-            add(questionsLabel, "align 50% 0%, split, gapright 0");
-            add(customerSupportButton, "align 50% 0%, wrap");
+            JPanel wrappingPanel = new JPanel();
+            wrappingPanel.add(questionsLabelA);
+            wrappingPanel.add(customerSupportButton);
+            wrappingPanel.add(questionsLabelB);
+
+            add(wrappingPanel, "align 50% 0%, gapright 0, wrap");
         }
         add(Box.createVerticalStrut(1), "wrap, growy");
     }
     
     private static boolean areThereProblematicModules(List<ActivationItem> eventList) {
         for (ActivationItem item : eventList) {
-            if (item.getStatus() != ActivationItem.Status.ACTIVE) {
+            if (item.getStatus() == ActivationItem.Status.UNAVAILABLE || item.getStatus() == ActivationItem.Status.UNUSEABLE_LW || item.getStatus() == ActivationItem.Status.UNUSEABLE_OS) {
                 return true;
             }
         }
         return false;
     }
-    
+
+    private static boolean areSomeModulesExpired(List<ActivationItem> eventList) {
+        for (ActivationItem item : eventList) {
+            if (item.getStatus() == ActivationItem.Status.EXPIRED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Fills in the top right corner if a scrollbar appears with an empty table
      * header.

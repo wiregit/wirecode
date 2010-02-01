@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -29,8 +30,7 @@ public final class LostLicenseItem implements ActivationItem {
 
     @Override
     public String getURL() {
-        //TODO: fix this url
-        return "http://www.limewire.com/client_redirect/?page=gopro";
+        return ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get();
     }
 
     @Override
