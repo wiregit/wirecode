@@ -368,7 +368,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         
         // send new capabilities when simpp updates.
         simppManager.get().addListener(new SimppListener() {
-            public void simppUpdated(int newVersion) {
+            public void simppUpdated() {
                 capabilitiesVMFactory.updateCapabilities();
                 sendUpdatedCapabilities();
             }

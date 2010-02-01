@@ -167,7 +167,7 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
         // trigger simpp version update
         simppManager.version = 5;
         for (SimppListener listener : simppManager.listeners) {
-            listener.simppUpdated(5);
+            listener.simppUpdated();
         }
         
         for (BlockingConnection connection : ULTRAPEER) {
@@ -269,6 +269,16 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
         @Override
         public void removeListener(SimppListener listener) {
             listeners.remove(listener);
+        }
+
+        @Override
+        public int getKeyVersion() {
+            return 0;
+        }
+
+        @Override
+        public int getNewVersion() {
+            return 0;
         }
         
     }

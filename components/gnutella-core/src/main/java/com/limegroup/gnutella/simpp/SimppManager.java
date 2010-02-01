@@ -11,6 +11,10 @@ public interface SimppManager {
     public void initialize();
 
     public int getVersion();
+    
+    public int getNewVersion();
+    
+    public int getKeyVersion();
 
     /**
      * @return the cached value of the simpp bytes. 

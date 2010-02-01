@@ -39,6 +39,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -60,6 +61,8 @@ public class SimppManagerImpl implements SimppManager {
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private volatile byte[] _lastBytes = new byte[0];
     private volatile int _lastId = MIN_VERSION;
+    private volatile int newVersion = MIN_VERSION;
+    private volatile int keyVersion = MIN_VERSION;
     
     /** If an HTTP failover update is in progress */
     private final HttpRequestControl httpRequestControl = new HttpRequestControl();
@@ -159,6 +162,16 @@ public class SimppManagerImpl implements SimppManager {
     public int getVersion() {
         return _lastId;
     }
+
+    @Override
+    public int getKeyVersion() {
+        return keyVersion;
+    }
+
+    @Override
+    public int getNewVersion() {
+        return newVersion;
+    }
     
     /**
      * @return the cached value of the simpp bytes. 
@@ -221,8 +234,9 @@ public class SimppManagerImpl implements SimppManager {
             return;
         }
         
+        CertifiedMessage certifiedMessage = parser.getCertifiedMessage();
         try { 
-            simppMessageVerifier.verify(parser.getCertifiedMessage(), handler);
+            simppMessageVerifier.verify(certifiedMessage, handler);
         } catch (SignatureException se) {
             LOG.error("message did not verify", se);
         }
@@ -233,20 +247,20 @@ public class SimppManagerImpl implements SimppManager {
         
         switch(updateType) {
         case FROM_NETWORK:
-            if(parser.getVersion() == IGNORE_ID) {
-                if(_lastId != IGNORE_ID)
+            if(certifiedMessage.getKeyVersion() == IGNORE_ID) {
+                if(keyVersion != IGNORE_ID)
                     doHttpMaxFailover();
-            } else if(parser.getVersion() > _lastId) {
+            } else if(parser.getNewVersion() > newVersion) {
                 storeAndUpdate(data, parser, updateType);
             }
             break;
         case FROM_DISK:
-            if(parser.getVersion() > _lastId) {
+            if(parser.getNewVersion() > newVersion) {
                 storeAndUpdate(data, parser, updateType);
             }
             break;
         case FROM_HTTP:
-            if(parser.getVersion() >= _lastId) {
+            if(parser.getVersion() >= newVersion) {
                 storeAndUpdate(data, parser, updateType);
             }
             break;
@@ -254,15 +268,17 @@ public class SimppManagerImpl implements SimppManager {
     }
     
     private void storeAndUpdate(byte[] data, SimppParser parser, UpdateType updateType) {
+        CertifiedMessage certifiedMessage = parser.getCertifiedMessage();
         if(LOG.isTraceEnabled())
             LOG.trace("Retrieved new data from: " + updateType + ", storing & updating");
-        if(parser.getVersion() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
+        if(certifiedMessage.getKeyVersion() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
             throw new IllegalStateException("shouldn't be here!");
         
         if(updateType == UpdateType.FROM_NETWORK && httpRequestControl.isRequestPending())
             return;
         
         _lastId = parser.getVersion();
+        newVersion = parser.getNewVersion();
         _lastBytes = data;
         
         if(updateType != UpdateType.FROM_DISK) {
@@ -272,7 +288,7 @@ public class SimppManagerImpl implements SimppManager {
         for(SimppSettingsManager ssm : simppSettingsManagers)
             ssm.updateSimppSettings(parser.getPropsData());
         for (SimppListener listener : listeners)
-            listener.simppUpdated(_lastId);
+            listener.simppUpdated();
     }
     
     private void doHttpMaxFailover() {
@@ -416,5 +432,4 @@ public class SimppManagerImpl implements SimppManager {
             requestActive.set(false);
         }
     }
-    
 }

@@ -193,7 +193,7 @@ public class CategoryManagerImplTest extends LimeTestCase {
         
         LibrarySettings.ADDITIONAL_PROGRAM_OSX_LINUX_EXTS.set(new String[] { osxLinuxExt, sharedExt } );
         LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS.set(new String[] { windowsExt, sharedExt } );
-        simppListener.simppUpdated(0);
+        simppListener.simppUpdated();
         
         assertEquals(Category.PROGRAM, cmi.getCategoryForExtension(osxLinuxExt));
         assertEquals(Category.PROGRAM, cmi.getCategoryForFilename("a file." + osxLinuxExt));
@@ -256,7 +256,7 @@ public class CategoryManagerImplTest extends LimeTestCase {
         assertEquals(Category.OTHER, cmi.getCategoryForExtension(unique));
         
         // notify, make sure it took.
-        simppListener.simppUpdated(0);
+        simppListener.simppUpdated();
         assertEquals(category, cmi.getCategoryForExtension(unique));
         assertEquals(category, cmi.getCategoryForFilename("a file." + unique));
         assertEquals(category, cmi.getCategoryForFile(new File("a file." + unique)));
@@ -279,7 +279,7 @@ public class CategoryManagerImplTest extends LimeTestCase {
         
         // If we wipe it out, it disappears.
         setting.set(new String[0]);
-        simppListener.simppUpdated(0);
+        simppListener.simppUpdated();
         assertEquals(Category.OTHER, cmi.getCategoryForExtension(unique));
         assertEquals(extensionsBefore, cmi.getExtensionsForCategory(category));
     }

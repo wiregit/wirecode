@@ -93,7 +93,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         } catch (IllegalArgumentException badSimpp) {}
     }
     
-    public void simppUpdated(int newVersion) {
+    public void simppUpdated() {
         updateAllowed();
     }
     

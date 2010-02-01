@@ -234,7 +234,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         List<SimppListener> l = (List<SimppListener>) 
             PrivilegedAccessor.getValue(simppManager, "listeners");
         for (SimppListener s : l)
-            s.simppUpdated(simppVersion++);
+            s.simppUpdated();
     }
     
     private class TestResponder extends RestrictedResponder {
