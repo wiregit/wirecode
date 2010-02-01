@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.SortController;
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
@@ -102,7 +103,7 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
         
         if(column >= 0) {
             // show the appropriate arrow if this column is sorted            
-            SortOrder order = getSortOrder(table, table.convertColumnIndexToModel(column));
+            SortOrder order = getSortOrder(table, column);
             if(order == SortOrder.UNSORTED) { 
                 setIcon(null);
             } else if(order == SortOrder.ASCENDING) {
@@ -116,11 +117,11 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
     }
     
     /**
-     * Returns the sort order associated with the specified JXTable and model
+     * Returns the sort order associated with the specified JXTable and view
      * column index.  The sort order is meaningful only if the column is the 
      * first sort key column; otherwise, SortOrder.UNSORTED is returned.
      */
-    private SortOrder getSortOrder(JTable table, int modelColumn) {
+    private SortOrder getSortOrder(JTable table, int viewColumn) {
         if(table instanceof GlazedJXTable) {     
             SortController sortController = ((GlazedJXTable)table).getSortController();
             if (sortController == null) {
@@ -133,11 +134,14 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
             }
             
             SortKey firstKey = SortKey.getFirstSortingKey(sortKeys);
-            if ((firstKey != null) && (firstKey.getColumn() == modelColumn)) {
+            if ((firstKey != null) && (firstKey.getColumn() == table.convertColumnIndexToModel(viewColumn))) {
                 return firstKey.getSortOrder();
             } else {
                 return SortOrder.UNSORTED;
             }
+        } else 
+            if(table instanceof JXTable) {
+            return ((JXTable)table).getSortOrder(viewColumn);
         } else {
             return SortOrder.UNSORTED;
         }

@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.ByteUtils;
+
 /**
  * Defines the interface for an object to return an {@link InetAddress}, port 
  * as an integer and the host address as a string.
@@ -67,18 +69,34 @@ public interface IpPort {
                         if(neta[3] == netb[3]) {
                             return 0;
                         } else {
-                            return neta[3] - netb[3];
+                            return compareUnsignedBytes(neta[3], netb[3]);
                         }
                     } else {
-                        return neta[2] - netb[2];
+                        return compareUnsignedBytes(neta[2], netb[2]);
                     }
                 } else {
-                    return neta[1] - netb[1];
+                    return compareUnsignedBytes(neta[1], netb[1]);
                 }
             } else {
-                return neta[0] - netb[0];
+                return compareUnsignedBytes(neta[0], netb[0]);
             }
         }
+        
+        private int compareUnsignedBytes(byte b1, byte b2){
+            int i1 = ByteUtils.ubyte2int(b1);
+            int i2 = ByteUtils.ubyte2int(b2);
+            
+            if (i1 == i2){
+                return 0;
+            }
+            
+            if (i1 > i2){
+                return 1;
+            }
+            
+            return -1;
+        }
+        
     }
     /**
      * Compares <code>IpPort</code> objects.

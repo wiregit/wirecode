@@ -9,6 +9,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -20,7 +23,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
@@ -37,6 +41,8 @@ import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadPropertyKey;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
@@ -57,6 +63,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     private DownloadStatusListener downloadStatus;
     
     private JXTable infoTable;
+    private FileInfoTableModel infoModel;
     
     private Timer refreshTimer;
     private JLabel leechersLabel;
@@ -83,11 +90,11 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
         GuiUtils.assignResources(this);
         
-        infoTable = new JXTable();
+        infoModel = new FileInfoTableModel();
+        infoTable = new JXTable(infoModel);
         
         tableDecorator.decorate(infoTable);
         
-        infoTable.setSortable(false);
         infoTable.setCellSelectionEnabled(false);
         infoTable.setShowGrid(false, false);
         infoTable.setEditable(false);
@@ -131,7 +138,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         refreshTimer = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                init();
+                refresh();
             }
         });
         
@@ -168,35 +175,32 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         }
     }
     
-    private void init() {
-        DefaultTableModel model = new DefaultTableModel();
-
-        model.setColumnIdentifiers(new Object[]{tr("Address"),
-                "", tr("Client"),
-                tr("Upload"), tr("Download")});
-                 
-        List<SourceInfo> sources;
-        if (download != null) {
-            sources = download.getSourcesDetails();
-        } else {
-            sources = upload.getTransferDetails();
-        }
-                
-        for( SourceInfo info : sources ) {
-            model.addRow(new Object[] {info.getIPAddress(),
-                    info.isEncyrpted(), 
-                    info.getClientName(),
-                    GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getUploadSpeed())),
-                    GuiUtils.formatUnitFromBytesPerSec(Math.round(info.getDownloadSpeed()))});
-        }
-                
-        infoTable.setModel(model);
-                
-        TableColumn column = infoTable.getColumn(1);
+    private void init() {        
+        TableColumn column = infoTable.getColumn(FileInfoTableModel.ENCRYPTED);
         column.setCellRenderer(new LockRenderer());
         column.setMaxWidth(12);
         column.setMinWidth(12);
         column.setWidth(12);
+
+        infoTable.getColumnExt(FileInfoTableModel.IP).setComparator(IpPort.IP_COMPARATOR);
+        TableColumn ipColumn = infoTable.getColumn(FileInfoTableModel.IP);
+        ipColumn.setCellRenderer(new IPRenderer());
+        
+        TableColumn uploadColumn = infoTable.getColumn(FileInfoTableModel.UPLOAD_SPEED);
+        uploadColumn.setCellRenderer(new SpeedRenderer());
+        
+        TableColumn downloadColumn = infoTable.getColumn(FileInfoTableModel.DOWNLOAD_SPEED);
+        downloadColumn.setCellRenderer(new SpeedRenderer());
+    }
+    
+    private void refresh() {
+        infoModel.clear();
+                
+        if (download != null) {
+            infoModel.addAll(download.getSourcesDetails());
+        } else {
+            infoModel.addAll(upload.getTransferDetails());
+        }
             
         // Add leecher/seeder info if BT
         if (torrent != null) {
@@ -261,4 +265,101 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             
         }
     }
+    
+    private static class FileInfoTableModel extends AbstractTableModel {
+
+        public static final int IP = 0;
+        public static final int ENCRYPTED = 1;
+        public static final int CLIENT_NAME = 2;
+        public static final int UPLOAD_SPEED = 3;
+        public static final int DOWNLOAD_SPEED = 4;
+        
+        private List<SourceInfo> sources = new ArrayList<SourceInfo>();
+        
+        private String[] columnNames = new String[]{tr("Address"),
+                "", tr("Client"), tr("Upload"), tr("Download")};
+        
+        public void clear(){
+            sources.clear();
+        }
+        
+        public void addAll(Collection<SourceInfo> info){
+            sources.addAll(info);
+            fireTableDataChanged();
+        }
+       
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            if(column < columnNames.length){
+                return columnNames[column];
+            }
+            return null;
+        }
+
+
+        @Override
+        public int getRowCount() {
+            return sources.size();
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            if (rowIndex >= getRowCount()){
+            return null;
+            }
+            return getColumnValue(sources.get(rowIndex), columnIndex);
+        }    
+        
+        private Object getColumnValue(SourceInfo info, int column) {
+            switch (column){
+            case IP:
+                try {
+                    return new IpPortImpl(info.getIPAddress(), 0);
+                } catch (UnknownHostException e) {
+                    // This only thrown when no IP address can be found for a host or and with global 
+                    //IPv6 addresses that have a scope_id.  
+                    return null;
+                }
+            case ENCRYPTED:
+                return info.isEncyrpted();
+            case CLIENT_NAME:
+                return info.getClientName();
+            case UPLOAD_SPEED:
+                return Long.valueOf(Math.round(info.getUploadSpeed()));
+            case DOWNLOAD_SPEED:
+                return Long.valueOf(Math.round(info.getDownloadSpeed()));
+            }
+            return null;
+        }  
+        
+    }
+
+    private static class SpeedRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value != null){
+                value = GuiUtils.formatUnitFromBytesPerSec((Long)value);
+            }
+            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        }
+        
+    }
+    private static class IPRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value != null){
+                value = ((IpPort)value).getAddress();
+            }
+            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        }
+        
+    }
+    
 }
