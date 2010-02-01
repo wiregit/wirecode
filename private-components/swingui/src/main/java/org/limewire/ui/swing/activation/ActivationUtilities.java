@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.activation;
 
+import java.net.URL;
+
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -27,6 +29,15 @@ public class ActivationUtilities {
         default:
             return "";
         }
+    }
+    
+    public static String getInfoIconURL() {
+        return getURL("/org/limewire/ui/swing/mainframe/resources/icons/info.png");
+    }
+
+    private static String getURL(String path) {
+        URL resource = ActivationUtilities.class.getResource(path);
+        return resource != null ? resource.toExternalForm() : "";
     }
 
 }

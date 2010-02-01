@@ -43,6 +43,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.ColoredBusyLabel;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -462,13 +463,13 @@ public class ActivationPanel {
 
     private class ActivatedButtonPanel extends ButtonPanel {
         JButton refreshButton;
-        JButton editAccountButton;
+        HyperlinkButton editAccountButton;
         
         public ActivatedButtonPanel() {
             refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of features associated with the key")));
             JButton okButton = new JButton(new OKDialogAction());
             
-            editAccountButton = new JButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get()));
+            editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get()));
             
             add(refreshButton, "split");
             add(editAccountButton, "push");
@@ -532,7 +533,7 @@ public class ActivationPanel {
                 textLabel.setVisible(true);
                 return;
             case UNSUPPORTED:
-                textLabel.setText("<html>" + I18n.tr("One or more of your features is currently not active. Click on  for more information.") + "</html>");
+                textLabel.setText("<html>" + I18n.tr("One or more of your features is currently not active. Click on <img src='" + ActivationUtilities.getInfoIconURL() + "'> for more information.") + "</html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
                 return;
