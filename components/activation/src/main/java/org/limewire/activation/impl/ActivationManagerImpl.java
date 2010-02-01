@@ -272,7 +272,9 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
     @Override
     public void stop() {
-        // todo: cancel all background stuff still running
+        if (activationContactor != null) {
+            activationContactor.unschedule();
+        }
     }
 
     @Override
