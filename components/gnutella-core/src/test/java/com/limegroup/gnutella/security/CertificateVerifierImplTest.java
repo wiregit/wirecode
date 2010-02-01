@@ -47,4 +47,12 @@ public class CertificateVerifierImplTest extends BaseTestCase {
         } catch (SignatureException se) {
         }
     }
+    
+    public void testVerifyNullCertificateFails() throws Exception {
+        try {
+            certificateVerifierImpl.verify(new NullCertificate());
+            fail("exception expected");
+        } catch (SignatureException se) {
+        }
+    }
 }
