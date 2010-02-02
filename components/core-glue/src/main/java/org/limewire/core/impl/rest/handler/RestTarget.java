@@ -4,15 +4,15 @@ package org.limewire.core.impl.rest.handler;
  * REST API request targets.
  */
 public enum RestTarget {
-    HELLO("hello"), LIBRARY("library");
+    HELLO("hello"), LIBRARY("library"), SEARCH("search");
     
-    private final String prefix;
+    private final String pattern;
     
-    RestTarget(String target) {
-        this.prefix = "/remote/" + target + "/";
+    RestTarget(String pattern) {
+        this.pattern = pattern;
     }
     
     public String pattern() {
-        return prefix + "*";
+        return pattern;
     }
 }

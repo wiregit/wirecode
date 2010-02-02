@@ -17,6 +17,8 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 @EagerSingleton
 public class CoreGlueRestService implements Service {
 
+    private static final String REMOTE_PREFIX = "/remote/";
+    
     private final Provider<LocalHTTPAcceptor> localHttpAcceptorFactory;
     private final RestRequestHandlerFactory restRequestHandlerFactory;
     
@@ -43,17 +45,25 @@ public class CoreGlueRestService implements Service {
 
     @Override
     public void start() {
+        // Register handlers for all REST targets.
         for (RestTarget restTarget : RestTarget.values()) {
-            localHttpAcceptorFactory.get().registerHandler(restTarget.pattern(), 
+            localHttpAcceptorFactory.get().registerHandler(createPattern(restTarget.pattern()),
                     restRequestHandlerFactory.createRequestHandler(restTarget));
         }
     }
 
     @Override
     public void stop() {
+        // Unregister handlers for all REST targets.
         for (RestTarget restTarget : RestTarget.values()) {
-            localHttpAcceptorFactory.get().unregisterHandler(restTarget.pattern());
+            localHttpAcceptorFactory.get().unregisterHandler(createPattern(restTarget.pattern()));
         }
     }
 
+    /**
+     * Creates the remote access URI pattern for the specified target.
+     */
+    private String createPattern(String target) {
+        return REMOTE_PREFIX + target + "*";
+    }
 }

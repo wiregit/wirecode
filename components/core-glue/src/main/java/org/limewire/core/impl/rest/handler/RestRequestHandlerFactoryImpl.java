@@ -15,14 +15,22 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Default implementation for RestRequestHandlerFactory.
  */
 public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
 
+    private final Provider<LibraryRequestHandler> libraryHandlerFactory;
+    private final Provider<SearchRequestHandler> searchHandlerFactory;
+    
     @Inject
-    public RestRequestHandlerFactoryImpl() {
+    public RestRequestHandlerFactoryImpl(
+            Provider<LibraryRequestHandler> libraryHandlerFactory,
+            Provider<SearchRequestHandler> searchHandlerFactory) {
+        this.libraryHandlerFactory = libraryHandlerFactory;
+        this.searchHandlerFactory = searchHandlerFactory;
     }
     
     @Override
@@ -31,8 +39,9 @@ public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory 
         case HELLO:
             return new HelloRequestHandler();
         case LIBRARY:
-            // TODO implement library handler
-            return new UnknownRequestHandler();
+            return libraryHandlerFactory.get();
+        case SEARCH:
+            return searchHandlerFactory.get();
         default:
             return new UnknownRequestHandler();
         }
@@ -46,22 +55,22 @@ public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory 
         @Override
         public void handle(HttpRequest request, HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
-            System.out.println("handler.handle() thread=" + Thread.currentThread().getName());//TODO
-            System.out.println("-> request  = " + request.getRequestLine().getUri());
-            System.out.println("-> response = " + response.getProtocolVersion());
             
-            // Set entity and status in response.
-            Date dateTime = new Date(System.currentTimeMillis());
-            NStringEntity entity = new NStringEntity(dateTime.toString() + ": Hello world!");
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
-            System.out.println("-> entity   = " + entity.getContentType());//TODO
+            if ("GET".equals(request.getRequestLine().getMethod())) {
+                // Set entity and status in response.
+                Date dateTime = new Date(System.currentTimeMillis());
+                NStringEntity entity = new NStringEntity(dateTime.toString() + ": Hello world!");
+                response.setEntity(entity);
+                response.setStatusCode(HttpStatus.SC_OK);
+                
+            } else {
+                response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
+            }
         }
 
         @Override
         public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
                 HttpContext context) throws HttpException, IOException {
-            System.out.println("handler.entityRequest()");//TODO
             return null;
         }
     }
@@ -74,7 +83,7 @@ public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory 
         @Override
         public void handle(HttpRequest request, HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
-            response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
         }
 
         @Override
