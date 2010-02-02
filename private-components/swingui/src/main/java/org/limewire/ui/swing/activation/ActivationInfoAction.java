@@ -31,7 +31,7 @@ public class ActivationInfoAction extends AbstractAction {
         Object item = editor.getCellEditorValue();
         if (item != null && item instanceof ActivationItem) {
             ActivationItem activationItem = (ActivationItem) item;
-            String message = ActivationUtilities.getStatusMessage(activationItem);
+            JComponent message = ActivationUtilities.getStatusMessage(activationItem);
             FocusJOptionPane.showMessageDialog(parent.getRootPane().getParent(), message, activationItem.getLicenseName(), JOptionPane.OK_OPTION);
             editor.cancelCellEditing();
         }

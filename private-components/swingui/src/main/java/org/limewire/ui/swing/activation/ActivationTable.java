@@ -2,10 +2,12 @@ package org.limewire.ui.swing.activation;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
@@ -220,10 +222,12 @@ class ActivationTable extends MouseableTable {
             iconButton.setVisible(false);
             expiredLabel.setVisible(false);
             
-            setLayout(new MigLayout("fill, insets 0 5 0 5, hidemode 3"));
+            setLayout(new GridLayout(1, 2));
             add(dateLabel);
-            add(iconButton);
-            add(expiredLabel);
+            JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0 0 0 0, hidemode 3"));
+            innerPanel.add(iconButton);
+            innerPanel.add(expiredLabel);
+            add(innerPanel);
         }
         
         public void addActionListener(ActionListener listener) {

@@ -36,9 +36,13 @@ public class SetupActivationThankYouPanel extends JPanel {
         
         GuiUtils.assignResources(this);
         
-        if (areSomeModulesExpired(eventList)) {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that one or more of your features has expired."));
-            thankYouLabel.setForeground(thankYouColor);
+        if (areAllModulesExpired(eventList)) {
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
+            thankYouLabel.setForeground(Color.BLACK);
+            add(thankYouLabel, "align 50% 50%, wrap");
+        } else if (areSomeModulesExpired(eventList)) {
+            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
+            thankYouLabel.setForeground(Color.BLACK);
             add(thankYouLabel, "align 50% 50%, wrap");
         } else if (userHasPreexistingLicense) {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
@@ -77,7 +81,7 @@ public class SetupActivationThankYouPanel extends JPanel {
                 innerPanel.add(infoTextLine2a, "align 50% 50%, split, gapright 0");
                 innerPanel.add(infoTextLine2b, "align 50% 50%, wrap");
             } else {
-                JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not activated."));
+                JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not supported."));
                 JLabel infoTextLine2a = wizardPage.createAndDecorateMultiLine(I18n.tr("Click on "));
                 JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
                 innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
@@ -90,21 +94,7 @@ public class SetupActivationThankYouPanel extends JPanel {
         } else {
             add(scrollPane, "align 50% 0%, wrap");
 
-            add(Box.createVerticalStrut(10), "wrap");
-    
-            //JPanel customerSupportPanel = new JPanel();
-            JLabel questionsLabelA = wizardPage.createAndDecorateLabel(I18n.tr("Please contact"));
-            //customerSupportPanel.add(questionsLabel);
-            HyperlinkButton customerSupportButton = wizardPage.createAndDecorateHyperlink("http://www.limewire.com/support",
-                                                                                          I18n.tr("Customer Support"));
-            JLabel questionsLabelB = wizardPage.createAndDecorateLabel(I18n.tr("for more information."));
-            
-            JPanel wrappingPanel = new JPanel();
-            wrappingPanel.add(questionsLabelA);
-            wrappingPanel.add(customerSupportButton);
-            wrappingPanel.add(questionsLabelB);
-
-            add(wrappingPanel, "align 50% 0%, gapright 0, wrap");
+            add(Box.createVerticalStrut(10), "wrap");    
         }
         add(Box.createVerticalStrut(1), "wrap, growy");
     }
@@ -117,6 +107,15 @@ public class SetupActivationThankYouPanel extends JPanel {
             }
         }
         return false;
+    }
+
+    private static boolean areAllModulesExpired(List<ActivationItem> eventList) {
+        for (ActivationItem item : eventList) {
+            if (item.getStatus() != ActivationItem.Status.EXPIRED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean areSomeModulesExpired(List<ActivationItem> eventList) {

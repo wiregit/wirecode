@@ -252,7 +252,7 @@ class SetupActivationTable extends BasicJXTable {
 
         private void updateComponents(ActivationItem item) {
             checkMarkButton.setVisible(item.getStatus() == Status.ACTIVE);
-            boolean showInfoButton = item.getStatus() != Status.ACTIVE && item.getStatus() != Status.EXPIRED;
+            boolean showInfoButton = item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
             strut1.setVisible(showInfoButton);
             infoButton.setVisible(showInfoButton);
             strut2.setVisible(showInfoButton);
