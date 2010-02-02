@@ -32,7 +32,7 @@ public class NullCertificate implements Certificate {
             }
             @Override
             public String getAlgorithm() {
-                return "DSA";
+                return "";
             }
         };
     }
