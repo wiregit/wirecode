@@ -27,6 +27,8 @@ public class SetupPage3 extends WizardPage {
     private String forwardText;
     private boolean hasBackButton;
     
+    private SetupActivationPanel activationPanel;
+    
     public SetupPage3(SetupComponentDecorator decorator, 
                       Application application, 
                       LibraryData libraryData,
@@ -43,7 +45,7 @@ public class SetupPage3 extends WizardPage {
         setOpaque(false);
         setLayout(new BorderLayout());
 
-        if (activationManager.getActivationState() != ActivationState.AUTHORIZED) {       
+        if (activationManager.getActivationState() != ActivationState.AUTHORIZED) {
             this.activationListener = new ActivationListener();
             this.activationManager.addListener(activationListener);
             showLicenseEntryPage();
@@ -60,6 +62,18 @@ public class SetupPage3 extends WizardPage {
         }
     }
 
+    @Override
+    public void setVisible(boolean visible) {
+        // if they leave this setup page and come back to it, let's clear its state.
+        if (visible) {
+            if (activationPanel != null) {
+                activationPanel.reset();
+            }
+        }
+        
+        super.setVisible(visible);
+    }
+    
     @Override
     protected String getForwardButtonText() {
         return forwardText;
@@ -94,7 +108,8 @@ public class SetupPage3 extends WizardPage {
                 : I18n.tr("You can activate LimeWire Pro later from File > License...");
         forwardText = I18n.tr("Skip This Step");
         hasBackButton = true;
-        add(new SetupActivationPanel(this, activationManager));
+        activationPanel = new SetupActivationPanel(this, activationManager); 
+        add(activationPanel);
     }
 
     private void showModuleInfoPage() {
@@ -105,7 +120,7 @@ public class SetupPage3 extends WizardPage {
         hasBackButton = false;
         wizard.updateControls();
     }
-    
+
     private class ActivationListener implements EventListener<ActivationEvent> {
         @Override
         public void handleEvent(final ActivationEvent event) {

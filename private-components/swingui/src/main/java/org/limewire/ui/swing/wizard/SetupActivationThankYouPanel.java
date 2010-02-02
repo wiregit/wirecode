@@ -16,7 +16,9 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -26,6 +28,8 @@ public class SetupActivationThankYouPanel extends JPanel {
     private Color thankYouColor;
     @Resource
     private Icon infoIcon;
+    @Resource
+    private Icon noticeIcon;
     
     public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense) {
         super(new MigLayout("fill, insets 50 15 0 15, gap 0, gapy 0", "[]", "[][][][][][]"));
@@ -63,13 +67,24 @@ public class SetupActivationThankYouPanel extends JPanel {
 
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
-            JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not activated."));
-            JLabel infoTextLine2a = wizardPage.createAndDecorateMultiLine(I18n.tr("Click on "));
-            JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
-            innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
-            innerPanel.add(infoTextLine2a, "align 0% 50%, split, gapright 0");
-            innerPanel.add(new JLabel(infoIcon), "align 0% 50%, split, gapright 0");
-            innerPanel.add(infoTextLine2b, "align 0% 50%, wrap");
+            if (areSomeModulesExpired(eventList)) {
+                JLabel infoTextLine1 = wizardPage.createAndDecorateLabel(I18n.tr("Click"));
+                HyperlinkButton infoTextLine2a = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_RENEWAL_HOST.get(), I18n.tr("here"));
+                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" to renew your features."));
+                innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");
+                innerPanel.add(new IconButton(noticeIcon), "align 50% 50%, split");
+                innerPanel.add(infoTextLine1, "align 50% 50%, split");
+                innerPanel.add(infoTextLine2a, "align 50% 50%, split, gapright 0");
+                innerPanel.add(infoTextLine2b, "align 50% 50%, wrap");
+            } else {
+                JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not activated."));
+                JLabel infoTextLine2a = wizardPage.createAndDecorateMultiLine(I18n.tr("Click on "));
+                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
+                innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
+                innerPanel.add(infoTextLine2a, "align 0% 50%, split, gapright 0");
+                innerPanel.add(new JLabel(infoIcon), "align 0% 50%, split, gapright 0");
+                innerPanel.add(infoTextLine2b, "align 0% 50%, wrap");
+            }
             
             add(innerPanel, "align 50% 0%, wrap");
         } else {
@@ -96,7 +111,8 @@ public class SetupActivationThankYouPanel extends JPanel {
     
     private static boolean areThereProblematicModules(List<ActivationItem> eventList) {
         for (ActivationItem item : eventList) {
-            if (item.getStatus() == ActivationItem.Status.UNAVAILABLE || item.getStatus() == ActivationItem.Status.UNUSEABLE_LW || item.getStatus() == ActivationItem.Status.UNUSEABLE_OS) {
+            if (item.getStatus() == ActivationItem.Status.UNAVAILABLE || item.getStatus() == ActivationItem.Status.UNUSEABLE_LW 
+                 || item.getStatus() == ActivationItem.Status.UNUSEABLE_OS || item.getStatus() == ActivationItem.Status.EXPIRED) {
                 return true;
             }
         }

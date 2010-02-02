@@ -106,6 +106,14 @@ public class SetupActivationPanel extends JPanel {
         this.activationManager.addListener(activationListener);
     }
     
+    public void reset() {
+        if (activationManager.getActivationError() != ActivationError.NO_ERROR && activationManager.getActivationError() != ActivationError.BLOCKED_KEY) {
+            setActivationError(ActivationError.NO_ERROR);
+            iconPanel.showNoIcon();
+            licenseField.setText("");
+        }
+    }
+    
     private void setActivationState(ActivationState state) {
         switch(state) 
         {
