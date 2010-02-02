@@ -3,16 +3,12 @@ package com.limegroup.gnutella.security;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 
 public class FileCertificateReaderImpl implements FileCertificateReader {
-    
-    private static final Log LOG = LogFactory.getLog(FileCertificateReaderImpl.class);
     
     private final CertificateParser certificateParser;
 
@@ -37,7 +33,7 @@ public class FileCertificateReaderImpl implements FileCertificateReader {
 
     @Override
     public boolean write(Certificate certificate, File file) {
-        return FileUtils.writeUtf8StringWithBackupFile(certificate.getCertificateString(), file, file, LOG);
+        return FileUtils.verySafeSave(file.getParentFile(), file.getName(), StringUtils.toUTF8Bytes(certificate.getCertificateString()));
     }
 
 }

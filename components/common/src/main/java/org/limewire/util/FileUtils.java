@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -50,47 +49,17 @@ public class FileUtils {
 
     private static final CopyOnWriteArrayList<FileLocker> fileLockers = new CopyOnWriteArrayList<FileLocker>();
     
-    private interface WriterCallback {
-        void write(OutputStream out) throws IOException;
-    }
-
     /**
      * Writes an object to a backup file and then renames that file to a proper
      * file. Returns true if this succeeded, false otherwise.
      */
-    public static boolean writeWithBackupFile(final Object toWrite, File backupFile, File properFile, org.apache.commons.logging.Log log) {
-        return writeWithBackupFile(new WriterCallback() {
-            @Override
-            public void write(OutputStream out) throws IOException {
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
-                objectOutputStream.writeObject(toWrite);
-                objectOutputStream.close();
-            }
-        }, backupFile, properFile, log);
-    }
-
-    public static boolean writeUtf8StringWithBackupFile(final String string, File backupFile, File properFile, org.apache.commons.logging.Log log) {
-        return writeWithBackupFile(new WriterCallback() {
-            @Override
-            public void write(OutputStream out) throws IOException {
-                OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
-                writer.write(string);
-                writer.close();
-            }
-        }, backupFile, properFile, log);
-    }
-    
-    /**
-     * Writes an object to a backup file and then renames that file to a proper
-     * file. Returns true if this succeeded, false otherwise.
-     */
-    private static boolean writeWithBackupFile(WriterCallback writerCallback, File backupFile, File properFile,
+    public static boolean writeWithBackupFile(Object toWrite, File backupFile, File properFile,
             org.apache.commons.logging.Log log) {
-        BufferedOutputStream out = null;
+        ObjectOutputStream out = null;
         
         try {
-            out = new BufferedOutputStream(new FileOutputStream(backupFile));
-            writerCallback.write(out);
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
+            out.writeObject(toWrite);
             out.flush();
             out.close();
             out = null;
@@ -115,7 +84,6 @@ public class FileUtils {
         
         return false;
     }
-    
 
     /**
      * Writes the passed Object to corresponding file.
