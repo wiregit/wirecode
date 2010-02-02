@@ -27,7 +27,6 @@ import com.google.inject.Provider;
  * - if activation is attemted while another is in progress, cancel old one
  *   in favor of new one.
  */
-// todo: write tests
 class ActivationCommunicatorImpl implements ActivationCommunicator {
     private static Log LOG = LogFactory.getLog(ActivationCommunicatorImpl.class);
     
@@ -45,10 +44,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
     }
     
     public ActivationResponse activate(final String key) throws IOException, InvalidDataException {
-        // get query string
-        String query = activationSettings.getQueryString() + "&lid=" + key;;
-//        String query = LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
-//            activationManager.isProActive(), activationManager.getMCode()) + "&lid=" + key;
+        String query = activationSettings.getQueryString() + "&lid=" + key;
 
         String jsonResult = sendToServer(query);
         LOG.debugf("Activation server response: " + jsonResult);
