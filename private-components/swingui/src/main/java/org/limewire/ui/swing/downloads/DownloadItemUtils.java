@@ -35,8 +35,7 @@ public class DownloadItemUtils {
         assert downloadItem.isLaunchable();
         
         // Warn user that the file has not been scanned for viruses.
-        if (downloadItem.getState() == DownloadState.SCAN_FAILED ||
-                downloadItem.getState() == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+        if (downloadItem.getState() == DownloadState.SCAN_FAILED) {
             String message = I18n.tr("This file has not been scanned for viruses.  Do you want to launch anyway?");
             int answer = FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
                     new MultiLineLabel(message, 400), I18n.tr("Message"), 

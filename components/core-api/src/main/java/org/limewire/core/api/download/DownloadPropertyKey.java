@@ -11,5 +11,7 @@ public enum DownloadPropertyKey {
     /**The index of the update (if the update is incremental)*/
     ANTIVIRUS_INCREMENT_INDEX, 
     /** The total number of increments (if the update is incremental)*/
-    ANTIVIRUS_INCREMENT_COUNT
+    ANTIVIRUS_INCREMENT_COUNT,
+    /** A hint for the reason of a scan failure. */
+    ANTIVIRUS_FAIL_HINT,
 }

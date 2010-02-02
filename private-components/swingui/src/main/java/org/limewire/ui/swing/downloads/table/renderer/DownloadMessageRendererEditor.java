@@ -103,8 +103,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         messageLabel.setText(getPercentMessage(item) + getMessage(item));
         if (state == DownloadState.DANGEROUS ||
                 state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED ||
-                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+                state == DownloadState.SCAN_FAILED) {
             messageLabel.setForeground(resources.getDisabledForeground());
         }
         
@@ -113,8 +112,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                 state == DownloadState.SCANNING ||
                 state == DownloadState.SCANNING_FRAGMENT || 
                 state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED ||
-                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
+                state == DownloadState.SCAN_FAILED);
     }
     
     /**
@@ -204,7 +202,6 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         case THREAT_FOUND:
             return I18n.tr("File deleted - Threat detected by AVG");
         case SCAN_FAILED:
-        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return I18n.tr("Done, but unable to scan for viruses");
         case APPLYING_DEFINITION_UPDATE:
             AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);

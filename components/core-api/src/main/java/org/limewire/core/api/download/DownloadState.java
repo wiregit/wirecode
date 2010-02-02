@@ -27,9 +27,6 @@ public enum DownloadState {
     THREAT_FOUND(false, false, true),
 	/** Anti-virus scan failed. */
 	SCAN_FAILED(false, false, true),
-    /** Anti-virus scan failed b/c the first definition set
-     * is being downloaded. */
-	SCAN_FAILED_DOWNLOADING_DEFINITIONS(false, false, true), 
 	/**Applying the downloaded anti-virus update*/
 	APPLYING_DEFINITION_UPDATE(false, false, false);
 

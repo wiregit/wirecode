@@ -26,6 +26,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
@@ -148,8 +149,8 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                     downloadStatus = DownloadState.COMPLETE;
                 }
             } catch(VirusScanException e) {
-                downloadStatus = e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS ?
-                        DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS : DownloadState.SCAN_FAILED;
+                setAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT, e.getDetail(), false);
+                downloadStatus = DownloadState.SCAN_FAILED;
                 return false;
             }
             // The torrent file is copied into the incomplete file

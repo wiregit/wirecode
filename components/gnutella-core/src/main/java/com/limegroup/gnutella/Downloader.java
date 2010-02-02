@@ -266,7 +266,6 @@ public interface Downloader extends BandwidthTracker,
         SCANNING,
         THREAT_FOUND,
         SCAN_FAILED,
-        SCAN_FAILED_DOWNLOADING_DEFINITIONS,
         APPLYING_ANTIVIRUS_DEFINITION_UPDATE
     }
     

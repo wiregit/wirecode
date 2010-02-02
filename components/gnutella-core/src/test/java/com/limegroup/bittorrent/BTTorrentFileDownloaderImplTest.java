@@ -478,6 +478,12 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 return null;
             }
         }, new VirusScanner() {
+            
+            @Override
+            public boolean shouldBeSupported() {
+                return false;
+            }
+            
             @Override
             public boolean isSupported() {
                 return false;

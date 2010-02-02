@@ -494,7 +494,6 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         case DANGEROUS:
         case THREAT_FOUND:
         case SCAN_FAILED:
-        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return false;
         default:
             return true;

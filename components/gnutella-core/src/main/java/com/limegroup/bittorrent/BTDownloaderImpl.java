@@ -27,6 +27,7 @@ import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -173,8 +174,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             addFileToCollections(completeFile);
             complete.set(true);
             deleteIncompleteFiles();
-            if(lastState.get() != DownloadState.SCAN_FAILED &&
-                    lastState.get() != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+            if(lastState.get() != DownloadState.SCAN_FAILED) {
                 lastState.set(DownloadState.COMPLETE);
                 listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
             }
@@ -225,10 +225,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 if(isInfected(getIncompleteFile()))
                     return true;
             } catch(VirusScanException e) {
-                if(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS)
-                    lastState.set(DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
-                else
-                    lastState.set(DownloadState.SCAN_FAILED);
+                setAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT, e.getDetail(), false);
+                lastState.set(DownloadState.SCAN_FAILED);
                 listeners.broadcast(new DownloadStateEvent(this, lastState.get()));
             }
         }
@@ -269,8 +267,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
      * Returns true if the given file is infected, after stopping the download.
      */
     private boolean isInfected(File file) throws VirusScanException {
-        if(virusScanner.get().isEnabled() &&
-                virusScanner.get().isInfected(file)) {
+        if(virusScanner.get().isInfected(file)) {
             lastState.set(DownloadState.THREAT_FOUND);
             listeners.broadcast(new DownloadStateEvent(this, DownloadState.THREAT_FOUND));
             // This will cause TorrentEvent.STOPPED
@@ -470,8 +467,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             return DownloadState.THREAT_FOUND;
         case SCAN_FAILED:
             return DownloadState.SCAN_FAILED;
-        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
-            return DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;
         case SCANNING:
             return DownloadState.SCANNING;
         }
@@ -609,7 +604,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case DANGEROUS:
         case THREAT_FOUND:
         case SCAN_FAILED:
-        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return true;
         }
         return false;

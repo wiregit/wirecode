@@ -701,8 +701,7 @@ public class DownloadWorker {
                     && state != DownloadState.SAVING
                     && state != DownloadState.SCANNING
                     && state != DownloadState.THREAT_FOUND
-                    && state != DownloadState.SCAN_FAILED
-                    && state != DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+                    && state != DownloadState.SCAN_FAILED) {
                 if (_interrupted.get())
                     return; // we were signalled to stop.
                 _manager.setState(DownloadState.CONNECTING);

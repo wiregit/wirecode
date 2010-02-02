@@ -195,8 +195,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
             DownloadState state = item.getState();
             return (state == DownloadState.DANGEROUS ||
                     state == DownloadState.THREAT_FOUND ||
-                    state == DownloadState.SCAN_FAILED ||
-                    state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS);
+                    state == DownloadState.SCAN_FAILED);
         }
     }
 }

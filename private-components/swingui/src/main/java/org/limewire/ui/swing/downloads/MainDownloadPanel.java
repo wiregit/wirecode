@@ -147,8 +147,6 @@ public class MainDownloadPanel extends JPanel {
                     avInfoPanelFactory.get().showThreatMessage(downloadItem, true);
                 } else if (state == DownloadState.SCAN_FAILED) {
                     avInfoPanelFactory.get().showFailureMessage(downloadItem, true);
-                } else if (state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
-                    avInfoPanelFactory.get().showFailureMessageDefsDownloading(downloadItem, true);
                 } else if (state == DownloadState.DANGEROUS) {
                     avInfoPanelFactory.get().showDangerMessage(downloadItem, true);
                 } else {

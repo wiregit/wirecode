@@ -30,6 +30,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.DownloadSettings;
@@ -748,7 +749,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 case DANGEROUS:
                 case THREAT_FOUND:
                 case SCAN_FAILED:
-                case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
                     clearingNeeded = true;
                     setState(status);
                     break;
@@ -968,7 +968,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case DANGEROUS:
             case THREAT_FOUND:
             case SCAN_FAILED:
-            case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
                 return true;
         }
         return false;
@@ -1579,8 +1578,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 state == DownloadState.THREAT_FOUND)
             return false;
         if(state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED ||
-                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS)
+                state == DownloadState.SCAN_FAILED)
             return true;
         return amountForPreview() > 0;
     }
@@ -1831,8 +1829,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
             return corrupt;
         } else if (state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED ||
-                state == DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS) {
+                state == DownloadState.SCAN_FAILED) {
             // If the download is complete, return the whole file.
             return getSaveFile();
         } else {
@@ -2029,18 +2026,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private DownloadState verifyAndSave() throws InterruptedException {
 
         // Scan the file for viruses
-        if(virusScanner.isEnabled())
+        if(virusScanner.isEnabled()) {
             setState(DownloadState.SCANNING);
+        }
+        
         DownloadState scanFailed = null;
         try {
             if(isInfected(incompleteFile))
                 return DownloadState.THREAT_FOUND;
         } catch(VirusScanException e) {
-            if(e.getDetail() == VirusScanException.Detail.DOWNLOADING_DEFINITIONS) {
-                scanFailed = DownloadState.SCAN_FAILED_DOWNLOADING_DEFINITIONS;    
-            } else {
-                scanFailed = DownloadState.SCAN_FAILED;
-            }
+            setAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT, e.getDetail(), false);
+            scanFailed = DownloadState.SCAN_FAILED;
         }
         
         // Check whether this is a dangerous file

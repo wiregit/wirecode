@@ -25,6 +25,8 @@ import javax.swing.event.HyperlinkListener;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -167,23 +169,28 @@ public class AVInfoPanel extends JPanel {
      * @param showOption true to show option to turn off warning
      */
     public void showFailureMessage(DownloadItem item, boolean showOption) {
-        String heading = I18n.tr("Unable to Scan");
-        String message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+        VirusEngine.HintReason reason = (VirusEngine.HintReason)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_FAIL_HINT);
+        if(reason == null) {
+            reason = VirusEngine.HintReason.NO_HINT;
+        }
+        
+        String heading, message;
+        switch(reason) {
+        case NO_DEFINITIONS:
+            heading = I18n.tr("Can't Scan Yet");
+            message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            break;            
+        case NOT_SUPPORTED:
+            heading = I18n.tr("Unable to Scan");
+            message = I18n.tr("{0} could not be inspected because the virus scanner cannot be loaded.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            break;            
+        default:
+            heading = I18n.tr("Unable to Scan");
+            message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            break;            
+        }        
+
         showWarningMessage(heading, message, showOption, true, 
-                SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
-    }
-    
-    /**
-     * Displays the failure message.  This applies to files that could not be 
-     * scanned due the initial set of definitions still being downloaded.
-     * 
-     * @param item the item representing the downloaded file
-     * @param autoNotify true if this is an automatic message request due to a state change
-     */
-    public void showFailureMessageDefsDownloading(DownloadItem item, boolean autoNotify) {
-        String heading = I18n.tr("Can't Scan Yet");
-        String message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
-        showWarningMessage(heading, message, autoNotify, true,
                 SwingUiSettings.WARN_DOWNLOAD_SCAN_FAILED, SwingUiSettings.HIDE_DOWNLOAD_SCAN_FAILED);
     }
     

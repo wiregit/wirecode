@@ -22,7 +22,6 @@ public enum BasicDownloadState {
             return BasicDownloadState.NOT_STARTED;
         case DONE:
         case SCAN_FAILED:
-        case SCAN_FAILED_DOWNLOADING_DEFINITIONS:
             return BasicDownloadState.DOWNLOADED;
         case ERROR:
         case TRYING_AGAIN:
