@@ -80,6 +80,7 @@ public class HttpCertificateReaderImplTest extends BaseTestCase {
         
         try {
             httpCertificateReaderImpl.read(URIUtils.toSafeUri("http://limewire.com/"), new IpPortImpl("192.168.0.1:5555"));
+            fail("exception expected");
         } catch (IOException ie) {
         }
         

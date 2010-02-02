@@ -52,7 +52,7 @@ public class CertificateProviderImpl implements CertificateProvider {
     public void set(Certificate certificate) {
         try { 
             Certificate localCopy = validCertificate;
-            if (localCopy == null || (!localCopy.equals(certificate) && certificate.getKeyVersion() > localCopy.getKeyVersion())) {
+            if (localCopy == null || certificate.getKeyVersion() > localCopy.getKeyVersion()) {
                 validCertificate = certificateVerifier.verify(certificate);
                 fileCertificateReader.write(certificate, file);
             }
@@ -87,12 +87,10 @@ public class CertificateProviderImpl implements CertificateProvider {
         Certificate certificate = null;
         try {
             certificate = httpCertificateReader.read(uri, messageSource);
-            set(certificateVerifier.verify(certificate));
+            set(certificate);
             return certificate;
         } catch (IOException ie) {
             LOG.debugf(ie, "certificate from invalid url: {0}", uri);
-        } catch (SignatureException e) {
-            LOG.debugf(e, "certificate from url {0} invalid {1} ", uri, certificate);
         }
         certificate = validCertificate;
         if (certificate != null) {
@@ -103,5 +101,4 @@ public class CertificateProviderImpl implements CertificateProvider {
         return certificate;
     }
     
-
 }

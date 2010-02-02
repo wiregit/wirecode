@@ -207,7 +207,7 @@ public class SimppManagerImpl implements SimppManager {
         }
     }
     
-    private void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
+    void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
         if (data == null) {
             if (updateType == UpdateType.FROM_NETWORK && handler != null)
                 networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
@@ -260,7 +260,7 @@ public class SimppManagerImpl implements SimppManager {
             }
             break;
         case FROM_HTTP:
-            if(parser.getVersion() >= newVersion) {
+            if(parser.getNewVersion() >= newVersion) {
                 storeAndUpdate(data, parser, updateType);
             }
             break;
@@ -279,6 +279,7 @@ public class SimppManagerImpl implements SimppManager {
         
         _lastId = parser.getVersion();
         newVersion = parser.getNewVersion();
+        keyVersion = certifiedMessage.getKeyVersion();
         _lastBytes = data;
         
         if(updateType != UpdateType.FROM_DISK) {

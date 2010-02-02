@@ -89,7 +89,7 @@ public class CertificateProviderImplTest extends BaseTestCase {
             one(httpCertificateReader).read(uri, null);
             will(returnValue(certificate));
             
-            exactly(2).of(certificateVerifier).verify(certificate);
+            one(certificateVerifier).verify(certificate);
             will(returnValue(certificate));
             
             one(fileCertificateReader).write(certificate, file);
@@ -115,10 +115,6 @@ public class CertificateProviderImplTest extends BaseTestCase {
 
             // successful http get
             one(httpCertificateReader).read(uri, null);
-            will(returnValue(certificate));
-            
-            // successful verification
-            one(certificateVerifier).verify(certificate);
             will(returnValue(certificate));
             
             one(certificate).getKeyVersion();
@@ -159,7 +155,7 @@ public class CertificateProviderImplTest extends BaseTestCase {
             one(httpCertificateReader).read(uri, null);
             will(returnValue(certificate));
 
-            exactly(2).of(certificateVerifier).verify(certificate);
+            one(certificateVerifier).verify(certificate);
             will(returnValue(certificate));
             
             one(fileCertificateReader).write(certificate, file);

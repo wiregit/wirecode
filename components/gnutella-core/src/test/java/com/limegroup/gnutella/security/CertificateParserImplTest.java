@@ -64,6 +64,11 @@ public class CertificateParserImplTest extends BaseTestCase {
             fail("expected exception, input doesn't have enough pipe symbols");
         } catch (IOException ie) {
         }
+        try {
+            certificateParser.parseCertificate("|ABCDE");
+            fail("expected exception, input doesn't have enough pipe symbols");
+        } catch (IOException ie) {
+        }
     }
     
     public void testParseCertificate() throws Exception {

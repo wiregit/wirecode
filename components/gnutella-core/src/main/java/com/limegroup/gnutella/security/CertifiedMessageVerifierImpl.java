@@ -32,7 +32,7 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         } else if (message.getKeyVersion() > certificate.getKeyVersion()) {
             LOG.debug("message key version greater than stored key version");
             certificate = certificateProvider.getFromHttp(messageSource);
-            if (message.getKeyVersion() > certificate.getKeyVersion()) {
+            if (message.getKeyVersion() != certificate.getKeyVersion()) {
                 throw new SignatureException("key version greater than certificate version");
             }
         }

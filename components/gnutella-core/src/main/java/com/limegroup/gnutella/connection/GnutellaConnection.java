@@ -1159,8 +1159,16 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         SimppManager simppManager = this.simppManager.get();
         if (LOG.isDebugEnabled())
             LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
-        return newVersion > simppManager.getNewVersion() || version > simppManager.getVersion()
-        || keyVersion > simppManager.getKeyVersion();
+        if (newVersion > simppManager.getNewVersion() && keyVersion == simppManager.getKeyVersion()) {
+            return true;
+        }
+        if (version > simppManager.getVersion()) {
+            return true;
+        }
+        if (keyVersion > simppManager.getKeyVersion()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -1195,7 +1203,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             int newSimppVersion = capVM.supportsNewSimppVersion();
             int keyVersion = capVM.supportsSimppKeyVersion();
             if (smpV != -1) {
-                if (shouldRequestSimpp(smpV, newSimppVersion, keyVersion)|| (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
+                if (shouldRequestSimpp(smpV, newSimppVersion, keyVersion) || (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
                     // request the simpp message
                     networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
                     send(new SimppRequestVM());
