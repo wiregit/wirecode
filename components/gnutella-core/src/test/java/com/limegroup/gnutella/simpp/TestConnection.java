@@ -4,15 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.ByteReader;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
+import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
-import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -41,6 +42,8 @@ public class TestConnection extends AssertComparisons {
     private boolean _causeError;
     
     private final MessageFactory messageFactory;
+    
+    private final CountDownLatch done = new CountDownLatch(1);
 
     /**
      * When creating a TestConnection you want to specify 4 things
@@ -53,15 +56,15 @@ public class TestConnection extends AssertComparisons {
      * @param sendSimppData whether or not the TestConnection should send the
      * simpp-data when it receives a SimppRequestVM
      */
-    public TestConnection(int simppNumber, boolean expectSimppReq,
+    public TestConnection(File simppFile, int simppNumber, boolean expectSimppReq,
                                      boolean sendSimppData, MessageFactory messageFactory) throws IOException {
-        this(simppNumber, expectSimppReq, sendSimppData, simppNumber, messageFactory);
+        this(simppFile, simppNumber, expectSimppReq, sendSimppData, simppNumber, messageFactory);
     }
     
-    public TestConnection(int simppNumber, boolean expectSimppReq, 
+    public TestConnection(File simppFile, int simppNumber, boolean expectSimppReq, 
                boolean sendSimppData, int capabilitySimpp, MessageFactory messageFactory) throws IOException {
         super("FakeTest");
-        _simppData = readCorrectFile(simppNumber);
+        setSimppMessageFile(simppFile);
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
         _capabilitySimppNo = capabilitySimpp;
@@ -80,7 +83,9 @@ public class TestConnection extends AssertComparisons {
                 } catch (IOException iox) {
                     if(!_causeError) //if not expected, show errorservice
                         ErrorService.error(iox);
-                }        
+                } finally {
+                    done.countDown();
+                }
             }
         };
         t.setDaemon(true);
@@ -212,46 +217,15 @@ public class TestConnection extends AssertComparisons {
         _expectSimppRequest = expected;
     }
     
-    public void setSimppMessageNumber(int number) {
-        try {
-            _simppData = readCorrectFile(number);        
-        } catch(IOException iox) {
-            throw new RuntimeException("unable to read correct simpp test data", iox);
+    public void setSimppMessageFile(File file) {
+        _simppData = FileUtils.readFileFully(file);
+        if (_simppData == null) {
+            throw new RuntimeException("unable to read correct simpp test data");
         }
     }
-
-    ////////////////////////utilities//////////////////////
-
-    private byte[] readCorrectFile(int fileVersion) throws IOException {
-        File file = null;
-        String simppDir = "com/limegroup/gnutella/simpp/";
-        if(fileVersion == SimppManagerTest.OLD)
-            file = TestUtils.getResourceFile(simppDir+"oldFile.xml");
-        else if(fileVersion == SimppManagerTest.MIDDLE)
-            file = TestUtils.getResourceFile(simppDir+"middleFile.xml");
-        else if(fileVersion == SimppManagerTest.NEW) 
-            file = TestUtils.getResourceFile(simppDir+"newFile.xml");
-        else if(fileVersion == SimppManagerTest.DEF_MESSAGE)
-            file = TestUtils.getResourceFile(simppDir+"defMessageFile.xml");
-        else if(fileVersion == SimppManagerTest.DEF_SIGNATURE)
-            file = TestUtils.getResourceFile(simppDir+"defSigFile.xml");
-        else if(fileVersion == SimppManagerTest.BAD_XML)
-            file = TestUtils.getResourceFile(simppDir+"badXmlFile.xml");
-        else if(fileVersion == SimppManagerTest.RANDOM_BYTES)
-            file = TestUtils.getResourceFile(simppDir+"randFile.xml");
-        else if(fileVersion == SimppManagerTest.ABOVE_MAX)
-            file = TestUtils.getResourceFile(simppDir+"aboveMaxFile.xml");
-        else if(fileVersion == SimppManagerTest.BELOW_MIN)
-            file = TestUtils.getResourceFile(simppDir+"belowMinFile.xml");
-        else
-            fail("simpp version set to illegal value");
-        
-        //read the bytes of the file and close it. 
-        RandomAccessFile raf = new RandomAccessFile(file,"r");
-        byte[] ret = new byte[(int)raf.length()];
-        raf.readFully(ret);
-        raf.close();
-        return ret;
+    
+    public boolean waitForConnection(long timeout, TimeUnit unit) throws InterruptedException {
+        return done.await(timeout, unit);
     }
 
 }

@@ -229,8 +229,6 @@ public class SimppManagerImpl implements SimppManager {
             return;
         }
         
-        if(updateType == UpdateType.FROM_NETWORK && handler != null)
-            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.SIMPP);
         
         SimppParser parser = null;
         try {
@@ -247,6 +245,9 @@ public class SimppManagerImpl implements SimppManager {
             LOG.error("message did not verify", se);
             return;
         }
+
+        if(updateType == UpdateType.FROM_NETWORK && handler != null)
+            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.SIMPP);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Got data with version: " + parser.getVersion() + " from: " + updateType + ", current version is: " + _lastId);

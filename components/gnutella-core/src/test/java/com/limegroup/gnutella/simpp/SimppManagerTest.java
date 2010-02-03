@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -18,6 +21,8 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -74,6 +79,12 @@ public class SimppManagerTest extends LimeTestCase {
     private File CERT_FILE_4;
 
     private File certFile;
+
+    private File ABOVE_MAX_FILE;
+
+    private File BELOW_MIN_FILE;
+
+    private ScheduledExecutorService backgroundExecutor;
     
     public SimppManagerTest(String name) {
         super(name);
@@ -108,6 +119,7 @@ public class SimppManagerTest extends LimeTestCase {
 		simppManager = injector.getInstance(SimppManager.class);
 		lifecycleManager = injector.getInstance(LifecycleManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        backgroundExecutor = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
 		
         lifecycleManager.start();
     }
@@ -127,6 +139,8 @@ public class SimppManagerTest extends LimeTestCase {
         DEF_MESSAGE_FILE  = TestUtils.getResourceInPackage("defMessageFile.xml",SimppManagerTest.class);
         BAD_XML_FILE      = TestUtils.getResourceInPackage("badXmlFile.xml", SimppManagerTest.class);
         RANDOM_BYTES_FILE = TestUtils.getResourceInPackage("randFile.xml", SimppManagerTest.class);
+        ABOVE_MAX_FILE = TestUtils.getResourceInPackage("aboveMaxFile.xml", SimppManagerTest.class);
+        BELOW_MIN_FILE = TestUtils.getResourceInPackage("belowMinFile.xml", SimppManagerTest.class);
         
         CERT_FILE_4 = TestUtils.getResourceInPackage("simpp.cert.4", SimppManagerTest.class);
 
@@ -244,7 +258,7 @@ public class SimppManagerTest extends LimeTestCase {
         createSimppManager();
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
-        TestConnection conn = new TestConnection(OLD, false, false, messageFactory);//!expect, !respond
+        TestConnection conn = new TestConnection(OLD_SIMPP_FILE, OLD, false, false, messageFactory);//!expect, !respond
         try {
             conn.start();
         
@@ -269,7 +283,7 @@ public class SimppManagerTest extends LimeTestCase {
         
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
-        TestConnection conn = new TestConnection(NEW ,false, true, OLD, messageFactory);
+        TestConnection conn = new TestConnection(NEW_SIMPP_FILE , NEW, false, true, OLD, messageFactory);
         conn.start();
         //6s = 2s * 3 (timeout in TestConnection == 2s)
         Thread.sleep(6000);//let messages be exchanged, 
@@ -288,7 +302,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
-        TestConnection conn = new TestConnection(MIDDLE,false, true, messageFactory);
+        TestConnection conn = new TestConnection(MIDDLE_SIMPP_FILE, MIDDLE, false, true, messageFactory);
         try {
             conn.start();
             //6s = 2s * 3 (timeout in TestConnection == 2s)
@@ -310,7 +324,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
-        TestConnection conn = new TestConnection(MIDDLE,false, true, OLD, messageFactory);
+        TestConnection conn = new TestConnection(MIDDLE_SIMPP_FILE, MIDDLE, false, true, OLD, messageFactory);
         try {
             conn.start();
             
@@ -334,7 +348,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
-        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);//expect, respond
+        TestConnection conn = new TestConnection(NEW_SIMPP_FILE, NEW, true, true, messageFactory);//expect, respond
         try {
             conn.start();
             
@@ -357,7 +371,7 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
         //msg
-        TestConnection conn = new TestConnection(DEF_SIGNATURE, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -378,7 +392,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
-        TestConnection conn = new TestConnection(DEF_MESSAGE, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -399,7 +413,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
-        TestConnection conn = new TestConnection(BAD_XML, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(BAD_XML_FILE, BAD_XML, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -418,7 +432,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
-        TestConnection conn = new TestConnection(RANDOM_BYTES, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(RANDOM_BYTES_FILE, RANDOM_BYTES, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -439,7 +453,7 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);
+        TestConnection conn = new TestConnection(NEW_SIMPP_FILE, NEW, true, true, messageFactory);
         conn.start();
 
         Thread.sleep(6000);//let the message exchange take place
@@ -458,7 +472,7 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(ABOVE_MAX, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(ABOVE_MAX_FILE, ABOVE_MAX, true, true, NEW, messageFactory);
         conn.start();
         Thread.sleep(6000);//let the message exchange take place
 
@@ -477,7 +491,7 @@ public class SimppManagerTest extends LimeTestCase {
                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(BELOW_MIN, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(BELOW_MIN_FILE, BELOW_MIN, true, true, NEW, messageFactory);
         conn.start();
         
         Thread.sleep(6000);//let the message exchange take place
@@ -497,7 +511,7 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire, but then close the connection while
         //uploading the simpp message
-        TestConnection conn = new TestConnection(NEW, true, true, messageFactory);
+        TestConnection conn = new TestConnection(NEW_SIMPP_FILE, NEW, true, true, messageFactory);
         conn.setCauseError(true);
         conn.start();
 
@@ -509,8 +523,35 @@ public class SimppManagerTest extends LimeTestCase {
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
     }
+    
+    public void testNewSignatureWorks() throws Exception {
+        createSimppManager();
+        
+        File file = TestUtils.getResourceInPackage("simpp.xml.ov657_kv4_nv_44_nocert", getClass());
+        assertTrue(file.exists());
+        
+        TestConnection conn = new TestConnection(file, 657, true, true, messageFactory);
+        conn.start();
+        
+        waitForConnection(conn);
+        
+        assertEquals(657, simppManager.getVersion());
+    }
 
     ////////////////////////////////private methods///////////////////////////
+    
+    void waitForConnection(TestConnection connection) throws InterruptedException {
+        assertTrue(connection.waitForConnection(5, TimeUnit.SECONDS));
+        Thread.sleep(1000);
+        final CountDownLatch latch = new CountDownLatch(1);
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        });
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+    }
     
     private void changeSimppFile(File inputFile) throws Exception {        
         FileUtils.copy(inputFile, _simppFile);
