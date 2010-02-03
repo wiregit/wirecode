@@ -49,7 +49,7 @@ public class MockSearchManager implements SearchManager {
     }
 
     @Override
-    public List<Search> getActiveSearches() {
+    public List<SearchResultList> getActiveSearchLists() {
         return Collections.emptyList();
     }
 

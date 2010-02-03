@@ -49,13 +49,13 @@ public class CoreSearchManager implements SearchManager {
     }
 
     @Override
-    public List<Search> getActiveSearches() {
-        List<Search> list = new ArrayList<Search>();
+    public List<SearchResultList> getActiveSearchLists() {
+        List<SearchResultList> list = new ArrayList<SearchResultList>();
         
         // Add active searches to list.
         for (SearchResultList resultList : threadSafeSearchList) {
             if (resultList.getGuid() != null) {
-                list.add(resultList.getSearch());
+                list.add(resultList);
             }
         }
         

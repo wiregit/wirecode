@@ -812,7 +812,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public List<Search> getActiveSearches() {
+        public List<SearchResultList> getActiveSearchLists() {
             return null;
         }
 
@@ -859,6 +859,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public Search getSearch() {
+            return null;
+        }
+
+        @Override
+        public String getSearchQuery() {
             return null;
         }
     }

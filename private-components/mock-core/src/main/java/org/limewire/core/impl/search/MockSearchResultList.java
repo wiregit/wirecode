@@ -80,6 +80,11 @@ class MockSearchResultList implements SearchResultList {
     }
 
     @Override
+    public String getSearchQuery() {
+        return searchDetails.getSearchQuery();
+    }
+
+    @Override
     public void addListener(EventListener<Collection<GroupedSearchResult>> listener) {
         listListeners.addListener(listener);
     }

@@ -26,7 +26,7 @@ public interface SearchManager {
      * a GUID, which includes network searches started but excludes unstarted
      * searches and browse searches.
      */
-    List<Search> getActiveSearches();
+    List<SearchResultList> getActiveSearchLists();
     
     /**
      * Returns the result list for the specified search.  The method returns 
