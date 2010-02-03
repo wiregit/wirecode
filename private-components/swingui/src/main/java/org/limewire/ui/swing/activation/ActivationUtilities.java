@@ -8,6 +8,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -39,7 +40,7 @@ public class ActivationUtilities {
                 }
             });
             textLabel.setText("<html>" + I18n.tr("{0} is not supported by LimeWire {1}. Please ", item.getLicenseName(), lwVersion) 
-                              + "<a href='http://www.limewire.com/download'>" + I18n.tr("upgrade") + "</a>" 
+                              + "<a href='" + ActivationSettings.LIMEWIRE_DOWNLOAD_HOST.get() + "'>" + I18n.tr("upgrade") + "</a>" 
                               + I18n.tr(" to the latest version.") + "</html>");
             return textLabel;
         case UNUSEABLE_OS:

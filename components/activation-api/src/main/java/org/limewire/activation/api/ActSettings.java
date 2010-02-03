@@ -5,11 +5,15 @@ public interface ActSettings {
     public String getActivationHost();
     
     public String getActivationRenewalHost();
+
+    public String getCustomerSupportHost();
+    
+    public String getDownloadHost();
     
     public boolean isLastStartPro();
     
     public void setLastStartPro(boolean value);
-    
+
     public String getActivationKey();
     
     public void setActivationKey(String key);

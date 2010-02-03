@@ -60,4 +60,13 @@ public class ActivationSettingStub implements ActSettings {
         this.mcode = mCode;
     }
 
+    @Override
+    public String getCustomerSupportHost() {
+        return "http://www.limewire.com/support";
+    }
+
+    @Override
+    public String getDownloadHost() {
+        return "http://www.limewire.com/download";
+    }
 }

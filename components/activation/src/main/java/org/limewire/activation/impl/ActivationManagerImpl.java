@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.activation.api.ActSettings;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
@@ -406,6 +408,16 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 break;
             case BLOCKED:
                 activationSettings.setActivationKey(response.getLid());
+                // we want to show the blocked popup when their activation is being auto-refreshed and not when they are 
+                // manually entering a new key into the license dialog.
+                if (currentState == State.REFRESHING || currentState == State.ACTIVATED_FROM_DISK) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            BlockedNotificationDialog blockedNotificationDialog = new BlockedNotificationDialog(ActivationManagerImpl.this, activationSettings);
+                            blockedNotificationDialog.setVisible(true);
+                        }
+                    });
+                }
                 error = ActivationError.BLOCKED_KEY;
                 break;
             default:

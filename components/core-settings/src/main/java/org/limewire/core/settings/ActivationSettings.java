@@ -22,7 +22,7 @@ public class ActivationSettings extends LimeProps {
     //TODO: set the correct link here. This will be used to determine what location a given module
     // should use for renewing. 
     public static final StringSetting ACTIVATION_RENEWAL_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_RENEWAL_HOST", "http://www.limewire.com", "ActivationSettings.activationRenewalHost");
+            "ACTIVATION_RENEWAL_HOST", "https://www.limewire.com/support/lookup", "ActivationSettings.activationRenewalHost");
 
     public static final StringSetting ACTIVATION_CUSTOMER_SUPPORT_HOST = FACTORY.createRemoteStringSetting(
             "ACTIVATION_CUSTOMER_SUPPORT_HOST", "http://www.limewire.com/support", "ActivationSettings.activationCustomerSupportHost");
@@ -33,6 +33,10 @@ public class ActivationSettings extends LimeProps {
     public static final StringSetting MODULE_KEY_IDENTIFIER = FACTORY.createRemoteStringSetting(
             "MODULE_KEY_IDENTIFIER", "moduleId=", "ActivationSettings.moduleKeyIdentifier");
     
+    // TODO: This property probably shouldn't be in this class. It's here temporarily until we can find it a better home.
+    public static final StringSetting LIMEWIRE_DOWNLOAD_HOST = FACTORY.createRemoteStringSetting(
+            "LIMEWIRE_DOWNLOAD_HOST", "http://www.limewire.com/download", "ActivationSettings.limewireDownloadHost");
+
     /**
      * Returns whether this was considered a PRO version at the last shutdown. This is
      * needed for starting up some UI components before ActivationManager can be fully

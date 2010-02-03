@@ -17,6 +17,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.core.settings.ActivationSettings;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -76,7 +77,9 @@ public class SetupActivationThankYouPanel extends JPanel {
                 HyperlinkButton infoTextLine2a = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_RENEWAL_HOST.get(), I18n.tr("here"));
                 JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" to renew your features."));
                 innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");
-                innerPanel.add(new IconButton(noticeIcon), "align 50% 50%, split");
+                IconButton noticeButton = new IconButton(noticeIcon);
+                noticeButton.addActionListener(new UrlAction(ActivationSettings.ACTIVATION_RENEWAL_HOST.get()));
+                innerPanel.add(noticeButton, "align 50% 50%, split");
                 innerPanel.add(infoTextLine1, "align 50% 50%, split");
                 innerPanel.add(infoTextLine2a, "align 50% 50%, split, gapright 0");
                 innerPanel.add(infoTextLine2b, "align 50% 50%, wrap");
@@ -86,7 +89,8 @@ public class SetupActivationThankYouPanel extends JPanel {
                 JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
                 innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
                 innerPanel.add(infoTextLine2a, "align 0% 50%, split, gapright 0");
-                innerPanel.add(new JLabel(infoIcon), "align 0% 50%, split, gapright 0");
+                IconButton infoButton = new IconButton(infoIcon);
+                innerPanel.add(infoButton, "align 0% 50%, split, gapright 0");
                 innerPanel.add(infoTextLine2b, "align 0% 50%, wrap");
             }
             

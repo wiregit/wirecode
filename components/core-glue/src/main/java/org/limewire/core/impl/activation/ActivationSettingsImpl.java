@@ -28,6 +28,14 @@ public class ActivationSettingsImpl implements ActSettings {
         return ActivationSettings.ACTIVATION_RENEWAL_HOST.get() + "?" + ActivationSettings.MODULE_KEY_IDENTIFIER.get();
     }
     
+    public String getCustomerSupportHost() {
+        return ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get();
+    }
+    
+    public String getDownloadHost() {
+        return ActivationSettings.LIMEWIRE_DOWNLOAD_HOST.get();
+    }
+
     @Override
     public String getActivationKey() {
         return ActivationSettings.ACTIVATION_KEY.get();
@@ -47,6 +55,7 @@ public class ActivationSettingsImpl implements ActSettings {
     public boolean isLastStartPro() {
         return ActivationSettings.LAST_START_WAS_PRO.getValue();
     }
+
 
     @Override
     public void setActivationKey(String key) {
