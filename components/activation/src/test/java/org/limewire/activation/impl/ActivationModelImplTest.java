@@ -3,6 +3,7 @@ package org.limewire.activation.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
@@ -27,7 +28,7 @@ public class ActivationModelImplTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        model = new ActivationModelImpl();
+        model = new ActivationModelImpl(Executors.newSingleThreadExecutor());
         factory = new ActivationItemFactoryImpl(new ActivationSettingStub());
     }
     

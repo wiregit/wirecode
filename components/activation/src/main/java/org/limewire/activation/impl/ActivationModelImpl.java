@@ -4,25 +4,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.listener.AsynchronousEventMulticaster;
+import org.limewire.listener.AsynchronousMulticasterImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
 class ActivationModelImpl implements ActivationModel {
 
     private final Map<ActivationID, ActivationItem> itemMap = new HashMap<ActivationID, ActivationItem>(4);
-    private final EventListenerList<ActivationModuleEvent> listeners = new EventListenerList<ActivationModuleEvent>();
+    private final AsynchronousEventMulticaster<ActivationModuleEvent> listeners;
     
     @Inject
-    public ActivationModelImpl() {
+    public ActivationModelImpl(@Named("fastExecutor") Executor executor) {
+        listeners = new AsynchronousMulticasterImpl<ActivationModuleEvent>(executor);
     }
     
     @Override
