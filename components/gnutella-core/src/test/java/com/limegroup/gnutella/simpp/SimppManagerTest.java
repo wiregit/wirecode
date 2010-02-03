@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
-import java.security.PrivateKey;
-import java.security.Signature;
 
 import junit.framework.Test;
 
@@ -14,7 +12,6 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -73,6 +70,10 @@ public class SimppManagerTest extends LimeTestCase {
     private LifecycleManager lifecycleManager;
     
     private MessageFactory messageFactory;
+
+    private File CERT_FILE_4;
+
+    private File certFile;
     
     public SimppManagerTest(String name) {
         super(name);
@@ -99,7 +100,7 @@ public class SimppManagerTest extends LimeTestCase {
                         return new SimppDataProviderImpl().getOldUpdateResponse();
                     }
                 });
-                bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQUAAFAMBADRAMTBWOA43OM6DE3H4U3OYATOWNG7EO4G52MWL4W2SXBQQAG5AKFI2GGOUL7HCH734WYYX33TT27MPJWOO424YA4LK3HWHNKJB66R736VBH2ATYTK223AVJP2LNZUIRDGHU2CDAYQ2O6SEO3SLIX5DYHITRPJX7JMX6IMKRLBTOSOZMDU2VRJXG5K3JNPNAIYR5CPLYINZK7A"));
+                bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAHNFDNZU6UKXDJP5N7NGWAD2YQMOU23C5IRAJHNHHSDJQITAY3BRZGMUONFNOJFR74VMICCOS4UNEPZMDA46ACY5BCGRSRLPGU3XIIXZATSCOL5KFHWGOJZCZUAVFHHQHENYOIJVGFSFULPIXRK2AS45PHNNFCYCDLHZ4SQNFLZN43UIVR4DOO6EYGYP2QYCPLVU2LJXW745S"));
             }
         });
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
@@ -117,19 +118,6 @@ public class SimppManagerTest extends LimeTestCase {
         lifecycleManager.shutdown();
     }
     
-    public static void main(String[] args) {
-        File file = TestUtils.getResourceInPackage("oldFile.xml", SimppManagerTest.class);
-        
-    }
-    
-    private static String sign(byte[] data, PrivateKey privateKey) throws Exception {
-        Signature signer = Signature.getInstance("DSA");
-        signer.initSign(privateKey);
-        signer.update(data);
-        byte[] sig = signer.sign();        
-        return Base32.encode(sig);
-    }
-    
     private void setSettings() throws Exception {
 
         OLD_SIMPP_FILE    = TestUtils.getResourceInPackage("oldFile.xml", SimppManagerTest.class);
@@ -139,6 +127,8 @@ public class SimppManagerTest extends LimeTestCase {
         DEF_MESSAGE_FILE  = TestUtils.getResourceInPackage("defMessageFile.xml",SimppManagerTest.class);
         BAD_XML_FILE      = TestUtils.getResourceInPackage("badXmlFile.xml", SimppManagerTest.class);
         RANDOM_BYTES_FILE = TestUtils.getResourceInPackage("randFile.xml", SimppManagerTest.class);
+        
+        CERT_FILE_4 = TestUtils.getResourceInPackage("simpp.cert.4", SimppManagerTest.class);
 
         assertTrue(OLD_SIMPP_FILE.exists());
         assertTrue(MIDDLE_SIMPP_FILE.exists());
@@ -146,12 +136,15 @@ public class SimppManagerTest extends LimeTestCase {
         assertTrue(DEF_SIG_FILE.exists());
         assertTrue(BAD_XML_FILE.exists());
         assertTrue(RANDOM_BYTES_FILE.exists());
+        assertTrue(CERT_FILE_4.exists());
         
         _simppFile = new File(_settingsDir, "simpp.xml");
+        certFile = new File(_settingsDir, "simpp.cert");
 
         //set up the correct simpp version
         //_simppMessageNumber = OLD;
         changeSimppFile(OLD_SIMPP_FILE);
+        changeCertFile(CERT_FILE_4);
 
         if (SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue() != 
             SimppManagerTestSettings.DEFAULT_SETTING) {
@@ -529,5 +522,9 @@ public class SimppManagerTest extends LimeTestCase {
             capabilitiesVMFactory.updateCapabilities();
             capabilitiesVMFactory.getCapabilitiesVM();
         }
+    }
+    
+    private void changeCertFile(File inputFile) throws Exception {
+        FileUtils.copy(inputFile, certFile);
     }
 }
