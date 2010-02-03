@@ -436,6 +436,7 @@ public class ActivationPanel {
         
         public NoLicenseButtonPanel() {
             JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"),"http://www.limewire.com/client_redirect/?page=gopro"));
+            goProButton.setToolTipText(I18n.tr("Upgrade to PRO"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
             
@@ -476,6 +477,7 @@ public class ActivationPanel {
             JButton okButton = new JButton(new OKDialogAction());
             
             editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get()));
+            editAccountButton.setToolTipText(I18n.tr("Edit information about the account associated with this License Key"));
             
             add(refreshButton, "split");
             add(editAccountButton, "push");
