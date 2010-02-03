@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,6 +44,8 @@ class ActivationTable extends MouseableTable {
 
     @Resource
     private Icon infoIcon;
+    @Resource
+    private Color expiredColor;
     
     private final DefaultEventTableModel<ActivationItem> model;
     
@@ -214,17 +217,19 @@ class ActivationTable extends MouseableTable {
         private ActivationItem cellEditorValue = null;
         
         public ExpiredRenderer() {
+            setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
             dateLabel = new JLabel();
             iconButton = new IconButton(infoIcon);
             expiredLabel = new JLabel(I18n.tr("Expired"));
-            expiredLabel.setForeground(Color.RED);
+            expiredLabel.setForeground(expiredColor);
 
             iconButton.setVisible(false);
             expiredLabel.setVisible(false);
             
             setLayout(new GridLayout(1, 2));
             add(dateLabel);
-            JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0 0 0 0, hidemode 3"));
+            JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0, hidemode 3"));
+            innerPanel.setOpaque(false);
             innerPanel.add(iconButton);
             innerPanel.add(expiredLabel);
             add(innerPanel);

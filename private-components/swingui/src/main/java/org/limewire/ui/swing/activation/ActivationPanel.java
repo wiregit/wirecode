@@ -162,7 +162,7 @@ public class ActivationPanel {
         
         activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + "!, gpy 200, wrap");
         
-        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, span, growx, wrap");
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, width " + tableWidth + "!, span, growx, wrap");
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
@@ -206,15 +206,15 @@ public class ActivationPanel {
         if(activationManager.getActivationError() == ActivationError.BLOCKED_KEY) {
             error = activationManager.getActivationError();
         }
-
         stateManager.setActivationState(activationManager.getActivationState(), error);
-
+        
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModal(true);
         dialog.setResizable(false);
         dialog.setTitle(I18n.tr("LimeWire"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.add(activationPanel);
+        
         dialog.pack();
         
         dialog.addComponentListener(new ComponentListener(){
@@ -227,7 +227,9 @@ public class ActivationPanel {
             @Override
             public void componentResized(ComponentEvent e) {}
             @Override
-            public void componentShown(ComponentEvent e) {}
+            public void componentShown(ComponentEvent e) {
+                dialog.pack();
+            }
         }); 
 
         dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
@@ -359,7 +361,7 @@ public class ActivationPanel {
             } else {
                 underneathModuleTableMessagePanel.setState(MessageState.NO_ERROR);
             }
-            
+
             // row 6: the button panel
             // let's set which panel of buttons is showing underneath the module table
             String cardName = NO_LICENSE_BUTTON_PANEL;
@@ -381,6 +383,10 @@ public class ActivationPanel {
             } else if (state == ActivationState.AUTHORIZED) {
                 ((ActivatedButtonPanel)cardMap.get(OK_LICENSE_BUTTON_PANEL)).setRefreshEnabled(true);
             }
+            
+            activationPanel.revalidate();
+            activationPanel.invalidate();
+            
         }
         
         private boolean areThereExpiredModules() {
@@ -516,8 +522,6 @@ public class ActivationPanel {
             
             add(iconLabel, "gap right 5, aligny 50%");
             add(textLabel, "growx");
-            
-            setMaximumSize(new Dimension(tableWidth, Integer.MAX_VALUE));
         }
 
         public void setState(MessageState state) {

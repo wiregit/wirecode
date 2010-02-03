@@ -17,7 +17,7 @@ public class ActivationSettings extends LimeProps {
     //TODO: set the correct link here. This is a working test
     //TODO: move this out of settings to prevent it being changed from props
     public static final StringSetting ACTIVATION_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_HOST", "http://activate.limewire.int/lookup", "ActivationSettings.activationHost");
+            "ACTIVATION_HOST", "https://qa-activate.limewire.com/lookup", "ActivationSettings.activationHost");
     
     //TODO: set the correct link here. This will be used to determine what location a given module
     // should use for renewing. 
