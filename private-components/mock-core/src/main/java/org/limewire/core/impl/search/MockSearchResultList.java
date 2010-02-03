@@ -119,7 +119,7 @@ class MockSearchResultList implements SearchResultList {
                 int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
                 if (idx >= 0) {
                     // Found URN so add result to grouping.
-                    GroupedSearchResultImpl gsr = (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
+                    MockGroupedSearchResult gsr = (MockGroupedSearchResult) groupedUrnResultList.get(idx);
                     gsr.addNewSource(result, searchDetails.getSearchQuery());
                     groupedUrnResultList.set(idx, gsr);
                     // Notify listeners that result changed.
@@ -128,7 +128,7 @@ class MockSearchResultList implements SearchResultList {
                 } else {
                     // URN not found so add new result at insertion point.
                     idx = -(idx + 1);
-                    GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
+                    GroupedSearchResult gsr = new MockGroupedSearchResult(result,
                             searchDetails.getSearchQuery());
                     groupedUrnResultList.add(idx, gsr);
                     newResults.add(gsr);
