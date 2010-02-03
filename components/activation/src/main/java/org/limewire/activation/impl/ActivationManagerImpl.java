@@ -46,10 +46,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationResponseFactory activationResponseFactory;
     private final ActSettings activationSettings;
     private Periodic activationContactor = null;
-    
-    // interval in seconds between successive hits to the activation server
-    private long refreshIntervalSeconds = 0;
-    
+        
     private enum State {
         NOT_ACTIVATED(ActivationState.NOT_AUTHORIZED),
         ACTIVATING(ActivationState.AUTHORIZING),
@@ -145,7 +142,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
             transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.NOTFOUND));
             return false;
         }
-        refreshIntervalSeconds = 0;
         return true;
     }
 
@@ -169,7 +165,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
         return activationModel.getActivationItems();
     }
     
-    public void setActivationItems(List<ActivationItem> items) {
+    private void setActivationItems(List<ActivationItem> items) {
         activationModel.setActivationItems(items);
     }
 
@@ -297,75 +293,51 @@ class ActivationManagerImpl implements ActivationManager, Service {
         return listeners.removeListener(listener);
     }
             
-    private class ActivationResponseProcessor {
-        private final static int MAX_ATTEMPTS = 5;
-        private int numAttempted = 0;
-        private final int numRetries;
-        
-        ActivationResponseProcessor(int numRetries) {
-            this.numRetries = numRetries;    
-        }
-        
-        public void processResponse(ActivationResponse response, Throwable error) {
-            if (error != null) {
-                if (numRetries > 0) {
-                    if (error instanceof IOException) {
-                        if (++numAttempted <= MAX_ATTEMPTS) {
-                            int nextDelay = numAttempted * 5000;
-                            transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-                            activationContactor.rescheduleIfSooner(nextDelay);
-                            return;
-                        }
-                    }
-                }
-
-                transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-                return;
-            }
-            processActivationResponse(response);
-        }
-        
-        private void processActivationResponse(ActivationResponse response) {
-            if (response != null && response.getResponseType() == ActivationResponse.Type.VALID) {
-                transitionToState(State.ACTIVATED_FROM_SERVER, response);
-                
-                // reset counter
-                numAttempted = 0;
-                
-                // reschedule next ping of activation server if necessary
-                long refreshVal = response.getRefreshInterval();
-                if (refreshVal > 0) {
-                    refreshIntervalSeconds = refreshVal;
-                    activationContactor.rescheduleIfSooner(refreshIntervalSeconds*1000);
-                }
-            } else if(response != null){
-                transitionToState(State.NOT_ACTIVATED, response);
-            } else {
-                transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.ERROR));
-            }
-        }
-    }
     
     private class ActivationTask implements Runnable {
         
-        private final ActivationResponseProcessor responseProcessor;
+        private int consecutiveFailedRetries = 0;
+        private final int maxFailedConsecutiveRetries;
         private final String key;
 
-        ActivationTask(final String key, int numRetries) {
-            this.responseProcessor = new ActivationResponseProcessor(numRetries);
-            this.key = key;
+        ActivationTask(String keyParam, int maxFailedConsecutiveRetriesParam) {
+            maxFailedConsecutiveRetries = maxFailedConsecutiveRetriesParam;
+            key = keyParam;
         }
 
         @Override
         public void run() {
-            ActivationResponse response = null;
+            ActivationResponse response;
             Throwable error = null;
             try {
                 response = activationCommunicator.activate(key);
+                consecutiveFailedRetries = 0;
             } catch (Throwable e) {
                 error = e;
-            } finally {
-                responseProcessor.processResponse(response, error);
+                response = activationResponseFactory.createErrorResponse(Type.ERROR);
+            }
+            State state = getNextState(response.getResponseType());
+            transitionToState(state, response);
+            
+            if (state == State.ACTIVATED_FROM_SERVER) {
+                // reschedule next ping of activation server if necessary
+                long refreshVal = response.getRefreshInterval();
+                if (refreshVal > 0) {
+                    activationContactor.rescheduleIfSooner(refreshVal*1000);
+                }        
+            } else if (error != null) {
+                retryOnErrorIfNecessary(error);
+            }
+        }
+        
+        private State getNextState(Type type) {
+            return (type == ActivationResponse.Type.VALID) ? State.ACTIVATED_FROM_SERVER : State.NOT_ACTIVATED;
+        }
+        
+        private void retryOnErrorIfNecessary(Throwable error) {
+            if ((error instanceof IOException) && (++consecutiveFailedRetries <= maxFailedConsecutiveRetries)) {
+                int nextDelayInMs = consecutiveFailedRetries * 5000;
+                activationContactor.rescheduleIfSooner(nextDelayInMs);    
             }
         }
     }
