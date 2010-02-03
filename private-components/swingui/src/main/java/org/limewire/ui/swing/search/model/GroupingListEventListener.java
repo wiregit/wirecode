@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
+import static org.limewire.ui.swing.search.model.VisualSearchResult.NEW_SOURCES;
 
 /**
  * A listener to handle updates to the list of visual search results.  This
@@ -25,7 +26,7 @@ class GroupingListEventListener implements VisualSearchResultStatusListener {
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
-        if("new-sources".equals(propertyName)) {
+        if (NEW_SOURCES.equals(propertyName)) {
             similarResultsDetector.detectSimilarResult(vsr);
         }
     }

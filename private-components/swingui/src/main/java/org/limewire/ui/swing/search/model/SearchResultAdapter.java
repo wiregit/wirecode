@@ -1,12 +1,8 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,12 +11,15 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
@@ -29,7 +28,7 @@ import com.google.inject.Provider;
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
  */
-class SearchResultAdapter implements VisualSearchResult, Comparable {
+class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultListener, Comparable {
 
     private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
     
@@ -39,79 +38,78 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         FIND_HTML_MARKUP = p.matcher("");
     }
     
-    private static final Comparator<RemoteHost> REMOTE_HOST_COMPARATOR = new RemoteHostComparator();
-    private static final Comparator<Friend> FRIEND_COMPARATOR = new FriendComparator();
-
-    private List<SearchResult> coreResults;
-    private Set<Friend> friends;
-    private final Set<RemoteHost> remoteHosts;    
+    private final GroupedSearchResult groupedSearchResult;
+    
     private final Provider<PropertiableHeadings> propertiableHeadings;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private CopyOnWriteArrayList<VisualSearchResult> similarResults = null;
     private VisualSearchResult similarityParent;
-    private boolean anonymous;
     private boolean visible;
     private boolean childrenVisible;    
     private Boolean spamCache;    
     private boolean preExistingDownload = false;    
-    private float relevance = 0;    
     private String cachedHeading;    
     private String cachedSubHeading;
     
     private final VisualSearchResultStatusListener changeListener;
 
     /**
-     * Constructs a SearchResultAdapter with the specified List of core results
-     * and property values.
+     * Constructs a SearchResultAdapter with the specified grouped core results.
      */
-    public SearchResultAdapter(SearchResult source,
+    public SearchResultAdapter(GroupedSearchResult groupedSearchResult,
             Provider<PropertiableHeadings> propertiableHeadings,
-            VisualSearchResultStatusListener changeListener, String query) {
+            VisualSearchResultStatusListener changeListener) {
+        this.groupedSearchResult = groupedSearchResult;
         this.propertiableHeadings = propertiableHeadings;
-        this.remoteHosts = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
-        this.visible = true;
-        this.childrenVisible = false;
         this.changeListener = changeListener;
         
-        addNewSource(source, query);
+        this.visible = true;
+        this.childrenVisible = false;
+    }
+    
+    /**
+     * Initializes adapter to listen for new sources added.
+     */
+    void initialize() {
+        groupedSearchResult.addResultListener(this);
     }
 
     @Override
     public boolean isAnonymous() {
-        return anonymous;
+        return groupedSearchResult.isAnonymous();
     }
     
     @Override
     public Category getCategory() {
-        return coreResults.get(0).getCategory();
+        return getCoreSearchResults().get(0).getCategory();
     }
 
     @Override
     public List<SearchResult> getCoreSearchResults() {
-        return coreResults;
+        return groupedSearchResult.getSearchResults();
     }
 
     @Override
     public String getFileExtension() {
-        return coreResults.get(0).getFileExtension();
+        return getCoreSearchResults().get(0).getFileExtension();
     }
     
     @Override
     public String getFileName() {
-        return coreResults.get(0).getFileName();
+        return groupedSearchResult.getFileName();
     }
     
     @Override
     public Collection<Friend> getFriends() {
-        return friends == null ? Collections.<Friend>emptySet() : friends;
+        return groupedSearchResult.getFriends();
     }
 
     @Override
     public Object getProperty(FilePropertyKey key) {
         // find the first non-null value in any of the search results.
-        for(SearchResult result : coreResults) {
+        for (SearchResult result : getCoreSearchResults()) {
             Object value = result.getProperty(key);
-            if(value != null) {
+            if (value != null) {
                 return value;
             }
         }
@@ -158,7 +156,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     public void setSimilarityParent(VisualSearchResult parent) {
         VisualSearchResult oldParent = this.similarityParent;
         this.similarityParent = parent;
-        firePropertyChange("similarityParent", oldParent, parent);
+        firePropertyChange(SIMILARITY_PARENT, oldParent, parent);
     }
 
     @Override
@@ -168,12 +166,12 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     @Override
     public long getSize() {
-        return coreResults.get(0).getSize();
+        return getCoreSearchResults().get(0).getSize();
     }
 
     @Override
     public Collection<RemoteHost> getSources() {
-        return remoteHosts;
+        return groupedSearchResult.getSources();
     }
 
     @Override
@@ -200,47 +198,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         return getCoreSearchResults().toString();
     }
 
-    /**
-     * Reloads the sources from the core search results. The number of alt-locs
-     * is limited to avoid giving high relevance to spam results.
-     */
-    void addNewSource(SearchResult result, String query) {
-        // optimize for only having a single result
-        if(coreResults == null) {
-            coreResults = Collections.singletonList(result);
-        } else {
-            if(coreResults.size() == 1) {
-                coreResults = new ArrayList<SearchResult>(coreResults);
-            }
-            coreResults.add(result);
-        }
-        
-        relevance += result.getRelevance(query);
-        
-        // Build collection of non-anonymous friends for filtering.
-        for (RemoteHost host : result.getSources()) {
-            remoteHosts.add(host);
-            
-            Friend friend = host.getFriendPresence().getFriend();
-            if (friend.isAnonymous()) {
-                anonymous = true;
-            } else {
-                if(friends == null) {
-                    // optimize for a single friend having it
-                    friends = Collections.singleton(friend);
-                } else {
-                    // convert to TreeSet if we need to.
-                    if(!(friends instanceof TreeSet)) {
-                        Set<Friend> newFriends = new TreeSet<Friend>(FRIEND_COMPARATOR);
-                        newFriends.addAll(friends);
-                        friends = newFriends;
-                    }
-                    friends.add(friend);
-                }
-            }
-        }
-    }
-
     @Override
     public boolean isVisible() {
         return visible;
@@ -265,7 +222,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     public boolean isSpam() {
         if (spamCache == null) {
             boolean spam = false;
-            for (SearchResult result : coreResults)
+            for (SearchResult result : getCoreSearchResults())
                 spam |= result.isSpam();
             spamCache = spam;
         }
@@ -301,7 +258,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     @Override
     public URN getUrn() {
-        return coreResults.get(0).getUrn();
+        return groupedSearchResult.getUrn();
     }
 
     @Override
@@ -354,7 +311,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     @Override
     public float getRelevance() {
-        return relevance;
+        return groupedSearchResult.getRelevance();
     }
 
     /**
@@ -364,7 +321,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
      */
     @Override
     public boolean isLicensed() {
-        for (SearchResult searchResult : coreResults) {
+        for (SearchResult searchResult : getCoreSearchResults()) {
              if (searchResult.isLicensed()) {
                 return true;
              }
@@ -383,12 +340,27 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     }
 
     @Override
+    public void sourceAdded() {
+        // Forward source added event to UI change listener.
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            @Override
+            public void run() {
+                firePropertyChange(NEW_SOURCES);
+            }
+        });
+    }
+
+    @Override
     public int compareTo(Object o) {
         if(!(o instanceof SearchResultAdapter)) 
             return -1;
         
         SearchResultAdapter sra = (SearchResultAdapter) o;
         return getHeading().compareTo(sra.getHeading());
+    }
+
+    private void firePropertyChange(String propertyName) {
+        changeListener.resultChanged(this, propertyName, null, null);
     }
 
     private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
@@ -400,33 +372,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     private void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
         if (!Objects.equalOrNull(oldValue, newValue)) {
             changeListener.resultChanged(this, propertyName, oldValue, newValue);
-        }
-    }
-    
-    private static class RemoteHostComparator implements Comparator<RemoteHost> {
-        @Override
-        public int compare(RemoteHost o1, RemoteHost o2) {
-            int compare = 0;
-            boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
-            boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
-
-            if (anonymous1 == anonymous2) {
-                compare = o1.getFriendPresence().getFriend().getRenderName().compareToIgnoreCase(o2.getFriendPresence().getFriend().getRenderName());
-            } else if (anonymous1) {
-                compare = 1;
-            } else if (anonymous2) {
-                compare = -1;
-            }
-            return compare;
-        }
-    }
-    
-    private static class FriendComparator implements Comparator<Friend> {
-        @Override
-        public int compare(Friend o1, Friend o2) {
-            String id1 = o1.getId();
-            String id2 = o2.getId();
-            return Objects.compareToNullIgnoreCase(id1, id2, false);
         }
     }
 }

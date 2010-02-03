@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import static org.limewire.ui.swing.search.model.VisualSearchResult.NEW_SOURCES;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,30 +17,29 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchManager;
+import org.limewire.core.api.search.SearchResultList;
 import org.limewire.core.api.search.SearchDetails.SearchType;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
-import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor.Event;
-import ca.odell.glazedlists.util.concurrent.Lock;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Provider;
 
@@ -59,6 +60,12 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     /** Search request object. */
     private final Search search;
+    
+    /** Search manager. */
+    private final SearchManager searchManager;
+    
+    /** Search result list. */
+    private final SearchResultList searchResultList;
 
     /** Core download manager. */
     private final DownloadListManager downloadListManager;
@@ -66,20 +73,20 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     /** Download exception handler. */
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
 
-    /** Total number of search results. */
-    private int resultCount;
+    /** Factory to create visual search results. */
+    private final VisualSearchResultFactory vsrFactory;
 
-    /** List of search results grouped by URN. */
+    /** List of visual search results grouped and sorted by URN. */
     private final EventList<VisualSearchResult> groupedUrnResults;
-    
-    /** A TransactionList for upstream changes. */
-    private final TransactionList<VisualSearchResult> transactionList;
 
     /** Filtered list of grouped search results. */
     private final FilterList<VisualSearchResult> filteredResultList;
 
     /** Listener to handle search request events. */
     private SearchListener searchListener;
+
+    /** Listener to handle search result list events. */
+    private EventListener<Collection<GroupedSearchResult>> searchListListener;
 
     /** Current list of sorted and filtered results. */
     private SortedList<VisualSearchResult> sortedResultList;
@@ -104,14 +111,8 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     private List<DisposalListener> disposalListeners = new ArrayList<DisposalListener>();
     
-    /** Headings to create search results with. */
-    private final Provider<PropertiableHeadings> propertiableHeadings;
-    
     /** A list of listeners for changes. */
     private final List<VisualSearchResultStatusListener> changeListeners;
-    
-    /** The object that queues up list changes & applies them in bulk. */
-    private final ListQueuer listQueuer = new ListQueuer();
     
     /** Comparator that searches through the list of results & finds them based on URN. */
     private final UrnResultFinder resultFinder = new UrnResultFinder();
@@ -126,43 +127,31 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * search request object, and services.
      */
     public BasicSearchResultsModel(SearchInfo searchInfo, Search search, 
-            Provider<PropertiableHeadings> propertiableHeadings,
+            VisualSearchResultFactory vsrFactory,
             DownloadListManager downloadListManager,
-            Provider<DownloadExceptionHandler> downloadExceptionHandler) {
+            Provider<DownloadExceptionHandler> downloadExceptionHandler,
+            SearchManager searchManager) {
         
         this.searchInfo = searchInfo;
         this.search = search;
+        this.vsrFactory = vsrFactory;
+        this.searchManager = searchManager;
         this.downloadListManager = downloadListManager;
         this.downloadExceptionHandler = downloadExceptionHandler;
-        this.propertiableHeadings = propertiableHeadings;
-        this.changeListeners = new ArrayList<VisualSearchResultStatusListener>(3);
+        
+        changeListeners = new ArrayList<VisualSearchResultStatusListener>(3);
         
         // Create filter debugger.
         filterDebugger = new FilterDebugger<VisualSearchResult>();
         
-        // Underlying list, with no locks -- always accessed on EDT.
-        groupedUrnResults = new BasicEventList<VisualSearchResult>(new ReadWriteLock() {
-            private Lock noopLock = new Lock() {
-                @Override public void lock() {}
-                @Override public boolean tryLock() { return true; }
-                @Override public void unlock() {}
-            };
-            
-            @Override
-            public Lock readLock() {
-                return noopLock;
-            }
-            
-            @Override
-            public Lock writeLock() {
-                return noopLock;
-            }
-        });
+        // Create core list of grouped results.
+        searchResultList = searchManager.addSearch(search, searchInfo);
         
-        transactionList = GlazedListsFactory.transactionList(groupedUrnResults);
+        // Create local list of grouped visual results.
+        groupedUrnResults = new BasicEventList<VisualSearchResult>();
         
         // Create filtered list. 
-        filteredResultList = GlazedListsFactory.filterList(transactionList);
+        filteredResultList = GlazedListsFactory.filterList(groupedUrnResults);
         
         // Initialize display category and sorted list.
         setSelectedCategory(searchInfo.getSearchCategory());
@@ -183,8 +172,69 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         this.searchListener = searchListener;
         search.addSearchListener(searchListener);
         
+        // Install listener to handle new grouped results.  The event is 
+        // usually fired by a background thread.
+        searchListListener = new EventListener<Collection<GroupedSearchResult>>() {
+            @Override
+            public void handleEvent(Collection<GroupedSearchResult> results) {
+                // Create result list.
+                final List<GroupedSearchResult> resultList = new ArrayList<GroupedSearchResult>(results);
+                
+                // Post UI event to add result list.
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        addResultsInternal(0, resultList);
+                    }
+                });
+            }
+        };
+        searchResultList.addListener(searchListListener);
+        
         // Start search.
         search.start();
+    }
+    
+    /**
+     * Adds the specified list of grouped results to the list of visual
+     * results.
+     */
+    void addResultsInternal(int startIdx, final List<GroupedSearchResult> resultList) {
+        // Process next group of results.  We process large result lists in
+        // groups of 1000 so other UI events can get handled on the UI thread.
+        final int endIdx = Math.min(startIdx + 1000, resultList.size());
+        for (int i = startIdx; i < endIdx; i++) {
+            GroupedSearchResult gsr = resultList.get(i);
+            URN urn = gsr.getUrn();
+            int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+            if (idx < 0) {
+                // URN not found so add visual result at insertion point.
+                // This keeps the list in sorted order.
+                idx = -(idx + 1);
+                VisualSearchResult vsr = vsrFactory.create(gsr, this);
+                groupedUrnResults.add(idx, vsr);
+                // Notify listeners to update result states.
+                for (VisualSearchResultStatusListener listener : changeListeners) {
+                    listener.resultCreated(vsr);
+                }
+            }
+        }
+        
+        if (endIdx < resultList.size()) {
+            // Post UI event to process next group of results.
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    addResultsInternal(endIdx, resultList);
+                }
+            });
+            
+        } else {
+            // Reapply sort in case similarity parents have changed.
+            if (sortedResultList != null) {
+                sortedResultList.setComparator(sortedResultList.getComparator());
+            }
+        }
     }
     
     /**
@@ -195,11 +245,18 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         // Stop search.
         search.stop();
         
-        // Remove search listener.
+        // Remove search listeners.
         if (searchListener != null) {
             search.removeSearchListener(searchListener);
             searchListener = null;
         }
+        if (searchListListener != null) {
+            searchResultList.removeListener(searchListListener);
+            searchListListener = null;
+        }
+        
+        // Remove search from core management.
+        searchManager.removeSearch(search);
         
         groupedUrnResults.dispose();
         
@@ -218,7 +275,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public EventList<VisualSearchResult> getUnfilteredList() {
-        return transactionList;
+        return groupedUrnResults;
     }
     
     @Override
@@ -243,7 +300,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public int getResultCount() {
-        return resultCount;
+        return searchResultList.getResultCount();
     }
     
     @Override
@@ -357,74 +414,48 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     
     @Override
     public void resultChanged(VisualSearchResult vsr, String propertyName, Object oldValue, Object newValue) {
-        // Scan through the list & find the item.
-        URN urn = vsr.getUrn();
-        int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
-        //TODO clean up, see comment about cleared variable, and why it should be removed.
-        assert cleared || idx >= 0;
+        if (NEW_SOURCES.equals(propertyName)) {
+            // Notify change listeners about new sources.  This event is
+            // handled by the grouping listener to update similar results.
+            for (VisualSearchResultStatusListener listener : changeListeners) {
+                listener.resultChanged(vsr, NEW_SOURCES, null, null);
+            }
+            
+        } else {
+            // Scan through the list & find the item.
+            URN urn = vsr.getUrn();
+            int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
+            //TODO clean up, see comment about cleared variable, and why it should be removed.
+            assert cleared || idx >= 0;
 
-        if(idx >=0) {
-        
-            VisualSearchResult existing = groupedUrnResults.get(idx);
-            VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
-            assert cleared || replaced == vsr;
-            if(replaced == vsr) {
-                for(VisualSearchResultStatusListener listener : changeListeners) {
-                    listener.resultChanged(vsr, propertyName, oldValue, newValue);
+            if (idx >=0) {
+                VisualSearchResult existing = groupedUrnResults.get(idx);
+                VisualSearchResult replaced = groupedUrnResults.set(idx, existing);
+                assert cleared || replaced == vsr;
+                if(replaced == vsr) {
+                    for(VisualSearchResultStatusListener listener : changeListeners) {
+                        listener.resultChanged(vsr, propertyName, oldValue, newValue);
+                    }
                 }
             }
         }
-    }
-    
-    @Override
-    public void addSearchResult(SearchResult result) {
-        if(result.getUrn() == null) {
-            // Some results can be missing a URN, specifically
-            // secure results.  For now, we drop these.
-            // We should figure out a way to show them later on.
-            return;
-        }
-        
-//        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
-        try {
-            listQueuer.add(result);
-        } catch (Throwable th) {
-            // Throw wrapper exception with detailed message.
-            throw new RuntimeException(createMessageDetail("Problem adding result", result), th);
-        }
-    }
-    
-    @Override
-    public void addSearchResults(Collection<? extends SearchResult> results) {
-        boolean ok = true;
-        // make certain there's nothing w/o a URN in here
-        for(SearchResult result : results) {
-            if(result.getUrn() == null) {
-                // crap, we need to really work on this list & remove bad items.
-                ok = false;
-                break;
-            }
-        }
-        
-        // filter out any items w/o a URN
-        if(!ok) {
-            ArrayList<SearchResult> cleanup = new ArrayList<SearchResult>(results);
-            for(int i = cleanup.size() - 1; i >= 0; i--) {
-                if(cleanup.get(i).getUrn() == null) {
-                    cleanup.remove(i);
-                }
-            }
-            results = cleanup;
-        }        
-        
-        listQueuer.addAll(results);
     }
     
     /**
      * Removes all results from the model
      */
-    public void clear(){
-        listQueuer.clear();
+    @Override
+    public void clear() {
+        cleared = true;
+        
+        // Clear result list.
+        searchResultList.clear();
+        groupedUrnResults.clear();
+        
+        // Notify change listeners that results are cleared.
+        for (VisualSearchResultStatusListener listener : changeListeners) {
+            listener.resultsCleared();
+        }
     }
     
     /**
@@ -496,24 +527,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     }
     
     /**
-     * Returns a detailed message including the specified prefix and search 
-     * result.
-     */
-    private String createMessageDetail(String prefix, SearchResult result) {
-        StringBuilder buf = new StringBuilder(prefix);
-        
-        buf.append(", searchCategory=").append(searchInfo.getSearchCategory());
-        buf.append(", resultCategory=").append(result.getCategory());
-        buf.append(", spam=").append(result.isSpam());
-        buf.append(", unfilteredSize=").append(getUnfilteredList().size());
-        buf.append(", filteredSize=").append(getFilteredList().size());
-        buf.append(", EDT=").append(SwingUtilities.isEventDispatchThread());
-        buf.append(", filters=").append(filterDebugger.getFilterString());
-        
-        return buf.toString();
-    }
-    
-    /**
      * Returns true if the specified search result is allowed by the current
      * filter editor.  This means the result is a member of the filtered list.
      */
@@ -552,39 +565,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         }
     }
 
-    private void addResultsInternal(Collection<? extends SearchResult> results) {
-        transactionList.beginEvent(true);
-        try {
-            for(SearchResult result : results) {
-                URN urn = result.getUrn();
-                if(urn != null) {
-                    int idx = Collections.binarySearch(groupedUrnResults, urn, resultFinder);
-                    if(idx >= 0) {
-                        SearchResultAdapter vsr = (SearchResultAdapter)groupedUrnResults.get(idx);
-                        vsr.addNewSource(result, searchInfo.getSearchQuery());
-                        groupedUrnResults.set(idx, vsr);
-                        for(VisualSearchResultStatusListener listener : changeListeners) {
-                            listener.resultChanged(vsr, "new-sources", null, null);
-                        }
-                    } else {
-                        idx = -(idx + 1);
-                        SearchResultAdapter vsr =
-                            new SearchResultAdapter(result,
-                                    propertiableHeadings, this,
-                                    searchInfo.getSearchQuery());
-                        groupedUrnResults.add(idx, vsr);
-                        for(VisualSearchResultStatusListener listener : changeListeners) {
-                            listener.resultCreated(vsr);
-                        }
-                    }
-                    resultCount += result.getSources().size();
-                }
-            }
-        } finally {
-            transactionList.commitEvent();
-        }
-    }
-
     @Override
     public void addDisposalListener(DisposalListener listener) {
         disposalListeners.add(listener);
@@ -598,78 +578,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     private void notifyDisposalListeners(){
         for (DisposalListener listener : disposalListeners){
             listener.objectDisposed(this);
-        }
-    }
-    
-    private class ListQueuer implements Runnable {
-        private final Object LOCK = new Object();
-        private final List<SearchResult> queue = new ArrayList<SearchResult>();
-        private final ArrayList<SearchResult> transferQ = new ArrayList<SearchResult>();
-        private boolean scheduled = false;
-        
-        void add(SearchResult result) {
-            synchronized(LOCK) {
-                queue.add(result);
-                schedule();
-            }
-        }
-        
-        void addAll(Collection<? extends SearchResult> results) {
-            synchronized(LOCK) {
-                queue.addAll(results);
-                schedule();
-            }
-        }
-        
-        void clear() {
-            synchronized(LOCK) {
-                queue.clear();
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        cleared = true;
-                        groupedUrnResults.clear();
-                        for(VisualSearchResultStatusListener listener : changeListeners) {
-                            listener.resultsCleared();
-                        }
-                    }
-                });
-            }
-        }
-        
-        private void schedule() {
-            if(!scheduled) {
-                scheduled = true;
-                // purposely SwingUtilities & not SwingUtils so
-                // that we force it to the back of the stack
-                SwingUtilities.invokeLater(this);
-            }
-        }
-        
-        @Override
-        public void run() {
-            // move to transferQ inside lock
-            transferQ.clear();
-            synchronized(LOCK) {
-                transferQ.addAll(queue);
-                queue.clear();
-            }
-            
-            // move to searchResults outside lock,
-            // so we don't hold a lock while allSearchResults
-            // triggers events.
-            addResultsInternal(transferQ);
-            transferQ.clear();
-            
-            synchronized(LOCK) {
-                scheduled = false;
-                // If the queue wasn't empty, we need to reschedule
-                // ourselves, because something got added to the queue
-                // without scheduling itself, since we had scheduled=true
-                if(!queue.isEmpty()) {
-                    schedule();
-                }
-            }
         }
     }
     

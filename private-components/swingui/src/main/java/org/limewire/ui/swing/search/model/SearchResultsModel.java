@@ -1,10 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.Collection;
-
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.ui.swing.components.DisposalListenerList;
 import org.limewire.ui.swing.filter.FilterableSource;
@@ -77,16 +74,6 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Sets the MatcherEditor used to filter search results. 
      */
     void setFilterEditor(MatcherEditor<VisualSearchResult> editor);
-    
-    /**
-     * Adds the specified search result to the results list.
-     */
-    void addSearchResult(SearchResult result);
-    
-    /**
-     * Adds all the search results to the results list.
-     */
-    void addSearchResults(Collection<? extends SearchResult> result);
     
     /**
      * Removes all results from the model
