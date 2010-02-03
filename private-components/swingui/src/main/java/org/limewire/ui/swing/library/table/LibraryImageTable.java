@@ -57,7 +57,7 @@ public class LibraryImageTable extends JPanel implements Scrollable {
     
     @Inject
     public LibraryImageTable(final ImageList imageList, final ImageCellEditor imageEditor, 
-            final LibraryNavigatorPanel navigatorPanel) {
+            final LibraryNavigatorPanel navigatorPanel, DeletionKeyListener deletionKeyListener) {
         super(new MigLayout("insets 0 0 0 0, fill"));
         
         this.imageEditor = imageEditor;
@@ -77,6 +77,8 @@ public class LibraryImageTable extends JPanel implements Scrollable {
         
         layer = new JXLayer<JComponent>(imageScrollPane, new AbstractLayerUI<JComponent>());
         layer.getGlassPane().setLayout(null);       
+
+        imageList.addKeyListener(deletionKeyListener);
 
         new MouseReaction(imageList, imageEditor, imageScrollPane);
         layer.getGlassPane().add(imageEditor);
