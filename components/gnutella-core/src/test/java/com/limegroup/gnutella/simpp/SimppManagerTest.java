@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
+import java.security.PrivateKey;
+import java.security.Signature;
 
 import junit.framework.Test;
 
@@ -12,6 +14,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -79,10 +82,6 @@ public class SimppManagerTest extends LimeTestCase {
         return buildTestSuite(SimppManagerTest.class);
     }
 
-    public static void main(String[] args) throws Exception {
-        junit.textui.TestRunner.run(suite());
-    }
-
     @Override
     public void setUp() throws Exception {
         setSettings();
@@ -100,6 +99,7 @@ public class SimppManagerTest extends LimeTestCase {
                         return new SimppDataProviderImpl().getOldUpdateResponse();
                     }
                 });
+                bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQUAAFAMBADRAMTBWOA43OM6DE3H4U3OYATOWNG7EO4G52MWL4W2SXBQQAG5AKFI2GGOUL7HCH734WYYX33TT27MPJWOO424YA4LK3HWHNKJB66R736VBH2ATYTK223AVJP2LNZUIRDGHU2CDAYQ2O6SEO3SLIX5DYHITRPJX7JMX6IMKRLBTOSOZMDU2VRJXG5K3JNPNAIYR5CPLYINZK7A"));
             }
         });
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
@@ -115,6 +115,19 @@ public class SimppManagerTest extends LimeTestCase {
     protected void tearDown() throws Exception {
         connectionServices.disconnect();
         lifecycleManager.shutdown();
+    }
+    
+    public static void main(String[] args) {
+        File file = TestUtils.getResourceInPackage("oldFile.xml", SimppManagerTest.class);
+        
+    }
+    
+    private static String sign(byte[] data, PrivateKey privateKey) throws Exception {
+        Signature signer = Signature.getInstance("DSA");
+        signer.initSign(privateKey);
+        signer.update(data);
+        byte[] sig = signer.sign();        
+        return Base32.encode(sig);
     }
     
     private void setSettings() throws Exception {

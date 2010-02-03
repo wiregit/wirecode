@@ -92,6 +92,8 @@ public class SimppManagerImpl implements SimppManager {
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
 
     private final CertifiedMessageVerifier simppMessageVerifier;
+
+    private final SimppDataVerifier simppDataVerifier;
     
     private static enum UpdateType {
         FROM_NETWORK, FROM_DISK, FROM_HTTP;
@@ -103,11 +105,13 @@ public class SimppManagerImpl implements SimppManager {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
             SimppDataProvider simppDataProvider,
-            @Simpp CertifiedMessageVerifier simppMessageVerifier) {
+            @Simpp CertifiedMessageVerifier simppMessageVerifier,
+            SimppDataVerifier simppDataVerifier) {
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
         this.simppMessageVerifier = simppMessageVerifier;
+        this.simppDataVerifier = simppDataVerifier;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         this.httpExecutor = httpExecutor;
         this.backgroundExecutor = backgroundExecutor;
@@ -215,8 +219,10 @@ public class SimppManagerImpl implements SimppManager {
             return;
         }
         
-        SimppDataVerifier verifier=new SimppDataVerifier(data);
-        if(!verifier.verifySource()) {
+        byte[] signedData = null;
+        try {
+            signedData = simppDataVerifier.extractSignedData(data);
+        } catch (SignatureException se) {
             if(updateType == UpdateType.FROM_NETWORK && handler != null)
                 networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
             LOG.warn("Couldn't verify signature on data.");
@@ -228,7 +234,7 @@ public class SimppManagerImpl implements SimppManager {
         
         SimppParser parser = null;
         try {
-            parser = new SimppParser(verifier.getVerifiedData());
+            parser = new SimppParser(signedData);
         } catch(IOException iox) {
             LOG.error("IOX parsing simpp data", iox);
             return;
@@ -239,6 +245,7 @@ public class SimppManagerImpl implements SimppManager {
             simppMessageVerifier.verify(certifiedMessage, handler);
         } catch (SignatureException se) {
             LOG.error("message did not verify", se);
+            return;
         }
         
         if(LOG.isDebugEnabled()) {

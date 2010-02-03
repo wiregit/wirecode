@@ -33,7 +33,7 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
             LOG.debug("message key version greater than stored key version");
             certificate = certificateProvider.getFromHttp(messageSource);
             if (message.getKeyVersion() != certificate.getKeyVersion()) {
-                throw new SignatureException("key version greater than certificate version");
+                throw new SignatureException("key version not equal to certificate version");
             }
         }
         SignatureVerifier signatureVerifier = new SignatureVerifier(message.getSignedPayload(), message.getSignature(), certificate.getPublicKey(), "DSA");
