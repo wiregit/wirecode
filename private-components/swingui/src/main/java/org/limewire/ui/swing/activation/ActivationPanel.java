@@ -429,7 +429,7 @@ public class ActivationPanel {
         private JButton activateButton;
         
         public NoLicenseButtonPanel() {
-            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go Pro"),"http://www.limewire.com/client_redirect/?page=gopro"));
+            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"),"http://www.limewire.com/client_redirect/?page=gopro"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
             
