@@ -119,6 +119,8 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
     private JSONObject createFileDescription(LocalFileItem fileItem) throws JSONException {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("filename", fileItem.getFileName());
+        jsonObj.put("category", fileItem.getCategory().getSingularName());
+        jsonObj.put("size", fileItem.getSize());
         return jsonObj;
     }
 }
