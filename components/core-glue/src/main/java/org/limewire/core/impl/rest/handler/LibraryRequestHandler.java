@@ -9,6 +9,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -62,14 +65,18 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
             // Get library files.
             LibraryFileList fileList = libraryManager.getLibraryManagedList();
             
-            // Create result string.
-            StringBuilder builder = new StringBuilder();
-            builder.append("{name: \"Library\"");
-            builder.append(", size: ").append(fileList.size());
-            builder.append(", id: \"library\"}");
+            // Create JSON result.
+            JSONObject jsonObj = new JSONObject();
+            try {
+                jsonObj.put("name", "Library");
+                jsonObj.put("size", fileList.size());
+                jsonObj.put("id", "library");
+            } catch (JSONException ex) {
+                throw new IOException(ex);
+            }
             
             // Set response entity and status.
-            NStringEntity entity = new NStringEntity(builder.toString());
+            NStringEntity entity = new NStringEntity(jsonObj.toString());
             response.setEntity(entity);
             response.setStatusCode(HttpStatus.SC_OK);
             
@@ -84,19 +91,22 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
             int offset = (offsetStr != null) ? Integer.parseInt(offsetStr) : 0;
             int limit = (limitStr != null) ? Integer.parseInt(limitStr) : fileItemList.size();
             
-            // Create result string with requested files.
-            StringBuilder builder = new StringBuilder();
-            builder.append("[\n");
-            for (int i = offset, max = Math.min(offset + limit, fileItemList.size()); i < max; i++) {
-                LocalFileItem fileItem = fileItemList.get(i);
-                builder.append(createFileDescription(fileItem)).append("\n");
+            try {
+                // Create JSON result with requested files.
+                JSONArray jsonArr = new JSONArray();
+                for (int i = offset, max = Math.min(offset + limit, fileItemList.size()); i < max; i++) {
+                    LocalFileItem fileItem = fileItemList.get(i);
+                    jsonArr.put(createFileDescription(fileItem));
+                }
+
+                // Set response entity and status.
+                NStringEntity entity = new NStringEntity(jsonArr.toString(2));
+                response.setEntity(entity);
+                response.setStatusCode(HttpStatus.SC_OK);
+                
+            } catch (JSONException ex) {
+                throw new IOException(ex);
             }
-            builder.append("]");
-            
-            // Set response entity and status.
-            NStringEntity entity = new NStringEntity(builder.toString());
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
             
         } else {
             response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
@@ -104,13 +114,11 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
     }
     
     /**
-     * Creates the file description string for the specified file item.
+     * Creates the file description object for the specified file item.
      */
-    private String createFileDescription(LocalFileItem fileItem) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        builder.append("\"filename\": \"").append(fileItem.getFileName()).append("\"");
-        builder.append("}");
-        return builder.toString();
+    private JSONObject createFileDescription(LocalFileItem fileItem) throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("filename", fileItem.getFileName());
+        return jsonObj;
     }
 }

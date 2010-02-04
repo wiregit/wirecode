@@ -10,6 +10,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 
@@ -59,18 +62,21 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
             // Get active search lists.
             List<SearchResultList> searchLists = searchManager.getActiveSearchLists();
             
-            // Create result string.
-            StringBuilder builder = new StringBuilder();
-            builder.append("[\n");
-            for (SearchResultList searchList : searchLists) {
-                builder.append(createSearchDescription(searchList)).append("\n");
+            try {
+                // Create JSON result.
+                JSONArray jsonArr = new JSONArray();
+                for (SearchResultList searchList : searchLists) {
+                    jsonArr.put(createSearchDescription(searchList));
+                }
+
+                // Set response entity and status.
+                NStringEntity entity = new NStringEntity(jsonArr.toString(2));
+                response.setEntity(entity);
+                response.setStatusCode(HttpStatus.SC_OK);
+
+            } catch (JSONException ex) {
+                throw new IOException(ex);
             }
-            builder.append("]");
-            
-            // Set response entity and status.
-            NStringEntity entity = new NStringEntity(builder.toString());
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
             
         } else {
             response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
@@ -78,15 +84,13 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
     }
     
     /**
-     * Creates the search description string for the specified search list.
+     * Creates the search description object for the specified search list.
      */
-    private String createSearchDescription(SearchResultList searchList) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        builder.append("\"name\": \"").append(searchList.getSearchQuery()).append("\", ");
-        builder.append("\"size\": ").append(searchList.getGroupedResults().size()).append(", ");
-        builder.append("\"id\": \"").append(searchList.getGuid()).append("\"");
-        builder.append("}");
-        return builder.toString();
+    private JSONObject createSearchDescription(SearchResultList searchList) throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("name", searchList.getSearchQuery());
+        jsonObj.put("size", searchList.getGroupedResults().size());
+        jsonObj.put("id", searchList.getGuid());
+        return jsonObj;
     }
 }
