@@ -138,6 +138,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 activationContactor.unschedule();
         }
 
+        if (key == null || key.equals("")) {
+            transitionToState(State.NOT_ACTIVATED, null);
+            return false;
+        }
+        
         if (!isValidKey(key)) {
             transitionToState(State.NOT_ACTIVATED, activationResponseFactory.createErrorResponse(Type.NOTFOUND));
             return false;
@@ -399,40 +404,47 @@ class ActivationManagerImpl implements ActivationManager, Service {
         ActivationError error;
         boolean removeMcode = false;
         boolean removeKey = false;
-        switch(response.getResponseType()) {
-            case ERROR:
-                if(currentState == State.REFRESHING) {
-                    activationError = ActivationError.COMMUNICATION_ERROR;
-                    setCurrentState(lastState);
-                    return;
-                } else {
-                    error = ActivationError.COMMUNICATION_ERROR;
-                }
-                break;
-            case REMOVE:
-                error = ActivationError.INVALID_KEY;
-                removeMcode = true;
-                removeKey = true;
-                break;
-            case STOP:
-                error = ActivationError.INVALID_KEY;
-                removeKey = true;
-                break;
-            case NOTFOUND:
-                error = ActivationError.INVALID_KEY;
-                removeMcode = true;
-                removeKey = true;
-                break;
-            case BLOCKED:
-                activationSettings.setActivationKey(response.getLid());
-                error = ActivationError.BLOCKED_KEY;
-                break;
-            default:
-                throw new IllegalStateException("Unknown state " + response.getResponseType());
+        // if the user is clearing the key from the dialog, then we didn't go to the server and the response is null.
+        if (response == null) {
+            error = ActivationError.NO_ERROR;
+            removeMcode = true;
+            removeKey = true;
+        } else {
+            switch(response.getResponseType()) {
+                case ERROR:
+                    if(currentState == State.REFRESHING) {
+                        activationError = ActivationError.COMMUNICATION_ERROR;
+                        setCurrentState(lastState);
+                        return;
+                    } else {
+                        error = ActivationError.COMMUNICATION_ERROR;
+                    }
+                    break;
+                case REMOVE:
+                    error = ActivationError.INVALID_KEY;
+                    removeMcode = true;
+                    removeKey = true;
+                    break;
+                case STOP:
+                    error = ActivationError.INVALID_KEY;
+                    removeKey = true;
+                    break;
+                case NOTFOUND:
+                    error = ActivationError.INVALID_KEY;
+                    removeMcode = true;
+                    removeKey = true;
+                    break;
+                case BLOCKED:
+                    activationSettings.setActivationKey(response.getLid());
+                    error = ActivationError.BLOCKED_KEY;
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown state " + response.getResponseType());
+            }
         }
         if(!(currentState.getActivationState() == ActivationState.AUTHORIZED 
                 && error == ActivationError.COMMUNICATION_ERROR)) {
-            if(error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY)
+            if(error == ActivationError.NO_ERROR || error == ActivationError.INVALID_KEY || error == ActivationError.BLOCKED_KEY)
                 removeData(removeMcode, removeKey);
             activationError = error;
             setCurrentState(State.NOT_ACTIVATED);
