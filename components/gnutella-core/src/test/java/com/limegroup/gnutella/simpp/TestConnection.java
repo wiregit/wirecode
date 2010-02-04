@@ -60,7 +60,12 @@ public class TestConnection extends AssertComparisons {
                                      boolean sendSimppData, MessageFactory messageFactory) throws IOException {
         this(simppFile, expectSimppReq, sendSimppData, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(simppNumber), messageFactory);
     }
-    
+
+    public TestConnection(File simppFile, int version, int keyVersion, int newVersion, boolean expectSimppReq,
+            boolean sendSimppData, MessageFactory messageFactory) throws IOException {
+        this(simppFile, expectSimppReq, sendSimppData, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(version, newVersion, keyVersion), messageFactory);
+    }
+
     public TestConnection(File simppFile, boolean expectSimppReq, 
                boolean sendSimppData, CapabilitiesVM capabilitiesVM, MessageFactory messageFactory) throws IOException {
         super("FakeTest");
