@@ -113,6 +113,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * Subclasses may refine the requery behavior by overriding {@link #newRequery()}
  * {@link #allowAddition(RemoteFileDesc)}, {@link #addDownload(Collection, boolean)}.
  */
+@SuppressWarnings("unused")
 class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocListener,
         ManagedDownloader, DownloadWorkerSupport {
 
@@ -470,7 +471,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Library library;
     protected final CategoryManager categoryManager;
     private final BandwidthCollector bandwidthCollector;
-    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     private final SocketsManager socketsManager;
@@ -2647,15 +2647,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         
         if (capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
-            //TODO: change this in the installer
-//            return SpeedConstants.MODEM_SWARM;
-            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.MODEM_SWARM + 2 : SpeedConstants.MODEM_SWARM;
+            return SpeedConstants.MODEM_SWARM;
         else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
-//            return SpeedConstants.T1_SWARM;
-            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T1_SWARM + 2 : SpeedConstants.T1_SWARM;
+            return SpeedConstants.T1_SWARM;
         else // T3
-//            return SpeedConstants.T3_SWARM;
-            return activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? SpeedConstants.T3_SWARM + 4 : SpeedConstants.T3_SWARM;
+            return SpeedConstants.T3_SWARM;
     }
 
     @Override

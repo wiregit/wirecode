@@ -135,6 +135,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * maintains a list of connections.
  */
 //@Singleton // not here because it's not constructed, subclass is!
+@SuppressWarnings("unused")
 public abstract class MessageRouterImpl implements MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(MessageRouterImpl.class);
@@ -285,7 +286,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private static final int UDP_REPLY_CACHE_TIME = 60 * 1000;
     
     @InspectionPoint("guid tracker")
-    @SuppressWarnings("unused")
     private final GUIDTracker guidTracker = new GUIDTracker();
     
     @InspectionPoint("dropped replies")
@@ -339,7 +339,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final QRPUpdater qrpUpdater;
     private final URNFilter urnFilter;
     private final SpamServices spamServices;
-    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     private final PingRequestFactory pingRequestFactory;
@@ -1779,10 +1778,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions - also, don't send what is new
         // requests down too many connections
-		//TODO:revert this and change in the install script
-//        final int max = qr.isWhatIsNewRequest() ? 2 : 3;
-		final int max = activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE) ? (qr.isWhatIsNewRequest() ? 2 : 5) : (qr.isWhatIsNewRequest() ? 2 : 3);
-	int start = !qr.isWhatIsNewRequest() ? 0 :
+        final int max = qr.isWhatIsNewRequest() ? 2 : 3;
+        int start = !qr.isWhatIsNewRequest() ? 0 :
 		(int) (Math.floor(Math.random()*(list.size()-1)));
         int limit = Math.min(max, list.size());
         final boolean wantsOOB = qr.desiresOutOfBandReplies();

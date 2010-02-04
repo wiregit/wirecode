@@ -6,10 +6,10 @@ import org.limewire.activation.api.ActivationManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+@SuppressWarnings("unused")
 @Singleton
 public class QuerySettings {
 
-    @SuppressWarnings("unused")
     private final ActivationManager activationManager; 
     
     @Inject
@@ -18,8 +18,6 @@ public class QuerySettings {
     }
     
     public int getUltrapeerResults() {
-        //TODO: this needs to get changed in installer
-//        return 150;
-        return activationManager.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE) ? 250 : 150;
+        return 150;
     }
 }

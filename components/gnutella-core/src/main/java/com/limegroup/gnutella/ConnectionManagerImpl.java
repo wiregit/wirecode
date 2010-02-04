@@ -107,6 +107,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
  */
+@SuppressWarnings("unused")
 @EagerSingleton
 public class ConnectionManagerImpl implements ConnectionManager, Service {
     
@@ -130,10 +131,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
     
     // Older leaves will report the same connections for both inspection points
-    @SuppressWarnings("unused")
     @InspectionPoint("leaf connections")
     private final Inspectable LEAF = new LegacyConnectionStats(true);
-    @SuppressWarnings("unused")
     @InspectionPoint("ultrapeer connections")
     private final Inspectable UP = new LegacyConnectionStats(false);
     
@@ -145,7 +144,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private volatile long _connectTime = Long.MAX_VALUE;
     /** Timestamp for the last time we reached our preferred connections */
     @InspectablePrimitive("last time preferred reached")
-    @SuppressWarnings("unused")
     private volatile long _lastFullConnectTime;
     /**
      * Timestamp for the time we began automatically connecting.  We stop
@@ -300,7 +298,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
-    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     @Inject
@@ -2235,9 +2232,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         else if(isIdle())
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());
         else
-            //TODO: revert this to a method call, install script change
-            //setPreferredConnections(3);
-            setPreferredConnections(activationManager.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE) ? 5 : 3);
+            setPreferredConnections(3);
     }
     
     /**
