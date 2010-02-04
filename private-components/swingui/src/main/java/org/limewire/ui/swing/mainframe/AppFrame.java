@@ -223,8 +223,7 @@ public class AppFrame extends SingleFrameApplication {
     protected void ready() {
         if (application.isNewInstall()) {
             initializeNewInstall();
-        }
-        if (SetupWizard.shouldShowWizard()) {
+        } else if (SetupWizard.shouldShowWizard()) {
             showSetupWizard();
         }
 
