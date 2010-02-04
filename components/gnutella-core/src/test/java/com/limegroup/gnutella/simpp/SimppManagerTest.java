@@ -534,7 +534,231 @@ public class SimppManagerTest extends LimeTestCase {
         
         assertEquals(657, simppManager.getVersion());
     }
+    
+    
+    /////////////////////When LimeWire starts///////////////////////////////////
+    // accept
+    public void testStartLoadGoodCertAndGoodSimpp() throws Exception {}
+    // download cert from newCertURL, and load and accept simpp
+    public void testStartLoadMissingCertAndDownloadOKAndGoodSimpp() throws Exception {}
+    // do not accept simpp in this session
+    public void testStartLoadMissingCertAndFailedDownload() throws Exception {}
+    // do not accept simpp in this session
+    public void testStartLoadMissingCertAndDownloadOKBadCertSig() throws Exception {}
+    // accept simpp and store the downloaded cert
+    public void testStartLoadBadSigCertAndDownloadOKAndLoadGoodSimpp() throws Exception {}
+    // do not accept simpp in this session
+    public void testStartLoadBadSigCertAndDownloadFailed() throws Exception {}
+    // use default simpp values
+    public void testStartLoadGoodCertAndLoadSimppFailed() throws Exception {}
+    // use default simpp values
+    public void testStartLoadMissingCertAndDownloadOKAndLoadMissingSimpp() throws Exception {}
+    // use default simpp values
+    public void testStartLoadGoodCertAndLoadSimppBadOldSig() throws Exception {}
+    // use default simpp values
+    public void testStartLoadGoodCertAndLoadSimppBadNewSig() throws Exception {}
+    
+    /////////////////////Verify a simpp from a peer/////////////////////////////
+    
+    // reject? 
+    // or we should not download the simpp from peer because we don't have keys?
+    // if so, should move it to the tests of deciding download or not
+    public void testNoKeyAndValidSimpp() throws Exception {}
 
+    // accept. 
+    public void testValidSimpp() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(10, simppManager.getVersion());
+    }
+    
+    // reject.   
+    public void testBadOldSigSimpp() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_15_Nv30_badOldSig", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 10, 15, 30, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    } 
+    
+    // reject.   
+    public void testKvLocalGreater() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.20", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(10, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov11_Kv15_Nv31_NoCert", getClass());
+        //lie about keyVersion = 25 in capabilityVM
+        TestConnection conn = new TestConnection(newSimppFile, 11, 25, 31, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(10, simppManager.getVersion());
+    }
+    
+    // reject.   
+    public void testKvEqualNvLocalGreater() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov11_Kv15_Nv24_NoCert", getClass());
+        //lie about newVersion = 30 in capabilityVM
+        TestConnection conn = new TestConnection(newSimppFile, 11, 15, 30, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    }
+    
+    // reject.   
+    public void testOvGreaterKvEqualNvequal() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov11_Kv15_Nv25_NoCert", getClass());
+        //lie about newVersion = 30 in capabilityVM
+        TestConnection conn = new TestConnection(newSimppFile, 11, 15, 30, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    }    
+    
+    // reject. If already tested, move here for completeness  
+    public void testKvEqualNvLocalLessBadNewSig() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv15_Nv26_NoCert_badNewSig", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, 15, 26, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    }
+    
+    // reject.   
+    public void testKvNetwkGreaterNotIGIDCertInSimmpBadCertSig() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv20_Nv26_Cert_badCertSig", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, 20, 26, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    }
+    
+    // reject. 
+    public void testKvNetwkGreaterNotIGIDCertInSimmpKvSimppGreaterThanCert() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv20_Nv26_Cert_badSimppKv21", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, 20, 26, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());        
+    }
+    
+    // reject. 
+    public void testKvNetwkGreaterNotIGIDCertInSimmpKvEqualBadNewSig() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv20_Nv26_Cert_badNewSig", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, 20, 26, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(5, simppManager.getVersion());
+    }
+    
+    // accept. New Cert stored
+    public void testKvNetwkGreaterNotIGIDCertInSimmpKvEqualGoodNewSig() throws Exception {
+        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        changeSimppFile(simppFile);
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(10, simppManager.getVersion());
+        assertEquals(20, simppManager.getKeyVersion());
+    }
+    
+    
+    // reject.   
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadFailed() throws Exception {}
+    // reject.   
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKBadCertSig() throws Exception {}
+    // accept. New Cert stored.   
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvEqualGoodNewSig() throws Exception {}
+    // reject.   
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvSimppGreaterThanCert() throws Exception {}
+    
+    // reject.   
+    public void testKvNetwkGreaterIGIDCertDownloadFailed() throws Exception {}
+    // reject.   
+    public void testKvNetwkGreaterIGIDCertDownloadOKBadCertSig() throws Exception {}
+    // reject.   
+    public void testKvNetwkGreaterIGIDCertDownloadOKGoodCertSigKvNotIGID() throws Exception {}
+    // cert looks good, trigger http download of simpp. 
+    // Cert is not store at this point, it will be store only after http simpp gets accepted
+    public void testKvNetwkGreaterIGIDCertDownloadOKGoodCertSigKvIGID() throws Exception {}
+    
     ////////////////////////////////private methods///////////////////////////
     
     void waitForConnection(TestConnection connection) throws InterruptedException {
