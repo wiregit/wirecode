@@ -259,6 +259,25 @@ class ActivationManagerImpl implements ActivationManager, Service {
         });
     }
 
+    /**
+     * Asynchronously serializes to disk.
+     * 
+     * @param moduleInfoAsJson contents of activation response as a json
+     */
+    private void writeToDisk(final String moduleInfoAsJson) {
+        scheduler.execute(new Runnable(){
+            public void run() {
+                try {
+                    activationSerializer.writeToDisk(moduleInfoAsJson);                        
+                } catch (Exception e) {
+                    // todo: maybe invoke an error callback if we ever decide to do anything with the error
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk.");
+                }
+            }
+        });    
+    }
+
     @Override
     public void start() {
         // if a PKey exists, start the server and try contacting the authentication server
@@ -436,16 +455,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private void removeData(boolean removeMCode, boolean removeKey) {
         if(removeKey)
             activationSettings.setActivationKey("");
-        scheduler.execute(new Runnable(){
-            public void run() {
-                try {
-                    activationSerializer.writeToDisk("");                        
-                } catch (Exception e) {
-                    if(LOG.isErrorEnabled())
-                        LOG.error("Error saving json string to disk.");
-                }
-            }
-        });
+        writeToDisk("");
         setActivationItems(Collections.<ActivationItem>emptyList());
         if(removeMCode)
             activationSettings.setMCode("");
@@ -469,17 +479,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void activated(final ActivationResponse response) {
-        scheduler.execute(new Runnable(){
-            public void run() {
-                try {
-                    activationSerializer.writeToDisk(response.getJSONString());                        
-                } catch (Exception e) {
-                    if(LOG.isErrorEnabled())
-                        LOG.error("Error saving json string to disk.");
-                }
-            }
-        });
-
+        writeToDisk(response.getJSONString());
         activationSettings.setActivationKey(response.getLid());
         activationSettings.setMCode(response.getMCode());
         setActivationItems(response.getActivationItems());
