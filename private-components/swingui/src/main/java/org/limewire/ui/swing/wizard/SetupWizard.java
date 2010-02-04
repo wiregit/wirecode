@@ -70,7 +70,7 @@ public class SetupWizard {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
 
-        return true;
+        return false;
     }
 
 }
