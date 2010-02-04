@@ -29,9 +29,13 @@ public class PhraseFilter implements SpamFilter, ResponseFilter {
     }
     
     private List<String> createDefaultList() {
-        ImmutableList.Builder<String> builder = ImmutableList.builder();        
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
         // ADD PHRASES HERE
         return builder.build();
+    }
+
+    private String canonical(String word) {
+        return word.toLowerCase(Locale.US).intern();
     }
 
     @Override // SpamFilter
@@ -53,7 +57,7 @@ public class PhraseFilter implements SpamFilter, ResponseFilter {
     }
 
     /** Returns true if input matches any of the banned phrases. */
-    private boolean isBanned(String input) {
+    public boolean isBanned(String input) {
         String canonical = input.toLowerCase(Locale.US);
         for(String word : ban) {
             int idx = canonical.indexOf(word);
