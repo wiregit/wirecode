@@ -47,7 +47,9 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         String query = activationSettings.getQueryString() + "&lid=" + key;
 
         String jsonResult = sendToServer(query);
-        LOG.debugf("Activation server response: ", jsonResult);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Activation server response: " + jsonResult);
+        }
 
         return activationFactory.createFromJson(jsonResult);
     }
