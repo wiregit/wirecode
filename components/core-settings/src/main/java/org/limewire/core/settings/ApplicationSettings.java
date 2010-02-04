@@ -176,7 +176,12 @@ public class ApplicationSettings extends LimeProps {
      * TODO we can remove this field after the beta release. We will still be able to remotely alter it if needed.
      */
     public static final BooleanSetting AVG_REMOVE_FROM_PRO_VERSION_5_5_0 = FACTORY.createRemoteBooleanSetting("AVG_REMOVE_FROM_PRO_VERSION_5_4", false, "avg.remove.from.pro.version.5.5.0");
- 
+    
+    /**
+     * Returns true if local access to the REST API is enabled.
+     */
+    public static final BooleanSetting LOCAL_REST_ACCESS_ENABLED =
+        FACTORY.createBooleanSetting("LOCAL_REST_ACCESS_ENABLED", false);
     
     /**
      * Gets the current language setting.
