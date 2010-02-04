@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
@@ -21,7 +22,6 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
@@ -84,7 +84,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     private File BELOW_MIN_FILE;
 
-    private ScheduledExecutorService backgroundExecutor;
+    private NotifyingSimpleTimer backgroundExecutor = new NotifyingSimpleTimer(); 
     
     public SimppManagerTest(String name) {
         super(name);
@@ -112,6 +112,7 @@ public class SimppManagerTest extends LimeTestCase {
                     }
                 });
                 bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAHNFDNZU6UKXDJP5N7NGWAD2YQMOU23C5IRAJHNHHSDJQITAY3BRZGMUONFNOJFR74VMICCOS4UNEPZMDA46ACY5BCGRSRLPGU3XIIXZATSCOL5KFHWGOJZCZUAVFHHQHENYOIJVGFSFULPIXRK2AS45PHNNFCYCDLHZ4SQNFLZN43UIVR4DOO6EYGYP2QYCPLVU2LJXW745S"));
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
             }
         });
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
@@ -119,7 +120,6 @@ public class SimppManagerTest extends LimeTestCase {
 		simppManager = injector.getInstance(SimppManager.class);
 		lifecycleManager = injector.getInstance(LifecycleManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
-        backgroundExecutor = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
 		
         lifecycleManager.start();
     }
@@ -352,7 +352,7 @@ public class SimppManagerTest extends LimeTestCase {
         try {
             conn.start();
             
-            Thread.sleep(6000);//let the message exchange take place
+            waitForUpdateRun();
             
             //3. OK. LimeWire should have upgraded now. 
             SimppManager man = simppManager;
@@ -374,15 +374,13 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
         conn.start();
         
-        Thread.sleep(6000);//let the message exchange take place
+        waitForUpdateRun();
 
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         
-        //we should have been disconnected
-        assertFalse(connectionServices.isConnected());
     }
 
     public void testTamperedSimppDataRejected() throws Exception  {
@@ -395,15 +393,13 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
         conn.start();
         
-        Thread.sleep(6000);//let the message exchange take place
+        waitForUpdateRun();
 
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
         
-        //we should have been disconnected
-        assertFalse(connectionServices.isConnected());
     }
 
     public void testBadSimppXMLRejected() throws Exception  {
@@ -415,7 +411,8 @@ public class SimppManagerTest extends LimeTestCase {
         //expect a simpp request from limewire and send a bad_xml msg
         TestConnection conn = new TestConnection(BAD_XML_FILE, BAD_XML, true, true, NEW, messageFactory);
         conn.start();
-        Thread.sleep(6000);//let the message exchange take place
+        
+        waitForUpdateRun();
 
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = simppManager;
@@ -434,14 +431,13 @@ public class SimppManagerTest extends LimeTestCase {
         //expect a simpp request from limewire and send a garbage msg
         TestConnection conn = new TestConnection(RANDOM_BYTES_FILE, RANDOM_BYTES, true, true, NEW, messageFactory);
         conn.start();
-        Thread.sleep(6000);//let the message exchange take place
+        
+        waitForUpdateRun();
 
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = simppManager;
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
-        //we should have been disconnected
-        assertFalse(connectionServices.isConnected());
     }
 
     public void testSimppTakesEffect() throws Exception {
@@ -456,7 +452,7 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(NEW_SIMPP_FILE, NEW, true, true, messageFactory);
         conn.start();
 
-        Thread.sleep(6000);//let the message exchange take place
+        waitForUpdateRun();
 
         assertEquals("test_upload setting not changed to simpp value", 15,
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
@@ -474,7 +470,8 @@ public class SimppManagerTest extends LimeTestCase {
         //Get a new message from a connection and make sure the value is changed
         TestConnection conn = new TestConnection(ABOVE_MAX_FILE, ABOVE_MAX, true, true, NEW, messageFactory);
         conn.start();
-        Thread.sleep(6000);//let the message exchange take place
+        
+        waitForUpdateRun();
 
         assertEquals("test_upload setting not changed to simpp value",
                      SimppManagerTestSettings.MAX_SETTING,
@@ -494,7 +491,7 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(BELOW_MIN_FILE, BELOW_MIN, true, true, NEW, messageFactory);
         conn.start();
         
-        Thread.sleep(6000);//let the message exchange take place
+        waitForUpdateRun();
         
         assertEquals("test_upload settting didn't obey min value",
                SimppManagerTestSettings.MIN_SETTING,
@@ -515,11 +512,10 @@ public class SimppManagerTest extends LimeTestCase {
         conn.setCauseError(true);
         conn.start();
 
-        Thread.sleep(6000);//let the message exchange take place
+        Thread.sleep(6000);
 
-        //3. OK. LimeWire should have upgraded now. 
         SimppManager man = simppManager;
-        assertEquals("Simpp manager did not update simpp version", 
+        assertEquals("Simpp manager has wrong simpp version", 
                                                      MIDDLE, man.getVersion());
         conn.killConnection();
     }
@@ -533,7 +529,7 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(file, 657, true, true, messageFactory);
         conn.start();
         
-        waitForConnection(conn);
+        waitForUpdateRun();
         
         assertEquals(657, simppManager.getVersion());
     }
@@ -542,15 +538,10 @@ public class SimppManagerTest extends LimeTestCase {
     
     void waitForConnection(TestConnection connection) throws InterruptedException {
         assertTrue(connection.waitForConnection(5, TimeUnit.SECONDS));
-        Thread.sleep(1000);
-        final CountDownLatch latch = new CountDownLatch(1);
-        backgroundExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                latch.countDown();
-            }
-        });
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
+    }
+    
+    void waitForUpdateRun() throws InterruptedException {
+        assertTrue(backgroundExecutor.waitForSimppUpdate(5, TimeUnit.SECONDS));   
     }
     
     private void changeSimppFile(File inputFile) throws Exception {        
@@ -567,5 +558,35 @@ public class SimppManagerTest extends LimeTestCase {
     
     private void changeCertFile(File inputFile) throws Exception {
         FileUtils.copy(inputFile, certFile);
+    }
+    
+    /**
+     * Executor that lowers a countdown latch when the SimppManager has
+     * received a new message.
+     */
+    private class NotifyingSimpleTimer extends SimpleTimer {
+        
+        public NotifyingSimpleTimer() {
+            super(true);
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        
+        @Override
+        public void execute(Runnable command) {
+            super.execute(command);
+            if (command.getClass().getName().endsWith("SimppManagerImpl$2")) {
+                super.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        latch.countDown();
+                    }
+                });
+            }
+        }
+        
+        public boolean waitForSimppUpdate(long timeout, TimeUnit unit) throws InterruptedException {
+            return latch.await(timeout, unit);
+        }
     }
 }
