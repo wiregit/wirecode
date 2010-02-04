@@ -29,7 +29,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
-import org.limewire.ui.swing.action.UrlAction.LaunchType;
 import org.limewire.ui.swing.components.HTMLLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
@@ -130,7 +129,7 @@ public class IntentDialog extends LimeJDialog {
         FontUtils.underline(privacyButton);
         privacyButton.setForeground(new Color(0x2152a6));
         
-        avgLicenseButton = new HyperlinkButton(new UrlAction(avgLicenseURL, LaunchType.POPUP, languageAppender));
+        avgLicenseButton = new HyperlinkButton(new UrlAction(avgLicenseURL, title, languageAppender));
         avgLicenseButton.setFocusPainted(false);
         avgLicenseButton.setFont(smallFont);
         FontUtils.underline(avgLicenseButton);
