@@ -157,7 +157,7 @@ public class TransferOptionPanel extends OptionPanel {
             useAntivirusCheckBox.setOpaque(false);
             
             //TODO: activation - text needs to change
-            buyAntivirusButton = new HyperlinkButton("Upgrade to scan files with AVG anti-virus");
+            buyAntivirusButton = new HyperlinkButton("Upgrade to scan files with AVG Anti-Virus");
             buyAntivirusButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

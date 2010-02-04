@@ -108,7 +108,7 @@ public class AVInfoPanel extends JPanel {
         
         // Set message text.  We also set the preferred size to control the
         // message and dialog width.
-        String message = I18n.tr("LimeWire's anti-virus protection is powered by AVG.  AVG scans, detects and deletes files that are suspected to contain viruses or spyware.  <a href=\"{0}\">Learn more</a>", AVHOME);
+        String message = I18n.tr("LimeWire's Anti-Virus protection is powered by AVG.  AVG scans, detects and deletes files that are suspected to contain viruses or spyware.  <a href=\"{0}\">Learn more</a>", AVHOME);
         messageLabel.setText(message);
         messageLabel.setPreferredSize(new Dimension(300, messageLabel.getPreferredSize().height));
         
@@ -156,7 +156,7 @@ public class AVInfoPanel extends JPanel {
      */
     public void showThreatMessage(DownloadItem item, boolean showOption) {
         String heading = I18n.tr("Threat Detected");
-        String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire's anti-virus protection is powered by AVG.", item.getFileName());
+        String message = I18n.tr("{0} is suspected to contain a virus or spyware and has automatically been deleted for your protection.  LimeWire's Anti-Virus protection is powered by AVG.", item.getFileName());
         showWarningMessage(heading, message, showOption, true, 
                 SwingUiSettings.WARN_DOWNLOAD_THREAT_FOUND, SwingUiSettings.HIDE_DOWNLOAD_THREAT_FOUND);
     }
