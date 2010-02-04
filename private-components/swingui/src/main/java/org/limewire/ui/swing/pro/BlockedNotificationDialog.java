@@ -1,4 +1,4 @@
-package org.limewire.activation.impl;
+package org.limewire.ui.swing.pro;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,7 +10,6 @@ import java.awt.event.ComponentListener;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -22,11 +21,14 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActSettings;
-import org.limewire.activation.api.ActivationManager;
+import org.limewire.ui.swing.activation.ActivationPanel;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class BlockedNotificationDialog extends LimeJDialog {
 
@@ -37,15 +39,14 @@ public class BlockedNotificationDialog extends LimeJDialog {
     @Resource
     private Color headingColor;
 
-    private final ActivationManager activationManager;
+    private final Provider<ActivationPanel> licenseDialogProvider;
     private final ActSettings activationSettings;
     
-    public BlockedNotificationDialog(ActivationManager activationManager, ActSettings activationSettings) {
-        super(GuiUtils.getMainFrame());
-
+    @Inject
+    public BlockedNotificationDialog(Provider<ActivationPanel> licenseDialogProvider, ActSettings activationSettings) {
         GuiUtils.assignResources(this);   
 
-        this.activationManager = activationManager;
+        this.licenseDialogProvider = licenseDialogProvider;
         this.activationSettings = activationSettings;
     }
     
@@ -116,17 +117,17 @@ public class BlockedNotificationDialog extends LimeJDialog {
 
         contentPanel.add(Box.createVerticalGlue(), "growy, growprioy 200, wrap");
 
-        final JCheckBox dontShowAgainCheckbox = new JCheckBox(I18n.tr("Don't show me this again"));
-        dontShowAgainCheckbox.addActionListener(new ActionListener() {
+        JButton editLicenseButton = new JButton(I18n.tr("Edit License"));
+        editLicenseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                activationSettings.setActivationKey("");
-                activationSettings.setMCode("");
-                // we call the activation manager and ask it to validate an obviously bad key to erase the blocked error message
-                activationManager.activateKey("");
+                BlockedNotificationDialog.this.setVisible(false);
+                BlockedNotificationDialog.this.dispose();
+                licenseDialogProvider.get().show();
             }
+            
         });
-        contentPanel.add(dontShowAgainCheckbox, "align 0% 50%, split");
+        contentPanel.add(editLicenseButton, "align 0% 50%, split");
 
         contentPanel.add(Box.createHorizontalGlue(), "align 0% 50%, growx, split");
 
