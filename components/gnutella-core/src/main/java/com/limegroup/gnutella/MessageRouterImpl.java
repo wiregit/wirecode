@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeHashMap;
@@ -135,7 +134,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * maintains a list of connections.
  */
 //@Singleton // not here because it's not constructed, subclass is!
-@SuppressWarnings("unused")
 public abstract class MessageRouterImpl implements MessageRouter {
     
     private static final Log LOG = LogFactory.getLog(MessageRouterImpl.class);
@@ -286,6 +284,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private static final int UDP_REPLY_CACHE_TIME = 60 * 1000;
     
     @InspectionPoint("guid tracker")
+    @SuppressWarnings("unused")
     private final GUIDTracker guidTracker = new GUIDTracker();
     
     @InspectionPoint("dropped replies")
@@ -339,6 +338,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final QRPUpdater qrpUpdater;
     private final URNFilter urnFilter;
     private final SpamServices spamServices;
+    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     private final PingRequestFactory pingRequestFactory;

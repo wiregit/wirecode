@@ -20,7 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.settings.ApplicationSettings;
@@ -107,7 +106,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
  */
-@SuppressWarnings("unused")
 @EagerSingleton
 public class ConnectionManagerImpl implements ConnectionManager, Service {
     
@@ -131,8 +129,10 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
     
     // Older leaves will report the same connections for both inspection points
+    @SuppressWarnings("unused")
     @InspectionPoint("leaf connections")
     private final Inspectable LEAF = new LegacyConnectionStats(true);
+    @SuppressWarnings("unused")
     @InspectionPoint("ultrapeer connections")
     private final Inspectable UP = new LegacyConnectionStats(false);
     
@@ -143,6 +143,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     @InspectablePrimitive("last connect time")
     private volatile long _connectTime = Long.MAX_VALUE;
     /** Timestamp for the last time we reached our preferred connections */
+    @SuppressWarnings("unused")
     @InspectablePrimitive("last time preferred reached")
     private volatile long _lastFullConnectTime;
     /**
@@ -298,6 +299,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
+    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     @Inject

@@ -21,7 +21,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
@@ -113,7 +112,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * Subclasses may refine the requery behavior by overriding {@link #newRequery()}
  * {@link #allowAddition(RemoteFileDesc)}, {@link #addDownload(Collection, boolean)}.
  */
-@SuppressWarnings("unused")
+
 class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocListener,
         ManagedDownloader, DownloadWorkerSupport {
 
@@ -471,6 +470,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Library library;
     protected final CategoryManager categoryManager;
     private final BandwidthCollector bandwidthCollector;
+    @SuppressWarnings("unused")
     private final ActivationManager activationManager;
     
     private final SocketsManager socketsManager;
