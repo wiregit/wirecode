@@ -143,7 +143,7 @@ public class DownloadSettings extends LimeProps {
             "DELETE_CANCELED_DOWNLOADS", true);
     
     public static final StringSetting VIRUS_UPDATES_SERVER = FACTORY.createRemoteStringSetting(
-            "VIRUS_UPDATES_SERVER", "http://af.avg.com/softw/90free/sdklmw/", "DownloadSettings.virusUpdatesServer");
+            "VIRUS_UPDATES_SERVER", "http://vdefs.limewire.com/avg/?filename=", "DownloadSettings.virusUpdatesServer");
     
     @InspectablePrimitive("num scanned clean")
     public static final IntSetting NUM_SCANNED_CLEAN = FACTORY.createIntSetting("NUM_SCANNED_CLEAN", 0);
