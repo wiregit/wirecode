@@ -137,7 +137,7 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
         LEAF[0].flush();
         ULTRAPEER[1].send(new SimppRequestVM());
         // send capabilties update which should remove it from the queue
-        ULTRAPEER[1].send(CapabilitiesVMStubHelper.makeCapibilitesWithSimpp(5));
+        ULTRAPEER[1].send(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(5));
         ULTRAPEER[1].flush();
         
         SimppVM simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0], SimppVM.class);

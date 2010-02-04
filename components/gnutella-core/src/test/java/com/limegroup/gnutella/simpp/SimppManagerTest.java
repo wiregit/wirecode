@@ -27,6 +27,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 
 public class SimppManagerTest extends LimeTestCase {
     
@@ -283,7 +284,7 @@ public class SimppManagerTest extends LimeTestCase {
         
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
-        TestConnection conn = new TestConnection(NEW_SIMPP_FILE , NEW, false, true, OLD, messageFactory);
+        TestConnection conn = new TestConnection(NEW_SIMPP_FILE, false, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(OLD), messageFactory);
         conn.start();
         //6s = 2s * 3 (timeout in TestConnection == 2s)
         Thread.sleep(6000);//let messages be exchanged, 
@@ -324,7 +325,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
-        TestConnection conn = new TestConnection(MIDDLE_SIMPP_FILE, MIDDLE, false, true, OLD, messageFactory);
+        TestConnection conn = new TestConnection(MIDDLE_SIMPP_FILE, false, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(OLD), messageFactory);
         try {
             conn.start();
             
@@ -371,7 +372,7 @@ public class SimppManagerTest extends LimeTestCase {
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
         //msg
-        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();
@@ -390,7 +391,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
-        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, DEF_MESSAGE, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(DEF_MESSAGE_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();
@@ -409,7 +410,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
-        TestConnection conn = new TestConnection(BAD_XML_FILE, BAD_XML, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(BAD_XML_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();
@@ -429,7 +430,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
-        TestConnection conn = new TestConnection(RANDOM_BYTES_FILE, RANDOM_BYTES, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(RANDOM_BYTES_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();
@@ -468,7 +469,7 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(ABOVE_MAX_FILE, ABOVE_MAX, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(ABOVE_MAX_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();
@@ -488,7 +489,7 @@ public class SimppManagerTest extends LimeTestCase {
                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = new TestConnection(BELOW_MIN_FILE, BELOW_MIN, true, true, NEW, messageFactory);
+        TestConnection conn = new TestConnection(BELOW_MIN_FILE, true, true, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(NEW), messageFactory);
         conn.start();
         
         waitForUpdateRun();

@@ -37,7 +37,7 @@ public class TestConnection extends AssertComparisons {
 
     private volatile boolean _expectSimppRequest;
 
-    private int _capabilitySimppNo;
+    private CapabilitiesVM capabilitiesVM;
 
     private boolean _causeError;
     
@@ -58,16 +58,16 @@ public class TestConnection extends AssertComparisons {
      */
     public TestConnection(File simppFile, int simppNumber, boolean expectSimppReq,
                                      boolean sendSimppData, MessageFactory messageFactory) throws IOException {
-        this(simppFile, simppNumber, expectSimppReq, sendSimppData, simppNumber, messageFactory);
+        this(simppFile, expectSimppReq, sendSimppData, CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(simppNumber), messageFactory);
     }
     
-    public TestConnection(File simppFile, int simppNumber, boolean expectSimppReq, 
-               boolean sendSimppData, int capabilitySimpp, MessageFactory messageFactory) throws IOException {
+    public TestConnection(File simppFile, boolean expectSimppReq, 
+               boolean sendSimppData, CapabilitiesVM capabilitiesVM, MessageFactory messageFactory) throws IOException {
         super("FakeTest");
         setSimppMessageFile(simppFile);
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
-        _capabilitySimppNo = capabilitySimpp;
+        this.capabilitiesVM = capabilitiesVM;
         _causeError = false;
         this.messageFactory = messageFactory;
     }
@@ -137,8 +137,7 @@ public class TestConnection extends AssertComparisons {
             throws IOException {
         //This method checks that the initial simpp request is always followed
         //by a response.
-        CapabilitiesVM capVM = makeCapabilitiesVM();
-        capVM.write(os);
+        capabilitiesVM.write(os);
         os.flush();
         //Read the first message of type SimppRequest
         Message message = null;
@@ -162,8 +161,7 @@ public class TestConnection extends AssertComparisons {
         //correctly, and if necessary upload simpp-bytes to the limewire so the
         //testing can be done.
         
-        CapabilitiesVM capVM = makeCapabilitiesVM();
-        capVM.write(os);
+        capabilitiesVM.write(os);
         os.flush();
         //Read the first message of type SimppRequest
         SimppRequestVM message = null;
@@ -192,15 +190,6 @@ public class TestConnection extends AssertComparisons {
         //Read messages, if (_expectSimppRequest) make sure we get it, otherwise
         //make sure we do not get it. Then based on _sendSimppData send the data
         //back once if we got the SimppRequestVM        
-    }
-
-    private CapabilitiesVM makeCapabilitiesVM() {
-        try {
-            return  CapabilitiesVMStubHelper.makeCapibilitesWithSimpp(_capabilitySimppNo);
-        } catch (Exception e) {
-            fail("couldn't set up test -- failed to manipulate CapabilitiesVM");
-        }
-        return null;
     }
 
     ////////////////////////////setter methods////////////////////////

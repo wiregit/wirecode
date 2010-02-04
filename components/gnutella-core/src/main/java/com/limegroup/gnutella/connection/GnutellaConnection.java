@@ -1159,10 +1159,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         SimppManager simppManager = this.simppManager.get();
         if (LOG.isDebugEnabled())
             LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
-        if (newVersion > simppManager.getNewVersion() && keyVersion == simppManager.getKeyVersion()) {
-            return true;
-        }
-        if (version > simppManager.getVersion()) {
+        if (newVersion != -1) {
+            if (newVersion > simppManager.getNewVersion() && keyVersion == simppManager.getKeyVersion()) {
+                return true;
+            }
+        } else if (version > simppManager.getVersion()) {
             return true;
         }
         if (keyVersion > simppManager.getKeyVersion()) {
