@@ -61,7 +61,7 @@ class ActivationResponseFactoryImpl implements ActivationResponseFactory {
             if (type == ActivationResponse.Type.ERROR) {
                 optionalMessage = parentObj.getString("message");
             }
-            LOG.debugf("Parsed response from json input, type: ", type);
+            LOG.debugf("Parsed response from json input, type: " + type);
             List<ActivationItem> items = parseActivationItems(parentObj, loadedFromDisk);
             return new ActivationResponse(json, lid, type, mcode, refresh, items, optionalMessage);
         } catch (JSONException e) {
