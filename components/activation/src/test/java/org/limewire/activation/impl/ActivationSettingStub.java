@@ -7,11 +7,15 @@ public class ActivationSettingStub implements ActSettings {
     private String activationKey = "";
     private String mcode = "";
     private boolean isLastStartPro = false;
+    private String activationHost = "http://activation.limewire.int";
     
     @Override
     public String getActivationHost() {
-        // TODO Auto-generated method stub
-        return null;
+        return activationHost;
+    }
+    
+    void setActivationHost(String activationHostParam) {
+        activationHost = activationHostParam;
     }
 
     @Override

@@ -23,6 +23,7 @@
     	
     	<!-- test dependencies. -->
     	<dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
+    	<dependency org="org.limewire" name="net" rev="latest.integration" conf="test"/>
     	
     	<dependency org="none" name="guice" rev="${guice.version}" conf="test"/>
         <dependency org="none" name="json" rev="${json.version}" conf="test"/>

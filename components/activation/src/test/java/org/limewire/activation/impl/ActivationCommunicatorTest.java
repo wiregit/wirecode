@@ -11,14 +11,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActSettings;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
+import org.limewire.http.LimeWireHttpModule;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivateAccessor;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.common.LimeWireCommonModule;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
@@ -33,6 +39,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 
 /**
  * Test for {@link ActivationCommunicatorImpl}
@@ -48,7 +56,8 @@ import com.google.inject.Stage;
  * 
  */
 public class ActivationCommunicatorTest extends BaseTestCase {
-    
+   
+    private ActivationSettingStub settingsStub;
     private ServerController serverController;
     private Injector injector;
     private ActivationCommunicator comm;
@@ -66,7 +75,8 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         injector = createInjector(getModules());
         serverController = new ServerController();
         comm = injector.getInstance(ActivationCommunicator.class);
-//        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/activate");
+        settingsStub = (ActivationSettingStub)injector.getInstance(ActSettings.class);
+        settingsStub.setActivationHost("http://127.0.0.1:8123/activate");
     }
     
     @Override
@@ -80,8 +90,19 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     
     private Module[] getModules() {
         List<Module> modules = new ArrayList<Module>();
-//        modules.add(new LimeWireCoreModule());
-//        modules.add(new CoreGlueModule());
+        modules.add(new AbstractModule() {
+            @Override
+            public void configure() {
+                bind(ActSettings.class).toInstance(new ActivationSettingStub());
+                bind(ActivationCommunicator.class).to(ActivationCommunicatorImpl.class);
+                bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
+                bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new SimpleTimer(true));
+            }
+        });
+        modules.add(new LimeWireHttpModule());
+        modules.add(new LimeWireCommonModule());
+        modules.add(new LimeWireNetTestModule());
         return modules.toArray(new Module[modules.size()]);
     }
     
@@ -136,7 +157,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     // test 404 file not found exception
     //
     public void test404ErrorResponse() throws Exception {
-//        ActivationSettings.ACTIVATION_HOST.set("http://localhost:8123/invalid");
+        settingsStub.setActivationHost("http://127.0.0.1:8123/invalid");
         serverController.setSetServerReturn("dfgdfgd");
         serverController.startServer();
         try {
@@ -188,8 +209,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
             Class.forName(LimeWireHttpClientModule.class.getName()), null, "CONNECTION_TIMEOUT");
         final int timeout = ((Integer)accessor.getOriginalValue()) + 2000;
         
-//        ActivationSettings.ACTIVATION_HOST.set("http://" + unreachableIpAddress + ":8123/sfsdfs");
-
+        settingsStub.setActivationHost("http://" + unreachableIpAddress + ":8123/sfsdfs");
         Callable<ActivationResponse> contactUnreachableServer = new Callable<ActivationResponse>() {
             @Override
             public ActivationResponse call() throws Exception {
