@@ -21,6 +21,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.activation.ActivationPanel;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /** A nag to go to LimeWire PRO. */ 
 class ProNag extends JXPanel {
@@ -41,7 +43,8 @@ class ProNag extends JXPanel {
     private long offlineShownAt = -1;
     
     @Inject public ProNag(Application application, ActivationManager activationManager,
-                          final GnutellaConnectionManager connectionManager) {
+                          final GnutellaConnectionManager connectionManager,
+                          final Provider<ActivationPanel> activationPanelProvider) {
         super(new BorderLayout());
         
         this.application = application;        
@@ -68,6 +71,10 @@ class ProNag extends JXPanel {
                     
                     if(href != null && href.equals("_hide_nag_")) {
                         container.dispose();
+                    } else if (href != null && href.equals("_edit_license_")) {
+                        container.dispose();
+                        ActivationPanel activationPanel = activationPanelProvider.get();
+                        activationPanel.show();
                     } else if(e.getURL() != null) {
                         String url = e.getURL().toExternalForm();
                         url += "&gs=" + connectionManager.getConnectionStrength().getStrengthId();
@@ -178,7 +185,8 @@ class ProNag extends JXPanel {
     public ListeningFuture<LoadResult> loadContents(boolean firstLaunch) {
         String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());
         String url = application.addClientInfoToUrl(
-                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch + "&bgcolor=" + EncodingUtils.encode(bgColor));
+                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch 
+                + "&bgcolor=" + EncodingUtils.encode(bgColor)) + "&mcode=" + activationManager.getMCode();
         String backupUrl = createDefaultPage(firstLaunch, bgColor);
         
         ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);

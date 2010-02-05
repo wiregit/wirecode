@@ -13,6 +13,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.activation.api.MCodeEvent;
 import org.limewire.activation.impl.ActivationResponse.Type;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
@@ -38,6 +39,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
+    private final EventListenerList<MCodeEvent> mcodeListeners = new EventListenerList<MCodeEvent>();
 
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
@@ -68,6 +70,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private volatile ActivationError activationError = ActivationError.NO_ERROR;
     private volatile State lastState = State.NOT_ACTIVATED;
     private volatile State currentState = State.NOT_ACTIVATED;
+    private volatile boolean attemptedToContactActivationServer = false;
     
     @Inject
     public ActivationManagerImpl(@Named("fastExecutor") ScheduledExecutorService scheduler,
@@ -160,6 +163,10 @@ class ActivationManagerImpl implements ActivationManager, Service {
         currentState = newState;
     }
     
+    public boolean isMCodeUpToDate() {
+        return activationSettings.getActivationKey().isEmpty() || attemptedToContactActivationServer;
+    }
+
     @Override
     public ActivationError getActivationError() {
         return activationError;
@@ -287,6 +294,9 @@ class ActivationManagerImpl implements ActivationManager, Service {
         String storedLicenseKey = getLicenseKey();
         if (!storedLicenseKey.isEmpty()) {
             activateKeyAtStartup(storedLicenseKey);
+        } else {
+        // if not PKey exists, then the mcode doesn't exist either. so, we can show the nag now.
+            mcodeListeners.broadcast(new MCodeEvent(""));
         }
     }
 
@@ -316,8 +326,17 @@ class ActivationManagerImpl implements ActivationManager, Service {
     public boolean removeListener(EventListener<ActivationEvent> listener) {
         return listeners.removeListener(listener);
     }
-            
-    
+
+    @Override
+    public void addMCodeListener(EventListener<MCodeEvent> listener) {
+        mcodeListeners.addListener(listener);
+    }
+
+    @Override
+    public boolean removeMCodeListener(EventListener<MCodeEvent> listener) {
+        return mcodeListeners.removeListener(listener);
+    }
+
     private class ActivationTask implements Runnable {
         
         private int consecutiveFailedRetries = 0;
@@ -341,8 +360,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 response = activationResponseFactory.createErrorResponse(Type.ERROR);
             }
             State state = getNextState(response.getResponseType());
+            attemptedToContactActivationServer = true;
             transitionToState(state, response);
-            
+
+            mcodeListeners.broadcast(new MCodeEvent(getMCode()));
+
             if (state == State.ACTIVATED_FROM_SERVER) {
                 // reschedule next ping of activation server if necessary
                 long refreshVal = response.getRefreshInterval();
@@ -397,6 +419,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     throw new IllegalStateException("Unknown state " + newState);
             }
         }
+
         listeners.broadcast(new ActivationEvent(getActivationState(), getActivationError()));
     }
     
@@ -487,4 +510,5 @@ class ActivationManagerImpl implements ActivationManager, Service {
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.ACTIVATED_FROM_SERVER);
     }
+
 }

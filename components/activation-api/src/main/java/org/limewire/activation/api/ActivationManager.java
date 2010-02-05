@@ -53,6 +53,16 @@ public interface ActivationManager {
     public ActivationError getActivationError();
     
     /**
+     * Returns whether the MCode (the string representing the user's list of paid features)
+     * is up to date. This returns true if 
+     * (a) the user doesn't have a license and therefore doesn't have any paid features
+     * (b) the user does have a license and the activation manager has gotten the latest mcode
+     *     from the activation server or there was a communication error with the activation server
+     *     but the cached mcode is available.
+     */
+    public boolean isMCodeUpToDate();
+
+    /**
      * Performs analysis on the Key to perform local validation checks
      * before taking the time to hit the server. Returns true if the 
      * key is valid, false otherwise.
@@ -81,4 +91,8 @@ public interface ActivationManager {
     public void addListener(EventListener<ActivationEvent> listener);
     
     public boolean removeListener(EventListener<ActivationEvent> listener);
+
+    public void addMCodeListener(EventListener<MCodeEvent> listener);
+    
+    public boolean removeMCodeListener(EventListener<MCodeEvent> listener);
 }

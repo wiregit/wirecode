@@ -10,6 +10,7 @@ import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationEvent;
+import org.limewire.activation.api.MCodeEvent;
 import org.limewire.listener.EventListener;
 
 /**
@@ -53,5 +54,8 @@ public class LegacyProActivationManager implements ActivationManager {
     @Override public void addModuleListener(EventListener<ActivationModuleEvent> listener) { }
     @Override public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }
     @Override public void addListener(EventListener<ActivationEvent> listener) { }
-    @Override public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }    
+    @Override public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }
+    @Override public void addMCodeListener(EventListener<MCodeEvent> listener) {}
+    @Override public boolean isMCodeUpToDate() { return false; }
+    @Override public boolean removeMCodeListener(EventListener<MCodeEvent> listener) { return false; }
 }

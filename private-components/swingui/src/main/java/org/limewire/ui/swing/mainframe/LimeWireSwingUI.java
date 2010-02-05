@@ -210,7 +210,7 @@ public class LimeWireSwingUI extends JPanel {
     }
 	
 	void loadProNag() {
-	    proNagController.allowProNag(layeredPane);
+	    proNagController.setLayeredPane(layeredPane);
 	}
 	
 	public void goHome() {

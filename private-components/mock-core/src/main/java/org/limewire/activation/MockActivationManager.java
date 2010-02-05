@@ -9,6 +9,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.activation.api.MCodeEvent;
 import org.limewire.listener.EventListener;
 
 public class MockActivationManager implements ActivationManager {
@@ -94,4 +95,17 @@ public class MockActivationManager implements ActivationManager {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public boolean isMCodeUpToDate() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public void addMCodeListener(EventListener<MCodeEvent> listener) {}
+    
+    @Override
+    public boolean removeMCodeListener(EventListener<MCodeEvent> listener) { return false; }
+
 }
