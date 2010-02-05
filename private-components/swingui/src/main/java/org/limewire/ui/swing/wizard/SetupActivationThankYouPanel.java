@@ -29,6 +29,8 @@ public class SetupActivationThankYouPanel extends JPanel {
     private Icon infoIcon;
     @Resource
     private Icon noticeIcon;
+    @Resource
+    private Color expiredMessageColor;
     
     public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense) {
         super(new MigLayout("fill, insets 50 15 0 15, gap 0, gapy 0", "[]", "[][][][][][]"));
@@ -37,11 +39,11 @@ public class SetupActivationThankYouPanel extends JPanel {
         
         if (areAllModulesExpired(eventList)) {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
-            thankYouLabel.setForeground(Color.BLACK);
+            thankYouLabel.setForeground(expiredMessageColor);
             add(thankYouLabel, "align 50% 50%, wrap");
         } else if (areSomeModulesExpired(eventList)) {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
-            thankYouLabel.setForeground(Color.BLACK);
+            thankYouLabel.setForeground(expiredMessageColor);
             add(thankYouLabel, "align 50% 50%, wrap");
         } else if (userHasPreexistingLicense) {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
