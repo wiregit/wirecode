@@ -2,6 +2,8 @@ package org.limewire.core.impl.activation;
 
 import org.limewire.activation.api.ActSettings;
 import org.limewire.core.settings.ActivationSettings;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.setting.evt.SettingEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +14,22 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 public class ActivationSettingsImpl implements ActSettings {
 
     private final ApplicationServices applicationServices;
+    
+    static {
+        
+        // When the application starts, we need to know whether to show the pro or the basic splash screen,
+        // and we need to know this before the settings have been loaded. So, we add a listener to this setting
+        // that creates a file on disk which we can use to determine whether or not to show the pro splash screen.
+        //
+        ActivationSettings.LAST_START_WAS_PRO.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                LimeWireUtils.setShouldShowProSplashScreen(
+                    ActivationSettings.LAST_START_WAS_PRO.getValue());
+            }
+        });    
+    }
+    
     
     @Inject
     public ActivationSettingsImpl(ApplicationServices applicationServices) {

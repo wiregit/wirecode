@@ -41,18 +41,6 @@ public class ActivationSettings extends LimeProps {
     public static final BooleanSetting LAST_START_WAS_PRO = FACTORY.createBooleanSetting(
             "LAST_START_WAS_PRO", false);//LimeWireUtils.shouldShowProSplashScreen());
 
-//    static {
-//        // When the application starts, we need to know whether to show the pro or the basic splash screen,
-//        // and we need to know this before the settings have been loaded. So, we add a listener to this setting
-//        // that creates a file on disk which we can use to determine whether or not to show the pro splash screen.
-//        LAST_START_WAS_PRO.addSettingListener(new SettingListener() {
-//            @Override
-//            public void settingChanged(SettingEvent evt) {
-//                LimeWireUtils.setShouldShowProSplashScreen(LAST_START_WAS_PRO.getValue());
-//            }
-//        });
-//    }
-
     /**
      * License Key for activation. If not License Key exists will return empty String.
      */
