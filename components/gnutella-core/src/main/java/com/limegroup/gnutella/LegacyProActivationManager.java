@@ -1,4 +1,4 @@
-package org.limewire.activation.impl;
+package com.limegroup.gnutella;
 
 import java.util.List;
 import java.util.EnumSet;

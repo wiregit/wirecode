@@ -11,7 +11,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
-import org.limewire.activation.impl.LegacyProActivationManager;
+import com.limegroup.gnutella.LegacyProActivationManager;
 import org.limewire.activation.api.ActivationManager;
 
 import com.google.inject.AbstractModule;
@@ -55,7 +55,7 @@ public class RequeryManagerTest extends LimeTestCase {
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
-        activationManager = new LegacyProActivationManager();
+        activationManager = new com.limegroup.gnutella.LegacyProActivationManager();
         
         mockery = new Mockery();
         requeryListener = mockery.mock(RequeryListener.class);

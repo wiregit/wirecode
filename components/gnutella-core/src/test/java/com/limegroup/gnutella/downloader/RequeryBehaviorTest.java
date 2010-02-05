@@ -39,7 +39,7 @@ import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
-import org.limewire.activation.impl.LegacyProActivationManager;
+import com.limegroup.gnutella.LegacyProActivationManager;
 
 public class RequeryBehaviorTest extends LimeTestCase {
 
