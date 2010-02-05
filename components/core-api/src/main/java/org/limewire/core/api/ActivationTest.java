@@ -7,4 +7,8 @@ public interface ActivationTest {
     public int getSwarmSpeed();
     
     public int getNumResults();
+    
+    public String getVendor();
+    
+    public String getHttpServer();
 }

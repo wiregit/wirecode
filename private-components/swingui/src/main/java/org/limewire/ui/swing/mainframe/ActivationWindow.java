@@ -17,28 +17,27 @@ import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.ActivationTest;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class ActivationWindow {
 
     private final ActivationManager activationManager;
-    private final ApplicationServices applicationServices;
+    private final Application application;
     private final ActivationTest activationTest;
     
     private final JDialog dialog;
 
     @Inject
-    public ActivationWindow(ActivationManager activationManager, ApplicationServices applicationServices,
+    public ActivationWindow(ActivationManager activationManager, Application application,
             ActivationTest activationTest) {
         this.activationManager = activationManager;
-        this.applicationServices = applicationServices;
+        this.application = application;
         this.activationTest = activationTest;
         
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
@@ -66,13 +65,13 @@ public class ActivationWindow {
             
             add(createField("Version:"));
             
-            add(createField(LimeWireUtils.getLimeWireVersion()), "wrap");
+            add(createField(application.getVersion()), "wrap");
             
             add(createField("HTTP Server Name:"));
-            add(createField(LimeWireUtils.getHttpServer()), "wrap");
+            add(createField(activationTest.getHttpServer()), "wrap");
             
             add(createField("Vendor:"));
-            add(createField(LimeWireUtils.getVendor()), "wrap");
+            add(createField(activationTest.getVendor()), "wrap");
             
             add(createField("mCode:"));
             add(createField(activationManager.getMCode()), "wrap");
@@ -84,8 +83,7 @@ public class ActivationWindow {
             add(createField(ActivationSettings.ACTIVATION_HOST.toString()), "wrap");
             
             add(createField("URL info"));
-            add(createField(LimeWireUtils.addLWInfoToUrl("", applicationServices.getMyGUID(), 
-                    activationManager.isProActive(), activationManager.getMCode())), "wrap");
+            add(createField(application.addClientInfoToUrl("")));
             
             addActivationModuleInformation(activationManager.getActivationItems());
             

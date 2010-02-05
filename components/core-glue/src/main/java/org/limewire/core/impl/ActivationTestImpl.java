@@ -3,6 +3,7 @@ package org.limewire.core.impl;
 import org.limewire.core.api.ActivationTest;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class ActivationTestImpl implements ActivationTest {
 
@@ -46,6 +47,16 @@ public class ActivationTestImpl implements ActivationTest {
     public int getNumResults() {
         return 0;
 //        return querySetting.getUltrapeerResults();
+    }
+
+    @Override
+    public String getHttpServer() {
+        return LimeWireUtils.getHttpServer();
+    }
+
+    @Override
+    public String getVendor() {
+        return LimeWireUtils.getVendor();
     }
     
     
