@@ -523,50 +523,43 @@ public class SimppManagerTest extends LimeTestCase {
 
     
     /////////////////////When LimeWire starts///////////////////////////////////
+    private void assertVersionNumbers(int version, int keyVersion, int newVersion){
+        assertEquals(version, simppManager.getVersion());
+        assertEquals(keyVersion, simppManager.getKeyVersion());
+        assertEquals(newVersion, simppManager.getNewVersion());        
+    }
+    
+    private void loadCertAndSimpp(String certFilename, String simppFilename) throws Exception {
+        File certFile = TestUtils.getResourceInPackage(certFilename, getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage(simppFilename, getClass());
+        changeSimppFile(simppFile);
+    }
+    
     // accept
     public void testStartLoadGoodCertAndGoodSimpp() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
-    }
+        assertVersionNumbers(5, 15, 25);
+    }   
     
     // use default simpp values
     public void testStartLoadGoodCertAndLoadSimppFailed() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.notExist", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.notExist");
         createSimppManager();
-        assertEquals(0, simppManager.getVersion());
-        assertEquals(0, simppManager.getKeyVersion());
-        assertEquals(0, simppManager.getNewVersion());
+        assertVersionNumbers(0, 0, 0);
     }    
     // use default simpp values
     public void testStartLoadGoodCertAndLoadSimppBadOldSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_15_Nv30_badOldSig", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov10_Kv_15_Nv30_badOldSig");
         createSimppManager();
-        assertEquals(0, simppManager.getVersion());
-        assertEquals(0, simppManager.getKeyVersion());
-        assertEquals(0, simppManager.getNewVersion());    
+        assertVersionNumbers(0, 0, 0);
     }
     // use default simpp values
     public void testStartLoadGoodCertAndLoadSimppBadNewSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv15_Nv26_NoCert_badNewSig", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov6_Kv15_Nv26_NoCert_badNewSig");
         createSimppManager();
-        assertEquals(0, simppManager.getVersion());
-        assertEquals(0, simppManager.getKeyVersion());
-        assertEquals(0, simppManager.getNewVersion());        
+        assertVersionNumbers(0, 0, 0);
     }
     
     // download cert from newCertURL, and load and accept simpp
@@ -591,10 +584,7 @@ public class SimppManagerTest extends LimeTestCase {
 
     // accept. 
     public void testValidSimpp() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -603,17 +593,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(6, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(26, simppManager.getNewVersion());
+        assertVersionNumbers(6, 15, 26);
     }
     
     // reject.   
     public void testBadOldSigSimpp() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -622,17 +607,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     } 
     
     // reject.   
     public void testKvLocalGreater() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.20", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.20", "simpp.xml.Ov10_Kv_20_Nv30_NoCert");
         createSimppManager();
         assertEquals(10, simppManager.getVersion());
         
@@ -642,17 +622,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(10, simppManager.getVersion());
-        assertEquals(20, simppManager.getKeyVersion());
-        assertEquals(30, simppManager.getNewVersion());
+        assertVersionNumbers(10, 20, 30);
     }
     
     // reject.   
     public void testKvEqualNvLocalGreater() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -662,17 +637,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     }
     
     // reject.   
     public void testOvGreaterKvEqualNvequal() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -682,17 +652,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     }    
     
     // reject. If already tested, move here for completeness  
     public void testKvEqualNvLocalLessBadNewSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -700,18 +665,13 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(newSimppFile, 6, 15, 26, true, true, messageFactory);        
         conn.start();
         
-        waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        waitForUpdateRun();        
+        assertVersionNumbers(5, 15, 25);
     }
     
     // reject.   
     public void testKvNetwkGreaterNotIGIDCertInSimmpBadCertSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -720,17 +680,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     }
     
     // reject. 
     public void testKvNetwkGreaterNotIGIDCertInSimmpKvSimppGreaterThanCert() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -739,17 +694,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     }
     
     // reject. 
     public void testKvNetwkGreaterNotIGIDCertInSimmpKvEqualBadNewSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -758,17 +708,12 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(5, simppManager.getVersion());
-        assertEquals(15, simppManager.getKeyVersion());
-        assertEquals(25, simppManager.getNewVersion());
+        assertVersionNumbers(5, 15, 25);
     }
     
     // accept. New Cert stored
     public void testKvNetwkGreaterNotIGIDCertInSimmpKvEqualGoodNewSig() throws Exception {
-        File certFile = TestUtils.getResourceInPackage("slave.cert.15", getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
-        changeSimppFile(simppFile);
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
@@ -777,9 +722,7 @@ public class SimppManagerTest extends LimeTestCase {
         conn.start();
         
         waitForUpdateRun();
-        assertEquals(10, simppManager.getVersion());
-        assertEquals(20, simppManager.getKeyVersion());
-        assertEquals(30, simppManager.getNewVersion());
+        assertVersionNumbers(10, 20, 30);
     }
     
     
