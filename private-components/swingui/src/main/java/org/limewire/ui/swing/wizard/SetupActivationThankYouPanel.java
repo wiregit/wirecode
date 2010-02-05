@@ -16,6 +16,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -32,7 +33,8 @@ public class SetupActivationThankYouPanel extends JPanel {
     @Resource
     private Color expiredMessageColor;
     
-    public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense) {
+    public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense,
+            Application application) {
         super(new MigLayout("fill, insets 50 15 0 15, gap 0, gapy 0", "[]", "[][][][][][]"));
         
         GuiUtils.assignResources(this);
@@ -57,7 +59,7 @@ public class SetupActivationThankYouPanel extends JPanel {
 
         add(Box.createVerticalStrut(10), "wrap");
 
-        SetupActivationTable table = new SetupActivationTable(eventList);
+        SetupActivationTable table = new SetupActivationTable(eventList, application);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
         configureEnclosingScrollPane(scrollPane, table);

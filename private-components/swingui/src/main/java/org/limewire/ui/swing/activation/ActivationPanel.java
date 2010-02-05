@@ -37,6 +37,7 @@ import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -99,16 +100,17 @@ public class ActivationPanel {
     private CardLayout cardLayout;
 
     @Inject
-    public ActivationPanel(ActivationManager activationManager, CalendarRenderer calendarRenderer) {
+    public ActivationPanel(ActivationManager activationManager, CalendarRenderer calendarRenderer,
+            Application application) {
         this.activationManager = activationManager;
         listener = new ActivationListener();
         eventList = new BasicEventList<ActivationItem>();
         stateManager = new StateManager();
         
-        initComponents(calendarRenderer);
+        initComponents(calendarRenderer, application);
     }
     
-    private void initComponents(CalendarRenderer calendarRenderer) {
+    private void initComponents(CalendarRenderer calendarRenderer, Application application) {
         GuiUtils.assignResources(this);   
         
         activationPanel = new JPanel(new MigLayout("gap 0, fillx, insets 20 20 20 20"));
@@ -137,7 +139,7 @@ public class ActivationPanel {
         
         underneathModuleTableMessagePanel = new UnderneathActivationTableMessagePanel();
         
-        table = new ActivationTable(eventList, calendarRenderer);
+        table = new ActivationTable(eventList, calendarRenderer, application);
 
         scrollPane = new JScrollPane(table);
         int height = 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 2;

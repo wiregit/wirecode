@@ -31,6 +31,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.core.api.Application;
 import org.limewire.ui.swing.activation.ActivationInfoAction;
 import org.limewire.ui.swing.activation.ActivationItemComparator;
 import org.limewire.ui.swing.components.IconButton;
@@ -52,9 +53,12 @@ class SetupActivationTable extends BasicJXTable {
     @Resource private Icon infoIcon;
     
     protected MouseMotionListener mouseOverEditorListener;
+    private Application application;
 
-    public SetupActivationTable(List<ActivationItem> activationItems) {
+    public SetupActivationTable(List<ActivationItem> activationItems, Application application) {
         super();
+        
+        this.application = application;
         
         GuiUtils.assignResources(this);
 
@@ -211,7 +215,7 @@ class SetupActivationTable extends BasicJXTable {
             strut2.setVisible(false);
             
             infoButton = new IconButton(infoIcon);
-            infoButton.addActionListener(new ActivationInfoAction(this, SetupActivationTable.this));
+            infoButton.addActionListener(new ActivationInfoAction(this, SetupActivationTable.this, application));
             infoButton.setVisible(false);
             
             setLayout(new MigLayout("filly, insets 0 5 0 5, hidemode 3"));

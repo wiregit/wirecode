@@ -20,6 +20,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -49,7 +50,7 @@ class ActivationTable extends MouseableTable {
     
     private final DefaultEventTableModel<ActivationItem> model;
     
-    public ActivationTable(EventList<ActivationItem> eventList, CalendarRenderer calendarRenderer) {
+    public ActivationTable(EventList<ActivationItem> eventList, CalendarRenderer calendarRenderer, Application application) {
         GuiUtils.assignResources(this);
 
         model = new DefaultEventTableModel<ActivationItem>(new SortedList<ActivationItem>(eventList, new ActivationItemComparator()), new ActivationTableFormat());
@@ -70,7 +71,7 @@ class ActivationTable extends MouseableTable {
         
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellRenderer(new ExpiredRenderer());
         ExpiredRenderer expiredRenderer = new ExpiredRenderer();
-        expiredRenderer.addActionListener(new ActivationInfoAction(expiredRenderer, this));
+        expiredRenderer.addActionListener(new ActivationInfoAction(expiredRenderer, this, application));
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellEditor(expiredRenderer);
         
         setupHighlighters();

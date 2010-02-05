@@ -19,6 +19,7 @@ public class SetupPage3 extends WizardPage {
 
     private final ActivationManager activationManager;
     private final Wizard wizard;
+    private final Application application;
     private final boolean userHasPreexistingLicense;
     
     private ActivationListener activationListener;
@@ -38,6 +39,7 @@ public class SetupPage3 extends WizardPage {
         
         GuiUtils.assignResources(this);
 
+        this.application = application;
         this.activationManager = activationManager;
         this.wizard = wizard;
         userHasPreexistingLicense = !ActivationSettings.ACTIVATION_KEY.isDefault();
@@ -114,7 +116,7 @@ public class SetupPage3 extends WizardPage {
 
     private void showModuleInfoPage() {
         removeAll();
-        add(new SetupActivationThankYouPanel(SetupPage3.this, activationManager.getActivationItems(), userHasPreexistingLicense));
+        add(new SetupActivationThankYouPanel(SetupPage3.this, activationManager.getActivationItems(), userHasPreexistingLicense, application));
         footerText = I18n.tr("You can edit your licenses from File > License...");
         forwardText = I18n.tr("Done");
         hasBackButton = false;
