@@ -190,10 +190,10 @@ public class LimeWireSwingUI extends JPanel {
         if(title == null)
             return;
         if(isPro) {
-            if(!title.endsWith("Pro"))
-                title += " Pro";
+            if(!title.endsWith("PRO"))
+                title += " PRO";
         } else {
-           if(title.endsWith("Pro"))
+           if(title.endsWith("PRO"))
                title = title.substring(0, title.length()-4);
         }   
         frame.setTitle(title);
