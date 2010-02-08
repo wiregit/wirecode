@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -164,7 +165,10 @@ public class ActivationPanel {
         
         activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + ", gpy 200, wrap");
         
-        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, width " + tableWidth + "!, span, growx, wrap");
+        FontMetrics metrics = underneathModuleTableMessagePanel.getFontMetrics(underneathModuleTableMessagePanel.getMessagePanelFont());
+        int fontHeight = metrics.getHeight();
+
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 0, width " + tableWidth + "!, height " + (2*fontHeight+1) + "!, span, growx, wrap");
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
@@ -526,6 +530,10 @@ public class ActivationPanel {
             
             add(iconLabel, "gap right 5, aligny 50%");
             add(textLabel, "growx");
+        }
+        
+        public Font getMessagePanelFont() {
+            return textLabel.getFont();
         }
 
         public void setState(MessageState state) {
