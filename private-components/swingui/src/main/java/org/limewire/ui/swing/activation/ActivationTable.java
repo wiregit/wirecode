@@ -3,6 +3,7 @@ package org.limewire.ui.swing.activation;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
@@ -230,12 +231,14 @@ class ActivationTable extends MouseableTable {
 
             iconButton.setVisible(false);
             expiredLabel.setVisible(false);
+            FontMetrics metrics = getFontMetrics(rendererFont);
+            int fontWidth = metrics.stringWidth("12/30/30");
             
-            setLayout(new MigLayout("fill, insets 0, hidemode 3"));
+            setLayout(new MigLayout("fill, debug, insets 0, hidemode 3", "[][grow]", "[]"));
 
-            add(dateLabel, "alignx left, aligny 50%");
-            add(iconButton, "span, growx, align 50%");
-            add(expiredLabel, "span, growx, align 50%");
+            add(dateLabel, "alignx left, width " + fontWidth + ", aligny 50%");
+            add(iconButton, "split 2, align 50%");
+            add(expiredLabel, "align 50%");
         }
         
         public void addActionListener(ActionListener listener) {
