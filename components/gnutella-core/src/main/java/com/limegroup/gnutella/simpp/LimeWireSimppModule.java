@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
+import java.net.URI;
 
 import org.limewire.inject.LazySingleton;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.URIUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -27,7 +27,7 @@ public class LimeWireSimppModule extends AbstractModule {
     
     @Provides @LazySingleton @Simpp CertificateProvider simppCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
             CertificateVerifier certificateVerifier) {
-        return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URIUtils.toSafeUri("http://localhost/"));
+        return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URI.create("http://static.limewire.com/simpp/simpp.cert"));
     }
     
     @Provides @Simpp CertifiedMessageVerifier simppMessageVerifier(@Simpp CertificateProvider certificateProvider) {

@@ -1,12 +1,24 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicHttpResponse;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -16,6 +28,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -25,6 +38,7 @@ import com.google.inject.Injector;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
@@ -85,7 +99,15 @@ public class SimppManagerTest extends LimeTestCase {
 
     private File BELOW_MIN_FILE;
 
-    private NotifyingSimpleTimer backgroundExecutor = new NotifyingSimpleTimer(); 
+    private NotifyingSimpleTimer backgroundExecutor = new NotifyingSimpleTimer();
+
+    private Mockery context;
+
+    private HttpExecutor httpExecutor;
+
+    private LimeHttpClient limeHttpClient;
+    
+    private byte[] defaultSimppData = null;
     
     public SimppManagerTest(String name) {
         super(name);
@@ -97,6 +119,14 @@ public class SimppManagerTest extends LimeTestCase {
 
     @Override
     public void setUp() throws Exception {
+        context = new Mockery();
+        httpExecutor = context.mock(HttpExecutor.class);
+        limeHttpClient = context.mock(LimeHttpClient.class);
+        
+        context.checking(new Expectations() {{
+            ignoring(limeHttpClient).releaseConnection(with(any(HttpResponse.class)));
+        }});
+        
         setSettings();
     }
     
@@ -106,7 +136,7 @@ public class SimppManagerTest extends LimeTestCase {
             protected void configure() {
                 bind(SimppDataProvider.class).toInstance(new SimppDataProvider() {
                     public byte[] getDefaultData() {
-                        return null;
+                        return defaultSimppData;
                     }
                     public byte[] getOldUpdateResponse() {
                         return new SimppDataProviderImpl().getOldUpdateResponse();
@@ -114,6 +144,8 @@ public class SimppManagerTest extends LimeTestCase {
                 });
                 bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAHNFDNZU6UKXDJP5N7NGWAD2YQMOU23C5IRAJHNHHSDJQITAY3BRZGMUONFNOJFR74VMICCOS4UNEPZMDA46ACY5BCGRSRLPGU3XIIXZATSCOL5KFHWGOJZCZUAVFHHQHENYOIJVGFSFULPIXRK2AS45PHNNFCYCDLHZ4SQNFLZN43UIVR4DOO6EYGYP2QYCPLVU2LJXW745S"));
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
+                bind(HttpExecutor.class).toInstance(httpExecutor);
+                bind(LimeHttpClient.class).toInstance(limeHttpClient);
             }
         });
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
@@ -563,7 +595,29 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     // download cert from newCertURL, and load and accept simpp
-    public void testStartLoadMissingCertAndDownloadOKAndGoodSimpp() throws Exception {}
+    public void testStartLoadMissingCertAndDownloadOKAndGoodSimpp() throws Exception {
+        changeSimppFile(TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass()));
+        assertTrue(certFile.delete());
+        
+        final HttpResponse httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
+        byte[] certBytes = FileUtils.readFileFully(TestUtils.getResourceInPackage("slave.cert.15", getClass()));
+        ByteArrayEntity byteArrayEntity = new ByteArrayEntity(certBytes);
+        byteArrayEntity.setContentEncoding("UTF-8");
+        httpResponse.setEntity(byteArrayEntity);
+        
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
+            will(returnValue(httpResponse));
+            
+            ignoring(limeHttpClient).execute(with(any(HttpUriRequest.class)));
+            will(throwException(new IOException()));
+        }});
+        
+        createSimppManager();
+        assertVersionNumbers(5, 15, 25);
+        
+        context.assertIsSatisfied();
+    }
     // do not accept simpp in this session
     public void testStartLoadMissingCertAndFailedDownload() throws Exception {}
     // do not accept simpp in this session
@@ -727,7 +781,28 @@ public class SimppManagerTest extends LimeTestCase {
     
     
     // reject.   
-    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadFailed() throws Exception {}
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadFailed() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+            
+            ignoring(limeHttpClient).execute(with(any(HttpUriRequest.class)));
+            will(throwException(new IOException()));
+        }});
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_NoCert", getClass());
+        
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);
+        
+        context.assertIsSatisfied();
+    }
     // reject.   
     public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKBadCertSig() throws Exception {}
     // accept. New Cert stored.   
@@ -798,6 +873,22 @@ public class SimppManagerTest extends LimeTestCase {
         
         public boolean waitForSimppUpdate(long timeout, TimeUnit unit) throws InterruptedException {
             return latch.await(timeout, unit);
+        }
+    }
+    
+    private static class SimppCertificateRequestMatcher extends BaseMatcher<HttpUriRequest> {
+        @Override
+        public boolean matches(Object item) {
+            if (item instanceof HttpGet) {
+                HttpGet get = (HttpGet)item;
+                if (get.getURI().equals(URI.create("http://static.limewire.com/simpp/simpp.cert"))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        @Override
+        public void describeTo(Description description) {
         }
     }
 }
