@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.activation;
 
+import java.awt.Font;
 import java.net.URL;
 
 import javax.swing.JComponent;
@@ -38,14 +39,16 @@ public class ActivationUtilities {
                     }
                 }
             });
-            textLabel.setText("<html>" + I18n.tr("{0} is not supported by LimeWire {1}. Please ", item.getLicenseName(), lwVersion) 
+            Font font = new MultiLineLabel().getFont();
+            textLabel.setText("<html>" + "<font size=\"4\" face=\"" + font.getFontName() + "\">" + I18n.tr("{0} is not supported by LimeWire {1}. Please ", item.getLicenseName(), lwVersion) 
                               + "<a href='" + ActivationSettings.LIMEWIRE_DOWNLOAD_HOST.get() + "'>" + I18n.tr("upgrade") + "</a>" 
                               + I18n.tr(" to the latest version.") + "</html>");
             return textLabel;
         case UNUSEABLE_OS:
             String osName = OSUtils.getOS();
             String osVersion = OSUtils.getOSVersion();
-            return new MultiLineLabel(I18n.tr("{0} is not supported by " + osName + " " + osVersion + "." + I18n.tr(" We apologize for the inconvenience."), item.getLicenseName()));
+            MultiLineLabel label = new MultiLineLabel(I18n.tr("{0} is not supported by " + osName + " " + osVersion + "." + I18n.tr(" We apologize for the inconvenience."), item.getLicenseName()));
+            return label;
         case EXPIRED:
             return new MultiLineLabel(I18n.tr("{0} is expired.", item.getLicenseName()));
         default:
