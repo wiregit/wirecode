@@ -75,9 +75,9 @@ public class SetupActivationThankYouPanel extends JPanel {
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
             if (areSomeModulesExpired(eventList)) {
-                JLabel infoTextLine1 = wizardPage.createAndDecorateLabel(I18n.tr("Click"));
-                HyperlinkButton infoTextLine2a = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_RENEWAL_HOST.get(), I18n.tr("here"));
-                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" to renew your features."));
+                JLabel infoTextLine1 = wizardPage.createAndDecorateLabel(I18n.tr("You can renew your features at your"));
+                HyperlinkButton infoTextLine2a = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get(), I18n.tr("user account"));
+                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" page."));
                 innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");
                 JLabel noticeLabel = new JLabel(noticeIcon);
                 innerPanel.add(noticeLabel, "align 50% 50%, split");

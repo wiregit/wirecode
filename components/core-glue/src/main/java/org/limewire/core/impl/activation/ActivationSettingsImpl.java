@@ -43,7 +43,7 @@ public class ActivationSettingsImpl implements ActSettings {
 
     @Override
     public String getActivationRenewalHost() {
-        return ActivationSettings.ACTIVATION_RENEWAL_HOST.get() + "?" + ActivationSettings.MODULE_KEY_IDENTIFIER.get();
+        return ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get();
     }
     
     public String getCustomerSupportHost() {

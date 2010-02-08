@@ -89,7 +89,7 @@ public class SetupActivationPanel extends JPanel {
 
         // TODO Change this link to point to the correct get key page.
         add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
-        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink("http://www.limewire.com/",
+        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get(),
                                                                                  I18n.tr("I don't know my license key"));
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
