@@ -13,8 +13,11 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
     
     private final CertificateProvider certificateProvider;
 
-    public CertifiedMessageVerifierImpl(CertificateProvider certificateProvider) {
+    private final CertificateVerifier certificateVerifier;
+
+    public CertifiedMessageVerifierImpl(CertificateProvider certificateProvider, CertificateVerifier certificateVerifier) {
         this.certificateProvider = certificateProvider;
+        this.certificateVerifier = certificateVerifier;
     }
     
     @Override
@@ -23,8 +26,7 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         Certificate certificate = message.getCertificate();
         if (certificate != null) {
             LOG.debugf("message comes with new certificate: {0}", certificate);
-            // try to set certificate, if it is older or invalid this will fail
-            certificateProvider.set(certificate);
+            certificateProvider.set(certificateVerifier.verify(certificate));
         } 
         certificate = certificateProvider.get();
         if (message.getKeyVersion() < certificate.getKeyVersion()) {

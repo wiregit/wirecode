@@ -124,6 +124,8 @@ public class SimppManagerTest extends LimeTestCase {
         limeHttpClient = context.mock(LimeHttpClient.class);
         
         context.checking(new Expectations() {{
+            ignoring(limeHttpClient).execute(with(new NonSimppCertificateRequestMatcher()));
+            will(throwException(new IOException()));
             ignoring(limeHttpClient).releaseConnection(with(any(HttpResponse.class)));
         }});
         
@@ -608,9 +610,6 @@ public class SimppManagerTest extends LimeTestCase {
         context.checking(new Expectations() {{
             one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
             will(returnValue(httpResponse));
-            
-            ignoring(limeHttpClient).execute(with(any(HttpUriRequest.class)));
-            will(throwException(new IOException()));
         }});
         
         createSimppManager();
@@ -618,6 +617,20 @@ public class SimppManagerTest extends LimeTestCase {
         
         context.assertIsSatisfied();
     }
+    
+    public void testStartLoadMissingSimppUsesDefaultData() throws Exception {
+        assertTrue(_simppFile.delete());
+        assertTrue(certFile.delete());
+        
+        File defaultDataFile = TestUtils.getResourceInPackage("simpp.xml.ov656_kv4_nv4_cert", getClass());
+        defaultSimppData = FileUtils.readFileFully(defaultDataFile);
+        assertNotNull(defaultSimppData);
+        
+        createSimppManager();
+        assertVersionNumbers(656, 4, 4);
+        assertTrue(certFile.exists());
+    }
+    
     // do not accept simpp in this session
     public void testStartLoadMissingCertAndFailedDownload() throws Exception {}
     // do not accept simpp in this session
@@ -786,9 +799,6 @@ public class SimppManagerTest extends LimeTestCase {
         context.checking(new Expectations() {{
             one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
             will(throwException(new IOException()));
-            
-            ignoring(limeHttpClient).execute(with(any(HttpUriRequest.class)));
-            will(throwException(new IOException()));
         }});
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
@@ -891,4 +901,21 @@ public class SimppManagerTest extends LimeTestCase {
         public void describeTo(Description description) {
         }
     }
+    
+    private static class NonSimppCertificateRequestMatcher extends BaseMatcher<HttpUriRequest> {
+        @Override
+        public boolean matches(Object item) {
+            if (item instanceof HttpGet) {
+                HttpGet get = (HttpGet)item;
+                if (get.getURI().equals(URI.create("http://static.limewire.com/simpp/simpp.cert"))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        @Override
+        public void describeTo(Description description) {
+        }
+    }
+    
 }
