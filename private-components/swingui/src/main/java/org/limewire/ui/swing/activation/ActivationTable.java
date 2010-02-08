@@ -2,13 +2,12 @@ package org.limewire.ui.swing.activation;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
@@ -47,6 +46,8 @@ class ActivationTable extends MouseableTable {
     private Icon infoIcon;
     @Resource
     private Color expiredColor;
+    @Resource
+    private Font rendererFont;
     
     private final DefaultEventTableModel<ActivationItem> model;
     
@@ -147,6 +148,7 @@ class ActivationTable extends MouseableTable {
         public LicenseTypeEditorRenderer() {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
+            nameLabel.setFont(rendererFont);
             licenseAction = new UrlAction(I18n.tr("Lost your license?"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get());
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
@@ -220,20 +222,20 @@ class ActivationTable extends MouseableTable {
         public ExpiredRenderer() {
             setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
             dateLabel = new JLabel();
+            dateLabel.setFont(rendererFont);
             iconButton = new IconButton(infoIcon);
             expiredLabel = new JLabel(I18n.tr("Expired"));
             expiredLabel.setForeground(expiredColor);
+            expiredLabel.setFont(rendererFont);
 
             iconButton.setVisible(false);
             expiredLabel.setVisible(false);
             
-            setLayout(new GridLayout(1, 2));
-            add(dateLabel);
-            JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0, hidemode 3"));
-            innerPanel.setOpaque(false);
-            innerPanel.add(iconButton);
-            innerPanel.add(expiredLabel);
-            add(innerPanel);
+            setLayout(new MigLayout("fill, insets 0, hidemode 3"));
+
+            add(dateLabel, "alignx left, aligny 50%");
+            add(iconButton, "span, growx, align 50%");
+            add(expiredLabel, "span, growx, align 50%");
         }
         
         public void addActionListener(ActionListener listener) {

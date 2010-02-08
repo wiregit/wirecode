@@ -162,7 +162,7 @@ public class ActivationPanel {
         
         activationPanel.add(licenseErrorLabel, "span, growx, aligny 50%, height 27!, wrap");
         
-        activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + "!, gpy 200, wrap");
+        activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + ", gpy 200, wrap");
         
         activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, width " + tableWidth + "!, span, growx, wrap");
 
