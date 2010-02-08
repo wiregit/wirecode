@@ -18,11 +18,14 @@ import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.malware.AntivirusUpdateType;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Address;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
-
+/**
+ * Implementation of DownloadItem for mock core.
+ */
 public class MockDownloadItem implements DownloadItem {
 
 	private volatile String title;
@@ -308,7 +311,12 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public Object getDownloadProperty(DownloadPropertyKey key) {
-        return null;
+        switch (key) {
+        case ANTIVIRUS_UPDATE_TYPE: 
+            return AntivirusUpdateType.FULL;
+        default:
+            return null;
+        }
     }
 
     @Override
