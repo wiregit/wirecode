@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,8 +23,19 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
+import org.limewire.activation.serial.ActivationSerializerImpl;
+import org.limewire.activation.serial.ActivationSerializerSettings;
+import org.limewire.activation.serial.ActivationSerializerSettingsImpl;
+import org.limewire.common.LimeWireCommonModule;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.LimeWireHttpModule;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.security.certificate.CipherProvider;
+import org.limewire.security.certificate.CipherProviderImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
 
@@ -33,10 +44,12 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class ActivationManagerTest extends BaseTestCase {
     
-    private ActivationSettingStub settingStub;
+    private ActSettings activationSettings;
     
     protected Injector injector;
     private ActivationResponseFactory responseFactory;
@@ -62,6 +75,7 @@ public class ActivationManagerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         injector = Guice.createInjector(Stage.DEVELOPMENT, getModules());
         responseFactory = injector.getInstance(ActivationResponseFactory.class);
+        activationSettings = injector.getInstance(ActSettings.class);
     }
     
     private Module[] getModules() {
@@ -69,12 +83,28 @@ public class ActivationManagerTest extends BaseTestCase {
         modules.add(new AbstractModule() {
             @Override
             public void configure(){
+                bind(CipherProvider.class).to(CipherProviderImpl.class);
                 bind(ActSettings.class).to(ActivationSettingStub.class);
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new SimpleTimer(true));
+                
+                LimeScheduledThreadPoolExecutor scheduledThreadExecutor = 
+                    new LimeScheduledThreadPoolExecutor(1, 
+                        ExecutorsHelper.daemonThreadFactory("FastExecutor"));
+                
+                bind(Executor.class).annotatedWith(Names.named("fastExecutor")).toInstance(scheduledThreadExecutor);
+                bind(ScheduledExecutorService.class).annotatedWith(
+                    Names.named("fastExecutor")).toInstance(scheduledThreadExecutor);
+                bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
+                
+                bind(ActivationModel.class).to(ActivationModelImpl.class);
+                bind(ActivationSerializer.class).to(ActivationSerializerImpl.class);
+                bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
+                bind(ActivationSerializerSettings.class).to(ActivationSerializerSettingsImpl.class);
             }
         });
-//        modules.add(new LimeWireCoreModule());
-//        modules.add(new CoreGlueModule());
-        modules.add(new ActivationModule());
+        modules.add(new LimeWireHttpModule());
+        modules.add(new LimeWireCommonModule());
+        modules.add(new LimeWireNetTestModule());
         return modules.toArray(new Module[modules.size()]);
     }
 
@@ -94,7 +124,7 @@ public class ActivationManagerTest extends BaseTestCase {
         ActivationCommunicator comm = getCommunicatorByJsonResponse(successfulLookupJson); 
         ActivationManagerImpl activationManager = getActivationManager(comm);
         
-//        ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("L4RXLP28XVQ5");
         activationManager.start();
         assertTrue("Timed out waiting for activation competion.", 
             waitForSuccessfulActivation(activationManager, 10));
@@ -132,7 +162,7 @@ public class ActivationManagerTest extends BaseTestCase {
     }
     
     public void testStartServiceInvalidKeyShouldNotEvenGoToServer() throws Exception {
-//        ActivationSettings.ACTIVATION_KEY.set("invalid Key");
+        activationSettings.setActivationKey("invalid Key");
         final AtomicBoolean serverContacted = new AtomicBoolean(false);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -151,7 +181,7 @@ public class ActivationManagerTest extends BaseTestCase {
     }
     
     public void testStartServiceRetriesServerStaysDown() throws Exception {
-//        ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("L4RXLP28XVQ5");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -190,7 +220,7 @@ public class ActivationManagerTest extends BaseTestCase {
                 "   \"duration\":\"0.005184\"\n" +
                 "}";
         
-//        ActivationSettings.ACTIVATION_KEY.set("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("L4RXLP28XVQ5");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -225,7 +255,7 @@ public class ActivationManagerTest extends BaseTestCase {
     //
     public void testNotFoundResponseErasesKeyAndMcodeNoAutoStart() throws Exception {
         String KEY = "L4RXLP28XVQ5";
-//        ActivationSettings.ACTIVATION_KEY.set(KEY);
+        activationSettings.setActivationKey(KEY);
         final String json = "{\"response\":\"notfound\",\"lid\":\"HT5YXS7CWGRG\"," +
                              "\"guid\":\"44444444444444444444444444444444\",\"refresh\":1440," +
                              "\"mcode\":\"\",\"duration\":\"0.001737\"}";
@@ -243,8 +273,8 @@ public class ActivationManagerTest extends BaseTestCase {
         assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
-//        assertEquals("", ActivationSettings.ACTIVATION_KEY.get());
-//        assertEquals("", ActivationSettings.M_CODE.get());
+        assertEquals("", activationSettings.getActivationKey());
+        assertEquals("", activationSettings.getMCode());
         
         // after "notfound" is received and processed, calling start() on activation manager
         // should not result in contacting the activation server
@@ -263,8 +293,8 @@ public class ActivationManagerTest extends BaseTestCase {
     public void testStopResponseErasesKeyButMcodeStaysNoAutoStart() throws Exception {
         String KEY = "L4RXLP28XVQ5";
         String MCODE = "cvnb";
-//        ActivationSettings.ACTIVATION_KEY.set(KEY);
-//        ActivationSettings.M_CODE.set(MCODE);
+        activationSettings.setActivationKey(KEY);
+        activationSettings.setMCode(MCODE);
         final String json = "{\"response\":\"stop\",\"lid\":" +
                              "\"HT5YXS7CWGRG\",\"guid\":\"44444444444444444444444444444444\"," +
                              "\"refresh\":0,\"mcode\":\"cvnb\",\"duration\":\"0.001739\"}";
@@ -282,8 +312,8 @@ public class ActivationManagerTest extends BaseTestCase {
         assertEquals(activationManager.getActivationState(), ActivationState.NOT_AUTHORIZED);
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
-//        assertEquals("", ActivationSettings.ACTIVATION_KEY.get());
-//        assertEquals(MCODE, ActivationSettings.M_CODE.get());
+        assertEquals("", activationSettings.getActivationKey());
+        assertEquals(MCODE, activationSettings.getMCode());
         
         // after "stop" is received and processed, calling start() on activation manager
         // should not result in contacting the activation server
@@ -311,10 +341,7 @@ public class ActivationManagerTest extends BaseTestCase {
         });
         // check if activation is done, before waiting for a state change.
         ActivationState state = activationManager.getActivationState();
-        if (isSuccessfulState(state)) {
-            return true;
-        }
-        return latch.await(delay, TimeUnit.SECONDS);        
+        return isSuccessfulState(state) || latch.await(delay, TimeUnit.SECONDS);
     }
      
     
@@ -327,16 +354,16 @@ public class ActivationManagerTest extends BaseTestCase {
     }
     
     /**
+     * @param comm ActivationCommunicator
      * @return an {@link ActivationManager} object with a
      * stub/mocked {@link ActivationCommunicator}
      */
     private ActivationManagerImpl getActivationManager(ActivationCommunicator comm) {
-        settingStub = new ActivationSettingStub();
         ActivationModel model = injector.getInstance(ActivationModel.class);
         ActivationSerializer serializer = injector.getInstance(ActivationSerializer.class);
-        ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
+        ScheduledExecutorService scheduler = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("fastExecutor")));
         ActivationResponseFactory factory = injector.getInstance(ActivationResponseFactory.class);
-        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, injector.getInstance(ActSettings.class));
+        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, activationSettings);
     }
         
     private boolean isSuccessfulState(ActivationState state) {
