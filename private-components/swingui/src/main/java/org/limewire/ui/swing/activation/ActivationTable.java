@@ -234,7 +234,7 @@ class ActivationTable extends MouseableTable {
             FontMetrics metrics = getFontMetrics(rendererFont);
             int fontWidth = metrics.stringWidth("12/30/30");
             
-            setLayout(new MigLayout("fill, debug, insets 0, hidemode 3", "[][grow]", "[]"));
+            setLayout(new MigLayout("fill, insets 0, hidemode 3", "[][grow]", "[]"));
 
             add(dateLabel, "alignx left, width " + fontWidth + ", aligny 50%");
             add(iconButton, "split 2, align 50%");
