@@ -24,7 +24,7 @@ import com.google.inject.Provider;
  *
  * - activating / validating at startup and periodically with pkey
  * - retry automatically if server is down
- * - if activation is attemted while another is in progress, cancel old one
+ * - if activation is attempted while another is in progress, cancel old one
  *   in favor of new one.
  */
 class ActivationCommunicatorImpl implements ActivationCommunicator {

@@ -28,9 +28,6 @@ import org.limewire.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-/**
- * 
- */
 @EagerSingleton
 class ActivationManagerImpl implements ActivationManager, Service {
     
@@ -395,6 +392,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void transitionToState(State newState, ActivationResponse response) {
+        LOG.debugf("transitioning to state:", newState);
         synchronized(this) {
             switch(newState) {
                 case NOT_ACTIVATED:

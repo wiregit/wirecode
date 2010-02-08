@@ -21,7 +21,8 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
-import org.limewire.ui.swing.activation.ActivationStateIconPanel;
+import org.limewire.ui.swing.activation.ActivationWarningPanel;
+import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -32,7 +33,7 @@ public class SetupActivationPanel extends JPanel {
     private final ActivationManager activationManager;
     
     private JTextField licenseField;
-    private ActivationStateIconPanel iconPanel;
+    private ActivationWarningPanel iconPanel;
     private JLabel errorMessageLabel;
     private ActivationListener activationListener;
     private JPanel customerSupportLabel;
@@ -66,8 +67,8 @@ public class SetupActivationPanel extends JPanel {
         add(errorMessageLabel, "spanx 1, growx, cell 2 5"); //wrap
         add(Box.createRigidArea(new Dimension(1, 33)), "spanx 1, growx, cell 2 5"); //wrap
 
-        iconPanel = new ActivationStateIconPanel();
-        add(iconPanel, "cell 1 6, aligny 50%");
+        iconPanel = new ActivationWarningPanel();
+        add(iconPanel.getComponent(), "cell 1 6, aligny 50%");
         add(Box.createHorizontalStrut(3), "cell 1 6, aligny 50%");
 
         add(wizardPage.createAndDecorateHeader(I18n.tr("License Key") + ":"), "aligny 50%");
@@ -109,25 +110,24 @@ public class SetupActivationPanel extends JPanel {
     public void reset() {
         if (activationManager.getActivationError() != ActivationError.NO_ERROR && activationManager.getActivationError() != ActivationError.BLOCKED_KEY) {
             setActivationError(ActivationError.NO_ERROR);
-            iconPanel.showNoIcon();
+            iconPanel.setActivationMode(Mode.EMPTY);
             licenseField.setText("");
         }
     }
     
     private void setActivationState(ActivationState state) {
-        switch(state) 
-        {
+        switch(state) {
         case NOT_AUTHORIZED:
-            iconPanel.showErrorIcon();
+            iconPanel.setActivationMode(Mode.WARNING);
             return;
         case AUTHORIZING:
-            iconPanel.showBusyIcon();
+            iconPanel.setActivationMode(Mode.SPINNER);
             return;
         case REFRESHING:
-            iconPanel.showBusyIcon();
+            iconPanel.setActivationMode(Mode.SPINNER);
             return;
         case AUTHORIZED:
-            iconPanel.showNoIcon();
+            iconPanel.setActivationMode(Mode.EMPTY);
             return;
         }
         throw new IllegalStateException("Unknown state: " + state);
@@ -159,8 +159,7 @@ public class SetupActivationPanel extends JPanel {
         throw new IllegalStateException("Unknown state: " + error);
     }
 
-    class EnterActionListener implements ActionListener
-    {
+    class EnterActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             final String key = licenseField.getText();
@@ -185,5 +184,4 @@ public class SetupActivationPanel extends JPanel {
             });
         }
     }
-
 }
