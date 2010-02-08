@@ -20,18 +20,17 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
@@ -66,13 +65,12 @@ public class SimppManagerImpl implements SimppManager {
     private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
     private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;    
     private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
-    private final ApplicationServices applicationServices;    
     private final Clock clock;
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HttpParams> defaultParams;
     private final SimppDataProvider simppDataProvider;
-    private final ActivationManager activationManager;
+    private final HttpClientInstanceUtils httpClientUtils;
     
     private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v2/simpp.def",
             "http://simpp2.limewire.com/v2/simpp.def",
@@ -89,24 +87,23 @@ public class SimppManagerImpl implements SimppManager {
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
     
     private static enum UpdateType {
-        FROM_NETWORK, FROM_DISK, FROM_HTTP;
+        FROM_NETWORK, FROM_DISK, FROM_HTTP
     }
     
     @Inject
     public SimppManagerImpl(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker, Clock clock,
-            ApplicationServices applicationServices, Provider<HttpExecutor> httpExecutor,
+            Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider, ActivationManager activationManager) {
+            SimppDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils) {
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
-        this.applicationServices = applicationServices;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         this.httpExecutor = httpExecutor;
         this.backgroundExecutor = backgroundExecutor;
         this.defaultParams = defaultParams;
         this.simppDataProvider = simppDataProvider;
-        this.activationManager = activationManager;
+        this.httpClientUtils = httpClientUtils;
     }
     
     List<String> getMaxUrls() {
@@ -297,8 +294,7 @@ public class SimppManagerImpl implements SimppManager {
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getMCode()));
+        HttpGet get = new HttpGet(httpClientUtils.addClientInfoToUrl(url));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
