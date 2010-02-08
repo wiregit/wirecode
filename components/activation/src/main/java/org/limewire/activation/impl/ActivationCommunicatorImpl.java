@@ -21,14 +21,15 @@ import com.google.inject.Provider;
 
 /**
  * Responsible for communicating with activation server.
- *
+ * <pre>
  * - activating / validating at startup and periodically with pkey
  * - retry automatically if server is down
  * - if activation is attempted while another is in progress, cancel old one
  *   in favor of new one.
+ * </pre>
  */
 class ActivationCommunicatorImpl implements ActivationCommunicator {
-    private static Log LOG = LogFactory.getLog(ActivationCommunicatorImpl.class);
+    private final static Log LOG = LogFactory.getLog(ActivationCommunicatorImpl.class);
     
     private final ActivationResponseFactory activationFactory;
     private final Provider<LimeHttpClient> httpClientProvider;
@@ -62,17 +63,21 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         httpPost.addHeader("Connection", "close");
         httpPost.addHeader("Content-Type", URLEncodedUtils.CONTENT_TYPE);
         httpPost.setEntity(postContent);
-
         HttpClient httpClient = httpClientProvider.get();
-        HttpResponse response = httpClient.execute(httpPost);
-        int statusCode = response.getStatusLine().getStatusCode();
-        HttpEntity entity = response.getEntity();
-        if (statusCode != 200 || entity == null) {
-            throw new IOException("invalid http response, status: " + statusCode
-                   + ", entity: " + ((entity != null) ? EntityUtils.toString(entity) : "none"));
+        
+        HttpResponse response = null;
+        try {
+            response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            if (statusCode != 200 || entity == null) {
+                throw new IOException("invalid http response, status: " + statusCode
+                       + ", entity: " + ((entity != null) ? EntityUtils.toString(entity) : "none"));
+            }
+            return EntityUtils.toString(entity);
+        } finally {
+            HttpClientUtils.releaseConnection(response);
         }
-        HttpClientUtils.releaseConnection(response);
-        return EntityUtils.toString(entity);
     }
 }
 
