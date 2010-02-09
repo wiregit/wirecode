@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.security.GeneralSecurityException;
 
 import org.limewire.activation.api.ActSettings;
 import org.limewire.activation.api.ActivationError;
@@ -276,10 +277,13 @@ class ActivationManagerImpl implements ActivationManager, Service {
             public void run() {
                 try {
                     activationSerializer.writeToDisk(moduleInfoAsJson);                        
-                } catch (Exception e) {
+                } catch (IOException e) {
                     // todo: maybe invoke an error callback if we ever decide to do anything with the error
                     if(LOG.isErrorEnabled())
-                        LOG.error("Error saving json string to disk.");
+                        LOG.error("Error saving json string to disk", e);
+                } catch (GeneralSecurityException e) {
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Error saving json string to disk", e);
                 }
             }
         });    
@@ -348,12 +352,13 @@ class ActivationManagerImpl implements ActivationManager, Service {
         @Override
         public void run() {
             ActivationResponse response;
-            Throwable error = null;
             try {
                 response = activationCommunicator.activate(key);
                 consecutiveFailedRetries = 0;
-            } catch (Throwable e) {
-                error = e;
+            } catch (IOException e) {
+                response = activationResponseFactory.createErrorResponse(Type.ERROR);
+                retryOnErrorIfNecessary();
+            } catch (InvalidDataException e) {
                 response = activationResponseFactory.createErrorResponse(Type.ERROR);
             }
             State state = getNextState(response.getResponseType());
@@ -368,8 +373,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 if (refreshVal > 0) {
                     activationContactor.rescheduleIfSooner(refreshVal*1000);
                 }        
-            } else if (error != null) {
-                retryOnErrorIfNecessary(error);
             }
         }
         
@@ -377,8 +380,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
             return (type == ActivationResponse.Type.VALID) ? State.ACTIVATED_FROM_SERVER : State.NOT_ACTIVATED;
         }
         
-        private void retryOnErrorIfNecessary(Throwable error) {
-            if ((error instanceof IOException) && (++consecutiveFailedRetries <= maxFailedConsecutiveRetries)) {
+        private void retryOnErrorIfNecessary() {
+            if (++consecutiveFailedRetries <= maxFailedConsecutiveRetries) {
                 int nextDelayInMs = consecutiveFailedRetries * 5000;
                 activationContactor.rescheduleIfSooner(nextDelayInMs);    
             }
@@ -392,7 +395,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     private void transitionToState(State newState, ActivationResponse response) {
-        LOG.debugf("transitioning to state:", newState);
+        LOG.debugf("transitioning to state {0}", newState);
         synchronized(this) {
             switch(newState) {
                 case NOT_ACTIVATED:
