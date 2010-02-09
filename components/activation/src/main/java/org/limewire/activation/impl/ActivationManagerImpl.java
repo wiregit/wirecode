@@ -25,6 +25,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -139,7 +140,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 activationContactor.unschedule();
         }
 
-        if (key == null || key.equals("")) {
+        if (StringUtils.isEmpty(key)) {  
             transitionToState(State.NOT_ACTIVATED, null);
             return false;
         }
