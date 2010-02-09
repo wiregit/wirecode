@@ -15,7 +15,10 @@ public interface ActivationItem {
         /** ActivationItem can be used. */
         ACTIVE, 
         
-        /** ActivationItem expired and must be repurchased for continued use. */
+        /** ActivationItem expired and must be repurchased for continued use. 
+         *  If an item is expired, clients will no longer be able to see if it's also
+         *  unuseable for the current os, for the current version of LimeWire, or unavailable.
+         **/
         EXPIRED, 
         
         /** ActivationItem is Active but can't be used by this Operating System. */

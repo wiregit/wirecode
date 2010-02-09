@@ -16,17 +16,20 @@ public class ActivationSettings extends LimeProps {
             "ACTIVATION_HOST", "https://qa-activate.limewire.com/lookup", "ActivationSettings.activationHost");
     
     public static final StringSetting ACTIVATION_CUSTOMER_SUPPORT_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_CUSTOMER_SUPPORT_HOST", "http://www.limewire.com/support", "ActivationSettings.activationCustomerSupportHost");
+            "ACTIVATION_CUSTOMER_SUPPORT_HOST", "http://www.limewire.com/client_redirect/?page=proSupport", "ActivationSettings.activationCustomerSupportHost");
 
     public static final StringSetting ACTIVATION_ACCOUNT_SETTINGS_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_ACCOUNT_SETTINGS_HOST", "https://www.limewire.com/support/lookup", "ActivationSettings.activationAccountSettingsHost");
+            "ACTIVATION_ACCOUNT_SETTINGS_HOST", "http://www.limewire.com/client_redirect/?page=accountDetails", "ActivationSettings.activationAccountSettingsHost");
 
-    public static final StringSetting MODULE_KEY_IDENTIFIER = FACTORY.createRemoteStringSetting(
-            "MODULE_KEY_IDENTIFIER", "moduleId=", "ActivationSettings.moduleKeyIdentifier");
-    
     // TODO: This property probably shouldn't be in this class. It's here temporarily until we can find it a better home.
-    public static final StringSetting LIMEWIRE_DOWNLOAD_HOST = FACTORY.createRemoteStringSetting(
-            "LIMEWIRE_DOWNLOAD_HOST", "http://www.limewire.com/download", "ActivationSettings.limewireDownloadHost");
+    public static final StringSetting LIMEWIRE_UPSELL_PRO_DOWNLOAD_HOST = FACTORY.createRemoteStringSetting(
+            "LIMEWIRE_UPSELL_PRO_DOWNLOAD_HOST", "http://www.limewire.com/client_redirect/?page=downloadPro", "ActivationSettings.limewireDownloadUpsellHost");
+
+    public static final StringSetting LIMEWIRE_DOWNLOAD_UPDATE_HOST = FACTORY.createRemoteStringSetting(
+            "LIMEWIRE_DOWNLOAD_UPDATE_HOST", "http://www.limewire.com/client_redirect/?page=update", "ActivationSettings.limewireDownloadUpdateHost");
+
+    public static final StringSetting RENEW_PRO_HOST = FACTORY.createRemoteStringSetting(
+            "RENEW_PRO_HOST", "http://www.limewire.com/client_redirect/?page=renewPro", "ActivationSettings.activationRenewProHost");
 
     /**
      * Returns whether this was considered a PRO version at the last shutdown. This is

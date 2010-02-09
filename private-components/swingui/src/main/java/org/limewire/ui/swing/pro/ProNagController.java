@@ -27,6 +27,7 @@ import org.limewire.ui.swing.pro.ProNag.NagContainer;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 
@@ -70,6 +71,7 @@ public class ProNagController {
      */
     private class MCodeListener implements EventListener<MCodeEvent> {
         @Override
+        @SwingEDTEvent
         public void handleEvent(final MCodeEvent event) {
             synchronized (this) {
                 waitingForMCode = false;
@@ -84,11 +86,15 @@ public class ProNagController {
         }
     }
 
-    public void setLayeredPane(final JLayeredPane layeredPane)  {
-        this.layeredPane = layeredPane;
+    public void showNagIfReady(final JLayeredPane layeredPane)  {
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            public void run() {
+                ProNagController.this.layeredPane = layeredPane;
 
-        if (isNagReady())
-            showNag();
+                if (isNagReady())
+                    showNag();
+            }
+        });
     }
     
     /*

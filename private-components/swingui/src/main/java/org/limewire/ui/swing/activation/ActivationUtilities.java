@@ -27,27 +27,17 @@ public class ActivationUtilities {
             return new MultiLineLabel(I18n.tr("{0} is no longer supported by LimeWire.", item.getLicenseName()));
         case UNUSEABLE_LW:
             String lwVersion = application.getVersion();
-            JEditorPane textLabel = new JEditorPane();
-            textLabel.setContentType("text/html");
-            textLabel.setEditable(false);
-            textLabel.setOpaque(false);
-            textLabel.addHyperlinkListener(new HyperlinkListener() {
-                @Override
-                public void hyperlinkUpdate(HyperlinkEvent e) {
-                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                        NativeLaunchUtils.openURL(e.getURL().toExternalForm());
-                    }
-                }
-            });
+            LabelWithLinkSupport textLabel = new LabelWithLinkSupport();
             Font font = new MultiLineLabel().getFont();
-            textLabel.setText("<html>" + "<font size=\"4\" face=\"" + font.getFontName() + "\">" + I18n.tr("{0} is not supported by LimeWire {1}. Please ", item.getLicenseName(), lwVersion) 
-                              + "<a href='" + ActivationSettings.LIMEWIRE_DOWNLOAD_HOST.get() + "'>" + I18n.tr("upgrade") + "</a>" 
-                              + I18n.tr(" to the latest version.") + "</html>");
+            textLabel.setText("<html>" + "<font size=\"4\" face=\"" + font.getFontName() + "\">" 
+                                + I18n.tr("{0} is not supported by LimeWire {1}. ", item.getLicenseName(), lwVersion) 
+                                + I18n.tr("Please {0}upgrade{1} to the latest version.", "<a href='" + ActivationSettings.LIMEWIRE_DOWNLOAD_UPDATE_HOST.get() + "'>", "</a>")
+                                + "</html>");
             return textLabel;
         case UNUSEABLE_OS:
             String osName = OSUtils.getOS();
             String osVersion = OSUtils.getOSVersion();
-            MultiLineLabel label = new MultiLineLabel(I18n.tr("{0} is not supported by " + osName + " " + osVersion + "." + I18n.tr(" We apologize for the inconvenience."), item.getLicenseName()));
+            MultiLineLabel label = new MultiLineLabel(I18n.tr("{0} is not supported by {1} {2}. We apologize for the inconvenience.", item.getLicenseName(), osName, osVersion));
             return label;
         case EXPIRED:
             return new MultiLineLabel(I18n.tr("{0} is expired.", item.getLicenseName()));

@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -22,6 +23,7 @@ import org.limewire.activation.api.ActivationState;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.activation.ActivationWarningPanel;
+import org.limewire.ui.swing.activation.LabelWithLinkSupport;
 import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -36,7 +38,7 @@ public class SetupActivationPanel extends JPanel {
     private ActivationWarningPanel iconPanel;
     private JLabel errorMessageLabel;
     private ActivationListener activationListener;
-    private JPanel customerSupportLabel;
+    private LabelWithLinkSupport customerSupportLabel;
     
     @Resource
     private Color errorColor;
@@ -71,7 +73,7 @@ public class SetupActivationPanel extends JPanel {
         add(iconPanel.getComponent(), "cell 1 6, aligny 50%");
         add(Box.createHorizontalStrut(3), "cell 1 6, aligny 50%");
 
-        add(wizardPage.createAndDecorateHeader(I18n.tr("License Key") + ":"), "aligny 50%");
+        add(wizardPage.createAndDecorateHeader(I18n.tr("License Key:")), "aligny 50%");
         licenseField = wizardPage.createAndDecorateLicenseKeyField();
         if (!ActivationSettings.ACTIVATION_KEY.isDefault()) {
             licenseField.setText(ActivationSettings.ACTIVATION_KEY.getValueAsString());
@@ -95,11 +97,12 @@ public class SetupActivationPanel extends JPanel {
         
         add(Box.createVerticalStrut(40), "cell 2 9");
 
-        customerSupportLabel = new JPanel();
-        customerSupportLabel.add(wizardPage.createAndDecorateLabel(I18n.tr("Please contact")));
-        customerSupportLabel.add(wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get(),
-                                                                       I18n.tr("customer support")));
-        customerSupportLabel.add(wizardPage.createAndDecorateLabel(I18n.tr("for more information.")));
+        customerSupportLabel = new LabelWithLinkSupport();
+        Font font = wizardPage.createAndDecorateLabel("").getFont();
+        customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
+                            + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get() + "'>", "</a>") 
+                            + "</font></html>");
+
         customerSupportLabel.setVisible(false);
         add(customerSupportLabel, "align 25% 50%, spanx 1, cell 2 10, hidemode 3"); //wrap
 
@@ -108,7 +111,8 @@ public class SetupActivationPanel extends JPanel {
     }
     
     public void reset() {
-        if (activationManager.getActivationError() != ActivationError.NO_ERROR && activationManager.getActivationError() != ActivationError.BLOCKED_KEY) {
+        ActivationError activationError = activationManager.getActivationError();
+        if (activationError != ActivationError.NO_ERROR && activationError != ActivationError.BLOCKED_KEY) {
             setActivationError(ActivationError.NO_ERROR);
             iconPanel.setActivationMode(Mode.EMPTY);
             licenseField.setText("");

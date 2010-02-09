@@ -51,7 +51,7 @@ public class ActivationSettingsImpl implements ActSettings {
     }
     
     public String getDownloadHost() {
-        return ActivationSettings.LIMEWIRE_DOWNLOAD_HOST.get();
+        return ActivationSettings.LIMEWIRE_UPSELL_PRO_DOWNLOAD_HOST.get();
     }
 
     @Override

@@ -37,12 +37,6 @@ public class MockActivationManager implements ActivationManager {
     }
 
     @Override
-    public boolean isValidKey(String key) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public void addListener(EventListener<ActivationEvent> listener) {
         // TODO Auto-generated method stub
         

@@ -186,7 +186,7 @@ class ProNag extends JXPanel {
         String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());
         String url = application.addClientInfoToUrl(
                 "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch 
-                + "&bgcolor=" + EncodingUtils.encode(bgColor)) + "&mcode=" + activationManager.getMCode();
+                + "&bgcolor=" + EncodingUtils.encode(bgColor));
         String backupUrl = createDefaultPage(firstLaunch, bgColor);
         
         ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);

@@ -19,14 +19,11 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.table.JTableHeader;
 
 import net.miginfocom.swing.MigLayout;
@@ -48,6 +45,7 @@ import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
+import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
@@ -118,7 +116,7 @@ public class ActivationPanel {
 
         activationPanel.setBackground(GuiUtils.getMainFrame().getBackground());
         
-        JLabel licenseKeyLabel = new JLabel(I18n.tr("License Key") + ":");
+        JLabel licenseKeyLabel = new JLabel(I18n.tr("License Key:"));
         licenseKeyLabel.setFont(font);
         licenseKeyLabel.setForeground(fontColor);
         
@@ -217,7 +215,7 @@ public class ActivationPanel {
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModal(true);
         dialog.setResizable(false);
-        dialog.setTitle(I18n.tr("LimeWire"));
+        dialog.setTitle(AppFrame.getInstance().getContext().getResourceMap().getString("Application.title"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.add(activationPanel);
         
@@ -441,7 +439,7 @@ public class ActivationPanel {
         private JButton activateButton;
         
         public NoLicenseButtonPanel() {
-            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"),"http://www.limewire.com/client_redirect/?page=gopro"));
+            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), ActivationSettings.LIMEWIRE_UPSELL_PRO_DOWNLOAD_HOST.get()));
             goProButton.setToolTipText(I18n.tr("Upgrade to PRO"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
@@ -507,7 +505,7 @@ public class ActivationPanel {
     private class UnderneathActivationTableMessagePanel extends JPanel {
         
         private final JLabel iconLabel;
-        private final JEditorPane textLabel;
+        private final LabelWithLinkSupport textLabel;
         
         public UnderneathActivationTableMessagePanel() {
             setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
@@ -515,18 +513,7 @@ public class ActivationPanel {
             
             iconLabel = new JLabel(unsupportedIcon);
             
-            textLabel = new JEditorPane();
-            textLabel.setContentType("text/html");
-            textLabel.setEditable(false);
-            textLabel.setOpaque(false);
-            textLabel.addHyperlinkListener(new HyperlinkListener() {
-                @Override
-                public void hyperlinkUpdate(HyperlinkEvent e) {
-                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                        NativeLaunchUtils.openURL(e.getURL().toExternalForm());
-                    }
-                }
-            });
+            textLabel = new LabelWithLinkSupport();
             
             add(iconLabel, "gap right 5, aligny 50%");
             add(textLabel, "growx");
@@ -539,7 +526,9 @@ public class ActivationPanel {
         public void setState(MessageState state) {
             switch(state) {
             case BLOCKED:
-                textLabel.setText("<html>" + I18n.tr("Please contact ") + "<a href='http://www.limewire.com/support'>" + I18n.tr("Customer Support") + "</a>" + I18n.tr(" to resolve the situation.") + "</html>");
+                textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">"
+                                  + I18n.tr("Please contact {0}Customer Support{1} to resolve the situation.", "<a href='" + ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get() + "'>", "</a>") 
+                                  + "</font></html>");
                 iconLabel.setVisible(false);
                 textLabel.setVisible(true);
                 return;
@@ -549,7 +538,7 @@ public class ActivationPanel {
                 textLabel.setVisible(true);
                 return;
             case UNSUPPORTED:
-                textLabel.setText("<html>" + I18n.tr("One or more of your features is currently not active. Click on <img src='" + ActivationUtilities.getInfoIconURL() + "'> for more information.") + "</html>");
+                textLabel.setText("<html>" + I18n.tr("One or more of your features is currently not active. Click on {0} for more information.", "<img src='" + ActivationUtilities.getInfoIconURL() + "'>") + "</html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
                 return;

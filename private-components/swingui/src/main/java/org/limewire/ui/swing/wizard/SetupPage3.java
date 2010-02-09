@@ -106,8 +106,7 @@ public class SetupPage3 extends WizardPage {
     }
     
     private void showLicenseEntryPage() {
-        footerText = OSUtils.isMacOSX() ? I18n.tr("You can activate LimeWire Pro later from File > License...") 
-                : I18n.tr("You can activate LimeWire Pro later from File > License...");
+        footerText = I18n.tr("You can activate LimeWire PRO later from File > License..."); 
         forwardText = I18n.tr("Skip This Step");
         hasBackButton = true;
         activationPanel = new SetupActivationPanel(this, activationManager); 

@@ -69,7 +69,6 @@ public class ActivationSettingStub implements ActSettings {
         return "http://www.limewire.com/support";
     }
 
-    @Override
     public String getDownloadHost() {
         return "http://www.limewire.com/download";
     }

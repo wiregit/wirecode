@@ -8,7 +8,7 @@ public interface ActSettings {
 
     public String getCustomerSupportHost();
     
-    public String getDownloadHost();
+//    public String getDownloadHost();
     
     public boolean isLastStartPro();
     

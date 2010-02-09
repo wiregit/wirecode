@@ -568,8 +568,6 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         @Override
         public boolean isProActive() { return false; }
         @Override
-        public boolean isValidKey(String key) { return false; }
-        @Override
         public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }
         @Override
         public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }

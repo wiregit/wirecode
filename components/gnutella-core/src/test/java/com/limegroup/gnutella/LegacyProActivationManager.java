@@ -50,7 +50,6 @@ public class LegacyProActivationManager implements ActivationManager {
     @Override public void refreshKey(String key) { }
     @Override public ActivationState getActivationState() { return null; }
     @Override public ActivationError getActivationError() { return null; }
-    @Override public boolean isValidKey(String key) { return false; }
     @Override public void addModuleListener(EventListener<ActivationModuleEvent> listener) { }
     @Override public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }
     @Override public void addListener(EventListener<ActivationEvent> listener) { }

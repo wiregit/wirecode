@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -18,6 +19,8 @@ import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
+import org.limewire.ui.swing.activation.ActivationUtilities;
+import org.limewire.ui.swing.activation.LabelWithLinkSupport;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -75,24 +78,21 @@ public class SetupActivationThankYouPanel extends JPanel {
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
             if (areSomeModulesExpired(eventList)) {
-                JLabel infoTextLine1 = wizardPage.createAndDecorateLabel(I18n.tr("You can renew your features at your"));
-                HyperlinkButton infoTextLine2a = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get(), I18n.tr("user account"));
-                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" page."));
+                LabelWithLinkSupport renewFeaturesLabel = new LabelWithLinkSupport();
+                Font font = wizardPage.createAndDecorateLabel("").getFont();
+                renewFeaturesLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
+                                    + I18n.tr("You can renew your features at your {0}user account{1} page.", "<a href='" + ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get() + "'>", "</a>") 
+                                    + "</font></html>");
+                
                 innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");
                 JLabel noticeLabel = new JLabel(noticeIcon);
                 innerPanel.add(noticeLabel, "align 50% 50%, split");
-                innerPanel.add(infoTextLine1, "align 50% 50%, split");
-                innerPanel.add(infoTextLine2a, "align 50% 50%, split, gapright 0");
-                innerPanel.add(infoTextLine2b, "align 50% 50%, wrap");
+                innerPanel.add(renewFeaturesLabel, "align 50% 50%, wrap");
             } else {
                 JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not supported."));
-                JLabel infoTextLine2a = wizardPage.createAndDecorateMultiLine(I18n.tr("Click on "));
-                JLabel infoTextLine2b = wizardPage.createAndDecorateMultiLine(I18n.tr(" for more information."));
+                JLabel infoTextLine2 = wizardPage.createAndDecorateMultiLine("<html>" + I18n.tr("Click on {0} for more information.", "<img src='" + ActivationUtilities.getInfoIconURL() + "'>") + "</html>");
                 innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
-                innerPanel.add(infoTextLine2a, "align 0% 50%, split, gapright 0");
-                JLabel infoLabel = new JLabel(infoIcon);
-                innerPanel.add(infoLabel, "align 0% 50%, split, gapright 0");
-                innerPanel.add(infoTextLine2b, "align 0% 50%, wrap");
+                innerPanel.add(infoTextLine2, "align 0% 50%, wrap");
             }
             
             add(innerPanel, "align 50% 0%, wrap");

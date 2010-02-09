@@ -189,8 +189,12 @@ class ActivationManagerImpl implements ActivationManager, Service {
         return activationSettings.getMCode();
     }
 
-    @Override
-    public boolean isValidKey(String key) {
+    /**
+     * Performs analysis on the Key to perform local validation checks
+     * before taking the time to hit the server. Returns true if the 
+     * key is valid, false otherwise.
+     */
+    private boolean isValidKey(String key) {
         if (key == null || key.length() != 12)
             return false;
         
@@ -205,7 +209,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
             if (positionInValidChars == -1) {
                 return false;
             } else {
-                sum += positionInValidChars;
+                sum += (counter+1) * positionInValidChars;
             }
         }
 
