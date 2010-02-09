@@ -23,9 +23,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
-import org.limewire.activation.serial.ActivationSerializerImpl;
-import org.limewire.activation.serial.ActivationSerializerSettings;
-import org.limewire.activation.serial.ActivationSerializerSettingsImpl;
+import org.limewire.activation.serial.ActivationSerializerModule;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
@@ -97,11 +95,10 @@ public class ActivationManagerTest extends BaseTestCase {
                 bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
                 
                 bind(ActivationModel.class).to(ActivationModelImpl.class);
-                bind(ActivationSerializer.class).to(ActivationSerializerImpl.class);
                 bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
-                bind(ActivationSerializerSettings.class).to(ActivationSerializerSettingsImpl.class);
             }
         });
+        modules.add(new ActivationSerializerModule());
         modules.add(new LimeWireHttpModule());
         modules.add(new LimeWireCommonModule());
         modules.add(new LimeWireNetTestModule());

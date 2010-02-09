@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.util.CommonUtils;
 
-public class ActivationSerializerSettingsImpl implements ActivationSerializerSettings {
+class ActivationSerializerSettingsImpl implements ActivationSerializerSettings {
 
     @Override
     public File getBackupFile() {

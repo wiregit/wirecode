@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 /**
  * Serializes and Deserializes ActivationModules to and from Disk.
  */
-public class ActivationSerializerImpl implements ActivationSerializer {
+class ActivationSerializerImpl implements ActivationSerializer {
 
     private static final String ENCRYPTION_ALGORITHM = "AES";
     private static final CipherType CIPHER_TYPE = CipherType.AES;
