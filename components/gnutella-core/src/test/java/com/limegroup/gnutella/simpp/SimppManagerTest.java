@@ -557,32 +557,13 @@ public class SimppManagerTest extends LimeTestCase {
 
     
     /////////////////////When LimeWire starts///////////////////////////////////
-    private void assertVersionNumbers(int version, int keyVersion, int newVersion){
-        assertEquals(version, simppManager.getVersion());
-        assertEquals(keyVersion, simppManager.getKeyVersion());
-        assertEquals(newVersion, simppManager.getNewVersion());        
-    }
-    
-    private void loadCertAndSimpp(String certFilename, String simppFilename) throws Exception {
-        File certFile = TestUtils.getResourceInPackage(certFilename, getClass());
-        changeCertFile(certFile);
-        File simppFile = TestUtils.getResourceInPackage(simppFilename, getClass());
-        changeSimppFile(simppFile);
-    }
-    
     // accept
     public void testStartLoadGoodCertAndGoodSimpp() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
         assertVersionNumbers(5, 15, 25);
     }   
-    
-    // use default simpp values
-    public void testStartLoadGoodCertAndLoadSimppFailed() throws Exception {
-        loadCertAndSimpp("slave.cert.15", "simpp.xml.notExist");
-        createSimppManager();
-        assertVersionNumbers(0, 0, 0);
-    }    
+
     // use default simpp values
     public void testStartLoadGoodCertAndLoadSimppBadOldSig() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov10_Kv_15_Nv30_badOldSig");
@@ -630,25 +611,91 @@ public class SimppManagerTest extends LimeTestCase {
         assertVersionNumbers(656, 4, 4);
         assertTrue(certFile.exists());
     }
+
+    // do not accept simpp in this session
+    public void testStartSimppGoodLoadBadSigCertAndDownloadFailedUsesDefaultData() throws Exception {
+        //TODO: load simpp.xml.Ov10_Kv_20_Nv30_NoCert
+        
+        //TODO: load slave.cert.20_badSig
+        
+        //TODO: download slave.cert.20 failed
+        
+        //TODO: assert default simpp
+        
+        // testing "do not accept simpp in this session"
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());        
+        //TODO: expecting simpp download?
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        //TODO: assert default simpp        
+    }
     
     // do not accept simpp in this session
-    public void testStartLoadMissingCertAndFailedDownload() throws Exception {}
+    public void testStartSimppGoodLoadMissingCertAndDownloadFailedUsesDefaultData() throws Exception {
+        //TODO: load simpp.xml.Ov10_Kv_20_Nv30_NoCert
+        
+        //TODO: load slave.cert.notExist
+        
+        //TODO: download slave.cert.20 failed
+        
+        //TODO: assert default simpp
+        
+        // testing "do not accept simpp in this session"
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass()); 
+        //TODO: expecting simpp download?
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        //TODO: assert default simpp        
+    }
+    
+    
     // do not accept simpp in this session
-    public void testStartLoadMissingCertAndDownloadOKBadCertSig() throws Exception {}
-    // accept simpp and store the downloaded cert
-    public void testStartLoadBadSigCertAndDownloadOKAndLoadGoodSimpp() throws Exception {}
-    // do not accept simpp in this session
-    public void testStartLoadBadSigCertAndDownloadFailed() throws Exception {}
-    // use default simpp values
-    public void testStartLoadMissingCertAndDownloadOKAndLoadMissingSimpp() throws Exception {}
-
+    public void testStartSimppGoodLoadBadSigCertAndDownloadBadSigCertUsesDefaultData() throws Exception {
+        //TODO: load simpp.xml.Ov10_Kv_20_Nv30_NoCert
+        //TODO: load slave.cert.20_badSig
+        //TODO: download slave.cert.20_badSig
+        
+        //TODO: assert default simpp
+        
+        // testing "do not accept simpp in this session"
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());        
+        //TODO: expecting simpp download?
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        //TODO: assert default simpp
+    }
+    
+    // default simpp, store good cert, accepting later simpp
+    public void testStartSimppBadSigLoadBadSigCertAndDownloadOkUsesDefaultData() throws Exception {
+        //TODO: load simpp.xml.Ov10_Kv_20_Nv30_NoCert_badOldSig
+        //TODO: load slave.cert.20_badSig        
+        //TODO: download slave.cert.20
+        
+        //TODO: assert default simpp
+        //TODO: assert cert saved
+        
+        // testing "accept simpp in this session"
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        //TODO: assert new simpp
+        
+    }
+    
+    /////////////////////download a simpp from a peer, or not/////////////////////////////
+    
+    // public void test
+    
     /////////////////////Verify a simpp from a peer/////////////////////////////
     
-    // reject? 
-    // or we should not download the simpp from peer because we don't have keys?
-    // if so, should move it to the tests of deciding download or not
-    public void testNoKeyAndValidSimpp() throws Exception {}
-
     // accept. 
     public void testValidSimpp() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
@@ -814,23 +861,215 @@ public class SimppManagerTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     // reject.   
-    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKBadCertSig() throws Exception {}
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKBadCertSig() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        //TODO: need to setup downloading slave.cert.20_badSig
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_NoCert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);
+        
+        context.assertIsSatisfied();
+        
+    }
     // accept. New Cert stored.   
-    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvEqualGoodNewSig() throws Exception {}
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvEqualGoodNewSig() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        //TODO: need to setup downloading slave.cert.20
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_NoCert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers updated
+        assertVersionNumbers(10, 20, 30);
+        
+        //TODO: assert that the new cert is stored.
+        
+        context.assertIsSatisfied();
+        
+    }
     // reject.   
-    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvSimppGreaterThanCert() throws Exception {}
+    public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKKvSimppNotEqualCert() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        //TODO: need to setup downloading slave.cert.20
+
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv19_Nv30_NoCert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 10, 19, 30, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5,15,25);
+        
+        context.assertIsSatisfied();
+    }
     
+    // reject. 
+    public void testKvNetwkGreaterIGIDCertDownloadFailed() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+        }});
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 6, 2147483647, 2147483647, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);        
+        context.assertIsSatisfied();
+        
+    }
+    
+    // reject.  
+    public void testKvNetwkGreaterIGIDCertDownloadOKBadCertSig() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        //TODO:  setup downloading slave.cert.2147483647_badSig
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 6, 2147483647, 2147483647, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);        
+        context.assertIsSatisfied();
+    }
+
     // reject.   
-    public void testKvNetwkGreaterIGIDCertDownloadFailed() throws Exception {}
-    // reject.   
-    public void testKvNetwkGreaterIGIDCertDownloadOKBadCertSig() throws Exception {}
-    // reject.   
-    public void testKvNetwkGreaterIGIDCertDownloadOKGoodCertSigKvNotIGID() throws Exception {}
+    public void testKvNetwkGreaterIGIDCertDownloadOKGoodCertSigKvNotIGID() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        //TODO: setup downloading slave.cert.20
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 6, 2147483647, 2147483647, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);        
+        context.assertIsSatisfied();
+    }
+    
+    ////////////////////////////////http download simpp ///////////////////////////
+    
     // cert looks good, trigger http download of simpp. 
-    // Cert is not store at this point, it will be store only after http simpp gets accepted
-    public void testKvNetwkGreaterIGIDCertDownloadOKGoodCertSigKvIGID() throws Exception {}
+    // simpp is good too, store simpp and cert
+    // accept
+    public void testKvIGIDCertDownloadOKSimppDownloadOK() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        // TODO: download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert from peer
+        
+        // TODO: assert "do not use cert in simpp, download cert from server"
+        
+        // TODO: download slave.cert.2147483647 from our server
+        
+        // TODO: download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert from server
+        
+        // TODO: assert the downloaded simpp (not the one from peer) is stored
+        // version numbers should be IGID
+        assertVersionNumbers(6, 2147483647, 2147483647);
+        // TODO: assert the downloaded Cert is stored 
+
+    }
+            
+    // cert looks good, trigger http download of simpp, but failed. 
+    // reject simpp, cert is not stored, it will be store only after http simpp gets accepted
+    public void testKvIGIDCertDownloadOKSimppDownloadFail() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        // TODO: download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert from peer
+        
+        // TODO: assert "do not use cert in simpp, download cert from server"
+        
+        // TODO: download slave.cert.2147483647 from our server
+        
+        // TODO: download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert from server FAILED
+        
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);
+        // TODO: assert Cert is not stored 
+
+    }
+    
+    // reject simpp, cert is not stored
+    public void testKvIGIDCertDownloadOKSimppDownloadOkBadOldSig() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        // TODO: download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert from peer
+        
+        // TODO: assert "do not use cert in simpp, download cert from server"
+        
+        // TODO: download slave.cert.2147483647 from our server
+        
+        // TODO: (4) download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert_badOldSig from server
+        
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);
+        // TODO: assert Cert is not stored 
+
+    }
+    
+    // reject simpp, cert is not stored
+    public void testKvIGIDCertDownloadOKSimppDownloadOkKvnotIGID() throws Exception {
+        //TODO: same as above one, except download simpp.xml.Ov6_Kv20_Nv2147483647_Cert from server at TODO (4).
+    }
+
+    // reject simpp, cert is not stored
+    public void testKvIGIDCertDownloadOKSimppDownloadOkNvnotIGID() throws Exception {
+        //TODO: same as above one, except download simpp.xml.Ov6_Kv2147483647_Nv30_Cert from server at TODO (4).
+    }
+
+    // reject simpp, cert is not stored
+    public void testKvIGIDCertDownloadOKSimppDownloadOkBadNewSig() throws Exception {
+      //TODO: same as above one, except download simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert_badNewSig from server at TODO (4).
+    }
     
     ////////////////////////////////private methods///////////////////////////
+    private void assertVersionNumbers(int version, int keyVersion, int newVersion){
+        assertEquals(version, simppManager.getVersion());
+        assertEquals(keyVersion, simppManager.getKeyVersion());
+        assertEquals(newVersion, simppManager.getNewVersion());        
+    }
+    
+    private void loadCertAndSimpp(String certFilename, String simppFilename) throws Exception {
+        File certFile = TestUtils.getResourceInPackage(certFilename, getClass());
+        changeCertFile(certFile);
+        File simppFile = TestUtils.getResourceInPackage(simppFilename, getClass());
+        changeSimppFile(simppFile);
+    }
     
     void waitForConnection(TestConnection connection) throws InterruptedException {
         assertTrue(connection.waitForConnection(5, TimeUnit.SECONDS));
