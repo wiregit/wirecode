@@ -13,16 +13,16 @@ import org.limewire.util.BaseTestCase;
  * Unit test for {@link org.limewire.activation.impl.ActivationItemFactory}
  * TODO: test loading from disk with expired time
  */
-public class ActivationParsingTest extends BaseTestCase {
+public class ActivationItemFactoryImplTest extends BaseTestCase {
 
     private ActivationResponseFactory parser;
     
-    public ActivationParsingTest(String name) {
+    public ActivationItemFactoryImplTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
-        return buildTestSuite(ActivationParsingTest.class);
+        return buildTestSuite(ActivationItemFactoryImplTest.class);
     }
 
     @Override
