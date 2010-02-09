@@ -11,7 +11,7 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
-public class ActivationSettingsImpl implements ActSettings {
+class ActivationSettingsImpl implements ActSettings {
 
     private final ApplicationServices applicationServices;
     

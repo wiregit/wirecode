@@ -2,7 +2,7 @@ package org.limewire.activation.impl;
 
 import org.limewire.activation.api.ActSettings;
 
-public class ActivationSettingStub implements ActSettings {
+class ActivationSettingStub implements ActSettings {
 
     private String activationKey = "";
     private String mcode = "";
@@ -40,7 +40,6 @@ public class ActivationSettingStub implements ActSettings {
 
     @Override
     public String getQueryString() {
-        // TODO Auto-generated method stub
         return null;
     }
 
