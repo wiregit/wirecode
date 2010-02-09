@@ -1,6 +1,7 @@
 package org.limewire.activation.serial;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 /**
  * Saves and loads Activation JSON strings to disk. The JSON string
@@ -18,5 +19,5 @@ public interface ActivationSerializer {
     /**
      * Writes the json String to disk.
      */
-    public boolean writeToDisk(String jsonString) throws Exception;
+    public boolean writeToDisk(String jsonString) throws IOException, GeneralSecurityException;
 }

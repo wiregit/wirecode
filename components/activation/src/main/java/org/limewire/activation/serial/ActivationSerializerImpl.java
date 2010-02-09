@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -86,7 +87,7 @@ public class ActivationSerializerImpl implements ActivationSerializer {
     }
 
     @Override
-    public synchronized boolean writeToDisk(String jsonString) throws Exception {
+    public synchronized boolean writeToDisk(String jsonString) throws IOException, GeneralSecurityException {
         String encrypted = encrypt(jsonString);
         return FileUtils.writeWithBackupFile(encrypted, settings.getBackupFile(), settings.getSaveFile(), LOG);            
     }
