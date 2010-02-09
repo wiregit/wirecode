@@ -7,6 +7,8 @@ import java.security.PublicKey;
  */
 public interface Certificate {
 
+    public static final int IGNORE_ID = Integer.MAX_VALUE;
+    
     byte[] getSignature();
     
     PublicKey getPublicKey();

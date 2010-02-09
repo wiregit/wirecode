@@ -38,6 +38,7 @@ import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.security.Certificate;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
@@ -56,7 +57,7 @@ public class SimppManagerImpl implements SimppManager {
    
     private static final String FILENAME = "simpp.xml";    
     private static final Random RANDOM = new Random();
-    private static final int IGNORE_ID = Integer.MAX_VALUE;
+    private static final int IGNORE_ID = Certificate.IGNORE_ID;
    
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private volatile byte[] _lastBytes = new byte[0];
@@ -77,16 +78,16 @@ public class SimppManagerImpl implements SimppManager {
     private final Provider<HttpParams> defaultParams;
     private final SimppDataProvider simppDataProvider;
     
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v2/simpp.def",
-            "http://simpp2.limewire.com/v2/simpp.def",
-            "http://simpp3.limewire.com/v2/simpp.def",
-            "http://simpp4.limewire.com/v2/simpp.def",
-            "http://simpp5.limewire.com/v2/simpp.def",
-            "http://simpp6.limewire.com/v2/simpp.def",
-            "http://simpp7.limewire.com/v2/simpp.def",
-            "http://simpp8.limewire.com/v2/simpp.def",
-            "http://simpp9.limewire.com/v2/simpp.def",
-            "http://simpp10.limewire.com/v2/simpp.def");
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v3/simpp.def",
+            "http://simpp2.limewire.com/v3/simpp.def",
+            "http://simpp3.limewire.com/v3/simpp.def",
+            "http://simpp4.limewire.com/v3/simpp.def",
+            "http://simpp5.limewire.com/v3/simpp.def",
+            "http://simpp6.limewire.com/v3/simpp.def",
+            "http://simpp7.limewire.com/v3/simpp.def",
+            "http://simpp8.limewire.com/v3/simpp.def",
+            "http://simpp9.limewire.com/v3/simpp.def",
+            "http://simpp10.limewire.com/v3/simpp.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
@@ -268,7 +269,7 @@ public class SimppManagerImpl implements SimppManager {
             }
             break;
         case FROM_HTTP:
-            if(parser.getNewVersion() >= newVersion) {
+            if(parser.getNewVersion() == IGNORE_ID && certifiedMessage.getKeyVersion() == IGNORE_ID) {
                 storeAndUpdate(data, parser, updateType);
             }
             break;

@@ -1166,7 +1166,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         } else if (version > simppManager.getVersion()) {
             return true;
         }
-        if (keyVersion > simppManager.getKeyVersion()) {
+        if (simppManager.getKeyVersion() > -1 && keyVersion > simppManager.getKeyVersion()) {
             return true;
         }
         return false;

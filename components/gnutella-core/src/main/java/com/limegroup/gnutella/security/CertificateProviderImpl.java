@@ -88,7 +88,6 @@ public class CertificateProviderImpl implements CertificateProvider {
         try {
             certificate = httpCertificateReader.read(uri, messageSource);
             set(certificate);
-            return certificate;
         } catch (IOException ie) {
             LOG.debugf(ie, "certificate from invalid url: {0}", uri);
         }

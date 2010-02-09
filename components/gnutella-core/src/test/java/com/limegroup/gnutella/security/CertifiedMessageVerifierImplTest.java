@@ -32,6 +32,7 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
     private PublicKey publicKey;
     private byte[] signedPayload;
     private byte[] signature;
+    private CertificateVerifier certificateVerifier;
     
     private static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
@@ -50,7 +51,8 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         certificateProvider = context.mock(CertificateProvider.class);
-        certifiedMessageVerifierImpl = new CertifiedMessageVerifierImpl(certificateProvider);
+        certificateVerifier = context.mock(CertificateVerifier.class);
+        certifiedMessageVerifierImpl = new CertifiedMessageVerifierImpl(certificateProvider, certificateVerifier);
         message = context.mock(CertifiedMessage.class);
         certificate = context.mock(Certificate.class);
         

@@ -25,6 +25,9 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         LOG.debugf("verifying message {0} from {1}", message, messageSource);
         Certificate certificate = message.getCertificate();
         if (certificate != null) {
+            if (certificate.getKeyVersion() != message.getKeyVersion()) {
+                throw new SignatureException("certificate key version and message key version don't match");
+            }
             LOG.debugf("message comes with new certificate: {0}", certificate);
             certificateProvider.set(certificateVerifier.verify(certificate));
         } 
