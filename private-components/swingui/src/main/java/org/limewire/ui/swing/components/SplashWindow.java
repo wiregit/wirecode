@@ -95,12 +95,13 @@ public class SplashWindow {
         Dimension size = new Dimension(imgWidth + 2, imgHeight + 2);
         splashWindow.setSize(size);        
   
-        splashWindow.setLocationRelativeTo(null);
         splashLabel.setIcon(new ImageIcon(splashImage));
         splashWindow.getContentPane().add(splashLabel, BorderLayout.CENTER);
 
         splashWindow.setGlassPane(textAndProgressPanel);
         splashWindow.pack();
+        // for some reason if you place this call before the pack, then the splash screen isn't centered correctly
+        splashWindow.setLocationRelativeTo(null);
     }
     
     /**

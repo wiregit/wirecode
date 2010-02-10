@@ -2,10 +2,12 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -157,8 +159,17 @@ final class Initializer {
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
-//        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
-        //ActivationSettings.LAST_START_WAS_PRO.getValue() ? getProSplashImage() : 
+        URL imageURL = null;
+        if (ActivationSettings.LAST_START_WAS_PRO.getValue()) {
+            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
+        } else {
+            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
+        }
+        
+        if (imageURL != null) {
+            splashImage = Toolkit.getDefaultToolkit().createImage(imageURL);
+        }
+        
         switchSplashes(awtSplash, splashImage, 
                        ActivationSettings.LAST_START_WAS_PRO.getValue());
         

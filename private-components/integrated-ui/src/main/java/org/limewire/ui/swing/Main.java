@@ -46,13 +46,7 @@ public class Main {
                 // is shown at the same place.
                 if(splashScreen != null && splashScreen.isVisible()) {
                     bounds = splashScreen.getBounds();
-
-                    //splashImage = Toolkit.getDefaultToolkit().createImage(splashScreen.getImageURL());    
-                    if (LimeWireUtils.shouldShowProSplashScreen()) {
-                        splashImage = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png"));
-                    } else {
-                        splashImage = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png"));
-                    }
+                    splashImage = Toolkit.getDefaultToolkit().createImage(splashScreen.getImageURL());
                 } else {
                     // If no splash was already showing, then there's no pre-existing bounds
                     // and we need to find our own image.
@@ -103,13 +97,8 @@ public class Main {
      * Gets the image to be used as the splash.
      */
     private static Image getSplashImage() {
-        URL imageURL = null;
-        if (LimeWireUtils.shouldShowProSplashScreen()) {
-            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
-        } else {
-            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
-        }
-        
+        URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
+
         if (imageURL != null) {
             return Toolkit.getDefaultToolkit().createImage(imageURL);
         } else {
