@@ -43,13 +43,17 @@ public class TemplateToken extends KeywordToken {
     /**
      * If the filename contains the query (ignoring case), returns a new token
      * representing the filename with the query replaced with a fixed string.
+     * Digits and whitespace are stripped from the start of the template.
      * Otherwise returns null.
      */
     public static TemplateToken create(String query, String filename) {
         query = query.trim().toLowerCase(Locale.US);
         filename = filename.trim().toLowerCase(Locale.US);
-        if(filename.contains(query) && !filename.equals(query))
-            return new TemplateToken(filename.replace(query, REPLACEMENT_STRING));
+        if(filename.contains(query) && !filename.equals(query)) {
+            String template = filename.replace(query, REPLACEMENT_STRING);
+            template = template.replaceFirst("^[0-9\\s]*", "");
+            return new TemplateToken(template);
+        }
         return null;
     }
 
