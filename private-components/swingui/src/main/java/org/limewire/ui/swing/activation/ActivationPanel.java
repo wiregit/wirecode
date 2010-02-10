@@ -166,7 +166,7 @@ public class ActivationPanel {
         FontMetrics metrics = underneathModuleTableMessagePanel.getFontMetrics(underneathModuleTableMessagePanel.getMessagePanelFont());
         int fontHeight = metrics.getHeight();
 
-        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 0, width " + tableWidth + "!, height " + (2*fontHeight+1) + "!, span, growx, wrap");
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 0, width " + tableWidth + "!, height " + (2*fontHeight+5) + "!, span, growx, wrap");
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
