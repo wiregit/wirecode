@@ -709,8 +709,79 @@ public class SimppManagerTest extends LimeTestCase {
     
     /////////////////////download a simpp from a peer, or not/////////////////////////////
     
-    // public void test
+    public void testOldClientsAdvertiseSimppGreater() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertVersionNumbers(5, 15, 25);
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv15_Nv26_NoCert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertVersionNumbers(6, 15, 26);
+        
+    }   
+    public void testOldClientsAdvertiseSimppNotGreater() throws Exception {
+        loadCertAndSimpp("slave.cert.20", "simpp.xml.Ov10_Kv_20_Nv30_NoCert");
+        createSimppManager();
+        assertVersionNumbers(10, 20, 30);
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv15_Nv26_NoCert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, false, false, messageFactory);        
+        conn.start();
+        
+        // TODO: should not download
+        // still have old version numbers
+        assertVersionNumbers(10, 20, 30);
+    }   
     
+    public void testOldClientAdvertisingIgnoreIdDoesNotTriggerDownload() throws Exception {
+        
+    }
+
+    public void testKvEqualNvGreater() throws Exception{
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertVersionNumbers(5, 15, 25);
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv15_Nv26_NoCert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 6, 15, 26, true, true, messageFactory);        
+        conn.start();
+        
+        waitForUpdateRun();
+        assertVersionNumbers(6, 15, 26);
+        
+    }
+
+    public void testKvEqualNvLess() throws Exception{
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov6_Kv15_Nv26_NoCert");
+        createSimppManager();
+        assertVersionNumbers(6, 15, 26);
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 5, 15, 25, false, false, messageFactory);        
+        conn.start();
+        
+        // TODO: should not download
+        // still have old version numbers
+        assertVersionNumbers(6, 15, 26);
+        
+    }
+    public void testKvLess() throws Exception{
+        loadCertAndSimpp("slave.cert.20", "simpp.xml.Ov10_Kv_20_Nv30_NoCert");
+        createSimppManager();
+        assertVersionNumbers(10, 20, 30);
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
+        TestConnection conn = new TestConnection(newSimppFile, 5, 15, 25, false, false, messageFactory);        
+        conn.start();
+        
+        // TODO: should not download
+        // still have old version numbers
+        assertVersionNumbers(10, 20, 30);
+        
+    }
     /////////////////////Verify a simpp from a peer/////////////////////////////
     
     // accept. 
@@ -1150,14 +1221,6 @@ public class SimppManagerTest extends LimeTestCase {
         assertFilesEqual("simpp.xml.Ov5_Kv_15_Nv25_NoCert", _simppFile);
 
         context.assertIsSatisfied();
-    }
-    
-    public void testOldClientsAdvertisesSimpp() {
-        
-    }
-    
-    public void testOldClientAdvertisingIgnoreIdDoesNotTriggerDownload() {
-        
     }
     
     private void assertFilesEqual(String expectedFile, File actualFile) {
