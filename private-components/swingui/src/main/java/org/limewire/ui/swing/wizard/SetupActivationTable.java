@@ -66,14 +66,14 @@ class SetupActivationTable extends BasicJXTable {
         
         Collections.sort(activationItems, new ActivationItemComparator());
 
-        getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
-
         getColumn(columnNames[0]).setCellRenderer(new LicenseTypeRendererEditor());
         getColumn(columnNames[0]).setCellEditor(new LicenseTypeRendererEditor());
         getColumn(columnNames[0]).setMinWidth(200);
         getColumn(columnNames[1]).setCellRenderer(new DateRenderer());
         getColumn(columnNames[1]).setMinWidth(100);
         getColumn(columnNames[1]).setMaxWidth(150);
+
+        getTableHeader().setDefaultRenderer(new TableHeaderRenderer());
 
         JTableHeader header = getTableHeader();
         header.setMinimumSize(new Dimension(400, 27));
@@ -288,7 +288,7 @@ class SetupActivationTable extends BasicJXTable {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if(value instanceof ActivationItem) {
                 ActivationItem item = (ActivationItem) value;
-                setText(GuiUtils.msec2Date(item.getDateExpired()));
+                setText(GuiUtils.date2String(item.getDateExpired()));
             } else {
                 setText("");
             }
