@@ -1,13 +1,15 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,8 +17,6 @@ import org.json.JSONObject;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-
-import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
@@ -27,6 +27,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
 
     private static final String METADATA = "";
     private static final String FILES = "/files";
+    private static final int MAX_LIMIT = 50;
     
     private final LibraryManager libraryManager;
     
@@ -42,7 +43,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
         String method = request.getRequestLine().getMethod();
         if (GET.equals(method)) {
             // Get uri target.
-            String uriTarget = getUriTarget(request, RestTarget.LIBRARY.pattern());
+            String uriTarget = getUriTarget(request, RestPrefix.LIBRARY.pattern());
             
             // Get query parameters.
             Map<String, String> queryParams = getQueryParams(request);
@@ -65,31 +66,29 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
             // Get library files.
             LibraryFileList fileList = libraryManager.getLibraryManagedList();
             
-            // Create JSON result.
-            JSONObject jsonObj = new JSONObject();
             try {
-                jsonObj.put("name", "Library");
-                jsonObj.put("size", fileList.size());
-                jsonObj.put("id", "library");
+                // Create JSON result.
+                JSONObject jsonObj = createLibraryDescription(fileList);
+
+                // Set response entity and status.
+                HttpEntity entity = createStringEntity(jsonObj.toString());
+                response.setEntity(entity);
+                response.setStatusCode(HttpStatus.SC_OK);
+                
             } catch (JSONException ex) {
                 throw new IOException(ex);
             }
             
-            // Set response entity and status.
-            NStringEntity entity = new NStringEntity(jsonObj.toString());
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
-            
         } else if (FILES.equals(uriTarget)) {
             // Get library files.
             LibraryFileList fileList = libraryManager.getLibraryManagedList();
-            EventList<LocalFileItem> fileItemList = fileList.getModel();
+            List<LocalFileItem> fileItemList = new ArrayList<LocalFileItem>(fileList.getModel());
             
             // Get query parameters.
             String offsetStr = queryParams.get("offset");
             String limitStr = queryParams.get("limit");
             int offset = (offsetStr != null) ? Integer.parseInt(offsetStr) : 0;
-            int limit = (limitStr != null) ? Integer.parseInt(limitStr) : fileItemList.size();
+            int limit = (limitStr != null) ? Math.min(Integer.parseInt(limitStr), MAX_LIMIT) : MAX_LIMIT;
             
             try {
                 // Create JSON result with requested files.
@@ -100,7 +99,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
                 }
 
                 // Set response entity and status.
-                NStringEntity entity = new NStringEntity(jsonArr.toString(2));
+                HttpEntity entity = createStringEntity(jsonArr.toString(2));
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 
@@ -121,6 +120,17 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
         jsonObj.put("filename", fileItem.getFileName());
         jsonObj.put("category", fileItem.getCategory().getSingularName());
         jsonObj.put("size", fileItem.getSize());
+        return jsonObj;
+    }
+    
+    /**
+     * Creates the JSON description object for the specified library file list.
+     */
+    private JSONObject createLibraryDescription(LibraryFileList fileList) throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("name", "Library");
+        jsonObj.put("size", fileList.size());
+        jsonObj.put("id", "library");
         return jsonObj;
     }
 }

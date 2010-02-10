@@ -1,4 +1,4 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -21,6 +21,8 @@ import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.io.GUID;
+import org.limewire.rest.AbstractRestRequestHandler;
+import org.limewire.rest.SearchRequestHandler;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;

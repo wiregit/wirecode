@@ -1,13 +1,13 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.IOException;
 import java.util.Date;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 
@@ -17,7 +17,7 @@ import com.google.inject.Provider;
 /**
  * Default implementation for RestRequestHandlerFactory.
  */
-public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
+class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
 
     private final Provider<LibraryRequestHandler> libraryHandlerFactory;
     private final Provider<SearchRequestHandler> searchHandlerFactory;
@@ -34,7 +34,7 @@ public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory 
     }
     
     @Override
-    public NHttpRequestHandler createRequestHandler(RestTarget restTarget) {
+    public NHttpRequestHandler createRequestHandler(RestPrefix restTarget) {
         switch (restTarget) {
         case HELLO:
             return new HelloRequestHandler();
@@ -59,7 +59,7 @@ public class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory 
             if (GET.equals(request.getRequestLine().getMethod())) {
                 // Set entity and status in response.
                 Date dateTime = new Date(System.currentTimeMillis());
-                NStringEntity entity = new NStringEntity(dateTime.toString() + ": Hello world!");
+                HttpEntity entity = createStringEntity(dateTime.toString() + ": Hello world!");
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 

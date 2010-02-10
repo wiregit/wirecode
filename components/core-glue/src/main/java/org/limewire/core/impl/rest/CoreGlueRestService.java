@@ -1,12 +1,12 @@
 package org.limewire.core.impl.rest;
 
-import org.limewire.core.impl.rest.handler.RestTarget;
-import org.limewire.core.impl.rest.handler.RestRequestHandlerFactory;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.rest.RestPrefix;
+import org.limewire.rest.RestRequestHandlerFactory;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -51,11 +51,6 @@ public class CoreGlueRestService implements Service {
 
     @Override
     public void start() {
-        // Register request handlers if enabled.
-        if (ApplicationSettings.LOCAL_REST_ACCESS_ENABLED.getValue()) {
-            registerLocalHandlers();
-        }
-        
         // Install setting listener.
         if (localSettingListener == null) {
             localSettingListener = new SettingListener() {
@@ -69,6 +64,11 @@ public class CoreGlueRestService implements Service {
                 }
             };
             ApplicationSettings.LOCAL_REST_ACCESS_ENABLED.addSettingListener(localSettingListener);
+        }
+        
+        // Register request handlers if enabled.
+        if (ApplicationSettings.LOCAL_REST_ACCESS_ENABLED.getValue()) {
+            registerLocalHandlers();
         }
     }
 
@@ -87,9 +87,9 @@ public class CoreGlueRestService implements Service {
      * Registers local handlers for all REST targets.
      */
     private void registerLocalHandlers() {
-        for (RestTarget restTarget : RestTarget.values()) {
-            localHttpAcceptorFactory.get().registerHandler(createPattern(restTarget.pattern()),
-                    restRequestHandlerFactory.createRequestHandler(restTarget));
+        for (RestPrefix restPrefix : RestPrefix.values()) {
+            localHttpAcceptorFactory.get().registerHandler(createPattern(restPrefix.pattern()),
+                    restRequestHandlerFactory.createRequestHandler(restPrefix));
         }
     }
     
@@ -97,8 +97,8 @@ public class CoreGlueRestService implements Service {
      * Unregisters local handlers for all REST targets.
      */
     private void unregisterLocalHandlers() {
-        for (RestTarget restTarget : RestTarget.values()) {
-            localHttpAcceptorFactory.get().unregisterHandler(createPattern(restTarget.pattern()));
+        for (RestPrefix restPrefix : RestPrefix.values()) {
+            localHttpAcceptorFactory.get().unregisterHandler(createPattern(restPrefix.pattern()));
         }
     }
     

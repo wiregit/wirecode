@@ -1,4 +1,4 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,6 +20,8 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.rest.AbstractRestRequestHandler;
+import org.limewire.rest.LibraryRequestHandler;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;

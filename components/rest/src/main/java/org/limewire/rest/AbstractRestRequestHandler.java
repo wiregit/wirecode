@@ -1,14 +1,16 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HttpCoreUtils;
@@ -22,11 +24,23 @@ abstract class AbstractRestRequestHandler extends SimpleNHttpRequestHandler {
     public static final String PUT = "PUT";
     public static final String POST = "POST";
     public static final String DELETE = "DELETE";
+    
+    public static final String UTF_CHARSET = "UTF-8";
 
+    /**
+     * Default implementation always returns null.
+     */
     @Override
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
             HttpContext context) throws HttpException, IOException {
         return null;
+    }
+    
+    /**
+     * Returns a new HttpEntity containing the specified content string.
+     */
+    public static HttpEntity createStringEntity(String content) throws IOException {
+        return new NStringEntity(content, UTF_CHARSET);
     }
     
     /**
@@ -35,7 +49,7 @@ abstract class AbstractRestRequestHandler extends SimpleNHttpRequestHandler {
      * example, if the URI is "http://localhost/remote/library/files?type=audio"
      * and the prefix is "/library", then the target is "/files". 
      */
-    protected String getUriTarget(HttpRequest request, String uriPrefix) throws IOException {
+    public static String getUriTarget(HttpRequest request, String uriPrefix) throws IOException {
         // Get uri string.
         String uriStr = request.getRequestLine().getUri();
         
@@ -53,7 +67,7 @@ abstract class AbstractRestRequestHandler extends SimpleNHttpRequestHandler {
      * Returns a map of name/value pairs corresponding to the query parameters
      * in the specified request.
      */
-    protected Map<String, String> getQueryParams(HttpRequest request) throws IOException {
+    public static Map<String, String> getQueryParams(HttpRequest request) throws IOException {
         try {
             // Get uri string.
             String uriStr = request.getRequestLine().getUri();

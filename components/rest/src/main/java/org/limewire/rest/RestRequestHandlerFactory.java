@@ -1,4 +1,4 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import org.apache.http.nio.protocol.NHttpRequestHandler;
 
@@ -10,5 +10,5 @@ public interface RestRequestHandlerFactory {
     /**
      * Creates a request handler for the specified REST target. 
      */
-    NHttpRequestHandler createRequestHandler(RestTarget restTarget);
+    NHttpRequestHandler createRequestHandler(RestPrefix restTarget);
 }

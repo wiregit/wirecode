@@ -1,14 +1,14 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +39,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
         String method = request.getRequestLine().getMethod();
         if (GET.equals(method)) {
             // Get uri target.
-            String uriTarget = getUriTarget(request, RestTarget.SEARCH.pattern());
+            String uriTarget = getUriTarget(request, RestPrefix.SEARCH.pattern());
 
             // Get query parameters.
             Map<String, String> queryParams = getQueryParams(request);
@@ -70,7 +70,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
                 }
 
                 // Set response entity and status.
-                NStringEntity entity = new NStringEntity(jsonArr.toString(2));
+                HttpEntity entity = createStringEntity(jsonArr.toString(2));
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
 

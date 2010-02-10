@@ -1,13 +1,9 @@
-package org.limewire.core.impl.rest.handler;
+package org.limewire.rest;
 
-import java.io.IOException;
 import java.util.Map;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.RequestLine;
-import org.apache.http.protocol.HttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
@@ -16,8 +12,6 @@ import org.limewire.util.BaseTestCase;
  * JUnit test case for AbstractRestRequestHandler.
  */
 public class AbstractRestRequestHandlerTest extends BaseTestCase {
-    /** Instance of class being tested. */
-    private AbstractRestRequestHandler requestHandler;
     
     private Mockery context = new Mockery();
 
@@ -31,17 +25,10 @@ public class AbstractRestRequestHandlerTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        requestHandler = new AbstractRestRequestHandler() {
-            @Override
-            public void handle(HttpRequest request, HttpResponse response, HttpContext context)
-                    throws HttpException, IOException {
-            }
-        };
     }
 
     @Override
     protected void tearDown() throws Exception {
-        requestHandler = null;
         super.tearDown();
     }
 
@@ -59,7 +46,7 @@ public class AbstractRestRequestHandlerTest extends BaseTestCase {
             will(returnValue(mockRequestLine));
         }});
         
-        assertEquals("/files", requestHandler.getUriTarget(mockRequest, testPrefix));
+        assertEquals("/files", AbstractRestRequestHandler.getUriTarget(mockRequest, testPrefix));
     }
     
     /** Tests method to get URI query parameters. */
@@ -75,7 +62,7 @@ public class AbstractRestRequestHandlerTest extends BaseTestCase {
             will(returnValue(mockRequestLine));
         }});
         
-        Map<String, String> queryParams = requestHandler.getQueryParams(mockRequest);
+        Map<String, String> queryParams = AbstractRestRequestHandler.getQueryParams(mockRequest);
         assertEquals(1, queryParams.size());
         assertEquals("1", queryParams.get("offset"));
     }
