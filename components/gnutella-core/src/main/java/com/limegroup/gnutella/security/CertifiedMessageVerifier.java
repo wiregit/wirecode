@@ -20,9 +20,10 @@ public interface CertifiedMessageVerifier {
      * @param message the message to verify
      * @param messageSource the source from which the message was sent, used
      * for reporting, can be null
+     * @return the certificate that was used for verifying the 
      * @throws SignatureException if the message does not verify
      */
-    void verify(CertifiedMessage message, IpPort messageSource) throws SignatureException;
+    Certificate verify(CertifiedMessage message, IpPort messageSource) throws SignatureException;
     
     /**
      * Defines a certified message.

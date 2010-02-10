@@ -48,6 +48,7 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.security.CertificateProvider;
 
 public class SimppManagerTest extends LimeTestCase {
@@ -169,6 +170,10 @@ public class SimppManagerTest extends LimeTestCase {
         certificateProvider = injector.getInstance(Key.get(CertificateProvider.class, Simpp.class));
 		
         lifecycleManager.start();
+        
+        simppManager.setMaxHttpRequestUpdateDelayForMaxFailover(1);
+        simppManager.setMinHttpRequestUpdateDelayForMaxFailover(0);
+        simppManager.setSilentPeriodForMaxHttpRequest(0);
     }
     
     @Override
@@ -246,7 +251,7 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     ////////////////////////////////tests/////////////////////////////////////
-/*
+
     public void testOldVersion() throws Exception{
         //Note: we have already set the version to be old in setSettings
         createSimppManager();
@@ -577,16 +582,16 @@ public class SimppManagerTest extends LimeTestCase {
     }   
 
     // use default simpp values
-    public void testStartLoadGoodCertAndLoadSimppBadOldSig() throws Exception {
+    public void testStartLoadSimppBadOldSig() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov10_Kv_15_Nv30_badOldSig");
         createSimppManager();
-        assertVersionNumbers(0, 0, 0);
+        assertVersionNumbers(0, 15, 0);
     }
     // use default simpp values
     public void testStartLoadGoodCertAndLoadSimppBadNewSig() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov6_Kv15_Nv26_NoCert_badNewSig");
         createSimppManager();
-        assertVersionNumbers(0, 0, 0);
+        assertVersionNumbers(0, 15, 0);
     }
     
     
@@ -620,7 +625,6 @@ public class SimppManagerTest extends LimeTestCase {
     }
 
 
-    // do not accept simpp in this session
     public void testStartSimppGoodLoadBadSigCertAndDownloadFailedUsesDefaultData() throws Exception {
         loadCertAndSimpp("slave.cert.20_badSig", "simpp.xml.Ov10_Kv_20_Nv30_NoCert");
         defaultSimppData = FileUtils.readFileFully(TestUtils.getResourceInPackage("simpp.xml.ov656_kv4_nv4_cert", getClass()));
@@ -636,12 +640,12 @@ public class SimppManagerTest extends LimeTestCase {
         
         // testing "do not accept simpp in this session"
         File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov10_Kv_20_Nv30_Cert", getClass());        
-        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, false, false, messageFactory);
+        TestConnection conn = new TestConnection(newSimppFile, 10, 20, 30, true, true, messageFactory);
         conn.start();
         
-        Thread.sleep(6000);
+        waitForUpdateRun();
 
-        assertVersionNumbers(656, 4, 4);
+        assertVersionNumbers(10, 20, 30);
         context.assertIsSatisfied();
     }
     
@@ -678,7 +682,6 @@ public class SimppManagerTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
-    */
     // default simpp, store good cert, accepting later simpp
     public void testStartSimppBadSigLoadBadSigCertAndDownloadOkUsesDefaultData() throws Exception {
         loadCertAndSimpp("slave.cert.20_badSig", "simpp.xml.Ov10_Kv_20_Nv30_NoCert_badOldSig");
@@ -691,6 +694,7 @@ public class SimppManagerTest extends LimeTestCase {
         }});
         
         createSimppManager();
+        waitForDiskUpdateRun();
         // ensure valid certificate was saved
         assertFilesEqual("simpp.cert.4", certFile);
         // ensure older default simpp was accepted
@@ -731,15 +735,13 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(newSimppFile, 6, false, false, messageFactory);        
         conn.start();
         
+        Thread.sleep(6000);
+        
         // TODO: should not download
         // still have old version numbers
         assertVersionNumbers(10, 20, 30);
     }   
     
-    public void testOldClientAdvertisingIgnoreIdDoesNotTriggerDownload() throws Exception {
-        
-    }
-
     public void testKvEqualNvGreater() throws Exception{
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
@@ -763,6 +765,8 @@ public class SimppManagerTest extends LimeTestCase {
         TestConnection conn = new TestConnection(newSimppFile, 5, 15, 25, false, false, messageFactory);        
         conn.start();
         
+        Thread.sleep(6000);
+        
         // TODO: should not download
         // still have old version numbers
         assertVersionNumbers(6, 15, 26);
@@ -776,6 +780,8 @@ public class SimppManagerTest extends LimeTestCase {
         File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov5_Kv_15_Nv25_NoCert", getClass());
         TestConnection conn = new TestConnection(newSimppFile, 5, 15, 25, false, false, messageFactory);        
         conn.start();
+        
+        Thread.sleep(6000);
         
         // TODO: should not download
         // still have old version numbers
@@ -952,7 +958,7 @@ public class SimppManagerTest extends LimeTestCase {
     public void testKvNetwkGreaterNotIGIDCertNotInSimppDownloadOKBadCertSig() throws Exception {
         loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
         createSimppManager();
-        waitForUpdateFromDisk();
+        waitForDiskUpdateRun();
         assertVersionNumbers(5, 15, 25);
 
         context.checking(new Expectations() {{
@@ -1070,10 +1076,6 @@ public class SimppManagerTest extends LimeTestCase {
         createSimppManager();
         assertEquals(5, simppManager.getVersion());
         
-        simppManager.setMaxHttpRequestUpdateDelayForMaxFailover(1);
-        simppManager.setMinHttpRequestUpdateDelayForMaxFailover(0);
-        simppManager.setSilentPeriodForMaxHttpRequest(0);
-
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(new SimppDownloadRequestMatcher()), 
                     with(any(HttpParams.class)), with(any(HttpClientListener.class)));
@@ -1084,10 +1086,9 @@ public class SimppManagerTest extends LimeTestCase {
                 6, 2147483647, 2147483647, true, true, messageFactory);
         connection.start();
         
-        // TODO: assert "do not use cert in simpp, download cert from server"
         waitForUpdateRun();
         
-        waitForUpdateRunFromHttp();
+        waitForHttpUpdateRun();
         // version numbers should be IGID
         assertVersionNumbers(7, 2147483647, 2147483647);
         // ensure valid simpp has been saved
@@ -1223,6 +1224,27 @@ public class SimppManagerTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
+    // reject.   
+    public void testKvNetwkGreaterIGIDCertDownloadFailed() throws Exception {
+        loadCertAndSimpp("slave.cert.15", "simpp.xml.Ov5_Kv_15_Nv25_NoCert");
+        createSimppManager();
+        assertEquals(5, simppManager.getVersion());
+
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new SimppCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+        }});
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv2147483647_Nv2147483647_NoCert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 6, 2147483647, 2147483647, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        // version numbers should still be old
+        assertVersionNumbers(5, 15, 25);        
+        context.assertIsSatisfied();
+    }
+    
     private void assertFilesEqual(String expectedFile, File actualFile) {
         byte[] expectedBytes = FileUtils.readFileFully(TestUtils.getResourceInPackage(expectedFile, getClass()));
         byte[] actualBytes = FileUtils.readFileFully(actualFile); 
@@ -1251,11 +1273,11 @@ public class SimppManagerTest extends LimeTestCase {
         assertTrue(backgroundExecutor.waitForSimppUpdate(5, TimeUnit.SECONDS));   
     }
     
-    void waitForUpdateFromDisk() throws InterruptedException {
+    void waitForDiskUpdateRun() throws InterruptedException {
         assertTrue(backgroundExecutor.waitForUpdateFromDisk(5, TimeUnit.SECONDS));   
     }
     
-    void waitForUpdateRunFromHttp() throws InterruptedException {
+    void waitForHttpUpdateRun() throws InterruptedException {
         assertTrue(backgroundExecutor.waitForUpdateFromHttp(5, TimeUnit.SECONDS));   
     }
     
@@ -1377,7 +1399,7 @@ public class SimppManagerTest extends LimeTestCase {
         public boolean matches(Object item) {
             if (item instanceof HttpGet) {
                 HttpGet get = (HttpGet)item;
-                if (get.getURI().equals(URI.create("http://static.limewire.com/simpp/simpp.cert"))) {
+                if (get.getURI().equals(URI.create("http://certs.limewire.com/simpp/simpp.cert"))) {
                     return true;
                 }
             }
@@ -1385,6 +1407,7 @@ public class SimppManagerTest extends LimeTestCase {
         }
         @Override
         public void describeTo(Description description) {
+            description.appendText("simpp certificate request");
         }
     }
     
@@ -1393,7 +1416,7 @@ public class SimppManagerTest extends LimeTestCase {
         public boolean matches(Object item) {
             if (item instanceof HttpGet) {
                 HttpGet get = (HttpGet)item;
-                if (get.getURI().equals(URI.create("http://static.limewire.com/simpp/simpp.cert"))) {
+                if (get.getURI().equals(URI.create("http://certs.limewire.com/simpp/simpp.cert"))) {
                     return false;
                 }
             }
@@ -1401,6 +1424,7 @@ public class SimppManagerTest extends LimeTestCase {
         }
         @Override
         public void describeTo(Description description) {
+            description.appendText("non simpp certificate request");
         }
     }
     
@@ -1420,6 +1444,7 @@ public class SimppManagerTest extends LimeTestCase {
 
         @Override
         public void describeTo(Description description) {
+            description.appendText("simpp download request");
         }
         
     }

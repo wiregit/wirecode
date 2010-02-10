@@ -21,17 +21,18 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
     }
     
     @Override
-    public void verify(CertifiedMessage message, IpPort messageSource) throws SignatureException {
+    public Certificate verify(CertifiedMessage message, IpPort messageSource) throws SignatureException {
         LOG.debugf("verifying message {0} from {1}", message, messageSource);
         Certificate certificate = message.getCertificate();
         if (certificate != null) {
             if (certificate.getKeyVersion() != message.getKeyVersion()) {
                 throw new SignatureException("certificate key version and message key version don't match");
             }
-            LOG.debugf("message comes with new certificate: {0}", certificate);
-            certificateProvider.set(certificateVerifier.verify(certificate));
-        } 
-        certificate = certificateProvider.get();
+            // verify sent certificate
+            certificate = certificateVerifier.verify(certificate);
+        } else {
+            certificate = certificateProvider.get();
+        }
         if (message.getKeyVersion() < certificate.getKeyVersion()) {
             throw new SignatureException("message version less than certificate version");
         } else if (message.getKeyVersion() > certificate.getKeyVersion()) {
@@ -45,6 +46,7 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         if (!signatureVerifier.verifySignature()) {
             throw new SignatureException("Invalid signature for: " + message);
         }
+        return certificate;
     }
 
 }

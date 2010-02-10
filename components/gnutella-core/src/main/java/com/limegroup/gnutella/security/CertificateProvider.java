@@ -10,4 +10,5 @@ import org.limewire.io.IpPort;
 public interface CertificateProvider extends MutableProvider<Certificate> {
 
     Certificate getFromHttp(IpPort messageSource);
+    
 }

@@ -90,9 +90,6 @@ public class CertificateProviderImplTest extends BaseTestCase {
             
             one(certificateVerifier).verify(certificate);
             will(returnValue(certificate));
-            
-            one(fileCertificateReader).write(certificate, file);
-            will(returnValue(true));
         }});
         
         assertSame(certificate, certificateProviderImpl.get());
@@ -111,27 +108,10 @@ public class CertificateProviderImplTest extends BaseTestCase {
             // fail
             one(httpCertificateReader).read(uri, null);
             will(throwException(new IOException()));
-
-            // successful http get
-            one(httpCertificateReader).read(uri, null);
-            will(returnValue(certificate));
-            
-            one(certificate).getKeyVersion();
-            will(returnValue(1));
-
-            // and another verification in set()
-            one(certificateVerifier).verify(certificate);
-            will(returnValue(certificate));
-            
-            // write new certificate
-            one(fileCertificateReader).write(certificate, file);
-            will(returnValue(true));
         }});
         
         assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
-        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
-        // ensure null certificate was replaced
-        assertSame(certificate, certificateProviderImpl.get());
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.getFromHttp(null));
         
         context.assertIsSatisfied();
     }
@@ -140,6 +120,10 @@ public class CertificateProviderImplTest extends BaseTestCase {
         context.checking(new SequencedExpectations(context) {{
             // failed http get
             one(httpCertificateReader).read(uri, null);
+            will(throwException(new IOException()));
+            
+            // failed file read
+            one(fileCertificateReader).read(file);
             will(throwException(new IOException()));
         }});
         
@@ -156,13 +140,13 @@ public class CertificateProviderImplTest extends BaseTestCase {
 
             one(certificateVerifier).verify(certificate);
             will(returnValue(certificate));
-            
-            one(fileCertificateReader).write(certificate, file);
-            will(returnValue(true));
+
+            one(fileCertificateReader).read(file);
+            will(throwException(new IOException()));
         }});
         
         assertSame(certificate, certificateProviderImpl.getFromHttp(null));
-        assertSame(certificate, certificateProviderImpl.get());
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
     }
