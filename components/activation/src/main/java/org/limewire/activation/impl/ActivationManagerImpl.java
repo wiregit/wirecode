@@ -465,6 +465,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     break;
                 case BLOCKED:
                     activationSettings.setActivationKey(response.getLid());
+                    activationSettings.setMCode(response.getMCode());
                     error = ActivationError.BLOCKED_KEY;
                     break;
                 default:
