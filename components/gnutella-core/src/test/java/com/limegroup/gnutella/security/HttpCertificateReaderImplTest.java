@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.security;
 
 import java.io.IOException;
+import java.net.URI;
 
 import junit.framework.Test;
 
@@ -18,7 +19,6 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.URIUtils;
 
 public class HttpCertificateReaderImplTest extends BaseTestCase {
     
@@ -64,7 +64,7 @@ public class HttpCertificateReaderImplTest extends BaseTestCase {
         }});
         
         try {
-            httpCertificateReaderImpl.read(URIUtils.toSafeUri("http://limewire.com/"), new IpPortImpl("192.168.0.1:5555"));
+            httpCertificateReaderImpl.read(URI.create("http://limewire.com/"), new IpPortImpl("192.168.0.1:5555"));
         } catch (IOException ie) {
         }
         
@@ -79,7 +79,7 @@ public class HttpCertificateReaderImplTest extends BaseTestCase {
         }});
         
         try {
-            httpCertificateReaderImpl.read(URIUtils.toSafeUri("http://limewire.com/"), new IpPortImpl("192.168.0.1:5555"));
+            httpCertificateReaderImpl.read(URI.create("http://limewire.com/"), new IpPortImpl("192.168.0.1:5555"));
             fail("exception expected");
         } catch (IOException ie) {
         }
@@ -99,7 +99,7 @@ public class HttpCertificateReaderImplTest extends BaseTestCase {
             will(returnValue(new NullCertificate()));
         }});
         
-        Certificate certificate = httpCertificateReaderImpl.read(URIUtils.toSafeUri("http://limewire.com/"), null);
+        Certificate certificate = httpCertificateReaderImpl.read(URI.create("http://limewire.com/"), null);
         assertInstanceof(NullCertificate.class, certificate);
         
         context.assertIsSatisfied();

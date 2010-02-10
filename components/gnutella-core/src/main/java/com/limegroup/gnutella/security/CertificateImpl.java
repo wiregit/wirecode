@@ -6,6 +6,11 @@ import org.limewire.util.Objects;
 
 /**
  * Immutable, threadsafe, implements value equality.
+ * <p>
+ * The string represenation of this certificate is:
+ * <pre>
+ * base32(signature)|keyVersion as integer literal|base32(public key)
+ * </pre>
  */
 public class CertificateImpl implements Certificate {
 
@@ -60,5 +65,10 @@ public class CertificateImpl implements Certificate {
     @Override
     public int hashCode() {
         return certificateString.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return certificateString;
     }
 }

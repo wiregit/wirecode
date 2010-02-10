@@ -9,7 +9,9 @@ import org.limewire.io.IpPort;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-
+/**
+ * Reads valid certificates from file, http and stores them to the same file.
+ */
 public class CertificateProviderImpl implements CertificateProvider {
 
     private static final Log LOG = LogFactory.getLog(CertificateProviderImpl.class);
@@ -24,6 +26,15 @@ public class CertificateProviderImpl implements CertificateProvider {
 
     private final URI uri;
     
+    /**
+     * @param fileCertificateReader the file certificate reader used for reading
+     * certificates from disk and for storing them to disk.
+     * @param httpCertificateReader the http certificate reader used for 
+     * retrieving certificates from a trusted http server
+     * @param certificateVerifier verifier to verify all read and set certificates
+     * @param file the file to read certificates from and write them to
+     * @param uri the uri certificates are downloaded from over http
+     */
     public CertificateProviderImpl(FileCertificateReader fileCertificateReader,
             HttpCertificateReader httpCertificateReader, 
             CertificateVerifier certificateVerifier,
@@ -61,6 +72,16 @@ public class CertificateProviderImpl implements CertificateProvider {
         }
     }
 
+    /**
+     * Potentially blocking call, accessing the disk and making network connections.
+     * <p>
+     * If a valid certificate is loaded, it will return the valid certificate.
+     * Otherwise it will try to read a certificate from disk. If this fails it
+     * will resort to http.
+     * 
+     * @returns {@link NullCertificate} if no valid certificate could be retrieved
+     * from any of the sources
+     */
     @Override
     public Certificate get() {
         Certificate copy = validCertificate;

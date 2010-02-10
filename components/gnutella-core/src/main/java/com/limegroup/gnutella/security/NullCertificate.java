@@ -1,12 +1,12 @@
-/**
- * 
- */
 package com.limegroup.gnutella.security;
 
 import java.security.PublicKey;
 
 import com.limegroup.gnutella.util.DataUtils;
 
+/**
+ * A null certificate that doesn't verify against any {@link CertificateVerifier}.
+ */
 public class NullCertificate implements Certificate {
     
     @Override

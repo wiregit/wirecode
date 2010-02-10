@@ -7,6 +7,12 @@ import org.limewire.security.SignatureVerifier;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 
+/**
+ * Parses certificate strings of the following format:
+ * <pre>
+ * base32(signature)|key version as integer literal|base32(X509 encoded DSA public key)
+ * </pre>
+ */
 public class CertificateParserImpl implements CertificateParser {
 
     

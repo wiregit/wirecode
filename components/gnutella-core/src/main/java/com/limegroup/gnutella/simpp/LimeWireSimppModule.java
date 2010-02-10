@@ -27,7 +27,7 @@ public class LimeWireSimppModule extends AbstractModule {
     
     @Provides @LazySingleton @Simpp CertificateProvider simppCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
             CertificateVerifier certificateVerifier) {
-        return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URI.create("http://static.limewire.com/simpp/simpp.cert"));
+        return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "simpp.cert"), URI.create("http://certs.limewire.com/simpp/simpp.cert"));
     }
     
     @Provides @Simpp CertifiedMessageVerifier simppMessageVerifier(@Simpp CertificateProvider certificateProvider, CertificateVerifier certificateVerifier) {

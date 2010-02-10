@@ -12,7 +12,6 @@ import org.jmock.Mockery;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.URIUtils;
 
 public class CertificateProviderImplTest extends BaseTestCase {
 
@@ -36,7 +35,7 @@ public class CertificateProviderImplTest extends BaseTestCase {
         httpCertificateReader = context.mock(HttpCertificateReader.class);
         certificateVerifier = context.mock(CertificateVerifier.class);
         certificate = context.mock(Certificate.class);
-        uri = URIUtils.toSafeUri("http://cert.cert/cert/cert");
+        uri = URI.create("http://cert.cert/cert/cert");
         file = new File("file");
         certificateProviderImpl = new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, file, uri);
     }

@@ -94,7 +94,9 @@ public class SimppParser {
                 _propsData = value;
             }
         }//end of for -- done all child nodes
-        // TODO fberger throw if necessary data is missing
+        if (keyVersion <= -1 || newVersion <= -1 || signature == null) {
+            throw new IOException("missing or invalid data: " + StringUtils.toString(this, keyVersion, newVersion, signature));
+        }
     }
     
     public CertifiedMessage getCertifiedMessage() {
@@ -115,6 +117,11 @@ public class SimppParser {
             public Certificate getCertificate() {
                 return certificate;
             }
+            
+            @Override
+            public String toString() {
+                return StringUtils.toString(SimppParser.this, keyVersion, signature, signedPayload, certificate);
+            }
         };
     }
     
@@ -130,4 +137,5 @@ public class SimppParser {
     static String stripSignature(String input) {
         return input.replaceAll("<signature>[^<]*</signature>", "");
     }
+    
 }
