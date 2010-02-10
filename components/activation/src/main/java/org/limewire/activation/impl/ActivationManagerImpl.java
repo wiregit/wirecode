@@ -1,5 +1,6 @@
 package org.limewire.activation.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -515,7 +517,23 @@ class ActivationManagerImpl implements ActivationManager, Service {
         setActivationItems(response.getActivationItems());
         activationSettings.setLastStartPro(isProActive());
         activationError = ActivationError.NO_ERROR;
+        deleteBuyProLinks();
         setCurrentState(State.ACTIVATED_FROM_SERVER);
     }
 
+    // we might need to move this code to a different location.
+    // i don't think its right here, but i'm not sure where it should go. GRK
+    private void deleteBuyProLinks() {
+        if (OSUtils.isWindows()) {
+            File pathToLimeWireStartMenuLink = new File(System.getProperty("user.home") + "/Start Menu/Programs/LimeWire/Buy LimeWire PRO.lnk");
+            if (pathToLimeWireStartMenuLink.exists()) {
+                pathToLimeWireStartMenuLink.delete();
+                
+                File pathToLimeWireDirLink = new File(System.getProperty("user.dir") + "/Buy LimeWire PRO.url");       
+                if (pathToLimeWireDirLink.exists()) {
+                    pathToLimeWireDirLink.delete();
+                }
+            }
+        }
+    }
 }
