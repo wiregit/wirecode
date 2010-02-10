@@ -170,6 +170,15 @@ public class SetupActivationPanel extends JPanel {
             if (key != null) {
                 BackgroundExecutorService.execute(new Runnable(){
                     public void run() {
+                        // we check for empty strings as key entries, and manually set the error for it,
+                        // b/c the activation manager usually doesn't create an error for this case.
+                        // it just clears the key.
+                        if (key.equals("")) {
+                            setActivationState(ActivationState.NOT_AUTHORIZED);
+                            setActivationError(ActivationError.INVALID_KEY);
+                            return;
+                        }
+                        
                         activationManager.activateKey(key.replaceAll("-", ""));                        
                     }
                 });
