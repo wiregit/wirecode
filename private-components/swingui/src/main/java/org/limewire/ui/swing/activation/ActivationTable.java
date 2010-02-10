@@ -278,7 +278,7 @@ class ActivationTable extends MouseableTable {
                 boolean isSelected, int row, int column) {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
-                dateLabel.setText(GuiUtils.msec2Date(item.getDateExpired())); 
+                dateLabel.setText(GuiUtils.date2String(item.getDateExpired())); 
                 iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
                 expiredLabel.setVisible(item.getStatus() == Status.EXPIRED);
             } else {

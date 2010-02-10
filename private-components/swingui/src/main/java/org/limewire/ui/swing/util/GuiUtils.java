@@ -294,7 +294,7 @@ public class GuiUtils {
         return DATE_FORMAT.format(date);
     }
     
-    public static String msec2Date(Date date) {
+    public static String date2String(Date date) {
         return DATE_FORMAT.format(date);
     }
     
