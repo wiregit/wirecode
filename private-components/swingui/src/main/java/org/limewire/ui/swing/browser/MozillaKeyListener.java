@@ -51,7 +51,6 @@ class MozillaKeyListener extends KeyAdapter {
                     && !BrowserUtils.isTextControl(mozKeyEvent.getSourceNode());
 
             if ((leftPressed || backPressed)) {
-
                 MozillaExecutor.mozAsyncExec(new Runnable() {
                     public void run() {
                         if (nav.getCanGoBack())
@@ -60,16 +59,20 @@ class MozillaKeyListener extends KeyAdapter {
                 });
 
             } else if (rightPressed) {
-
                 MozillaExecutor.mozAsyncExec(new Runnable() {
                     public void run() {
                         if (nav.getCanGoForward())
                             nav.goForward();
                     }
                 });
-
+            } else if (mozKeyEvent.getKeyCode() == KeyEvent.VK_F5) {
+                MozillaExecutor.mozAsyncExec(new Runnable() {
+                    public void run() {
+                        nav.reload(nsIWebNavigation.LOAD_FLAGS_NONE);
+                    }
+                }); 
             }
         }
     }
-
+    
 }
