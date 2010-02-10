@@ -10,14 +10,14 @@ import org.limewire.activation.api.ActivationItem;
  * Class representing response data from the activation server.  Immutable
  * 
  * Response should contain:
- * 
+ * <pre>
  * - lid              (lookup ID)
  * - valid flag       (is the key valid)
  * - mcode            (data that is to be passed on in future HTTP requests, 
  *                     for instance to client-data)
  * - refresh interval (interval before contacting server again)
  * - modules listing  (list of activation items)
- *    
+ * </pre>   
  */
 class ActivationResponse {
     
