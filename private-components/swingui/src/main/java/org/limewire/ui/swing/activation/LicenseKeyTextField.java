@@ -56,21 +56,21 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
             StringBuffer modifiedStringToInsert = new StringBuffer();
             for (int counter = offs; counter < offs+stringLength; counter++)
             {
-                // disallow more than 14 characters. that is the length of the key with the hyphens
-                if ((offs+modifiedStringToInsert.length()) < 14) {
+                // disallow more than 14 characters. that is the length of the key with the hyphens.
+                // and disallow hyphens
+                if ((offs+modifiedStringToInsert.length()) < 14
+                    && stringToInsert.charAt(counter-offs) != '-') {
                     modifiedStringToInsert.append(stringToInsert.charAt(counter-offs));
                 }
 
                 // here we insert a hyphen into the license key if the user is at the 3rd or the 8th position
                 if ((offs+modifiedStringToInsert.length()) == 4 || (offs+modifiedStringToInsert.length()) == 9) {
-                    // if the user is copying and pasting the key, it might have hyphens already. check for that
-                    // and only add the hyphens if they don't exist already
-                    if (counter + 1 >= (offs+stringLength) || stringToInsert.charAt(counter-offs+1) != '-')
-                        modifiedStringToInsert.append("-");
+                    modifiedStringToInsert.append("-");
                 }
             }
             
             super.insertString(offs, modifiedStringToInsert.toString(), a);
+
             
             if (getLength() > 14) {
                 remove(14, getLength()-14);
