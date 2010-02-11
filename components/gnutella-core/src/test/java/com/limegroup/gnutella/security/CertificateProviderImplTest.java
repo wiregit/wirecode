@@ -12,6 +12,7 @@ import org.jmock.Mockery;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.SequencedExpectations;
 
 public class CertificateProviderImplTest extends BaseTestCase {
 

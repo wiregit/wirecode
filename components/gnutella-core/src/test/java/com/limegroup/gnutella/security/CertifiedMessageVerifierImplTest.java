@@ -67,21 +67,20 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
             one(message).getCertificate();
             will(returnValue(certificate));
             
-            one(certificateProvider).set(certificate);
-            one(certificateProvider).get();
-            will(returnValue(certificate));
-            
             allowing(message).getKeyVersion();
             will(returnValue(1));
             
             allowing(certificate).getKeyVersion();
             will(returnValue(1));
+            
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
         }});
         
         context.checking(new ValidMessageExpectations());
         
         certifiedMessageVerifierImpl.verify(message, null);
-        
+                
         context.assertIsSatisfied();
     }
     

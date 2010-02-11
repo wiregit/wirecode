@@ -26,21 +26,24 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
         Certificate certificate = message.getCertificate();
         if (certificate != null) {
             if (certificate.getKeyVersion() != message.getKeyVersion()) {
+                // no need to even verify
                 throw new SignatureException("certificate key version and message key version don't match");
             }
             // verify sent certificate
             certificate = certificateVerifier.verify(certificate);
         } else {
             certificate = certificateProvider.get();
-        }
-        if (message.getKeyVersion() < certificate.getKeyVersion()) {
-            throw new SignatureException("message version less than certificate version");
-        } else if (message.getKeyVersion() > certificate.getKeyVersion()) {
-            LOG.debug("message key version greater than stored key version");
-            certificate = certificateProvider.getFromHttp(messageSource);
-            if (message.getKeyVersion() != certificate.getKeyVersion()) {
-                throw new SignatureException("key version not equal to certificate version");
+            // we might have to fetch a newer certificate from http
+            if (message.getKeyVersion() > certificate.getKeyVersion()) {
+                LOG.debug("message key version greater than stored key version");
+                certificate = certificateProvider.getFromHttp(messageSource);
+                if (message.getKeyVersion() != certificate.getKeyVersion()) {
+                    throw new SignatureException("key version not equal to certificate version");
+                }
             }
+        }
+        if (message.getKeyVersion() != certificate.getKeyVersion()) {
+            throw new SignatureException("message version less than certificate version");
         }
         SignatureVerifier signatureVerifier = new SignatureVerifier(message.getSignedPayload(), message.getSignature(), certificate.getPublicKey(), "DSA");
         if (!signatureVerifier.verifySignature()) {
