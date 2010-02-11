@@ -48,8 +48,8 @@ public class ActivationSettings extends LimeProps {
     /**
      * Saved mcode from the last json String.
      */
-    public static final StringSetting M_CODE = FACTORY.createStringSetting(
-            "M_CODE", "");
+    public static final StringSetting MODULE_CODE = FACTORY.createStringSetting(
+            "MODULE_CODE", "");
     
     /**
      * Encryption key for saving the json message.

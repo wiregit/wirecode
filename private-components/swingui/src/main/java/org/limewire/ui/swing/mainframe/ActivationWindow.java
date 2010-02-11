@@ -74,7 +74,7 @@ public class ActivationWindow {
             add(createField(activationTest.getVendor()), "wrap");
             
             add(createField("mCode:"));
-            add(createField(activationManager.getMCode()), "wrap");
+            add(createField(activationManager.getModuleCode()), "wrap");
             
             add(createField("lid:"));
             add(createField(activationManager.getLicenseKey()), "wrap");

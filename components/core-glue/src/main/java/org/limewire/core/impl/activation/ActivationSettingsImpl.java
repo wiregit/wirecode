@@ -42,8 +42,8 @@ class ActivationSettingsImpl implements ActSettings {
     }
 
     @Override
-    public String getMCode() {
-        return ActivationSettings.M_CODE.get();
+    public String getModuleCode() {
+        return ActivationSettings.MODULE_CODE.get();
     }
 
     @Override
@@ -69,12 +69,12 @@ class ActivationSettingsImpl implements ActSettings {
     }
 
     @Override
-    public void setMCode(String mCode) {
-        ActivationSettings.M_CODE.set(mCode);
+    public void setModuleCode(String mCode) {
+        ActivationSettings.MODULE_CODE.set(mCode);
     }
     
     @Override
     public String getQueryString() {
-        return LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), isLastStartPro(), getMCode());
+        return LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), isLastStartPro(), getModuleCode());
     }
 }

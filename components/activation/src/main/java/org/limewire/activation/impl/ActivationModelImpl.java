@@ -38,7 +38,9 @@ class ActivationModelImpl implements ActivationModel {
     
     @Override
     public int size() {
-        return itemMap.size();
+        synchronized(this) {
+            return itemMap.size();
+        }
     }
     
     @Override
@@ -56,6 +58,8 @@ class ActivationModelImpl implements ActivationModel {
             }
         }
 
+        
+        //TODO: consolidate unchanged events
         // we need to disable anything that may have been previously active
         for(ActivationItem item : oldItems) {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)

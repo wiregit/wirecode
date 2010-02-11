@@ -271,7 +271,7 @@ public class ActivationManagerTest extends BaseTestCase {
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
         assertEquals("", activationSettings.getActivationKey());
-        assertEquals("", activationSettings.getMCode());
+        assertEquals("", activationSettings.getModuleCode());
         
         // after "notfound" is received and processed, calling start() on activation manager
         // should not result in contacting the activation server
@@ -291,7 +291,7 @@ public class ActivationManagerTest extends BaseTestCase {
         String KEY = "L4RXLP28XVQ5";
         String MCODE = "cvnb";
         activationSettings.setActivationKey(KEY);
-        activationSettings.setMCode(MCODE);
+        activationSettings.setModuleCode(MCODE);
         final String json = "{\"response\":\"stop\",\"lid\":" +
                              "\"HT5YXS7CWGRG\",\"guid\":\"44444444444444444444444444444444\"," +
                              "\"refresh\":0,\"mcode\":\"cvnb\",\"duration\":\"0.001739\"}";
@@ -310,7 +310,7 @@ public class ActivationManagerTest extends BaseTestCase {
         assertEquals(activationManager.getActivationError(), ActivationError.INVALID_KEY);
         assertEquals(activationManager.getActivationItems(), Collections.<ActivationItem>emptyList());
         assertEquals("", activationSettings.getActivationKey());
-        assertEquals(MCODE, activationSettings.getMCode());
+        assertEquals(MCODE, activationSettings.getModuleCode());
         
         // after "stop" is received and processed, calling start() on activation manager
         // should not result in contacting the activation server

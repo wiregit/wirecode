@@ -8,8 +8,6 @@ public interface ActSettings {
 
     public String getCustomerSupportHost();
     
-//    public String getDownloadHost();
-    
     public boolean isLastStartPro();
     
     public void setLastStartPro(boolean value);
@@ -18,9 +16,9 @@ public interface ActSettings {
     
     public void setActivationKey(String key);
     
-    public String getMCode();
+    public String getModuleCode();
     
-    public void setMCode(String mCode);
+    public void setModuleCode(String moduleCode);
     
     public String getPassKey();
     

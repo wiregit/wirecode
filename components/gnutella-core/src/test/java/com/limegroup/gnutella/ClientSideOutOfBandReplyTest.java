@@ -19,7 +19,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
-import org.limewire.activation.api.MCodeEvent;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -562,7 +562,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         @Override
         public String getLicenseKey() { return null; }
         @Override
-        public String getMCode() { return null; }
+        public String getModuleCode() { return null; }
         @Override
         public boolean isActive(ActivationID id) { return false; }
         @Override
@@ -576,9 +576,9 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         @Override
         public boolean isMCodeUpToDate() { return false; }
         @Override
-        public void addMCodeListener(EventListener<MCodeEvent> listener) {}
+        public void addMCodeListener(EventListener<ModuleCodeEvent> listener) {}
         @Override
-        public boolean removeMCodeListener(EventListener<MCodeEvent> listener) { return false; }
+        public boolean removeMCodeListener(EventListener<ModuleCodeEvent> listener) { return false; }
     }
 
 }

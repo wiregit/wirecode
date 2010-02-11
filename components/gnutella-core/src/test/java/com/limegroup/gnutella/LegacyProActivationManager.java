@@ -10,7 +10,7 @@ import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationEvent;
-import org.limewire.activation.api.MCodeEvent;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.listener.EventListener;
 
 /**
@@ -45,7 +45,7 @@ public class LegacyProActivationManager implements ActivationManager {
     // default skeleton impls of interface.
     @Override public List<ActivationItem> getActivationItems() { return null; }
     @Override public String getLicenseKey() { return null; }
-    @Override public String getMCode() { return null; }
+    @Override public String getModuleCode() { return null; }
     @Override public void activateKey(String key) { }
     @Override public void refreshKey(String key) { }
     @Override public ActivationState getActivationState() { return null; }
@@ -54,7 +54,7 @@ public class LegacyProActivationManager implements ActivationManager {
     @Override public boolean removeModuleListener(EventListener<ActivationModuleEvent> listener) { return false; }
     @Override public void addListener(EventListener<ActivationEvent> listener) { }
     @Override public boolean removeListener(EventListener<ActivationEvent> listener) { return false; }
-    @Override public void addMCodeListener(EventListener<MCodeEvent> listener) {}
+    @Override public void addMCodeListener(EventListener<ModuleCodeEvent> listener) {}
     @Override public boolean isMCodeUpToDate() { return false; }
-    @Override public boolean removeMCodeListener(EventListener<MCodeEvent> listener) { return false; }
+    @Override public boolean removeMCodeListener(EventListener<ModuleCodeEvent> listener) { return false; }
 }

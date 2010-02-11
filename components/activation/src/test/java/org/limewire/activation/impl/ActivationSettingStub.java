@@ -29,7 +29,7 @@ public class ActivationSettingStub implements ActSettings {
     }
 
     @Override
-    public String getMCode() {
+    public String getModuleCode() {
         return mcode;
     }
 
@@ -59,7 +59,7 @@ public class ActivationSettingStub implements ActSettings {
     }
 
     @Override
-    public void setMCode(String mCode) {
+    public void setModuleCode(String mCode) {
         this.mcode = mCode;
     }
 

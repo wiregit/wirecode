@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.activation.api.ActivationManager;
-import org.limewire.activation.api.MCodeEvent;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.InstallSettings;
@@ -69,10 +69,10 @@ public class ProNagController {
      * Listens for when the ActivationManager has the correct mcode (encoded list of pro features)
      * to send in the request for the nag.
      */
-    private class MCodeListener implements EventListener<MCodeEvent> {
+    private class MCodeListener implements EventListener<ModuleCodeEvent> {
         @Override
         @SwingEDTEvent
-        public void handleEvent(final MCodeEvent event) {
+        public void handleEvent(final ModuleCodeEvent event) {
             synchronized (this) {
                 waitingForMCode = false;
                 if (isNagReady()) {

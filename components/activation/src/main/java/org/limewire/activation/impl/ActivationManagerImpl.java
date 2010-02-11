@@ -15,7 +15,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
-import org.limewire.activation.api.MCodeEvent;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.activation.impl.ActivationResponse.Type;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
@@ -40,7 +40,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
-    private final EventListenerList<MCodeEvent> mcodeListeners = new EventListenerList<MCodeEvent>();
+    private final EventListenerList<ModuleCodeEvent> mcodeListeners = new EventListenerList<ModuleCodeEvent>();
 
     private final ActivationModel activationModel;
     private final ScheduledExecutorService scheduler;
@@ -188,8 +188,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
     
     @Override
-    public String getMCode() {
-        return activationSettings.getMCode();
+    public String getModuleCode() {
+        return activationSettings.getModuleCode();
     }
 
     /**
@@ -304,7 +304,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
             activateKeyAtStartup(storedLicenseKey);
         } else {
         // if not PKey exists, then the mcode doesn't exist either. so, we can show the nag now.
-            mcodeListeners.broadcast(new MCodeEvent(""));
+            mcodeListeners.broadcast(new ModuleCodeEvent(""));
         }
     }
 
@@ -336,12 +336,12 @@ class ActivationManagerImpl implements ActivationManager, Service {
     }
 
     @Override
-    public void addMCodeListener(EventListener<MCodeEvent> listener) {
+    public void addMCodeListener(EventListener<ModuleCodeEvent> listener) {
         mcodeListeners.addListener(listener);
     }
 
     @Override
-    public boolean removeMCodeListener(EventListener<MCodeEvent> listener) {
+    public boolean removeMCodeListener(EventListener<ModuleCodeEvent> listener) {
         return mcodeListeners.removeListener(listener);
     }
 
@@ -372,7 +372,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
             attemptedToContactActivationServer = true;
             transitionToState(state, response);
 
-            mcodeListeners.broadcast(new MCodeEvent(getMCode()));
+            mcodeListeners.broadcast(new ModuleCodeEvent(getModuleCode()));
 
             if (state == State.ACTIVATED_FROM_SERVER) {
                 // reschedule next ping of activation server if necessary
@@ -467,7 +467,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     break;
                 case BLOCKED:
                     activationSettings.setActivationKey(response.getLid());
-                    activationSettings.setMCode(response.getMCode());
+                    activationSettings.setModuleCode(response.getMCode());
                     error = ActivationError.BLOCKED_KEY;
                     break;
                 default:
@@ -490,7 +490,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
         writeToDisk("");
         setActivationItems(Collections.<ActivationItem>emptyList());
         if(removeMCode)
-            activationSettings.setMCode("");
+            activationSettings.setModuleCode("");
     }
     
     private void refreshing() {
@@ -513,7 +513,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private void activated(final ActivationResponse response) {
         writeToDisk(response.getJSONString());
         activationSettings.setActivationKey(response.getLid());
-        activationSettings.setMCode(response.getMCode());
+        activationSettings.setModuleCode(response.getMCode());
         setActivationItems(response.getActivationItems());
         activationSettings.setLastStartPro(isProActive());
         activationError = ActivationError.NO_ERROR;

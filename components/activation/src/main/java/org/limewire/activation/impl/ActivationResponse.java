@@ -21,12 +21,30 @@ import org.limewire.activation.api.ActivationItem;
  */
 class ActivationResponse {
     
+    /**
+     * Type of response recieved from the server when trying to authenticate
+     * a License Key.
+     */
     public enum Type {
+        /**
+         * The License Key is currently valid. This does not guarentee the 
+         * License Key has active modules.
+         */
         VALID,
+        
+        /** The License Key could not be found or is not valid. */
         NOTFOUND,
+        
+        /** The License Key is currently blocked for abuse. */
         BLOCKED,
+        
+        /** There was some communication error with the server. */
         ERROR,
+        
+        /** The current License Key should be removed from within the client. */
         REMOVE,
+        
+        /** The client should no longer contact the server at startup. */
         STOP        
     }
         

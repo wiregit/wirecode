@@ -9,7 +9,7 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
-import org.limewire.activation.api.MCodeEvent;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.listener.EventListener;
 
 public class MockActivationManager implements ActivationManager {
@@ -32,7 +32,7 @@ public class MockActivationManager implements ActivationManager {
     }
     
     @Override
-    public String getMCode() {
+    public String getModuleCode() {
         return "";
     }
 
@@ -97,9 +97,9 @@ public class MockActivationManager implements ActivationManager {
     }
     
     @Override
-    public void addMCodeListener(EventListener<MCodeEvent> listener) {}
+    public void addMCodeListener(EventListener<ModuleCodeEvent> listener) {}
     
     @Override
-    public boolean removeMCodeListener(EventListener<MCodeEvent> listener) { return false; }
+    public boolean removeMCodeListener(EventListener<ModuleCodeEvent> listener) { return false; }
 
 }

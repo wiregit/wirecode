@@ -24,10 +24,10 @@ public interface ActivationManager {
     public String getLicenseKey();
     
     /**
-     * Returns the m_Code associated with this LicenseKey. If no LicenseKey
+     * Returns the Module Code associated with this LicenseKey. If no LicenseKey
      * exists this will return empty String.
      */
-    public String getMCode();
+    public String getModuleCode();
     
     /**
      * This activates a key that has been newly entered by the user.
@@ -85,7 +85,7 @@ public interface ActivationManager {
     
     public boolean removeListener(EventListener<ActivationEvent> listener);
 
-    public void addMCodeListener(EventListener<MCodeEvent> listener);
+    public void addMCodeListener(EventListener<ModuleCodeEvent> listener);
     
-    public boolean removeMCodeListener(EventListener<MCodeEvent> listener);
+    public boolean removeMCodeListener(EventListener<ModuleCodeEvent> listener);
 }
