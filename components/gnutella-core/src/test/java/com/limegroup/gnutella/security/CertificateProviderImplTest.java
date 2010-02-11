@@ -95,23 +95,9 @@ public class CertificateProviderImplTest extends BaseTestCase {
         assertSame(certificate, certificateProviderImpl.get());
         // test again to ensure the same certificate is returned henceforth
         assertSame(certificate, certificateProviderImpl.get());
-        
-        context.assertIsSatisfied();
-    }
-    
-    public void testSuccessfulHttpGetReplacesNullCertificate() throws Exception {
-        context.checking(new SequencedExpectations(context) {{
-            // fail
-            one(fileCertificateReader).read(file);
-            will(throwException(new IOException()));
-            
-            // fail
-            one(httpCertificateReader).read(uri, null);
-            will(throwException(new IOException()));
-        }});
-        
-        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
-        assertInstanceof(NullCertificate.class, certificateProviderImpl.getFromHttp(null));
+        // http get is only called once, next time it's called it returns
+        // the local valid certificate
+        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
         
         context.assertIsSatisfied();
     }
@@ -223,5 +209,27 @@ public class CertificateProviderImplTest extends BaseTestCase {
         assertSame(certificate, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
+    }
+    
+    public void testSecondCallToHttpGetReturnsCachedCertificate() throws Exception {
+        final Certificate httpCertificate = context.mock(Certificate.class);
+        context.checking(new Expectations() {{
+            one(httpCertificateReader).read(uri, null);
+            will(returnValue(httpCertificate));
+            
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            one(certificateVerifier).verify(httpCertificate);
+            will(returnValue(httpCertificate));
+            
+            one(fileCertificateReader).write(certificate, file);
+            will(returnValue(true));
+        }});
+        
+        certificateProviderImpl.set(certificate);
+        assertSame(httpCertificate, certificateProviderImpl.getFromHttp(null));
+        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
+        assertSame(certificate, certificateProviderImpl.get());
     }
 }

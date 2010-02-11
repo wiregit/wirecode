@@ -12,7 +12,7 @@ import org.limewire.util.Objects;
  * base32(signature)|keyVersion as integer literal|base32(public key)
  * </pre>
  */
-public class CertificateImpl implements Certificate {
+class CertificateImpl implements Certificate {
 
     private final byte[] signature;
     private final byte[] signedPayload;

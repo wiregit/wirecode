@@ -49,7 +49,7 @@ public class CertificateProviderImpl implements CertificateProvider {
         this.uri = uri;
     }
     
-    public Certificate getFromFile() {
+    private Certificate getFromFile() {
         try {
             return certificateVerifier.verify(fileCertificateReader.read(file));
         } catch (IOException e) {
