@@ -4,8 +4,8 @@ import java.io.File;
 
 public class ActivationSerializerSettingsStub  implements ActivationSerializerSettings {
 
-    private File backupFile;
-    private File saveFile;
+    private final File backupFile;
+    private final File saveFile;
     
     public ActivationSerializerSettingsStub(File backup, File save) {
         this.backupFile = backup;

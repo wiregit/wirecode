@@ -55,8 +55,8 @@ class ActivationResponseFactoryImpl implements ActivationResponseFactory {
             String response = parentObj.getString("response");
             String lid = parentObj.getString("lid");
             ActivationResponse.Type type = ActivationResponse.Type.valueOf(response.toUpperCase());
-            String mcode = parentObj.has("mcode") ? parentObj.getString("mcode") : null;
-            int refresh = parentObj.has("refresh") ? parentObj.getInt("refresh") : 0;
+            String mcode = parentObj.optString("mcode", null);
+            int refresh =  parentObj.optInt("refresh", 0);
             String optionalMessage = null;
             if (type == ActivationResponse.Type.ERROR) {
                 optionalMessage = parentObj.getString("message");
@@ -66,8 +66,11 @@ class ActivationResponseFactoryImpl implements ActivationResponseFactory {
             return new ActivationResponse(json, lid, type, mcode, refresh, items, optionalMessage);
         } catch (JSONException e) {
             throw new InvalidDataException("Error parsing JSON String " + json, e);
-        } catch (Throwable e) {
+        } catch (ParseException e) {
             throw new InvalidDataException("Error parsing JSON String " + json, e);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidDataException("Error parsing JSON " +
+                    "String due to unrecognized response type: " + json, e);
         }
     }
 

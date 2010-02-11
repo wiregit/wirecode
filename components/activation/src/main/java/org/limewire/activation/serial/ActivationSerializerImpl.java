@@ -51,7 +51,7 @@ class ActivationSerializerImpl implements ActivationSerializer {
     }
 
     @Override
-    public synchronized String readFromDisk() throws IOException {
+    public String readFromDisk() throws IOException {
         if(!settings.getSaveFile().exists() && !settings.getBackupFile().exists())
             return null;
         
@@ -87,7 +87,7 @@ class ActivationSerializerImpl implements ActivationSerializer {
     }
 
     @Override
-    public synchronized boolean writeToDisk(String jsonString) throws IOException, GeneralSecurityException {
+    public boolean writeToDisk(String jsonString) throws IOException, GeneralSecurityException {
         String encrypted = encrypt(jsonString);
         return FileUtils.writeWithBackupFile(encrypted, settings.getBackupFile(), settings.getSaveFile(), LOG);            
     }
@@ -119,7 +119,6 @@ class ActivationSerializerImpl implements ActivationSerializer {
      * Returns the encryption/decryption key.
      */
     private String getEncryptionKey() {
-        String key = activationSettings.getPassKey();
-        return key;
+        return activationSettings.getPassKey();
     }
 }
