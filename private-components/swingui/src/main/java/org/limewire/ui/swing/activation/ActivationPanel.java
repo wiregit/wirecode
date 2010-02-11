@@ -269,6 +269,10 @@ public class ActivationPanel {
         cardLayout.show(cardPanel, card);
     }
 
+    /*
+     * This class receives updates about the applications activation state and updates the user interface accordingly,
+     * showing and hiding various components depending on what the activation state and error state is.
+     */
     private class StateManager {
         private boolean editingLicense = true;
         private ActivationState state = ActivationState.NOT_AUTHORIZED;
@@ -389,8 +393,6 @@ public class ActivationPanel {
             }
             
             activationPanel.revalidate();
-            activationPanel.invalidate();
-            
         }
         
         private boolean areThereExpiredModules() {

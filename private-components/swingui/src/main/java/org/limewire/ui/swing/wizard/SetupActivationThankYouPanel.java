@@ -21,7 +21,6 @@ import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.activation.ActivationUtilities;
 import org.limewire.ui.swing.activation.LabelWithLinkSupport;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -29,8 +28,6 @@ public class SetupActivationThankYouPanel extends JPanel {
 
     @Resource
     private Color thankYouColor;
-    @Resource
-    private Icon infoIcon;
     @Resource
     private Icon noticeIcon;
     @Resource
@@ -42,18 +39,18 @@ public class SetupActivationThankYouPanel extends JPanel {
         
         GuiUtils.assignResources(this);
         
-        if (areAllModulesExpired(eventList)) {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
-            thankYouLabel.setForeground(expiredMessageColor);
-            add(thankYouLabel, "align 50% 50%, wrap");
-        } else if (areSomeModulesExpired(eventList)) {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
-            thankYouLabel.setForeground(expiredMessageColor);
-            add(thankYouLabel, "align 50% 50%, wrap");
+        if (containsOnlyExpiredModules(eventList)) {
+            JLabel expiredLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
+            expiredLabel.setForeground(expiredMessageColor);
+            add(expiredLabel, "align 50% 50%, wrap");
+        } else if (containsSomeExpiredModules(eventList)) {
+            JLabel expiredLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
+            expiredLabel.setForeground(expiredMessageColor);
+            add(expiredLabel, "align 50% 50%, wrap");
         } else if (userHasPreexistingLicense) {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
-            thankYouLabel.setForeground(thankYouColor);
-            add(thankYouLabel, "align 50% 50%, wrap");
+            JLabel yayLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
+            yayLabel.setForeground(thankYouColor);
+            add(yayLabel, "align 50% 50%, wrap");
         } else {
             JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! You have successfully activated your license."));
             thankYouLabel.setForeground(thankYouColor);
@@ -67,17 +64,20 @@ public class SetupActivationThankYouPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createLineBorder(thankYouColor));
         configureEnclosingScrollPane(scrollPane, table);
         int numberOfItemsVisible = (eventList.size() > 4) ? 4 : eventList.size();
-        scrollPane.setMinimumSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
-        scrollPane.setPreferredSize(new Dimension(400, 27 + numberOfItemsVisible * 29 + 10));
+        int estimatedHeaderSize = 27;
+        int estimatedRowSize = 29;
+        int estimatedPaddingOnEnd = 10;
+        scrollPane.setMinimumSize(new Dimension(400, estimatedHeaderSize + numberOfItemsVisible * estimatedRowSize + estimatedPaddingOnEnd));
+        scrollPane.setPreferredSize(new Dimension(400, estimatedHeaderSize + numberOfItemsVisible * estimatedRowSize + estimatedPaddingOnEnd));
         
-        if (areThereProblematicModules(eventList)) {
+        if (containsProblematicModules(eventList)) {
             JPanel innerPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, gapy 0", "[]", "[][][]"));
             
             innerPanel.add(scrollPane, "align 50% 50%, wrap");
 
             innerPanel.add(Box.createVerticalStrut(10), "wrap");
 
-            if (areSomeModulesExpired(eventList)) {
+            if (containsSomeExpiredModules(eventList)) {
                 LabelWithLinkSupport renewFeaturesLabel = new LabelWithLinkSupport();
                 Font font = wizardPage.createAndDecorateLabel("").getFont();
                 renewFeaturesLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
@@ -104,7 +104,7 @@ public class SetupActivationThankYouPanel extends JPanel {
         add(Box.createVerticalStrut(1), "wrap, growy");
     }
     
-    private static boolean areThereProblematicModules(List<ActivationItem> eventList) {
+    private static boolean containsProblematicModules(List<ActivationItem> eventList) {
         for (ActivationItem item : eventList) {
             if (item.getStatus() == ActivationItem.Status.UNAVAILABLE || item.getStatus() == ActivationItem.Status.UNUSEABLE_LW 
                  || item.getStatus() == ActivationItem.Status.UNUSEABLE_OS || item.getStatus() == ActivationItem.Status.EXPIRED) {
@@ -114,7 +114,7 @@ public class SetupActivationThankYouPanel extends JPanel {
         return false;
     }
 
-    private static boolean areAllModulesExpired(List<ActivationItem> eventList) {
+    private static boolean containsOnlyExpiredModules(List<ActivationItem> eventList) {
         for (ActivationItem item : eventList) {
             if (item.getStatus() != ActivationItem.Status.EXPIRED) {
                 return false;
@@ -123,7 +123,7 @@ public class SetupActivationThankYouPanel extends JPanel {
         return true;
     }
 
-    private static boolean areSomeModulesExpired(List<ActivationItem> eventList) {
+    private static boolean containsSomeExpiredModules(List<ActivationItem> eventList) {
         for (ActivationItem item : eventList) {
             if (item.getStatus() == ActivationItem.Status.EXPIRED) {
                 return true;
