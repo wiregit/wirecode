@@ -24,6 +24,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
@@ -169,6 +170,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final EventListenerList<UpdateEvent> listeners;
+    private final ActivationManager activationManager;
     
     private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
     private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
@@ -202,7 +204,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             UpdateMessageVerifier updateMessageVerifier, 
             RemoteFileDescFactory remoteFileDescFactory,
             @GnutellaFiles FileView gnutellaFileView,
-            Library library) {
+            Library library, ActivationManager activationManager) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
@@ -218,6 +220,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.gnutellaFileView = gnutellaFileView;
+        this.activationManager = activationManager;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
@@ -448,7 +451,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
-                    LimeWireUtils.isPro(),
+                    activationManager.isProActive(),
                     style,
                     javaV);
 
@@ -544,7 +547,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID()));
+        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
+            activationManager.isProActive(), activationManager.getModuleCode()));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();

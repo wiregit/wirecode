@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -124,7 +125,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
-            BandwidthCollector bandwidthCollector) {
+            BandwidthCollector bandwidthCollector, ActivationManager activationManager) {
 	    super(saveLocationManager, downloadManager, gnutellaFileCollection,
 	            incompleteFileManager, downloadCallback, networkManager,
 	            alternateLocationFactory, requeryManagerFactory,
@@ -135,7 +136,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	            applicationServices, remoteFileDescFactory, pushListProvider,
 	            socketsManager, downloadStateProcessingQueue,
 	            dangerousFileChecker, virusScanner, spamManager, library,
-	            categoryManager, bandwidthCollector);
+	            categoryManager, bandwidthCollector, activationManager);
     }
     
     @Override

@@ -27,12 +27,6 @@ import com.google.inject.AbstractModule;
 
 public class LimeWireSwingUiModule extends AbstractModule {
     
-    private final boolean isPro;
-    
-    public LimeWireSwingUiModule(boolean isPro) {
-        this.isPro = isPro;
-    }
-    
     @Override
     protected void configure() {
         bind(GuiCallbackImpl.class);
@@ -46,7 +40,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiMainframeModule());
         install(new LimeWireUiNavModule());
         install(new LimeWireUiOptionsModule());
-        install(new LimeWireUiPainterModule(isPro));
+        install(new LimeWireUiPainterModule());
         install(new LimeWireUiPlayerModule());
         install(new LimeWireUiPropertiesModule());
         install(new LimeWireUiSearchModule());

@@ -23,6 +23,7 @@ public class SpamServicesImplTest extends LimeTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() {
         mockery = new Mockery();
         ipFilter = mockery.mock(IPFilter.class);
@@ -39,6 +40,7 @@ public class SpamServicesImplTest extends LimeTestCase {
                 responseFilterFactory);
     }
 
+    @Override
     protected void tearDown(){}
 
     public void testReloadSpamFilters() {

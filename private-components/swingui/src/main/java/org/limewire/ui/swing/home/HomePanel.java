@@ -11,10 +11,13 @@ import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
@@ -51,6 +54,7 @@ public class HomePanel extends JXPanel {
     private int retryCount = 0;
     private boolean firstRequest = true;
     private long initialLoadTime = -1;
+    private boolean isProLoadState = false;
 
     @Inject
     public HomePanel(Application application, final Navigator navigator, GnutellaConnectionManager gnutellaConnectionManager) {
@@ -120,7 +124,9 @@ public class HomePanel extends JXPanel {
         }
     }
     
-    @Inject void register() {        
+    @Inject void register(final ActivationManager activationManager) {        
+        isProLoadState = activationManager.isProActive();
+        
         gnutellaConnectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -129,6 +135,29 @@ public class HomePanel extends JXPanel {
                 }
             }
         });
+
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
+            @Override
+            public void handleEvent(ActivationModuleEvent event) {
+                // we need to check on isProActive rather than the event.getData()
+                // since isProActive will always return the correct value while the event.getData()
+                // may be old modules being removed
+                handleProStateChange(activationManager.isProActive());
+            }
+        });
+    }
+    
+    private void handleProStateChange(boolean currentState) {
+        // if the homepanel is visible and pro was enabled or disabled,
+        // try reloading the homepage
+        if(HomePanel.this.isVisible() && currentState != isProLoadState) {
+            isProLoadState = currentState;
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    loadDefaultUrl();                    
+                }
+            });
+        }
     }
     
     private boolean isRequestInProgress() {

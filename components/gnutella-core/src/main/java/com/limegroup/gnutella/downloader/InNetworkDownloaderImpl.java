@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
@@ -85,7 +86,8 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             VirusScanner virusScanner,
             SpamManager spamManager,
             Library library,
-            CategoryManager categoryManager, BandwidthCollector bandwidthCollector) throws DownloadException {
+            CategoryManager categoryManager, BandwidthCollector bandwidthCollector,
+            ActivationManager activationManager) throws DownloadException {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -96,7 +98,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, virusScanner, spamManager, library,
-                categoryManager, bandwidthCollector);
+                categoryManager, bandwidthCollector, activationManager);
     }
     
     /* (non-Javadoc)

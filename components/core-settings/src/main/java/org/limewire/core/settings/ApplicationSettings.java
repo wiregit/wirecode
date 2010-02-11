@@ -168,7 +168,7 @@ public class ApplicationSettings extends LimeProps {
      *
      * TODO we can remove this field after the beta release. We will still be able to remotely alter it if needed.
      */
-    public static final BooleanSetting AVG_REMOVE_FROM_FREE_VERSION_5_5_0 = FACTORY.createRemoteBooleanSetting("AVG_REMOVE_FROM_FREE_VERSION_5_5_0", false, "avg.remove.from.free.version.5.5.0");
+    public static final BooleanSetting AVG_REMOVE_FROM_FREE_VERSION_5_5_0 = FACTORY.createRemoteBooleanSetting("AVG_REMOVE_FROM_FREE_VERSION_5_5_0", true, "avg.remove.from.free.version.5.5.0");
     
     /**
      * Adds the capability to remove avg from the pro 5.5.0 beta.

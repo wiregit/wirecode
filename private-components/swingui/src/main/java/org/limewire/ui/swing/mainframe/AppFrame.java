@@ -223,8 +223,7 @@ public class AppFrame extends SingleFrameApplication {
     protected void ready() {
         if (application.isNewInstall()) {
             initializeNewInstall();
-        }
-        if (SetupWizard.shouldShowWizard()) {
+        } else if (SetupWizard.shouldShowWizard()) {
             showSetupWizard();
         }
 
@@ -391,7 +390,7 @@ public class AppFrame extends SingleFrameApplication {
             childInjector = Guice.createInjector(Stage.DEVELOPMENT,
                     new MockModule(),
                     new LimeWireInjectModule(),
-                    new LimeWireSwingUiModule(false),
+                    new LimeWireSwingUiModule(),
                     thiz);
         } else {
             // TODO: We want to use child injectors, but weird things happen
@@ -400,7 +399,7 @@ public class AppFrame extends SingleFrameApplication {
                     Modules.providersFrom(injector),
                     new LimeWireInjectModule(),
                     thiz,
-                    new LimeWireSwingUiModule(injector.getInstance(Application.class).isProVersion()),
+                    new LimeWireSwingUiModule(),
                     new AbstractModule() {
                         @Override
                         protected void configure() {                            

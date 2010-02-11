@@ -15,6 +15,7 @@ class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     private final JMenu recentDownloadsMenu;
     
+    private Provider<ActivationAction> activationActionProvider;
     private Provider<OpenFileAction> openFileActionProvider; 
     private Provider<OpenLinkAction> openLinkActionProvider;
     private Provider<AddFileAction> addFileActionProvider;
@@ -24,6 +25,7 @@ class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     @Inject
     public FileMenu(RecentDownloadsMenu recentDownloadsMenu,
+            Provider<ActivationAction> activationActionProvider,
             Provider<OpenFileAction> openFileActionProvider, 
             Provider<OpenLinkAction> openLinkActionProvider,
             Provider<AddFileAction> addFileActionProvider, 
@@ -34,6 +36,7 @@ class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
         super(I18n.tr("&File"));
 
         this.recentDownloadsMenu = recentDownloadsMenu;
+        this.activationActionProvider = activationActionProvider;
         this.openFileActionProvider = openFileActionProvider; 
         this.openLinkActionProvider = openLinkActionProvider; 
         this.addFileActionProvider = addFileActionProvider;
@@ -44,6 +47,7 @@ class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     @Override
     public void createMenuItems() {
+        add(activationActionProvider.get());
         add(openFileActionProvider.get());
         add(openLinkActionProvider.get());
         add(recentDownloadsMenu);

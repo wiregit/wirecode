@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
@@ -88,6 +89,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.QuerySettings;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -368,7 +370,8 @@ public class RequeryDownloadTest extends LimeTestCase {
                 OutgoingQueryReplyFactory outgoingQueryReplyFactory,
                 SharedFilesKeywordIndex sharedFilesKeywordIndex,
                 QRPUpdater qrpUpdater, URNFilter urnFilter,
-                SpamServices spamServices) {
+                SpamServices spamServices, ActivationManager activationManager,
+                QuerySettings querySettings) {
             super(networkManager, queryRequestFactory, queryHandlerFactory,
                     onDemandUnicaster, headPongFactory, pingReplyFactory,
                     connectionManager, forMeReplyHandler, queryUnicaster,
@@ -385,7 +388,7 @@ public class RequeryDownloadTest extends LimeTestCase {
                     messageHandlerBinder, oobHandlerFactory, macManager,
                     limeACKHandler, outgoingQueryReplyFactory,
                     sharedFilesKeywordIndex, qrpUpdater, urnFilter,
-                    spamServices);
+                    spamServices, activationManager, querySettings);
         } 
         
         @Override

@@ -45,7 +45,12 @@ public class GetInfoTest extends AbstractCommunicationSupportWithNoLocalServer {
         Map<Info, String> expectedProperties = new HashMap<Info, String>() { {
                 put(Info.IsAlphaRelease, String.valueOf(LimeWireUtils.isAlphaRelease()));
                 put(Info.MinorVersionNumber, String.valueOf(LimeWireUtils.getMinorVersionNumber()));
-                put(Info.IsPro, String.valueOf(LimeWireUtils.isPro()));
+            
+                // put(Info.IsPro, String.valueOf(LimeWireUtils.isPro()));
+                // todo: activation: fix me: fix this unit test
+                fail("This used to call put(Info.IsPro, String.valueOf(LimeWireUtils.isPro())), " +
+                     "and LimeWireUtils.isPro() is not going to exist anymore!");
+            
                 put(Info.MajorVersionNumber, String.valueOf(LimeWireUtils.getMajorVersionNumber()));
                 put(Info.ServiceVersionNumber, String.valueOf(LimeWireUtils.getServiceVersionNumber()));
                 put(Info.IsBetaRelease, String.valueOf(LimeWireUtils.isBetaRelease()));

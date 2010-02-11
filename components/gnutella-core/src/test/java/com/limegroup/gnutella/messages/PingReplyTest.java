@@ -1087,7 +1087,7 @@ public class PingReplyTest extends LimeTestCase {
                     backgroundExecutor, simppManager, capabilitiesVMFactory,
                     managedConnectionFactory, queryUnicaster, 
                     socketsManager, connectionServices, nodeAssigner, 
-                    ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
+                    ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils, null);
         }
         
         @Override

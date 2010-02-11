@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
@@ -87,7 +88,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
-            BandwidthCollector bandwidthCollector) {
+            BandwidthCollector bandwidthCollector, ActivationManager activationManager) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -98,7 +99,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, virusScanner, spamManager, library,
-                categoryManager, bandwidthCollector);
+                categoryManager, bandwidthCollector, activationManager);
     }
     
     /* (non-Javadoc)

@@ -23,7 +23,7 @@ import org.limewire.ui.swing.util.ResizeUtils;
 
 public class UrlAction extends AbstractAction {
     private final LaunchType type;
-    private final String url;
+    private String url;
     private final String title;
     private final GetParamAppender getParamAppender;
     
@@ -99,6 +99,10 @@ public class UrlAction extends AbstractAction {
         this.title = title;
         this.getParamAppender = getParamAppender;
         putValue(Action.SHORT_DESCRIPTION, url);
+    }
+       
+    public void setURL(String url) {
+        this.url = url;
     }
        
     @Override

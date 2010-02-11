@@ -47,11 +47,6 @@ public class MockApplication implements Application {
     }
 
     @Override
-    public boolean isProVersion() {
-        return false;
-    }
-    
-    @Override
     public boolean isBetaVersion() {
         return true;
     }

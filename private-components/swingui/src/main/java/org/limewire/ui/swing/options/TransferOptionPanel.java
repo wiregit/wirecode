@@ -13,13 +13,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.listener.EventListener;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -74,7 +79,26 @@ public class TransferOptionPanel extends OptionPanel {
         add(getTrayPanel(), "pushx, growx, wrap");
         add(getTransfersPanel(), "pushx, growx, wrap");
         add(new JButton(new DialogDisplayAction(this, this.bitTorrentOptionPanel, I18n.tr("Configure Torrent Settings"), I18n.tr("Configure Torrent Settings..."), I18n.tr("Configure torrent settings."))), "wrap");
+    }
         
+    @Inject
+    public void register(ActivationManager activationManager) {
+        //when avg activation changes, update the virus scanning options
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
+            @Override
+            public void handleEvent(final ActivationModuleEvent event) {
+                if(event.getData() == ActivationID.AVG_MODULE) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            if(downloadsPanel != null) {
+                                downloadsPanel.setAVGCheckBoxVisible();
+                                downloadsPanel.revalidate();
+                            }                            
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private OptionPanel getDownloadsPanel() {
@@ -294,6 +318,12 @@ public class TransferOptionPanel extends OptionPanel {
                             .isSelected() || storeOptionPanel.hasChanged();
         }
 
+        public void setAVGCheckBoxVisible() {
+            boolean value = virusEngine.isSupported();
+            useAntivirusCheckBox.setVisible(value);
+            buyAntivirusButton.setVisible(!value);
+        }
+
         @Override
         public void initOptions() {
             autoRenameDuplicateFilesCheckBox
@@ -301,8 +331,7 @@ public class TransferOptionPanel extends OptionPanel {
             
             useAntivirusCheckBox.setSelected(FilterSettings.VIRUS_SCANNER_ENABLED.getValue());
 
-            useAntivirusCheckBox.setVisible(virusEngine.isSupported());
-            buyAntivirusButton.setVisible(!useAntivirusCheckBox.isVisible());
+            setAVGCheckBoxVisible();
             
             saveFolderPanel.initOptions();
 

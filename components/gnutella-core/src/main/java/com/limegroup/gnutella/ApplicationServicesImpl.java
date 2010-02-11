@@ -37,13 +37,29 @@ public class ApplicationServicesImpl implements ApplicationServices {
         System.arraycopy(limewireGUID,0,mybtguid,8,12);
         bittorrentGUID = mybtguid;
         
-        String lastRunVersion = InstallSettings.LAST_VERSION_RUN.get();
-        newInstall = lastRunVersion == null || !lastRunVersion.equals(LimeWireUtils.getLimeWireVersion());
+        String lastRunVersion = getVersionNoProModifier(InstallSettings.LAST_VERSION_RUN.get());
+        String limewireVersion = getVersionNoProModifier(LimeWireUtils.getLimeWireVersion());
+        newInstall = lastRunVersion == null || !lastRunVersion.equals(limewireVersion);
         
         String lastJavaVersion = InstallSettings.LAST_JAVA_VERSION_RUN.get();
         String currentJavaVersion = System.getProperty("java.version");
         newJavaVersion = lastJavaVersion == null || !lastJavaVersion.equals(currentJavaVersion);
         InstallSettings.LAST_JAVA_VERSION_RUN.set(currentJavaVersion);
+    }
+
+    /**
+     * @param fullVersion full version string, such as "5.1.1", "5.1.1 Pro"
+     * @return the version string, stripping out any "Pro" modifiers.
+     * If the version string is null, or does not end in "Pro", returns
+     * the argument which was passed in.
+     */
+    private static String getVersionNoProModifier(String fullVersion) {
+        String fullVersionNoModifiers = null;
+        if (fullVersion != null) {
+            fullVersionNoModifiers = fullVersion.endsWith("Pro") ? 
+                fullVersion.substring(0, fullVersion.length()-4) : fullVersion; 
+        }
+        return fullVersionNoModifiers;
     }
 
     /* (non-Javadoc)

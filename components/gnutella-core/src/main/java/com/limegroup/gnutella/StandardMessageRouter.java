@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inject.EagerSingleton;
@@ -56,6 +57,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.QuerySettings;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -119,7 +121,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
             SharedFilesKeywordIndex sharedFilesKeywordIndex,
             QRPUpdater qrpUpdater, URNFilter urnFilter,
-            SpamServices spamServices) {
+            SpamServices spamServices, ActivationManager activationManager,
+            QuerySettings querySettings) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -134,7 +137,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
                 MACCalculatorRepositoryManager, limeACKHandler,
                 outgoingQueryReplyFactory, qrpUpdater, urnFilter,
-                spamServices);
+                spamServices, activationManager, querySettings);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;

@@ -20,6 +20,7 @@ import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 public class TransferProgressRenderer extends JXPanel implements TableCellRenderer {
 
     protected final TransferRendererResources resources;
+    private final ProgressBarDecorator progressBarDecorator;
     
     protected final LimeProgressBar progressBar;
     protected final JLabel timeLabel;
@@ -30,10 +31,11 @@ public class TransferProgressRenderer extends JXPanel implements TableCellRender
     public TransferProgressRenderer(ProgressBarDecorator progressBarDecorator) {
         super(new MigLayout("insets 0, gap 0, novisualpadding, nogrid, aligny center"));
         
+        this.progressBarDecorator = progressBarDecorator;
         resources = new TransferRendererResources();
         
         progressBar = new LimeProgressBar(0, 100);
-        progressBarDecorator.decoratePlain(progressBar);  
+        updateColor(); 
         progressBar.setBorder(new LineBorder(resources.getProgressBarBorderColor()));
         Dimension size = new Dimension(resources.getProgressBarWidth(), resources.getProgressBarHeight());
         progressBar.setMaximumSize(size);
@@ -64,6 +66,10 @@ public class TransferProgressRenderer extends JXPanel implements TableCellRender
     protected void updateProgress(Object value, int columnWidth) {
         progressBar.setValue(0);
         progressBar.setVisible(true);
+    }
+
+    public void updateColor() {
+        progressBarDecorator.decoratePlain(progressBar);
     }
 
     /**

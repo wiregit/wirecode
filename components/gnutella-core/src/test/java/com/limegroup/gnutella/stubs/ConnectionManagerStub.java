@@ -61,7 +61,7 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                 capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                 socketsManager, connectionServices, nodeAssigner, ipFilter,
-                connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
+                connectionCheckerManager, pingRequestFactory, networkInstanceUtils, null);
     }
 
     /** Calls c.close iff enableRemove */

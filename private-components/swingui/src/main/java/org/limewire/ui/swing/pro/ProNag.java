@@ -14,12 +14,14 @@ import javax.swing.text.html.HTMLDocument;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.color.ColorUtil;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.activation.ActivationPanel;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.HTMLPane.LoadResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -28,21 +30,25 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /** A nag to go to LimeWire PRO. */ 
 class ProNag extends JXPanel {
     
     private NagContainer container;
     private final Application application;
+    private final ActivationManager activationManager;
     private final HTMLPane editorPane;
     
     private long offlineShownAt = -1;
     
-    @Inject public ProNag(Application application, 
-                          final GnutellaConnectionManager connectionManager) {
+    @Inject public ProNag(Application application, ActivationManager activationManager,
+                          final GnutellaConnectionManager connectionManager,
+                          final Provider<ActivationPanel> activationPanelProvider) {
         super(new BorderLayout());
         
         this.application = application;        
+        this.activationManager = activationManager;
         this.editorPane = new HTMLPane();
         editorPane.putClientProperty(BasicHTML.documentBaseKey, "");
 
@@ -65,6 +71,10 @@ class ProNag extends JXPanel {
                     
                     if(href != null && href.equals("_hide_nag_")) {
                         container.dispose();
+                    } else if (href != null && href.equals("_edit_license_")) {
+                        container.dispose();
+                        ActivationPanel activationPanel = activationPanelProvider.get();
+                        activationPanel.show();
                     } else if(e.getURL() != null) {
                         String url = e.getURL().toExternalForm();
                         url += "&gs=" + connectionManager.getConnectionStrength().getStrengthId();
@@ -175,7 +185,8 @@ class ProNag extends JXPanel {
     public ListeningFuture<LoadResult> loadContents(boolean firstLaunch) {
         String bgColor = ColorUtil.toHexString(GuiUtils.getMainFrame().getBackground());
         String url = application.addClientInfoToUrl(
-                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch + "&bgcolor=" + EncodingUtils.encode(bgColor));
+                "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch 
+                + "&bgcolor=" + EncodingUtils.encode(bgColor));
         String backupUrl = createDefaultPage(firstLaunch, bgColor);
         
         ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);
@@ -197,7 +208,8 @@ class ProNag extends JXPanel {
     
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
         // Pro has no default page.
-        if(application.isProVersion()) {
+        // TODO: this will change to display an add possibly
+        if(activationManager.isProActive()) {
             return "";
         }
         

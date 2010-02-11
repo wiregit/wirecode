@@ -13,7 +13,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ModuleCodeEvent;
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
@@ -24,6 +27,7 @@ import org.limewire.ui.swing.pro.ProNag.NagContainer;
 import org.limewire.ui.swing.statusbar.ProStatusPanel;
 import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 
@@ -33,17 +37,78 @@ public class ProNagController {
     private final ProNag proNag;
     private final ProStatusPanel proStatusPanel;
     
+    private final ActivationManager activationManager;
+    private MCodeListener listener;
+    private boolean waitingForMCode = true;
+
+    private JLayeredPane layeredPane;
     private boolean nagShown;
 
-    @Inject ProNagController(ProNag proNag, ProStatusPanel proStatusPanel) {
+    @Inject ProNagController(ProNag proNag, ProStatusPanel proStatusPanel, 
+                             ActivationManager activationManager,
+                             Application application) {
         isFirstLaunch = !InstallSettings.UPGRADED_TO_5.getValue();
         this.proNag = proNag;
         this.proStatusPanel = proStatusPanel;
+
+        this.activationManager = activationManager;
+        waitingForMCode = !activationManager.isMCodeUpToDate(); 
     }
 
-    public void allowProNag(final JLayeredPane layeredPane)  {
+    @Inject
+    public void register() {
+        if (!activationManager.isMCodeUpToDate()) {
+            this.listener = new MCodeListener();
+            activationManager.addMCodeListener(listener);
+        } else {
+            waitingForMCode = !activationManager.isMCodeUpToDate(); 
+        }
+    }
+
+    /**
+     * Listens for when the ActivationManager has the correct mcode (encoded list of pro features)
+     * to send in the request for the nag.
+     */
+    private class MCodeListener implements EventListener<ModuleCodeEvent> {
+        @Override
+        @SwingEDTEvent
+        public void handleEvent(final ModuleCodeEvent event) {
+            synchronized (this) {
+                waitingForMCode = false;
+                if (isNagReady()) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            showNag();
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public void showNagIfReady(final JLayeredPane layeredPane)  {
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            public void run() {
+                ProNagController.this.layeredPane = layeredPane;
+
+                if (isNagReady())
+                    showNag();
+            }
+        });
+    }
+    
+    /*
+     * We don't want to show the nag until we've been given the application's layered pane and until the activation manager
+     * has refreshed its mcode (its encoded list of pro features) that we send in the nag request.
+     */
+    private boolean isNagReady() {
+        return !waitingForMCode && layeredPane != null;
+    }
+    
+    private void showNag() {
         if(!nagShown) {
             assert SwingUtilities.isEventDispatchThread();
+           
             nagShown = true;
            
             proNag.loadContents(isFirstLaunch).addFutureListener(new EventListener<FutureEvent<LoadResult>>() {

@@ -43,8 +43,10 @@ public class BlacklistServerTest extends LimeTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp(){}
 
+    @Override
     protected void tearDown(){
         FilterSettings.URN_BLACKLIST_UPDATE_URLS.revertToDefault();
         if(injector != null) {

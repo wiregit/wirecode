@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.upload.UploadMediator;
@@ -49,9 +53,10 @@ public class UploadTable extends TransferTable<UploadItem> {
     @Resource private int cancelMaxWidth;
     
     private final CategoryIconManager iconManager;
-    private final ProgressBarDecorator progressBarDecorator;
     private final UploadActionHandler uploadActionHandler;
     private final DefaultEventSelectionModel<UploadItem> selectionModel;
+    private final UploadProgressRenderer uploadProgressRenderer;
+    private boolean isPro = false;
     
     @Inject
     public UploadTable(@Assisted UploadMediator uploadMediator,
@@ -63,8 +68,8 @@ public class UploadTable extends TransferTable<UploadItem> {
         super(uploadMediator.getUploadList(), new UploadTableFormat());
         
         this.iconManager = iconManager;
-        this.progressBarDecorator = progressBarDecorator;
         this.uploadActionHandler = uploadActionHandler;
+        this.uploadProgressRenderer = new UploadProgressRenderer(progressBarDecorator);
         
         GuiUtils.assignResources(this);
         
@@ -79,6 +84,25 @@ public class UploadTable extends TransferTable<UploadItem> {
         
         initializeColumns();
         initializeRenderers();
+    }
+
+    @Inject
+    public void register(final ActivationManager activationManager) {
+        isPro = activationManager.isProActive();
+        
+        activationManager.addModuleListener(new EventListener<ActivationModuleEvent>() {
+            @Override
+            public void handleEvent(ActivationModuleEvent event) {
+                if(isPro != activationManager.isProActive()) {
+                    isPro = activationManager.isProActive();
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            uploadProgressRenderer.updateColor();                            
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -103,7 +127,7 @@ public class UploadTable extends TransferTable<UploadItem> {
         // Set column renderers.
         setColumnRenderer(UploadTableFormat.TITLE_COL, new UploadTitleRenderer(iconManager));
         setColumnRenderer(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer());
-        setColumnRenderer(UploadTableFormat.PROGRESS_COL, new UploadProgressRenderer(progressBarDecorator));
+        setColumnRenderer(UploadTableFormat.PROGRESS_COL, uploadProgressRenderer);
         setColumnRenderer(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(null));
         setColumnRenderer(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(null));
         

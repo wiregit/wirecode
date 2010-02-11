@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
@@ -119,6 +120,7 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
+import com.limegroup.gnutella.search.QuerySettings;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -336,6 +338,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final QRPUpdater qrpUpdater;
     private final URNFilter urnFilter;
     private final SpamServices spamServices;
+    @SuppressWarnings("unused")
+    private final ActivationManager activationManager;
     
     private final PingRequestFactory pingRequestFactory;
 
@@ -344,6 +348,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final ConnectionListener connectionListener = new ConnectionListener();
     
     private final OutgoingQueryReplyFactory outgoingQueryReplyFactory;
+    private final QuerySettings querySettings;
     
     /**
      * Creates a MessageRouter. Must call initialize before using.
@@ -394,7 +399,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
             QRPUpdater qrpUpdater,
             URNFilter urnFilter,
-            SpamServices spamServices) {
+            SpamServices spamServices,
+            ActivationManager activationManager,
+            QuerySettings querySettings) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -437,6 +444,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.qrpUpdater = qrpUpdater;
         this.urnFilter = urnFilter;
         this.spamServices = spamServices;
+        this.activationManager = activationManager;
+        this.querySettings = querySettings;
 
         _clientGUID = applicationServices.getMyGUID();
         _bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager);
@@ -1212,7 +1221,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         if (numResults < 0) // this may be a proxy query
     		numResults = queryDispatcher.getLeafResultsForQuery(qGUID);
 
-        if (numResults < 0 || numResults > QueryHandler.ULTRAPEER_RESULTS) {
+        if (numResults < 0 || numResults > querySettings.getUltrapeerResults()) {
             return -1;
         }
         

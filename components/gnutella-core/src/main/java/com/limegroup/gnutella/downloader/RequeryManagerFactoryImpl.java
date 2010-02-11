@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.activation.api.ActivationManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -15,16 +17,19 @@ public class RequeryManagerFactoryImpl implements RequeryManagerFactory {
     private final Provider<AltLocFinder> altLocFinder;
     private final Provider<DHTManager> dhtManager;
     private final ConnectionServices connectionServices;
+    private final ActivationManager activationManager;
 
     @Inject
     public RequeryManagerFactoryImpl(Provider<DownloadManager> downloadManager,
             Provider<AltLocFinder> altLocFinder,
             Provider<DHTManager> dhtManager,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            ActivationManager activationManager) {
         this.downloadManager = downloadManager;
         this.altLocFinder = altLocFinder;
         this.dhtManager = dhtManager;
         this.connectionServices = connectionServices;
+        this.activationManager = activationManager;
     }    
 
     /* (non-Javadoc)
@@ -33,6 +38,7 @@ public class RequeryManagerFactoryImpl implements RequeryManagerFactory {
     public RequeryManager createRequeryManager(
             RequeryListener requeryListener) {
         return new RequeryManager(requeryListener, downloadManager.get(),
-                altLocFinder.get(), dhtManager.get(), connectionServices);
+                altLocFinder.get(), dhtManager.get(), connectionServices,
+                activationManager);
     }
 }

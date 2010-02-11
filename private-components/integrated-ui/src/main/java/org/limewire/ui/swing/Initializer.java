@@ -2,10 +2,12 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -22,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
+import org.limewire.core.settings.ActivationSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.GuiceUtils;
@@ -62,9 +65,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActiveLimeWireCheck;
-import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeCoreGlue;
+import com.limegroup.gnutella.ActiveLimeWireCheck.ActiveLimeWireException;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.connection.ConnectionInspections;
@@ -156,7 +159,19 @@ final class Initializer {
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
-        switchSplashes(awtSplash, splashImage, LimeWireUtils.isPro());
+        URL imageURL = null;
+        if (ActivationSettings.LAST_START_WAS_PRO.getValue()) {
+            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
+        } else {
+            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
+        }
+        
+        if (imageURL != null) {
+            splashImage = Toolkit.getDefaultToolkit().createImage(imageURL);
+        }
+        
+        switchSplashes(awtSplash, splashImage, 
+                       ActivationSettings.LAST_START_WAS_PRO.getValue());
         
         startEarlyCore();
         

@@ -95,6 +95,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     private final Provider<SpamManager> spamManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final QuerySettings querySettings;
     
     private volatile ResponseFilter responseFilter;
 
@@ -109,7 +110,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             RemoteFileDescFactory remoteFileDescFactory,
             NetworkInstanceUtils networkInstanceUtils,
             PushEndpointFactory pushEndpointFactory,
-            ResponseFilterFactory responseFilterFactory) {
+            ResponseFilterFactory responseFilterFactory,
+            QuerySettings querySettings) {
         this.networkManager = networkManager;
         this.activityCallback = activityCallback;
         this.connectionManager = connectionManager;
@@ -119,6 +121,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         this.networkInstanceUtils = networkInstanceUtils;
         this.pushEndpointFactory = pushEndpointFactory;
         this.responseFilter = responseFilterFactory.createResponseFilter();
+        this.querySettings = querySettings;
     }
 
     @Override
@@ -386,7 +389,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
                     gc.tallyReport();
-                    if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
+                    if (gc.getNumResults() > querySettings.getUltrapeerResults())
                         gc.markAsFinished();
                     // if you think you are done, then undeniably shut off the
                     // query.
@@ -444,7 +447,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     private boolean isQueryStillValid(GuidCount gc, long now) {
         LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
         return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
-               (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
+               (gc.getNumResults() < querySettings.getUltrapeerResults());
     }
 
     /*---------------------------------------------------    
