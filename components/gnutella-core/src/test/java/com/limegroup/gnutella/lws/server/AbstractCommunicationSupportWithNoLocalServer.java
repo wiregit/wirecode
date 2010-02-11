@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.LWSSettings;
+import org.limewire.core.impl.CoreGlueModule;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.LifecycleManager;
 
 
 /**
- * This is a simpler class than {@link AbstractCommunicationSupport} in the
+ * This is a simpler class than {@link org.limewire.lws.server.AbstractCommunicationSupport} in the
  * <code>lwsserver</code> component, because it doesn't have a mock local
  * server representing that on the client. Instead it's an integration test so
  * only has a mock remote server and mock web page javascript code to send the
@@ -50,7 +51,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     private final int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
     
     /**
-     * Public key analogy for {@link TIMES_TO_TRY_FOR_PRIVATE_KEY}
+     * Public key analogy for {@link #TIMES_TO_TRY_FOR_PRIVATE_KEY}
      */
     private final int TIMES_TO_TRY_FOR_PUBLIC_KEY = 3;
     
@@ -61,7 +62,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     private final int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 300;
     
     /**
-     * Public key analogy for {@link SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES}
+     * Public key analogy for {@link #SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES}
      */    
     private final int SLEEP_TIME_BETWEEN_PUBLIC_KEY_TRIES = 300;
     
@@ -139,7 +140,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("localhost");
         LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        inj = LimeTestUtils.createInjector();
+        inj = LimeTestUtils.createInjector(new CoreGlueModule());
         remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();
@@ -320,10 +321,10 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     }
     
     /**
-     * Returns a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     * Returns a {@link FakeJavascriptCodeInTheWebpage.Handler} for ensuring
      * there was some error, but the type doesn't matter.
      * 
-     * @return a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     * @return a {@link FakeJavascriptCodeInTheWebpage.Handler} for ensuring
      *         there was some error, but the type doesn't matter.
      */
     protected final FakeJavascriptCodeInTheWebpage.Handler errorHandlerAny() {

@@ -9,6 +9,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
+import org.limewire.activation.api.ActivationManager;
 
 /**
  * Tests the <code>GetInfo</code> command.
@@ -46,10 +47,8 @@ public class GetInfoTest extends AbstractCommunicationSupportWithNoLocalServer {
                 put(Info.IsAlphaRelease, String.valueOf(LimeWireUtils.isAlphaRelease()));
                 put(Info.MinorVersionNumber, String.valueOf(LimeWireUtils.getMinorVersionNumber()));
             
-                // put(Info.IsPro, String.valueOf(LimeWireUtils.isPro()));
-                // todo: activation: fix me: fix this unit test
-                fail("This used to call put(Info.IsPro, String.valueOf(LimeWireUtils.isPro())), " +
-                     "and LimeWireUtils.isPro() is not going to exist anymore!");
+                ActivationManager activationManager = getInstance(ActivationManager.class);
+                put(Info.IsPro, Boolean.toString(activationManager.isProActive()));
             
                 put(Info.MajorVersionNumber, String.valueOf(LimeWireUtils.getMajorVersionNumber()));
                 put(Info.ServiceVersionNumber, String.valueOf(LimeWireUtils.getServiceVersionNumber()));
