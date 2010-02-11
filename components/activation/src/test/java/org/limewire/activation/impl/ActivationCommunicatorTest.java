@@ -169,7 +169,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         }
     }
     
-    // test to make sure the LW client times out if server does not respond.
+    // test to make sure the LW client times out when the server can't be reached
     //
     public void testNoResponseFromServerClientTimesOut() throws Exception {
         LimeWireHttpClientModule.class.getClass();
