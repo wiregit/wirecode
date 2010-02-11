@@ -2,7 +2,6 @@ package org.limewire.core.impl;
 
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.Application;
-import org.limewire.http.httpclient.HttpClientInstanceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,7 +10,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
-class ApplicationImpl implements Application, HttpClientInstanceUtils {
+class ApplicationImpl implements Application {
     
     private final ApplicationServices applicationServices;
     private final LifecycleManager lifecycleManager;

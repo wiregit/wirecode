@@ -20,6 +20,7 @@ import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.LimeWireCoreSettingsModule;
 import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inject.LazySingleton;
@@ -234,6 +235,7 @@ public class LimeWireCoreModule extends AbstractModule {
             bind(ActivityCallback.class).to(activityCallbackClass);
         }        
 
+        bind(HttpClientInstanceUtils.class).to(LimeWireInfo.class);
         bind(ActivationSettingsController.class).to(ActivationSettingsImpl.class);
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);

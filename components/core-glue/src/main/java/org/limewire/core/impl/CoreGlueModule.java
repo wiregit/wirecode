@@ -34,7 +34,6 @@ import org.limewire.core.impl.updates.CoreGlueUpdatesModule;
 import org.limewire.core.impl.upload.CoreGlueUploadModule;
 import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.core.impl.xmpp.CoreGlueXMPPModule;
-import org.limewire.http.httpclient.HttpClientInstanceUtils;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.ActivityCallback;
@@ -51,7 +50,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(UploadListenerList.class).to(GlueActivityCallback.class);
         bind(IncomingSearchListenerList.class).to(GlueActivityCallback.class);
         bind(Application.class).to(ApplicationImpl.class);
-        bind(HttpClientInstanceUtils.class).to(ApplicationImpl.class);
+
         bind(LifeCycleManager.class).to(LifeCycleManagerImpl.class);
         bind(MagnetFactory.class).to(MagnetFactoryImpl.class);
         bind(ItunesMediator.class).to(ItunesMediatorImpl.class);
