@@ -37,9 +37,9 @@ public class SimppParser {
     private int _version;
     private String _propsData;
 
-    private int keyVersion;
+    private int keyVersion = -1;
 
-    private int newVersion;
+    private int newVersion = -1;
 
     private byte[] signature;
     
@@ -66,6 +66,17 @@ public class SimppParser {
         return _propsData;
     }
 
+    int getKeyVersion() {
+        return keyVersion;
+    }
+
+    byte[] getSignature(){
+        return signature;
+    }
+    
+    Certificate getCertificate(){
+        return certificate;
+    }
     ///////////////////////////private helpers////////////////////////
 
     private void parseInfo(String xmlStr) throws IOException {
