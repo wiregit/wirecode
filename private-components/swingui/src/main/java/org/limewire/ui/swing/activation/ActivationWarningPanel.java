@@ -3,6 +3,7 @@ package org.limewire.ui.swing.activation;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -14,6 +15,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 public class ActivationWarningPanel {
+
+    private static int ICON_WIDTH = 16;
 
     public static enum Mode {
         EMPTY, SPINNER, WARNING
@@ -32,8 +35,10 @@ public class ActivationWarningPanel {
         
         panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
-
-        ResizeUtils.forceSize(panel, new Dimension(20, 20));
+        // believe it or not, this actually is necessary to get miglayout to allocate enough space for this component.
+        panel.add(Box.createRigidArea(new Dimension(ICON_WIDTH, ICON_WIDTH)), BorderLayout.CENTER);
+        
+        ResizeUtils.forceSize(panel, new Dimension(ICON_WIDTH, ICON_WIDTH));
     }
     
     public JComponent getComponent() {
@@ -57,7 +62,7 @@ public class ActivationWarningPanel {
             panel.add(new JLabel(warningIcon), BorderLayout.CENTER);
             break;
         case SPINNER:
-            busyLabel = new ColoredBusyLabel(new Dimension(20,20));
+            busyLabel = new ColoredBusyLabel(new Dimension(ICON_WIDTH,ICON_WIDTH));
             panel.add(busyLabel, BorderLayout.CENTER);
             panel.revalidate();
             busyLabel.setBusy(true);
