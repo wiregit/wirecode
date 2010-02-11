@@ -53,8 +53,6 @@ class LaunchFileAction extends AbstractAction {
         List<LocalFileItem> localFileItems = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         if (localFileItems.size() > 0) {
             LibraryInspectionUtils.fileLaunched();
-            //make sure nothing else is playing
-            PlayerUtils.stop();
             
             // Get first selected item.
             LocalFileItem fileItem = localFileItems.get(0);
@@ -64,6 +62,8 @@ class LaunchFileAction extends AbstractAction {
                 audioPlayerProvider.get().setActivePlaylist(libraryNavProvider.get().getSelectedNavItem());
                 audioPlayerProvider.get().play(fileItem);
             } else if (SwingUiSettings.PLAYER_ENABLED.getValue() && PlayerUtils.isPlayableVideoFile(fileItem.getFile(), categoryManager)) {
+                //make sure nothing else is playing
+                PlayerUtils.pause();
                 videoPlayerProvider.get().play(fileItem);
             } else {    
                 NativeLaunchUtils.safeLaunchFile(fileItem.getFile(), categoryManager);

@@ -1,17 +1,25 @@
 package org.limewire.ui.swing.player;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.awt.TextComponent;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -97,6 +105,9 @@ public class MiniPlayerPanel extends JPanel {
             add(statusButton, "gapbottom 0, gaptop 0");
          
             setMaximumSize(getPreferredSize());
+
+            //we are using AWTEventListener rather than key binding so that other focused components won't consume the event
+            Toolkit.getDefaultToolkit().addAWTEventListener(new SpacebarPlaybackToggler(), AWTEvent.KEY_EVENT_MASK);
         }
     }
     
@@ -159,7 +170,7 @@ public class MiniPlayerPanel extends JPanel {
             initialize();
             //Show MiniPlayer when song is opened
             statusButton.setText(name);
-            statusButton.getToolTip().setTipText(name);
+            statusButton.setToolTipText(name);
             if(!isVisible())
                 setVisible(true);
             statusButton.start();
@@ -185,5 +196,38 @@ public class MiniPlayerPanel extends JPanel {
             }
         }
         
+    }
+    
+    private class SpacebarPlaybackToggler implements AWTEventListener {
+        
+        @Override
+        public void eventDispatched(AWTEvent event) {
+            if(shouldTogglePlayback(event)){
+                setPlaying(!isPlaying());                        
+            }
+        }
+        
+        private boolean shouldTogglePlayback(AWTEvent event){
+            if (isSpacePressed(event)) {
+                return MiniPlayerPanel.this.isVisible() && !isTextComponentFocused();
+            }            
+            return false;
+        }
+        
+        private boolean isSpacePressed(AWTEvent event) {
+            if (event instanceof KeyEvent) {
+                KeyEvent keyEvent = (KeyEvent) event;
+                
+                return keyEvent.getKeyCode() == KeyEvent.VK_SPACE
+                        && keyEvent.getID() == KeyEvent.KEY_PRESSED;
+            }
+            
+            return false;
+        }
+        
+        private boolean isTextComponentFocused(){
+            Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            return focusOwner instanceof TextComponent || focusOwner instanceof JTextComponent;
+        }
     }
 }
