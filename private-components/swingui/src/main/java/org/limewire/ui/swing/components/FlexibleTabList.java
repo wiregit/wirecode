@@ -57,13 +57,12 @@ public class FlexibleTabList extends AbstractTabList {
     private final Action closeAllAction;
 
     private final JComponent parent;
-    private final Animator animator;
-    private final ScreenTransition transition;
+    private final LayoutAnimator animator;
     
     private int maxVisibleTabs;
     private int vizStartIdx = -1;
-    private boolean pendingLayout;
-    private List<FancyTab> pendingVisibleTabs;
+    private boolean delayedLayout;
+    private ChangeType pendingChangeType;
     
     /**
      * Constructs a FlexibleTabList with the specified combobox decorator.
@@ -91,10 +90,8 @@ public class FlexibleTabList extends AbstractTabList {
         parent.setOpaque(false);
         parent.add(this, BorderLayout.CENTER);
         
-        // Set up animation to run for 0.3 seconds at 33 frames per second.
-        animator = new Animator(300, new AnimationListener());
-        animator.setResolution(30);
-        transition = new ScreenTransition(this, new TransitionAdapter(), animator);
+        // Create layout animation manager.
+        animator = new LayoutAnimator(this);
         
         // Add listener to adjust tab layout when container is resized. 
         addComponentListener(new ComponentAdapter() {
@@ -149,8 +146,8 @@ public class FlexibleTabList extends AbstractTabList {
         // Must be called on UI thread.
         assert SwingUtilities.isEventDispatchThread();
         
-        // Do layout only if not pending or in progress.
-        if (!pendingLayout) {
+        // Do layout only if not in progress or delayed.
+        if (!animator.isRunning() && !delayedLayout) {
             List<FancyTab> visibleTabs = getPendingVisibleTabs(false);
             doTabLayout(visibleTabs);
             revalidate();
@@ -163,9 +160,17 @@ public class FlexibleTabList extends AbstractTabList {
         // Must be called on UI thread.
         assert SwingUtilities.isEventDispatchThread();
         
-        // Skip if layout is pending or in progress.
-        if (!pendingLayout) {
-            pendingLayout = true;
+        // Skip if layout is delayed.
+        if (delayedLayout) return;
+        
+        if (animator.isRunning()) {
+            // Save change type for later use.
+            pendingChangeType = changeType;
+            return;
+            
+        } else {
+            // Clear pending change type.
+            pendingChangeType = null;
 
             // Get old index of first visible tab.
             int oldStartIdx = vizStartIdx;
@@ -179,8 +184,7 @@ public class FlexibleTabList extends AbstractTabList {
                     changeType == ChangeType.SELECTED) {
                 // Set up tab effects and start layout animation.
                 setupTabEffects(changeType, oldStartIdx, visibleTabs);
-                pendingVisibleTabs = visibleTabs;
-                transition.start();
+                animator.start(visibleTabs);
 
             } else {
                 // Layout tabs without animation.
@@ -188,7 +192,6 @@ public class FlexibleTabList extends AbstractTabList {
                 doTabLayout(visibleTabs);
                 revalidate();
                 repaint();
-                pendingLayout = false;
             }
         }
     }
@@ -342,6 +345,16 @@ public class FlexibleTabList extends AbstractTabList {
     }
     
     /**
+     * Handles event when animated layout is completed.
+     */
+    private void layoutDone() {
+        // Redo layout if layout change is pending.
+        if (pendingChangeType != null) {
+            layoutTabs(pendingChangeType);
+        }
+    }
+    
+    /**
      * Freezes the current tab layout.  This method may be called when we want
      * to aggregate multiple tab additions/deletions into a single layout
      * update.  The <code>updateTabLayout()</code> method should be called to
@@ -351,7 +364,7 @@ public class FlexibleTabList extends AbstractTabList {
      */
     public void freezeTabLayout() {
         assert SwingUtilities.isEventDispatchThread();
-        pendingLayout = true;
+        delayedLayout = true;
     }
     
     /**
@@ -360,7 +373,7 @@ public class FlexibleTabList extends AbstractTabList {
      * @see #freezeTabLayout()
      */
     public void updateTabLayout(ChangeType changeType) {
-        pendingLayout = false;
+        delayedLayout = false;
         layoutTabs(changeType);
     }
     
@@ -467,24 +480,52 @@ public class FlexibleTabList extends AbstractTabList {
     }
     
     /**
-     * Listener to handle animation events. 
+     * Animation manager for the tab layout. 
      */
-    private class AnimationListener extends TimingTargetAdapter {
-        @Override
-        public void end() {
-            // Reset indicator to re-enable layout requests.
-            pendingLayout = false;
+    private class LayoutAnimator extends TimingTargetAdapter implements TransitionTarget {
+        private final Animator animator;
+        private final ScreenTransition transition;
+        
+        private List<FancyTab> newVisibleTabs;
+        private boolean running;
+
+        /**
+         * Constructs a LayoutAnimator for the specified tab container.
+         */
+        public LayoutAnimator(JComponent tabContainer) {
+            // Set up animation to run for 0.3 seconds at 33 frames per second.
+            animator = new Animator(300, this);
+            animator.setResolution(30);
+            transition = new ScreenTransition(tabContainer, this, animator);
         }
-    }
-    
-    /**
-     * Transition listener to handle request to set up the next tab layout.
-     */
-    private class TransitionAdapter implements TransitionTarget {
+        
+        /**
+         * Starts the animated transition.
+         */
+        public void start(List<FancyTab> visibleTabs) {
+            running = true;
+            newVisibleTabs = new ArrayList<FancyTab>(visibleTabs);
+            transition.start();
+        }
+        
+        /**
+         * Returns true if the animated transition is running.
+         */
+        public boolean isRunning() {
+            return running;
+        }
+        
         @Override
         public void setupNextScreen() {
-            // Add pending visible tabs to container.
-            doTabLayout(pendingVisibleTabs);
+            // Add new visible tabs to container.
+            doTabLayout(newVisibleTabs);
+        }
+        
+        @Override
+        public void end() {
+            // Reset indicator and notify container.
+            running = false;
+            layoutDone();
         }
     }
 }
