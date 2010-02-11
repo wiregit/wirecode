@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -20,6 +21,7 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -90,8 +92,29 @@ class StoreMenu extends MnemonicMenu implements DelayedMenuItemCreator {
             }
             @Override
             public void menuSelected(MenuEvent e) {
-                AtomicReference<Integer> currentPosition = new AtomicReference<Integer>();
-                for(HistoryEntry entry : storeMediator.getComponent().getHistory(currentPosition)) {
+                // On OS-X we fill the history list on a thread off of the EDT thread, because the call to storeMediator.getComponent().getHistory()
+                // was going into some native mozilla code which was then deadlocking somewhere and causing LimeWire to freeze.
+                if (OSUtils.isMacOSX()) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            final AtomicReference<Integer> currentPosition = new AtomicReference<Integer>();
+                            final Iterable<HistoryEntry> historyEntries = storeMediator.getComponent().getHistory(currentPosition);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    addBrowserHistoryToHistoryMenu(historyEntries, currentPosition);
+                                }
+                            });
+                        }
+                    }).start();
+                } else {
+                    final AtomicReference<Integer> currentPosition = new AtomicReference<Integer>();
+                    final Iterable<HistoryEntry> historyEntries = storeMediator.getComponent().getHistory(currentPosition);
+                    addBrowserHistoryToHistoryMenu(historyEntries, currentPosition);
+                }
+            }
+            
+            private void addBrowserHistoryToHistoryMenu(Iterable<HistoryEntry> historyEntries, AtomicReference<Integer> currentPosition) {
+                for(HistoryEntry entry : historyEntries) {
                     JMenuItem item = history.add(new HistoryAction(entry));
                     if(entry.getIndex() == currentPosition.get()) {
                         FontUtils.bold(item);
