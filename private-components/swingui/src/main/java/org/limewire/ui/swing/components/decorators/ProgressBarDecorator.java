@@ -36,8 +36,8 @@ public class ProgressBarDecorator {
         if(painterFactory == null)
             painterFactory = painterFactoryProvider.get();
         
-        AbstractPainter<JProgressBar> foregroundPainter =  painterFactory.createRegularForegroundPainter();
-        AbstractPainter<JComponent>   backgroundPainter = painterFactory.createRegularBackgroundPainter();
+        AbstractPainter<JProgressBar> foregroundPainter =  painterFactory.createForegroundPainter();
+        AbstractPainter<JComponent>   backgroundPainter = painterFactory.createBackgroundPainter();
         
         bar.setForegroundPainter(foregroundPainter);
         bar.setBackgroundPainter(backgroundPainter);

@@ -43,7 +43,7 @@ public class ProgressPainterFactoryImpl implements ProgressPainterFactory {
     }
     
     @Override
-    public AbstractPainter<JComponent> createRegularBackgroundPainter() {
+    public AbstractPainter<JComponent> createBackgroundPainter() {
         if(activationManager.isProActive()) {
             return new ProgressBarBackgroundPainter(
                     new GradientPaint(0,0,this.barBackgroundGradientTop,0,1,this.barBackgroundGradientBottom),
@@ -56,7 +56,7 @@ public class ProgressPainterFactoryImpl implements ProgressPainterFactory {
     }
     
     @Override
-    public AbstractPainter<JProgressBar> createRegularForegroundPainter() {
+    public AbstractPainter<JProgressBar> createForegroundPainter() {
         if(activationManager.isProActive()) {
             return new ProgressBarForegroundPainter<JProgressBar>(
                     new GradientPaint(0,0,this.proBarForegroundGradientTop,0,1,this.proBarForegroundGradientBottom),

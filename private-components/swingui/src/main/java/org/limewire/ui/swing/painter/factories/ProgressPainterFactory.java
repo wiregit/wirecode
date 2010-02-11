@@ -6,6 +6,6 @@ import javax.swing.JProgressBar;
 import org.jdesktop.swingx.painter.AbstractPainter;
 
 public interface ProgressPainterFactory {
-    public AbstractPainter<JComponent> createRegularBackgroundPainter();
-    public AbstractPainter<JProgressBar> createRegularForegroundPainter();
+    public AbstractPainter<JComponent> createBackgroundPainter();
+    public AbstractPainter<JProgressBar> createForegroundPainter();
 }
