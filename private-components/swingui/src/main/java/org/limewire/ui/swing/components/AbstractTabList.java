@@ -128,7 +128,7 @@ public abstract class AbstractTabList extends JXPanel {
     protected void removeTab(FancyTab tab) {
         boolean selected = tab.isSelected();
         int idx = tabs.indexOf(tab);
-        assert idx != -1;
+        if (idx < 0) return;
         tabs.remove(tab);
         tab.removeFromGroup(tabGroup);
         
