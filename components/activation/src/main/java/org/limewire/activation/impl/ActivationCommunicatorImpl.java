@@ -9,7 +9,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.InvalidDataException;
@@ -33,10 +33,10 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
     
     private final ActivationResponseFactory activationFactory;
     private final Provider<LimeHttpClient> httpClientProvider;
-    private final ActSettings activationSettings;
+    private final ActivationSettingsController activationSettings;
 
     @Inject
-    public ActivationCommunicatorImpl(ActSettings activationSettings,
+    public ActivationCommunicatorImpl(ActivationSettingsController activationSettings,
                                       ActivationResponseFactory activationFactory,
                                       Provider<LimeHttpClient> httpClientProvider) {
         this.activationSettings = activationSettings;

@@ -1,15 +1,14 @@
-package org.limewire.core.impl.activation;
+package com.limegroup.gnutella;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.core.settings.ActivationSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
-class ActivationSettingsImpl implements ActSettings {
+public class ActivationSettingsImpl implements ActivationSettingsController {
 
     private static final String ACTIVATION_HOST = "https://qa-activate.limewire.com/lookup";
     
@@ -57,7 +56,6 @@ class ActivationSettingsImpl implements ActSettings {
     public boolean isLastStartPro() {
         return ActivationSettings.LAST_START_WAS_PRO.getValue();
     }
-
 
     @Override
     public void setActivationKey(String key) {

@@ -1,6 +1,6 @@
 package org.limewire.activation.api;
 
-public interface ActSettings {
+public interface ActivationSettingsController {
 
     public String getActivationHost();
     

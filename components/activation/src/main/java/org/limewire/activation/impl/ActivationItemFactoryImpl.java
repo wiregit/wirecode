@@ -2,7 +2,7 @@ package org.limewire.activation.impl;
 
 import java.util.Date;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationItem.Status;
 
@@ -12,10 +12,10 @@ import com.google.inject.Singleton;
 @Singleton
 class ActivationItemFactoryImpl implements ActivationItemFactory {
 
-    private final ActSettings activationSettings;
+    private final ActivationSettingsController activationSettings;
     
     @Inject
-    public ActivationItemFactoryImpl(ActSettings activationSettings) {
+    public ActivationItemFactoryImpl(ActivationSettingsController activationSettings) {
         this.activationSettings = activationSettings;
     }
     

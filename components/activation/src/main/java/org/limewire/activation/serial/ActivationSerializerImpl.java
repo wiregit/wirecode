@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.io.IOUtils;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProvider.CipherType;
@@ -40,11 +40,11 @@ class ActivationSerializerImpl implements ActivationSerializer {
     
     private final ActivationSerializerSettings settings;
     private final CipherProvider cipherProvider;
-    private final ActSettings activationSettings;
+    private final ActivationSettingsController activationSettings;
     
     @Inject
     public ActivationSerializerImpl(ActivationSerializerSettings settings, CipherProvider cipherProvider,
-            ActSettings activationSettings){
+            ActivationSettingsController activationSettings){
         this.settings = settings;
         this.cipherProvider = cipherProvider;
         this.activationSettings = activationSettings;

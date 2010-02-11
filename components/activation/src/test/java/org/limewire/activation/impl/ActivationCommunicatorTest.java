@@ -17,7 +17,7 @@ import junit.framework.Test;
 
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.util.BaseTestCase;
@@ -75,7 +75,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         injector = createInjector(getModules());
         serverController = new ServerController();
         comm = injector.getInstance(ActivationCommunicator.class);
-        settingsStub = (ActivationSettingStub)injector.getInstance(ActSettings.class);
+        settingsStub = (ActivationSettingStub)injector.getInstance(ActivationSettingsController.class);
         settingsStub.setActivationHost("http://127.0.0.1:8123/activate");
     }
     
@@ -93,7 +93,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         modules.add(new AbstractModule() {
             @Override
             public void configure() {
-                bind(ActSettings.class).toInstance(new ActivationSettingStub());
+                bind(ActivationSettingsController.class).toInstance(new ActivationSettingStub());
                 bind(ActivationCommunicator.class).to(ActivationCommunicatorImpl.class);
                 bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
                 bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);

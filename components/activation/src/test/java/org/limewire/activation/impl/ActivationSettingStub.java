@@ -1,8 +1,8 @@
 package org.limewire.activation.impl;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 
-public class ActivationSettingStub implements ActSettings {
+public class ActivationSettingStub implements ActivationSettingsController {
 
     private String activationKey = "";
     private String mcode = "";

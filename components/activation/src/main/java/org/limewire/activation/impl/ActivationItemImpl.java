@@ -2,14 +2,14 @@ package org.limewire.activation.impl;
 
 import java.util.Date;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.util.OSUtils;
 
 class ActivationItemImpl implements ActivationItem {
 
-    private final ActSettings activationSettings;
+    private final ActivationSettingsController activationSettings;
     
     private final int intID;
     private final ActivationID moduleID;
@@ -18,12 +18,12 @@ class ActivationItemImpl implements ActivationItem {
     private final Date dateExpired;
     private final Status currentStatus;
     
-    public ActivationItemImpl(ActSettings activationSettings, int intID, String licenseName, Date datePurchased, 
+    public ActivationItemImpl(ActivationSettingsController activationSettings, int intID, String licenseName, Date datePurchased, 
             Date dateExpired, Status currentStatus) {
         this(activationSettings, intID, licenseName, datePurchased, dateExpired, currentStatus, false);
     }
     
-    public ActivationItemImpl(ActSettings activationSettings, int intID, String licenseName, Date datePurchased, 
+    public ActivationItemImpl(ActivationSettingsController activationSettings, int intID, String licenseName, Date datePurchased, 
             Date dateExpired, Status currentStatus, boolean isLoadedFromDisk) {
         this.activationSettings = activationSettings;
         this.intID = intID;

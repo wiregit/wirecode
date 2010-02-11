@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.security.GeneralSecurityException;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -47,7 +47,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationCommunicator activationCommunicator;
     private final ActivationSerializer activationSerializer;
     private final ActivationResponseFactory activationResponseFactory;
-    private final ActSettings activationSettings;
+    private final ActivationSettingsController activationSettings;
     private Periodic activationContactor = null;
         
     private enum State {
@@ -78,7 +78,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                                  ActivationCommunicator activationCommunicator,
                                  ActivationModel activationModel, ActivationSerializer activationSerializer,
                                  ActivationResponseFactory activationReponseFactory,
-                                 ActSettings activationSettings) {
+                                 ActivationSettingsController activationSettings) {
         this.activationModel = activationModel;
         this.scheduler = scheduler;
         this.activationCommunicator = activationCommunicator;

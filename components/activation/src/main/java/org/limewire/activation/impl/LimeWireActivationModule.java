@@ -5,7 +5,7 @@ import org.limewire.activation.serial.ActivationSerializerModule;
 
 import com.google.inject.AbstractModule;
 
-public class ActivationModule extends AbstractModule {
+public class LimeWireActivationModule extends AbstractModule {
 
     @Override
     protected void configure() {

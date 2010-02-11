@@ -4,6 +4,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.activation.api.ActivationSettingsController;
+import org.limewire.activation.impl.LimeWireActivationModule;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
@@ -205,6 +207,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireDHTModule());
         
+        binder().install(new LimeWireActivationModule());
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireSearchModule());
         binder().install(new LimeWireStatisticsModule());
@@ -231,6 +234,7 @@ public class LimeWireCoreModule extends AbstractModule {
             bind(ActivityCallback.class).to(activityCallbackClass);
         }        
 
+        bind(ActivationSettingsController.class).to(ActivationSettingsImpl.class);
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(TLSManager.class).to(NetworkManagerImpl.class);

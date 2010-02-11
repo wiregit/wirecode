@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
-import org.limewire.activation.api.ActSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
@@ -47,7 +47,7 @@ import com.google.inject.name.Names;
 
 public class ActivationManagerTest extends BaseTestCase {
     
-    private ActSettings activationSettings;
+    private ActivationSettingsController activationSettings;
     
     protected Injector injector;
     private ActivationResponseFactory responseFactory;
@@ -73,7 +73,7 @@ public class ActivationManagerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         injector = Guice.createInjector(Stage.DEVELOPMENT, getModules());
         responseFactory = injector.getInstance(ActivationResponseFactory.class);
-        activationSettings = injector.getInstance(ActSettings.class);
+        activationSettings = injector.getInstance(ActivationSettingsController.class);
     }
     
     private Module[] getModules() {
@@ -82,7 +82,7 @@ public class ActivationManagerTest extends BaseTestCase {
             @Override
             public void configure(){
                 bind(CipherProvider.class).to(CipherProviderImpl.class);
-                bind(ActSettings.class).to(ActivationSettingStub.class);
+                bind(ActivationSettingsController.class).to(ActivationSettingStub.class);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new SimpleTimer(true));
                 
                 LimeScheduledThreadPoolExecutor scheduledThreadExecutor = 
