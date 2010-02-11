@@ -11,6 +11,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @Singleton
 class ActivationSettingsImpl implements ActSettings {
 
+    private static final String ACTIVATION_HOST = "https://qa-activate.limewire.com/lookup";
+    
     private final ApplicationServices applicationServices;
     
     @Inject
@@ -20,7 +22,7 @@ class ActivationSettingsImpl implements ActSettings {
     
     @Override
     public String getActivationHost() {
-        return ActivationSettings.ACTIVATION_HOST.get();
+        return ACTIVATION_HOST;
     }
 
     @Override

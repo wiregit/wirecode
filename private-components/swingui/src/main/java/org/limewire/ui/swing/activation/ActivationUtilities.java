@@ -4,16 +4,12 @@ import java.awt.Font;
 import java.net.URL;
 
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.OSUtils;
 
 public class ActivationUtilities {

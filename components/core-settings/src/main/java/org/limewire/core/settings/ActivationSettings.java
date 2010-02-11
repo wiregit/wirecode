@@ -9,11 +9,6 @@ import org.limewire.setting.StringSetting;
 public class ActivationSettings extends LimeProps {
 
     private ActivationSettings() {}
-
-    //TODO: set the correct link here. This is a working test
-    //TODO: move this out of settings to prevent it being changed from props
-    public static final StringSetting ACTIVATION_HOST = FACTORY.createRemoteStringSetting(
-            "ACTIVATION_HOST", "https://qa-activate.limewire.com/lookup", "ActivationSettings.activationHost");
     
     public static final StringSetting ACTIVATION_CUSTOMER_SUPPORT_HOST = FACTORY.createRemoteStringSetting(
             "ACTIVATION_CUSTOMER_SUPPORT_HOST", "http://www.limewire.com/client_redirect/?page=proSupport", "ActivationSettings.activationCustomerSupportHost");

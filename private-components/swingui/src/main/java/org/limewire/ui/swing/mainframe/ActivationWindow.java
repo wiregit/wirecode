@@ -18,7 +18,6 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.api.ActivationTest;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -78,9 +77,9 @@ public class ActivationWindow {
             
             add(createField("lid:"));
             add(createField(activationManager.getLicenseKey()), "wrap");
-            
-            add(createField("Host:"));
-            add(createField(ActivationSettings.ACTIVATION_HOST.toString()), "wrap");
+//            
+//            add(createField("Host:"));
+//            add(createField(ActivationSettings.ACTIVATION_HOST.toString()), "wrap");
             
             add(createField("URL info"));
             add(createField(application.addClientInfoToUrl("")));

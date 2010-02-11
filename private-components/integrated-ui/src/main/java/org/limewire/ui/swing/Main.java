@@ -9,8 +9,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Locale;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 /** The entry point into the program using the real core. */
 public class Main {
     

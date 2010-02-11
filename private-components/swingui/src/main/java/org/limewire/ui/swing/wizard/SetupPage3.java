@@ -13,7 +13,6 @@ import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.OSUtils;
 
 public class SetupPage3 extends WizardPage {
 

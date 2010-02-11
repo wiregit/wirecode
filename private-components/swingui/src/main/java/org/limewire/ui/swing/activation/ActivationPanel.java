@@ -52,7 +52,6 @@ import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
