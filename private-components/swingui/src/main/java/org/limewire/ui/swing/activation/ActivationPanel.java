@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -154,18 +153,15 @@ public class ActivationPanel {
         tableJXLayer.getGlassPane().setVisible(false);
         
         activationPanel.add(licenseKeyLabel, "gapright 10, growy 0");
-        activationPanel.add(licenseKeyPanel.getComponent(), "pushy, growy 0");
+        activationPanel.add(licenseKeyPanel.getComponent(), "pushx, width 230!, growy 0");
         activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%, growy 0");
-        activationPanel.add(editButton, "gapleft 40, align 100% 50%, growy 0, wrap");
+        activationPanel.add(editButton, "gapleft 16, align 100% 50%, growy 0, wrap");
         
         activationPanel.add(licenseErrorLabel, "span, growx, aligny 50%, height 27!, wrap");
         
         activationPanel.add(tableJXLayer, "span, grow, gapbottom 10, height " + height + "!, width " + tableWidth + ", gpy 200, wrap");
-        
-        FontMetrics metrics = underneathModuleTableMessagePanel.getFontMetrics(underneathModuleTableMessagePanel.getMessagePanelFont());
-        int fontHeight = metrics.getHeight();
 
-        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 0, width " + tableWidth + "!, height " + (2*fontHeight+5) + "!, span, growx, wrap");
+        activationPanel.add(underneathModuleTableMessagePanel, "hidemode 3, width " + tableWidth + "!, span, growx, wrap");
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
@@ -509,19 +505,15 @@ public class ActivationPanel {
         private final LabelWithLinkSupport textLabel;
         
         public UnderneathActivationTableMessagePanel() {
-            setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
+            setLayout(new BorderLayout());
             setOpaque(false);
             
             iconLabel = new JLabel(unsupportedIcon);
             
             textLabel = new LabelWithLinkSupport();
             
-            add(iconLabel, "gap right 5, aligny 50%");
-            add(textLabel, "growx");
-        }
-        
-        public Font getMessagePanelFont() {
-            return textLabel.getFont();
+            add(iconLabel, BorderLayout.WEST);
+            add(textLabel, BorderLayout.CENTER);
         }
 
         public void setState(MessageState state) {
