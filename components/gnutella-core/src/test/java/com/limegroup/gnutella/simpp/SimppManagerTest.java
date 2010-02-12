@@ -52,7 +52,9 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.security.CertificateProvider;
 
 public class SimppManagerTest extends LimeTestCase {
-    
+    // tools and keys used to generate simpp.xml files, certificate files, etc are in 
+    // tools_and_keys_for_generating_simpps_used_in_SimppManagerTest.tgz which is in
+    // the resources folder
     static final int OLD = 1;
     
     static final int MIDDLE = 2;
