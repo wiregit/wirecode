@@ -47,6 +47,10 @@ public class SetupActivationThankYouPanel extends JPanel {
             JLabel expiredLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
             expiredLabel.setForeground(expiredMessageColor);
             add(expiredLabel, "align 50% 50%, wrap");
+        } else if (containsProblematicModules(eventList)) {
+            JLabel problematicModulesLabel = wizardPage.createAndDecorateHeader(I18n.tr("Your license has been activated, but..."));
+            problematicModulesLabel.setForeground(expiredMessageColor);
+            add(problematicModulesLabel, "align 50% 50%, wrap");
         } else if (userHasPreexistingLicense) {
             JLabel yayLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
             yayLabel.setForeground(thankYouColor);
@@ -98,6 +102,13 @@ public class SetupActivationThankYouPanel extends JPanel {
             add(innerPanel, "align 50% 0%, wrap");
         } else {
             add(scrollPane, "align 50% 0%, wrap");
+
+            LabelWithLinkSupport customerSupportLabel = new LabelWithLinkSupport();
+            Font font = wizardPage.createAndDecorateLabel("").getFont();
+            customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
+                                + I18n.tr("If you have any questions about your license, please contact {0}Customer Support{1}.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
+                                + "</font></html>");
+            add(customerSupportLabel, "align 50% 50%, wrap");
 
             add(Box.createVerticalStrut(10), "wrap");    
         }
