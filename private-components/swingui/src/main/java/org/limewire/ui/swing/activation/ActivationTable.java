@@ -19,9 +19,9 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
@@ -150,7 +150,7 @@ class ActivationTable extends MouseableTable {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
             nameLabel.setFont(rendererFont);
-            licenseAction = new UrlAction(I18n.tr("Lost your license?"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get());
+            licenseAction = new UrlAction(I18n.tr("Lost your license?"), ActivationSettingsController.ACCOUNT_SETTINGS_URL);
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             

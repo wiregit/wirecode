@@ -7,13 +7,14 @@ import javax.swing.JComponent;
 
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
 public class ActivationUtilities {
 
+    private static final String DOWNLOAD_UPDATE_URL = "http://www.limewire.com/client_redirect/?page=update";
+    
     /**
      * Returns a message based on the ActivationItem's current Status.
      */
@@ -27,7 +28,7 @@ public class ActivationUtilities {
             Font font = new MultiLineLabel().getFont();
             textLabel.setText("<html>" + "<font size=\"4\" face=\"" + font.getFontName() + "\">" 
                                 + I18n.tr("{0} is not supported by LimeWire {1}. ", item.getLicenseName(), lwVersion) 
-                                + I18n.tr("Please {0}upgrade{1} to the latest version.", "<a href='" + ActivationSettings.LIMEWIRE_DOWNLOAD_UPDATE_HOST.get() + "'>", "</a>")
+                                + I18n.tr("Please {0}upgrade{1} to the latest version.", "<a href='" + DOWNLOAD_UPDATE_URL + "'>", "</a>")
                                 + "</html>");
             return textLabel;
         case UNUSEABLE_OS:

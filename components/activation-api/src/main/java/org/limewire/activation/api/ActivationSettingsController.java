@@ -2,11 +2,11 @@ package org.limewire.activation.api;
 
 public interface ActivationSettingsController {
 
-    public String getActivationHost();
+    public static final String ACCOUNT_SETTINGS_URL = "http://www.limewire.com/client_redirect/?page=accountDetails";
+    public static final String CUSTOMER_SUPPORT_URL = "http://www.limewire.com/client_redirect/?page=proSupport";
+    public static final String UPSELL_URL = "http://www.limewire.com/client_redirect/?page=downloadPro";
     
-    public String getActivationRenewalHost();
-
-    public String getCustomerSupportHost();
+    public String getActivationHost();
     
     public boolean isLastStartPro();
     

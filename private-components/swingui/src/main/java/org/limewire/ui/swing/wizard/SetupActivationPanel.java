@@ -19,6 +19,7 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
@@ -91,7 +92,7 @@ public class SetupActivationPanel extends JPanel {
 
         // TODO Change this link to point to the correct get key page.
         add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
-        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get(),
+        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(ActivationSettingsController.ACCOUNT_SETTINGS_URL,
                                                                                  I18n.tr("I don't know my license key"));
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
@@ -100,7 +101,7 @@ public class SetupActivationPanel extends JPanel {
         customerSupportLabel = new LabelWithLinkSupport();
         Font font = wizardPage.createAndDecorateLabel("").getFont();
         customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
-                            + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get() + "'>", "</a>") 
+                            + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
                             + "</font></html>");
 
         customerSupportLabel.setVisible(false);

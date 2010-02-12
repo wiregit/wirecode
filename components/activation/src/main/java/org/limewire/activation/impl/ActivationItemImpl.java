@@ -8,8 +8,6 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.util.OSUtils;
 
 class ActivationItemImpl implements ActivationItem {
-
-    private final ActivationSettingsController activationSettings;
     
     private final int intID;
     private final ActivationID moduleID;
@@ -18,14 +16,13 @@ class ActivationItemImpl implements ActivationItem {
     private final Date dateExpired;
     private final Status currentStatus;
     
-    public ActivationItemImpl(ActivationSettingsController activationSettings, int intID, String licenseName, Date datePurchased, 
+    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, 
             Date dateExpired, Status currentStatus) {
-        this(activationSettings, intID, licenseName, datePurchased, dateExpired, currentStatus, false);
+        this(intID, licenseName, datePurchased, dateExpired, currentStatus, false);
     }
     
-    public ActivationItemImpl(ActivationSettingsController activationSettings, int intID, String licenseName, Date datePurchased, 
+    public ActivationItemImpl(int intID, String licenseName, Date datePurchased, 
             Date dateExpired, Status currentStatus, boolean isLoadedFromDisk) {
-        this.activationSettings = activationSettings;
         this.intID = intID;
         this.moduleID = ActivationID.getActivationID(intID);
         this.licenseName = licenseName;
@@ -56,7 +53,7 @@ class ActivationItemImpl implements ActivationItem {
     
     @Override
     public String getURL() {
-        return activationSettings.getActivationRenewalHost() + Integer.toString(intID);
+        return ActivationSettingsController.ACCOUNT_SETTINGS_URL + Integer.toString(intID);
     }
 
     @Override

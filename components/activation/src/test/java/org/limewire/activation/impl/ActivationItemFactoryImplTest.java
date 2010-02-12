@@ -28,7 +28,7 @@ public class ActivationItemFactoryImplTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         parser = new ActivationResponseFactoryImpl(
-            new ActivationItemFactoryImpl(new ActivationSettingStub()));
+            new ActivationItemFactoryImpl());
     }
 
     // Test a successful activation string with 3 modules, 2 of which

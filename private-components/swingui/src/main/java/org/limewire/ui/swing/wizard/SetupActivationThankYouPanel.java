@@ -17,8 +17,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.activation.api.ActivationItem;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.ui.swing.activation.ActivationUtilities;
 import org.limewire.ui.swing.activation.LabelWithLinkSupport;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -81,7 +81,7 @@ public class SetupActivationThankYouPanel extends JPanel {
                 LabelWithLinkSupport renewFeaturesLabel = new LabelWithLinkSupport();
                 Font font = wizardPage.createAndDecorateLabel("").getFont();
                 renewFeaturesLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
-                                    + I18n.tr("You can renew your features at your {0}user account{1} page.", "<a href='" + ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get() + "'>", "</a>") 
+                                    + I18n.tr("You can renew your features at your {0}user account{1} page.", "<a href='" + ActivationSettingsController.ACCOUNT_SETTINGS_URL + "'>", "</a>") 
                                     + "</font></html>");
                 
                 innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");

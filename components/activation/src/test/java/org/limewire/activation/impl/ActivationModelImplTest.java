@@ -29,7 +29,7 @@ public class ActivationModelImplTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         model = new ActivationModelImpl(Executors.newSingleThreadExecutor());
-        factory = new ActivationItemFactoryImpl(new ActivationSettingStub());
+        factory = new ActivationItemFactoryImpl();
     }
     
     public void testSingleModule() {

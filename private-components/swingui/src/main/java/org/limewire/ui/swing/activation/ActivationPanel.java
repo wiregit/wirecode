@@ -34,9 +34,9 @@ import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.core.api.Application;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.action.UrlAction;
@@ -440,7 +440,7 @@ public class ActivationPanel {
         private JButton activateButton;
         
         public NoLicenseButtonPanel() {
-            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), ActivationSettings.LIMEWIRE_UPSELL_PRO_DOWNLOAD_HOST.get()));
+            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), ActivationSettingsController.UPSELL_URL));
             goProButton.setToolTipText(I18n.tr("Upgrade to PRO"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
@@ -481,7 +481,7 @@ public class ActivationPanel {
             refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of features associated with the key")));
             JButton okButton = new JButton(new OKDialogAction());
             
-            editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get()));
+            editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettingsController.ACCOUNT_SETTINGS_URL));
             editAccountButton.setToolTipText(I18n.tr("Edit information about the account associated with this License Key"));
             
             add(refreshButton, "split");
@@ -528,7 +528,7 @@ public class ActivationPanel {
             switch(state) {
             case BLOCKED:
                 textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">"
-                                  + I18n.tr("Please contact {0}Customer Support{1} to resolve the situation.", "<a href='" + ActivationSettings.ACTIVATION_CUSTOMER_SUPPORT_HOST.get() + "'>", "</a>") 
+                                  + I18n.tr("Please contact {0}Customer Support{1} to resolve the situation.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
                                   + "</font></html>");
                 iconLabel.setVisible(false);
                 textLabel.setVisible(true);

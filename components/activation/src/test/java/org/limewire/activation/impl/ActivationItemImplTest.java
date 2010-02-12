@@ -22,7 +22,7 @@ public class ActivationItemImplTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        factory = new ActivationItemFactoryImpl(new ActivationSettingStub());
+        factory = new ActivationItemFactoryImpl();
     }
     
     public void testExpiredFromServer() throws Exception {

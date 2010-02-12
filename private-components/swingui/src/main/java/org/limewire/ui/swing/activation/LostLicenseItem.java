@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.core.settings.ActivationSettings;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -30,7 +30,7 @@ public final class LostLicenseItem implements ActivationItem {
 
     @Override
     public String getURL() {
-        return ActivationSettings.ACTIVATION_ACCOUNT_SETTINGS_HOST.get();
+        return ActivationSettingsController.ACCOUNT_SETTINGS_URL;
     }
 
     @Override

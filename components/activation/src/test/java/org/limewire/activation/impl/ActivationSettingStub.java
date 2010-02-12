@@ -24,11 +24,6 @@ public class ActivationSettingStub implements ActivationSettingsController {
     }
 
     @Override
-    public String getActivationRenewalHost() {
-        return "http://activation.limewire.com";
-    }
-
-    @Override
     public String getModuleCode() {
         return mcode;
     }
@@ -61,14 +56,5 @@ public class ActivationSettingStub implements ActivationSettingsController {
     @Override
     public void setModuleCode(String mCode) {
         this.mcode = mCode;
-    }
-
-    @Override
-    public String getCustomerSupportHost() {
-        return "http://www.limewire.com/support";
-    }
-
-    public String getDownloadHost() {
-        return "http://www.limewire.com/download";
     }
 }
