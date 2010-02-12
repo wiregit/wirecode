@@ -702,11 +702,26 @@ public class StringUtils {
      * Returns a byte array from the given hexString.
      * Assume string is a proper hexString.
      */
-    public static byte[] fromHexString(String hexString) {
+    public static byte[] fromHexString(String hexString) { 
         byte[] bytes = new byte[hexString.length() / 2];
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = (byte) Integer.parseInt(hexString.substring(2 * i, 2 * i + 2), 16);
         }
         return bytes;
+    }
+    
+    /**
+     * Replaces a character in the specified string at the given position
+     * @param string the given <code>string</code> to process
+     * @param pos index of the character inside the <code>string</code> to be replaced
+     * @param c the substitute character to be put at position <code>pos</code>
+     * @throws NullPointerException if the <code>string</code> is null
+     */
+    public static String replaceCharAt(final String string, final int pos, final char c) {
+        final StringBuffer resultString = new StringBuffer(string.length());
+        resultString.append(string.substring(0, pos));
+        resultString.append(c);
+        resultString.append(string.substring(pos + 1));
+        return resultString.toString();
     }
 }

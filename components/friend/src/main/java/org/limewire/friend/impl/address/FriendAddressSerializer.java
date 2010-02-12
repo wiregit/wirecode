@@ -9,6 +9,7 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
+import org.limewire.util.EmailAddressUtils;
 
 import com.google.inject.Inject;
 
@@ -36,16 +37,9 @@ public class FriendAddressSerializer implements AddressSerializer {
         return "xmpp-address";
     }
 
-    public Address deserialize(String address) throws IOException {
-        // TODO replace with a real email address parser
-        int atIndex = address.indexOf('@');
-        if(atIndex != -1 && atIndex != address.length() - 1) {
-            String host = address.substring(atIndex + 1);
-            int dotIndex = host.indexOf('.');
-            if(dotIndex != -1 && dotIndex != 0 && dotIndex != host.length() - 1) {
-                return new FriendAddress(address);
-            }
-        }
+    public Address deserialize(final String address) throws IOException {
+        if (EmailAddressUtils.isValidAddress(address))
+            return new FriendAddress(address);
         throw new IOException();
     }
     
