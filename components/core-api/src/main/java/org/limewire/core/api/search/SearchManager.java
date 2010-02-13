@@ -29,6 +29,12 @@ public interface SearchManager {
     List<SearchResultList> getActiveSearchLists();
     
     /**
+     * Returns the result list for the specified GUID string.  The method 
+     * returns null if there is no list associated with the GUID.
+     */
+    SearchResultList getSearchResultList(String guidStr);
+    
+    /**
      * Returns the result list for the specified search.  The method returns 
      * null if there is no list associated with the search.
      */

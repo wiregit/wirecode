@@ -54,6 +54,19 @@ public class MockSearchManager implements SearchManager {
     }
 
     @Override
+    public SearchResultList getSearchResultList(String guidStr) {
+        // Return result list from collection.
+        for (SearchResultList resultList : threadSafeSearchList) {
+            if (guidStr.equalsIgnoreCase(resultList.getGuid().toString())) {
+                return resultList;
+            }
+        }
+        
+        // Return null if search not found.
+        return null;
+    }
+
+    @Override
     public SearchResultList getSearchResultList(Search search) {
         // Return result list from collection.
         for (SearchResultList resultList : threadSafeSearchList) {

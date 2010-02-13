@@ -807,6 +807,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
+        public SearchResultList getSearchResultList(String guidStr) {
+            return null;
+        }
+
+        @Override
         public SearchResultList getSearchResultList(Search search) {
             return null;
         }
