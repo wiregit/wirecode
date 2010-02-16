@@ -76,6 +76,7 @@ public class ActivationPanel {
     private final static String OK_LICENSE_BUTTON_PANEL = "OK_PANEL";
 
     private final ActivationManager activationManager;
+    private final Application application;
     private final ActivationListener listener;
     private final EventList<ActivationItem> eventList;
     private final StateManager stateManager;
@@ -98,8 +99,9 @@ public class ActivationPanel {
 
     @Inject
     public ActivationPanel(ActivationManager activationManager, CalendarRenderer calendarRenderer,
-            Application application) {
+                           Application application) {
         this.activationManager = activationManager;
+        this.application = application;
         listener = new ActivationListener();
         eventList = new BasicEventList<ActivationItem>();
         stateManager = new StateManager();
@@ -302,7 +304,7 @@ public class ActivationPanel {
                 if (error == ActivationError.BLOCKED_KEY) {
                     // do nothing
                 } else {
-                    eventList.add(new LostLicenseItem());
+                    eventList.add(new LostLicenseItem(application));
                 }
             }
 
@@ -436,7 +438,7 @@ public class ActivationPanel {
         private JButton activateButton;
         
         public NoLicenseButtonPanel() {
-            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), ActivationSettingsController.UPSELL_URL));
+            JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), application.addClientInfoToUrl(ActivationSettingsController.UPSELL_URL)));
             goProButton.setToolTipText(I18n.tr("Upgrade to PRO"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
@@ -477,7 +479,8 @@ public class ActivationPanel {
             refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of features associated with the key")));
             JButton okButton = new JButton(new OKDialogAction());
             
-            editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), ActivationSettingsController.ACCOUNT_SETTINGS_URL));
+            String accountSettingsUrl = application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL);
+            editAccountButton = new HyperlinkButton(new UrlAction(I18n.tr("Edit Account"), accountSettingsUrl));
             editAccountButton.setToolTipText(I18n.tr("Edit information about the account associated with this License Key"));
             
             add(refreshButton, "split");
@@ -520,7 +523,7 @@ public class ActivationPanel {
             switch(state) {
             case BLOCKED:
                 textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">"
-                                  + I18n.tr("Please contact {0}Customer Support{1} to resolve the situation.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
+                                  + I18n.tr("Please contact {0}Customer Support{1} to resolve the situation.", "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.CUSTOMER_SUPPORT_URL) + "'>", "</a>") 
                                   + "</font></html>");
                 iconLabel.setVisible(false);
                 textLabel.setVisible(true);

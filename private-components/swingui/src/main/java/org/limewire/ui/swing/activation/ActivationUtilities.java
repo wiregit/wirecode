@@ -28,7 +28,8 @@ public class ActivationUtilities {
             Font font = new MultiLineLabel().getFont();
             textLabel.setText("<html>" + "<font size=\"4\" face=\"" + font.getFontName() + "\">" 
                                 + I18n.tr("{0} is not supported by LimeWire {1}. ", item.getLicenseName(), lwVersion) 
-                                + I18n.tr("Please {0}upgrade{1} to the latest version.", "<a href='" + DOWNLOAD_UPDATE_URL + "'>", "</a>")
+                                + I18n.tr("Please {0}upgrade{1} to the latest version.", 
+                                          "<a href='" + application.addClientInfoToUrl(DOWNLOAD_UPDATE_URL) + "'>", "</a>")
                                 + "</html>");
             return textLabel;
         case UNUSEABLE_OS:

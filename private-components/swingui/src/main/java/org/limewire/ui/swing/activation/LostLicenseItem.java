@@ -5,6 +5,7 @@ import java.util.Date;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationSettingsController;
+import org.limewire.core.api.Application;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -13,6 +14,12 @@ import org.limewire.ui.swing.util.I18n;
  */
 public final class LostLicenseItem implements ActivationItem {
 
+    private final Application application;
+    
+    LostLicenseItem(Application application) {
+        this.application = application;
+    }
+    
     @Override
     public Date getDateExpired() {
         return null;
@@ -30,7 +37,7 @@ public final class LostLicenseItem implements ActivationItem {
 
     @Override
     public String getURL() {
-        return ActivationSettingsController.ACCOUNT_SETTINGS_URL;
+        return application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL);
     }
 
     @Override

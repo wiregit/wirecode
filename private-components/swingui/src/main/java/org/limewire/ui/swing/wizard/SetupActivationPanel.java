@@ -21,6 +21,7 @@ import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationState;
+import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.activation.ActivationWarningPanel;
@@ -44,7 +45,7 @@ public class SetupActivationPanel extends JPanel {
     @Resource
     private Color errorColor;
 
-    public SetupActivationPanel(WizardPage wizardPage, ActivationManager activationManager) {
+    public SetupActivationPanel(WizardPage wizardPage, ActivationManager activationManager, Application application) {
         super(new MigLayout("fillx, insets 75 60 10 60, gap 0, gapy 0", "[][grow][]", "[][][][][][][][][][]"));
         
         GuiUtils.assignResources(this);
@@ -55,7 +56,7 @@ public class SetupActivationPanel extends JPanel {
 
         add(wizardPage.createAndDecorateHeader(I18n.tr("Activate your LimeWire PRO.")), "cell 2 2");
         
-        HyperlinkButton goProButton = wizardPage.createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=gopro",
+        HyperlinkButton goProButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.UPSELL_URL),
                                                                  I18n.tr("Want to go PRO?"));
         add(goProButton, "spanx 1, growx, cell 2 2"); //wrap
 
@@ -92,7 +93,7 @@ public class SetupActivationPanel extends JPanel {
 
         // TODO Change this link to point to the correct get key page.
         add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
-        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(ActivationSettingsController.ACCOUNT_SETTINGS_URL,
+        HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL),
                                                                                  I18n.tr("I don't know my license key"));
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
@@ -101,7 +102,7 @@ public class SetupActivationPanel extends JPanel {
         customerSupportLabel = new LabelWithLinkSupport();
         Font font = wizardPage.createAndDecorateLabel("").getFont();
         customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
-                            + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
+                            + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.CUSTOMER_SUPPORT_URL) + "'>", "</a>") 
                             + "</font></html>");
 
         customerSupportLabel.setVisible(false);

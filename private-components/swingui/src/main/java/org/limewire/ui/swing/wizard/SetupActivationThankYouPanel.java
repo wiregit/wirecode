@@ -34,7 +34,7 @@ public class SetupActivationThankYouPanel extends JPanel {
     private Color expiredMessageColor;
     
     public SetupActivationThankYouPanel(final WizardPage wizardPage, List<ActivationItem> eventList, boolean userHasPreexistingLicense,
-            Application application) {
+                                        Application application) {
         super(new MigLayout("fill, insets 50 15 0 15, gap 0, gapy 0", "[]", "[][][][][][]"));
         
         GuiUtils.assignResources(this);
@@ -84,8 +84,11 @@ public class SetupActivationThankYouPanel extends JPanel {
             if (containsSomeExpiredModules(eventList)) {
                 LabelWithLinkSupport renewFeaturesLabel = new LabelWithLinkSupport();
                 Font font = wizardPage.createAndDecorateLabel("").getFont();
+                System.out.println("having problems opening url <" + application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL) + ">");
                 renewFeaturesLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
-                                    + I18n.tr("You can renew your features at your {0}user account{1} page.", "<a href='" + ActivationSettingsController.ACCOUNT_SETTINGS_URL + "'>", "</a>") 
+                                    + I18n.tr("You can renew your features at your {0}user account{1} page.", 
+                                              "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL) + "'>", 
+                                              "</a>") 
                                     + "</font></html>");
                 
                 innerPanel.add(Box.createVerticalStrut(10), "align 0% 50%, wrap");
@@ -106,7 +109,7 @@ public class SetupActivationThankYouPanel extends JPanel {
             LabelWithLinkSupport customerSupportLabel = new LabelWithLinkSupport();
             Font font = wizardPage.createAndDecorateLabel("").getFont();
             customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
-                                + I18n.tr("If you have any questions about your license, please contact {0}Customer Support{1}.", "<a href='" + ActivationSettingsController.CUSTOMER_SUPPORT_URL + "'>", "</a>") 
+                                + I18n.tr("If you have any questions about your license, please contact {0}Customer Support{1}.", "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.CUSTOMER_SUPPORT_URL) + "'>", "</a>") 
                                 + "</font></html>");
             add(customerSupportLabel, "align 50% 50%, wrap");
 

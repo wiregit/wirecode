@@ -51,12 +51,15 @@ class ActivationTable extends MouseableTable {
     private Font rendererFont;
     
     private final DefaultEventTableModel<ActivationItem> model;
-    
+    private final Application application;
+
     public ActivationTable(EventList<ActivationItem> eventList, CalendarRenderer calendarRenderer, Application application) {
         GuiUtils.assignResources(this);
 
         model = new DefaultEventTableModel<ActivationItem>(new SortedList<ActivationItem>(eventList, new ActivationItemComparator()), new ActivationTableFormat());
         setModel(model);
+
+        this.application = application;
 
         initTable();
         
@@ -150,7 +153,8 @@ class ActivationTable extends MouseableTable {
             nameLabel = new JLabel();
             nameLabel.setVisible(false);
             nameLabel.setFont(rendererFont);
-            licenseAction = new UrlAction(I18n.tr("Lost your license?"), ActivationSettingsController.ACCOUNT_SETTINGS_URL);
+            String accountSettingsUrl = application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL);
+            licenseAction = new UrlAction(I18n.tr("Lost your license?"), accountSettingsUrl);
             licenseButton = new HyperlinkButton(licenseAction);
             licenseButton.setVisible(false);
             

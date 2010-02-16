@@ -435,7 +435,8 @@ public final class LimeWireUtils {
     /**
      * Updates a URL to contain common information about the LW installation.
      */
-    // TODO: ACTIVATION: REFACTOR!  If possible, Put logic inside ApplicationImpl instead of here
+    // TODO: This logic is available inside ApplicationImpl under addClientInfoToUrl(). 
+    // That method should be used rather than this one as we are refactoring this method out.
     public static String addLWInfoToUrl(String url, byte[] myClientGUID, boolean isPro, String mcode) {
         if(url.indexOf('?') == -1)
             url += "?";
