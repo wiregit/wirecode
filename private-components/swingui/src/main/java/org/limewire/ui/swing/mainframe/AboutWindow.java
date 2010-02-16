@@ -160,18 +160,17 @@ class AboutWindow {
          " </tr>" + 
          " <tr>" + 
          "   <td>Mike Sorvillo</td>" + 
-         "   <td>Dan Sullivan</td>" + 
-         " </tr>" + 
-         " <tr>" + 
          "   <td>Michael Tiraborrelli</td>" + 
+         " </tr>" + 
+         " <tr>" + 
          "   <td>Matt Turkel</td>" + 
-         " </tr>" + 
-         " <tr>" + 
          "   <td>Peter Vertenten</td>" + 
-         "   <td>Peng Wang</td>" + 
          " </tr>" + 
          " <tr>" + 
+         "   <td>Peng Wang</td>" + 
          "   <td>Kurt Wasserman</td>" + 
+         " </tr>" + 
+         " <tr>" + 
          "   <td>Ernie Yu</td>" + 
          " </tr>" + 
         " </table>");
