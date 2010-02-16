@@ -125,7 +125,7 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
      * Ensures a simpp requestor is removed from the queue if we receive a 
      * capabilties update that shows it already has the current simpp version. 
      */
-    public void testRequestorIsRemovedFromQueueOnCapabilitiesUpdate() throws Exception {
+    public void testRequestorIsRemovedFromQueueOnNewerOldVersion() throws Exception {
         drainAll();
         
         simppManager.version = 5;
@@ -159,6 +159,84 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
     }
     
     /**
+     * Ensures a simpp requestor is removed from the queue if we receive a 
+     * capabilties update that shows it already has the current new simpp version. 
+     */
+    public void testRequestorIsRemovedFromQueueOnEqualNewVersion() throws Exception {
+        drainAll();
+        
+        simppManager.version = Integer.MAX_VALUE;
+        simppManager.newVersion = 4;
+        simppManager.keyVersion = 4;
+        simppManager.data = new byte[32 * 1024];
+        
+        ULTRAPEER[0].send(new SimppRequestVM());
+        ULTRAPEER[0].flush();
+        LEAF[0].send(new SimppRequestVM());
+        LEAF[0].flush();
+        ULTRAPEER[1].send(new SimppRequestVM());
+        // send capabilties update which should remove it from the queue
+        ULTRAPEER[1].send(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 4, 4));
+        ULTRAPEER[1].flush();
+        
+        SimppVM simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0], SimppVM.class);
+        assertNotNull(simppVM);
+        simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0], SimppVM.class);
+        assertNotNull(simppVM);
+
+        // ensure utrapeer 1 is not serviced
+        BlockingConnectionUtils.failIfAnyArrive(ULTRAPEER, SimppVM.class);
+        
+        // a new request should ben handled again
+        ULTRAPEER[1].send(new SimppRequestVM());
+        ULTRAPEER[1].flush();
+        
+        simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[1], SimppVM.class);
+        assertNotNull(simppVM);
+        
+        BlockingConnectionUtils.failIfAnyArrive(ULTRAPEER, SimppVM.class);
+    }
+    
+    /**
+     * Ensures a simpp requestor is removed from the queue if we receive a 
+     * capabilties update that shows it already has a newer key version than us.
+     */
+    public void testRequestorIsRemovedFromQueueOnNewerKeyVersion() throws Exception {
+        drainAll();
+        
+        simppManager.version = Integer.MAX_VALUE;
+        simppManager.newVersion = 4;
+        simppManager.keyVersion = 4;
+        simppManager.data = new byte[32 * 1024];
+        
+        ULTRAPEER[0].send(new SimppRequestVM());
+        ULTRAPEER[0].flush();
+        LEAF[0].send(new SimppRequestVM());
+        LEAF[0].flush();
+        ULTRAPEER[1].send(new SimppRequestVM());
+        // send capabilties update which should remove it from the queue
+        ULTRAPEER[1].send(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 3, 5));
+        ULTRAPEER[1].flush();
+        
+        SimppVM simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[0], SimppVM.class);
+        assertNotNull(simppVM);
+        simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(LEAF[0], SimppVM.class);
+        assertNotNull(simppVM);
+
+        // ensure utrapeer 1 is not serviced
+        BlockingConnectionUtils.failIfAnyArrive(ULTRAPEER, SimppVM.class);
+        
+        // a new request should ben handled again
+        ULTRAPEER[1].send(new SimppRequestVM());
+        ULTRAPEER[1].flush();
+        
+        simppVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(ULTRAPEER[1], SimppVM.class);
+        assertNotNull(simppVM);
+        
+        BlockingConnectionUtils.failIfAnyArrive(ULTRAPEER, SimppVM.class);
+    }
+    
+    /**
      * Ensures that simpp updates are propagated to peers in a {@link CapabilitiesVM}. 
      */
     public void testCapabilitiesAreSentOnSimppVersionUpdate() throws Exception {
@@ -166,6 +244,8 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
         
         // trigger simpp version update
         simppManager.version = 5;
+        simppManager.newVersion = 5;
+        simppManager.keyVersion = 4;
         for (SimppListener listener : simppManager.listeners) {
             listener.simppUpdated();
         }
@@ -174,11 +254,15 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
             CapabilitiesVM capabilitiesVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(connection, CapabilitiesVM.class);
             assertNotNull(capabilitiesVM);
             assertEquals(5, capabilitiesVM.supportsSIMPP());
+            assertEquals(5, capabilitiesVM.supportsNewSimppVersion());
+            assertEquals(4, capabilitiesVM.supportsSimppKeyVersion());
         }
         for (BlockingConnection connection : LEAF) {
             CapabilitiesVM capabilitiesVM = BlockingConnectionUtils.getFirstInstanceOfMessageType(connection, CapabilitiesVM.class);
             assertNotNull(capabilitiesVM);
             assertEquals(5, capabilitiesVM.supportsSIMPP());
+            assertEquals(5, capabilitiesVM.supportsNewSimppVersion());
+            assertEquals(4, capabilitiesVM.supportsSimppKeyVersion());
         }
         // no more capabilities should come in
         BlockingConnectionUtils.failIfAnyArrive(ULTRAPEER, CapabilitiesVM.class);
@@ -225,6 +309,8 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
     private static class SimppManagerStub implements SimppManager {
 
         public volatile int version;
+        public volatile int newVersion;
+        public volatile int keyVersion;
         public volatile byte[] data = new byte[] { 1 };
         
         public final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>(); 
@@ -273,12 +359,17 @@ public class SimppSenderIntegrationTest extends ServerSideTestCase {
 
         @Override
         public int getKeyVersion() {
-            return 0;
+            return keyVersion;
         }
 
         @Override
         public int getNewVersion() {
-            return 0;
+            return newVersion;
+        }
+
+        @Override
+        public boolean shouldRequestSimppMessage(int version, int newVersion, int keyVersion) {
+            return false;
         }
         
     }

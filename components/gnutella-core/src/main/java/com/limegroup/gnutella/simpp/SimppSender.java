@@ -300,6 +300,21 @@ public class SimppSender {
         }
     }
 
+    boolean shouldCancelSimppUpload(CapabilitiesVM capabilitiesVM) {
+        int version = capabilitiesVM.supportsSIMPP();
+        int newVersion = capabilitiesVM.supportsNewSimppVersion();
+        int keyVersion = capabilitiesVM.supportsSimppKeyVersion();
+        if (keyVersion > simppManager.get().getKeyVersion()) {
+            return true;
+        }
+        if (newVersion >= simppManager.get().getNewVersion() && keyVersion == simppManager.get().getKeyVersion()) {
+            return true;
+        } else if (newVersion == -1 && version >= simppManager.get().getVersion()) {
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * Listens for incoming {@link SimppRequestVM} messages and enqueues
      * the requestors.
@@ -318,10 +333,9 @@ public class SimppSender {
     private class CapabilitiesVMMessageHandler implements MessageHandler {
         @Override
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            int currentSimppVersion = simppManager.get().getVersion();
-            if (((CapabilitiesVM)msg).supportsSIMPP() >= currentSimppVersion) {
+            if (shouldCancelSimppUpload((CapabilitiesVM)msg)) {
                 if (LOG.isDebugEnabled())
-                    LOG.debugf("{0} already has version {1}", handler, currentSimppVersion);
+                    LOG.debugf("{0} already has current meessage", handler);
                 removeReplyHandlerFromQueue(handler);
             }
         }

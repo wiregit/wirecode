@@ -12,8 +12,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -23,6 +21,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -32,9 +32,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
@@ -71,7 +69,6 @@ public class SimppManagerImpl implements SimppManager {
 
     private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
     private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;    
-    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final ApplicationServices applicationServices;    
     private final Clock clock;
     private final Provider<HttpExecutor> httpExecutor;
@@ -100,7 +97,7 @@ public class SimppManagerImpl implements SimppManager {
     private final CertificateProvider certificateProvider;
     
     @Inject
-    public SimppManagerImpl(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker, Clock clock,
+    public SimppManagerImpl(Clock clock,
             ApplicationServices applicationServices, Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
@@ -108,7 +105,6 @@ public class SimppManagerImpl implements SimppManager {
             @Simpp CertifiedMessageVerifier simppMessageVerifier,
             SimppDataVerifier simppDataVerifier,
             @Simpp CertificateProvider certificateProvider) {
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
         this.simppMessageVerifier = simppMessageVerifier;
@@ -215,8 +211,6 @@ public class SimppManagerImpl implements SimppManager {
     
     void handleDataInternal(byte[] data, CertifiedMessageSourceType updateType, ReplyHandler handler) {
         if (data == null) {
-            if (updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
             LOG.warn("No data to handle.");
             return;
         }
@@ -225,8 +219,6 @@ public class SimppManagerImpl implements SimppManager {
         try {
             signedData = simppDataVerifier.extractSignedData(data);
         } catch (SignatureException se) {
-            if(updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
             LOG.warn("Couldn't verify signature on data.");
             return;
         }
@@ -249,9 +241,6 @@ public class SimppManagerImpl implements SimppManager {
             return;
         }
 
-        if(updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
-            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.SIMPP);
-        
         if(LOG.isDebugEnabled()) {
             LOG.debug("Got data with version: " + parser.getVersion() + " from: " + updateType + ", current version is: " + _lastId);
         }
@@ -447,5 +436,38 @@ public class SimppManagerImpl implements SimppManager {
         void requestFinished() {
             requestActive.set(false);
         }
+    }
+
+    /**
+     * Old clients won't send us neither newVersion nor keyVersion, so their
+     * values will be -1. If we get a capabilities update from a new client, we
+     * will only look at newVersion and keyVersion and ignore the old version
+     * field completely. This is the first if branch. In that case we request a
+     * simpp, if its newVersion number is greater and the key version is the
+     * same as the current keyVersion.
+     * 
+     * If an old client is sending us a capabilities update, we are in the
+     * second if branch, where we check that the advertised version is higher
+     * than the currently known one.
+     * 
+     * If none of the two cases above was the case, it could be that a newer key
+     * version is advertised and we should download the simpp regardless of its
+     * version or its newVersion. That's the last if branch.
+     */
+    @Override
+    public boolean shouldRequestSimppMessage(int version, int newVersion, int keyVersion) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
+        if (newVersion != -1) {
+            if (newVersion > getNewVersion() && keyVersion == getKeyVersion()) {
+                return true;
+            }
+        } else if (version > getVersion()) {
+            return true;
+        }
+        if (getKeyVersion() > -1 && keyVersion > getKeyVersion()) {
+            return true;
+        }
+        return false;
     }
 }
