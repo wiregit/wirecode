@@ -8,7 +8,7 @@ import org.jmock.Sequence;
 import org.jmock.syntax.ReceiverClause;
 
 /**
- * Subclass of {@link Expectations} that adds convenient support of a sequence
+ * Subclass of {@link Expectations} that adds convenient support for a sequence
  * of calls to the mock with different arguments and different behaviors. This
  * allows for easy overriding of behavior.
  * <p>
