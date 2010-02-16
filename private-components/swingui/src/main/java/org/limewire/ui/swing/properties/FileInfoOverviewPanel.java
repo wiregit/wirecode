@@ -136,7 +136,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
             if(propertiableFile instanceof LocalFileItem && ((LocalFileItem)propertiableFile).isShareable()) {
                 copyToClipboard = new HyperlinkButton();
                 copyToClipboard.setFont(smallFont);
-                copyToClipboard.setAction(new AbstractAction(I18n.tr("copy magnet link")) {
+                copyToClipboard.setAction(new AbstractAction(I18n.tr("Copy Magnet Link")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         StringSelection sel = new StringSelection(magnetLinkFactory.createMagnetLink((LocalFileItem)propertiableFile));
@@ -392,7 +392,7 @@ class FileInfoOverviewPanel implements FileInfoPanel {
      */
     private class RenameAction extends AbstractAction {
         public RenameAction() {
-            super(I18n.tr("rename file"));
+            super(I18n.tr("Rename File"));
         }
         
         @Override

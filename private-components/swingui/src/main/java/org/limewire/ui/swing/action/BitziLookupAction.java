@@ -21,7 +21,7 @@ public class BitziLookupAction extends AbstractAction {
     private final PropertiableFile propertiableFile;
     
     public BitziLookupAction(PropertiableFile file) {
-        super(I18n.tr("lookup on Bitzi"));
+        super(I18n.tr("Lookup on Bitzi"));
         this.propertiableFile = file;
     }
     

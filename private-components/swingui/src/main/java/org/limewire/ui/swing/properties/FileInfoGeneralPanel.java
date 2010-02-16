@@ -254,7 +254,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         case LOCAL_FILE:
             if(propertiableFile instanceof LocalFileItem) {
                 HyperlinkButton locateOnDisk = new HyperlinkButton(
-                    new AbstractAction(I18n.tr("locate on disk")) {
+                    new AbstractAction(I18n.tr("Locate on Disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             NativeLaunchUtils.launchExplorer(((LocalFileItem)propertiableFile).getFile());
@@ -262,7 +262,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     });
                 
                 HyperlinkButton locateInLibrary = new HyperlinkButton( 
-                    new AbstractAction(I18n.tr("locate in library")) {
+                    new AbstractAction(I18n.tr("Locate in Library")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             component.getRootPane().getParent().setVisible(false);
