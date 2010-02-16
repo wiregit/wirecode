@@ -6,6 +6,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivateAccessor;
+import org.limewire.activation.api.ActivationManager;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.LifecycleManager;
@@ -24,13 +25,18 @@ public class ApplicationImplTest extends BaseTestCase {
     public void testAddClientInfoToUrl() {
         Mockery context = new Mockery();
         
-        final ApplicationServices applicationServices = context.mock(ApplicationServices.class); 
+        final ApplicationServices applicationServices = context.mock(ApplicationServices.class);
+        final ActivationManager activationManager = context.mock(ActivationManager.class);
             
-        final ApplicationImpl applicationImpl = new ApplicationImpl(applicationServices, null, null);
+        final ApplicationImpl applicationImpl = new ApplicationImpl(applicationServices, null, activationManager);
         
         context.checking(new Expectations() {{
             allowing(applicationServices).getMyGUID();
             will(returnValue(new byte[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}));
+            allowing(activationManager).isProActive();
+            will(returnValue(true));
+            allowing(activationManager).getModuleCode();
+            will(returnValue(""));
         }});
         
         String urlOne = applicationImpl.addClientInfoToUrl("hello");
