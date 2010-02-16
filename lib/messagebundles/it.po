@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire IT\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-08 11:30-0500\n"
+"POT-Creation-Date: 2010-02-15 11:30-0500\n"
 "PO-Revision-Date: 2010-02-03 21:27+0000\n"
 "Last-Translator: Julien <Unknown>\n"
 "Language-Team: Italian\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-02-09 04:32+0000\n"
+"X-Launchpad-Export-Date: 2010-02-16 04:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
@@ -139,21 +139,6 @@ msgstr ""
 msgid "XMPP Service"
 msgstr "Servizio XMPP"
 
-#: components/core-settings/src/main/java/org/limewire/core/settings/FacebookSettings.java:86
-#, java-format
-msgid ""
-"just shared a file with you on LimeWire. Start {0}LimeWire{1} or "
-"{2}download{3} it to get the file."
-msgid_plural ""
-"just shared {4} files with you on LimeWire. Start {0}LimeWire{1} or "
-"{2}download{3} it to get them."
-msgstr[0] ""
-"E' appena stato condiviso con te un file su LimeWire. Lancia {0}LimeWire{1} "
-"o {2}scaricalo{3} per ottenere il file."
-msgstr[1] ""
-"Sono appena stati condivisi con te {4} file su LimeWire. Lancia "
-"{0}Limewire{1} o {2}scaricalo{3} per averli."
-
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
@@ -200,7 +185,7 @@ msgstr "Sfoglia l'Host Handler"
 msgid "Connection Dispatching"
 msgstr "Invio della Connessione"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:396
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:401
 msgid "Connection Management"
 msgstr "Gestione della Connessione"
 
@@ -262,7 +247,7 @@ msgstr "Localizzatore Peer"
 msgid "Core Glue"
 msgstr "Core Glue"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:559
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:568
 msgid "Message Routing"
 msgstr "Percorso dei Messaggi"
 
@@ -320,7 +305,7 @@ msgstr "Creative Commons"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:186
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:191
 msgid "LimeWire Store Integration"
 msgstr "Integrazione Negozio LimeWire"
 
@@ -365,7 +350,7 @@ msgstr "Statistiche del tempo di attività"
 msgid "Browse"
 msgstr "Sfoglia"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:987
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:991
 msgid "Update Checks"
 msgstr "Aggiorna Controlli"
 
@@ -821,28 +806,28 @@ msgid "OK"
 msgstr "OK"
 
 #. Load up the HTML engine.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:526
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
 msgid "Muddling Mint..."
 msgstr "Menta in preparazione..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:543
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:558
 msgid "Scouring NYC for Limes..."
 msgstr "Alla Ricerca di Limes su NYC..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:577
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:592
 msgid "Squeezing Limes..."
 msgstr "Limes in Spremitura..."
 
 #. Touch the I18N stuff to ensure it loads properly.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:618
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:633
 msgid "Prepping Mojitos..."
 msgstr "Mojitos in Preparazione..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:650
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:665
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr "Questa versione Alpha è scaduta. Premi Ok per uscire. "
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:656
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:671
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "security program blocking LimeWire's access to the internet or loopback "
@@ -854,7 +839,7 @@ msgstr ""
 "internet o alle connessioni di loopback sulla macchina locale. Aggiungere "
 "LimeWire come eccezione al programma di sicurezza e riavviare LimeWire..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:661
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:676
 msgid ""
 "LimeWire could not create a temporary preferences folder.\n"
 "\n"
@@ -874,7 +859,7 @@ msgstr ""
 "www.limewire.com e clicca sul collegamento 'Supporto'.\n"
 "LimeWire termina adesso. Grazie."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:671
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:686
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
@@ -883,7 +868,7 @@ msgstr ""
 msgid "Error"
 msgstr "Errore"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:687
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:702
 msgid ""
 "Another instance of LimeWire appears to be running. Please completely shut "
 "down all other instances of LimeWire before continuing. If this problem "
@@ -893,7 +878,7 @@ msgstr ""
 "tutte le altre istanze di LimeWire prima di continuare. Se il problema "
 "persiste, ti preghiamo di riavviare il computer."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:696
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:711
 msgid "LimeWire is already running"
 msgstr "LimeWire è già in esecuzione"
 
@@ -976,6 +961,177 @@ msgstr "Incolla"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
 msgid "Select All"
 msgstr "Seleziona tutto"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:117
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:77
+msgid "License Key:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:414
+msgid "Your License Key has been used on too many installations."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:416
+msgid "Connection error. Please try again later."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:418
+msgid "Invalid License Key."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:439
+msgid "Go PRO"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:440
+msgid "Upgrade to PRO"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:441
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:85
+msgid "Activate"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:441
+msgid "Activate the License Key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:442
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:255
+msgid "Later"
+msgstr "Più tardi"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:442
+msgid "Activate License at a later time"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:459
+msgid "Update"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:459
+msgid "Update the saved key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:477
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:102
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:198
+msgid "Refresh"
+msgstr "Aggiorna"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:477
+msgid "Refresh the list of features associated with the key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:480
+msgid "Edit Account"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:481
+msgid "Edit information about the account associated with this License Key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:523
+#, java-format
+msgid "Please contact {0}Customer Support{1} to resolve the situation."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:529
+msgid ""
+"One or more of your features has expired. Click \"Edit Account\" to renew."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:534
+#, java-format
+msgid ""
+"One or more of your features is currently not active. Click on {0} for more "
+"information."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:549
+msgid "Edit Key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:550
+msgid "Edit the saved License Key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:561
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:36
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:36
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:36
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:92
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CancelSharingAction.java:17
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:81
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:219
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:16
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:301
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:116
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:254
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:269
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:254
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:389
+msgid "Cancel"
+msgstr "Cancella"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:562
+msgid "Cancel editing"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:122
+msgid "Feature"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:122
+msgid "Registered"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:122
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
+msgid "Expires"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:153
+msgid "Lost your license?"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:228
+msgid "Expired"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:24
+#, java-format
+msgid "{0} is no longer supported by LimeWire."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:30
+#, java-format
+msgid "{0} is not supported by LimeWire {1}. "
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:31
+#, java-format
+msgid "Please {0}upgrade{1} to the latest version."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:37
+#, java-format
+msgid "{0} is not supported by {1} {2}. We apologize for the inconvenience."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:40
+#, java-format
+msgid "{0} is expired."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/LostLicenseItem.java:28
+msgid "Don't see your features?"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:188
@@ -1359,7 +1515,7 @@ msgstr "Chiudi le altre finestre"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:182
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:50
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:241
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:253
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:196
 msgid "Yes"
 msgstr "Sì"
@@ -1447,7 +1603,7 @@ msgid_plural "P2P Users"
 msgstr[0] "Utente P2P"
 msgstr[1] "Utenti P2P"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:115
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:116
 msgid "Loading LimeWire..."
 msgstr "Caricamento LimeWire in corso..."
 
@@ -1465,28 +1621,6 @@ msgstr "Tutti i donwload"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:30
 msgid "Cancel all downloads?"
 msgstr "Eliminare tutti i download?"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:36
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:92
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:70
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CancelSharingAction.java:17
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:47
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:47
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:81
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:219
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:16
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:301
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:143
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:116
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:254
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:269
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:254
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:389
-msgid "Cancel"
-msgstr "Cancella"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:23
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:118
@@ -1783,6 +1917,7 @@ msgstr "Terminazione in corso..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:544
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPanel.java:107
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:119
 msgid "Done"
 msgstr "Completato"
 
@@ -2874,7 +3009,7 @@ msgstr ""
 "creatori LimeWire:"
 
 #. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:180
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -2883,7 +3018,7 @@ msgstr ""
 "gestiti dagli sviluppatori commerciali di LimeWire:"
 
 #. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:191
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:188
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -2892,7 +3027,7 @@ msgstr ""
 "passato ma da allora si sono trasferiti su altri progetti:"
 
 #. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:272
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:270
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -2906,7 +3041,7 @@ msgstr ""
 "codice o entrambi:"
 
 #. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:344
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:342
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2917,7 +3052,7 @@ msgstr ""
 "per il sito web LimeWire."
 
 #. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:348
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:346
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -2926,7 +3061,7 @@ msgstr ""
 "speciale. Tra questi:"
 
 #. conclusion
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:370
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:368
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2936,7 +3071,7 @@ msgstr ""
 "tutti gli altri che hanno condiviso le loro idee per il progetto. Senza gli "
 "utenti LimeWire, la rete P2P non esisterebbe."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:375
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:373
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc. Gmail is a trademark of Google&nbsp;Inc., Jabber and LiveJournal are "
@@ -2950,11 +3085,15 @@ msgid ""
 "LiveJournal service or technology"
 msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/ActivationWindow.java:44
+msgid "Activation Dump Test"
+msgstr ""
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:151
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:408
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:410
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShowDownloadsTrayAction.java:21
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:137
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:161
 msgid "Downloads"
 msgstr "Download"
 
@@ -2984,7 +3123,7 @@ msgstr "Uploads ({0} a {1} KB/s)"
 msgid "Uploads ({0})"
 msgstr "({0}) Uploads"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:303
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:345
 msgid "New Version Available!"
 msgstr "È  disponibile una nuova versione!"
 
@@ -3007,11 +3146,6 @@ msgstr "Aggiungi dei file"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:101
 msgid "Repeat Search"
 msgstr "Ripeti ricerca"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:102
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:198
-msgid "Refresh"
-msgstr "Aggiorna"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:147
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:215
@@ -3046,6 +3180,10 @@ msgstr "Trova Più Risultati"
 msgid "Stop Search"
 msgstr "Ferma ricerca"
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ActivationAction.java:21
+msgid "&License..."
+msgstr ""
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:29
 msgid "&Add to Library..."
 msgstr "&Aggiungi alla Libreria..."
@@ -3067,7 +3205,7 @@ msgstr "E&sci"
 msgid "Exit After &Transfers"
 msgstr "Esci dopo &Trasferimenti"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:34
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:36
 msgid "&File"
 msgstr "&File"
 
@@ -3079,23 +3217,23 @@ msgstr "Aggiusta i Download in stallo"
 msgid "F&riends"
 msgstr "A&mici"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:32
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:38
 msgid "&Help"
 msgstr "&Aiuto"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:51
 msgid "&Using LimeWire"
 msgstr "&Utilizzo di LimeWire"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&FAQ"
 msgstr "&FAQ"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
 msgid "&Give Feedback"
 msgstr "&Scrivi un Commento"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
 msgid "Get Personalized &Tech Support"
 msgstr "Ricevi &Aiuto Tecnico personalizzato"
 
@@ -3171,72 +3309,72 @@ msgstr "Cancella Lista"
 msgid "&Share List"
 msgstr "&Condividi Lista"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:42
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:44
 msgid "&Store"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:55
 msgid "&Home"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:62
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:64
 msgid "&Log In"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:63
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:65
 msgid "&Sign Up"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:67
 msgid "&Genres"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:66
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:68
 msgid "&Alternative"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:67
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:69
 msgid "&Country"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:70
 msgid "&Electronica"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:69
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:71
 msgid "&Folk"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:72
 msgid "&Jazz"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:73
 msgid "&Pop"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:74
 msgid "&Rap"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:75
 msgid "&Rhythm and Blues"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:76
 msgid "&Rock"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:75
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:77
 msgid "&World"
 msgstr ""
 
 #. add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:79
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:81
 msgid "LimeWire Store Hel&p"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:81
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:83
 msgid "His&tory"
 msgstr ""
 
@@ -3497,8 +3635,8 @@ msgstr "Configurazione iTunes"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:100
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:188
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:251
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:179
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:209
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:203
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:233
 msgid "Configure..."
 msgstr "Configura..."
 
@@ -3950,102 +4088,102 @@ msgstr "Limita la larghezza di banda del tuo upload"
 msgid "Maximum uploads at once:"
 msgstr "Upload massimi contemporanei:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:81
 msgid "Configure Torrent Settings"
 msgstr "Configura le Impostazioni Torrent"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:81
 msgid "Configure Torrent Settings..."
 msgstr "Configura le Impostazioni Torrent..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:81
 msgid "Configure torrent settings."
 msgstr "Configura le Impostazioni torrent."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:140
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:164
 msgid "Save all downloads to one folder:"
 msgstr "Salva tutti i file scaricati in una sola cartella:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:141
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:165
 msgid "Save different categories to different folders"
 msgstr "Salva categorie differenti in cartelle differenti"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:153
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:177
 msgid "If the file already exists, download it with a different name"
 msgstr "Se il file esiste già, scaricalo con un altro nome"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:156
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:180
 msgid "Scan files I download for viruses"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:203
 msgid "Download Folders"
 msgstr "Cartelle dei Download"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:180
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:204
 msgid "Configure where different categories are downloaded"
 msgstr "Configura dove le differenti categorie verranno scaricate"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:208
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:232
 msgid "Configure how LimeWire Store downloads are organized"
 msgstr "Configura l'organizzazione dei download del negozio LimeWire"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:209
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:233
 msgid "Store File Organization"
 msgstr "Organizzazione File Negozio"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:209
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:233
 msgid "Configure how files downloaded from the LimeWire Store are organized"
 msgstr "Configura come organizzare i file scaricati  dal negozio LimeWire"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:249
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:273
 msgid "Could not save download directory, reverted to old directory"
 msgstr ""
 "Impossibile salvare la directory di download, tornato alla vecchia directory"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:250
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:274
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:80
 msgid "Save Folder Error"
 msgstr "Salva errore di cartella"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:348
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:377
 msgid "Tray"
 msgstr "Area di notifica"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:349
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:378
 msgid "Close tray when there are no transfers"
 msgstr "Chiudi quando non ci sono trasferimenti"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:352
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:381
 msgid "Show total bandwidth"
 msgstr "Mostra la larghezza di banda totale"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:356
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:385
 msgid "Clear downloads from list when finished"
 msgstr "Una volta finito cancella i download dalla lista"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:359
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:388
 msgid "Clear uploads from list when finished"
 msgstr "Una volta finito cancella upload dalla lista"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:413
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:442
 msgid "Upload/Download Limits"
 msgstr "Limiti di Upload/Download"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:415
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:444
 msgid "Set limits on downloads and uploads"
 msgstr "Imposta i limiti di download e upload"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:416
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:445
 msgid "Transfer Limits"
 msgstr "Limiti di trasferimento"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:416
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:445
 msgid "Settings..."
 msgstr "Impostazioni..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:416
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:445
 msgid "Configure transfer limit settings."
 msgstr "Imposta limiti di trasferimento."
 
@@ -4120,7 +4258,7 @@ msgstr "Mantieni qualunque cambiamento effettuato"
 msgid "Unknown"
 msgstr "Sconosciuto"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/MiniPlayerPanel.java:89
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/MiniPlayerPanel.java:97
 msgid "Nothing selected"
 msgstr "Nessuna selezione"
 
@@ -4161,37 +4299,33 @@ msgstr "Chiudi video"
 msgid "Playlists not supported in video"
 msgstr "Playlist non supportate nel video"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:215
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:227
 msgid "Upgrade to Pro!"
 msgstr "Fai l'Upgrade a Pro!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:228
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:240
 msgid "Upgrade to PRO today!"
 msgstr "Fai l'upgrade a PRO oggi!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:229
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:241
 msgid "Turbo-charged downloads"
 msgstr "Downloads Caricati Turbo"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:230
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:242
 msgid "More search results"
 msgstr "Piu' risultati di ricerca"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:231
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:243
 msgid "Free tech support and upgrades"
 msgstr "Supporto tecnico e upgrade gratuiti"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:239
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:251
 msgid "Upgrade to LimeWire PRO?"
 msgstr "Fare l'upgrade a LimeWire PRO?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:242
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:254
 msgid "Why"
 msgstr "Perche'"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:243
-msgid "Later"
-msgstr "Più tardi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentOverviewPanel.java:77
 msgid "Size:"
@@ -4859,7 +4993,7 @@ msgstr ""
 "{0} risultati non mostrati. Perfezionare i risultati per vederne di più."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:57
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:33
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:38
 msgid "For Turbo-Charged searches get LimeWire PRO."
 msgstr "Per velocizzare le tue ricerche metti il Turbo con LimeWire PRO."
 
@@ -4868,12 +5002,12 @@ msgid "Support LimeWire's peer-to-peer development. Get PRO."
 msgstr "Sostieni lo sviluppo di Limewire. Acquista la versione PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:41
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:46
 msgid "Purchase LimeWire PRO to help us make downloads faster."
 msgstr "Acquista LimeWire PRO per aiutarci a rendere i download più veloci."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:68
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:50
 msgid "For Turbo-Charged downloads get LimeWire PRO."
 msgstr "Per ottimizzare i tuoi downloads passa a Limewire PRO."
 
@@ -4886,12 +5020,12 @@ msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr "Supporta l'Open Source e i Protocolli Aperti, passa a LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:78
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:62
 msgid "For Turbo-Charged performance get LimeWire PRO."
 msgstr "Per performances con il Turbo passa a LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:81
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
 msgstr "Per una rete libera, passa a LimeWire PRO."
 
@@ -5008,19 +5142,19 @@ msgstr "stop"
 msgid "All Completed"
 msgstr "Tutto completato"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:37
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:42
 msgid "Want faster downloads?  Get LimeWire PRO."
 msgstr "Desideri download più veloci? Procurati LimeWire PRO."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:54
 msgid "For the best BitTorrent downloads, get LimeWire PRO."
 msgstr "Per i migliori download BitTorrent, utilizza LimeWire PRO."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:58
 msgid "LimeWire PRO comes with FREE tech support. "
 msgstr "LimeWire PRO include il supporto tecnico GRATUITO. "
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:70
 msgid "FREE updates and support - LimeWire PRO."
 msgstr "Aggiornamenti e supporto GRATUITO - LimeWire PRO."
 
@@ -5273,81 +5407,81 @@ msgstr "Il file esiste già. Sostituirlo?"
 msgid "Date"
 msgstr "Data"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:77
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:78
 #, java-format
 msgid "{0} bytes"
 msgstr "{0} bytes"
 
 #. TODO: trn???
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:78
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:79
 #, java-format
 msgid "{0} KB"
 msgstr "{0} KB"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:79
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:80
 #, java-format
 msgid "{0} MB"
 msgstr "{0} MB"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:80
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:81
 #, java-format
 msgid "{0} GB"
 msgstr "{0} GB"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:81
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:82
 #, java-format
 msgid "{0} TB"
 msgstr "{0} TB"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:110
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:111
 #, java-format
 msgid "{0} B/s"
 msgstr "{0} B/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:112
 #, java-format
 msgid "{0} KB/s"
 msgstr "{0} KB/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:113
 #, java-format
 msgid "{0} MB/s"
 msgstr "{0} MB/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:113
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:114
 #, java-format
 msgid "{0} GB/s"
 msgstr "{0} GB/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:114
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:115
 #, java-format
 msgid "{0} TB/s"
 msgstr "{0} TB/s"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:483
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:494
 msgctxt "Poor (media quality)"
 msgid "Poor"
 msgstr "Scarsa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:485
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:496
 msgctxt "Good (media quality)"
 msgid "Good"
 msgstr "Buona"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:487
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:498
 msgctxt "Excellent (media quality)"
 msgid "Excellent"
 msgstr "Eccellente"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:501
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:512
 msgid "Poor Quality"
 msgstr "Qualità Pessima"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:503
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:514
 msgid "Good Quality"
 msgstr "Qualità Buona"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:505
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:516
 msgid "Excellent Quality"
 msgstr "Qualità Eccellente"
 
@@ -5601,6 +5735,89 @@ msgstr "Termini di utilizzo:"
 msgid "I Agree"
 msgstr "Accetto"
 
+#. wrap
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:56
+msgid "Activate your LimeWire PRO."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:59
+msgid "Want to go PRO?"
+msgstr ""
+
+#. wrap
+#. wrap
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:64
+msgid ""
+"Enter your activation key below. This was sent to the email address you used "
+"when purchasing. You can always do this later on from the File menu."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
+msgid "I don't know my license key"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:104
+#, java-format
+msgid "Please contact {0}customer support{1} for more information."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:151
+msgid "Invalid license key."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:155
+msgid "Your license key has been used on too many installations."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:160
+msgid "Communication error. Please try again later."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
+msgid "Feature Type"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:43
+msgid "It appears that all of your features have expired."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:47
+msgid "It appears that some of your features have expired."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:51
+msgid "Your license has been activated, but..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:55
+msgid "Yay! Your license has been successfully activated."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:59
+msgid "Thank you! You have successfully activated your license."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:88
+#, java-format
+msgid "You can renew your features at your {0}user account{1} page."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:96
+msgid "* One or more of your features is currently not supported."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:97
+#, java-format
+msgid "Click on {0} for more information."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:109
+#, java-format
+msgid ""
+"If you have any questions about your license, please contact {0}Customer "
+"Support{1}."
+msgstr ""
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:56
 msgid "File Associations and Startup"
 msgstr "Associazione file e avvio"
@@ -5687,8 +5904,25 @@ msgstr ""
 "{0} file condivisi con la vecchia versione continueranno ad essere condivisi "
 "con il mondo."
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:99
+msgid "LimeWire PRO"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:108
+msgid "You can activate LimeWire PRO later from File > License..."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:109
+msgid "Skip This Step"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:118
+msgid "You can edit your licenses from File > License..."
+msgstr ""
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/WizardPage.java:34
 msgid "Continue"
 msgstr "Continua"
 
