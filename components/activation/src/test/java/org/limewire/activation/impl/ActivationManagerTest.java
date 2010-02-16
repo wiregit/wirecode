@@ -23,7 +23,6 @@ import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
-import org.limewire.activation.serial.ActivationSerializerModule;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
@@ -92,13 +91,9 @@ public class ActivationManagerTest extends BaseTestCase {
                 bind(Executor.class).annotatedWith(Names.named("fastExecutor")).toInstance(scheduledThreadExecutor);
                 bind(ScheduledExecutorService.class).annotatedWith(
                     Names.named("fastExecutor")).toInstance(scheduledThreadExecutor);
-                bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
-                
-                bind(ActivationModel.class).to(ActivationModelImpl.class);
-                bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
             }
         });
-        modules.add(new ActivationSerializerModule());
+        modules.add(new LimeWireActivationModule());
         modules.add(new LimeWireHttpModule());
         modules.add(new LimeWireCommonModule());
         modules.add(new LimeWireNetTestModule());
@@ -121,7 +116,7 @@ public class ActivationManagerTest extends BaseTestCase {
         ActivationCommunicator comm = getCommunicatorByJsonResponse(successfulLookupJson); 
         ActivationManagerImpl activationManager = getActivationManager(comm);
         
-        activationSettings.setActivationKey("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("YU2NFJ25REH9");
         activationManager.start();
         assertTrue("Timed out waiting for activation competion.", 
             waitForSuccessfulActivation(activationManager, 10));
@@ -178,7 +173,7 @@ public class ActivationManagerTest extends BaseTestCase {
     }
     
     public void testStartServiceRetriesServerStaysDown() throws Exception {
-        activationSettings.setActivationKey("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("YU2NFJ25REH9");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -217,7 +212,7 @@ public class ActivationManagerTest extends BaseTestCase {
                 "   \"duration\":\"0.005184\"\n" +
                 "}";
         
-        activationSettings.setActivationKey("L4RXLP28XVQ5");
+        activationSettings.setActivationKey("YU2NFJ25REH9");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
             @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
@@ -251,7 +246,7 @@ public class ActivationManagerTest extends BaseTestCase {
     // 2. Should not contact the activation server on startup
     //
     public void testNotFoundResponseErasesKeyAndMcodeNoAutoStart() throws Exception {
-        String KEY = "L4RXLP28XVQ5";
+        String KEY = "YU2NFJ25REH9";
         activationSettings.setActivationKey(KEY);
         final String json = "{\"response\":\"notfound\",\"lid\":\"HT5YXS7CWGRG\"," +
                              "\"guid\":\"44444444444444444444444444444444\",\"refresh\":1440," +
@@ -288,7 +283,7 @@ public class ActivationManagerTest extends BaseTestCase {
     // 2. Should not contact the activation server on startup
     //
     public void testStopResponseErasesKeyButMcodeStaysNoAutoStart() throws Exception {
-        String KEY = "L4RXLP28XVQ5";
+        String KEY = "YU2NFJ25REH9";
         String MCODE = "cvnb";
         activationSettings.setActivationKey(KEY);
         activationSettings.setModuleCode(MCODE);
