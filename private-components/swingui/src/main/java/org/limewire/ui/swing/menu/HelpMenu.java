@@ -10,7 +10,6 @@ import org.limewire.ui.swing.action.DelayedMenuItemCreator;
 import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.mainframe.AboutAction;
-import org.limewire.ui.swing.mainframe.ActivationWindow;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
@@ -26,14 +25,12 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
     private final Provider<TrayNotifier> trayNotifierProvider;
     private final Provider<AboutAction> aboutAction;
     private final ActivationManager activationManager;
-    private final Provider<ActivationWindow> activationWindow;
     
     @Inject
     public HelpMenu(Application application, 
             Provider<TrayNotifier> trayNotifierProvider,
             Provider<AboutAction> aboutAction,
-            ActivationManager activationManager,
-            Provider<ActivationWindow> activationWindow) {
+            ActivationManager activationManager) {
         
         super(I18n.tr("&Help"));
 
@@ -42,7 +39,6 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
         this.trayNotifierProvider = trayNotifierProvider;
         this.aboutAction = aboutAction;
         this.activationManager = activationManager;
-        this.activationWindow = activationWindow;
     }
 
     @Override
@@ -92,13 +88,6 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
                         Notification notification = new Notification("Short Title", "Short message.", this);
                         trayNotifierProvider.get().showMessage(notification);
                     }
-                }
-            });
-            add(new AbstractAction("Dump Activation Test") {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    ActivationWindow window = activationWindow.get();
-                    window.showDialog();
                 }
             });
         }
