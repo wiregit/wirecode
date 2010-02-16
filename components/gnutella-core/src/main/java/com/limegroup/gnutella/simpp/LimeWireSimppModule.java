@@ -23,6 +23,7 @@ public class LimeWireSimppModule extends AbstractModule {
         bind(SimppManager.class).to(SimppManagerImpl.class);
         bind(SimppDataProvider.class).to(SimppDataProviderImpl.class);
         bind(SimppSender.class);
+        bind(SimppDataVerifier.class).to(SimppDataVerifierImpl.class);
     }
     
     @Provides @LazySingleton @Simpp CertificateProvider simppCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
