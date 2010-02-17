@@ -33,6 +33,39 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+/**
+ * At startup, ActivationState is always NOT_ACTIVATED. 
+ * 
+ * <pre>
+ * -If no License Key exist on disk, nothing will happen and the state will
+ * continue to exist in a NOT_ACTIVATED state.
+ * -If a License Key exists on disk, the following will happen.
+ *      1) will transition to a REFRESHING state.
+ *      2) The jSON string will try to be read from disk.
+ *          -  If this is successful, will transition to an ACTIVATED_FROM_DISK
+ *          state. As far as the software is considered, this is no different
+ *          that activating from the server
+ *          - If not successful, will continue in a ACTIVATING state and
+ *          wait for the server communication to complete
+ *      3) The ActivationServer will be contacted with the License Key. 
+ *          - If the server is contacted succesfully, the current state will
+ *          be updated
+ *          - If the server cannot be contacted, an communication error will
+ *          appear in the dialog. If the current state is ACTIVATED_FROM_DISK,
+ *          no state change will occur. If the current state is REFRESHING,
+ *          the state will transition to NOT_ACTIVATED.
+ *          
+ * - When the server is contacted, either automatically at startup or by
+ * a user action, two types of states can be returned. 
+ *      1) a succcesful authentication. At this point the client will transition
+ *      to an ACTIVATED_FROM_SERVER state
+ *      2) an error occurs
+ *          - INVALID_KEY, transition to a NOT_ACTIVATED state and any features disabled
+ *          - BLOCKED_KEY, tranistion to a NOT_ACTIVATED state
+ *          - COMMUNICATION_ERROR, if activated from disk will continue in a 
+ *          ACTIVATED_FROM_DISK state, if not will transition to NOT_ACTIVATED
+ * </pre>         
+ */
 @EagerSingleton
 class ActivationManagerImpl implements ActivationManager, Service {
     
