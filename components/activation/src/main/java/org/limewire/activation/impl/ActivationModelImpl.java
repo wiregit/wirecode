@@ -58,15 +58,26 @@ class ActivationModelImpl implements ActivationModel {
             }
         }
 
+        // copy the list of newly added Items.
+        List<ActivationItem> eventItems = new ArrayList<ActivationItem>(items);
         
-        //TODO: consolidate unchanged events
-        // we need to disable anything that may have been previously active
-        for(ActivationItem item : oldItems) {
-            if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
+        // compare all the old items in the list to the new items added
+        for(ActivationItem item: oldItems) {
+            // if the old item existed in the list
+            if(itemMap.containsKey(item.getModuleID())) {
+                ActivationItem currentItem = itemMap.get(item.getModuleID());
+                // if the status remains the same, don't notify anyone
+                if(currentItem.getStatus() == item.getStatus()) {
+                    eventItems.remove(currentItem);
+                }
+            } else {
+                // if the old item doesn't exist, fire event as expired
                 listeners.broadcast(new ActivationModuleEvent(item.getModuleID(), Status.EXPIRED));
+            }
         }
-        // activate any new items that were added
-        for(ActivationItem item : items) {
+
+        //fire event changes on the changed status of newly added items
+        for(ActivationItem item : eventItems) {
             if(item.getModuleID() != ActivationID.UNKNOWN_MODULE)
                 listeners.broadcast(new ActivationModuleEvent(item.getModuleID(), item.getStatus()));
         }

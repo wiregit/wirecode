@@ -64,7 +64,13 @@ public class ActivationModelImplTest extends BaseTestCase {
         
         Listener listener = new Listener();
         model.addListener(listener);
-        model.setActivationItems(items);
+        model.setActivationItems(items); System.out.println("test");
+        
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            fail();
+        }
         
         assertEquals(1, listener.events.size());
         assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, listener.events.get(0).getData());
@@ -86,6 +92,13 @@ public class ActivationModelImplTest extends BaseTestCase {
         items.add(tech);
 
         model.setActivationItems(items);
+        
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            fail();
+        }
+        
         assertEquals(1, model.size());
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
@@ -97,6 +110,12 @@ public class ActivationModelImplTest extends BaseTestCase {
         Listener listener = new Listener();
         model.addListener(listener);
         model.setActivationItems(items);
+        
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            fail();
+        }
         
         assertEquals(2, listener.events.size());
         assertEquals(ActivationID.TECH_SUPPORT_MODULE, listener.events.get(0).getData());
