@@ -1,6 +1,7 @@
 package org.limewire.activation.impl;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,7 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -44,10 +46,10 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         this.activationFactory = activationFactory;
     }
     
-    public ActivationResponse activate(final String key) throws IOException, InvalidDataException {
+    public ActivationResponse activate(final String key, RequestType type) throws IOException, InvalidDataException {
         String query = activationSettings.getQueryString() + "&lid=" + key;
 
-        String jsonResult = sendToServer(query);
+        String jsonResult = sendToServer(query, key, type);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Activation server response: " + jsonResult);
         }
@@ -56,10 +58,10 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
     }
 
 
-    String sendToServer(String queryStringToPost) throws IOException {
+    String sendToServer(String queryStringToPost, String key, RequestType type) throws IOException {
         String submitUrl = activationSettings.getActivationHost();
         HttpEntity postContent = new StringEntity(queryStringToPost);
-        HttpPost httpPost = new HttpPost(submitUrl);
+        HttpPost httpPost = new HttpPost(getQueryString(submitUrl, type, key));
         httpPost.addHeader("Connection", "close");
         httpPost.addHeader("Content-Type", URLEncodedUtils.CONTENT_TYPE);
         httpPost.setEntity(postContent);
@@ -78,6 +80,22 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
+    }
+    
+    private String getQueryString(String url, RequestType type, String key) {
+        if(url.indexOf('?') == -1)
+            url += "?";
+        
+        return url +
+        "reqtype=" + EncodingUtils.encode(type.toString().toLowerCase(Locale.US)) +
+        (isBetaKey(key) ? ("&lid=" + key) : "");
+    }
+    
+    private boolean isBetaKey(String key) {
+        if(key.startsWith("BETA"))
+            return true;
+        else
+            return false;
     }
 }
 

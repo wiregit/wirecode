@@ -16,6 +16,7 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.api.ModuleCodeEvent;
+import org.limewire.activation.impl.ActivationCommunicator.RequestType;
 import org.limewire.activation.impl.ActivationResponse.Type;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
@@ -32,6 +33,39 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+/**
+ * At startup, ActivationState is always NOT_ACTIVATED. 
+ * 
+ * <pre>
+ * -If no License Key exist on disk, nothing will happen and the state will
+ * continue to exist in a NOT_ACTIVATED state.
+ * -If a License Key exists on disk, the following will happen.
+ *      1) will transition to a REFRESHING state.
+ *      2) The jSON string will try to be read from disk.
+ *          -  If this is successful, will transition to an ACTIVATED_FROM_DISK
+ *          state. As far as the software is considered, this is no different
+ *          that activating from the server
+ *          - If not successful, will continue in a ACTIVATING state and
+ *          wait for the server communication to complete
+ *      3) The ActivationServer will be contacted with the License Key. 
+ *          - If the server is contacted succesfully, the current state will
+ *          be updated
+ *          - If the server cannot be contacted, an communication error will
+ *          appear in the dialog. If the current state is ACTIVATED_FROM_DISK,
+ *          no state change will occur. If the current state is REFRESHING,
+ *          the state will transition to NOT_ACTIVATED.
+ *          
+ * - When the server is contacted, either automatically at startup or by
+ * a user action, two types of states can be returned. 
+ *      1) a succcesful authentication. At this point the client will transition
+ *      to an ACTIVATED_FROM_SERVER state
+ *      2) an error occurs
+ *          - INVALID_KEY, transition to a NOT_ACTIVATED state and any features disabled
+ *          - BLOCKED_KEY, tranistion to a NOT_ACTIVATED state
+ *          - COMMUNICATION_ERROR, if activated from disk will continue in a 
+ *          ACTIVATED_FROM_DISK state, if not will transition to NOT_ACTIVATED
+ * </pre>         
+ */
 @EagerSingleton
 class ActivationManagerImpl implements ActivationManager, Service {
     
@@ -49,7 +83,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationResponseFactory activationResponseFactory;
     private final ActivationSettingsController activationSettings;
     private Periodic activationContactor = null;
-        
+    
     private enum State {
         NOT_ACTIVATED(ActivationState.NOT_AUTHORIZED),
         ACTIVATING(ActivationState.AUTHORIZING),
@@ -95,7 +129,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         transitionToState(State.ACTIVATING);
 
-        scheduleServerQueriesForKey(key, 0);
+        scheduleServerQueriesForKey(key, RequestType.USER_ACTIVATE, 0);
     }
 
     @Override
@@ -106,7 +140,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         transitionToState(State.REFRESHING);
 
-        scheduleServerQueriesForKey(key, 0);
+        scheduleServerQueriesForKey(key, RequestType.REFRESH, 0);
     }
     
     private void activateKeyAtStartup(final String key) {
@@ -117,11 +151,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
         if(currentState != State.ACTIVATED_FROM_DISK)
             transitionToState(State.REFRESHING);
         
-        scheduleServerQueriesForKey(key, 5);
+        scheduleServerQueriesForKey(key, RequestType.AUTO_STARTUP, 5);
     }
 
-    private void scheduleServerQueriesForKey(final String key, final int numberOfRetries) {
-        activationContactor = new Periodic(new ActivationTask(key, numberOfRetries), scheduler);
+    private void scheduleServerQueriesForKey(final String key, final RequestType type, final int numberOfRetries) {
+        activationContactor = new Periodic(new ActivationTask(key, type, numberOfRetries), scheduler);
         activationContactor.rescheduleIfSooner(0);
     }
 
@@ -265,10 +299,10 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     }
                 } catch (IOException e) {
                     if(LOG.isErrorEnabled())
-                        LOG.error("Error reading serialized json string.");
+                        LOG.error("Error reading serialized json string.", e);
                 } catch (InvalidDataException e) {
                     if(LOG.isErrorEnabled())
-                        LOG.error("Error parsing json string.");
+                        LOG.error("Error parsing json string.", e);
                 }
             }
         });
@@ -350,17 +384,19 @@ class ActivationManagerImpl implements ActivationManager, Service {
         private int consecutiveFailedRetries = 0;
         private final int maxFailedConsecutiveRetries;
         private final String key;
+        private final RequestType type;
 
-        ActivationTask(String keyParam, int maxFailedConsecutiveRetriesParam) {
+        ActivationTask(String key, RequestType type, int maxFailedConsecutiveRetriesParam) {
             maxFailedConsecutiveRetries = maxFailedConsecutiveRetriesParam;
-            key = keyParam;
+            this.key = key;
+            this.type = type;
         }
 
         @Override
         public void run() {
             ActivationResponse response;
             try {
-                response = activationCommunicator.activate(key);
+                response = activationCommunicator.activate(key, type);
                 consecutiveFailedRetries = 0;
             } catch (IOException e) {
                 response = activationResponseFactory.createErrorResponse(Type.ERROR);
