@@ -59,7 +59,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
 
     String sendToServer(String queryStringToPost, String key, RequestType type) throws IOException {
         String submitUrl = activationSettings.getActivationHost();
-        HttpEntity postContent = new StringEntity(queryStringToPost); System.out.println(getQueryString(submitUrl, type, key));
+        HttpEntity postContent = new StringEntity(queryStringToPost);
         HttpPost httpPost = new HttpPost(getQueryString(submitUrl, type, key));
         httpPost.addHeader("Connection", "close");
         httpPost.addHeader("Content-Type", URLEncodedUtils.CONTENT_TYPE);
