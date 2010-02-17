@@ -171,7 +171,7 @@ class CategoryManagerImpl implements CategoryManager {
         // at once.
         simppManager.addListener(new SimppListener() {
             @Override
-            public void simppUpdated(int newVersion) {
+            public void simppUpdated() {
                 rebuildExtensions();
             }
         });

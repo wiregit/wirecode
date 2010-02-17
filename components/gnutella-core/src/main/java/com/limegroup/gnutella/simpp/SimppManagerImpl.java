@@ -3,6 +3,7 @@ package com.limegroup.gnutella.simpp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -11,8 +12,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -22,6 +21,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -31,12 +32,15 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.security.Certificate;
+import com.limegroup.gnutella.security.CertificateProvider;
+import com.limegroup.gnutella.security.CertifiedMessageSourceType;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -53,18 +57,18 @@ public class SimppManagerImpl implements SimppManager {
    
     private static final String FILENAME = "simpp.xml";    
     private static final Random RANDOM = new Random();
-    private static final int IGNORE_ID = Integer.MAX_VALUE;
+    private static final int IGNORE_ID = Certificate.IGNORE_ID;
    
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private volatile byte[] _lastBytes = new byte[0];
     private volatile int _lastId = MIN_VERSION;
+    private volatile int newVersion = MIN_VERSION;
     
     /** If an HTTP failover update is in progress */
     private final HttpRequestControl httpRequestControl = new HttpRequestControl();
 
     private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
     private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;    
-    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final Clock clock;
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;
@@ -72,32 +76,39 @@ public class SimppManagerImpl implements SimppManager {
     private final SimppDataProvider simppDataProvider;
     private final HttpClientInstanceUtils httpClientUtils;
     
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v2/simpp.def",
-            "http://simpp2.limewire.com/v2/simpp.def",
-            "http://simpp3.limewire.com/v2/simpp.def",
-            "http://simpp4.limewire.com/v2/simpp.def",
-            "http://simpp5.limewire.com/v2/simpp.def",
-            "http://simpp6.limewire.com/v2/simpp.def",
-            "http://simpp7.limewire.com/v2/simpp.def",
-            "http://simpp8.limewire.com/v2/simpp.def",
-            "http://simpp9.limewire.com/v2/simpp.def",
-            "http://simpp10.limewire.com/v2/simpp.def");
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v3/simpp.def",
+            "http://simpp2.limewire.com/v3/simpp.def",
+            "http://simpp3.limewire.com/v3/simpp.def",
+            "http://simpp4.limewire.com/v3/simpp.def",
+            "http://simpp5.limewire.com/v3/simpp.def",
+            "http://simpp6.limewire.com/v3/simpp.def",
+            "http://simpp7.limewire.com/v3/simpp.def",
+            "http://simpp8.limewire.com/v3/simpp.def",
+            "http://simpp9.limewire.com/v3/simpp.def",
+            "http://simpp10.limewire.com/v3/simpp.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
-    
-    private static enum UpdateType {
-        FROM_NETWORK, FROM_DISK, FROM_HTTP
-    }
-    
+
+    private final CertifiedMessageVerifier simppMessageVerifier;
+
+    private final SimppDataVerifier simppDataVerifier;
+
+    private final CertificateProvider certificateProvider;
+
     @Inject
-    public SimppManagerImpl(Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker, Clock clock,
+    public SimppManagerImpl(Clock clock,
             Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils) {
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
+            SimppDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
+            @Simpp CertifiedMessageVerifier simppMessageVerifier,
+            SimppDataVerifier simppDataVerifier,
+            @Simpp CertificateProvider certificateProvider) {
         this.clock = clock;
+        this.simppMessageVerifier = simppMessageVerifier;
+        this.simppDataVerifier = simppDataVerifier;
+        this.certificateProvider = certificateProvider;
         this.simppSettingsManagers = new CopyOnWriteArrayList<SimppSettingsManager>();
         this.httpExecutor = httpExecutor;
         this.backgroundExecutor = backgroundExecutor;
@@ -144,14 +155,24 @@ public class SimppManagerImpl implements SimppManager {
         backgroundExecutor.execute(new Runnable() {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(new File(CommonUtils
-                        .getUserSettingsDir(), FILENAME)), UpdateType.FROM_DISK, null);
-                handleDataInternal(simppDataProvider.getDefaultData(), UpdateType.FROM_DISK, null);
+                        .getUserSettingsDir(), FILENAME)), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(simppDataProvider.getDefaultData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
     }
         
     public int getVersion() {
         return _lastId;
+    }
+
+    @Override
+    public int getKeyVersion() {
+        return certificateProvider.get().getKeyVersion();
+    }
+
+    @Override
+    public int getNewVersion() {
+        return newVersion;
     }
     
     /**
@@ -182,85 +203,97 @@ public class SimppManagerImpl implements SimppManager {
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+                    handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
                 }
             });
         }
     }
     
-    private void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
+    void handleDataInternal(byte[] data, CertifiedMessageSourceType updateType, ReplyHandler handler) {
         if (data == null) {
-            if (updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
             LOG.warn("No data to handle.");
             return;
         }
         
-        SimppDataVerifier verifier=new SimppDataVerifier(data);
-        if(!verifier.verifySource()) {
-            if(updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get().handleInvalidResponse(handler, RequestType.SIMPP);
+        byte[] signedData = null;
+        try {
+            signedData = simppDataVerifier.extractSignedData(data);
+        } catch (SignatureException se) {
             LOG.warn("Couldn't verify signature on data.");
             return;
         }
         
-        if(updateType == UpdateType.FROM_NETWORK && handler != null)
-            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.SIMPP);
         
         SimppParser parser = null;
         try {
-            parser = new SimppParser(verifier.getVerifiedData());
+            parser = new SimppParser(signedData);
         } catch(IOException iox) {
             LOG.error("IOX parsing simpp data", iox);
             return;
         }
         
+        CertifiedMessage certifiedMessage = parser.getCertifiedMessage();
+        Certificate certificate = null;
+        try { 
+            certificate = simppMessageVerifier.verify(certifiedMessage, handler);
+        } catch (SignatureException se) {
+            LOG.error("message did not verify", se);
+            return;
+        }
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Got data with version: " + parser.getVersion() + " from: " + updateType + ", current version is: " + _lastId);
         }
         
         switch(updateType) {
         case FROM_NETWORK:
-            if(parser.getVersion() == IGNORE_ID) {
-                if(_lastId != IGNORE_ID)
+            if(certifiedMessage.getKeyVersion() == IGNORE_ID) {
+                if(getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover();
-            } else if(parser.getVersion() > _lastId) {
-                storeAndUpdate(data, parser, updateType);
+            } else if(parser.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
+                storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
         case FROM_DISK:
-            if(parser.getVersion() > _lastId) {
-                storeAndUpdate(data, parser, updateType);
+            if(parser.getNewVersion() > newVersion) {
+                storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
         case FROM_HTTP:
-            if(parser.getVersion() >= _lastId) {
-                storeAndUpdate(data, parser, updateType);
+            if(parser.getNewVersion() == IGNORE_ID && certifiedMessage.getKeyVersion() == IGNORE_ID) {
+                storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
         }
     }
     
-    private void storeAndUpdate(byte[] data, SimppParser parser, UpdateType updateType) {
+    private void storeAndUpdate(byte[] data, SimppParser parser, CertifiedMessageSourceType updateType, Certificate certificate) {
+        CertifiedMessage certifiedMessage = parser.getCertifiedMessage();
         if(LOG.isTraceEnabled())
             LOG.trace("Retrieved new data from: " + updateType + ", storing & updating");
-        if(parser.getVersion() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
+        if(certifiedMessage.getKeyVersion() == IGNORE_ID && updateType == CertifiedMessageSourceType.FROM_NETWORK)
             throw new IllegalStateException("shouldn't be here!");
         
-        if(updateType == UpdateType.FROM_NETWORK && httpRequestControl.isRequestPending())
+        if(updateType == CertifiedMessageSourceType.FROM_NETWORK && httpRequestControl.isRequestPending())
             return;
         
-        _lastId = parser.getVersion();
-        _lastBytes = data;
+        if (certificate.getKeyVersion() == IGNORE_ID) {
+            assert updateType != CertifiedMessageSourceType.FROM_NETWORK;
+        }
         
-        if(updateType != UpdateType.FROM_DISK) {
+        _lastId = parser.getVersion();
+        newVersion = parser.getNewVersion();
+        _lastBytes = data;
+        certificateProvider.set(certificate);
+        
+        if(updateType != CertifiedMessageSourceType.FROM_DISK) {
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
         }
         
         for(SimppSettingsManager ssm : simppSettingsManagers)
             ssm.updateSimppSettings(parser.getPropsData());
         for (SimppListener listener : listeners)
-            listener.simppUpdated(_lastId);
+            listener.simppUpdated();
     }
     
     private void doHttpMaxFailover() {
@@ -346,7 +379,7 @@ public class SimppManagerImpl implements SimppManager {
                     httpRequestControl.requestFinished();
                     
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(inflated, UpdateType.FROM_HTTP, null);
+                    handleDataInternal(inflated, CertifiedMessageSourceType.FROM_HTTP, null);
                 }
             });
             
@@ -404,5 +437,37 @@ public class SimppManagerImpl implements SimppManager {
             requestActive.set(false);
         }
     }
-    
+
+    /**
+     * Old clients won't send us neither newVersion nor keyVersion, so their
+     * values will be -1. If we get a capabilities update from a new client, we
+     * will only look at newVersion and keyVersion and ignore the old version
+     * field completely. This is the first if branch. In that case we request a
+     * simpp, if its newVersion number is greater and the key version is the
+     * same as the current keyVersion.
+     * 
+     * If an old client is sending us a capabilities update, we are in the
+     * second if branch, where we check that the advertised version is higher
+     * than the currently known one.
+     * 
+     * If none of the two cases above was the case, it could be that a newer key
+     * version is advertised and we should download the simpp regardless of its
+     * version or its newVersion. That's the last if branch.
+     */
+    @Override
+    public boolean shouldRequestSimppMessage(int version, int newVersion, int keyVersion) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
+        if (newVersion != -1) {
+            if (newVersion > getNewVersion() && keyVersion == getKeyVersion()) {
+                return true;
+            }
+        } else if (version > getVersion()) {
+            return true;
+        }
+        if (getKeyVersion() > -1 && keyVersion > getKeyVersion()) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -127,6 +127,6 @@ public class LimeResponsesTest extends ClientSideTestCase {
         List<SimppListener> l = (List<SimppListener>) 
             PrivilegedAccessor.getValue(simppManager, "listeners");
         for (SimppListener s : l)
-            s.simppUpdated(simppVersion++);
+            s.simppUpdated();
     }
 }

@@ -1154,7 +1154,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     public void handlePushRequest(PushRequest pushRequest, ReplyHandler receivingConnection) {
         send(pushRequest);
     }
-
+    
     @Override
     public void handleVendorMessage(VendorMessage vm) {
         // let Connection do as needed....
@@ -1184,10 +1184,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             // we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM) vm;
             int smpV = capVM.supportsSIMPP();
+            int newSimppVersion = capVM.supportsNewSimppVersion();
+            int keyVersion = capVM.supportsSimppKeyVersion();
             if (smpV != -1) {
-                if (smpV > simppManager.get().getVersion() || (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
-                    // request the simpp message
-                    networkUpdateSanityChecker.handleNewRequest(this, RequestType.SIMPP);
+                if (simppManager.get().shouldRequestSimppMessage(smpV, newSimppVersion, keyVersion)) {
                     send(new SimppRequestVM());
                 }
             }

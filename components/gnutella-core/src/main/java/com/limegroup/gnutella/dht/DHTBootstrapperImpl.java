@@ -276,7 +276,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         }
     }
     
-    public void simppUpdated(int newVersion) {
+    public void simppUpdated() {
         SocketAddress simpp = null;
         if((simpp = getSimppHost()) != null) {
             addBootstrapHost(simpp);

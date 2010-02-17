@@ -9,6 +9,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.Providers;
 
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 
@@ -328,5 +329,33 @@ public class SimppSenderTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
+    public void testShouldCancelSimppUpload() {
+        context.checking(new Expectations() {{
+            // getVersion() already mocked in setUp() to return 5
+            allowing(simppManager).getNewVersion();
+            will(returnValue(5));
+            allowing(simppManager).getKeyVersion();
+            will(returnValue(5));
+        }});
+        
+       
+        // old style messages missing new capabilities
+        assertFalse(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(4)));
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(5)));
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(6)));
+        
+        // new capabilities
+        assertFalse(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 4, 5)));
+        assertFalse(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 4, 4)));
+        assertFalse(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(5, 4, 4)));
+        assertFalse(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(5, 4, 5)));
+        
+        
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 4, 6)));
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(5, 5, 5)));
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(6, 5, 5)));
+        assertTrue(simppSender.shouldCancelSimppUpload(CapabilitiesVMStubHelper.makeCapabilitiesWithSimpp(Integer.MAX_VALUE, 5, 5))); 
+        
+    }
     
 }

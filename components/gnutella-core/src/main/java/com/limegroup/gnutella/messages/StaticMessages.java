@@ -51,7 +51,7 @@ public final class StaticMessages implements Service {
     public void start() {
         reloadMessages();
         simppManager.get().addListener(new SimppListener() {
-            public void simppUpdated(int newVersion) {
+            public void simppUpdated() {
                 reloadMessages();
             }
         });

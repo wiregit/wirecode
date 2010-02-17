@@ -153,6 +153,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryDispatcherImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
+import com.limegroup.gnutella.security.LimeWireSecurityModule;
 import com.limegroup.gnutella.settings.LimeWireSettingsModule;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
@@ -218,7 +219,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireMojitoModule());
         binder().install(new LimeWireSecurityCertificateModule());
         binder().install(new LimewireGeocodeModule());        
-        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));        
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
+        binder().install(new LimeWireSecurityModule());
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());

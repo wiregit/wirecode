@@ -85,7 +85,7 @@ class CoreRandomGlue {
             public void start() {
                 spamServices.reloadSpamFilters();
                 simppManager.addListener(new SimppListener() {
-                    public void simppUpdated(int newVersion) {
+                    public void simppUpdated() {
                         spamServices.reloadSpamFilters();
                     }
                 });

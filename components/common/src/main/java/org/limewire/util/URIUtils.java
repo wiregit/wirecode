@@ -53,7 +53,7 @@ public class URIUtils {
         }
         return uri;
     }
-
+    
     /**
      * Returns the port for the given URI. If no port can be found, it checks the scheme.
      * If the scheme is http port 80 is returned, if https 443.

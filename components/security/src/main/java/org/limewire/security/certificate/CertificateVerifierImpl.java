@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class CertificateVerifierImpl implements CertificateVerifier {
+    
     private static final Log LOG = LogFactory.getLog(CertificateVerifierImpl.class);
 
     private KeyStoreProvider keyStoreProvider;

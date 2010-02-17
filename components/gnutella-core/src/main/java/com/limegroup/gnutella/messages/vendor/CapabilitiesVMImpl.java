@@ -135,6 +135,16 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
         return supportsCapability(SIMPP_BYTES);
     }
     
+    @Override
+    public int supportsNewSimppVersion() {
+        return supportsCapability(SIMPP_NEW_VERSION_BYTES);
+    }
+
+    @Override
+    public int supportsSimppKeyVersion() {
+        return supportsCapability(SIMPP_KEY_VERSION_BYTES);
+    }
+    
     /**
      * Returns the current Update version.
      */

@@ -18,6 +18,10 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     /** The new SIMPP capability bytes. */
     static final byte[] SIMPP_BYTES = {'S', 'I', 'P', 'M' };
     
+    static final byte[] SIMPP_NEW_VERSION_BYTES = {'S', 'M', 'P', 'V' };
+    
+    static final byte[] SIMPP_KEY_VERSION_BYTES = {'S', 'M', 'P', 'K' };
+    
     /** The new lime update capability bytes. */
     static final byte[] UPDATE_BYTES = { 'U', 'P', 'L', 'M' };
     
@@ -97,6 +101,10 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
      * firewall-to-firewall transfers. If they didn't say anything we assume they can
      */
     public boolean canDoFWT();
+
+    public int supportsNewSimppVersion();
+
+    public int supportsSimppKeyVersion();
 }
 
 

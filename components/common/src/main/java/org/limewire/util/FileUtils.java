@@ -67,7 +67,7 @@ public class FileUtils {
             if(!properFile.equals(backupFile)) {
                 // Rename backup to save, now that it saved.
                 properFile.delete();
-                backupFile.renameTo(properFile);
+                return backupFile.renameTo(properFile);
             } else {
                 if(log != null) {
                     log.warn("backup file is same as proper file! -- " + backupFile);

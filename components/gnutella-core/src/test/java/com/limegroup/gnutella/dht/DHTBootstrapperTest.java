@@ -149,7 +149,7 @@ public class DHTBootstrapperTest extends DHTTestCase {
         //add bootstrap host post- bootstrap()
         DHTSettings.DHT_BOOTSTRAP_HOSTS.set(new String[] {"127.0.0.1:"+BOOTSTRAP_DHT_PORT});
         //this should trigger bootstrapping
-        bootstrapper.simppUpdated(0);
+        bootstrapper.simppUpdated();
         Thread.sleep(2000);
         assertFalse(bootstrapper.isWaitingForNodes());
         assertTrue(dhtContext.isBootstrapped());
