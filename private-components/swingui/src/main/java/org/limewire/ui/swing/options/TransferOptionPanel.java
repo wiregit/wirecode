@@ -13,7 +13,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -25,6 +24,7 @@ import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -85,17 +85,13 @@ public class TransferOptionPanel extends OptionPanel {
     public void register(ActivationManager activationManager) {
         //when avg activation changes, update the virus scanning options
         activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
-            @Override
+            @SwingEDTEvent
             public void handleEvent(final ActivationModuleEvent event) {
                 if(event.getData() == ActivationID.AVG_MODULE) {
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            if(downloadsPanel != null) {
-                                downloadsPanel.setAVGCheckBoxVisible();
-                                downloadsPanel.revalidate();
-                            }                            
-                        }
-                    });
+                    if(downloadsPanel != null) {
+                        downloadsPanel.setAVGCheckBoxVisible();
+                        downloadsPanel.revalidate();
+                    }                            
                 }
             }
         });

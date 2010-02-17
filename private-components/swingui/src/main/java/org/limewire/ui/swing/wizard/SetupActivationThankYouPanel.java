@@ -39,28 +39,25 @@ public class SetupActivationThankYouPanel extends JPanel {
         
         GuiUtils.assignResources(this);
         
+        JLabel headerLabel;
         if (containsOnlyExpiredModules(eventList)) {
-            JLabel expiredLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
-            expiredLabel.setForeground(expiredMessageColor);
-            add(expiredLabel, "align 50% 50%, wrap");
+            headerLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that all of your features have expired."));
+            headerLabel.setForeground(expiredMessageColor);
         } else if (containsSomeExpiredModules(eventList)) {
-            JLabel expiredLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
-            expiredLabel.setForeground(expiredMessageColor);
-            add(expiredLabel, "align 50% 50%, wrap");
+            headerLabel = wizardPage.createAndDecorateHeader(I18n.tr("It appears that some of your features have expired."));
+            headerLabel.setForeground(expiredMessageColor);
         } else if (containsProblematicModules(eventList)) {
-            JLabel problematicModulesLabel = wizardPage.createAndDecorateHeader(I18n.tr("Your license has been activated, but..."));
-            problematicModulesLabel.setForeground(expiredMessageColor);
-            add(problematicModulesLabel, "align 50% 50%, wrap");
+            headerLabel = wizardPage.createAndDecorateHeader(I18n.tr("Your license has been activated, but..."));
+            headerLabel.setForeground(expiredMessageColor);
         } else if (userHasPreexistingLicense) {
-            JLabel yayLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
-            yayLabel.setForeground(thankYouColor);
-            add(yayLabel, "align 50% 50%, wrap");
+            headerLabel = wizardPage.createAndDecorateHeader(I18n.tr("Yay! Your license has been successfully activated."));
+            headerLabel.setForeground(thankYouColor);
         } else {
-            JLabel thankYouLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! You have successfully activated your license."));
-            thankYouLabel.setForeground(thankYouColor);
-            add(thankYouLabel, "align 50% 50%, wrap");
+            headerLabel = wizardPage.createAndDecorateHeader(I18n.tr("Thank you! You have successfully activated your license."));
+            headerLabel.setForeground(thankYouColor);
         }
 
+        add(headerLabel, "align 50% 50%, wrap");
         add(Box.createVerticalStrut(10), "wrap");
 
         SetupActivationTable table = new SetupActivationTable(eventList, application);

@@ -147,17 +147,17 @@ public class HomePanel extends JXPanel {
         });
     }
     
-    private void handleProStateChange(boolean currentState) {
+    private void handleProStateChange(final boolean currentState) {
         // if the homepanel is visible and pro was enabled or disabled,
         // try reloading the homepage
-        if(HomePanel.this.isVisible() && currentState != isProLoadState) {
-            isProLoadState = currentState;
-            SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                if(HomePanel.this.isVisible() && currentState != isProLoadState) {
+                    isProLoadState = currentState;
                     loadDefaultUrl();                    
                 }
-            });
-        }
+            }
+        });
     }
     
     private boolean isRequestInProgress() {

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
@@ -15,6 +14,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.decorators.ProgressBarDecorator;
 import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.upload.UploadMediator;
@@ -92,14 +92,11 @@ public class UploadTable extends TransferTable<UploadItem> {
         
         activationManager.addModuleListener(new EventListener<ActivationModuleEvent>() {
             @Override
+            @SwingEDTEvent
             public void handleEvent(ActivationModuleEvent event) {
                 if(isPro != activationManager.isProActive()) {
                     isPro = activationManager.isProActive();
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            uploadProgressRenderer.updateColor();                            
-                        }
-                    });
+                    uploadProgressRenderer.updateColor();                            
                 }
             }
         });

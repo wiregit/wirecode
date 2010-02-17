@@ -74,8 +74,8 @@ class ActivationTable extends MouseableTable {
         
         getColumn(ActivationTableFormat.DATE_REGISTERED_INDEX).setCellRenderer(calendarRenderer);
         
-        getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellRenderer(new ExpiredRenderer());
-        ExpiredRenderer expiredRenderer = new ExpiredRenderer();
+        getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellRenderer(new ExpiredRendererEditor());
+        ExpiredRendererEditor expiredRenderer = new ExpiredRendererEditor();
         expiredRenderer.addActionListener(new ActivationInfoAction(expiredRenderer, this, application));
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellEditor(expiredRenderer);
         
@@ -217,14 +217,14 @@ class ActivationTable extends MouseableTable {
      * Renderers the date a Module expires. If there is a problem with this
      * module will also renderer clickable items. 
      */
-    private class ExpiredRenderer extends TableRendererEditor {
+    private class ExpiredRendererEditor extends TableRendererEditor {
         private final JLabel dateLabel;
         private final IconButton iconButton;
         private final JLabel expiredLabel;
 
         private ActivationItem cellEditorValue = null;
         
-        public ExpiredRenderer() {
+        public ExpiredRendererEditor() {
             setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
             dateLabel = new JLabel();
             dateLabel.setFont(rendererFont);

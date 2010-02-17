@@ -58,6 +58,14 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
+/**
+ * Creates the ActivationPanel which gets displayed in a Modal Dialog
+ * by going to File->License. 
+ * 
+ * This allows the user to enter/see their License Key and any Features
+ * that may be associated with that License Key in a table. Options
+ * change within the Panel depending on the state of the License Key.
+ */
 public class ActivationPanel {
 
     @Resource

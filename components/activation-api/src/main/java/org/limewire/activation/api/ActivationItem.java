@@ -10,6 +10,9 @@ import java.util.Date;
  */
 public interface ActivationItem {
 
+    /**
+     * Indicates the current status of this ActivationItem. 
+     */
     static enum Status {
         
         /** ActivationItem can be used. */

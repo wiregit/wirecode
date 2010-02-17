@@ -6,7 +6,6 @@ public class ActivationSettingStub implements ActivationSettingsController {
 
     private String activationKey = "";
     private String mcode = "";
-    private boolean isLastStartPro = false;
     private String activationHost = "http://activation.limewire.int";
     
     @Override
@@ -39,18 +38,13 @@ public class ActivationSettingStub implements ActivationSettingsController {
     }
 
     @Override
-    public boolean isLastStartPro() {
-        return isLastStartPro;
-    }
-
-    @Override
     public void setActivationKey(String key) {
         this.activationKey = key;
     }
 
     @Override
     public void setLastStartPro(boolean value) {
-        this.isLastStartPro = value;
+//        this.isLastStartPro = value;
     }
 
     @Override

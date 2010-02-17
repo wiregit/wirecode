@@ -70,18 +70,11 @@ public class ProNagController {
      * to send in the request for the nag.
      */
     private class MCodeListener implements EventListener<ModuleCodeEvent> {
-        @Override
         @SwingEDTEvent
         public void handleEvent(final ModuleCodeEvent event) {
-            synchronized (this) {
-                waitingForMCode = false;
-                if (isNagReady()) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            showNag();
-                        }
-                    });
-                }
+            waitingForMCode = false;
+            if (isNagReady()) {
+                showNag();
             }
         }
     }

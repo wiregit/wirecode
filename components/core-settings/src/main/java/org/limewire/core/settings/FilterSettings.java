@@ -206,12 +206,6 @@ public class FilterSettings extends LimeProps {
         FACTORY.createBooleanSetting("VIRUS_SCANNER_ENABLED", true);
     
     /**
-     * Whether to enable the virus scanner for testing versions.
-     */
-    public static final BooleanSetting TEST_VIRUS_SCANNER =
-        FACTORY.createBooleanSetting("TEST_VIRUS_SCANNER", false);
-    
-    /**
      * Whether to check for virus definition updates. This is set to false if
      * a virus definition update is released that requires a newer version of
      * the virus scanner library than the one that is installed, so it should

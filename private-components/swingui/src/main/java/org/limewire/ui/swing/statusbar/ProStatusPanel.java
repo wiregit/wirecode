@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.activation.api.ActivationID;
@@ -17,6 +16,7 @@ import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -108,20 +108,17 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
     public void register() {
         activationManager.addModuleListener(new EventListener<ActivationModuleEvent>(){
             @Override
+            @SwingEDTEvent
             public void handleEvent(final ActivationModuleEvent event) {
-                SwingUtilities.invokeLater(new Runnable(){
-                    public void run() {
-                        if(event.getData() == ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE ||
-                                event.getData() == ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE ||
-                                event.getData() == ActivationID.TECH_SUPPORT_MODULE) {
-                            if(activationManager.isProActive()) {
-            addCondition(InvisibilityCondition.IS_PRO);
-                            } else {
-                                removeCondition(InvisibilityCondition.IS_PRO);
-                            }
-                        }                        
-        }
-                });
+                if(event.getData() == ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE ||
+                        event.getData() == ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE ||
+                        event.getData() == ActivationID.TECH_SUPPORT_MODULE) {
+                    if(activationManager.isProActive()) {
+                        addCondition(InvisibilityCondition.IS_PRO);
+                    } else {
+                        removeCondition(InvisibilityCondition.IS_PRO);
+                    }
+                }                        
             }
         });
     }

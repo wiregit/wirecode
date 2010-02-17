@@ -128,6 +128,32 @@ class SetupActivationTable extends BasicJXTable {
         
         addHighlighter(unsupportedHighlighter);
     }
+       
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
+            return false;
+        }
+        return getColumnModel().getColumn(col).getCellEditor() != null;
+    }
+    
+    //Don't set the cell value when editing is cancelled
+    @Override
+    public void editingStopped(ChangeEvent e) {
+        TableCellEditor editor = getCellEditor();
+        if (editor != null) {          
+            removeEditor();
+        }
+    }
+    
+    //clears mouseover color
+    private void maybeCancelEditing() {
+        Point mousePosition = getMousePosition();
+        if (getCellEditor() != null && 
+                (mousePosition == null || rowAtPoint(mousePosition) == -1 || columnAtPoint(mousePosition) == -1)){
+            getCellEditor().cancelCellEditing();
+        } 
+    }
     
     /**
      * Highlights the text of a row gray when there is a problem with that Module.
@@ -167,35 +193,9 @@ class SetupActivationTable extends BasicJXTable {
         }
     }
     
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
-            return false;
-        }
-        return getColumnModel().getColumn(col).getCellEditor() != null;
-    }
-    
-    //Don't set the cell value when editing is cancelled
-    @Override
-    public void editingStopped(ChangeEvent e) {
-        TableCellEditor editor = getCellEditor();
-        if (editor != null) {          
-            removeEditor();
-        }
-    }
-    
-    //clears mouseover color
-    private void maybeCancelEditing() {
-        Point mousePosition = getMousePosition();
-        if (getCellEditor() != null && 
-                (mousePosition == null || rowAtPoint(mousePosition) == -1 || columnAtPoint(mousePosition) == -1)){
-            getCellEditor().cancelCellEditing();
-        } 
-    }
-    
     private class LicenseTypeRendererEditor extends TableRendererEditor {
 
-        private final JLabel checkMarkButton;
+        private final JLabel checkMarkLabel;
         private final JLabel nameLabel;
         private final Component strut1;
         private final Component strut2;
@@ -205,8 +205,8 @@ class SetupActivationTable extends BasicJXTable {
         public LicenseTypeRendererEditor() {
             nameLabel = new JLabel();
             
-            checkMarkButton = new JLabel(checkIcon);
-            checkMarkButton.setVisible(false);
+            checkMarkLabel = new JLabel(checkIcon);
+            checkMarkLabel.setVisible(false);
             
             strut1 = Box.createHorizontalStrut(1);
             strut1.setVisible(false);
@@ -219,7 +219,7 @@ class SetupActivationTable extends BasicJXTable {
             infoButton.setVisible(false);
             
             setLayout(new MigLayout("filly, insets 0 5 0 5, hidemode 3"));
-            add(checkMarkButton, "align 0% 50%");
+            add(checkMarkLabel, "align 0% 50%");
             add(strut1, "align 0% 50%, hidemode 3");
             add(infoButton, "align 0% 50%, hidemode 3");
             add(strut2, "align 0% 50%, hidemode 3");
@@ -227,13 +227,6 @@ class SetupActivationTable extends BasicJXTable {
 
             setBorder(BorderFactory.createEmptyBorder());
         }
-        
-//        @Override
-//        public void setForeground(Color color) {
-//            super.setForeground(color);
-//            if(nameLabel != null)
-//                nameLabel.setForeground(color);
-//        }
         
         @Override
         protected Component doTableCellRendererComponent(JTable table, Object value,
@@ -255,7 +248,7 @@ class SetupActivationTable extends BasicJXTable {
         }
 
         private void updateComponents(ActivationItem item) {
-            checkMarkButton.setVisible(item.getStatus() == Status.ACTIVE);
+            checkMarkLabel.setVisible(item.getStatus() == Status.ACTIVE);
             boolean showInfoButton = item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS;
             strut1.setVisible(showInfoButton);
             infoButton.setVisible(showInfoButton);

@@ -8,8 +8,6 @@ public interface ActivationSettingsController {
     
     public String getActivationHost();
     
-    public boolean isLastStartPro();
-    
     public void setLastStartPro(boolean value);
 
     public String getActivationKey();

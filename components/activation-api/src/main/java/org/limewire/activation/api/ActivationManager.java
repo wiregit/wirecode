@@ -55,10 +55,12 @@ public interface ActivationManager {
     /**
      * Returns whether the MCode (the string representing the user's list of paid features)
      * is up to date. This returns true if 
+     * <pre>
      * (a) the user doesn't have a license and therefore doesn't have any paid features
      * (b) the user does have a license and the activation manager has gotten the latest mcode
      *     from the activation server or there was a communication error with the activation server
      *     but the cached mcode is available.
+     * </pre>
      */
     public boolean isMCodeUpToDate();
 
@@ -70,10 +72,12 @@ public interface ActivationManager {
     
     /**
      * This returns true any of the following are active: 
+     * <pre>
      *          ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE isActive ||
      *          ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE isActive ||
      *          ActivationID.TECH_SUPPORT_MODULE isActive,
      *      false otherwise.
+     * </pre>
      */
     public boolean isProActive();
     

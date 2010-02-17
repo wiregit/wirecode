@@ -40,11 +40,6 @@ public class ActivationSettingsImpl implements ActivationSettingsController {
     }
 
     @Override
-    public boolean isLastStartPro() {
-        return ActivationSettings.LAST_START_WAS_PRO.getValue();
-    }
-
-    @Override
     public void setActivationKey(String key) {
         ActivationSettings.ACTIVATION_KEY.set(key);
     }
@@ -62,6 +57,7 @@ public class ActivationSettingsImpl implements ActivationSettingsController {
     
     @Override
     public String getQueryString() {
-        return LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), isLastStartPro(), getModuleCode());
+        return LimeWireUtils.getLWInfoQueryString(applicationServices.getMyGUID(), 
+                        ActivationSettings.LAST_START_WAS_PRO.getValue(), getModuleCode());
     }
 }
