@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
-import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationModuleEvent;
