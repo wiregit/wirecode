@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.GeneralSecurityException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -22,7 +22,6 @@ import org.limewire.io.IOUtils;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProvider.CipherType;
 import org.limewire.util.Base32;
-import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
@@ -58,7 +57,7 @@ class ActivationSerializerImpl implements ActivationSerializer {
         Throwable exception;
         ObjectInputStream in = null;
         try {
-            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(settings.getSaveFile())));
+            in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(settings.getSaveFile())));
             String encyrptedString = (String) in.readObject();
             return decrypt(encyrptedString);
         } catch(Throwable ignored) {
@@ -71,7 +70,7 @@ class ActivationSerializerImpl implements ActivationSerializer {
         // Falls through to here only on error with normal file.
         
         try {
-            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(settings.getBackupFile())));
+            in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(settings.getBackupFile())));
             String encyrptedString = (String) in.readObject();
             return decrypt(encyrptedString);
         } catch(Throwable ignored) {

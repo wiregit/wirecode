@@ -1,6 +1,7 @@
 package org.limewire.activation.impl;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -86,7 +87,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
             url += "?";
         
         return url +
-        "&type=" + EncodingUtils.encode(type.toString().toLowerCase()) +
+        "reqtype=" + EncodingUtils.encode(type.toString().toLowerCase(Locale.US)) +
         (isBetaKey(key) ? ("&lid=" + key) : "");
     }
     
