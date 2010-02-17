@@ -38,6 +38,7 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.security.Certificate;
 import com.limegroup.gnutella.security.CertificateProvider;
+import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
@@ -76,6 +77,12 @@ public class SimppManagerImpl implements SimppManager {
     private final SimppDataProvider simppDataProvider;
     private final HttpClientInstanceUtils httpClientUtils;
     
+    /**
+     * If the key used by {@link SimppDataVerifier} is leaked, but not the master
+     * key used by {@link CertificateVerifier}, the urls that would have to serve
+     * the final simpp message are the same as below, except for v3 has to be
+     * replaced with v2. 
+     */
     private volatile List<String> maxedUpdateList = Arrays.asList("http://simpp1.limewire.com/v3/simpp.def",
             "http://simpp2.limewire.com/v3/simpp.def",
             "http://simpp3.limewire.com/v3/simpp.def",
