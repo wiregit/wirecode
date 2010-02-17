@@ -34,7 +34,7 @@ public class PhraseFilter implements SpamFilter, ResponseFilter {
         return builder.build();
     }
 
-    private String canonical(String word) {
+    String canonical(String word) {
         return word.toLowerCase(Locale.US).intern();
     }
 
