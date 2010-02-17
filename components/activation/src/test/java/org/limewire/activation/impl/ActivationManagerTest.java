@@ -15,12 +15,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
-import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationEvent;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.common.LimeWireCommonModule;
@@ -39,9 +39,9 @@ import org.limewire.util.OSUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.google.inject.Key;
 import com.google.inject.name.Names;
 
 public class ActivationManagerTest extends BaseTestCase {
@@ -157,7 +157,7 @@ public class ActivationManagerTest extends BaseTestCase {
         activationSettings.setActivationKey("invalid Key");
         final AtomicBoolean serverContacted = new AtomicBoolean(false);
         ActivationCommunicator comm = new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 serverContacted.set(true);
                 return null;
             }
@@ -176,7 +176,7 @@ public class ActivationManagerTest extends BaseTestCase {
         activationSettings.setActivationKey("YU2NFJ25REH9");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 retriesCount.incrementAndGet();
                 throw new IOException("Server is down!");
             }
@@ -215,7 +215,7 @@ public class ActivationManagerTest extends BaseTestCase {
         activationSettings.setActivationKey("YU2NFJ25REH9");
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 int currentCount = retriesCount.incrementAndGet();
                 if (currentCount < 3) {
                     throw new IOException("Server is down!");
@@ -254,7 +254,7 @@ public class ActivationManagerTest extends BaseTestCase {
         
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 retriesCount.incrementAndGet();
                 return responseFactory.createFromJson(json);
             }
@@ -293,7 +293,7 @@ public class ActivationManagerTest extends BaseTestCase {
         
         final AtomicInteger retriesCount = new AtomicInteger(0);
         ActivationCommunicator comm = new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 retriesCount.incrementAndGet();
                 return responseFactory.createFromJson(json);
             }
@@ -339,7 +339,7 @@ public class ActivationManagerTest extends BaseTestCase {
     
     private ActivationCommunicator getCommunicatorByJsonResponse(final String json) {
         return new ActivationCommunicator() {
-            @Override public ActivationResponse activate(String key) throws IOException, InvalidDataException {
+            @Override public ActivationResponse activate(String key, RequestType type) throws IOException, InvalidDataException {
                 return responseFactory.createFromJson(json);        
             }
         };    

@@ -16,6 +16,7 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.activation.api.ActivationState;
 import org.limewire.activation.api.ModuleCodeEvent;
+import org.limewire.activation.impl.ActivationCommunicator.RequestType;
 import org.limewire.activation.impl.ActivationResponse.Type;
 import org.limewire.activation.serial.ActivationSerializer;
 import org.limewire.collection.Periodic;
@@ -49,7 +50,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationResponseFactory activationResponseFactory;
     private final ActivationSettingsController activationSettings;
     private Periodic activationContactor = null;
-        
+    
     private enum State {
         NOT_ACTIVATED(ActivationState.NOT_AUTHORIZED),
         ACTIVATING(ActivationState.AUTHORIZING),
@@ -95,7 +96,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         transitionToState(State.ACTIVATING);
 
-        scheduleServerQueriesForKey(key, 0);
+        scheduleServerQueriesForKey(key, RequestType.USER_ACTIVATE, 0);
     }
 
     @Override
@@ -106,7 +107,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
         transitionToState(State.REFRESHING);
 
-        scheduleServerQueriesForKey(key, 0);
+        scheduleServerQueriesForKey(key, RequestType.REFRESH, 0);
     }
     
     private void activateKeyAtStartup(final String key) {
@@ -117,11 +118,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
         if(currentState != State.ACTIVATED_FROM_DISK)
             transitionToState(State.REFRESHING);
         
-        scheduleServerQueriesForKey(key, 5);
+        scheduleServerQueriesForKey(key, RequestType.AUTO_STARTUP, 5);
     }
 
-    private void scheduleServerQueriesForKey(final String key, final int numberOfRetries) {
-        activationContactor = new Periodic(new ActivationTask(key, numberOfRetries), scheduler);
+    private void scheduleServerQueriesForKey(final String key, final RequestType type, final int numberOfRetries) {
+        activationContactor = new Periodic(new ActivationTask(key, type, numberOfRetries), scheduler);
         activationContactor.rescheduleIfSooner(0);
     }
 
@@ -265,10 +266,10 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     }
                 } catch (IOException e) {
                     if(LOG.isErrorEnabled())
-                        LOG.error("Error reading serialized json string.");
+                        LOG.error("Error reading serialized json string.", e);
                 } catch (InvalidDataException e) {
                     if(LOG.isErrorEnabled())
-                        LOG.error("Error parsing json string.");
+                        LOG.error("Error parsing json string.", e);
                 }
             }
         });
@@ -350,17 +351,19 @@ class ActivationManagerImpl implements ActivationManager, Service {
         private int consecutiveFailedRetries = 0;
         private final int maxFailedConsecutiveRetries;
         private final String key;
+        private final RequestType type;
 
-        ActivationTask(String keyParam, int maxFailedConsecutiveRetriesParam) {
+        ActivationTask(String key, RequestType type, int maxFailedConsecutiveRetriesParam) {
             maxFailedConsecutiveRetries = maxFailedConsecutiveRetriesParam;
-            key = keyParam;
+            this.key = key;
+            this.type = type;
         }
 
         @Override
         public void run() {
             ActivationResponse response;
             try {
-                response = activationCommunicator.activate(key);
+                response = activationCommunicator.activate(key, type);
                 consecutiveFailedRetries = 0;
             } catch (IOException e) {
                 response = activationResponseFactory.createErrorResponse(Type.ERROR);

@@ -10,6 +10,15 @@ import org.limewire.io.InvalidDataException;
  */
 interface ActivationCommunicator {
 
+    /**
+     * Describes the type of activation. 
+     */
+    enum RequestType {
+        AUTO_STARTUP,
+        REFRESH,
+        USER_ACTIVATE,
+        PING;
+    }
     
     /**
      * Given the key passed in, this method returns
@@ -21,5 +30,5 @@ interface ActivationCommunicator {
      * @throws java.io.IOException if the client is unable to contact the server
      * @throws org.limewire.io.InvalidDataException if a problem occurs during parsing
      */
-    public ActivationResponse activate(final String key) throws IOException, InvalidDataException;
+    public ActivationResponse activate(final String key, RequestType type) throws IOException, InvalidDataException;
 }

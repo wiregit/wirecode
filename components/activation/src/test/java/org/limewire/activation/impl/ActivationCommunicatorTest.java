@@ -18,6 +18,7 @@ import junit.framework.Test;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationSettingsController;
+import org.limewire.activation.impl.ActivationCommunicator.RequestType;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.util.BaseTestCase;
@@ -131,7 +132,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         serverController.startServer();
         
         ActivationCommunicator comm = injector.getInstance(ActivationCommunicator.class);
-        ActivationResponse resp = comm.activate("DAVV-XXME-BWU3");
+        ActivationResponse resp = comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
         List<ActivationItem> items = resp.getActivationItems();
         assertEquals(1, items.size());        
         ActivationItem item = items.get(0);
@@ -147,7 +148,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     //
     public void testConnectionRefused() throws Exception {
         try {
-            comm.activate("DAVV-XXME-BWU3");
+            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             fail("Expected IOException when server not listening.");
         } catch(IOException e) {
             // expected ioexception
@@ -161,7 +162,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         serverController.setSetServerReturn("dfgdfgd");
         serverController.startServer();
         try {
-            comm.activate("DAVV-XXME-BWU3");
+            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             fail("Expected IOException for 404 error.");
         } catch(IOException e) {
             // expected ioexception
@@ -191,7 +192,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
             }
         });
         try {
-            comm.activate("DAVV-XXME-BWU3");
+            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             fail("Should have received IOException: read timed out");
         } catch(SocketTimeoutException e) {
             // expected ioexception
@@ -213,7 +214,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         Callable<ActivationResponse> contactUnreachableServer = new Callable<ActivationResponse>() {
             @Override
             public ActivationResponse call() throws Exception {
-                return comm.activate("DAVV-XXME-BWU3");
+                return comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             }
         };
         ExecutorService poolForReachingServer = Executors.newSingleThreadExecutor();
