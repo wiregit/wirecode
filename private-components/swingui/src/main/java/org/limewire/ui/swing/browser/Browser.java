@@ -25,6 +25,7 @@ import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.OSUtils;
 import org.mozilla.browser.MozillaException;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaPanel;
@@ -79,8 +80,11 @@ public class Browser extends MozillaPanel {
     /**
      * Returns an Iterable of HistoryEntry items that can be used
      * to see what's previously been loaded in the browser.
+     * 
      */
     public Iterable<HistoryEntry> getHistory(final int maxEntries, final AtomicReference<Integer> currentPosition) {
+        assert !OSUtils.isMacOSX() : "The history menu is not working on Mac OS X. Calls to retrieve it go into native code and never return";
+
         try {
             return MozillaExecutor.mozSyncExec(new Callable<Iterable<HistoryEntry>>() {
                 @Override
