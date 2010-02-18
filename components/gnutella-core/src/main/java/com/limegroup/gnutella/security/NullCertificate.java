@@ -16,7 +16,7 @@ public class NullCertificate implements Certificate {
     
     @Override
     public int getKeyVersion() {
-        return -1;
+        return 3;
     }
     
     @Override
