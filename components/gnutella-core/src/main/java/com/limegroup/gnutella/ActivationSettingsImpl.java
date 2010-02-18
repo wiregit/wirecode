@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @Singleton
 public class ActivationSettingsImpl implements ActivationSettingsController {
 
-    private static final String ACTIVATION_HOST = "https://qa-activate.limewire.com/lookup";
+    private static final String ACTIVATION_HOST = "http://client-data.limewire.com/activation/";
     
     private final ApplicationServices applicationServices;
     
