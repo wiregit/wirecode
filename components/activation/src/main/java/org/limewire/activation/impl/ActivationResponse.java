@@ -51,18 +51,18 @@ class ActivationResponse {
     private final String jsonString;
     private final String lid;
     private final String mcode;
-    private final int refreshSeconds;
+    private final int refreshMinutes;
     private final List<ActivationItem> activationItems;
     private final Type type;
     private final String message;
     
     public ActivationResponse(String jsonString, String lid, Type type, String mcode, 
-                              int refreshSeconds, List<ActivationItem> activationItems, String message) {
+                              int refreshMinutes, List<ActivationItem> activationItems, String message) {
         this.jsonString = jsonString;
         this.lid = lid;
         this.type = type;
         this.mcode = mcode;
-        this.refreshSeconds = refreshSeconds;
+        this.refreshMinutes = refreshMinutes;
         this.activationItems = Collections.unmodifiableList(new ArrayList<ActivationItem>(activationItems));
         this.message = message;
     }
@@ -87,8 +87,8 @@ class ActivationResponse {
         return mcode;
     }
     
-    public int getRefreshInterval() {
-        return refreshSeconds;
+    public int getRefreshIntervalInMinutes() {
+        return refreshMinutes;
     }
     
     public List<ActivationItem> getActivationItems() {

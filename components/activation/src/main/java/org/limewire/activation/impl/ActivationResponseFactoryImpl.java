@@ -56,14 +56,14 @@ class ActivationResponseFactoryImpl implements ActivationResponseFactory {
             String lid = parentObj.getString("lid");
             ActivationResponse.Type type = ActivationResponse.Type.valueOf(response.toUpperCase());
             String mcode = parentObj.optString("mcode", null);
-            int refresh =  parentObj.optInt("refresh", 0);
+            int refreshIntervalInMinutes =  parentObj.optInt("refresh", 0);
             String optionalMessage = null;
             if (type == ActivationResponse.Type.ERROR) {
                 optionalMessage = parentObj.getString("message");
             }
             LOG.debugf("Parsed response from json input, type: {0}", type);
             List<ActivationItem> items = parseActivationItems(parentObj, loadedFromDisk);
-            return new ActivationResponse(json, lid, type, mcode, refresh, items, optionalMessage);
+            return new ActivationResponse(json, lid, type, mcode, refreshIntervalInMinutes, items, optionalMessage);
         } catch (JSONException e) {
             throw new InvalidDataException("Error parsing JSON String " + json, e);
         } catch (ParseException e) {

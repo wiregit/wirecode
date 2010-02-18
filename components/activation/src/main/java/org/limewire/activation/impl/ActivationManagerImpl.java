@@ -412,9 +412,9 @@ class ActivationManagerImpl implements ActivationManager, Service {
 
             if (state == State.ACTIVATED_FROM_SERVER) {
                 // reschedule next ping of activation server if necessary
-                long refreshVal = response.getRefreshInterval();
-                if (refreshVal > 0) {
-                    activationContactor.rescheduleIfSooner(refreshVal*1000);
+                long refreshValInMs = response.getRefreshIntervalInMinutes()*60*1000;
+                if (refreshValInMs > 0) {
+                    activationContactor.rescheduleIfSooner(refreshValInMs);
                 }        
             }
         }

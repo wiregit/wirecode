@@ -72,7 +72,7 @@ public class ActivationItemFactoryImplTest extends BaseTestCase {
         assertEquals("DAVV-XXME-BWU3", response.getLid());
         assertTrue(response.isValidResponse());
         assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
-        assertEquals(1440, response.getRefreshInterval());
+        assertEquals(1440, response.getRefreshIntervalInMinutes());
         assertEquals(3, response.getActivationItems().size());
 
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -116,7 +116,7 @@ public class ActivationItemFactoryImplTest extends BaseTestCase {
         assertEquals("DAVV-XXME-BWU3", response.getLid());
         assertTrue(response.isValidResponse());
         assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
-        assertEquals(1440, response.getRefreshInterval());
+        assertEquals(1440, response.getRefreshIntervalInMinutes());
         assertEquals(0, response.getActivationItems().size());
         
     }
@@ -147,7 +147,7 @@ public class ActivationItemFactoryImplTest extends BaseTestCase {
         assertEquals("DAVV-XXME-BWU3", response.getLid());
         assertTrue(response.isValidResponse());
         assertEquals("0pd15.1xM6.2xM6.3xM6", response.getMCode());
-        assertEquals(1440, response.getRefreshInterval());
+        assertEquals(1440, response.getRefreshIntervalInMinutes());
         assertEquals(1, response.getActivationItems().size());
         
         ActivationItem item = response.getActivationItems().get(0);
@@ -288,7 +288,7 @@ public class ActivationItemFactoryImplTest extends BaseTestCase {
         assertEquals("DAVV-XXME-BWU3", responseFromDisk.getLid());
         assertTrue(responseFromDisk.isValidResponse());
         assertEquals("0pd15.1xM6.2xM6.3xM6", responseFromDisk.getMCode());
-        assertEquals(1440, responseFromDisk.getRefreshInterval());
+        assertEquals(1440, responseFromDisk.getRefreshIntervalInMinutes());
         assertEquals(3, responseFromDisk.getActivationItems().size());
 
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
