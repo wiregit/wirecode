@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -51,7 +52,7 @@ public class ActivationModelImplTest extends BaseTestCase {
         assertTrue(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
     }
     
-    public void testListenersAddEvent() {
+    public void testListenersAddEvent() throws TimeoutException {
         assertEquals(0, model.size());
         assertEquals(0, model.getActivationItems().size());
         assertFalse(model.isActive(ActivationID.AVG_MODULE));
@@ -66,17 +67,13 @@ public class ActivationModelImplTest extends BaseTestCase {
         model.addListener(listener);
         model.setActivationItems(items);
         
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
-        assertEquals(1, listener.events.size());
-        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, listener.events.get(0).getData());
+        List<ActivationModuleEvent> events = listener.waitForEventsOrTimeout(1, 200);
+        assertEquals(1, events.size());
+        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, events.get(0).getData());
     }
     
-    public void testListenersUpdateEvent() {
+    public void testListenersUpdateEvent() throws TimeoutException {
+        System.out.println("In testListenersUpdateEvent...");
         assertEquals(0, model.size());
         assertEquals(0, model.getActivationItems().size());
         assertFalse(model.isActive(ActivationID.AVG_MODULE));
@@ -91,14 +88,12 @@ public class ActivationModelImplTest extends BaseTestCase {
         List<ActivationItem> items = new ArrayList<ActivationItem>();
         items.add(tech);
 
+        //add listener
+        Listener listener = new Listener();
+        model.addListener(listener);
+        
         model.setActivationItems(items);
-        
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
+        assertEquals(1, listener.waitForEventsOrTimeout(1, 200).size());
         assertEquals(1, model.size());
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
@@ -106,26 +101,19 @@ public class ActivationModelImplTest extends BaseTestCase {
         items.clear();
         items.add(downloads);
         
-        //add listener and replace AVG module with Dwonloads Module
-        Listener listener = new Listener();
-        model.addListener(listener);
+        // replace AVG module with Downloads Module
         model.setActivationItems(items);
         
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
-        assertEquals(2, listener.events.size());
-        assertEquals(ActivationID.TECH_SUPPORT_MODULE, listener.events.get(0).getData());
-        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, listener.events.get(1).getData());
+        List<ActivationModuleEvent> events = listener.waitForEventsOrTimeout(2, 400);
+        assertEquals(2, events.size());
+        assertEquals(ActivationID.TECH_SUPPORT_MODULE, events.get(0).getData());
+        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, events.get(1).getData());
         
         assertFalse(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         assertTrue(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
     }
     
-    public void testNoEventFired() {
+    public void testNoEventFired() throws Exception {
         assertEquals(0, model.size());
         assertEquals(0, model.getActivationItems().size());
         assertFalse(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
@@ -136,34 +124,29 @@ public class ActivationModelImplTest extends BaseTestCase {
         List<ActivationItem> items = new ArrayList<ActivationItem>();
         items.add(tech);
 
-        model.setActivationItems(items);
-        
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
-        assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
-        
-        //add listener and replace AVG module with Dwonloads Module
+        // add listener
         Listener listener = new Listener();
         model.addListener(listener);
+        model.setActivationItems(items);
+        assertEquals(1, listener.waitForEventsOrTimeout(1, 200).size());
+        assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         
+        // replace AVG module with Downloads Module
         //readd the same module as activated
         model.setActivationItems(items);
         
+        List<ActivationModuleEvent> events = new ArrayList<ActivationModuleEvent>();
         try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
+            events.addAll(listener.waitForEventsOrTimeout(2, 200));
+            fail("Expected timeout");
+        } catch (TimeoutException e) {
+            // expected timeout exception
         }
-        
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
-        assertEquals(0, listener.events.size());
+        assertEquals(0, events.size());
     }
     
-    public void testOneEventFiredOnTwoUpdates() {
+    public void testOneEventFiredOnTwoUpdates() throws TimeoutException {
         assertEquals(0, model.size());
         assertEquals(0, model.getActivationItems().size());
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
@@ -177,38 +160,26 @@ public class ActivationModelImplTest extends BaseTestCase {
         List<ActivationItem> items = new ArrayList<ActivationItem>();
         items.add(tech);
 
+        Listener listener = new Listener();
+        model.addListener(listener);
         model.setActivationItems(items);
-        
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
+        assertEquals(1, listener.waitForEventsOrTimeout(1, 200).size());
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         
-        //add listener and replace AVG module with Dwonloads Module
-        Listener listener = new Listener();
-        model.addListener(listener);
-        
-        //readd the same module as activated
+        // Replace AVG module with Dowloads Module
+        // Read the same module as activated
         items.add(downloads);
         model.setActivationItems(items);
-        
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
+        List<ActivationModuleEvent> events = listener.waitForEventsOrTimeout(1, 200);
         
         assertTrue(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
-        assertEquals(1, listener.events.size());
-        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, listener.events.get(0).getData());
+        assertEquals(1, events.size());
+        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, events.get(0).getData());
     }
     
-    public void testTwoEventsFiredOnThreeUpdates() {
+    public void testTwoEventsFiredOnThreeUpdates() throws TimeoutException {
         assertEquals(0, model.size());
         assertEquals(0, model.getActivationItems().size());
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
@@ -226,50 +197,68 @@ public class ActivationModelImplTest extends BaseTestCase {
         items.add(tech);
         items.add(search);
 
+        Listener listener = new Listener();
+        model.addListener(listener);
         model.setActivationItems(items);
-        
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
+        assertEquals(2, listener.waitForEventsOrTimeout(2, 200).size());
         
         assertFalse(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         assertTrue(model.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE));
         
-        //add listener and replace AVG module with Dwonloads Module
-        Listener listener = new Listener();
-        model.addListener(listener);
-        
+        // Replace AVG module with Downloads Module
         //readd the same module as activated
         items.add(downloads);
         items.remove(search);
         model.setActivationItems(items);
         
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            fail();
-        }
-        
+        List<ActivationModuleEvent> events = listener.waitForEventsOrTimeout(2, 200);
         assertTrue(model.isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE));
         assertTrue(model.isActive(ActivationID.TECH_SUPPORT_MODULE));
         assertFalse(model.isActive(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE));
-        assertEquals(2, listener.events.size());
-        assertEquals(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE, listener.events.get(0).getData());
-        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, listener.events.get(1).getData());
-        assertEquals(ActivationItem.Status.EXPIRED, listener.events.get(0).getStatus());
-        assertEquals(ActivationItem.Status.ACTIVE, listener.events.get(1).getStatus());
+        assertEquals(2, events.size());
+        assertEquals(ActivationID.OPTIMIZED_SEARCH_RESULT_MODULE, events.get(0).getData());
+        assertEquals(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE, events.get(1).getData());
+        assertEquals(ActivationItem.Status.EXPIRED, events.get(0).getStatus());
+        assertEquals(ActivationItem.Status.ACTIVE, events.get(1).getStatus());
     }
     
     private class Listener implements EventListener<ActivationModuleEvent> {
 
-        List<ActivationModuleEvent> events = new ArrayList<ActivationModuleEvent>();
+        private final List<ActivationModuleEvent> events = new ArrayList<ActivationModuleEvent>();
+        private int startingSize = 0;
         
         @Override
-        public void handleEvent(ActivationModuleEvent event) {
+        public synchronized void handleEvent(ActivationModuleEvent event) {
             events.add(event);
+            notifyAll();
+        }
+
+
+        public synchronized List<ActivationModuleEvent> waitForEventsOrTimeout(int numEventsToOccur, long milliSeconds) 
+        throws TimeoutException {
+            
+            long before = System.currentTimeMillis();
+            long after;
+            int totalNumEventsExpected = startingSize + numEventsToOccur;
+            while (events.size() < totalNumEventsExpected) {
+                try {
+                    wait(milliSeconds);
+                } catch (InterruptedException e) {
+                    // ignoring exception
+                }
+                after = System.currentTimeMillis();
+                if ((after - before) > milliSeconds) {
+                    throw new TimeoutException("Timed out waiting for " + numEventsToOccur + " events to occur.");
+                }
+            }
+            List<ActivationModuleEvent> newEvents = new ArrayList<ActivationModuleEvent>();
+            int totalNumEvents = events.size();
+            if (totalNumEvents > startingSize) {
+                newEvents.addAll(events.subList(startingSize, totalNumEvents));   
+            }
+            startingSize = totalNumEvents;
+            return newEvents;
         }
     }
 
