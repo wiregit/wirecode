@@ -163,7 +163,7 @@ public class ActivationPanel {
         tableJXLayer.getGlassPane().setVisible(false);
         
         activationPanel.add(licenseKeyLabel, "gapright 10, growy 0");
-        activationPanel.add(licenseKeyPanel.getComponent(), "pushx, width 230!, growy 0");
+        activationPanel.add(licenseKeyPanel.getComponent(), "growx, width 230!, growy 0");
         activationPanel.add(warningPanel.getComponent(), "gapleft 6, aligny 50%, growy 0");
         activationPanel.add(editButton, "gapleft 16, align 100% 50%, growy 0, wrap");
         
@@ -357,9 +357,11 @@ public class ActivationPanel {
             // row 4: the module table
             // here we set whether the busy spinner should show over the module table b/c we're refreshing the module list.
             if (state == ActivationState.REFRESHING) {
+                editButton.setEnabled(false);
                 tableOverlayBusyLabel.setBusy(true);
                 tableJXLayer.getGlassPane().setVisible(true);
             } else {
+                editButton.setEnabled(true);
                 tableOverlayBusyLabel.setBusy(false);
                 tableJXLayer.getGlassPane().setVisible(false);
             }
