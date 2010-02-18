@@ -67,6 +67,9 @@ public class ActivationWarningPanel {
             panel.revalidate();
             busyLabel.setBusy(true);
             break;
+        default:
+            panel.add(Box.createRigidArea(new Dimension(ICON_WIDTH, ICON_WIDTH)), BorderLayout.CENTER);
+            break;
         }
     }
 }
