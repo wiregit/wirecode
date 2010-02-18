@@ -62,12 +62,12 @@ class ActivationTable extends MouseableTable {
         this.application = application;
 
         initTable();
+               
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(90);
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(90);
         
-        getColumnExt(ActivationTableFormat.MODULE_TYPE_INDEX).setMinWidth(195);
-        getColumnExt(ActivationTableFormat.MODULE_TYPE_INDEX).setMaxWidth(195);
-        
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(108);
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(108);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(90);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(90);
         
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
