@@ -65,11 +65,11 @@ class ActivationTable extends MouseableTable {
 
         initTable();
                
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(90);
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(90);
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(100);
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(100);
         
-        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(90);
-        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(90);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(100);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(100);
         
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());
@@ -250,7 +250,7 @@ class ActivationTable extends MouseableTable {
             
             setLayout(new MigLayout("fill, insets 0, hidemode 3", "[][grow]", "[]"));
 
-            add(dateLabel, "alignx left, width " + fontWidth + ", aligny 50%");
+            add(dateLabel, "alignx left, width " + fontWidth + "!, aligny 50%");
             add(iconButton, "split 2, align 50%");
             add(expiredLabel, "align 50%");
         }

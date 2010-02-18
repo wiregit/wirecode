@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -177,7 +178,7 @@ public class ActivationPanel {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         
-        activationPanel.add(cardPanel, "span, gaptop 10, growx, wrap");
+        activationPanel.add(cardPanel, "span, gaptop 10, height 23!, growx, wrap");
     }
         
     /**
@@ -393,12 +394,9 @@ public class ActivationPanel {
             selectCard(cardName);
             
             // and let's update the button states
-            if (state == ActivationState.REFRESHING) {
-                ((ActivatedButtonPanel)cardMap.get(OK_LICENSE_BUTTON_PANEL)).setRefreshEnabled(false);
-            } else if (state == ActivationState.AUTHORIZED) {
-                ((ActivatedButtonPanel)cardMap.get(OK_LICENSE_BUTTON_PANEL)).setRefreshEnabled(true);
-            }
-            
+            cardMap.get(cardName).setIsActivating(state == ActivationState.REFRESHING
+                        || state == ActivationState.AUTHORIZING);
+           
             activationPanel.revalidate();
         }
         
@@ -441,11 +439,11 @@ public class ActivationPanel {
             setOpaque(false);
         }
         
-        public abstract void setActivationEnabled(boolean enabled);
+        public abstract void setIsActivating(boolean enabled);
     }
     
     private class NoLicenseButtonPanel extends ButtonPanel {
-        private JButton activateButton;
+        private final JButton activateButton;
         
         public NoLicenseButtonPanel() {
             JButton goProButton = new JButton(new UrlAction(I18n.tr("Go PRO"), application.addClientInfoToUrl(ActivationSettingsController.UPSELL_URL)));
@@ -459,13 +457,13 @@ public class ActivationPanel {
         }
         
         @Override
-        public void setActivationEnabled(boolean enabled) {
-            activateButton.setEnabled(enabled);
+        public void setIsActivating(boolean enabled) {
+            activateButton.setEnabled(!enabled);
         }
     }
 
     private class EditButtonPanel extends ButtonPanel {
-        private JButton updateButton;
+        private final JButton updateButton;
         
         public EditButtonPanel() {
             updateButton = new JButton(new ActivateAction(I18n.tr("Update"), I18n.tr("Update the saved key")));
@@ -476,14 +474,14 @@ public class ActivationPanel {
         }
         
         @Override
-        public void setActivationEnabled(boolean enabled){
-            updateButton.setEnabled(enabled);
+        public void setIsActivating(boolean enabled){
+            updateButton.setEnabled(!enabled);
         }
     }
 
     private class ActivatedButtonPanel extends ButtonPanel {
-        JButton refreshButton;
-        HyperlinkButton editAccountButton;
+        private final JButton refreshButton;
+        private final HyperlinkButton editAccountButton;
         
         public ActivatedButtonPanel() {
             refreshButton = new JButton(new RefreshAction(I18n.tr("Refresh"), I18n.tr("Refresh the list of features associated with the key")));
@@ -499,11 +497,8 @@ public class ActivationPanel {
         }
         
         @Override
-        public void setActivationEnabled(boolean enabled){
-        }
-
-        public void setRefreshEnabled(boolean enabled){
-            refreshButton.setEnabled(enabled);
+        public void setIsActivating(boolean enabled){
+            refreshButton.setEnabled(!enabled);
         }
     }
 
@@ -522,8 +517,10 @@ public class ActivationPanel {
             setOpaque(false);
             
             iconLabel = new JLabel(unsupportedIcon);
+            iconLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,6));
             
             textLabel = new LabelWithLinkSupport();
+            textLabel.setBorder(BorderFactory.createEmptyBorder());
             
             add(iconLabel, BorderLayout.WEST);
             add(textLabel, BorderLayout.CENTER);
