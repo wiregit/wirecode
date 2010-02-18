@@ -290,7 +290,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // send a reply with some BAD PushProxy info
         final IpPortSet proxies = new IpPortSet(new IpPortImpl("127.0.0.1", 7001));
-        Response[] res = new Response[] { responseFactory.createResponse(10, 10, "anita", UrnHelper.SHA1) };
+        Response[] res = new Response[] { responseFactory.createResponse(10, 10, "anita.yay", UrnHelper.SHA1) };
         m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 7000,
                 InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], true, false, true,
                 true, false, false, proxies);

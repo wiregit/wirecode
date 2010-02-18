@@ -164,17 +164,17 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         // we're sending.
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[] {
-                responseFactory.createResponse(10, 10, "susheel"+i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "susheel smells good"+i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "anita is sweet"+i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "anita is prety"+i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "susheel smells bad" + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "renu is sweet " + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "prety is spelled pretty " + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "go susheel go" + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "susheel runs fast" + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "susheel jumps high" + i, UrnHelper.SHA1),
-                responseFactory.createResponse(10, 10, "sleepy susheel" + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "susheel."+i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "susheel smells good."+i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "anita is sweet."+i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "anita is prety."+i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "susheel smells bad." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "renu is sweet ." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "prety is spelled pretty ." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "go susheel go." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "susheel runs fast." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "susheel jumps high." + i, UrnHelper.SHA1),
+                responseFactory.createResponse(10, 10, "sleepy susheel." + i, UrnHelper.SHA1),
             };
             m = queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
                     myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,

@@ -92,16 +92,16 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         assertQuery(testUP[0], guid);
         
         // send back a result that will be filtered
-        Response resp = responseFactory.createResponse(101, 1019, "sex", UrnHelper.SHA1);
+        Response resp = responseFactory.createResponse(101, 1019, "sex.sex", UrnHelper.SHA1);
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_TYPE, "adult", responseFactory, limeXMLDocumentFactory);
+        resp = XMLDocFilterTest.createXMLResponse("filename.sex", LimeXMLNames.VIDEO_TYPE, "adult", responseFactory, limeXMLDocumentFactory);
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = XMLDocFilterTest.createXMLResponse("filename", LimeXMLNames.VIDEO_RATING, "NC-17", responseFactory, limeXMLDocumentFactory);
+        resp = XMLDocFilterTest.createXMLResponse("filename.sex", LimeXMLNames.VIDEO_RATING, "NC-17", responseFactory, limeXMLDocumentFactory);
         sendAndAssertResponse(resp, guid, enabled);
         
-        resp = responseFactory.createResponse(105, 345, "harmless", UrnHelper.SHA1);
+        resp = responseFactory.createResponse(105, 345, "harmless.felix", UrnHelper.SHA1);
         sendAndAssertResponse(resp, guid, false);
     }
     

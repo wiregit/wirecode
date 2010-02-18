@@ -197,7 +197,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // now send back some results - they should be accepted.
         Response[] res = new Response[10];
         for (int j = 0; j < res.length; j++)
-            res[j] = responseFactory.createResponse(10, 10, "susheel"+j, UrnHelper.SHA1);
+            res[j] = responseFactory.createResponse(10, 10, "susheel."+j, UrnHelper.SHA1);
         Message m = 
             queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
                 myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
@@ -375,7 +375,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             Response[] res = new Response[respsPerUP];
             for (int j = 0; j < res.length; j++)
-                res[j] = responseFactory.createResponse(10, 10, "susheel"+i+j, UrnHelper.SHA1);
+                res[j] = responseFactory.createResponse(10, 10, "susheel."+i+j, UrnHelper.SHA1);
             Message m = 
                 queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
                     myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
@@ -514,7 +514,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         // now, do not send an RNVM and send a reply directly
         Response[] res = new Response[10];
         for (int j = 0; j < res.length; j++)
-            res[j] = responseFactory.createResponse(10, 10, "susheel"+j, UrnHelper.SHA1);
+            res[j] = responseFactory.createResponse(10, 10, "susheel."+j, UrnHelper.SHA1);
         Message m = 
             queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
                 myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
