@@ -539,12 +539,16 @@ public class ActivationPanel {
                 textLabel.setVisible(true);
                 return;
             case EXPIRED:
-                textLabel.setText("<html>" + I18n.tr("One or more of your features has expired. Click \"Edit Account\" to renew.") + "</html>"); 
+                textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" +
+                        I18n.tr("One or more of your features has expired. Click \"Edit Account\" to renew.")
+                        + "</font></html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
                 return;
             case UNSUPPORTED:
-                textLabel.setText("<html>" + I18n.tr("One or more of your features is currently not active. Click on {0} for more information.", "<img src='" + ActivationUtilities.getInfoIconURL() + "'>") + "</html>");
+                textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" +
+                            I18n.tr("One or more of your features is currently not active. Click on {0} for more information.", "<img src='" + ActivationUtilities.getInfoIconURL() + "'>")
+                            + "</font></html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
                 return;
