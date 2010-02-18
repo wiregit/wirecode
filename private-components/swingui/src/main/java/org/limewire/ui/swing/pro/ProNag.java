@@ -14,7 +14,9 @@ import javax.swing.text.html.HTMLDocument;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.color.ColorUtil;
+import org.limewire.activation.api.ActivationError;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.Application;
@@ -187,7 +189,7 @@ class ProNag extends JXPanel {
         String url = application.addClientInfoToUrl(
                 "http://client-data.limewire.com/client_startup/modal_nag/?html32=true&fromFirstRun=" + firstLaunch 
                 + "&bgcolor=" + EncodingUtils.encode(bgColor));
-        String backupUrl = createDefaultPage(firstLaunch, bgColor);
+        String backupUrl = createBackupPage(firstLaunch, bgColor);
         
         ListeningFuture<LoadResult> future = editorPane.setPageAsynchronous(url, backupUrl);
         
@@ -203,16 +205,26 @@ class ProNag extends JXPanel {
             };
         });
         
-        return future;        
+        return future;
+    }
+    
+    /*
+     * This returns an empty string if LimeWire is pro.
+     * This returns a blocked message if the users license is blocked.
+     * And it returns a pro nag if LimeWire is basic.
+     */
+    private String createBackupPage(boolean firstLaunch, String bgColor) {
+        // Pro has no default page.
+        if(activationManager.isProActive()) {
+            return "";
+        } else if (activationManager.getActivationError() == ActivationError.BLOCKED_KEY) {
+            return createBlockedPage(firstLaunch, bgColor);
+        } else {
+            return createDefaultPage(firstLaunch, bgColor);
+        }
     }
     
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
-        // Pro has no default page.
-        // TODO: this will change to display an add possibly
-        if(activationManager.isProActive()) {
-            return "";
-        }
-        
         URL bgImage =  ProNag.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/update_background.png");
         
         String outgoing = "http://www.limewire.com/download/pro/?rmnv=z&fromFirstRun=" + firstLaunch;
@@ -261,7 +273,44 @@ class ProNag extends JXPanel {
             + "</body>"
             + "</html>";
     }
-    
+
+    private String createBlockedPage(boolean firstLaunch, String bgColor) {
+
+        String customerSupportURL = application.addClientInfoToUrl(ActivationSettingsController.CUSTOMER_SUPPORT_URL).replace("&", "&amp;");
+        
+        return 
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
+            + "<html>"
+            + "<head><title>LimeWire " + I18n.tr("License") + "</title></head>"
+            + "<body   >"
+            + "<center>"
+            + "<table width=\"330\" height=\"125\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" bgcolor=\"" + bgColor + "\">"
+              + "<tr>"
+              + "<td width=\"15\"></td>"
+              + "<td colspan=2 >"
+                + "<table width=\"300\" height=\"90\" cellspacing=\"5\" cellpadding=\"0\" border=\"0\" bgcolor=\"" + bgColor + "\">"
+                  + "<tr><td valign=bottom height=\"25\">"
+                    + "<font size=4 color=\"#59762d\"><b>" + I18n.tr("Sorry, your license key has been blocked") + "</b></font>"
+                  + "</td></tr>"
+                  + "<tr ><td height=\"50\">"
+                        + "<font size=4>" + I18n.tr("Your license key has been used on too many installations. ")
+                        + I18n.tr("Please {0}contact support{1} to resolve the situation.", "<a href=\"" + customerSupportURL + "\">", "</a>") + "</font>"
+                  + "</td></tr>"
+                + "</table>"
+              + "</td>"
+              + "<td width=\"15\"></td>"
+              + "</tr>"
+              + "<tr valign=top>"
+                + "<td width=\"15\"></td>"
+                + "<td align=left height=\"40\"><form action=\"_edit_license_\"><input type=\"submit\" name=\"edit_key\" value=\"" +  I18n.tr("Edit License Key") + "\" id=\"\"></form></td>" 
+                + "<td align=right><form action=\"_hide_nag_\"><input type=\"submit\" value=\"" + I18n.tr("Later") + "\"/></form></td>"
+                + "<td width=\"15\"></td>"
+              + "</tr>"
+            + "</table>"
+            + "</center>"
+            + "</body>";
+    }
+
     static interface NagContainer {
         /** Notifies the nag container that it should be set invisible & disposed. */
         void dispose();
