@@ -416,7 +416,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         // send a reply with NO PushProxy info
         Response[] res = new Response[1];
-        res[0] = responseFactory.createResponse(10, 10, "golf is awesome", UrnHelper.SHA1);
+        res[0] = responseFactory.createResponse(10, 10, "golf is awesome.golf", UrnHelper.SHA1);
         m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6355,
                 myIP(), 0, res, clientGUID, new byte[0], false, false, true,
                 true, false, false, null);
