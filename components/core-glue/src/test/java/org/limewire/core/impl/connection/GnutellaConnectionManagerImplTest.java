@@ -20,6 +20,8 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 import org.limewire.util.PrivateAccessor;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.activation.api.ActivationID;
 
 import ca.odell.glazedlists.EventList;
 
@@ -438,8 +440,10 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
             final long lastIdleTime, 
             final ConnectionLifecycleEventType lastStrengthRelatedEvent) throws Exception {
         
+        final ActivationManager activationManager = context.mock(ActivationManager.class);
+        
         GnutellaConnectionManagerImpl gnutellaConnectionManager
-            = new GnutellaConnectionManagerImpl(connectionManager, null, null);
+            = new GnutellaConnectionManagerImpl(connectionManager, null, activationManager);
         
         gnutellaConnectionManager.lastIdleTime = lastIdleTime;
         gnutellaConnectionManager.lastStrengthRelatedEvent = lastStrengthRelatedEvent;
@@ -459,6 +463,8 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
             will(returnValue(getPreferredConnectionCount));
             allowing(connectionManager).isSupernode();
             will(returnValue(isSupernode));
+            allowing(activationManager).isActive(ActivationID.TURBO_CHARGED_DOWNLOADS_MODULE);
+            will(returnValue(isPro));
         }});
         
         //TODO: fix this 
