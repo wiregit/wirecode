@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.limewire.util.Version;
 
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
+
 /**
  * An abstraction for the update XML.
  * Contains the ID & timestamp of the message, as well as the list
@@ -36,5 +38,9 @@ public interface UpdateCollection {
      * Returns null if there is no relevant update.
      */
     public UpdateData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
-            int currentStyle, Version currentJava);    
+            int currentStyle, Version currentJava);
+
+    public CertifiedMessage getCertifiedMessage();
+
+    public int getNewVersion();    
 }

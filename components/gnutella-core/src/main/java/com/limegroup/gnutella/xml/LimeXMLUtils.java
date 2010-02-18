@@ -29,6 +29,8 @@ import org.limewire.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.limegroup.gnutella.simpp.SimppParser;
+
 /**
  * Contains utility methods.
  * @author  asingla
@@ -710,5 +712,18 @@ public class LimeXMLUtils {
                 fis.close();
         }
         return retBytes;
+    }
+
+    public static int parseInteger(String integer, int defaultValue) {
+        try {
+            return Integer.parseInt(integer);
+        } catch(NumberFormatException nfx) {
+            SimppParser.LOG.error("Unable to parse number: " + integer, nfx);
+            return defaultValue;
+        }
+    }
+
+    public static String stripElement(String input, String elementName) {
+        return input.replaceAll("<" + elementName + ">[^<]*</" + elementName +">", "");
     }
 }

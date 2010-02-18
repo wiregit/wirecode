@@ -321,4 +321,12 @@ public class LimeXMLUtilsTest extends LimeTestCase {
             + keyname 
             + "></video></videos>";
     }
+    
+    public void testStripsSignature() throws Exception {
+        assertEquals("hello", LimeXMLUtils.stripElement("hello", "signature"));
+        assertEquals("", LimeXMLUtils.stripElement("<signature>ABCDEFGHAIKLMNOPQRST1234569069</signature>", "signature"));
+        assertEquals("<simpp></simpp>", LimeXMLUtils.stripElement("<simpp><signature>ABCDEFGHAIKLMNOPQRST1234569069</signature></simpp>", "signature"));
+    }
+    
+    
 }

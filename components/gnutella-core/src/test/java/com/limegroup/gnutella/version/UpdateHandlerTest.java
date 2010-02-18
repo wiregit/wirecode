@@ -43,8 +43,8 @@ import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
-import com.limegroup.gnutella.version.UpdateHandlerImpl.UpdateType;
 
 public class UpdateHandlerTest extends LimeTestCase {
     
@@ -145,7 +145,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         assertEquals(10, maxUrls.size());
     }
 
-    public void testMaxTriggersHttpAfterSmallDelay() {
+    public void testMaxTriggersHttpAfterSmallDelay() throws Exception {
         final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
         final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
         final HttpGet method = new HttpGet();
@@ -914,7 +914,7 @@ public class UpdateHandlerTest extends LimeTestCase {
             }
         });
         UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
-        h.handleDataInternal(null, UpdateType.FROM_NETWORK, handler);
+        h.handleDataInternal(null, CertifiedMessageSourceType.FROM_NETWORK, handler);
         mockery.assertIsSatisfied();
     }
     
@@ -929,11 +929,11 @@ public class UpdateHandlerTest extends LimeTestCase {
             }
         });
         UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
-        h.handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+        h.handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
         mockery.assertIsSatisfied();        
     }
     
-    public void testVerifiedDataFromNetworkIsValid() {
+    public void testVerifiedDataFromNetworkIsValid() throws Exception {
         final byte[] data = new byte[0];
         final String verified = "";
         final ReplyHandler handler = mockery.mock(ReplyHandler.class);
@@ -958,12 +958,12 @@ public class UpdateHandlerTest extends LimeTestCase {
         });
         UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
         assertLessThan(id, h.getLatestId());
-        h.handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+        h.handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
         assertEquals(id, h.getLatestId());
         mockery.assertIsSatisfied();
     }
     
-    public void testVerifiedDataFromDiskIsNotSanityChecked() {
+    public void testVerifiedDataFromDiskIsNotSanityChecked() throws Exception {
         final byte[] data = new byte[0];
         final String verified = "";
         final ReplyHandler handler = mockery.mock(ReplyHandler.class);
@@ -985,7 +985,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         });
         UpdateHandlerImpl h = injector.getInstance(UpdateHandlerImpl.class);
         assertLessThan(id, h.getLatestId());
-        h.handleDataInternal(data, UpdateType.FROM_DISK, handler);
+        h.handleDataInternal(data, CertifiedMessageSourceType.FROM_DISK, handler);
         assertEquals(id, h.getLatestId());
         mockery.assertIsSatisfied();
     }

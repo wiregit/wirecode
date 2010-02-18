@@ -20,7 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class SimppParser {
     
-    private static final Log LOG = LogFactory.getLog(SimppParser.class);
+    public static final Log LOG = LogFactory.getLog(SimppParser.class);
 
     public static final String VERSION = "version";
     
@@ -91,14 +91,14 @@ public class SimppParser {
             String nodeName = node.getNodeName().toLowerCase(Locale.US).trim();
             String value = LimeXMLUtils.getText(node.getChildNodes());
             if(nodeName.equals(VERSION)) {
-                _version = parseInteger(value, -1);
+                _version = LimeXMLUtils.parseInteger(value, -1);
             } else if (nodeName.equals(KEY_VERSION)) {
-                keyVersion = parseInteger(value, -1);
+                keyVersion = LimeXMLUtils.parseInteger(value, -1);
             } else if (nodeName.equals(NEW_VERSION)) {
-                newVersion = parseInteger(value, -1);
+                newVersion = LimeXMLUtils.parseInteger(value, -1);
             } else if (nodeName.equals(SIGNATURE)) {
                 signature = Base32.decode(value);
-                signedPayload = StringUtils.toUTF8Bytes(stripSignature(xmlStr));
+                signedPayload = StringUtils.toUTF8Bytes(LimeXMLUtils.stripElement(xmlStr, SIGNATURE));
             } else if (nodeName.equals(CERTIFICATE)) {
                 certificate = new CertificateParserImpl().parseCertificate(value);
             } else if(nodeName.equals(PROPS)) {
@@ -134,19 +134,6 @@ public class SimppParser {
                 return StringUtils.toString(SimppParser.this, keyVersion, signature, signedPayload, certificate);
             }
         };
-    }
-    
-    static int parseInteger(String integer, int defaultValue) {
-        try {
-            return Integer.parseInt(integer);
-        } catch(NumberFormatException nfx) {
-            LOG.error("Unable to parse number: " + integer, nfx);
-            return defaultValue;
-        }
-    }
-    
-    static String stripSignature(String input) {
-        return input.replaceAll("<signature>[^<]*</signature>", "");
     }
     
 }

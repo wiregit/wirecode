@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -29,11 +30,13 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UpdateSettings;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -51,17 +54,14 @@ import org.limewire.util.VersionUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -77,6 +77,11 @@ import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.security.Certificate;
+import com.limegroup.gnutella.security.CertificateProvider;
+import com.limegroup.gnutella.security.CertifiedMessageSourceType;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -101,12 +106,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private static final String FILENAME = "version.xml";
     
     // Package access for testing
-    protected static final int IGNORE_ID = Integer.MAX_VALUE;
-    
-    // Package access for testing
-    protected static enum UpdateType {
-        FROM_NETWORK, FROM_DISK, FROM_HTTP;
-    }
+    protected static final int IGNORE_ID = Certificate.IGNORE_ID;
     
     /**
      * init the random generator on class load time
@@ -132,6 +132,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * The most recent id of the update info.
      */
     private volatile int _lastId;
+    private volatile int newVersion;
     
     /**
      * The bytes to send on the wire.
@@ -159,13 +160,11 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private final ConnectionServices connectionServices;
     private final Provider<HttpExecutor> httpExecutor;
     private final Provider<HttpParams> defaultParams;
-    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
     private final Library library;
     private final FileView gnutellaFileView;
-    private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
@@ -188,39 +187,47 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
     
     private volatile UpdateCollection updateCollection;
+
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
+
+    private final CertificateProvider certificateProvider;
+
+    private final CertifiedMessageVerifier certifiedMessageVerifier;
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             Provider<HttpExecutor> httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
-            ApplicationServices applicationServices,
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
             UpdateMessageVerifier updateMessageVerifier, 
             RemoteFileDescFactory remoteFileDescFactory,
             @GnutellaFiles FileView gnutellaFileView,
-            Library library, ActivationManager activationManager) {
+            Library library, ActivationManager activationManager,
+            HttpClientInstanceUtils httpClientInstanceUtils,
+            @Update CertificateProvider certificateProvider,
+            @Update CertifiedMessageVerifier certifiedMessageVerifier) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
         this.defaultParams = defaultParams;
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.connectionManager = connectionManager;
         this.downloadManager = downloadManager;
         this.library = library;
-        this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.gnutellaFileView = gnutellaFileView;
         this.activationManager = activationManager;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
+        this.certificateProvider = certificateProvider;
+        this.certifiedMessageVerifier = certifiedMessageVerifier;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
@@ -253,7 +260,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         LOG.trace("Initializing UpdateHandler");
         backgroundExecutor.execute(new Runnable() {
             public void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), UpdateType.FROM_DISK, null);
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
         
@@ -305,7 +312,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
+                    handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
                 }
             });
         }
@@ -331,29 +338,39 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * <p>
      * (Processes the data immediately.)
      */
-    protected void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
+    protected void handleDataInternal(byte[] data, CertifiedMessageSourceType updateType, ReplyHandler handler) {
         if (data == null) {
-            if (updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get()
-                        .handleInvalidResponse(handler, RequestType.VERSION);
+            if (updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
             LOG.warn("No data to handle.");
             return;
         }
 
         String xml = updateMessageVerifier.getVerifiedData(data);
         if (xml == null) {
-            if (updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get()
-                        .handleInvalidResponse(handler, RequestType.VERSION);
+            if (updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
             LOG.warn("Couldn't verify signature on data.");
             return;
         }
         
-        if (updateType == UpdateType.FROM_NETWORK && handler != null)
-            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
-
-        UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
-        updateCollection = uc;
+        UpdateCollection uc = null;
+        try {
+            uc = updateCollectionFactory.createUpdateCollection(xml);
+        } catch (InvalidDataException e) {
+            LOG.debug("invalid update data", e);
+            return;
+        }
+        
+        CertifiedMessage certifiedMessage = uc.getCertifiedMessage();
+        Certificate certificate = null;
+        try {
+            certificate = certifiedMessageVerifier.verify(certifiedMessage, handler);
+        } catch (SignatureException se) {
+            LOG.error("message did not verify", se);
+            return;
+        }
+                
+        // TOOD remove this line
+        
         if (LOG.isDebugEnabled())
             LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
 
@@ -363,14 +380,14 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // a) if max && no max already, do failover.
             // b) if not max && <= last, check stale.
             // c) if not max && > last, update
-            if (uc.getId() == IGNORE_ID) {
-                if (_lastId != IGNORE_ID)
+            if (certifiedMessage.getKeyVersion() == IGNORE_ID) {
+                if (getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover(uc);
             } else if (uc.getId() <= _lastId) {
                 checkForStaleUpdateAndMaybeDoHttpFailover();
                 addSourceIfIdMatches(handler, uc.getId());
-            } else {// is greater
-                storeAndUpdate(data, uc, updateType);
+            } else if (uc.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
+                storeAndUpdate(data, uc, updateType, certificate);
             }
             break;
         case FROM_DISK:
@@ -378,16 +395,17 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // a) always check for stale
             // b) update if we didn't get an update before this ran.
             checkForStaleUpdateAndMaybeDoHttpFailover();
-            if (uc.getId() > _lastId)
-                storeAndUpdate(data, uc, updateType);
+            if (uc.getNewVersion() > newVersion)
+                storeAndUpdate(data, uc, updateType, certificate);
             break;
         case FROM_HTTP:
             // on HTTP response:
             // a) update if >= stored.
             // (note this is >=, different than >, which is from
             // network)
-            if (uc.getId() >= _lastId)
-                storeAndUpdate(data, uc, updateType);
+            // TODO do we need to ensure key version = ignore id
+            if (uc.getNewVersion() >= newVersion) 
+                storeAndUpdate(data, uc, updateType, certificate);
             break;
         }
     }
@@ -395,20 +413,24 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     /**
      * Stores the given data to disk & posts an update to neighboring
      * connections. Starts the download of any updates
+     * @param certificate TODO
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection uc, UpdateType updateType) {
+    private void storeAndUpdate(byte[] data, UpdateCollection uc, CertifiedMessageSourceType updateType, Certificate certificate) {
         if(LOG.isTraceEnabled())
             LOG.trace("Retrieved new data from: " + updateType + ", storing & updating.");
-        if(uc.getId() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
+        if(uc.getId() == IGNORE_ID && updateType == CertifiedMessageSourceType.FROM_NETWORK)
             throw new IllegalStateException("shouldn't be here!");
         
         // If an http max request is pending, don't even bother with this stuff.
         // We want to get it straight from the source...
-        if (updateType == UpdateType.FROM_NETWORK && httpRequestControl.isRequestPending()
+        if (updateType == CertifiedMessageSourceType.FROM_NETWORK && httpRequestControl.isRequestPending()
                 && httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.MAX)
             return;
         
         _lastId = uc.getId();
+        newVersion = uc.getNewVersion();
+        updateCollection = uc;
+        certificateProvider.set(certificate);
         
         _lastTimestamp = uc.getTimestamp();
         UpdateSettings.LAST_UPDATE_TIMESTAMP.setValue(_lastTimestamp);
@@ -419,7 +441,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         
         _lastBytes = data;
         
-        if(updateType != UpdateType.FROM_DISK) {
+        if(updateType != CertifiedMessageSourceType.FROM_DISK) {
             // cancel any http and pretend we just updated.
             if(httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.TIMEOUT)
                 httpRequestControl.cancelRequest();
@@ -547,8 +569,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getModuleCode()));
+        HttpGet get = new HttpGet(httpClientInstanceUtils.addClientInfoToUrl(url));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
@@ -916,7 +937,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
                     httpRequestControl.requestFinished();
                     
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(inflated, UpdateType.FROM_HTTP, null);
+                    handleDataInternal(inflated, CertifiedMessageSourceType.FROM_HTTP, null);
                 }
             });
             
@@ -1029,5 +1050,9 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     @Override
     public boolean removeListener(EventListener<UpdateEvent> listener) {
         return listeners.removeListener(listener);
+    }
+    
+    public int getKeyVersion() {
+        return certificateProvider.get().getKeyVersion();
     }
 }

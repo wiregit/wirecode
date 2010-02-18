@@ -58,12 +58,6 @@ public class SimppParserTest extends BaseTestCase {
         assertEquals("propsdata", parser.getPropsData());
     }
     
-    public void testStripsSignature() throws Exception {
-        assertEquals("hello", SimppParser.stripSignature("hello"));
-        assertEquals("", SimppParser.stripSignature("<signature>ABCDEFGHAIKLMNOPQRST1234569069</signature>"));
-        assertEquals("<simpp></simpp>", SimppParser.stripSignature("<simpp><signature>ABCDEFGHAIKLMNOPQRST1234569069</signature></simpp>"));
-    }
-    
     public void testMissingSignatureFail() throws Exception{        
         String simppString = "<simpp><version>1</version><keyversion>2</keyversion><newversion>3</newversion><props>propsdata</props></simpp>";
         try {
