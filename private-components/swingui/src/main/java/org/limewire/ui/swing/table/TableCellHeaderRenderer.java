@@ -12,7 +12,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
@@ -47,8 +46,6 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
     private Icon downIcon;
     @Resource
     private Icon upIcon;
-    
-    private final Border emptyBorder;
 
     private final Font font;
     
@@ -71,10 +68,10 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
         
         switch (horizontalAlignment) {
         case TRAILING: case RIGHT:
-            emptyBorder = BorderFactory.createEmptyBorder(0, 0, 0, 10);
+            setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
             break;
         default:
-            emptyBorder = BorderFactory.createEmptyBorder(0, 10, 0, 0);
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
             break;
         }
         font = getFont().deriveFont(Font.BOLD, 11);
@@ -98,7 +95,6 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
         setIcon(sortIcon);
         
         setPreferredSize(new Dimension(20, getPreferredSize().width));
-        setBorder(emptyBorder);
         setFont(font);
         
         if(column >= 0) {

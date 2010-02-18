@@ -11,6 +11,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.JTableHeader;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -28,6 +29,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -80,6 +82,14 @@ class ActivationTable extends MouseableTable {
         getColumn(ActivationTableFormat.DATE_EXPIRE_INDEX).setCellEditor(expiredRenderer);
         
         setupHighlighters();
+    }
+    
+    @Override
+    protected void setTableHeaderRenderer() {
+        JTableHeader th = getTableHeader();
+        TableCellHeaderRenderer renderer = new TableCellHeaderRenderer();
+        renderer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        th.setDefaultRenderer(renderer);
     }
     
     private void initTable() {
