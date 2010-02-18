@@ -104,6 +104,10 @@ public class RoutedConnectionTest extends ServerSideTestCase {
             ignoring(cvm).supportsWhatIsNew();
             allowing(cvm).supportsSIMPP();
             will(returnValue(-1));
+            allowing(cvm).supportsNewSimppVersion();
+            will(returnValue(-1));
+            allowing(cvm).supportsSimppKeyVersion();
+            will(returnValue(-1));
             ignoring(cvm).isPassiveLeafNode();
             ignoring(cvm).supportsFeatureQueries();
             allowing(cvm).supportsUpdate();
