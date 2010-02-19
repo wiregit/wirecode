@@ -2,6 +2,7 @@ package org.limewire.ui.swing.pro;
 
 import java.awt.BorderLayout;
 import java.net.URL;
+import java.util.Date;
 
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -15,6 +16,7 @@ import javax.swing.text.html.HTMLDocument;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.color.ColorUtil;
 import org.limewire.activation.api.ActivationError;
+import org.limewire.activation.api.ActivationItem;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.concurrent.FutureEvent;
@@ -209,19 +211,43 @@ class ProNag extends JXPanel {
     }
     
     /*
-     * This returns an empty string if LimeWire is pro.
+     * This returns an empty string if LimeWire is pro (unless your features are expiring soon 
+     * in which case it warns you)
      * This returns a blocked message if the users license is blocked.
      * And it returns a pro nag if LimeWire is basic.
      */
     private String createBackupPage(boolean firstLaunch, String bgColor) {
         // Pro has no default page.
         if(activationManager.isProActive()) {
-            return "";
+            if (!areModulesExpiringSoon()) {
+                return "";
+            } else {
+                // but we show a features expiring notification if your features are expiring in 3 days
+                return createExpiredPage(firstLaunch, bgColor);
+            }
         } else if (activationManager.getActivationError() == ActivationError.BLOCKED_KEY) {
             return createBlockedPage(firstLaunch, bgColor);
         } else {
             return createDefaultPage(firstLaunch, bgColor);
         }
+    }
+    
+    /*
+     * This checks to see if any features are expiring in three days.
+     */
+    private boolean areModulesExpiringSoon() {
+        Date today = new Date();
+        double MILLSECS_PER_DAY = 1000 * 60 * 60 * 24;
+        for (ActivationItem item : activationManager.getActivationItems()) {
+            Date expirationDate = item.getDateExpired();
+            // this comparison isn't 100% correct b/c it neglects to account for daylight savings time
+            double deltaDays = ( ((double) expirationDate.getTime()) - today.getTime() ) / MILLSECS_PER_DAY;
+            if (deltaDays < 3) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     private String createDefaultPage(boolean firstLaunch, String bgColor) {
@@ -303,6 +329,40 @@ class ProNag extends JXPanel {
               + "<tr valign=top>"
                 + "<td width=\"15\"></td>"
                 + "<td align=left height=\"40\"><form action=\"_edit_license_\"><input type=\"submit\" name=\"edit_key\" value=\"" +  I18n.tr("Edit License Key") + "\" id=\"\"></form></td>" 
+                + "<td align=right><form action=\"_hide_nag_\"><input type=\"submit\" value=\"" + I18n.tr("Later") + "\"/></form></td>"
+                + "<td width=\"15\"></td>"
+              + "</tr>"
+            + "</table>"
+            + "</center>"
+            + "</body>";
+    }
+
+    private String createExpiredPage(boolean firstLaunch, String bgColor) {
+
+        String renewURL = application.addClientInfoToUrl(ActivationSettingsController.RENEW_URL).replace("&", "&amp;");
+        
+        return 
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"
+            + "<html>"
+            + "<head><title>" + I18n.tr("Time to Renew Your LimeWire") + "</title></head>"
+            + "<body   >"
+            + "<center>"
+            + "<table width=\"400\" height=\"115\" cellspacing=\"5\" cellpadding=\"0\" border=\"0\" bgcolor=\"" + bgColor + "\">"
+              + "<tr>"
+                + "<td width=\"15\"></td>"
+                + "<td colspan=2 height=\"30\" valign=bottom><font size=4 color=\"#59762d\"><b>" + I18n.tr("Your LimeWire subscription will be expiring shortly.") + "</b></font></td>"
+                + "<td width=\"15\"></td>"
+              + "</tr>"
+              + "<tr>"
+                + "<td width=\"15\"></td>"
+                + "<td colspan=2 height=\"30\" valign=top><font size=4 color=\"#59762d\"><b>" + I18n.tr("Don't miss a thing - act now for special renewal pricing!") + "</b></font></td>"
+                + "<td width=\"15\"></td>"
+            + "</tr>"
+              + "<tr valign=top>"
+                + "<td width=\"15\"></td>"
+                + "<td align=right height=\"40\" width=\"290\"><form action=\"" + renewURL + "\" method=\"GET\" target=\"_blank\">"
+                                        + "<input type=\"submit\" value=\"" + I18n.tr("Renew Now") + "\"/>"
+                        + "</form></td> "
                 + "<td align=right><form action=\"_hide_nag_\"><input type=\"submit\" value=\"" + I18n.tr("Later") + "\"/></form></td>"
                 + "<td width=\"15\"></td>"
               + "</tr>"

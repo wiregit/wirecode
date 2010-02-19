@@ -5,7 +5,8 @@ public interface ActivationSettingsController {
     public static final String ACCOUNT_SETTINGS_URL = "http://www.limewire.com/client_redirect/?page=accountDetails";
     public static final String CUSTOMER_SUPPORT_URL = "http://www.limewire.com/client_redirect/?page=proSupport";
     public static final String UPSELL_URL = "http://www.limewire.com/client_redirect/?page=downloadPro";
-    
+    public static final String RENEW_URL = "http://www.limewire.com/client_redirect/?page=renewPro";
+
     public String getActivationHost();
     
     public void setLastStartPro(boolean value);
