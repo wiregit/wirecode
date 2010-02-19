@@ -6,6 +6,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
@@ -442,6 +443,98 @@ public final class UpdateCollectionTest extends BaseTestCase {
         
     }
 
+    public void testThrowsOnMissingKeyVersion() {
+        try {
+            updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<newversion>5</newversion><signature>ABCDEF</signature>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes.</lang>" +
+                    "</msg>" +
+            "</update>");
+            fail("exception expected");
+        } catch (InvalidDataException ide) {
+        }
+    }
+    
+    public void testThrowsOnInvalidKeyVersion() {
+        try {
+            updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<keyversion>hey</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes.</lang>" +
+                    "</msg>" +
+            "</update>");
+            fail("exception expected");
+        } catch (InvalidDataException ide) {
+        }
+    }
+    
+    public void testThrowsOnMissingNewVersion() {
+        try {
+            updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<keyversion>4</keyversion><newversion></newversion><signature>ABCDEF</signature>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes.</lang>" +
+                    "</msg>" +
+            "</update>");
+            fail("exception expected");
+        } catch (InvalidDataException ide) {
+        }
+    }
+    
+    public void testThrowsOnMissingSignature() {
+        try {
+            updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<keyversion>9</keyversion><newversion>5</newversion>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes.</lang>" +
+                    "</msg>" +
+            "</update>");
+            fail("exception expected");
+        } catch (InvalidDataException ide) {
+        }
+    }
+    
+    public void testStripsSignatureForSignedPayload() throws Exception {
+        UpdateCollection updateCollection = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<keyversion>9</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes. \u30d5\u30a1\u30a4\u30eb\u30b7</lang>" +
+                    "</msg>" +
+            "</update>");
+        assertEquals(StringUtils.toUTF8Bytes("<update id='42'>" +
+                "<keyversion>9</keyversion><newversion>5</newversion>" +
+                "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                "<lang id='en'>WTG Quotes. \u30d5\u30a1\u30a4\u30eb\u30b7</lang>" +
+                "</msg>" +
+        "</update>"), updateCollection.getCertifiedMessage().getSignedPayload());
+    }
+    
+    public void testParsesCertificate() throws Exception {
+        UpdateCollection updateCollection = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                "<keyversion>9</keyversion><newversion>5</newversion><signature>ABCDEF</signature><certificate>GAWAEFC4RQX5WPKR6I5L4BBMJ5KXCNMJTNHVYFYCCQZFHTSZFUPC4WNAK6HUDV4YAQS7G2ALGQ|4|GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAIC5BZX4C463D34VXV74JRSGAVQXZK2FPDHEWT7YSLZ5R6AP6KAD4ODGZPVJ5I3NXRTGDEIYRBZAJ4WHMOLNDCJXHJLJPELPLLB6GUWMO5ZEN26KJD3CFEQRJDIPDAWZIISVZCSRCUJ64KKDO4Q32NKG5SZLPJSQM6HX2THS5PBHWHOVVTBXBJAUXMUUULU6SHYCKFC6EVJLW</certificate>" +
+                "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                "<lang id='en'>WTG Quotes. \u30d5\u30a1\u30a4\u30eb\u30b7</lang>" +
+                "</msg>" +
+        "</update>");
+        
+        assertNotNull(updateCollection.getCertifiedMessage().getCertificate());
+        assertEquals("GAWAEFC4RQX5WPKR6I5L4BBMJ5KXCNMJTNHVYFYCCQZFHTSZFUPC4WNAK6HUDV4YAQS7G2ALGQ|4|GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAIC5BZX4C463D34VXV74JRSGAVQXZK2FPDHEWT7YSLZ5R6AP6KAD4ODGZPVJ5I3NXRTGDEIYRBZAJ4WHMOLNDCJXHJLJPELPLLB6GUWMO5ZEN26KJD3CFEQRJDIPDAWZIISVZCSRCUJ64KKDO4Q32NKG5SZLPJSQM6HX2THS5PBHWHOVVTBXBJAUXMUUULU6SHYCKFC6EVJLW", updateCollection.getCertifiedMessage().getCertificate().getCertificateString());
+    }
+    
+    public void testThrowsOnMismatchedElements() {
+        try {
+            updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+                    "<keyversion>9</keyversio><newversion>5</newversion><signature>ABCDEF</signature>" +
+                    "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
+                    "<lang id='en'>WTG Quotes. \u30d5\u30a1\u30a4\u30eb\u30b7</lang>" +
+                    "</msg>" +
+            "</update>");
+            fail("expected to throw exception");
+        } catch (InvalidDataException ide) {
+        }
+    }
+    
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
         PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems");

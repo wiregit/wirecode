@@ -149,7 +149,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
             d = XMLUtils.getDocument(xml, LOG);
         } catch(IOException ioe) {
             LOG.error("Unable to parse: " + xml, ioe);
-            return;
+            throw new InvalidDataException(ioe);
         }
         
         parseDocumentElement(d.getDocumentElement(), updateDataList, xml);
