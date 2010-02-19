@@ -384,7 +384,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
         private int consecutiveFailedRetries = 0;
         private final int maxFailedConsecutiveRetries;
         private final String key;
-        private final RequestType type;
+        private RequestType type;
 
         ActivationTask(String key, RequestType type, int maxFailedConsecutiveRetriesParam) {
             maxFailedConsecutiveRetries = maxFailedConsecutiveRetriesParam;
@@ -406,14 +406,17 @@ class ActivationManagerImpl implements ActivationManager, Service {
             }
             State state = getNextState(response.getResponseType());
             attemptedToContactActivationServer = true;
-            transitionToState(state, response);
-
-            mcodeListeners.broadcast(new ModuleCodeEvent(getModuleCode()));
+            
+            if (type != RequestType.PING) {
+                transitionToState(state, response);
+                mcodeListeners.broadcast(new ModuleCodeEvent(getModuleCode()));
+            }
 
             if (state == State.ACTIVATED_FROM_SERVER) {
                 // reschedule next ping of activation server if necessary
                 long refreshValInMs = response.getRefreshIntervalInMinutes()*60*1000;
                 if (refreshValInMs > 0) {
+                    type = RequestType.PING;
                     activationContactor.rescheduleIfSooner(refreshValInMs);
                 }        
             }

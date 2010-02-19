@@ -17,7 +17,7 @@ interface ActivationCommunicator {
         AUTO_STARTUP,
         REFRESH,
         USER_ACTIVATE,
-        PING;
+        PING
     }
     
     /**
