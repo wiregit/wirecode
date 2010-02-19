@@ -291,20 +291,30 @@ class SetupActivationTable extends BasicJXTable {
     }
     
     private class TableHeaderRenderer extends JLabel implements TableCellRenderer {        
+        JLabel headerLabel = new JLabel();
+        Component strut = Box.createHorizontalStrut(10);
+
         public TableHeaderRenderer() {
-            setFont(headerFont);
-            setForeground(columnNameColor);
+            headerLabel.setFont(headerFont);
+            headerLabel.setForeground(columnNameColor);
+            headerLabel.setOpaque(false);
             setBackground(headerBackgroundColor);
             setOpaque(true);
             setHorizontalAlignment(JLabel.LEADING);
             setHorizontalTextPosition(JLabel.LEFT);
-            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+            setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+            setLayout(new MigLayout("filly, insets 0 0 0 0, hidemode 3"));
+            add(strut, "align 0% 50%, hidemode 3");
+            add(headerLabel, "align 0% 50%");
         }
         
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            setText(value.toString());
+            
+            strut.setVisible(column == 0);
+            headerLabel.setText(value.toString());
 
             return this;
         }

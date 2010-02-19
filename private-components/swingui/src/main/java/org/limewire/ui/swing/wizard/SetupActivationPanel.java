@@ -115,54 +115,60 @@ public class SetupActivationPanel extends JPanel {
     public void reset() {
         ActivationError activationError = activationManager.getActivationError();
         if (activationError != ActivationError.BLOCKED_KEY) {
-            setActivationError(ActivationError.NO_ERROR);
+            customerSupportLabel.setVisible(false);
+            errorMessageLabel.setVisible(false);
             iconPanel.setActivationMode(Mode.EMPTY);
             licenseField.setText("");
         }
     }
     
-    private void setActivationState(ActivationState state) {
+    private void setActivationState(ActivationState state, ActivationError error) {
         switch(state) {
         case NOT_AUTHORIZED:
-            iconPanel.setActivationMode(Mode.WARNING);
-            return;
+            if (error != ActivationError.COMMUNICATION_ERROR) {
+                iconPanel.setActivationMode(Mode.WARNING);
+            } else {
+                iconPanel.setActivationMode(Mode.EMPTY);
+            }
+            break;
         case AUTHORIZING:
             iconPanel.setActivationMode(Mode.SPINNER);
-            return;
+            break;
         case REFRESHING:
             iconPanel.setActivationMode(Mode.SPINNER);
-            return;
+            break;
         case AUTHORIZED:
             iconPanel.setActivationMode(Mode.EMPTY);
-            return;
+            break;
+        default:
+            throw new IllegalStateException("Unknown state: " + state);
         }
-        throw new IllegalStateException("Unknown state: " + state);
-    }
 
-    private void setActivationError(ActivationError error) {
         customerSupportLabel.setVisible(false);
+
         switch(error) {
         case NO_ERROR:
             errorMessageLabel.setVisible(false);
-            return;
+            break;
         case NO_KEY:
             errorMessageLabel.setVisible(false);
-            return;
+            break;
         case INVALID_KEY:
             errorMessageLabel.setText(I18n.tr("Invalid license key."));
             errorMessageLabel.setVisible(true);
-            return;
+            break;
         case BLOCKED_KEY:
             errorMessageLabel.setText(I18n.tr("Your license key has been used on too many installations."));
             errorMessageLabel.setVisible(true);
             customerSupportLabel.setVisible(true);
-            return;
+            break;
         case COMMUNICATION_ERROR:
             errorMessageLabel.setText(I18n.tr("Communication error. Please try again later."));
             errorMessageLabel.setVisible(true);
-            return;
+            break;
+        default:
+            throw new IllegalStateException("Unknown error: " + error);
         }
-        throw new IllegalStateException("Unknown state: " + error);
     }
 
     class EnterActionListener implements ActionListener {
@@ -176,8 +182,7 @@ public class SetupActivationPanel extends JPanel {
                         // b/c the activation manager usually doesn't create an error for this case.
                         // it just clears the key.
                         if (key.equals("")) {
-                            setActivationState(ActivationState.NOT_AUTHORIZED);
-                            setActivationError(ActivationError.INVALID_KEY);
+                            setActivationState(ActivationState.NOT_AUTHORIZED, ActivationError.INVALID_KEY);
                             return;
                         }
                         
@@ -193,8 +198,7 @@ public class SetupActivationPanel extends JPanel {
         public void handleEvent(final ActivationEvent event) {
             SwingUtilities.invokeLater(new Runnable(){
                 public void run() {
-                    setActivationState(event.getData());
-                    setActivationError(event.getError());
+                    setActivationState(event.getData(), event.getError());
                 }
             });
         }

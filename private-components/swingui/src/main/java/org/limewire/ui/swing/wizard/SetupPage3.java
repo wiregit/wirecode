@@ -105,7 +105,7 @@ public class SetupPage3 extends WizardPage {
     }
     
     private void showLicenseEntryPage() {
-        footerText = I18n.tr("You can activate LimeWire PRO later from File > License..."); 
+        footerText = I18n.tr("You can activate LimeWire PRO later from File > License"); 
         forwardText = I18n.tr("No thanks");
         hasBackButton = true;
         activationPanel = new SetupActivationPanel(this, activationManager, application); 
@@ -115,7 +115,7 @@ public class SetupPage3 extends WizardPage {
     private void showModuleInfoPage() {
         removeAll();
         add(new SetupActivationThankYouPanel(SetupPage3.this, activationManager.getActivationItems(), userHasPreexistingLicense, application));
-        footerText = I18n.tr("You can edit your licenses from File > License...");
+        footerText = I18n.tr("You can edit your licenses from File > License");
         forwardText = I18n.tr("Done");
         hasBackButton = false;
         wizard.updateControls();

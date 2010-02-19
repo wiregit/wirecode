@@ -81,7 +81,6 @@ public class SetupActivationThankYouPanel extends JPanel {
             if (containsSomeExpiredModules(eventList)) {
                 LabelWithLinkSupport renewFeaturesLabel = new LabelWithLinkSupport();
                 Font font = wizardPage.createAndDecorateLabel("").getFont();
-                System.out.println("having problems opening url <" + application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL) + ">");
                 renewFeaturesLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
                                     + I18n.tr("You can renew your features at your {0}user account{1} page.", 
                                               "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL) + "'>", 
@@ -96,6 +95,7 @@ public class SetupActivationThankYouPanel extends JPanel {
                 JLabel infoTextLine1 = wizardPage.createAndDecorateMultiLine(I18n.tr("* " + "One or more of your features is currently not supported."));
                 JLabel infoTextLine2 = wizardPage.createAndDecorateMultiLine("<html>" + I18n.tr("Click on {0} for more information.", "<img src='" + ActivationUtilities.getInfoIconURL() + "'>") + "</html>");
                 innerPanel.add(infoTextLine1, "align 0% 50%, wrap");
+                innerPanel.add(Box.createVerticalStrut(3), "wrap");
                 innerPanel.add(infoTextLine2, "align 0% 50%, wrap");
             }
             
