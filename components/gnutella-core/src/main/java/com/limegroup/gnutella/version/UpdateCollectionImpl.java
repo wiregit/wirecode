@@ -420,7 +420,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
             
             @Override
             public String toString() {
-                return StringUtils.toString(UpdateCollectionImpl.this);
+                return StringUtils.toString(UpdateCollectionImpl.this, keyVersion, signature, signedPayload, certificate);
             }
         };
     }

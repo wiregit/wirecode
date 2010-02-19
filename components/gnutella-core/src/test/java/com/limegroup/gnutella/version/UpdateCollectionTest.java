@@ -2,18 +2,22 @@ package com.limegroup.gnutella.version;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.core.api.updates.UpdateStyle;
-import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
+import org.limewire.util.Base32;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
 
-import com.google.inject.Injector;
-
-public final class UpdateCollectionTest extends LimeTestCase {
+public final class UpdateCollectionTest extends BaseTestCase {
 
     UpdateCollectionFactory updateCollectionFactory;
+    private Mockery context;
+    private HttpClientInstanceUtils httpClientInstanceUtils;
     
 	public UpdateCollectionTest(String name) {
 		super(name);
@@ -25,8 +29,13 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		Injector injector = LimeTestUtils.createInjectorNonEagerly();
-		updateCollectionFactory = injector.getInstance(UpdateCollectionFactory.class);
+	    context = new Mockery();
+	    httpClientInstanceUtils = context.mock(HttpClientInstanceUtils.class);
+	    updateCollectionFactory = new UpdateCollectionFactoryImpl(httpClientInstanceUtils);
+	    
+	    context.checking(new Expectations() {{
+	        ignoring(httpClientInstanceUtils).addClientInfoToUrl(with(any(String.class)));
+	    }});
 	}
 
 	/**
@@ -39,6 +48,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	public void testBasicCreation() throws Exception {
 	    
 	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42' timestamp=\"150973213135\">" +
+	            "<keyversion>4</keyversion><newversion>42</newversion><signature>ABCDEF</signature>" + 
             "<msg for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
                 "<lang id='en'>" +
                     "<![CDATA[<html><body>This is the text</body></html>]]>" +
@@ -70,6 +80,22 @@ public final class UpdateCollectionTest extends LimeTestCase {
         assertEquals(uc.getUpdateData().toString(), 2, uc.getUpdateData().size());
         assertEquals(42, uc.getId());
         assertEquals(150973213135L, uc.getTimestamp());
+        assertEquals(42, uc.getNewVersion());
+        assertEquals(4, uc.getCertifiedMessage().getKeyVersion());
+        assertEquals(Base32.decode("ABCDEF"), uc.getCertifiedMessage().getSignature());
+        assertEquals(StringUtils.toUTF8Bytes("<update id='42' timestamp=\"150973213135\">" +
+                "<keyversion>4</keyversion><newversion>42</newversion>"
+                + "<msg for='4.6.0' url='http://www.limewire.com/update' style='2'>"
+                + "<lang id='en'>" + "<![CDATA[<html><body>This is the text</body></html>]]>"
+                + "</lang>" + "<lang id='es' button1='b1' button2='b2'>"
+                + "Hola, no habla espanol." + "</lang>" + "<lang id='notext'></lang>" + "</msg>"
+                + "<msg/> " + "<msg for='4.1.2' url='http://limewire.com/hi'>" + "<lang id='en'>"
+                + "This didn't have a style, it should be ignored." + "</lang>" + "</msg>"
+                + "<msg for='4.1.2' style='3'>" + "<lang id='en'>"
+                + "This didn't have a URL, it should be ignored." + "</lang>" + "</msg>"
+                + "<msg style='3' url='nostyle'>" + "<lang id='en'>"
+                + "This didn't have a 'for', it should be ignored." + "</lang>" + "</msg>"
+                + "</update>"), uc.getCertifiedMessage().getSignedPayload());
 	    
 	    UpdateData data;
 	    
@@ -115,6 +141,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     public void testRanges() throws Exception {
 	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+	            "<keyversion>4</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
             "<msg to='3.0.0' for='4.6.0' url='http://www.limewire.com/update/force' style='4'>" +
                 "<lang id='en'>FORCED Text</lang>" +
             "</msg>" +
@@ -137,6 +164,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	        
         assertEquals(uc.getUpdateData().toString(), 6, uc.getUpdateData().size());
         assertEquals(42, uc.getId());
+        assertEquals(5, uc.getNewVersion());
 	    
 	    // Idea:
 	    // People who have [0.0.0, 3.0.0) are told about a FORCED update to 4.6.0 (with one set of text)
@@ -215,8 +243,10 @@ public final class UpdateCollectionTest extends LimeTestCase {
             "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' free='1'>" +
                 "<lang id='en'>Free Text</lang>" +
             "</msg>" +
+            "<keyversion>4</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
         "</update>");
 	        
+        assertEquals(4, uc.getCertifiedMessage().getKeyVersion());
         
         UpdateData data;
         
@@ -249,6 +279,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
                 "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Windows'>" +
                     "<lang id='en'>Windows Text</lang>" +
                 "</msg>" +
+                "<keyversion>4</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
                 "<msg for='4.6.0' url='http://www.limewire.com/update' style='2' os='Linux'>" +
                     "<lang id='en'>Linux Text</lang>" +
                 "</msg>" +
@@ -280,6 +311,8 @@ public final class UpdateCollectionTest extends LimeTestCase {
                 "<lang id='en'>malformed version</lang>" +
             "</msg>" +
             "</update>");
+            
+            assertEquals(5, uc.getNewVersion());
     	        
             boolean windows = OSUtils.isWindows();
             boolean mac = OSUtils.isMacOSX();
@@ -364,6 +397,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     public void testJavaRanges() throws Exception {
 	    UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+	        "<keyversion>4</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
             "<msg for='9.9.9' url='http://www.limewire.com/whyupgradejava' style='4' javato='1.4.2'>" +
                 "<lang id='en'>Your Java Sucks.</lang>" +
             "</msg>" +
@@ -396,6 +430,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     public void testQuotesAroundUCommand() throws Exception {
         UpdateCollection uc = updateCollectionFactory.createUpdateCollection("<update id='42'>" +
+            "<keyversion>4</keyversion><newversion>5</newversion><signature>ABCDEF</signature>" +
             "<msg for='9.9.9' url='http://www.limewire.com/update' style='4' ucommand='\"name with spaces\" after quote'>" +
                 "<lang id='en'>WTG Quotes.</lang>" +
             "</msg>" +
@@ -407,28 +442,6 @@ public final class UpdateCollectionTest extends LimeTestCase {
         
     }
 
-    /**
-     * Test to ensure that the update collection parser in use before the deployment
-     * of the new update key scheme gracefully ignores extra elements in the xml of
-     * the update message.
-     */
-    public void testUpdateCollectionParserIgnoresNewXMLElements() throws Exception {
-       String xmlWithExtraElements = "<update id=\"16\" timestamp=\"1262110452904\">" +
-       "<newVersion>4545</newVersion>" +
-       "<msg from=\"4.16.7\" to=\"5.4.6\" for=\"5.4.6\" url=\"http://www.limewire.com/download/update?fc=4\" style=\"2\" os=\"mac,windows,linux,unix,other\" osv=\"10.5,*,*,*,*,*,*,*,*,*\">" + 
-       "<lang id='en' title='LimeWire 5.4'>" + 
-       "<![CDATA[<html>LimeWire 5.4 is here!<ul><li>Follow downloads with BitTorrent visualization</li><li>Built-in video player</li><li>Improved network connectivity</li></ul>Update Now</html>]]>" +
-       "</lang>" +
-       "</msg>" +
-       "<cert>4039485045|3|3049540584059</cert>" +
-       "</update>";
-       UpdateCollection updateCollection = updateCollectionFactory.createUpdateCollection(xmlWithExtraElements);
-       assertEquals(16, updateCollection.getId());
-       assertEquals(1262110452904L, updateCollection.getTimestamp());
-       assertEquals(1, updateCollection.getUpdateData().size());
-    }
-    
-    
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
         PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems");
