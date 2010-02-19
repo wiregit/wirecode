@@ -43,7 +43,10 @@ import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.security.Certificate;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 public class UpdateHandlerTest extends LimeTestCase {
@@ -73,6 +76,7 @@ public class UpdateHandlerTest extends LimeTestCase {
     private byte[] guid;
 
     private File saveFile;
+    private CertifiedMessageVerifier certifiedMessageVerifier;
 
     @Override
     public void setUp() {
@@ -87,6 +91,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor = new ImmediateExecutor();
         updateMessageVerifier = mockery.mock(UpdateMessageVerifier.class);
         networkUpdateSanityChecker = mockery.mock(NetworkUpdateSanityChecker.class);
+        certifiedMessageVerifier = mockery.mock(CertifiedMessageVerifier.class);
         guid = new byte[16];
         clock = new ClockStub();
         settingsProvider = new SettingsProvider() {
@@ -115,6 +120,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                 bind(SettingsProvider.class).toInstance(settingsProvider);
                 bind(UpdateMessageVerifier.class).toInstance(updateMessageVerifier);
                 bind(NetworkUpdateSanityChecker.class).toInstance(networkUpdateSanityChecker);
+                bind(CertifiedMessageVerifier.class).annotatedWith(Update.class).toInstance(certifiedMessageVerifier);
             }
         });
 
@@ -144,14 +150,18 @@ public class UpdateHandlerTest extends LimeTestCase {
             assertEquals("http://update" + (i + 1) + ".limewire.com/v2/update.def", maxUrls.get(i));
         assertEquals(10, maxUrls.size());
     }
-
+    
+    
     public void testMaxTriggersHttpAfterSmallDelay() throws Exception {
         final AtomicReference<HttpClientListener> httpClientListenerRef = new AtomicReference<HttpClientListener>();
         final UpdateCollection updateCollection = mockery.mock(UpdateCollection.class);
+        final CertifiedMessage certifiedMessage = mockery.mock(CertifiedMessage.class);
         final HttpGet method = new HttpGet();
         final HttpResponse response = mockery.mock(HttpResponse.class);
         final StatusLine statusLine = mockery.mock(StatusLine.class);
         final Sequence requestSequence = mockery.sequence("Request Sequence");
+        final Certificate certificate = mockery.mock(Certificate.class);
+        
         mockery.checking(new Expectations() {
             {
                 one(updateMessageVerifier).getVerifiedData(new byte[0]);
@@ -160,6 +170,18 @@ public class UpdateHandlerTest extends LimeTestCase {
 
                 one(updateCollectionFactory).createUpdateCollection("asdf\n");
                 will(returnValue(updateCollection));
+                inSequence(requestSequence);
+                
+                one(updateCollection).getCertifiedMessage();
+                will(returnValue(certifiedMessage));
+                inSequence(requestSequence);
+                
+                one(certifiedMessageVerifier).verify(certifiedMessage, null);
+                will(returnValue(certificate));
+                inSequence(requestSequence);
+                
+                one(certifiedMessage).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 inSequence(requestSequence);
 
                 atLeast(1).of(updateCollection).getId();
