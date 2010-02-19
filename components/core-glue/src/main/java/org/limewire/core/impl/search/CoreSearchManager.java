@@ -9,6 +9,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.io.GUID;
 
 import com.google.inject.Inject;
 
@@ -66,7 +67,8 @@ public class CoreSearchManager implements SearchManager {
     public SearchResultList getSearchResultList(String guidStr) {
         // Return result list from collection.
         for (SearchResultList resultList : threadSafeSearchList) {
-            if (guidStr.equalsIgnoreCase(resultList.getGuid().toString())) {
+            GUID guid = resultList.getGuid();
+            if ((guid != null) && guidStr.equalsIgnoreCase(guid.toString())) {
                 return resultList;
             }
         }
