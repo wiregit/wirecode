@@ -29,14 +29,6 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 public class UpdateCollectionImpl implements UpdateCollection {
     private static final Log LOG = LogFactory.getLog(UpdateCollectionImpl.class);
     
-    public static final String KEY_VERSION = "keyversion";
-    
-    public static final String NEW_VERSION = "newversion";
-    
-    public static final String SIGNATURE = "signature";
-    
-    public static final String CERTIFICATE = "certificate";
-    
     /**
      * The id of this UpdateCollection.
      */
@@ -73,7 +65,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
     /**
      * Ensure that this is only created by using the factory constructor.
      */
-    UpdateCollectionImpl(String xml, HttpClientInstanceUtils httpClientInstanceUtils) throws InvalidDataException {
+    public UpdateCollectionImpl(String xml, HttpClientInstanceUtils httpClientInstanceUtils) throws InvalidDataException {
         this.httpClientInstanceUtils = httpClientInstanceUtils;
         if(LOG.isTraceEnabled())
             LOG.trace("Parsing Update XML: " + xml);

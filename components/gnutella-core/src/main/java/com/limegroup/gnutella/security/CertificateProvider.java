@@ -11,4 +11,16 @@ public interface CertificateProvider extends MutableProvider<Certificate> {
 
     Certificate getFromHttp(IpPort messageSource);
     
+    /**
+     * Potentially blocks.
+     * @returns NullCertificate if no valid certificate exists
+     */
+    @Override
+    Certificate get();
+    
+    /**
+     * Potentially blocks.
+     */
+    @Override
+    void set(Certificate newValue);
 }

@@ -13,6 +13,14 @@ import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage
  */
 public interface UpdateCollection {
     
+public static final String KEY_VERSION = "keyversion";
+    
+    public static final String NEW_VERSION = "newversion";
+    
+    public static final String SIGNATURE = "signature";
+    
+    public static final String CERTIFICATE = "certificate";
+    
     /**
      * Gets the id of this UpdateCollection.
      */
