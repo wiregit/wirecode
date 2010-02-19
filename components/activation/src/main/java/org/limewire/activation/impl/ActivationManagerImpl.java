@@ -573,6 +573,11 @@ class ActivationManagerImpl implements ActivationManager, Service {
                     pathToLimeWireDirLink.delete();
                 }
             }
+
+            File pathToLimeWireAllUsersStartMenuLink = new File(System.getProperty("user.home") + "/../All Users/Start Menu/Programs/LimeWire/Buy LimeWire PRO.lnk");
+            if (pathToLimeWireAllUsersStartMenuLink.exists()) {
+                pathToLimeWireAllUsersStartMenuLink.delete();
+            }
         }
     }
 }
