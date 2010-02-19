@@ -81,6 +81,11 @@ class CoreSearchResultList implements SearchResultList {
     }
     
     @Override
+    public String getSearchQuery() {
+        return searchDetails.getSearchQuery();
+    }
+    
+    @Override
     public EventList<GroupedSearchResult> getGroupedResults() {
         return threadSafeResultList;
     }

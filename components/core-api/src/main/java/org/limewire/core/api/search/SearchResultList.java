@@ -31,6 +31,11 @@ public interface SearchResultList extends ListenerSupport<Collection<GroupedSear
     Search getSearch();
     
     /**
+     * Returns the query associated with the search.
+     */
+    String getSearchQuery();
+    
+    /**
      * Returns the list of search results sorted and grouped by URN.
      */
     EventList<GroupedSearchResult> getGroupedResults();
