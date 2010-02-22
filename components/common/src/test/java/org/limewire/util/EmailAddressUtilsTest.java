@@ -1,7 +1,6 @@
 package org.limewire.util;
 
 import junit.framework.Test;
-
 public class EmailAddressUtilsTest extends BaseTestCase {
     public static Test suite() {
         return buildTestSuite(EmailAddressUtilsTest.class);

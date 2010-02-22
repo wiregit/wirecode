@@ -20,13 +20,13 @@ import com.google.inject.Inject;
 public class FriendAddressSerializer implements AddressSerializer {
 
     static final String JID = "JID";
-    
+
     @Override
     @Inject
     public void register(AddressFactory factory) {
         factory.registerSerializer(this);
     }
-    
+
     @Override
     public boolean canSerialize(Address address) {
         return address instanceof FriendAddress;
@@ -42,7 +42,7 @@ public class FriendAddressSerializer implements AddressSerializer {
             return new FriendAddress(address);
         throw new IOException();
     }
-    
+
     @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {
         try {
