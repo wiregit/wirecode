@@ -45,13 +45,13 @@ import org.limewire.ui.swing.components.ColoredBusyLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
-import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -221,7 +221,7 @@ public class ActivationPanel {
         dialog = new LimeJDialog(GuiUtils.getMainFrame());
         dialog.setModal(true);
         dialog.setResizable(false);
-        dialog.setTitle(AppFrame.getInstance().getContext().getResourceMap().getString("Application.title"));
+        dialog.setTitle(I18n.tr("License"));
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.add(activationPanel);
         
@@ -534,6 +534,8 @@ public class ActivationPanel {
                                   + "</font></html>");
                 iconLabel.setVisible(false);
                 textLabel.setVisible(true);
+                
+                ResizeUtils.forceSize(this, new Dimension(tableWidth, 17));
                 return;
             case EXPIRED:
                 textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" +
@@ -541,6 +543,7 @@ public class ActivationPanel {
                         + "</font></html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
+                ResizeUtils.forceSize(this, new Dimension(tableWidth, 17));
                 return;
             case UNSUPPORTED:
                 textLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" +
@@ -548,10 +551,12 @@ public class ActivationPanel {
                             + "</font></html>");
                 iconLabel.setVisible(true);
                 textLabel.setVisible(true);
+                ResizeUtils.forceSize(this, new Dimension(tableWidth, 34));
                 return;
             case NO_ERROR:
                 iconLabel.setVisible(false);
                 textLabel.setVisible(false);
+                ResizeUtils.forceSize(this, new Dimension(tableWidth, 0));
                 return;
             }
             throw new NotImplementedException("State does not exist");
