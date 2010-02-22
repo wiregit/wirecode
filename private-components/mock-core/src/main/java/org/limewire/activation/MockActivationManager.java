@@ -1,5 +1,6 @@
 package org.limewire.activation;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.activation.api.ActivationError;
@@ -21,7 +22,7 @@ public class MockActivationManager implements ActivationManager {
 
     @Override
     public List<ActivationItem> getActivationItems() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -40,12 +41,12 @@ public class MockActivationManager implements ActivationManager {
 
     @Override
     public ActivationError getActivationError() {
-        return null;
+        return ActivationError.NO_ERROR;
     }
 
     @Override
     public ActivationState getActivationState() {
-        return null;
+        return ActivationState.NOT_AUTHORIZED;
     }
 
     @Override
