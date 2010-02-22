@@ -178,7 +178,7 @@ public class ActivationPanel {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         
-        activationPanel.add(cardPanel, "span, gaptop 10, height 23!, growx, wrap");
+        activationPanel.add(cardPanel, "span, gaptop 10, growx, wrap");
     }
         
     /**
