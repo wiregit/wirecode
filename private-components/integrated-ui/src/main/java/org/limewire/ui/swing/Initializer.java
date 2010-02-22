@@ -347,7 +347,13 @@ final class Initializer {
         // set error handler for uncaught exceptions originating from non-LW
         UncaughtExceptionHandlerImpl uncaughtHandler = new UncaughtExceptionHandlerImpl();
         Thread.setDefaultUncaughtExceptionHandler(uncaughtHandler);
-        Native.setCallbackExceptionHandler(uncaughtHandler);
+        try {
+            Native.setCallbackExceptionHandler(uncaughtHandler);    
+        } catch(UnsatisfiedLinkError e) {
+            //catching so as not to prevent limewire startup, LWC-5005
+            ErrorService.error(e,"Error setting default uncaught exception handler for jna.");
+        }
+        
         stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages
