@@ -33,7 +33,6 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -225,9 +224,7 @@ public class HomePanel extends JXPanel {
             }
         }
         
-        if(MozillaInitialization.isInitialized()) {
-            // Reset the page to blank before continuing -- blocking is OK because this is fast.
-            MozillaAutomation.blockingLoad(browser, "about:blank");
+        if(MozillaInitialization.isInitialized()) {            
             browser.load(url);
         } else {       
             url += "&html32=true";
@@ -243,5 +240,14 @@ public class HomePanel extends JXPanel {
                 }
             });
         }
-    }    
+    } 
+    
+    /**
+     * Loads "about:blank" in the browser if Mozilla is initialized.
+     */
+    public void loadBlank(){
+        if (MozillaInitialization.isInitialized()) {
+            browser.load("about:blank");
+        }
+    }
 }
