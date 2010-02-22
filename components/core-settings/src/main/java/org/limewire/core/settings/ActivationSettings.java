@@ -29,10 +29,4 @@ public class ActivationSettings extends LimeProps {
      */
     public static final StringSetting MODULE_CODE = FACTORY.createStringSetting(
             "MODULE_CODE", "");
-    
-    /**
-     * Encryption key for saving the json message.
-     */
-    public static final StringSetting PASS_KEY = FACTORY.createStringSetting(
-            "PASS_KEY", "3A931AF193AC44F66540CFFC57C3978D");
 }
