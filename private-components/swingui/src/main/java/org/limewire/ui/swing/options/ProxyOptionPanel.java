@@ -134,7 +134,7 @@ public class ProxyOptionPanel extends OptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         int connectionMethod = ConnectionSettings.C_NO_PROXY;
 
         if (socksV4RadionButton.isSelected())
@@ -164,7 +164,7 @@ public class ProxyOptionPanel extends OptionPanel {
                 } 
             });
         }
-        return false;
+        return new ApplyOptionResult(false, true);
     }
 
     @Override

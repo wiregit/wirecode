@@ -123,8 +123,15 @@ public class TransferOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        return getDownloadsPanel().applyOptions() || getTrayPanel().applyOptions() || getTransfersPanel().applyOptions() || bitTorrentOptionPanel.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = getDownloadsPanel().applyOptions();
+        result.applyResult(getTrayPanel().applyOptions());
+        result.applyResult(getTransfersPanel().applyOptions());
+        result.applyResult(bitTorrentOptionPanel.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -236,7 +243,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
 
             if (singleLocationButton.isSelected() && saveFolderPanel.isConfigCustom()) {
                 saveFolderPanel.revertToDefault();
@@ -276,7 +283,9 @@ public class TransferOptionPanel extends OptionPanel {
                 }
             }
 
-            return saveFolderPanel.applyOptions() || storeOptionPanel.applyOptions();
+            boolean restartRequired = saveFolderPanel.applyOptions().isRestartRequired() || 
+                                      storeOptionPanel.applyOptions().isRestartRequired();
+            return new ApplyOptionResult(restartRequired, true);
         }
 
         /**
@@ -403,7 +412,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.setValue(closeTrayCheckBox.isSelected());
             SwingUiSettings.SHOW_TOTAL_BANDWIDTH.setValue(showBandwidthCheckBox.isSelected());
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
@@ -411,7 +420,7 @@ public class TransferOptionPanel extends OptionPanel {
 
             // DownloadSettings.DELETE_CANCELED_DOWNLOADS.setValue(
             // deleteFileOnCancelCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -446,7 +455,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             return connectionsOptionPanel.applyOptions();
         }
 

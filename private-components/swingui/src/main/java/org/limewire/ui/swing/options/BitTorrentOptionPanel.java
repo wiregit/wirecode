@@ -134,7 +134,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         BittorrentSettings.UPLOAD_TORRENTS_FOREVER.setValue(uploadTorrentsForeverButton.isSelected());
         if (!uploadTorrentsForeverButton.isSelected()) {
             BittorrentSettings.LIBTORRENT_SEED_RATIO_LIMIT.setValue(seedRatioModel.getNumber().floatValue());
@@ -153,7 +153,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 }  
             });
         }
-        return false;
+        return new ApplyOptionResult(false, true);
     }
 
     @Override

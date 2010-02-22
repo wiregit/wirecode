@@ -66,9 +66,15 @@ public class LibraryOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        return playerPanel.applyOptions() || getSharingPanel().applyOptions() 
-            || iTunesPanel != null ? iTunesPanel.applyOptions() : false;
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = playerPanel.applyOptions();
+        result.applyResult(getSharingPanel().applyOptions());
+        if (iTunesPanel != null)
+            result.applyResult(iTunesPanel.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -104,7 +110,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             return iTunesOptionPanel.applyOptions();
         }
 
@@ -138,9 +144,9 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -229,7 +235,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             return unsafeTypeOptionPanel.applyOptions();

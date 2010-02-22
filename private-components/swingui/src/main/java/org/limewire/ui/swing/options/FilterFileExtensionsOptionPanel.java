@@ -138,7 +138,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_EXTENSIONS.set(values);
         BackgroundExecutorService.execute(new Runnable() {
@@ -147,7 +147,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
                 spamManager.adjustSpamFilters();
             }
         });
-        return false;
+        return new ApplyOptionResult(false,true);
     }
 
     @Override

@@ -75,11 +75,13 @@ public class FilteringOptionPanel extends OptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
-        boolean restart = getBlockHostsPanel().applyOptions();
-        restart |= getAllowHostsPanel().applyOptions();
-
-        return restart;
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = getBlockHostsPanel().applyOptions();
+        result.applyResult(getAllowHostsPanel().applyOptions());
+       
+        return result;
     }
     
     @Override
@@ -123,9 +125,9 @@ public class FilteringOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             List<String> list = filterTable.getFilterModel().getModel();
-            
+
             FilterSettings.USE_NETWORK_FILTER.setValue(backListCheckBox.isSelected());
             FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(list.toArray(new String[list.size()]));
             BackgroundExecutorService.execute(new Runnable() {
@@ -134,7 +136,7 @@ public class FilteringOptionPanel extends OptionPanel {
                     spamManager.reloadIPFilter();
                 }
             });
-            return false;
+            return new ApplyOptionResult(false, true);
         }
     
         @Override
@@ -180,9 +182,9 @@ public class FilteringOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             List<String> list = filterTable.getFilterModel().getModel();
-            
+
             FilterSettings.WHITE_LISTED_IP_ADDRESSES.set(list.toArray(new String[list.size()]));
             BackgroundExecutorService.execute(new Runnable() {
                 @Override
@@ -190,7 +192,7 @@ public class FilteringOptionPanel extends OptionPanel {
                     spamManager.reloadIPFilter();
                 }
             });
-            return false;
+            return new ApplyOptionResult(false, true);
         }
     
         @Override

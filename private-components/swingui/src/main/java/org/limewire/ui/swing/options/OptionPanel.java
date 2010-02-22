@@ -10,11 +10,51 @@ import javax.swing.border.TitledBorder;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Abstract Option panel for intializing and saving the options within the
+ * Abstract Option panel for initializing and saving the options within the
  * panel.
  */
 public abstract class OptionPanel extends JPanel {
 
+    public static class ApplyOptionResult {
+        private boolean restartRequired;
+
+        private boolean successful;
+
+        ApplyOptionResult() {
+        }
+
+        ApplyOptionResult(boolean restartReq, boolean isSuccess) {
+            setRestartRequired(restartReq);
+            setSuccessful(isSuccess);
+        }
+
+        ApplyOptionResult(ApplyOptionResult res) {
+            setRestartRequired(res.isRestartRequired());
+            setSuccessful(res.isSuccessful());
+        }
+
+        public boolean isRestartRequired() {
+            return restartRequired;
+        }
+
+        public void setRestartRequired(boolean restartRequired) {
+            this.restartRequired = restartRequired;
+        }
+
+        public boolean isSuccessful() {
+            return successful;
+        }
+
+        public void setSuccessful(boolean successful) {
+            this.successful = successful;
+        }
+        
+        public void applyResult(ApplyOptionResult res){
+            setRestartRequired(isRestartRequired() || res.isRestartRequired());
+            setSuccessful(isSuccessful() && res.isSuccessful());
+        }
+    }
+    
     public OptionPanel() {
     }
 
@@ -37,7 +77,7 @@ public abstract class OptionPanel extends JPanel {
      */
     public abstract void initOptions();
 
-    abstract boolean applyOptions();
+    abstract ApplyOptionResult applyOptions();
 
     abstract boolean hasChanged();
 }

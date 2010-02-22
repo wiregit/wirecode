@@ -89,13 +89,14 @@ public class SearchOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
+        ApplyOptionResult result = null;
         
-        boolean restart = getSearchBarPanel().applyOptions();
-        restart |= getFilteringPanel().applyOptions();
+        result = getSearchBarPanel().applyOptions();
+        result.applyResult(getFilteringPanel().applyOptions());
         
-        return restart;
+        return result;
     }
 
     @Override
@@ -162,7 +163,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             
             SearchCategory category = (SearchCategory) defaultSearchSpinner.getSelectedItem();
             if (category != null) {
@@ -172,7 +173,7 @@ public class SearchOptionPanel extends OptionPanel {
             
             SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
             SwingUiSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -288,7 +289,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
             
             if (FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()) {
@@ -300,8 +301,10 @@ public class SearchOptionPanel extends OptionPanel {
                     }
                 });
             }
-            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions() ||
-                    unsafeOptionPanel.applyOptions();
+            boolean restartRequired = filterKeywordPanel.applyOptions().isRestartRequired()
+                                      || filterFileExtensionPanel.applyOptions().isRestartRequired() ||
+                                      unsafeOptionPanel.applyOptions().isRestartRequired();
+            return new ApplyOptionResult(restartRequired, true);
         }
 
         @Override

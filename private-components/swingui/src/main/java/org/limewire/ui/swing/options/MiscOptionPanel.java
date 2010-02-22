@@ -13,6 +13,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -22,6 +23,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.UrlAction;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.components.NonNullJComboBox;
@@ -105,21 +107,21 @@ public class MiscOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.setValue(shareUsageDataCheckBox.isSelected());
         
         Locale selectedLocale = (Locale) languageDropDown.getSelectedItem();
         
-        boolean restart = getNotificationsPanel().applyOptions();
-        restart |= getFriendChatPanel().applyOptions();
-        
+        ApplyOptionResult result = getNotificationsPanel().applyOptions();
+        result.applyResult(getFriendChatPanel().applyOptions());
+                
         // if the language changed, always notify about a required restart
         if(selectedLocale != null && !currentLanguage.equals(selectedLocale)) {
             currentLanguage = selectedLocale;
             LanguageUtils.setLocale(selectedLocale);
-            restart = true;
+            result.setRestartRequired(true);
         }
-        return restart;
+        return result;
     }
 
     @Override
@@ -171,9 +173,9 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -287,21 +289,30 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if(hasChanged()) {
                 if(autoLoginCheckBox.isSelected()) {
                     // Set this as the auto-login account
                     String user = usernameField.getText().trim();
                     String password = new String(passwordField.getPassword());
-                    if(user.equals("") || password.equals("")) {
-                        return false;
-                    }            
+                    if (user.length() == 0) {
+                        FocusJOptionPane.showMessageDialog(this, tr("Username cannot be blank."), tr("Username"), JOptionPane.ERROR_MESSAGE);
+                        usernameField.requestFocusInWindow();
+                        return new ApplyOptionResult(false, false);
+                    }
+                    
+                    if (password.length() == 0) {
+                        FocusJOptionPane.showMessageDialog(this, tr("Password cannot be blank."), tr("Password"), JOptionPane.ERROR_MESSAGE);
+                        passwordField.requestFocusInWindow();
+                        return new ApplyOptionResult(false, false);
+                    }
+                               
                     String label = (String)serviceComboBox.getSelectedItem();
                     FriendAccountConfiguration config = accountManager.get().getConfig(label);
                     if(label.equals("Jabber")) {
                         String service = serviceField.getText().trim();
                         if(service.equals(""))
-                            return false;
+                            return new ApplyOptionResult(false, true);
                         config.setServiceName(service);
                     }
                     config.setUsername(user);
@@ -311,7 +322,7 @@ public class MiscOptionPanel extends OptionPanel {
                     accountManager.get().setAutoLoginConfig(null);
                 }
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -380,8 +391,6 @@ public class MiscOptionPanel extends OptionPanel {
             return this;
         }
     }
-    
-    
     
     private static void resetWarnings() {
         int skipWarningSettingValue = getLicenseSettingValueFromCheckboxValue(true);

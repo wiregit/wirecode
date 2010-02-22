@@ -145,14 +145,14 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         applyOption(Category.AUDIO, audioTextField);
         applyOption(Category.VIDEO, videoTextField);
         applyOption(Category.IMAGE, imageTextField);
         applyOption(Category.DOCUMENT, documentTextField);
         applyOption(Category.PROGRAM, programTextField);
         applyOption(Category.OTHER, otherTextField);
-        return false;
+        return new ApplyOptionResult(false, true);
     }
     
     private void revertToDefault(LabelTextField textField) {

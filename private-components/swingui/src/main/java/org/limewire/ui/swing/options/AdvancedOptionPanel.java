@@ -116,12 +116,15 @@ public class AdvancedOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        boolean restartRequired = false;
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
         for (OptionPanel panel : panels.values()) {
-            restartRequired |= panel.applyOptions();
+            if (result == null)
+                result = panel.applyOptions();
+            else
+                result.applyResult(panel.applyOptions());
         }
-        return restartRequired;
+        return result;
     }
 
     @Override

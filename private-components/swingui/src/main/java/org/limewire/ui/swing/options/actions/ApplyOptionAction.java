@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.options.OptionPanel.ApplyOptionResult;
 
 public class ApplyOptionAction implements ActionListener {
 
@@ -16,9 +17,10 @@ public class ApplyOptionAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        optionDialog.applyOptions();
-        SettingsGroupManager.instance().save();
-        
-        optionDialog.dispose();
+        ApplyOptionResult result = optionDialog.applyOptions();
+        if (result.isSuccessful()) {
+            SettingsGroupManager.instance().save();
+            optionDialog.dispose();
+        }
     }
 }

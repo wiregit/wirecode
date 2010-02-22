@@ -106,7 +106,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(meChooseRadioButton.isSelected());
         for(NetworkItem item : eventList) {
             if(item.isSelected()) {
@@ -123,7 +123,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
                 } 
             });
         }
-        return false;
+        return new ApplyOptionResult(false, true);
     }
 
     @Override

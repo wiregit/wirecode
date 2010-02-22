@@ -58,9 +58,11 @@ public class TransferLimitsOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        boolean restart = downloadsPanel.applyOptions();
-        restart |= uploadPanel.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = downloadsPanel.applyOptions();
+        result.applyResult(uploadPanel.applyOptions());
 
         if (torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
             BackgroundExecutorService.execute(new Runnable() {
@@ -70,7 +72,7 @@ public class TransferLimitsOptionPanel extends OptionPanel {
                 } 
             });
         }
-        return restart;
+        return result;
     }
 
     @Override
@@ -126,13 +128,13 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             DownloadSettings.MAX_SIM_DOWNLOAD.setValue((Integer) maxDownloadSpinner.getModel()
                     .getValue());
             DownloadSettings.MAX_DOWNLOAD_SPEED
                     .setValue((Integer) maxDownloadSpeedSpinner.getValue() * 1024);
             DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.setValue(limitBandWidthCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -197,14 +199,14 @@ public class TransferLimitsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             UploadSettings.HARD_MAX_UPLOADS.setValue((Integer) maxUploadSpinner.getModel()
                     .getValue());
 
             UploadSettings.MAX_UPLOAD_SPEED.setValue((Integer) maxUploadSpeedSpinner.getValue() * 1024);
             UploadSettings.LIMIT_MAX_UPLOAD_SPEED.setValue(limitBandwidthCheckBox.isSelected());
 
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override

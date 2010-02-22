@@ -26,6 +26,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.options.OptionPanel.ApplyOptionResult;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.HelpAction;
@@ -119,21 +120,25 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         pack();
     }
     
-    public void applyOptions() {
-        boolean restartRequired = false;
+    public ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
         for(OptionPanel panel : panels.values()) {
-            restartRequired |= panel.applyOptions();
+            if (result == null)
+                result = panel.applyOptions();
+            else
+                result.applyResult(panel.applyOptions());
         }
         
         //TODO: more checks here. Look at OptionsPaneManager.applyOptions
 
         // if at least one option requires a restart before taking effect, notify user
-        if (restartRequired) {
+        if (result != null && result.isRestartRequired()) {
             FocusJOptionPane.showMessageDialog(this,
                             I18n.tr("One or more options will take effect the next time LimeWire is restarted."),
                             I18n.tr("Message"),
                             JOptionPane.INFORMATION_MESSAGE);
         }
+        return result;
 
     }
     

@@ -71,8 +71,13 @@ public class ListeningPortsOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        return gnutellaListeningPorts.applyOptions() || torrentListeningPorts.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = gnutellaListeningPorts.applyOptions();
+        result.applyResult(torrentListeningPorts.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -139,7 +144,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             int newGnutellaPort = gnutellaPortField.getValue(gnutellaPort);
             if (newGnutellaPort != gnutellaPort) {
                 try {
@@ -199,7 +204,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                 }
             });
 
-            return restart;
+            return new ApplyOptionResult(restart, true);
         }
 
         @Override
@@ -285,7 +290,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             int torrentStartPort = torrentStartPortField
                     .getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
             int torrentEndPort = torrentEndPortField
@@ -317,7 +322,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                 });
             }
 
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override

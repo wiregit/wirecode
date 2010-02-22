@@ -58,11 +58,14 @@ public class SystemOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        boolean restart = fileAssociationPanel.applyOptions();
-        restart |= startupShutdownPanel.applyOptions();
-        restart |= bugsAndUpdatesPanel.applyOptions();
-        return restart;
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = fileAssociationPanel.applyOptions();
+        result.applyResult(startupShutdownPanel.applyOptions());
+        result.applyResult(bugsAndUpdatesPanel.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -115,7 +118,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if (hasChanged(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS)) {
                 applyOption(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS);
                 LimeAssociationOption magnetAssociationOption = LimeAssociations
@@ -137,7 +140,7 @@ public class SystemOptionPanel extends OptionPanel {
             if (hasChanged(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
                 applyOption(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES);
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         private void applyOption(JCheckBox checkBox, BooleanSetting booleanSetting) {
@@ -230,7 +233,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if (OSUtils.isMacOSX()) {
                 MacOSXUtils.setLoginStatus(runAtStartupCheckBox.isSelected());
             } else if (WindowsUtils.isLoginStatusAvailable()) {
@@ -248,7 +251,7 @@ public class SystemOptionPanel extends OptionPanel {
             } else {
                 trayNotifier.hideTrayIcon();
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -290,14 +293,14 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        public boolean applyOptions() {
-            boolean restart = bugsPanel.applyOptions();
+        public ApplyOptionResult applyOptions() {
+            boolean restart = bugsPanel.applyOptions().isRestartRequired();
             if (betaCheckBox.isSelected()) {
                 UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
             } else {
                 UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
             }
-            return restart;
+            return new ApplyOptionResult(restart, true);
         }
 
         @Override
@@ -343,7 +346,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if (showBugsBeforeSendingButton.isSelected()) {
                 BugSettings.SHOW_BUGS.setValue(true);
                 BugSettings.REPORT_BUGS.setValue(true);
@@ -354,7 +357,7 @@ public class SystemOptionPanel extends OptionPanel {
                 BugSettings.SHOW_BUGS.setValue(false);
                 BugSettings.REPORT_BUGS.setValue(false);
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
