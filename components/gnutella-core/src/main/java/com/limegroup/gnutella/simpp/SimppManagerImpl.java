@@ -41,6 +41,7 @@ import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.DefaultDataProvider;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -74,7 +75,7 @@ public class SimppManagerImpl implements SimppManager {
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HttpParams> defaultParams;
-    private final SimppDataProvider simppDataProvider;
+    private final DefaultDataProvider simppDataProvider;
     private final HttpClientInstanceUtils httpClientUtils;
     
     /**
@@ -108,7 +109,7 @@ public class SimppManagerImpl implements SimppManager {
             Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
+            @Simpp DefaultDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
             @Simpp CertifiedMessageVerifier simppMessageVerifier,
             SimppDataVerifier simppDataVerifier,
             @Simpp CertificateProvider certificateProvider) {
@@ -346,7 +347,7 @@ public class SimppManagerImpl implements SimppManager {
     }
     
     public byte[] getOldUpdateResponse() {
-        return simppDataProvider.getOldUpdateResponse();
+        return simppDataProvider.getOldDefaultData();
     }
 
     
@@ -472,7 +473,7 @@ public class SimppManagerImpl implements SimppManager {
         } else if (version > getVersion()) {
             return true;
         }
-        if (getKeyVersion() > -1 && keyVersion > getKeyVersion()) {
+        if (getKeyVersion() > MIN_VERSION && keyVersion > getKeyVersion()) {
             return true;
         }
         return false;

@@ -37,7 +37,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ClockStub;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
@@ -72,7 +71,6 @@ public class UpdateHandlerTest extends LimeTestCase {
     private DownloadManager downloadManager;
     private SettingsProvider settingsProvider;
     private UpdateMessageVerifier updateMessageVerifier;
-    private NetworkUpdateSanityChecker networkUpdateSanityChecker;
     private byte[] guid;
 
     private File saveFile;
@@ -91,7 +89,6 @@ public class UpdateHandlerTest extends LimeTestCase {
         downloadManager = mockery.mock(DownloadManager.class);
         backgroundExecutor = new ImmediateExecutor();
         updateMessageVerifier = mockery.mock(UpdateMessageVerifier.class);
-        networkUpdateSanityChecker = mockery.mock(NetworkUpdateSanityChecker.class);
         certifiedMessageVerifier = mockery.mock(CertifiedMessageVerifier.class);
         certificateProvider = mockery.mock(CertificateProvider.class);
         guid = new byte[16];
@@ -121,7 +118,6 @@ public class UpdateHandlerTest extends LimeTestCase {
                 bind(DownloadManager.class).toInstance(downloadManager);
                 bind(SettingsProvider.class).toInstance(settingsProvider);
                 bind(UpdateMessageVerifier.class).toInstance(updateMessageVerifier);
-                bind(NetworkUpdateSanityChecker.class).toInstance(networkUpdateSanityChecker);
                 bind(CertifiedMessageVerifier.class).annotatedWith(Update.class).toInstance(certifiedMessageVerifier);
                 bind(CertificateProvider.class).annotatedWith(Update.class).toInstance(certificateProvider);
             }
@@ -147,10 +143,10 @@ public class UpdateHandlerTest extends LimeTestCase {
         });
         UpdateHandlerImpl updateHandler = (UpdateHandlerImpl) injector
                 .getInstance(UpdateHandler.class);
-        assertEquals("http://update0.limewire.com/v2/update.def", updateHandler.getTimeoutUrl());
+        assertEquals("http://update0.limewire.com/v3/update.def", updateHandler.getTimeoutUrl());
         List<String> maxUrls = updateHandler.getMaxUrls();
         for (int i = 0; i < 10; i++)
-            assertEquals("http://update" + (i + 1) + ".limewire.com/v2/update.def", maxUrls.get(i));
+            assertEquals("http://update" + (i + 1) + ".limewire.com/v3/update.def", maxUrls.get(i));
         assertEquals(10, maxUrls.size());
     }
     

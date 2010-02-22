@@ -25,6 +25,9 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     /** The new lime update capability bytes. */
     static final byte[] UPDATE_BYTES = { 'U', 'P', 'L', 'M' };
     
+    static final byte[] UPDATE_NEW_VERSION_BYTES = { 'U', 'P', 'D', 'V' };
+    
+    static final byte[] UPDATE_KEY_VERSION_BYTES = { 'U', 'P', 'D', 'K' };
     
     /** Bytes for supporting incoming TLS. */
     static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
@@ -105,6 +108,10 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     public int supportsNewSimppVersion();
 
     public int supportsSimppKeyVersion();
+    
+    public int supportsNewUpdateVersion();
+    
+    public int supportsUpdateKeyVersion();
 }
 
 

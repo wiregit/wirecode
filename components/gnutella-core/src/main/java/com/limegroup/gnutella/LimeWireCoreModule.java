@@ -333,7 +333,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Bootstrapper.Listener.class).to(HostCatcher.class);
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
-        bind(NetworkUpdateSanityChecker.class).to(NetworkUpdateSanityCheckerImpl.class);
         bind(CategoryManager.class).to(CategoryManagerImpl.class);
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        

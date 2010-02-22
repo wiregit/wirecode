@@ -12,7 +12,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -53,7 +52,6 @@ public final class LeafConnection extends NewConnection {
             QueryRequestFactory queryRequestFactory, HeadersFactory headersFactory,
             HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
-            NetworkUpdateSanityChecker networkUpdateSanityChecker,
             Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
@@ -64,7 +62,7 @@ public final class LeafConnection extends NewConnection {
             SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
         super(connections, queriesMustBeInRoutingTable, qrt, connectionManager, networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher, networkUpdateSanityChecker, searchResultHandler,
+                messageDispatcher, searchResultHandler,
                 capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier,

@@ -16,8 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -42,7 +40,8 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.util.Base32;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -79,8 +78,10 @@ import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.security.Certificate;
 import com.limegroup.gnutella.security.CertificateProvider;
+import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.DefaultDataProvider;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -171,17 +172,26 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private final EventListenerList<UpdateEvent> listeners;
     private final ActivationManager activationManager;
     
-    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
-            "http://update2.limewire.com/v2/update.def",
-            "http://update3.limewire.com/v2/update.def",
-            "http://update4.limewire.com/v2/update.def",
-            "http://update5.limewire.com/v2/update.def",
-            "http://update6.limewire.com/v2/update.def",
-            "http://update7.limewire.com/v2/update.def",
-            "http://update8.limewire.com/v2/update.def",
-            "http://update9.limewire.com/v2/update.def",
-            "http://update10.limewire.com/v2/update.def");
+    /**
+     * If the key used by {@link UpdateMessageVerifier} is leaked, but not the master
+     * key used by {@link CertificateVerifier}, the urls that would have to serve
+     * the final update message are the same as below, except for v3 has to be
+     * replaced with v2.
+     * <p>
+     * If the master key used by {@link CertificateVerifier} is leaked, the urls
+     * below ill have to serve. 
+     */
+    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v3/update.def";
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v3/update.def",
+            "http://update2.limewire.com/v3/update.def",
+            "http://update3.limewire.com/v3/update.def",
+            "http://update4.limewire.com/v3/update.def",
+            "http://update5.limewire.com/v3/update.def",
+            "http://update6.limewire.com/v3/update.def",
+            "http://update7.limewire.com/v3/update.def",
+            "http://update8.limewire.com/v3/update.def",
+            "http://update9.limewire.com/v3/update.def",
+            "http://update10.limewire.com/v3/update.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
@@ -193,6 +203,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private final CertificateProvider certificateProvider;
 
     private final CertifiedMessageVerifier certifiedMessageVerifier;
+
+    private final DefaultDataProvider updateDataProvider;
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -210,7 +222,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             Library library, ActivationManager activationManager,
             HttpClientInstanceUtils httpClientInstanceUtils,
             @Update CertificateProvider certificateProvider,
-            @Update CertifiedMessageVerifier certifiedMessageVerifier) {
+            @Update CertifiedMessageVerifier certifiedMessageVerifier,
+            @Update DefaultDataProvider updateDataProvider) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
@@ -228,6 +241,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         this.httpClientInstanceUtils = httpClientInstanceUtils;
         this.certificateProvider = certificateProvider;
         this.certifiedMessageVerifier = certifiedMessageVerifier;
+        this.updateDataProvider = updateDataProvider;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
@@ -261,6 +275,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         backgroundExecutor.execute(new Runnable() {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(getStoredFile()), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(updateDataProvider.getDefaultData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
         
@@ -1003,11 +1018,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             requestActive.set(false);
         }
     }
-
-    public byte[] getOldUpdateResponse() {
-        return Base32.decode("I5AVOQKFIZCE4Q2RKFATKVBWKBKVEWSOJRFU6WS2JVIUCR2QGRJESNBVIE3UESKDINIUCSSWIZKE2WCHGZKFMMS2GJAVSTKCGQ2TINSLIRFEQWCRG5KEITL4PQ6HK4DEMF2GKIDJMQ6SEMRRGQ3TIOBTGY2DOIRAORUW2ZLTORQW24B5EIYSEPQKEAQCAPDNONTSAZTSN5WT2IRXGYXDONZOG42SEIDGN5ZD2IRYGYXDQOBOHA2SEIDUN46SEOBWFY4DSLRYGURCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAON2HS3DFHURDAIRAN5ZT2ISXNFXGI33XOMRCA5LSNY6SE5LSNY5GE2LUOBZGS3TUHJIEYUCSKRIEET2BKJBE6U2BJNIECTKHKZJTEU2MGU3VGM2HIRGFCLRXIZIEGR2NG43VGSCPKFGVAUSQJU2UGNKMJ5NEKT2EG43EGRK2IQ2E2USBIVGESIRAOVRW63LNMFXGIPJHEISCKIRAF5JSOIDVNZQW2ZJ5EJGGS3LFK5UXEZKXNFXDILRRGYXDMLTFPBSSEIDTNF5GKPJCGQ2TANRSGU3CEPQKEAQCAIBAEA6GYYLOM4QGSZB5E5SW4JZ6BIQCAIBAEAQCAIB4EFNUGRCBKRAVWNBOGE3C4NRAKVJE4XK5HYFCAIBAEAQCAPBPNRQW4ZZ6BIQCAIB4F5WXGZZ6BIQCAIBAEAQDY3LTM4QGM4TPNU6SENBOHAXDCIRAMZXXEPJCGQXDCNROGYRCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAMZZGKZJ5EJ2HE5LFEIQG64Z5EJLWS3TEN53XGIRAON2HS3DFHURDIIRAOVZG4PJCOVZG4OTCNF2HA4TJNZ2DUUCMKBJFIUCCJ5AVEQSPKNAUWUCBJVDVMUZSKNGDKN2TGNDUITCRFY3UMUCDI5GTON2TJBHVCTKQKJIE2NKDGVGE6WSFJ5CDONSDIVNEINCNKJAUKTCJEIQHKY3PNVWWC3TEHUTSEJBFEIQC6UZHEB2W4YLNMU6SETDJNVSVO2LSMVLWS3RUFYYTMLRWFZSXQZJCEBZWS6TFHURDINJQGYZDKNRCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKEAQCAIBAEAFCAIBAEAQCAPDNONTSAZTSN5WT2IRUFY4C4MJCEBTG64R5EI2C4MJWFY3CEIDVOJWD2ITIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS65LQMRQXIZJCEBZXI6LMMU6SENBCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKHQXXK4DEMF2GKPQK");
-    }
-    
+        
     public String getServiceName() {
         return I18nMarker.marktr("Update Checks");
     }
@@ -1054,5 +1065,48 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     
     public int getKeyVersion() {
         return certificateProvider.get().getKeyVersion();
+    }
+
+    @Override
+    public byte[] getOldUpdateResponse() {
+        return updateDataProvider.getOldDefaultData();
+    }
+
+    @Override
+    public int getNewVersion() {
+        return newVersion;
+    }
+
+    /**
+     * Old clients won't send us neither newVersion nor keyVersion, so their
+     * values will be -1. If we get a capabilities update from a new client, we
+     * will only look at newVersion and keyVersion and ignore the old version
+     * field completely. This is the first if branch. In that case we request an
+     * update message, if its newVersion number is greater and the key version is the
+     * same as the current keyVersion.
+     * 
+     * If an old client is sending us a capabilities update, we are in the
+     * second if branch, where we check that the advertised version is higher
+     * than the currently known one.
+     * 
+     * If none of the two cases above was the case, it could be that a newer key
+     * version is advertised and we should download the update regardless of its
+     * version or its newVersion. That's the last if branch.
+     */
+    @Override
+    public boolean shouldRequestUpdateMessage(int version, int newVersion, int keyVersion) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
+        if (newVersion != -1) {
+            if (newVersion > getNewVersion() && keyVersion == getKeyVersion()) {
+                return true;
+            }
+        } else if (version > getLatestId()) {
+            return true;
+        }
+        if (getKeyVersion() > 3 && keyVersion > getKeyVersion()) {
+            return true;
+        }
+        return false;
     }
 }

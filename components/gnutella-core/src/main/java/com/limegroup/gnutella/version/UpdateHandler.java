@@ -29,6 +29,16 @@ public interface UpdateHandler {
      * Retrieves the latest id available.
      */
     public int getLatestId();
+    
+    /**
+     * @return the new version of the locally available update message
+     */
+    public int getNewVersion();
+    
+    /**
+     * @return the key version of the locally available update message
+     */
+    public int getKeyVersion();
 
     /**
      * Gets the bytes to send on the wire.
@@ -58,4 +68,15 @@ public interface UpdateHandler {
     public void addListener(EventListener<UpdateEvent> listener);
 
     public boolean removeListener(EventListener<UpdateEvent> listener);
+    
+    /**
+     * @param version advertised simpp version by other client, -1 if client 
+     * does not support simpp version
+     * @param newVersion advertised newVersion by other client, -1 if client 
+     * does not support new simpp version
+     * @param keyVersion adtvertised keyVersion by other client, -1 if client
+     * does not support key version
+     * @return true if a simpp message should be requested
+     */
+    public boolean shouldRequestUpdateMessage(int version, int newVersion, int keyVersion);
 }

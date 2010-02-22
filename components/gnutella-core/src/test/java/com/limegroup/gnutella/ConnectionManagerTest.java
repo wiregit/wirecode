@@ -35,7 +35,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.bootstrap.Bootstrapper;
@@ -56,7 +55,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
@@ -837,7 +835,6 @@ public class ConnectionManagerTest extends LimeTestCase {
         private final HandshakeResponderFactory handshakeResponderFactory;
         private final QueryReplyFactory queryReplyFactory;
         private final Provider<MessageDispatcher> messageDispatcher;
-        private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
         private final Provider<SearchResultHandler> searchResultHandler;
         private final CapabilitiesVMFactory capabilitiesVMFactory;
         private final SocketsManager socketsManager;
@@ -860,7 +857,6 @@ public class ConnectionManagerTest extends LimeTestCase {
                 HandshakeResponderFactory handshakeResponderFactory,
                 QueryReplyFactory queryReplyFactory,
                 Provider<MessageDispatcher> messageDispatcher,
-                Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
                 Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 SocketsManager socketsManager, Provider<Acceptor> acceptor,
@@ -879,7 +875,6 @@ public class ConnectionManagerTest extends LimeTestCase {
             this.connectionManager = connectionManager;
             this.queryReplyFactory = queryReplyFactory;
             this.messageDispatcher = messageDispatcher;
-            this.networkUpdateSanityChecker = networkUpdateSanityChecker;
             this.searchResultHandler = searchResultHandler;
             this.capabilitiesVMFactory = capabilitiesVMFactory;
             this.socketsManager = socketsManager;
@@ -903,7 +898,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         public GnutellaConnection createRoutedConnection(String host, int port, ConnectType type) {
             return new TestManagedConnection(connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    messageDispatcher.get(), searchResultHandler, 
                     capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
@@ -913,7 +908,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         public TestManagedConnection createTestConnection() {
             return new TestManagedConnection(connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    messageDispatcher.get(), searchResultHandler, 
                     capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
@@ -962,7 +957,6 @@ public class ConnectionManagerTest extends LimeTestCase {
                 HandshakeResponderFactory handshakeResponderFactory,
                 QueryReplyFactory queryReplyFactory,
                 MessageDispatcher messageDispatcher,
-                NetworkUpdateSanityChecker networkUpdateSanityChecker,
                 Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 SocketsManager socketsManager, Acceptor acceptor,
@@ -976,7 +970,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                 NetworkInstanceUtils networkInstanceUtils) {
             super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN,                 
                     connectionManager, networkManager, queryRequestFactory, headersFactory,
-                    handshakeResponderFactory, queryReplyFactory, messageDispatcher,                           networkUpdateSanityChecker, 
+                    handshakeResponderFactory, queryReplyFactory, messageDispatcher,
                     searchResultHandler, capabilitiesVMFactory,
                     socketsManager, acceptor, supportedVendorMessage,
                     simppManager, updateHandler,

@@ -152,6 +152,17 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
         return supportsCapability(UPDATE_BYTES);
     }
     
+    @Override
+    public int supportsNewUpdateVersion() {
+        return supportsCapability(UPDATE_NEW_VERSION_BYTES);
+    }
+    
+    
+    @Override
+    public int supportsUpdateKeyVersion() {
+        return supportsCapability(UPDATE_KEY_VERSION_BYTES);
+    }
+    
     /**
      * Returns the current DHT version if this node is an ACTIVE DHT node.
      */
@@ -250,5 +261,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     public Class<? extends Message> getHandlerClass() {
         return CapabilitiesVM.class;
     }
+
+
 
 }

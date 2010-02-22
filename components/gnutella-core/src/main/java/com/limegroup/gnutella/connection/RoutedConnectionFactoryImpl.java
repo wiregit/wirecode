@@ -17,7 +17,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -50,8 +49,6 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     private final QueryReplyFactory queryReplyFactory;
 
     private final Provider<MessageDispatcher> messageDispatcher;
-
-    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
 
     private final Provider<SearchResultHandler> searchResultHandler;
 
@@ -90,7 +87,6 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
             NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, Provider<MessageDispatcher> messageDispatcher,
-            Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             Provider<SearchResultHandler> searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory, Provider<SocketsManager> socketsManager,
             Provider<Acceptor> acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
@@ -107,7 +103,6 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
         this.handshakeResponderFactory = handshakeResponderFactory;
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.applicationServices = applicationServices;
         this.searchResultHandler = searchResultHandler;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
@@ -133,7 +128,7 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     public RoutedConnection createRoutedConnection(String host, int port, ConnectType type) {
         return new GnutellaConnection(host, port, type, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler,
+                messageDispatcher.get(), searchResultHandler,
                 capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
@@ -143,7 +138,7 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     public RoutedConnection createRoutedConnection(Socket socket) {
         return new GnutellaConnection(socket, connectionManager.get(), networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                messageDispatcher.get(), searchResultHandler, 
                 capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
