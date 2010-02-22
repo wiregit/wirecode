@@ -44,6 +44,10 @@ public class ActivationSettingsImpl implements ActivationSettingsController {
         ActivationSettings.ACTIVATION_KEY.set(key);
     }
 
+    public boolean isLastStartPro() {
+        return ActivationSettings.LAST_START_WAS_PRO.getValue();
+    }
+    
     @Override
     public void setLastStartPro(boolean value) {
         ActivationSettings.LAST_START_WAS_PRO.setValue(value);

@@ -355,7 +355,7 @@ public class ActivationManagerTest extends BaseTestCase {
         ActivationSerializer serializer = injector.getInstance(ActivationSerializer.class);
         ScheduledExecutorService scheduler = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("fastExecutor")));
         ActivationResponseFactory factory = injector.getInstance(ActivationResponseFactory.class);
-        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, activationSettings);
+        return new ActivationManagerImpl(scheduler, comm, model, serializer, factory, activationSettings, null);
     }
         
     private boolean isSuccessfulState(ActivationState state) {

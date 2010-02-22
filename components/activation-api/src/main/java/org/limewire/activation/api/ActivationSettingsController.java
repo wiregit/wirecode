@@ -8,6 +8,8 @@ public interface ActivationSettingsController {
     public static final String RENEW_URL = "http://www.limewire.com/client_redirect/?page=renewPro";
 
     public String getActivationHost();
+
+    public boolean isLastStartPro();
     
     public void setLastStartPro(boolean value);
 

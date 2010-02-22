@@ -32,6 +32,7 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.ApplicationServices;
 
 /**
  * At startup, ActivationState is always NOT_ACTIVATED. 
@@ -72,6 +73,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private static final Log LOG = LogFactory.getLog(ActivationManagerImpl.class);
 
     private static final String validChars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private static final String PATH_TO_BUY_PRO_LINK = "/Start Menu/Programs/LimeWire/Buy LimeWire PRO.lnk";
     
     private final EventListenerList<ActivationEvent> listeners = new EventListenerList<ActivationEvent>();
     private final EventListenerList<ModuleCodeEvent> mcodeListeners = new EventListenerList<ModuleCodeEvent>();
@@ -82,6 +84,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationSerializer activationSerializer;
     private final ActivationResponseFactory activationResponseFactory;
     private final ActivationSettingsController activationSettings;
+    private final ApplicationServices applicationServices;
     private Periodic activationContactor = null;
     
     private enum State {
@@ -112,13 +115,15 @@ class ActivationManagerImpl implements ActivationManager, Service {
                                  ActivationCommunicator activationCommunicator,
                                  ActivationModel activationModel, ActivationSerializer activationSerializer,
                                  ActivationResponseFactory activationReponseFactory,
-                                 ActivationSettingsController activationSettings) {
+                                 ActivationSettingsController activationSettings, 
+                                 ApplicationServices applicationServices) {
         this.activationModel = activationModel;
         this.scheduler = scheduler;
         this.activationCommunicator = activationCommunicator;
         this.activationSerializer = activationSerializer;
         this.activationResponseFactory = activationReponseFactory;
         this.activationSettings = activationSettings;
+        this.applicationServices = applicationServices;
     }
     
     @Override
@@ -554,27 +559,26 @@ class ActivationManagerImpl implements ActivationManager, Service {
         activationSettings.setActivationKey(response.getLid());
         activationSettings.setModuleCode(response.getMCode());
         setActivationItems(response.getActivationItems());
+        // this needs to come before we overwrite the value for last start pro
+        deleteBuyProLinks(activationSettings.isLastStartPro());
         activationSettings.setLastStartPro(isProActive());
         activationError = ActivationError.NO_ERROR;
-        deleteBuyProLinks();
         setCurrentState(State.ACTIVATED_FROM_SERVER);
     }
 
-    // we might need to move this code to a different location.
-    // i don't think its right here, but i'm not sure where it should go. GRK
-    private void deleteBuyProLinks() {
-        if (OSUtils.isWindows()) {
-            File pathToLimeWireStartMenuLink = new File(System.getProperty("user.home") + "/Start Menu/Programs/LimeWire/Buy LimeWire PRO.lnk");
+    /*
+     * This deletes the "Buy LimeWire Pro" link that appears in the Windows start menu in the LimeWire folder.
+     * It runs only on Windows when LimeWire is first activated or updated. 
+     */
+    private void deleteBuyProLinks(boolean lastStartPro) {
+        // We should add a check to see if the last start was already pro and if this is a new install
+        if (OSUtils.isWindows() && (!lastStartPro || applicationServices.isNewInstall())) {
+            File pathToLimeWireStartMenuLink = new File(System.getProperty("user.home") + PATH_TO_BUY_PRO_LINK);
             if (pathToLimeWireStartMenuLink.exists()) {
                 pathToLimeWireStartMenuLink.delete();
-                
-                File pathToLimeWireDirLink = new File(System.getProperty("user.dir") + "/Buy LimeWire PRO.url");       
-                if (pathToLimeWireDirLink.exists()) {
-                    pathToLimeWireDirLink.delete();
-                }
             }
 
-            File pathToLimeWireAllUsersStartMenuLink = new File(System.getProperty("user.home") + "/../All Users/Start Menu/Programs/LimeWire/Buy LimeWire PRO.lnk");
+            File pathToLimeWireAllUsersStartMenuLink = new File(System.getProperty("user.home") + "/../All Users" + PATH_TO_BUY_PRO_LINK);
             if (pathToLimeWireAllUsersStartMenuLink.exists()) {
                 pathToLimeWireAllUsersStartMenuLink.delete();
             }

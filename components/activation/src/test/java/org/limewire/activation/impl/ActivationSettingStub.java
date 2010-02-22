@@ -43,6 +43,11 @@ public class ActivationSettingStub implements ActivationSettingsController {
     }
 
     @Override
+    public boolean isLastStartPro() {
+        return false;
+    }
+    
+    @Override
     public void setLastStartPro(boolean value) {
 //        this.isLastStartPro = value;
     }
