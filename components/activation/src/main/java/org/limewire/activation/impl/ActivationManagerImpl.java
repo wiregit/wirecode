@@ -32,7 +32,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ApplicationServices;
 
 /**
  * At startup, ActivationState is always NOT_ACTIVATED. 
@@ -84,7 +83,6 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private final ActivationSerializer activationSerializer;
     private final ActivationResponseFactory activationResponseFactory;
     private final ActivationSettingsController activationSettings;
-    private final ApplicationServices applicationServices;
     private Periodic activationContactor = null;
     
     private enum State {
@@ -115,15 +113,13 @@ class ActivationManagerImpl implements ActivationManager, Service {
                                  ActivationCommunicator activationCommunicator,
                                  ActivationModel activationModel, ActivationSerializer activationSerializer,
                                  ActivationResponseFactory activationReponseFactory,
-                                 ActivationSettingsController activationSettings, 
-                                 ApplicationServices applicationServices) {
+                                 ActivationSettingsController activationSettings) {
         this.activationModel = activationModel;
         this.scheduler = scheduler;
         this.activationCommunicator = activationCommunicator;
         this.activationSerializer = activationSerializer;
         this.activationResponseFactory = activationReponseFactory;
         this.activationSettings = activationSettings;
-        this.applicationServices = applicationServices;
     }
     
     @Override
@@ -572,7 +568,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
      */
     private void deleteBuyProLinks(boolean lastStartPro) {
         // We should add a check to see if the last start was already pro and if this is a new install
-        if (OSUtils.isWindows() && (!lastStartPro || applicationServices.isNewInstall())) {
+        if (OSUtils.isWindows() && (!lastStartPro || activationSettings.isNewInstall())) {
             File pathToLimeWireStartMenuLink = new File(System.getProperty("user.home") + PATH_TO_BUY_PRO_LINK);
             if (pathToLimeWireStartMenuLink.exists()) {
                 pathToLimeWireStartMenuLink.delete();

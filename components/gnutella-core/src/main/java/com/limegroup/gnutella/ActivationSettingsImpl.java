@@ -49,6 +49,10 @@ public class ActivationSettingsImpl implements ActivationSettingsController {
         return ActivationSettings.LAST_START_WAS_PRO.getValue();
     }
     
+    public boolean isNewInstall() {
+        return this.applicationServices.isNewInstall();
+    }
+
     @Override
     public void setLastStartPro(boolean value) {
         ActivationSettings.LAST_START_WAS_PRO.setValue(value);

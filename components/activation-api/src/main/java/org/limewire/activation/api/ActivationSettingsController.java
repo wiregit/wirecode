@@ -11,6 +11,8 @@ public interface ActivationSettingsController {
 
     public boolean isLastStartPro();
     
+    public boolean isNewInstall();
+    
     public void setLastStartPro(boolean value);
 
     public String getActivationKey();
