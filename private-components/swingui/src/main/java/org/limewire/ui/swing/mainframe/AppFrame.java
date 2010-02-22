@@ -213,9 +213,6 @@ public class AppFrame extends SingleFrameApplication {
             getMainFrame().setVisible(true);
         }
         
-        ui.goHome();
-        ui.focusOnSearch();
-
         started = true;
     }
     
@@ -225,7 +222,10 @@ public class AppFrame extends SingleFrameApplication {
             initializeNewInstall();
         } else if (SetupWizard.shouldShowWizard()) {
             showSetupWizard();
-        }
+        }       
+
+        ui.goHome();
+        ui.focusOnSearch();
 
         // if still no geo-location found, register listener for geo update
         if(!LWSSettings.HAS_LOADED_LWS_GEO.getValue()) {

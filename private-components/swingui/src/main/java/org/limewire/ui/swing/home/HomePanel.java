@@ -180,13 +180,14 @@ public class HomePanel extends JXPanel {
      */
     private void reloadDefaultUrlIfPossibleAndNeeded() {
         // based on:
+        // * if the browser is showing 
         // * if the first request was already sent succesfully
         // * if there's no active request already
         // * if the retryCount is below 5 (we don't want to hammer)
         // * if we tried to load atleast once 
-        // * if the last request was successfull
+        // * if the last request was successful
         // * if our current strength indicates we're online
-        if (firstRequest && !isRequestInProgress()
+        if (isShowing() && firstRequest && !isRequestInProgress()
                 && retryCount < 5 && loadedOnce && !isLastRequestSuccessful()
                 && gnutellaConnectionManager.getConnectionStrength().isOnline()) {
             retryCount++;
