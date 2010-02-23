@@ -384,8 +384,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             return;
         }
                 
-        // TOOD remove this line
-        
         if (LOG.isDebugEnabled())
             LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
 

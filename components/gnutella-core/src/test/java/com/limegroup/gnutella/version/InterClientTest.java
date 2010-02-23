@@ -2,9 +2,15 @@ package com.limegroup.gnutella.version;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -15,8 +21,11 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Module;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.PeerTestCase;
@@ -27,7 +36,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
 import com.limegroup.gnutella.messages.vendor.UpdateResponse;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -39,6 +48,12 @@ public class InterClientTest extends PeerTestCase {
     private BlockingConnection PEER;
     
     private ActivityCallback myActivityCallback;
+    
+    @Inject
+    private UpdateHandler updateHandler;
+    
+    @Inject
+    private @Update CertificateProvider certificateProvider;
     
     public InterClientTest(String name) {
         super(name);
@@ -53,21 +68,37 @@ public class InterClientTest extends PeerTestCase {
     }
     
     private UpdateRequest dummy = new UpdateRequest();
+
+    private Module[] modules;
+
+    private NotifyingSimpleTimer backgroundExecutor;
+
+    private File certFile;
+
+    private File versionFile;
     
     @Override
     public void setUp() throws Exception {
+        super.setUp();
+        certFile = new File(_settingsDir, "update.cert");
+        versionFile = new File(_settingsDir, "version.xml");
+        changeCertFile("update.cert");
+        changeVersionFile("test_8.xml");
         myActivityCallback = new ActivityCallbackStub();
-        Module m = new AbstractModule() {
+        backgroundExecutor = new NotifyingSimpleTimer();
+        modules = new Module[] { new AbstractModule() {
             @Override
             public void configure() {
                 bind(ActivityCallback.class).toInstance(myActivityCallback);
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
             }
-        };
-        super.setUp(LimeTestUtils.createInjector(m));
-        setEmpty();
+        }, LimeTestUtils.createModule(this) };
+    }
+    
+    private void createUpdateHandler() throws Exception {
+        createInjector(modules);
         PEER = connect(true);
         BlockingConnectionUtils.drain(PEER);
-        doInitialExchange();
     }
     
     @Override
@@ -77,32 +108,28 @@ public class InterClientTest extends PeerTestCase {
             PEER.close();
     }
     
-    private UpdateHandler getUpdateHandler() {
-        return injector.getInstance(UpdateHandler.class);
-    }
-    
     /**
      * Simple test to make sure that if someone sends a CapabilitiesVM
      * with a greater version than we have, that we request the new version.
      * And that we don't request if someone doesn't send it.
      */
     public void testRequestIsSent() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
+        createUpdateHandler();
+        assertEquals(8, updateHandler.getNewVersion());
+        assertEquals(4, certificateProvider.get().getKeyVersion());
         
-        PEER.send(getCVM(2));
+        PEER.send(getCVM(9));
         PEER.flush();
         
         // We should get an UpdateRequest.
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        UpdateRequest m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNotNull(m);
-        assertInstanceof(UpdateRequest.class, m);
-        
-        setCurrentId(10);
-        assertEquals(10, getUpdateHandler().getLatestId());
-        PEER.send(getCVM(5));
+                
+        // send a lower old update version, should not get request
+        PEER.send(getCVM(7));
         PEER.flush();
         
-        // we shouldn't get a message, since they said they had 5 & we know of 10.
+        // we shouldn't get a message, since they said they had 7 and we have 8 already
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNull(m);
         
@@ -111,125 +138,150 @@ public class InterClientTest extends PeerTestCase {
         PEER.flush();
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNotNull(m);
-        assertInstanceof(UpdateRequest.class, m);
     }
+    
+    public void testRequestIsSentIfNewVersionIsAdvertised() throws Exception {
+        createUpdateHandler();
+        assertEquals(8, updateHandler.getNewVersion());
+        assertEquals(4, certificateProvider.get().getKeyVersion());
+        
+        PEER.send(CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(9, 9, 4));
+        PEER.flush();
+        
+        // We should get an UpdateRequest.
+        UpdateRequest m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        assertNotNull(m);
+        
+        // send same new version as current, but higher old version, should not trigger request
+        PEER.send(CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(9, 8, 4));
+        PEER.flush();
+        
+        // we shouldn't get a message
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        assertNull(m);
+        
+        // advertise lower new version, but higher key version, should trigger request
+        PEER.send(CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(9, 4, 5));
+        PEER.flush();
+        
+        // We should get an UpdateRequest.
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        assertNotNull(m);
+    }
+
     
     /**
      * Tests that a response is sent in response to a rquest.
      */
-    public void testResponseIsSent() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
+    public void testNoResponseIsSent() throws Exception {
+        assertTrue(versionFile.delete()); // delete version file
+        createUpdateHandler();
         
         // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequest());
         PEER.flush();
         Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
-        
-        // Alright, set some current bytes so we can do some testing.
-        byte[] data = setCurrent(-10);
+    }
+    
+    public void testResponseIsSent() throws Exception {
+        createUpdateHandler();
         PEER.send(new UpdateRequest());
         PEER.flush();
-        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        UpdateResponse m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
-        assertInstanceof(UpdateResponse.class, m);
         byte[] payload = payload(m);
         GGEP ggep = new GGEP(payload, 0);
-        assertEquals(data, ggep.get("U"));
+        assertEquals(readFile("test_8.xml"), ggep.get("U"));
         assertEquals(1, ggep.getHeaders().size());
     }
     
     /**
      * Tests that valid versions are used.
      */
-    public void testValidVersion() throws Exception {
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
-        
-        // Get the -10 file.
-        byte[] b = readFile(-10);
+    public void testReceiveNewerUpdateResponse() throws Exception {
+        createUpdateHandler();
+
+        byte[] b = readFile("test_10.xml");
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
         
-        assertEquals(-10, getUpdateHandler().getLatestId());
+        assertEquals(10, updateHandler.getNewVersion());
         
         // Make sure we got a new CapabilitiesVM.
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, CapabilitiesVM.class);
+        CapabilitiesVM m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, CapabilitiesVM.class);
         assertNotNull(m);
-        // TODO: is 65526 right?
-        assertEquals(65526, ((CapabilitiesVM)m).supportsUpdate());
+        
+        assertEquals(10, m.supportsUpdate());
+        assertEquals(10, m.supportsNewUpdateVersion());
+        assertEquals(4, m.supportsUpdateKeyVersion());
     }
-    
+
+        
     /**
      * Tests that older versions are ignored.
      */
-    public void testOlderVersionsIgnored() throws Exception {
-        setCurrentId(-9);
-        assertEquals(-9, getUpdateHandler().getLatestId());
+    public void testOlderUpdateResponsesAreIgnored() throws Exception {
+        changeVersionFile("test_10.xml");
+        createUpdateHandler();
+        assertEquals(10, updateHandler.getNewVersion());
         
-        // Get the -10 file.
-        byte[] b = readFile(-10);
+        byte[] b = readFile("test_8.xml");
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
         
-        assertEquals(-9, getUpdateHandler().getLatestId());        
+        assertEquals(10, updateHandler.getNewVersion());
     }
     
     /**
      * Test that invalid signatures are ignored.
      */
     public void testInvalidSignaturesIgnored() throws Exception {
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        createUpdateHandler();
         
-        // Get the -10 file.
-        byte[] b = readFile(-10);
+        byte[] b = readFile("test_10.xml");
         b[0] = '0'; // break the sig.
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
         
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        assertEquals(8, updateHandler.getNewVersion());
     }
     
     /**
      * Tests that invalid bytes break verification.
      */
     public void testInvalidBytesIgnored() throws Exception {
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        createUpdateHandler();
         
-        // Get the -10 file.
-        byte[] b = readFile(-10);
+        byte[] b = readFile("test_10.xml");
         b[b.length-1] = '0'; // break the data.
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
         
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        assertEquals(8, updateHandler.getNewVersion());
     }
     
     /**
      * Test invalid XML ignored.
      */
     public void testInvalidXMLIgnored() throws Exception {
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        createUpdateHandler();
         
-        // Get the -9 file.
-        byte[] b = readFile(-9);
+        byte[] b = readFile("invalid-xml-v9.xml");
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
         
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        assertEquals(8, updateHandler.getNewVersion());
     }
     
     /**
@@ -237,32 +289,29 @@ public class InterClientTest extends PeerTestCase {
      * version is too old
      */
     public void testUpdatesNotSentToGui() throws Exception {
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
+        createUpdateHandler();
         
         // add listener, should not receive any events
         HandleUpdate update = new HandleUpdate();
-        getUpdateHandler().addListener(update);
+        updateHandler.addListener(update);
         
-        // Get the -8 file.
-        byte[] b = readFile(-8);
+        byte[] b = readFile("test_10.xml");
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
 
-        getUpdateHandler().removeListener(update);// remove listener
+        updateHandler.removeListener(update);// remove listener
         
-        assertEquals(-8, getUpdateHandler().getLatestId());
+        assertEquals(10, updateHandler.getNewVersion());
         assertNull("Should not recieve update event", update.event);
     }
     
     /**
      * Tests that updates are sent out when versions come in.
      */
-    public void testUpdatesSentToGUI() throws Exception {       
-        setCurrentId(-11);
-        assertEquals(-11, getUpdateHandler().getLatestId());
+    public void testUpdatesSentToGUI() throws Exception {
+        createUpdateHandler();
         setVersion("3.0.0");
 
         // Set the update style to zero to ensure the message is not ignored
@@ -270,18 +319,17 @@ public class InterClientTest extends PeerTestCase {
         
         //add listener, should receive an update event
         HandleUpdate update = new HandleUpdate();
-        getUpdateHandler().addListener(update);
+        updateHandler.addListener(update);
         
-        // Get the -8 file.
-        byte[] b = readFile(-8);
+        byte[] b = readFile("test_10.xml");
         PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
         PEER.flush();
         
-        Thread.sleep(1000); // let it process.
+        backgroundExecutor.waitForNetworkDataHandled();
 
-        getUpdateHandler().removeListener(update); //remove listener
+        updateHandler.removeListener(update); //remove listener
         
-        assertEquals(-8, getUpdateHandler().getLatestId());
+        assertEquals(10, updateHandler.getNewVersion());
         assertEquals(update.event.getType(), com.limegroup.gnutella.version.UpdateEvent.Type.UPDATE);
     }    
     
@@ -295,48 +343,44 @@ public class InterClientTest extends PeerTestCase {
     }
     
     public void testCompressedResponse() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
+        assertTrue(versionFile.delete());
+        createUpdateHandler();
         
         // We should get no response, since we have no data to give.
         UpdateRequestStub request = new UpdateRequestStub(2,true,true);
         PEER.send(new UpdateRequest());
         PEER.flush();
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        UpdateResponse m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
-        // Alright, set some current bytes so we can do some testing.
-        byte[] data = setCurrent(-10);
+        updateHandler.handleNewData(readFile("test_8.xml"), null);
+        
+        backgroundExecutor.waitForNetworkDataHandled();
+        
         PEER.send(request);
         PEER.flush();
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
-        assertInstanceof(UpdateResponse.class, m);
+
         byte [] payload = payload(m);
         GGEP g = new GGEP(payload,0,null);
-        assertEquals(g.getBytes("C"),data);
+        assertEquals(readFile("test_8.xml"), g.getBytes("C"));
         assertFalse(g.hasKey("U"));
     }
     
     public void testUncompressedGGEPResponse() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
-        
-        // We should get no response, since we have no data to give.
-        PEER.send(new UpdateRequest());
-        PEER.flush();
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
-        assertNull(m);
+        createUpdateHandler();
         
         UpdateRequestStub request = new UpdateRequestStub(2,true,false);
-        byte[] data = setCurrent(-10);
+
         PEER.send(request);
         PEER.flush();
-        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        UpdateResponse m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
-        assertInstanceof(UpdateResponse.class, m);
         
         byte [] payload = payload(m);
         GGEP g = new GGEP(payload,0,null);
-        assertEquals(g.getBytes("U"),data);
+        assertEquals(readFile("test_8.xml"), g.getBytes("U"));
         assertFalse(g.hasKey("C"));
     }
     
@@ -344,34 +388,26 @@ public class InterClientTest extends PeerTestCase {
      * tests that a request with higher version w/o GGEP gets responded to properly
      */
     public void testHigherVersionNoGGEP() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
-        
-        // We should get no response, since we have no data to give.
-        PEER.send(new UpdateRequest());
-        PEER.flush();
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
-        assertNull(m);
+        createUpdateHandler();
         
         UpdateRequestStub request = new UpdateRequestStub(UpdateRequest.VERSION+1,false,false);
-        byte[] data = setCurrent(-10);
         PEER.send(request);
         PEER.flush();
-        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        UpdateResponse m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         byte [] payload = payload(m);
         GGEP g = new GGEP(payload,0);
-        assertEquals(g.getBytes("U"),data);
+        assertEquals(readFile("test_8.xml"), g.getBytes("U"));
         assertFalse(g.hasKey("C"));
     }
     
     /** Tests that requests from older versions get responded to properly. */
     public void testOldRequestGetsMaxVersionNoGGEP() throws Exception {
-        assertEquals(0, getUpdateHandler().getLatestId());
+        createUpdateHandler();
         
-        // We should get no response, since we have no data to give.
         PEER.send(new UpdateRequestStub(1, false, false));
         PEER.flush();
-        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        UpdateResponse m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         
         byte[] payload = payload(m);
@@ -379,45 +415,22 @@ public class InterClientTest extends PeerTestCase {
                 Base32.encode(payload));
     }
     
-    private  void setCurrentId(int i) throws Exception {
-        PrivilegedAccessor.setValue(getUpdateHandler(), "_lastId", new Integer(i));
-    }
-    
-    private void setCurrentBytes(byte[] b) throws Exception {
-        PrivilegedAccessor.setValue(getUpdateHandler(), "_lastBytes", b);
-    }
-    
-    private void setCurrentInfo(UpdateInformation info) throws Exception {
-        PrivilegedAccessor.setValue(getUpdateHandler(), "_updateInfo", null);
-    }
-    
-    private byte[] setCurrent(int i) throws Exception {
-        setCurrentId(i);
-        byte[] b = readFile(i);
-        assertNotNull(b);
-        setCurrentBytes(b);
-        return b;
-    }
-    
-    private void setEmpty() throws Exception {
-        setCurrentId(0);
-        setCurrentBytes(null);
-        setCurrentInfo(null);
-    }
-    
-    private static byte[] readFile(int i) throws Exception {
-        File f = TestUtils.getResourceFile("com/limegroup/gnutella/version/test_" + i + ".xml");
+    private static File locateFile(String fileName) {
+        File f = TestUtils.getResourceFile("com/limegroup/gnutella/version/" + fileName);
         assertTrue(f.exists());
         assertTrue(f.isFile());
-        return FileUtils.readFileFully(f);
+        return f;
+    }
+        
+    private static byte[] readFile(String fileName) throws Exception {
+        return FileUtils.readFileFully(locateFile(fileName));
     }
     
     private static void setVersion(String v) throws Exception {
         PrivilegedAccessor.setValue(LimeWireUtils.class, "testVersion", v);
     }
     
-    private static byte[] payload(Message m) throws Exception {
-        assertInstanceof("not a vendor message!", VendorMessage.class, m);
+    private static byte[] payload(UpdateResponse m) throws Exception {
         return (byte[])PrivilegedAccessor.invokeMethod(m, "getPayload");
     }
     
@@ -425,16 +438,18 @@ public class InterClientTest extends PeerTestCase {
         return CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(i);
     }
     
-    private void doInitialExchange() throws Exception {
-        PEER.send(getCVM(1));
-        PEER.flush();
-        assertNotNull(BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class));
-    }
-
     /* Required for PeerTestCase. */
     @Override
     protected ActivityCallback getActivityCallback() {
         return new ActivityCallbackStub();
+    }
+    
+    private void changeCertFile(String fileName) {
+        FileUtils.copy(locateFile(fileName), certFile);
+    }
+    
+    private void changeVersionFile(String fileName) {
+        FileUtils.copy(locateFile(fileName), versionFile);
     }
 
     private static byte[] derivePayload(boolean hasGGEP, boolean requestsCompressed) throws Exception {
@@ -479,5 +494,39 @@ public class InterClientTest extends PeerTestCase {
 //        }
         
     }
-}
+    
+    /**
+     * Executor that lowers a countdown latch when the SimppManager has
+     * received a new message.
+     */
+    private class NotifyingSimpleTimer extends SimpleTimer {
+        
+        public NotifyingSimpleTimer() {
+            super(true);
+        }
 
+        final CountDownLatch handleNetworkDataLatch = new CountDownLatch(1);
+        
+        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdatehandlerImpl$4", handleNetworkDataLatch);
+        
+        @Override
+        public void execute(Runnable command) {
+            super.execute(command);
+            for (final Entry<String, CountDownLatch> entry : latches.entrySet()) {
+                if (command.getClass().getName().endsWith(entry.getKey())) {
+                    super.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            entry.getValue().countDown();
+                        }
+                    });
+                }
+            }
+        }
+        
+        public boolean waitForNetworkDataHandled() throws InterruptedException {
+            return handleNetworkDataLatch.await(2, TimeUnit.SECONDS);
+        }
+
+    }
+}

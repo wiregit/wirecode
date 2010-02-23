@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.SignatureException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.io.IpPort;
 import org.limewire.logging.Log;
@@ -21,7 +22,7 @@ public class CertificateProviderImpl implements CertificateProvider {
     private final HttpCertificateReader httpCertificateReader;
     private final CertificateVerifier certificateVerifier;
     
-    private volatile Certificate validCertificate;
+    private AtomicReference<Certificate> validCertificate = new AtomicReference<Certificate>(null);
 
     private final File file;
 
@@ -63,9 +64,9 @@ public class CertificateProviderImpl implements CertificateProvider {
     @Override
     public void set(Certificate certificate) {
         try { 
-            Certificate localCopy = validCertificate;
+            Certificate localCopy = validCertificate.get();
             if (localCopy == null || certificate.getKeyVersion() > localCopy.getKeyVersion()) {
-                validCertificate = certificateVerifier.verify(certificate);
+                validCertificate.set(certificateVerifier.verify(certificate));
                 fileCertificateReader.write(certificate, file);
             }
         } catch (SignatureException se) {
@@ -85,17 +86,17 @@ public class CertificateProviderImpl implements CertificateProvider {
      */
     @Override
     public Certificate get() {
-        Certificate copy = validCertificate;
+        Certificate copy = validCertificate.get();
         if (copy != null) {
             return copy;
         }
-        validCertificate = getFromFile();
-        copy = validCertificate;
+        validCertificate.compareAndSet(null, getFromFile());
+        copy = validCertificate.get();
         if (copy != null) {
             return copy;
         }
-        validCertificate = getFromHttp(null);
-        return validCertificate;
+        validCertificate.compareAndSet(null, getFromHttp(null));
+        return validCertificate.get();
     }
 
     @Override
@@ -110,7 +111,7 @@ public class CertificateProviderImpl implements CertificateProvider {
             }
             return new NullCertificate();
         } else {
-            Certificate copy = validCertificate;
+            Certificate copy = validCertificate.get();
             if (copy != null) {
                 return copy;
             } else {
