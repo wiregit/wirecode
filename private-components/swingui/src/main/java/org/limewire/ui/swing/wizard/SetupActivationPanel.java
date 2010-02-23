@@ -41,6 +41,7 @@ public class SetupActivationPanel extends JPanel {
     private JLabel errorMessageLabel;
     private ActivationListener activationListener;
     private LabelWithLinkSupport customerSupportLabel;
+    private JXButton okButton;
     
     @Resource
     private Color errorColor;
@@ -83,7 +84,7 @@ public class SetupActivationPanel extends JPanel {
         licenseField.addActionListener(new EnterActionListener());
         add(licenseField, "cell 2 6, aligny 50%");
 
-        JXButton okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
+        okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
         okButton.addActionListener(new EnterActionListener());
         add(okButton, "cell 2 6, aligny 50%"); //wrap
 
@@ -123,6 +124,8 @@ public class SetupActivationPanel extends JPanel {
     }
     
     private void setActivationState(ActivationState state, ActivationError error) {
+        okButton.setEnabled(true);
+        
         switch(state) {
         case NOT_AUTHORIZED:
             if (error != ActivationError.COMMUNICATION_ERROR) {
@@ -132,6 +135,7 @@ public class SetupActivationPanel extends JPanel {
             }
             break;
         case AUTHORIZING:
+            okButton.setEnabled(false);
             iconPanel.setActivationMode(Mode.SPINNER);
             break;
         case REFRESHING:
@@ -186,7 +190,7 @@ public class SetupActivationPanel extends JPanel {
                             return;
                         }
                         
-                        activationManager.activateKey(key.replaceAll("-", ""));                        
+                        activationManager.activateKey(key.replaceAll("-", ""));
                     }
                 });
             }
