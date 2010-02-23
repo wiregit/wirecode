@@ -171,6 +171,22 @@ public class InterClientTest extends PeerTestCase {
         // We should get an UpdateRequest.
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
         assertNotNull(m);
+        
+        // advertise lower new version, but same key version, should not trigger request
+        PEER.send(CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(9, 4, 4));
+        PEER.flush();
+     
+        // we shouldn't get a message
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        assertNull(m);
+
+        // advertise higher new version, but lower key version, should not trigger request
+        PEER.send(CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(9, 9, 3));
+        PEER.flush();
+     
+        // we shouldn't get a message
+        m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateRequest.class);
+        assertNull(m);
     }
 
     
@@ -419,6 +435,88 @@ public class InterClientTest extends PeerTestCase {
                 Base32.encode(payload));
     }
     
+    ///////////////////// Integration tests ///////////////////////////////////
+    /////////////////////When LimeWire starts///////////////////////////////////
+    // UsesDefaultData
+    public void testStartLoadMissingUpdate() throws Exception {
+    }
+    
+    // use default Update values
+    public void testStartLoadUpdateBadOldSig() throws Exception {
+    }
+    
+    // download and store cert from newCertURL, and accept Update
+    public void testStartLoadMissingCertAndDownloadOK() throws Exception {
+    }
+    
+    // download and store cert from newCertURL, and accept Update
+    public void testStartLoadCertBadSigAndDownloadOK() throws Exception {
+    }
+    
+    // fail download cert from newCertURL, use default Update values 
+    // do not accept Update without cert in this session
+    public void testStartLoadMissingCertAndDownloadFailed() throws Exception {
+    }
+
+    // download and store Update from http, because local Update is too old
+    public void testStartOldLocalUpdateAndDownloadOK() throws Exception {
+    }
+    
+    /////////////////////Verify a Update from a peer/////////////////////////////
+    
+    // reject.   
+    public void testKvLocalGreater() throws Exception {
+    }
+    
+    // reject.   
+    public void testOvGreaterKvEqualNvequal() throws Exception {
+    }    
+    
+    // reject. 
+    public void testBadNewSig() throws Exception {
+    }
+    
+    // reject.   
+    public void testKvGreater_CertInUpdateBadCertSig() throws Exception {
+    }
+    
+    // reject. 
+    public void testKvGreater_CertInUpdateKvNotEqual() throws Exception {
+    }
+    
+    // reject. 
+    public void testKvGreater_CertInUpdateKvEqualBadNewSig() throws Exception {
+    }
+    
+    // accept. New Cert stored
+    public void testKvGreater_CertInUpdateKvEqualGoodNewSig() throws Exception {
+    }
+        
+    // reject.   
+    public void testKvGreaterCertNotInUpdate_DownloadFailed() throws Exception {
+    }
+    // accept. New Cert stored.   
+    public void testKvGreaterCertNotInUpdate_DownloadOK() throws Exception {
+    }
+    // reject.   
+    public void testKvGreaterCertNotInUpdate_DownloadOKKvUpdateNotEqualCert() throws Exception {
+    }
+    
+
+    // reject.  
+    public void testKvLocalIGIDNetworkIGID() throws Exception {
+    }
+    
+    ////////////////////////////////http download Update ///////////////////////////
+    
+    // accept
+    public void testKvIGIDDownloadFirstTimeOK() throws Exception {
+    }
+    // accept
+    public void testKvIGIDDownloadSecondTimeOK() throws Exception {
+    }
+        
+    ////////////////////////////////private methods///////////////////////////
     private static File locateFile(String fileName) {
         File f = TestUtils.getResourceFile("com/limegroup/gnutella/version/" + fileName);
         assertTrue(f.exists());
