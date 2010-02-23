@@ -18,8 +18,11 @@ import com.google.inject.Inject;
 
 public class LicenseKeyTextField extends JTextField implements Paintable {
 
+    public static final String LICENSE_IS_CORRECT_LENGTH = "License Complete";
+    
     private Painter<JTextField> backgroundPainter;
     private Insets paintedInsets;
+    private boolean licenseIsCorrectLength = false;
 
     @Inject
     public LicenseKeyTextField() {
@@ -74,6 +77,32 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
             
             if (getLength() > 14) {
                 remove(14, getLength()-14);
+            }
+            
+            checkLicenseForCompleteness();
+        }
+        
+        @Override
+        public void remove(int offs, int len) {
+            try {
+                super.remove(offs, len);
+            } catch (BadLocationException e) {
+            }
+            
+            checkLicenseForCompleteness();
+        }
+        
+        private void checkLicenseForCompleteness() {
+            if (getLength() == 14) {
+                if (!licenseIsCorrectLength) {
+                    firePropertyChange(LICENSE_IS_CORRECT_LENGTH, licenseIsCorrectLength, true);
+                    licenseIsCorrectLength = true;
+                }
+            } else {
+                if (licenseIsCorrectLength) {
+                    firePropertyChange(LICENSE_IS_CORRECT_LENGTH, licenseIsCorrectLength, false);
+                    licenseIsCorrectLength = false;
+                }
             }
         }
     }

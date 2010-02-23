@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -26,6 +28,7 @@ import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.activation.ActivationWarningPanel;
 import org.limewire.ui.swing.activation.LabelWithLinkSupport;
+import org.limewire.ui.swing.activation.LicenseKeyTextField;
 import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -86,6 +89,16 @@ public class SetupActivationPanel extends JPanel {
 
         okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
         okButton.addActionListener(new EnterActionListener());
+        okButton.setEnabled(licenseField.getText().length() == 14);
+        licenseField.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(LicenseKeyTextField.LICENSE_IS_CORRECT_LENGTH)) {
+                    Boolean enabled = (Boolean) evt.getNewValue();
+                    okButton.setEnabled(enabled.booleanValue());
+                }
+            }
+        });
         add(okButton, "cell 2 6, aligny 50%"); //wrap
 
         add(Box.createRigidArea(new Dimension(19, 16)), "cell 3 6, aligny 50%");

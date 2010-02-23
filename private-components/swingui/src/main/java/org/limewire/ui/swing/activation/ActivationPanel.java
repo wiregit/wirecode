@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -442,7 +444,7 @@ public class ActivationPanel {
         public abstract void setIsActivating(boolean enabled);
     }
     
-    private class NoLicenseButtonPanel extends ButtonPanel {
+    private class NoLicenseButtonPanel extends ButtonPanel implements PropertyChangeListener {
         private final JButton activateButton;
         
         public NoLicenseButtonPanel() {
@@ -450,6 +452,8 @@ public class ActivationPanel {
             goProButton.setToolTipText(I18n.tr("Upgrade to PRO"));
             activateButton = new JButton(new ActivateAction(I18n.tr("Activate"), I18n.tr("Activate the License Key")));
             JButton laterButton = new JButton(new OKDialogAction(I18n.tr("Later"), I18n.tr("Activate License at a later time")));
+            licenseField.addPropertyChangeListener(this);
+            activateButton.setEnabled(licenseField.getText().length() == 14);
             
             add(goProButton, "push");
             add(activateButton, "split, gapright 10, tag ok");
@@ -457,25 +461,57 @@ public class ActivationPanel {
         }
         
         @Override
-        public void setIsActivating(boolean enabled) {
-            activateButton.setEnabled(!enabled);
+        public void finalize() {
+            if (licenseField != null) {
+                licenseField.removePropertyChangeListener(this);
+            }
+        }
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (evt.getPropertyName().equals(LicenseKeyTextField.LICENSE_IS_CORRECT_LENGTH)) {
+                Boolean enabled = (Boolean) evt.getNewValue();
+                activateButton.setEnabled(enabled.booleanValue());
+            }
+        }
+
+    @Override
+        public void setIsActivating(boolean activating) {
+            activateButton.setEnabled(!activating && licenseField.getText().length() == 14);
         }
     }
 
-    private class EditButtonPanel extends ButtonPanel {
+    private class EditButtonPanel extends ButtonPanel implements PropertyChangeListener {
         private final JButton updateButton;
         
         public EditButtonPanel() {
             updateButton = new JButton(new ActivateAction(I18n.tr("Update"), I18n.tr("Update the saved key")));
             JButton cancelButton = new JButton(new CancelAction());
+            licenseField.addPropertyChangeListener(this);
+            updateButton.setEnabled(licenseField.getText().length() == 14);
             
             add(updateButton, "alignx 100%, gapright 10, tag ok, split");
             add(cancelButton, "wrap, tag cancel");
         }
         
         @Override
-        public void setIsActivating(boolean enabled){
-            updateButton.setEnabled(!enabled);
+        public void finalize() {
+            if (licenseField != null) {
+                licenseField.removePropertyChangeListener(this);
+            }
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (evt.getPropertyName().equals(LicenseKeyTextField.LICENSE_IS_CORRECT_LENGTH)) {
+                Boolean enabled = (Boolean) evt.getNewValue();
+                updateButton.setEnabled(enabled.booleanValue());
+            }
+        }
+
+        @Override
+        public void setIsActivating(boolean activating){
+            updateButton.setEnabled(!activating && licenseField.getText().length() == 14);
         }
     }
 
