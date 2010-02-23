@@ -81,6 +81,11 @@ class ProNag extends JXPanel {
                         activationPanel.show();
                     } else if(e.getURL() != null) {
                         String url = e.getURL().toExternalForm();
+                        // if the URL has a question mark appended onto the end of it, but it already has another question mark preceding it
+                        // in the URL, then chop off the last question mark, b/c it breaks the URL.
+                        if (url.endsWith("?") && url.indexOf('?') != (url.length()-1)) {
+                            url = url.substring(0, url.length()-1);
+                        }
                         url += "&gs=" + connectionManager.getConnectionStrength().getStrengthId();
                         // If the offline was shown, add the delay between shown & clicked in ms.
                         if(offlineShownAt > 0) {
