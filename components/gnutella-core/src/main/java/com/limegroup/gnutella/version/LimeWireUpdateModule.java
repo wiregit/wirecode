@@ -24,12 +24,12 @@ public class LimeWireUpdateModule extends AbstractModule {
         bind(DefaultDataProvider.class).annotatedWith(Update.class).to(UpdateDefaultDataProviderImpl.class);
     }
     
-    @Provides @LazySingleton @Update CertificateProvider simppCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
+    @Provides @LazySingleton @Update CertificateProvider updateCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,
             CertificateVerifier certificateVerifier) {
         return new CertificateProviderImpl(fileCertificateReader, httpCertificateReader, certificateVerifier, new File(CommonUtils.getUserSettingsDir(), "update.cert"), URI.create("http://certs.limewire.com/update/update.cert"));
     }
     
-    @Provides @Update CertifiedMessageVerifier simppMessageVerifier(@Update CertificateProvider certificateProvider, CertificateVerifier certificateVerifier) {
+    @Provides @Update CertifiedMessageVerifier updateMessageVerifier(@Update CertificateProvider certificateProvider, CertificateVerifier certificateVerifier) {
         return new CertifiedMessageVerifierImpl(certificateProvider, certificateVerifier);
     }
     

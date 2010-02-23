@@ -2,6 +2,7 @@ package com.limegroup.gnutella.version;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
@@ -10,15 +11,29 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.params.HttpParams;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.api.Invocation;
+import org.jmock.lib.action.CustomAction;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.GGEP;
 import org.limewire.listener.EventListener;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.common.collect.ImmutableMap;
@@ -39,6 +54,7 @@ import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertificateVerifierImpl;
+import com.limegroup.gnutella.security.DefaultDataProvider;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -79,6 +95,12 @@ public class InterClientTest extends PeerTestCase {
 
     private File versionFile;
     
+    private byte[] defaultData;
+
+    private Mockery context;
+
+    private LimeHttpClient limeHttpClient;
+    
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -86,8 +108,20 @@ public class InterClientTest extends PeerTestCase {
         versionFile = new File(_settingsDir, "version.xml");
         changeCertFile("update.cert");
         changeVersionFile("test_8.xml");
+        
         myActivityCallback = new ActivityCallbackStub();
         backgroundExecutor = new NotifyingSimpleTimer();
+        
+        context = new Mockery();
+        limeHttpClient = context.mock(LimeHttpClient.class);
+        
+        context.checking(new Expectations() {{
+            ignoring(limeHttpClient).execute(with(new NonUpdateCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+            ignoring(limeHttpClient).releaseConnection(with(any(HttpResponse.class)));
+            ignoring(limeHttpClient).setParams(with(any(HttpParams.class)));
+        }});
+        
         modules = new Module[] { new AbstractModule() {
             @Override
             public void configure() {
@@ -95,6 +129,13 @@ public class InterClientTest extends PeerTestCase {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
                 bind(UpdateMessageVerifier.class).toInstance(new UpdateMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAIC5BZX4C463D34VXV74JRSGAVQXZK2FPDHEWT7YSLZ5R6AP6KAD4ODGZPVJ5I3NXRTGDEIYRBZAJ4WHMOLNDCJXHJLJPELPLLB6GUWMO5ZEN26KJD3CFEQRJDIPDAWZIISVZCSRCUJ64KKDO4Q32NKG5SZLPJSQM6HX2THS5PBHWHOVVTBXBJAUXMUUULU6SHYCKFC6EVJLW"));
                 bind(CertificateVerifier.class).toInstance(new CertificateVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQUAAFAMBADU44D3J45TEMETF4ARTYM3GJNGUEPNZADXXFQ6XBWYWXRLGLIHAEIFPPSE4TXLMBJSD7V3ODNIJJRJ4NPBMNJ3B4DPWMZLGAPUWGVT3RCRKYJQSKYT73DHK7Z2XMPYG2NAA3UFRGTK6FWCLEBNL5XUD2Q7KXFH5XXUKYSTTIGSEBN225Q2CY74ED6I6UDYJP6Y35ORWSQHZONI"));
+                bind(DefaultDataProvider.class).annotatedWith(Update.class).toInstance(new UpdateDefaultDataProviderImpl() {
+                    @Override
+                    public byte[] getDefaultData() {
+                        return defaultData;
+                    }
+                });
+                bind(LimeHttpClient.class).toInstance(limeHttpClient);
             }
         }, LimeTestUtils.createModule(this) };
     }
@@ -435,27 +476,141 @@ public class InterClientTest extends PeerTestCase {
                 Base32.encode(payload));
     }
     
-    ///////////////////// Integration tests ///////////////////////////////////
     /////////////////////When LimeWire starts///////////////////////////////////
-    // UsesDefaultData
+
+    /**
+     * Tests that the default data is loaded if there is no local version.xml
+     * file available.
+     */
     public void testStartLoadMissingUpdate() throws Exception {
+        assertTrue(certFile.delete());
+        assertTrue(versionFile.delete());
+        defaultData = readFile("update_4_4_4_cert.xml");
+        createUpdateHandler();
+        assertEquals(4, updateHandler.getNewVersion());
+        assertEquals(4, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertEquals(StringUtils.toUTF8String(readFile("update.cert")), certificateProvider.get().getCertificateString());
     }
     
-    // use default Update values
+    /**
+     * Tests that the default data is used if the signature of the local
+     * version.xml file is corrupted. 
+     */
     public void testStartLoadUpdateBadOldSig() throws Exception {
+        byte[] versionXML = readFile("test_8.xml");
+        // change signature
+        versionXML[0] = (byte)(versionXML[0] + 1);
+        FileUtils.verySafeSave(versionFile.getParentFile(), versionFile.getName(), versionXML);
+        defaultData = readFile("update_4_4_4_cert.xml");
+        createUpdateHandler();
+        assertEquals(4, updateHandler.getNewVersion());
+        assertEquals(4, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertEquals(StringUtils.toUTF8String(readFile("update.cert")), certificateProvider.get().getCertificateString());
     }
     
-    // download and store cert from newCertURL, and accept Update
+    /**
+     * Tests that certificate is downloaded if missing at start up and local
+     * version.xml is accepted. Also ensure that new update messages are accepted
+     * in that session later on.
+     */
     public void testStartLoadMissingCertAndDownloadOK() throws Exception {
+        assertTrue(certFile.delete());
+        
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            will(uploadCertificate("update.cert"));
+        }});
+        
+        createUpdateHandler();
+        
+        assertEquals(8, updateHandler.getNewVersion());
+        assertEquals(8, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertFilesEqual("update.cert", certFile);
+        
+        // send newer update message
+        byte[] b = readFile("test_10.xml");
+        PEER.send(UpdateResponse.createUpdateResponse(b,dummy));
+        PEER.flush();
+        
+        backgroundExecutor.waitForNetworkDataHandled();
+        
+        assertEquals(10, updateHandler.getNewVersion());
+        assertEquals(10, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+
+        context.assertIsSatisfied();
     }
     
-    // download and store cert from newCertURL, and accept Update
-    public void testStartLoadCertBadSigAndDownloadOK() throws Exception {
+    /**
+     * Tests that only one http certificate request is made per session. If it 
+     * fails, the default certificate in the default update data will be used.
+     * Update responses with newer key versions and without cert will be ignored.
+     * Update responses with newer key version and with cert will be accepted.
+     */
+    public void testStartLoadMissingCertDownloadFailedIgnoresHigherKeyVersions() throws Exception {
+        assertTrue(certFile.delete());
+        defaultData = readFile("update_4_4_4_cert.xml");
+                
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+        }});
+        
+        createUpdateHandler();
+        assertEquals(4, updateHandler.getNewVersion());
+        assertEquals(4, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertFilesEqual("update.cert", certFile);
+        
+        // send update response with newer key version, but no certificate
+        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_30_20_noCert.xml"), dummy));
+        PEER.flush();
+        
+        backgroundExecutor.waitForNetworkDataHandled();
+        
+        assertEquals(4, updateHandler.getNewVersion());
+        assertEquals(4, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertFilesEqual("update.cert", certFile);
+        
+        context.assertIsSatisfied();
     }
     
-    // fail download cert from newCertURL, use default Update values 
-    // do not accept Update without cert in this session
-    public void testStartLoadMissingCertAndDownloadFailed() throws Exception {
+    /**
+     * Tests that only one http certificate request is made per session. If it 
+     * fails, the default certificate in the default update data will be used.
+     * Update responses with newer key version and with cert will be accepted.
+     */
+    public void testStartLoadMissingCertDownloadFailedAcceptHigherCerts() throws Exception {
+        assertTrue(certFile.delete());
+        defaultData = readFile("update_4_4_4_cert.xml");
+                
+        context.checking(new Expectations() {{
+            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            will(throwException(new IOException()));
+        }});
+        
+        createUpdateHandler();
+        assertEquals(4, updateHandler.getNewVersion());
+        assertEquals(4, updateHandler.getLatestId());
+        assertEquals(4, updateHandler.getKeyVersion());
+        assertFilesEqual("update.cert", certFile);
+        
+        // send update response with newer key version, but no certificate
+        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_30_20_Cert.xml"), dummy));
+        PEER.flush();
+        
+        backgroundExecutor.waitForNetworkDataHandled();
+        
+        assertEquals(10, updateHandler.getLatestId());
+        assertEquals(30, updateHandler.getNewVersion());
+        assertEquals(20, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_20.cert", certFile);
+        
+        context.assertIsSatisfied();
     }
 
     // download and store Update from http, because local Update is too old
@@ -569,6 +724,12 @@ public class InterClientTest extends PeerTestCase {
         return baos.toByteArray();
     }
     
+    private void assertFilesEqual(String expectedFile, File actualFile) throws Exception {
+        byte[] expectedBytes = readFile(expectedFile);
+        byte[] actualBytes = FileUtils.readFileFully(actualFile); 
+        assertEquals(StringUtils.toUTF8String(expectedBytes), StringUtils.toUTF8String(actualBytes));
+    }
+    
     private static class UpdateRequestStub extends AbstractVendorMessage {
 
         public int version;
@@ -595,6 +756,41 @@ public class InterClientTest extends PeerTestCase {
 //            return requestsCompressed;
 //        }
         
+    }
+    
+    private CustomAction uploadCertificate(final String fileName) {
+        return new CustomAction("upload certificate") {
+            @Override
+            public Object invoke(Invocation invocation) throws Throwable {
+                HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK");
+                ByteArrayEntity entity = new ByteArrayEntity(readFile(fileName));
+                entity.setContentEncoding("utf-8");
+                response.setEntity(entity);
+                return response;
+            }
+        };
+    }
+    
+    private static class UpdateCertificateRequestMatcher extends TypeSafeMatcher<HttpUriRequest> {
+        @Override
+        public boolean matchesSafely(HttpUriRequest item) {
+            return item.getURI().toString().startsWith("http://certs.limewire.com/update/update.cert");
+        }
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("update certificate request");
+        }
+    }
+    
+    private static class NonUpdateCertificateRequestMatcher extends TypeSafeMatcher<HttpUriRequest> {
+        @Override
+        public boolean matchesSafely(HttpUriRequest item) {
+            return !new UpdateCertificateRequestMatcher().matches(item);
+        }
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("update certificate request");
+        }
     }
     
     /**

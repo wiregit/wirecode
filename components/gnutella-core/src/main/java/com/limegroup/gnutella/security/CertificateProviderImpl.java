@@ -63,11 +63,14 @@ public class CertificateProviderImpl implements CertificateProvider {
 
     @Override
     public void set(Certificate certificate) {
+        LOG.debugf("setting certificate: {0}", certificate);
         try { 
             Certificate localCopy = validCertificate.get();
             if (localCopy == null || certificate.getKeyVersion() > localCopy.getKeyVersion()) {
                 validCertificate.set(certificateVerifier.verify(certificate));
                 fileCertificateReader.write(certificate, file);
+            } else {
+                LOG.debugf("certificate version not greater than local one: {0}", certificate);
             }
         } catch (SignatureException se) {
             LOG.debugf(se, "certificate invalid {0} ", certificate);
@@ -95,8 +98,7 @@ public class CertificateProviderImpl implements CertificateProvider {
         if (copy != null) {
             return copy;
         }
-        validCertificate.compareAndSet(null, getFromHttp(null));
-        return validCertificate.get();
+        return getFromHttp(null);
     }
 
     @Override
