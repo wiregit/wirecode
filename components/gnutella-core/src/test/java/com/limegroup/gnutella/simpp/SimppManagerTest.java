@@ -53,6 +53,7 @@ import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertificateVerifierImpl;
 import com.limegroup.gnutella.security.DefaultDataProvider;
+import com.limegroup.gnutella.util.MockUtils;
 
 public class SimppManagerTest extends LimeTestCase {
     // tools and keys used to generate simpp.xml files, certificate files, etc are in 
@@ -145,7 +146,7 @@ public class SimppManagerTest extends LimeTestCase {
             
             ignoring(httpExecutor).execute(with(new NonSimppDownloadRequestMatcher()),
                     with(any(HttpParams.class)), with(any(HttpClientListener.class)));
-            will(failUpload());
+            will(MockUtils.failUpload());
             ignoring(httpExecutor).releaseResources(with(any(HttpResponse.class)));
         }});
         
@@ -1116,7 +1117,7 @@ public class SimppManagerTest extends LimeTestCase {
         context.checking(new Expectations() {{
             one(httpExecutor).execute(with(new SimppDownloadRequestMatcher()), 
                     with(any(HttpParams.class)), with(any(HttpClientListener.class)));
-            will(failUpload());
+            will(MockUtils.failUpload());
         }});
         
         TestConnection connection = new TestConnection(TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv2147483647_Nv2147483647_Cert", getClass()),
@@ -1330,17 +1331,6 @@ public class SimppManagerTest extends LimeTestCase {
             public Object invoke(Invocation invocation) throws Throwable {
                 HttpClientListener httpClientListener = (HttpClientListener) invocation.getParameter(2);
                 httpClientListener.requestComplete((HttpUriRequest) invocation.getParameter(0), createHttpResponse(IOUtils.deflate(readFile(simppFilename))));
-                return null;
-            }
-        };
-    }
-    
-    private CustomAction failUpload() {
-        return new CustomAction("fail simpp upload") {
-            @Override
-            public Object invoke(Invocation invocation) throws Throwable {
-                HttpClientListener httpClientListener = (HttpClientListener) invocation.getParameter(2);
-                httpClientListener.requestFailed((HttpUriRequest) invocation.getParameter(0), null, new IOException());
                 return null;
             }
         };

@@ -17,18 +17,20 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.params.HttpParams;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.Matcher;
+import org.hamcrest.core.IsNot;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.concurrent.ScheduledListeningFuture;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.GGEP;
+import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
@@ -45,6 +47,8 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.http.HttpClientListener;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AbstractVendorMessage;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -57,6 +61,7 @@ import com.limegroup.gnutella.security.CertificateVerifierImpl;
 import com.limegroup.gnutella.security.DefaultDataProvider;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.util.MockUtils;
 
 /**
  * Tests to make sure updates are sent, requested, etc...
@@ -85,6 +90,14 @@ public class InterClientTest extends PeerTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    private final Matcher<HttpUriRequest> updateRequest = MockUtils.createUriRequestMatcher("limewire.com/v3/update.def");
+    
+    private final Matcher<HttpUriRequest> nonUpdateRequest = new IsNot<HttpUriRequest>(updateRequest);
+    
+    private final Matcher<HttpUriRequest> certificateRequest = MockUtils.createUriRequestMatcher("http://certs.limewire.com/update/update.cert");
+    
+    private final Matcher<HttpUriRequest> nonCertificateRequest = new IsNot<HttpUriRequest>(certificateRequest);
+    
     private UpdateRequest dummy = new UpdateRequest();
 
     private Module[] modules;
@@ -100,6 +113,8 @@ public class InterClientTest extends PeerTestCase {
     private Mockery context;
 
     private LimeHttpClient limeHttpClient;
+
+    private HttpExecutor httpExecutor;
     
     @Override
     public void setUp() throws Exception {
@@ -114,12 +129,17 @@ public class InterClientTest extends PeerTestCase {
         
         context = new Mockery();
         limeHttpClient = context.mock(LimeHttpClient.class);
+        httpExecutor = context.mock(HttpExecutor.class);
         
         context.checking(new Expectations() {{
-            ignoring(limeHttpClient).execute(with(new NonUpdateCertificateRequestMatcher()));
+            ignoring(limeHttpClient).execute(with(nonCertificateRequest));
             will(throwException(new IOException()));
             ignoring(limeHttpClient).releaseConnection(with(any(HttpResponse.class)));
-            ignoring(limeHttpClient).setParams(with(any(HttpParams.class)));
+            
+            ignoring(httpExecutor).execute(with(nonUpdateRequest),
+                    with(any(HttpParams.class)), with(any(HttpClientListener.class)));
+            will(MockUtils.failUpload());
+            ignoring(httpExecutor).releaseResources(with(any(HttpResponse.class)));
         }});
         
         modules = new Module[] { new AbstractModule() {
@@ -136,6 +156,7 @@ public class InterClientTest extends PeerTestCase {
                     }
                 });
                 bind(LimeHttpClient.class).toInstance(limeHttpClient);
+                bind(HttpExecutor.class).toInstance(httpExecutor);
             }
         }, LimeTestUtils.createModule(this) };
     }
@@ -519,7 +540,7 @@ public class InterClientTest extends PeerTestCase {
         assertTrue(certFile.delete());
         
         context.checking(new Expectations() {{
-            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            one(limeHttpClient).execute(with(certificateRequest));
             will(uploadCertificate("update.cert"));
         }});
         
@@ -555,7 +576,7 @@ public class InterClientTest extends PeerTestCase {
         defaultData = readFile("update_4_4_4_cert.xml");
                 
         context.checking(new Expectations() {{
-            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            one(limeHttpClient).execute(with(certificateRequest));
             will(throwException(new IOException()));
         }});
         
@@ -589,7 +610,7 @@ public class InterClientTest extends PeerTestCase {
         defaultData = readFile("update_4_4_4_cert.xml");
                 
         context.checking(new Expectations() {{
-            one(limeHttpClient).execute(with(new UpdateCertificateRequestMatcher()));
+            one(limeHttpClient).execute(with(certificateRequest));
             will(throwException(new IOException()));
         }});
         
@@ -613,8 +634,27 @@ public class InterClientTest extends PeerTestCase {
         context.assertIsSatisfied();
     }
 
-    // download and store Update from http, because local Update is too old
+    /**
+     * Tests http download are triggered if there hasn't been a new update
+     * message in a month
+     */
     public void testStartOldLocalUpdateAndDownloadOK() throws Exception {
+        UpdateSettings.LAST_UPDATE_TIMESTAMP.setValue(0);
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(0);
+        
+        context.checking(new Expectations() {{
+            one(httpExecutor).execute(with(updateRequest), with(any(HttpParams.class)), with(any(HttpClientListener.class)));
+            will(MockUtils.upload(IOUtils.deflate(readFile("update_10_30_20_Cert.xml"))));
+        }});
+        
+        createUpdateHandler();
+        
+        backgroundExecutor.waitForHttpUpdate();
+        
+        assertGreaterThan(0, UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue());
+        assertGreaterThan(0, UpdateSettings.LAST_HTTP_FAILOVER.getValue());
+        
+        context.assertIsSatisfied();
     }
     
     /////////////////////Verify a Update from a peer/////////////////////////////
@@ -770,29 +810,7 @@ public class InterClientTest extends PeerTestCase {
             }
         };
     }
-    
-    private static class UpdateCertificateRequestMatcher extends TypeSafeMatcher<HttpUriRequest> {
-        @Override
-        public boolean matchesSafely(HttpUriRequest item) {
-            return item.getURI().toString().startsWith("http://certs.limewire.com/update/update.cert");
-        }
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("update certificate request");
-        }
-    }
-    
-    private static class NonUpdateCertificateRequestMatcher extends TypeSafeMatcher<HttpUriRequest> {
-        @Override
-        public boolean matchesSafely(HttpUriRequest item) {
-            return !new UpdateCertificateRequestMatcher().matches(item);
-        }
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("update certificate request");
-        }
-    }
-    
+
     /**
      * Executor that lowers a countdown latch when the SimppManager has
      * received a new message.
@@ -804,8 +822,10 @@ public class InterClientTest extends PeerTestCase {
         }
 
         final CountDownLatch handleNetworkDataLatch = new CountDownLatch(1);
+        final CountDownLatch handleHttpUpdateLatch = new CountDownLatch(1);
         
-        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdatehandlerImpl$4", handleNetworkDataLatch);
+        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdatehandlerImpl$4", handleNetworkDataLatch,
+                "UpdateHandlerImpl$RequestHandler$1", handleHttpUpdateLatch);
         
         @Override
         public void execute(Runnable command) {
@@ -822,9 +842,23 @@ public class InterClientTest extends PeerTestCase {
             }
         }
         
-        public boolean waitForNetworkDataHandled() throws InterruptedException {
-            return handleNetworkDataLatch.await(2, TimeUnit.SECONDS);
+        @Override
+        public ScheduledListeningFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            // execute http immediately
+            if (command.getClass().getName().endsWith("UpdateHandlerImpl$5")) {
+                command.run();
+                return null;
+            } else {
+                return super.schedule(command, delay, unit);
+            }
+        }
+        
+        public void waitForNetworkDataHandled() throws InterruptedException {
+            assertTrue(handleNetworkDataLatch.await(2, TimeUnit.SECONDS));
         }
 
+        public void waitForHttpUpdate() throws InterruptedException {
+            assertTrue(handleHttpUpdateLatch.await(4, TimeUnit.SECONDS));
+        }
     }
 }
