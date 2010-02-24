@@ -35,6 +35,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.SequencedExpectations;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
@@ -946,9 +947,6 @@ public class InterClientTest extends PeerTestCase {
      * the download is ok. the downloaded update is accepted
      */
     public void testKvIGIDDownloadFirstTimeOK() throws Exception {
-        //local update_8_8_4_Cert.xml
-        //net update_2147483647_2147483647_2147483647_Cert.xml
-        //1st time http download ok
         changeVersionFile("update_8_8_4_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
@@ -967,7 +965,7 @@ public class InterClientTest extends PeerTestCase {
         // to ensure the accepted version is from http download, peer sends an update with old version != IGNORE_ID 
         PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_2147483647_2147483647_Cert.xml"), dummy));
         PEER.flush();
-        backgroundExecutor.waitForNetworkDataHandled();
+        backgroundExecutor.waitForHttpUpdate();
         
         assertEquals(2147483647, updateHandler.getNewVersion());
         assertEquals(2147483647, updateHandler.getLatestId());
@@ -990,18 +988,28 @@ public class InterClientTest extends PeerTestCase {
         assertEquals(4, updateHandler.getKeyVersion());
         assertFilesEqual("slave_4.cert", certFile);
         
-        // 1st time http download failed, but 2nd time is ok
-//        UpdateSettings.LAST_HTTP_FAILOVER.setValue(0);
-//        context.checking(new Expectations() {{
-//            one(httpExecutor).execute(with(updateRequest), with(any(HttpParams.class)), with(any(HttpClientListener.class)));
-//            will(MockUtils.upload(IOUtils.deflate(readFile("update_2147483647_2147483647_2147483647_Cert.xml"))));
-//        }});
-
+        context.checking(new SequencedExpectations(context) {{
+            one(httpExecutor).execute(with(updateRequest), with(any(HttpParams.class)), with(any(HttpClientListener.class)));
+            will(MockUtils.failUpload());
+            
+            one(httpExecutor).execute(with(updateRequest), with(any(HttpParams.class)), with(any(HttpClientListener.class)));
+            will(MockUtils.upload(IOUtils.deflate(readFile("update_2147483647_2147483647_2147483647_Cert.xml"))));
+        }});
+        
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(0);
         // send update response with IGNORE_ID key version
         // to ensure the accepted version is from http download, peer sends an update with old version != IGNORE_ID
         PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_2147483647_2147483647_Cert.xml"), dummy));
         PEER.flush();
+        
         backgroundExecutor.waitForNetworkDataHandled();
+        
+        // assume enough time between http fail overs has passed and we get a new message
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(0);
+        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_2147483647_2147483647_Cert.xml"), dummy));
+        PEER.flush();
+        
+        backgroundExecutor.waitForHttpUpdate();
         
         assertEquals(2147483647, updateHandler.getNewVersion());
         assertEquals(2147483647, updateHandler.getLatestId());
@@ -1123,15 +1131,15 @@ public class InterClientTest extends PeerTestCase {
         final CountDownLatch handleNetworkDataLatch = new CountDownLatch(1);
         final CountDownLatch handleHttpUpdateLatch = new CountDownLatch(1);
         
-        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdateHandlerImpl$4", handleNetworkDataLatch,
-                "UpdateHandlerImpl$RequestHandler$1", handleHttpUpdateLatch);
+        final Map<Class<? extends Runnable>, CountDownLatch> latches = ImmutableMap.of(UpdateHandlerImpl.NetworkDataRunnable.class, handleNetworkDataLatch,
+                UpdateHandlerImpl.RequestHandlerDataRunnable.class, handleHttpUpdateLatch);
         
         @Override
         public void execute(Runnable command) {
             super.execute(command);
-            System.out.println(command.getClass());
-            for (final Entry<String, CountDownLatch> entry : latches.entrySet()) {
-                if (command.getClass().getName().endsWith(entry.getKey())) {
+            // count down latches if a runnable was executed that we're interested in
+            for (final Entry<Class<? extends Runnable>, CountDownLatch> entry : latches.entrySet()) {
+                if (command.getClass() == entry.getKey()) {
                     super.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -1145,7 +1153,8 @@ public class InterClientTest extends PeerTestCase {
         @Override
         public ScheduledListeningFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
             // execute http immediately
-            if (command.getClass().getName().endsWith("UpdateHandlerImpl$5")) {
+            if (command.getClass() == UpdateHandlerImpl.StaleHttpUpdateRunnable.class
+                    || command.getClass() == UpdateHandlerImpl.HttpMaxFailOverRunnable.class) {
                 command.run();
                 return null;
             } else {

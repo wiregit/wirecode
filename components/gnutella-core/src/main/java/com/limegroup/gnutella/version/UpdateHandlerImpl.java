@@ -323,14 +323,31 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      *  All notifications are processed in the same thread, sequentially.)
      */
     public void handleNewData(final byte[] data, final ReplyHandler handler) {
+        LOG.debug("handling new network data");
         if(data != null) {
-            backgroundExecutor.execute(new Runnable() {
-                public void run() {
-                    LOG.trace("Parsing new data...");
-                    handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
-                }
-            });
+            backgroundExecutor.execute(new NetworkDataRunnable(data, handler));
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it
+     */
+    class NetworkDataRunnable implements Runnable {
+        
+        private final byte[] data;
+        private final ReplyHandler handler;
+
+        public NetworkDataRunnable(byte[] data, ReplyHandler handler) {
+            this.data = data;
+            this.handler = handler;
+        }
+
+        @Override
+        public void run() {
+            LOG.trace("Parsing new data...");
+            handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
+        }
+        
     }
     
     /**
@@ -385,7 +402,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         }
                 
         if (LOG.isDebugEnabled())
-            LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + this.newVersion);
+            LOG.debug("Got a collection with id: " + uc.getNewVersion() + ", from " + updateType + ".  Current id is: " + this.newVersion);
 
         switch (updateType) {
         case FROM_NETWORK:
@@ -539,17 +556,24 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             
-            backgroundExecutor.schedule(new Runnable() {
-                public void run() {
-                    try {
-                        launchHTTPUpdate(timeoutUpdateLocation);
-                    } catch (URISyntaxException e) {
-                        httpRequestControl.requestFinished();
-                        httpRequestControl.cancelRequest();
-                        LOG.warn(e.toString(), e);
-                    }
-                }
-            }, when, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(new StaleHttpUpdateRunnable(), when, TimeUnit.MILLISECONDS);
+        }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it
+     */
+    class StaleHttpUpdateRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                launchHTTPUpdate(timeoutUpdateLocation);
+            } catch (URISyntaxException e) {
+                httpRequestControl.requestFinished();
+                httpRequestControl.cancelRequest();
+                LOG.warn(e.toString(), e);
+            }
         }
     }
     
@@ -558,21 +582,29 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if(!httpRequestControl.requestQueued(HttpRequestControl.RequestReason.MAX) &&
                 UpdateSettings.LAST_HTTP_FAILOVER.getValue() < maxTimeAgo) {
             LOG.debug("Scheduling http max failover...");
-            backgroundExecutor.schedule(new Runnable() {
-                public void run() {
-                    String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
-                    try {
-                        launchHTTPUpdate(url);
-                    } catch (URISyntaxException e) {
-                        httpRequestControl.requestFinished();
-                        httpRequestControl.cancelRequest();
-                        LOG.warn(e.toString(), e);
-                    }
-                }
-            }, RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(new HttpMaxFailOverRunnable(), RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
         } else {
             LOG.debug("Ignoring http max failover.");
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it.
+     */
+    class HttpMaxFailOverRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
+            try {
+                launchHTTPUpdate(url);
+            } catch (URISyntaxException e) {
+                httpRequestControl.requestFinished();
+                httpRequestControl.cancelRequest();
+                LOG.warn(e.toString(), e);
+            }
+        }
+        
     }
 
     /**
@@ -945,14 +977,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             }
             
             // Handle the data in the background thread.
-            backgroundExecutor.execute(new Runnable() {
-                public void run() {
-                    httpRequestControl.requestFinished();
-                    
-                    LOG.trace("Parsing new data...");
-                    handleDataInternal(inflated, CertifiedMessageSourceType.FROM_HTTP, null);
-                }
-            });
+            backgroundExecutor.execute(new RequestHandlerDataRunnable(inflated));
             
             return false; // no more requests
         }
@@ -971,6 +996,26 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         public boolean allowRequest(HttpUriRequest request) {
             return true;
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it.
+     */
+    class RequestHandlerDataRunnable implements Runnable {
+
+        private final byte[] data;
+
+        public RequestHandlerDataRunnable(byte[] data) {
+            this.data = data;
+        }
+        
+        @Override
+        public void run() {
+            httpRequestControl.requestFinished();
+            LOG.trace("Parsing new data...");
+            handleDataInternal(data, CertifiedMessageSourceType.FROM_HTTP, null);
+        }
+        
     }
     
     /**
@@ -1106,5 +1151,9 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             return true;
         }
         return false;
+    }
+    
+    class Test {
+        
     }
 }
