@@ -124,6 +124,9 @@ public class InterClientTest extends PeerTestCase {
         changeCertFile("update.cert");
         changeVersionFile("test_8.xml");
         
+        // suppress timeout http failovers by default
+        UpdateSettings.LAST_HTTP_FAILOVER.setValue(System.currentTimeMillis());
+        
         myActivityCallback = new ActivityCallbackStub();
         backgroundExecutor = new NotifyingSimpleTimer();
         
