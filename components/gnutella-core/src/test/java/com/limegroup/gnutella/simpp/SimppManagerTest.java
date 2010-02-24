@@ -385,6 +385,23 @@ public class SimppManagerTest extends LimeTestCase {
         }
     }
     
+    public void testHigherKeyVersionLowerNewVersionIsAccepted() throws Exception {
+        changeSimppFile(TestUtils.getResourceInPackage("simpp.xml.Ov11_Kv15_Nv25_NoCert", getClass()));
+        changeCertFile(TestUtils.getResourceInPackage("slave.cert.15", getClass()));
+        createSimppManager();
+        assertVersionNumbers(11, 15, 25);
+        TestConnection conn = new TestConnection(TestUtils.getResourceInPackage("simp.xml.Ov10_Kv_19_Nv_10_Cert", getClass()), 10, 19, 10, true, true, messageFactory);//expect, respond
+        try {
+            conn.start();
+            
+            waitForUpdateRun();
+            
+            assertVersionNumbers(10, 19, 10);
+        } finally {
+            conn.killConnection();
+        }
+    }
+    
     public void testNewSimppAdvOldActualRejected() throws Exception {
         //1. Set up LimeWire 
         changeSimppFile(MIDDLE_SIMPP_FILE);

@@ -250,7 +250,7 @@ public class SimppManagerImpl implements SimppManager {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Got data with version: " + parser.getVersion() + " from: " + updateType + ", current version is: " + _lastId);
+            LOG.debug("Got data with version: " + parser.getNewVersion() + " from: " + updateType + ", current version is: " + newVersion);
         }
         
         switch(updateType) {
@@ -258,7 +258,7 @@ public class SimppManagerImpl implements SimppManager {
             if(certifiedMessage.getKeyVersion() == IGNORE_ID) {
                 if(getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover();
-            } else if(parser.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
+            } else if(parser.getNewVersion() > newVersion || certificate.getKeyVersion() > getKeyVersion()) {
                 storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
