@@ -1,11 +1,7 @@
 package org.limewire.core.impl.mozilla;
 
-import java.io.File;
-
 import org.limewire.core.settings.MozillaSettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.util.OSUtils;
-import org.limewire.util.SystemUtils;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -50,20 +46,6 @@ public class LimeMozillaOverrides {
                         "showAlertOnComplete", 0);
                 prefService.getBranch("general.useragent.extra.").setCharPref("firefox",
                         LimeWireUtils.getHttpServer());
-                
-                if(OSUtils.isWindows()) {
-                    String windowsRunningPath = SystemUtils.getRunningPath();
-                    if(windowsRunningPath != null && windowsRunningPath.contains("LimeWire.exe")) {
-                        prefService.getBranch("network.protocol-handler.app.").setCharPref("magnet", windowsRunningPath);
-                    }
-                } else if(OSUtils.isLinux()) {
-                    File linuxRunningPath = new File("/usr/lib/LimeWire/runLime.sh");
-                    if(linuxRunningPath.exists()) {
-                        prefService.getBranch("network.protocol-handler.app.").setCharPref("magnet", linuxRunningPath.getAbsolutePath());
-                    }
-                }
-                //prefService.getBranch("network.protocol-handler.external.").setBoolPref("magnet", 1);
-                prefService.getBranch("network.protocol-handler.warn-external.").setBoolPref("magnet", 0);
 
                 // prevents mozilla from beiing in offline mode inside of
                 // limewire.
