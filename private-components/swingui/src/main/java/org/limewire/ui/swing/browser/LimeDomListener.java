@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.utils.URIUtils;
+import org.limewire.ui.swing.browser.UriAction.TargetedUri;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaRuntimeException;
 import org.mozilla.dom.NodeFactory;
@@ -85,14 +86,43 @@ public class LimeDomListener implements nsIDOMEventListener {
     private UriAction.TargetedUri getTargetedUri(nsIDOMEvent event) {
         UriAction.TargetedUri targetedUrl = null;
         Node node = NodeFactory.getNodeInstance(event.getTarget());
-        if (!"html".equalsIgnoreCase(node.getNodeName())) {
-            targetedUrl = getTargetedUri(node);
-            if (targetedUrl == null) {
-                // also check parent node
-                targetedUrl = getTargetedUri(node.getParentNode());
+        
+        if("click".equals(event.getType())) {
+            if (!"html".equalsIgnoreCase(node.getNodeName())) {
+                targetedUrl = getTargetedUri(node);
+                if (targetedUrl == null) {
+                    // also check parent node
+                    targetedUrl = getTargetedUri(node.getParentNode());
+                }
             }
+        } else if("submit".equals(event.getType())) {
+            targetedUrl = getTargetedFormAction(node);
         }
         return targetedUrl;
+    }
+
+    /**
+     * Crawls up the DOM for the given node finding the first form. Returning 
+     * a TargetedUri populated with its action, or return null of no form or 
+     * action could be found. 
+     */
+    private TargetedUri getTargetedFormAction(Node node) {
+        if(node != null) {            
+            if("form".equalsIgnoreCase(node.getNodeName())) {
+                NamedNodeMap map = node.getAttributes();
+                Node actionNode = map.getNamedItem("action");
+                Node targetNode = map.getNamedItem("target");
+                String action = actionNode != null ? actionNode.getNodeValue() : null;
+                String target = targetNode != null && targetNode.getNodeValue() != null ? targetNode.getNodeValue() : "";
+                
+                if(action != null) {
+                    return new UriAction.TargetedUri(target, action);
+                }
+            } else {
+                return getTargetedFormAction(node.getParentNode());
+            }
+        }
+        return null ;
     }
 
     /**

@@ -121,12 +121,14 @@ public class BrowserUtils {
                 nsIDOMWindow2.class).getWindowRoot();
         // TODO: some way to listen for javascript?
         eventTarget.addEventListener("click", DOM_ADAPTER, true);
+        eventTarget.addEventListener("submit", DOM_ADAPTER, true);
     }
 
     static void removeDomListener(final nsIWebBrowserChrome chrome) {
         nsIDOMEventTarget eventTarget = XPCOMUtils.qi(chrome.getWebBrowser().getContentDOMWindow(),
                 nsIDOMWindow2.class).getWindowRoot();
         eventTarget.removeEventListener("click", DOM_ADAPTER, true);
+        eventTarget.removeEventListener("submit", DOM_ADAPTER, true);
     }
 
 }
