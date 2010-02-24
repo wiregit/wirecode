@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.listener;
 
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -20,19 +21,34 @@ public class ActionHandListener extends MouseActionListener {
     public void mouseEntered(MouseEvent e) {
         JComponent comp = (JComponent) e.getComponent();
         if (!Boolean.TRUE.equals(comp.getClientProperty("limewire.actionHand.disabled"))) {
-            comp.getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            Container topLevelContainer = comp.getTopLevelAncestor();
+            if(topLevelContainer != null) {
+                topLevelContainer.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            } else {
+                comp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
         }
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         JComponent comp = (JComponent) e.getComponent();
-        comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+        Container topLevelContainer = comp.getTopLevelAncestor();
+        if(topLevelContainer != null) {
+            topLevelContainer.setCursor(Cursor.getDefaultCursor());
+        } else {
+            comp.setCursor(Cursor.getDefaultCursor());
+        }
     }
     
     /** Resets cursor to default for specified component. */
     public static void resetDefaultCursor(JComponent comp) {
-        comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+        Container topLevelContainer = comp.getTopLevelAncestor();
+        if(topLevelContainer != null) {
+            topLevelContainer.setCursor(Cursor.getDefaultCursor());
+        } else {
+            comp.setCursor(Cursor.getDefaultCursor());
+        }
     }   
     
     /** Disables or re-enables the action hand from drawing. */
