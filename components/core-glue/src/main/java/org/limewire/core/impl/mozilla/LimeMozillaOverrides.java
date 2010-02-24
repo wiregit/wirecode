@@ -1,5 +1,7 @@
 package org.limewire.core.impl.mozilla;
 
+import java.io.File;
+
 import org.limewire.core.settings.MozillaSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.OSUtils;
@@ -50,9 +52,14 @@ public class LimeMozillaOverrides {
                         LimeWireUtils.getHttpServer());
                 
                 if(OSUtils.isWindows()) {
-                    String runningPath = SystemUtils.getRunningPath();
-                    if(runningPath != null && runningPath.contains("LimeWire.exe")) {
-                        prefService.getBranch("network.protocol-handler.app.").setCharPref("magnet", runningPath);
+                    String windowsRunningPath = SystemUtils.getRunningPath();
+                    if(windowsRunningPath != null && windowsRunningPath.contains("LimeWire.exe")) {
+                        prefService.getBranch("network.protocol-handler.app.").setCharPref("magnet", windowsRunningPath);
+                    }
+                } else if(OSUtils.isLinux()) {
+                    File linuxRunningPath = new File("/usr/lib/LimeWire/runLime.sh");
+                    if(linuxRunningPath.exists()) {
+                        prefService.getBranch("network.protocol-handler.app.").setCharPref("magnet", linuxRunningPath.getAbsolutePath());
                     }
                 }
                 //prefService.getBranch("network.protocol-handler.external.").setBoolPref("magnet", 1);
