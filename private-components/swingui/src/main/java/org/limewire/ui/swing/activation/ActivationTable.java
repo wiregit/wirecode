@@ -103,6 +103,8 @@ class ActivationTable extends MouseableTable {
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setColumnSelectionAllowed(false);
+        setRowSelectionAllowed(false);
+        setCellSelectionEnabled(false);
         setFillsViewportHeight(true);
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
