@@ -97,6 +97,12 @@ public class LimeDomListener implements nsIDOMEventListener {
             }
         } else if("submit".equals(event.getType())) {
             targetedUrl = getTargetedFormAction(node);
+            if("magnet".equals(targetedUrl.getProtocol())) {
+                return targetedUrl;
+            } else {
+                //only do this for magent links so that forms can be submitted still.
+                return null;
+            }
         }
         return targetedUrl;
     }
