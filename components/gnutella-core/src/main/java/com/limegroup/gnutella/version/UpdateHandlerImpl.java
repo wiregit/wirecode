@@ -305,15 +305,15 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     /**
      * Notification that a ReplyHandler has received a VM containing an update.
      */
-    public void handleUpdateAvailable(final ReplyHandler rh, final int version) {
-        if(version == _lastId) {
+    public void handleUpdateAvailable(final ReplyHandler rh, final int newVersion) {
+        if(newVersion == this.newVersion) {
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
-                    addSourceIfIdMatches(rh, version);
+                    addSourceIfIdMatches(rh, newVersion);
                 }
             });
         } else if(LOG.isDebugEnabled())
-            LOG.debug("Another version from rh: " + rh + ", them: " + version + ", me: " + _lastId);
+            LOG.debug("Another version from rh: " + rh + ", them: " + newVersion + ", me: " + this.newVersion);
     }
     
     /**
@@ -385,7 +385,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         }
                 
         if (LOG.isDebugEnabled())
-            LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
+            LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + this.newVersion);
 
         switch (updateType) {
         case FROM_NETWORK:
@@ -396,9 +396,9 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             if (certifiedMessage.getKeyVersion() == IGNORE_ID) {
                 if (getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover(uc);
-            } else if (uc.getId() <= _lastId) {
+            } else if (uc.getNewVersion() <= newVersion) {
                 checkForStaleUpdateAndMaybeDoHttpFailover();
-                addSourceIfIdMatches(handler, uc.getId());
+                addSourceIfIdMatches(handler, uc.getNewVersion());
             } else if (uc.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
                 storeAndUpdate(data, uc, updateType, certificate);
             }
@@ -515,7 +515,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             
             updateInfo.setUpdateCommand(null);
             
-            backgroundExecutor.schedule(new NotificationFailover(_lastId),
+            backgroundExecutor.schedule(new NotificationFailover(newVersion),
                     delay(clock.now(), uc.getTimestamp()),
                     TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
@@ -626,10 +626,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Notification that a given ReplyHandler may have an update we can use.
      */
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
-        if(version == _lastId)
+        if(version == this.newVersion)
             downloadUpdates(_updatesToDownload, rh);
         else if (LOG.isDebugEnabled())
-            LOG.debug("Another version? Me: " + version + ", here: " + _lastId);
+            LOG.debug("Another version? Me: " + version + ", here: " + this.newVersion);
     }
     
     /**
@@ -713,11 +713,11 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
         for(RoutedConnection mc : connectionManager.get().getConnections()) {
-            if(mc.getConnectionCapabilities().getRemoteHostUpdateVersion() == _lastId) {
+            if(mc.getConnectionCapabilities().getRemoteHostNewUpdateVersion() == newVersion) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
             } else
-                LOG.debug("Not adding source because bad id: " + mc.getConnectionCapabilities().getRemoteHostUpdateVersion() + ", us: " + _lastId);
+                LOG.debug("Not adding source because bad id: " + mc.getConnectionCapabilities().getRemoteHostNewUpdateVersion() + ", us: " + newVersion);
         }
     }
     
@@ -749,7 +749,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Determines if we should notify about there being new information.
      */
     private void notifyAboutInfo(int id) {
-        if (id != _lastId)
+        if (id != newVersion)
             return;
         
         UpdateInformation update = _updateInfo;
@@ -805,7 +805,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        backgroundExecutor.schedule(new NotificationFailover(_lastId),delay,TimeUnit.MILLISECONDS);
+                        backgroundExecutor.schedule(new NotificationFailover(newVersion),delay,TimeUnit.MILLISECONDS);
                     } else {
                         fireUpdate(updateInfo);
                         connectionManager.get().sendUpdatedCapabilities();
