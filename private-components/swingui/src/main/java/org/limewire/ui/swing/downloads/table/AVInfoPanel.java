@@ -45,6 +45,8 @@ import net.miginfocom.swing.MigLayout;
 public class AVInfoPanel extends JPanel {
     private static final String AVHOME = "#antivirus";
     private static final String AVHOME_URL = "http://www.limewire.com/client_redirect/?page=antivirus";
+    private static final String DANGEROUS = "#dangerous";
+    private static final String DANGEROUS_URL = "http://www.limewire.com/client_redirect/?page=dangerousDownloads";
 
     @Resource private Font doNotShowFont;
     @Resource private Color doNotShowForeground;
@@ -142,7 +144,7 @@ public class AVInfoPanel extends JPanel {
      */
     public void showDangerMessage(DownloadItem item, boolean showOption) {
         String heading = I18n.tr("Dangerous File");
-        String message = I18n.tr("{0} is considered a dangerous file and has automatically been deleted for your protection.", item.getFileName());
+        String message = I18n.tr("{0} is considered a dangerous file and has automatically been deleted for your protection.  <a href=\"{1}\">Learn more</a>", item.getFileName(), DANGEROUS);
         showWarningMessage(heading, message, showOption, false,
                 SwingUiSettings.WARN_DOWNLOAD_DANGEROUS, SwingUiSettings.HIDE_DOWNLOAD_DANGEROUS);
     }
@@ -319,6 +321,8 @@ public class AVInfoPanel extends JPanel {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                 if (AVHOME.equals(e.getDescription())) {
                     NativeLaunchUtils.openURL(application.addClientInfoToUrl(AVHOME_URL));
+                } else if (DANGEROUS.equals(e.getDescription())) {
+                    NativeLaunchUtils.openURL(application.addClientInfoToUrl(DANGEROUS_URL));
                 }
             }
         }
