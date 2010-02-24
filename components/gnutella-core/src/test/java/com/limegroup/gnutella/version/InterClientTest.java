@@ -510,6 +510,7 @@ public class InterClientTest extends PeerTestCase {
     public void testStartLoadMissingUpdate() throws Exception {
         assertTrue(certFile.delete());
         assertTrue(versionFile.delete());
+        // TODO: should we try update_missing.xml?
         defaultData = readFile("update_4_4_4_cert.xml");
         createUpdateHandler();
         assertEquals(4, updateHandler.getNewVersion());
@@ -696,23 +697,23 @@ public class InterClientTest extends PeerTestCase {
      */
     public void testOvGreaterKvEqualNvequal() throws Exception {
         // local new version is 8, key version is 4, old version is 8
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // send update response with the same key version and the same new version, but a higher old version
-        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_8_4_Cert.xml"), dummy));
+        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_8_5_Cert.xml"), dummy));
         PEER.flush();
         backgroundExecutor.waitForNetworkDataHandled();
         
         // local update is not changed
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         context.assertIsSatisfied();        
     }    
     
@@ -721,12 +722,12 @@ public class InterClientTest extends PeerTestCase {
      * Tests update with a cert that has a bad signature is dropped
      */   
     public void testKvGreaterCertInUpdateBadCertSig() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // send update response with higher key version, but a bad certificate signature
         PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_30_20_badCertSig.xml"), dummy));
@@ -736,8 +737,8 @@ public class InterClientTest extends PeerTestCase {
         // local update is not changed
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         context.assertIsSatisfied();        
     }
     
@@ -747,12 +748,12 @@ public class InterClientTest extends PeerTestCase {
      * that comes with the update are different, the update is dropped.
      */ 
     public void testKvGreaterCertInUpdateKvNotEqual() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // send update response with higher key version, 
         // but the key version number in the update and the certificate do not match  
@@ -763,8 +764,8 @@ public class InterClientTest extends PeerTestCase {
         // local update is not changed       
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         context.assertIsSatisfied();
     }
     
@@ -773,12 +774,12 @@ public class InterClientTest extends PeerTestCase {
      * Tests update with bad new signature is dropped.
      */ 
     public void testKvGreaterCertInUpdateBadNewSig() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // send update response with higher key version, but the update has a bad new signature  
         PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_30_20_Cert_badNewSig.xml"), dummy));
@@ -788,8 +789,8 @@ public class InterClientTest extends PeerTestCase {
         // local update is not changed   
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         context.assertIsSatisfied();
     }
     
@@ -798,12 +799,12 @@ public class InterClientTest extends PeerTestCase {
      * Tests good update with good cert is accepted. 
      */ 
     public void testKvGreaterCertInUpdate() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // send update response with higher key version, everything is fine.
         PEER.send(UpdateResponse.createUpdateResponse(readFile("update_10_30_20_Cert.xml"), dummy));
@@ -824,12 +825,12 @@ public class InterClientTest extends PeerTestCase {
      * the download fail, so the update is rejected.
      */ 
     public void testKvGreaterCertNotInUpdateDownloadFailed() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // will fail a cert download request
         context.checking(new Expectations() {{
@@ -844,8 +845,8 @@ public class InterClientTest extends PeerTestCase {
         // local update is not changed   
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
     }
     
     /**
@@ -854,12 +855,12 @@ public class InterClientTest extends PeerTestCase {
      * the download is ok, so the update is accepted.
      */  
     public void testKvGreaterCertNotInUpdateDownloadOK() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // will allow a cert download request
         context.checking(new Expectations() {{
@@ -886,12 +887,12 @@ public class InterClientTest extends PeerTestCase {
      * so the update is rejected.
      */    
     public void testKvGreaterCertNotInUpdateDownloadOKKvUpdateNotEqualCert() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // will allow a cert download request, but will be different from the key version in update message
         context.checking(new Expectations() {{
@@ -906,8 +907,8 @@ public class InterClientTest extends PeerTestCase {
         // local update is not changed        
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         context.assertIsSatisfied();
     }
     
@@ -939,6 +940,31 @@ public class InterClientTest extends PeerTestCase {
         context.assertIsSatisfied();
     }
     
+    /**
+     * accept. 
+     * Tests good update with higher key version but a lower new version is accepted.
+     */ 
+    public void testKvPeerGreaterNvPeerLower() throws Exception {
+        changeVersionFile("update_10_30_20_Cert.xml");
+        createUpdateHandler();
+        assertEquals(30, updateHandler.getNewVersion());
+        assertEquals(10, updateHandler.getLatestId());
+        assertEquals(20, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_20.cert", certFile);
+        
+        // send update response with higher key version, lower new version, everything is fine.
+        PEER.send(UpdateResponse.createUpdateResponse(readFile("update_8_29_25_Cert.xml"), dummy));
+        PEER.flush();
+        backgroundExecutor.waitForNetworkDataHandled();
+        
+        // update is accepted. 
+        assertEquals(29, updateHandler.getNewVersion());
+        assertEquals(8, updateHandler.getLatestId());
+        assertEquals(25, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_25.cert", certFile);
+        context.assertIsSatisfied();
+    }
+    
     ////////////////////////////////http download Update ///////////////////////////
     
     /**
@@ -947,12 +973,12 @@ public class InterClientTest extends PeerTestCase {
      * the download is ok. the downloaded update is accepted
      */
     public void testKvIGIDDownloadFirstTimeOK() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         // will allow a http update download 
         UpdateSettings.LAST_HTTP_FAILOVER.setValue(0);
@@ -981,12 +1007,12 @@ public class InterClientTest extends PeerTestCase {
      * the downloaded update is accepted
      */
     public void testKvIGIDDownloadSecondTimeOK() throws Exception {
-        changeVersionFile("update_8_8_4_Cert.xml");
+        changeVersionFile("update_8_8_5_Cert.xml");
         createUpdateHandler();
         assertEquals(8, updateHandler.getNewVersion());
         assertEquals(8, updateHandler.getLatestId());
-        assertEquals(4, updateHandler.getKeyVersion());
-        assertFilesEqual("slave_4.cert", certFile);
+        assertEquals(5, updateHandler.getKeyVersion());
+        assertFilesEqual("slave_5.cert", certFile);
         
         context.checking(new SequencedExpectations(context) {{
             one(httpExecutor).execute(with(updateRequest), with(any(HttpParams.class)), with(any(HttpClientListener.class)));

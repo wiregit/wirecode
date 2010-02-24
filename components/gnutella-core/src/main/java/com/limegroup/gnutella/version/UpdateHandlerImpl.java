@@ -404,20 +404,24 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (LOG.isDebugEnabled())
             LOG.debug("Got a collection with id: " + uc.getNewVersion() + ", from " + updateType + ".  Current id is: " + this.newVersion);
 
+
+        int networkKeyVersion = certificate.getKeyVersion();
+        int localKeyVersion = getKeyVersion();
         switch (updateType) {
         case FROM_NETWORK:
-            // the common case:
-            // a) if max && no max already, do failover.
-            // b) if not max && <= last, check stale.
-            // c) if not max && > last, update
-            if (certifiedMessage.getKeyVersion() == IGNORE_ID) {
-                if (getKeyVersion() != IGNORE_ID)
+            // if key version is higher than the local one
+            if (networkKeyVersion > localKeyVersion) {
+                if (networkKeyVersion == IGNORE_ID) {
                     doHttpMaxFailover(uc);
-            } else if (uc.getNewVersion() <= newVersion) {
+                } else {
+                    storeAndUpdate(data, uc, updateType, certificate);
+                }
+            } else if(networkKeyVersion == localKeyVersion && uc.getNewVersion() > newVersion ){
+                // if key versions are the same, but new version is higher than the local one
+                storeAndUpdate(data, uc, updateType, certificate);            
+            } else { // update is not accepted, check for stale
                 checkForStaleUpdateAndMaybeDoHttpFailover();
                 addSourceIfIdMatches(handler, uc.getNewVersion());
-            } else if (uc.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
-                storeAndUpdate(data, uc, updateType, certificate);
             }
             break;
         case FROM_DISK:
@@ -425,17 +429,28 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // a) always check for stale
             // b) update if we didn't get an update before this ran.
             checkForStaleUpdateAndMaybeDoHttpFailover();
-            if (uc.getNewVersion() > newVersion)
+            // if key version is higher, or
+            // if key versions are the same, but new version is higher
+            if ( (networkKeyVersion > localKeyVersion) || 
+                   (networkKeyVersion == localKeyVersion && uc.getNewVersion() > newVersion )){                
                 storeAndUpdate(data, uc, updateType, certificate);
+            }
             break;
         case FROM_HTTP:
             // on HTTP response:
             // a) update if >= stored.
             // (note this is >=, different than >, which is from
             // network)
-            // TODO do we need to ensure key version = ignore id
-            if (uc.getNewVersion() >= newVersion) 
+            boolean needToStore = true;  
+            // local key version is higher, or
+            // key versions are the same, but new version is lower, don't store
+            if ( networkKeyVersion < localKeyVersion || 
+                    ( networkKeyVersion == localKeyVersion && uc.getNewVersion() < newVersion )){
+                needToStore = false;
+            }
+            if( needToStore ){
                 storeAndUpdate(data, uc, updateType, certificate);
+            }
             break;
         }
     }
