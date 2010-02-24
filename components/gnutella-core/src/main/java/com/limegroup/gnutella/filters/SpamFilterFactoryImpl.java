@@ -14,14 +14,17 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
     private final Provider<HostileFilter> hostileFilter;
     private final Provider<LocalIPFilter> ipFilter;
     private final Provider<URNFilter> urnFilter;
+    private final Provider<RepetitiveQueryFilter> repetitiveQueryFilter;
 
     @Inject
     public SpamFilterFactoryImpl(Provider<HostileFilter> hostileFilter,
             Provider<LocalIPFilter> ipFilter,
-            Provider<URNFilter> urnFilter) {
+            Provider<URNFilter> urnFilter,
+            Provider<RepetitiveQueryFilter> repetitiveQueryFilter) {
         this.hostileFilter = hostileFilter;
         this.ipFilter = ipFilter;
         this.urnFilter = urnFilter;
+        this.repetitiveQueryFilter = repetitiveQueryFilter;
     }
 
     /* (non-Javadoc)
@@ -67,8 +70,10 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
         buf.add(new GUIDFilter());
 
         //2. Duplicate-based techniques.
-        if (FilterSettings.FILTER_DUPLICATES.getValue())
+        if (FilterSettings.FILTER_DUPLICATES.getValue()) {
             buf.add(new DuplicateFilter());
+            buf.add(repetitiveQueryFilter.get());
+        }
 
         //3. Greedy queries.  Yes, this is a route filter issue.
         if (FilterSettings.FILTER_GREEDY_QUERIES.getValue())

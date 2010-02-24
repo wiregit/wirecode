@@ -57,12 +57,19 @@ public class FilterSettings extends LimeProps {
         FACTORY.createRemoteBooleanSetting("FILTERED_URNS_ARE_SPAM", true,
                 "FilterSettings.filteredUrnsAreSpam");
     /**
-     * Sets whether or not duplicate search results are
-     * banned.
+     * Sets whether or not duplicate pings and queries are filtered.
      */
     public static final BooleanSetting FILTER_DUPLICATES =
         FACTORY.createBooleanSetting("FILTER_DUPLICATES", true);
     
+    /**
+     * The size of the <code>RepetitiveQueryFilter</code>: higher values make
+     * the filter more sensitive, 0 disables it entirely.
+     */
+    public static final IntSetting REPETITIVE_QUERY_FILTER_SIZE =
+        FACTORY.createRemoteIntSetting("REPETITIVE_QUERY_FILTER_SIZE", 10,
+                "FilterSettings.repetitiveQueryFilterSize", 0, 100);
+
     /**
      * Sets whether or not greedy queries are filtered.
      */
