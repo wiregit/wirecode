@@ -63,7 +63,7 @@ class LaunchFileAction extends AbstractAction {
                 audioPlayerProvider.get().play(fileItem);
             } else if (SwingUiSettings.PLAYER_ENABLED.getValue() && PlayerUtils.isPlayableVideoFile(fileItem.getFile(), categoryManager)) {
                 //make sure nothing else is playing
-                PlayerUtils.pause();
+                PlayerUtils.stop();
                 videoPlayerProvider.get().play(fileItem);
             } else {    
                 NativeLaunchUtils.safeLaunchFile(fileItem.getFile(), categoryManager);

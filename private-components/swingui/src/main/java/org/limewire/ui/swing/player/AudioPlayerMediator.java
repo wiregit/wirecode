@@ -282,7 +282,10 @@ class AudioPlayerMediator implements PlayerMediator {
     @Override
     public void resume() {
         PlayerState status = getPlayer().getStatus();
-        if ((status == PlayerState.STOPPED) || (status == PlayerState.UNKNOWN)) {
+        if ((status == PlayerState.STOPPED  || status == PlayerState.UNKNOWN) && fileItem != null) {
+            //resume the file that was stopped
+            play(fileItem);
+        } else if ((status == PlayerState.STOPPED) || (status == PlayerState.UNKNOWN)) {
             // Get first selected item.
             List<LocalFileItem> selectedItems = libraryMediator.getSelectedItems();
             if (selectedItems.size() > 0) {
