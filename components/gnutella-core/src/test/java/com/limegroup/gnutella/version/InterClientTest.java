@@ -827,12 +827,13 @@ public class InterClientTest extends PeerTestCase {
         final CountDownLatch handleNetworkDataLatch = new CountDownLatch(1);
         final CountDownLatch handleHttpUpdateLatch = new CountDownLatch(1);
         
-        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdatehandlerImpl$4", handleNetworkDataLatch,
+        final Map<String, CountDownLatch> latches = ImmutableMap.of("UpdateHandlerImpl$4", handleNetworkDataLatch,
                 "UpdateHandlerImpl$RequestHandler$1", handleHttpUpdateLatch);
         
         @Override
         public void execute(Runnable command) {
             super.execute(command);
+            System.out.println(command.getClass());
             for (final Entry<String, CountDownLatch> entry : latches.entrySet()) {
                 if (command.getClass().getName().endsWith(entry.getKey())) {
                     super.execute(new Runnable() {
