@@ -34,6 +34,7 @@ import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -51,6 +52,8 @@ class ActivationTable extends MouseableTable {
     private Color expiredColor;
     @Resource
     private Font rendererFont;
+    @Resource
+    private int columnWidth;
     
     private final DefaultEventTableModel<ActivationItem> model;
     private final Application application;
@@ -63,13 +66,17 @@ class ActivationTable extends MouseableTable {
 
         this.application = application;
 
+        // the column widths need to be wider for osx to support the error messages.
+        if(OSUtils.isMacOSX())
+            columnWidth += 10;
+        
         initTable();
                
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(100);
-        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(100);
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMinWidth(columnWidth);
+        getColumnExt(ActivationTableFormat.DATE_REGISTERED_INDEX).setMaxWidth(columnWidth);
         
-        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(100);
-        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(100);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMinWidth(columnWidth);
+        getColumnExt(ActivationTableFormat.DATE_EXPIRE_INDEX).setMaxWidth(columnWidth);
         
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellRenderer(new LicenseTypeEditorRenderer());
         getColumn(ActivationTableFormat.MODULE_TYPE_INDEX).setCellEditor(new LicenseTypeEditorRenderer());

@@ -55,6 +55,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.NotImplementedException;
+import org.limewire.util.OSUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -122,6 +123,10 @@ public class ActivationPanel {
     
     private void initComponents(CalendarRenderer calendarRenderer, Application application) {
         GuiUtils.assignResources(this);   
+        
+        // the columns need more space on OSX so we make the table wider also
+        if(OSUtils.isMacOSX())
+            tableWidth += 20;
         
         activationPanel = new JPanel(new MigLayout("gap 0, fillx, insets 20 20 20 20"));
 
