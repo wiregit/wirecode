@@ -152,7 +152,7 @@ public class ActivationPanel {
         table = new ActivationTable(eventList, calendarRenderer, application);
 
         scrollPane = new JScrollPane(table);
-        int height = 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 2;
+        int height = 4 * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + scrollPane.getInsets().top + scrollPane.getInsets().bottom;
         
         tableOverlayBusyLabel = new ColoredBusyLabel(new Dimension(20,20));
         JPanel busyLabelPanel = new JPanel(new MigLayout("align 50% 50%"));
