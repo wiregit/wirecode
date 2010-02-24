@@ -68,7 +68,7 @@ public class ActivationInfoAction extends AbstractAction {
             + I18n.tr("Please {0}upgrade{1} to the latest version.", "<a href='" + application.addClientInfoToUrl(DOWNLOAD_UPDATE_URL) + "'>", "</a>")
             + "</html>";
         case UNUSEABLE_OS:
-            I18n.tr("{0} is not supported by {1} {2}. We apologize for the inconvenience.", item.getLicenseName(), OSUtils.getOS(), OSUtils.getOSVersion());
+            return I18n.tr("{0} is not supported by {1} {2}. We apologize for the inconvenience.", item.getLicenseName(), OSUtils.getOS(), OSUtils.getOSVersion());
         case EXPIRED:
             return I18n.tr("{0} is expired.", item.getLicenseName());
         default:
