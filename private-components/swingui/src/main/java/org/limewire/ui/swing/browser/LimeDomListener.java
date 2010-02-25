@@ -96,6 +96,9 @@ public class LimeDomListener implements nsIDOMEventListener {
                 }
             }
         } else if("submit".equals(event.getType())) {
+            //TODO this is a special case to only handle submits for magnet links
+            //it would make sense in the future to just move all magnet link handling
+            //to its own listener, to not pollute the code with this special casing 
             targetedUrl = getTargetedFormAction(node);
             if("magnet".equals(targetedUrl.getProtocol())) {
                 return targetedUrl;
