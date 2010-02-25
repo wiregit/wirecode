@@ -163,7 +163,7 @@ public class SimppManagerTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DefaultDataProvider.class).toInstance(new DefaultDataProvider() {
+                bind(DefaultDataProvider.class).annotatedWith(Simpp.class).toInstance(new DefaultDataProvider() {
                     public byte[] getDefaultData() {
                         return defaultSimppData;
                     }
