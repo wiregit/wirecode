@@ -32,8 +32,4 @@ public class LimeWireUpdateModule extends AbstractModule {
     @Provides @Update CertifiedMessageVerifier updateMessageVerifier(@Update CertificateProvider certificateProvider, CertificateVerifier certificateVerifier) {
         return new CertifiedMessageVerifierImpl(certificateProvider, certificateVerifier);
     }
-
-    public static void main(String[] args) {
-        System.out.println(URI.create("http://certs.limewire.com/update/update.cert").toASCIIString());
-    }
 }
