@@ -93,7 +93,7 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
         }
         
         private void checkLicenseForCompleteness() {
-            if (getLength() == 14) {
+            if (getLength() == 14 || getLength() == 0) {
                 if (!licenseIsCorrectLength) {
                     firePropertyChange(LICENSE_IS_CORRECT_LENGTH, licenseIsCorrectLength, true);
                     licenseIsCorrectLength = true;
