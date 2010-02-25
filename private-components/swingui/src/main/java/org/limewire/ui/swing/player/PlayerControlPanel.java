@@ -97,6 +97,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     private final JPanel statusPanel;
     private final JButton volumeButton;
     private JButton shuffleButton;
+    private int numberOfPlayerTimeValuesToIgnore = 0;
     
     private final JPopupMenu volumeControlPopup;
     private final VolumeSlider volumeSlider; 
@@ -341,6 +342,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             protected void mouseSkip(int x) {
                 if (progressSlider.getUI() instanceof BasicSliderUI) {
                     progressSlider.setValue(((BasicSliderUI)progressSlider.getUI()).valueForXPosition(x));
+                    numberOfPlayerTimeValuesToIgnore = 2;
                 }
             }
         });
@@ -369,7 +371,16 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     @Override
     public void progressUpdated(float progress) {
         if (!(progressSlider.getValueIsAdjusting() || getPlayerMediator().getStatus() == PlayerState.SEEKING)) {
-            progressSlider.setValue((int) (progressSlider.getMaximum() * progress));
+            // When the slider value is updated by the mouse, there can be some slider updates with the old values still 
+            // queued and waiting to run. So, after the user moves the slider with his mouse to the new play location,
+            // an old update can cause it to return to the old play location before a fresh update causes it to jump
+            // forward to the new location again. To prevent this odd behavior, after the user changes the play position
+            // with his mouse, we ignore a few of the subsequent updates.
+            if (numberOfPlayerTimeValuesToIgnore > 0) {
+                numberOfPlayerTimeValuesToIgnore--;
+            } else {
+                progressSlider.setValue((int) (progressSlider.getMaximum() * progress));
+            }
         }
     }
     

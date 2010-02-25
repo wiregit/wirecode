@@ -42,6 +42,7 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -49,7 +50,7 @@ import com.google.inject.assistedinject.Assisted;
 /**
  * Panel that holds video and video controls.
  */
-class VideoPanel implements Disposable{
+class VideoPanel implements Disposable {
 
     private final HeaderBar headerBar = new HeaderBar();
     
@@ -117,9 +118,9 @@ class VideoPanel implements Disposable{
                 setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue()); 
             }
         });
-
+        
         fitToScreenContainer.add(this.videoRenderer);
-        setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());        
+        setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
 
         collapsePlayerControlsTimer.setRepeats(false);
 
@@ -154,7 +155,8 @@ class VideoPanel implements Disposable{
         if (videoMediator.isFullScreen()) {
             setFitToScreen(true);
             fullScreenButton.setIcon(fullScreenSelected);
-            collapsePlayerControlsTimer.restart();
+            if (!OSUtils.isMacOSX())
+                collapsePlayerControlsTimer.restart();
         } else {
             setFitToScreen(SwingUiSettings.VIDEO_FIT_TO_SCREEN.getValue());
             fullScreenButton.setIcon(fullScreenUnselected);
@@ -331,7 +333,8 @@ class VideoPanel implements Disposable{
              */
             if (videoMediator.isFullScreen() && (e.getLocationOnScreen().x != mouseX || e.getLocationOnScreen().y != mouseY)) {
                 headerBarCollapsiblePane.setCollapsed(false);
-                collapsePlayerControlsTimer.restart();
+                if (!OSUtils.isMacOSX())
+                    collapsePlayerControlsTimer.restart();
                 mouseX = e.getLocationOnScreen().x;
                 mouseY = e.getLocationOnScreen().y;
             }
@@ -367,4 +370,5 @@ class VideoPanel implements Disposable{
             }
         }
     }
+
 }
