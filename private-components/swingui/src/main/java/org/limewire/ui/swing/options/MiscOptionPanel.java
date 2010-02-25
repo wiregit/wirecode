@@ -282,7 +282,6 @@ public class MiscOptionPanel extends OptionPanel {
                 serviceField.setText("");
                 usernameField.setText("");
                 passwordField.setText("");
-                accountManager.get().setAutoLoginConfig(null);
             }
         }
 
