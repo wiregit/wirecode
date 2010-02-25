@@ -412,6 +412,8 @@ public class InterClientTest extends PeerTestCase {
         PEER.flush();
         
         backgroundExecutor.waitForNetworkDataHandled();
+        
+        assertTrue(update.latch.await(2, TimeUnit.SECONDS));
 
         updateHandler.removeListener(update); //remove listener
         
@@ -421,10 +423,12 @@ public class InterClientTest extends PeerTestCase {
     
     private class HandleUpdate implements EventListener<UpdateEvent> {
         UpdateEvent event = null;
+        CountDownLatch latch = new CountDownLatch(1);
 
         @Override
         public void handleEvent(UpdateEvent event) {
             this.event = event;
+            latch.countDown();
         }
     }
     

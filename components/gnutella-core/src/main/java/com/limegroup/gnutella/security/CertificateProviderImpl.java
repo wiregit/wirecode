@@ -98,11 +98,23 @@ public class CertificateProviderImpl implements CertificateProvider {
         if (copy != null) {
             return copy;
         }
-        return getFromHttp(null);
+        return new NullCertificate();
+    }
+    
+    @Override
+    public Certificate get(int keyVersion, IpPort messageSource) {
+        Certificate copy = validCertificate.get();
+        if (copy == null) {
+            validCertificate.compareAndSet(null, getFromFile());
+        }
+        copy = validCertificate.get();
+        if (copy != null && copy.getKeyVersion() >= keyVersion) {
+            return copy;
+        }
+        return getFromHttp(messageSource);
     }
 
-    @Override
-    public Certificate getFromHttp(IpPort messageSource) {
+    Certificate getFromHttp(IpPort messageSource) {
         if (httpDone.compareAndSet(false, true)) {
             try {
                 return certificateVerifier.verify(httpCertificateReader.read(uri, messageSource));
