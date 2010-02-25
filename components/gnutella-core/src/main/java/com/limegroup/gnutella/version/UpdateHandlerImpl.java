@@ -407,8 +407,12 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
 
         int networkKeyVersion = certificate.getKeyVersion();
         int localKeyVersion = getKeyVersion();
+        int networkNewVersion = uc.getNewVersion();
         switch (updateType) {
         case FROM_NETWORK:
+            if (localKeyVersion == IGNORE_ID){
+                break;
+            }
             // if key version is higher than the local one
             if (networkKeyVersion > localKeyVersion) {
                 if (networkKeyVersion == IGNORE_ID) {
@@ -416,12 +420,12 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
                 } else {
                     storeAndUpdate(data, uc, updateType, certificate);
                 }
-            } else if(networkKeyVersion == localKeyVersion && uc.getNewVersion() > newVersion ){
+            } else if(networkKeyVersion == localKeyVersion && networkNewVersion > newVersion ){
                 // if key versions are the same, but new version is higher than the local one
                 storeAndUpdate(data, uc, updateType, certificate);            
             } else { // update is not accepted, check for stale
                 checkForStaleUpdateAndMaybeDoHttpFailover();
-                addSourceIfIdMatches(handler, uc.getNewVersion());
+                addSourceIfIdMatches(handler, networkNewVersion);
             }
             break;
         case FROM_DISK:
@@ -432,7 +436,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // if key version is higher, or
             // if key versions are the same, but new version is higher
             if ( (networkKeyVersion > localKeyVersion) || 
-                   (networkKeyVersion == localKeyVersion && uc.getNewVersion() > newVersion )){                
+                   (networkKeyVersion == localKeyVersion && networkNewVersion > newVersion )){                
                 storeAndUpdate(data, uc, updateType, certificate);
             }
             break;
@@ -441,16 +445,17 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // a) update if >= stored.
             // (note this is >=, different than >, which is from
             // network)
-            boolean needToStore = true;  
+//            boolean needToStore = true;  
             // local key version is higher, or
             // key versions are the same, but new version is lower, don't store
-            if ( networkKeyVersion < localKeyVersion || 
-                    ( networkKeyVersion == localKeyVersion && uc.getNewVersion() < newVersion )){
-                needToStore = false;
-            }
-            if( needToStore ){
+            if ( networkKeyVersion > localKeyVersion || (networkKeyVersion == localKeyVersion && networkNewVersion >= newVersion)){
+//                    ( networkKeyVersion != localKeyVersion || networkNewVersion >= newVersion ))){
                 storeAndUpdate(data, uc, updateType, certificate);
+//                needToStore = false;
             }
+//            if( needToStore ){
+//                storeAndUpdate(data, uc, updateType, certificate);
+//            }
             break;
         }
     }

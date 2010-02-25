@@ -176,14 +176,16 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(certifiedMessage));
                 inSequence(requestSequence);
                 
+                one(updateCollection).getNewVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+                
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(certificate));
                 inSequence(requestSequence);
                 
-                one(certifiedMessage).getKeyVersion();
+                one(certificate).getKeyVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
-                inSequence(requestSequence);
-                
+                               
                 allowing(certificateProvider).get();
                 will(returnValue(providerCertificate));
                 
@@ -291,12 +293,15 @@ public class UpdateHandlerTest extends LimeTestCase {
 
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
-
-                one(certifiedMessage).getKeyVersion();
+                
+                one(updateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
 
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
+                
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                                
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
@@ -348,11 +353,14 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                 
-                one(certifiedMessage).getKeyVersion();
+                one(updateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
-                
+
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
+                
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
@@ -424,6 +432,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         final CertifiedMessage httpCertifiedMessage = mockery.mock(CertifiedMessage.class);
         final Certificate httpCert = mockery.mock(Certificate.class);        
+        final Certificate providerCert = mockery.mock(Certificate.class);
 
         mockery.checking(new Expectations() {
             {
@@ -467,12 +476,21 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(certifiedMessageVerifier).verify(httpCertifiedMessage, null);
                 will(returnValue(httpCert));
                 
+                one(httpCert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+                
                 atLeast(1).of(httpCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 atLeast(1).of(httpCollection).getId();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+                
+                one(certificateProvider).get();
+                will(returnValue(providerCert));
 
+                one(providerCert).getKeyVersion();
+                will(returnValue(7));
+                
                 one(httpCollection).getTimestamp();
                 inSequence(requestSequence);
                 will(returnValue(54321L));
@@ -518,12 +536,18 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                 
-                one(certifiedMessage).getKeyVersion();
+                one(updateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
-                
+ 
+//                one(certifiedMessage).getKeyVersion();
+//                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+//                
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
                 
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+              
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
 
@@ -593,6 +617,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         
         final CertifiedMessage httpCertifiedMessage = mockery.mock(CertifiedMessage.class);
         final Certificate httpCert = mockery.mock(Certificate.class);        
+        final Certificate providerCert = mockery.mock(Certificate.class);
 
         mockery.checking(new Expectations() {
             {
@@ -636,6 +661,15 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(certifiedMessageVerifier).verify(httpCertifiedMessage, null);
                 will(returnValue(httpCert));
                 
+                one(httpCert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+
+                one(certificateProvider).get();
+                will(returnValue(providerCert));
+
+                one(providerCert).getKeyVersion();
+                will(returnValue(7));
+                
                 atLeast(1).of(httpCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
@@ -647,7 +681,6 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(54321L));
 
                 one(capabilitiesVmFactory).updateCapabilities();
-                inSequence(requestSequence);
 
                 one(connectionManager).sendUpdatedCapabilities();
                 inSequence(requestSequence);
@@ -691,11 +724,14 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                 
-                one(certifiedMessage).getKeyVersion();
+                one(updateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
+                
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
@@ -767,6 +803,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
         final CertifiedMessage httpCertifiedMessage = mockery.mock(CertifiedMessage.class);
         final Certificate httpCert = mockery.mock(Certificate.class);        
+        final Certificate providerCert = mockery.mock(Certificate.class);
 
         mockery.checking(new Expectations() {
             {
@@ -810,6 +847,15 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(certifiedMessageVerifier).verify(httpCertifiedMessage, null);
                 will(returnValue(httpCert));
                 
+                one(httpCert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
+
+                one(certificateProvider).get();
+                will(returnValue(providerCert));
+
+                one(providerCert).getKeyVersion();
+                will(returnValue(7));
+                
                 atLeast(1).of(httpCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
@@ -842,8 +888,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         backgroundExecutor.clear();
         final UpdateCollection secondUpdateCollection = mockery.mock(UpdateCollection.class);
         final CertifiedMessage secondCertifiedMessage = mockery.mock(CertifiedMessage.class);
-        final Certificate secondCert = mockery.mock(Certificate.class);
-         
+        final Certificate secondCert = mockery.mock(Certificate.class);         
         final Certificate secondProviderCertificate = mockery.mock(Certificate.class);
         
         mockery.checking(new Expectations() {
@@ -858,12 +903,15 @@ public class UpdateHandlerTest extends LimeTestCase {
 
                 one(secondUpdateCollection).getCertifiedMessage();
                 will(returnValue(secondCertifiedMessage));
-                
-                one(secondCertifiedMessage).getKeyVersion();
+                               
+                one(secondUpdateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certifiedMessageVerifier).verify(secondCertifiedMessage, null);
                 will(returnValue(secondCert));
+                
+                one(secondCert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certificateProvider).get();
                 will(returnValue(secondProviderCertificate));
@@ -900,15 +948,18 @@ public class UpdateHandlerTest extends LimeTestCase {
                 will(returnValue(verified));
                 one(updateCollectionFactory).createUpdateCollection(verified);
                 will(returnValue(updateCollection));
+
+                one(updateCollection).getNewVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                 
-                one(certifiedMessage).getKeyVersion();
-                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
-                
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
+                
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
@@ -1004,11 +1055,14 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                 
-                one(certifiedMessage).getKeyVersion();
+                one(updateCollection).getNewVersion();
                 will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certifiedMessageVerifier).verify(certifiedMessage, null);
                 will(returnValue(cert));
+                
+                one(cert).getKeyVersion();
+                will(returnValue(UpdateHandlerImpl.IGNORE_ID));
                 
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
@@ -1129,17 +1183,17 @@ public class UpdateHandlerTest extends LimeTestCase {
                 one(updateCollection).getCertifiedMessage();
                 will(returnValue(certifiedMessage));
                         
-                one(certifiedMessage).getKeyVersion();
-                will(returnValue(id));
+               /* one(certifiedMessage).getKeyVersion();
+                will(returnValue(id));*/
                         
                 one(certifiedMessageVerifier).verify(certifiedMessage, handler);
                 will(returnValue(cert));                     
                 
+                one(cert).getKeyVersion();
+                will(returnValue(id));
+                
                 atLeast(1).of(updateCollection).getId();
                 will(returnValue(id));
-
-                one(cert).getKeyVersion();
-                will(returnValue(7));
                 
                 one(certificateProvider).get();
                 will(returnValue(providerCertificate));
