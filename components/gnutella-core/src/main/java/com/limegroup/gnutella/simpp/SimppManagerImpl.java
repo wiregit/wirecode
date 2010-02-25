@@ -258,7 +258,7 @@ public class SimppManagerImpl implements SimppManager {
             if(certifiedMessage.getKeyVersion() == IGNORE_ID) {
                 if(getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover();
-            } else if(parser.getNewVersion() > newVersion || certificate.getKeyVersion() > getKeyVersion()) {
+            } else if(certificate.getKeyVersion() > getKeyVersion() || (certificate.getKeyVersion() == getKeyVersion() && parser.getNewVersion() > newVersion)) {
                 storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
