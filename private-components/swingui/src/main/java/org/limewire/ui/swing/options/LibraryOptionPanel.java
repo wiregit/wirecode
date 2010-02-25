@@ -13,7 +13,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -27,7 +26,6 @@ import com.google.inject.Provider;
 public class LibraryOptionPanel extends OptionPanel {
     
     @Resource private Icon p2pSharedListIcon;
-    @Resource private Icon sharingMyFilesNoStoreIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
     
@@ -200,19 +198,11 @@ public class LibraryOptionPanel extends OptionPanel {
             add(configureButton, "gapleft 15");
         }
         
-        private void addModifyInfo() {
-            
-            Icon myFilesIcon = null;
-            if (StoreMediator.canShowStoreMenu()) {
-                myFilesIcon = sharingMyFilesIcon;
-            } else {
-                myFilesIcon = sharingMyFilesNoStoreIcon;
-            }
-            
+        private void addModifyInfo() {            
             JPanel modifyInfoPanel = new JPanel(new MigLayout("nogrid, insets 0, gap 0"));
             modifyInfoPanel.setOpaque(false);
                        
-            JLabel myFiles = new JLabel(I18n.tr("My Files"), myFilesIcon, JLabel.CENTER);
+            JLabel myFiles = new JLabel(I18n.tr("My Files"), sharingMyFilesIcon, JLabel.CENTER);
             myFiles.setVerticalTextPosition(JLabel.BOTTOM);
             myFiles.setHorizontalTextPosition(JLabel.CENTER);
 

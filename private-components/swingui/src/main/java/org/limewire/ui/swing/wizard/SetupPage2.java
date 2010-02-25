@@ -18,7 +18,6 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.SegmentLayout;
-import org.limewire.ui.swing.mainframe.StoreMediator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -30,7 +29,6 @@ public class SetupPage2 extends WizardPage {
     private final LibraryData libraryData;
 
     @Resource private Icon p2pSharedListIcon;
-    @Resource private Icon sharingMyFilesNoStoreIcon;
     @Resource private Icon sharingMyFilesIcon;
     @Resource private Icon sharingArrowIcon;
 
@@ -148,18 +146,11 @@ public class SetupPage2 extends WizardPage {
     private JPanel createModifyInfoPanel() {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         
-        Icon myFilesIcon = null;
-        if (StoreMediator.canShowStoreMenu()) {
-            myFilesIcon = sharingMyFilesIcon;
-        } else {
-            myFilesIcon = sharingMyFilesNoStoreIcon;
-        }
-        
         JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
         modifyInfoPanel.add(createAndDecorateHeader(I18n.tr("To see or modify files in your Public Shared list, go to")),
                 "alignx center, wrap");
 
-        JLabel myFiles = new JLabel(I18n.tr("My Files"), myFilesIcon, JLabel.CENTER);
+        JLabel myFiles = new JLabel(I18n.tr("My Files"), sharingMyFilesIcon, JLabel.CENTER);
         myFiles.setVerticalTextPosition(JLabel.BOTTOM);
         myFiles.setHorizontalTextPosition(JLabel.CENTER);
 
