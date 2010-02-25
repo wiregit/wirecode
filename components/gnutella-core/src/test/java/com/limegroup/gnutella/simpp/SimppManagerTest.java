@@ -20,6 +20,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.concurrent.ScheduledListeningFuture;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -1400,7 +1401,18 @@ public class SimppManagerTest extends LimeTestCase {
                 });
             }
         }
-        
+
+        @Override
+        public ScheduledListeningFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+            // execute http immediately
+            if (command.getClass().getName().contains("SimppManagerImpl")) {
+                command.run();
+                return null;
+            } else {
+                return super.schedule(command, delay, unit);
+            }
+        }
+
         public boolean waitForSimppUpdate(long timeout, TimeUnit unit) throws InterruptedException {
             return latch.await(timeout, unit);
         }
