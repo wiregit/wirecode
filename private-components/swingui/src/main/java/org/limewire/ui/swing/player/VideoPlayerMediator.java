@@ -46,6 +46,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.lti.utils.OSUtils;
 
 @Singleton
 class VideoPlayerMediator implements PlayerMediator {
@@ -255,6 +256,11 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public boolean isVolumeSettable() {
+        // On Mac OS X we're using true full screen mode, and you can't use popups in true full screen mode.
+        // So, since the volume popup won't work, let's disable it.
+        if (OSUtils.isMacOSX() && isFullScreen())
+            return false;
+
         return player != null && player.getGainControl() != null;
     }
 
