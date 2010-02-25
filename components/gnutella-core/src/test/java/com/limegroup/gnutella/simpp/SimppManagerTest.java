@@ -1100,6 +1100,21 @@ public class SimppManagerTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
+    // reject.   
+    public void testKvNetwkLowerNvNetwkGreater() throws Exception {
+        loadCertAndSimpp("slave.cert.2147483647", "simpp.xml.Ov6_Kv2147483647_Nv30_Cert");
+        createSimppManager();
+        assertEquals(30, simppManager.getNewVersion());
+        
+        File newSimppFile = TestUtils.getResourceInPackage("simpp.xml.Ov6_Kv20_Nv2147483647_Cert", getClass());        
+        TestConnection conn = new TestConnection(newSimppFile, 6, 2147483647, 2147483647, true, true, messageFactory);
+        conn.start();
+        
+        waitForUpdateRun();
+        assertEquals(30, simppManager.getNewVersion());
+    }
+    
+    
     ////////////////////////////////http download simpp ///////////////////////////
     
     // cert looks good, trigger http download of simpp. 
