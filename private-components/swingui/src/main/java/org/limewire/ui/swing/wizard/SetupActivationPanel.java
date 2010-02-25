@@ -62,6 +62,7 @@ public class SetupActivationPanel extends JPanel {
         
         HyperlinkButton goProButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.UPSELL_URL),
                                                                  I18n.tr("Want to go PRO?"));
+        goProButton.setToolTipText("");
         add(goProButton, "spanx 1, growx, cell 2 2"); //wrap
 
         add(Box.createVerticalStrut(15), "spanx 1, growx, cell 2 3"); //wrap
@@ -109,6 +110,7 @@ public class SetupActivationPanel extends JPanel {
         add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
         HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL),
                                                                                  I18n.tr("I don't know my license key"));
+        unknownKeyButton.setToolTipText("");
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
         add(Box.createVerticalStrut(40), "cell 2 9");
@@ -118,6 +120,7 @@ public class SetupActivationPanel extends JPanel {
         customerSupportLabel.setText("<html>" + "<font size=\"3\" face=\"" + font.getFontName() + "\">" 
                             + I18n.tr("Please contact {0}customer support{1} for more information.", "<a href='" + application.addClientInfoToUrl(ActivationSettingsController.CUSTOMER_SUPPORT_URL) + "'>", "</a>") 
                             + "</font></html>");
+        customerSupportLabel.setToolTipText("");
 
         customerSupportLabel.setVisible(false);
         add(customerSupportLabel, "align 25% 50%, spanx 1, cell 2 10, hidemode 3"); //wrap
