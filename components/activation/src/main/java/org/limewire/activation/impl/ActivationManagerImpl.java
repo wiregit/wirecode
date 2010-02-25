@@ -513,6 +513,7 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 default:
                     throw new IllegalStateException("Unknown state " + response.getResponseType());
             }
+            LOG.debugf("Error responseType:{0} error:{1}", response.getResponseType(), error);
         }
         if(!(currentState.getActivationState() == ActivationState.AUTHORIZED 
                 && error == ActivationError.COMMUNICATION_ERROR)) {
