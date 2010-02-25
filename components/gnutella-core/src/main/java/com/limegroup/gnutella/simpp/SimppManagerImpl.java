@@ -41,7 +41,7 @@ import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
-import com.limegroup.gnutella.security.DefaultDataProvider;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -75,7 +75,7 @@ public class SimppManagerImpl implements SimppManager {
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HttpParams> defaultParams;
-    private final DefaultDataProvider simppDataProvider;
+    private final DefaultSignedMessageDataProvider simppDataProvider;
     private final HttpClientInstanceUtils httpClientUtils;
     
     /**
@@ -109,7 +109,7 @@ public class SimppManagerImpl implements SimppManager {
             Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            @Simpp DefaultDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
+            @Simpp DefaultSignedMessageDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
             @Simpp CertifiedMessageVerifier simppMessageVerifier,
             SimppDataVerifier simppDataVerifier,
             @Simpp CertificateProvider certificateProvider) {
@@ -164,7 +164,7 @@ public class SimppManagerImpl implements SimppManager {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(new File(CommonUtils
                         .getUserSettingsDir(), FILENAME)), CertifiedMessageSourceType.FROM_DISK, null);
-                handleDataInternal(simppDataProvider.getDefaultData(), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(simppDataProvider.getDefaultSignedMessageData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
     }
@@ -347,7 +347,7 @@ public class SimppManagerImpl implements SimppManager {
     }
     
     public byte[] getOldUpdateResponse() {
-        return simppDataProvider.getOldDefaultData();
+        return simppDataProvider.getDisabledKeysSignedMessageData();
     }
 
     

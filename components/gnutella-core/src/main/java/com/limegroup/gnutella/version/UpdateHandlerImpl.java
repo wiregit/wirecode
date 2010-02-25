@@ -81,7 +81,7 @@ import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
-import com.limegroup.gnutella.security.DefaultDataProvider;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -179,7 +179,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * replaced with v2.
      * <p>
      * If the master key used by {@link CertificateVerifier} is leaked, the urls
-     * below ill have to serve. 
+     * below will have to serve. 
      */
     private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v3/update.def";
     private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v3/update.def",
@@ -204,7 +204,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
 
     private final CertifiedMessageVerifier certifiedMessageVerifier;
 
-    private final DefaultDataProvider updateDataProvider;
+    private final DefaultSignedMessageDataProvider updateDataProvider;
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -223,7 +223,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             HttpClientInstanceUtils httpClientInstanceUtils,
             @Update CertificateProvider certificateProvider,
             @Update CertifiedMessageVerifier certifiedMessageVerifier,
-            @Update DefaultDataProvider updateDataProvider) {
+            @Update DefaultSignedMessageDataProvider updateDataProvider) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
@@ -275,7 +275,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         backgroundExecutor.execute(new Runnable() {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(getStoredFile()), CertifiedMessageSourceType.FROM_DISK, null);
-                handleDataInternal(updateDataProvider.getDefaultData(), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(updateDataProvider.getDefaultSignedMessageData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
         
@@ -463,7 +463,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     /**
      * Stores the given data to disk & posts an update to neighboring
      * connections. Starts the download of any updates
-     * @param certificate TODO
      */
     private void storeAndUpdate(byte[] data, UpdateCollection uc, CertifiedMessageSourceType updateType, Certificate certificate) {
         if(LOG.isTraceEnabled())
@@ -1132,7 +1131,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
 
     @Override
     public byte[] getOldUpdateResponse() {
-        return updateDataProvider.getOldDefaultData();
+        return updateDataProvider.getDisabledKeysSignedMessageData();
     }
 
     @Override
@@ -1172,8 +1171,5 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         }
         return false;
     }
-    
-    class Test {
-        
-    }
+
 }

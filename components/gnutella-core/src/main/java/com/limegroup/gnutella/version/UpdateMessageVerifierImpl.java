@@ -20,11 +20,11 @@ public class UpdateMessageVerifierImpl implements UpdateMessageVerifier {
     
     private final String base32Key;
     
-    public UpdateMessageVerifierImpl() {
+    UpdateMessageVerifierImpl() {
         this(KEY);
     }
   
-    public UpdateMessageVerifierImpl(String base32Key) {
+    UpdateMessageVerifierImpl(String base32Key) {
         this.base32Key = base32Key;
     }
 

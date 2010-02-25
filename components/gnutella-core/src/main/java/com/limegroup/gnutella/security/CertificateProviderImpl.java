@@ -117,6 +117,7 @@ public class CertificateProviderImpl implements CertificateProvider {
     Certificate getFromHttp(IpPort messageSource) {
         if (httpDone.compareAndSet(false, true)) {
             try {
+                LOG.debug("getting certifcate from http");
                 return certificateVerifier.verify(httpCertificateReader.read(uri, messageSource));
             } catch (IOException ie) {
                 LOG.debugf(ie, "certificate from invalid url: {0}", uri);

@@ -13,7 +13,7 @@ import com.limegroup.gnutella.security.CertificateProviderImpl;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageVerifierImpl;
-import com.limegroup.gnutella.security.DefaultDataProvider;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
 import com.limegroup.gnutella.security.FileCertificateReader;
 import com.limegroup.gnutella.security.HttpCertificateReader;
 
@@ -21,7 +21,7 @@ public class LimeWireUpdateModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(DefaultDataProvider.class).annotatedWith(Update.class).to(UpdateDefaultDataProviderImpl.class);
+        bind(DefaultSignedMessageDataProvider.class).annotatedWith(Update.class).to(UpdateDefaultDataProviderImpl.class);
     }
     
     @Provides @LazySingleton @Update CertificateProvider updateCertificateProvider(FileCertificateReader fileCertificateReader, HttpCertificateReader httpCertificateReader,

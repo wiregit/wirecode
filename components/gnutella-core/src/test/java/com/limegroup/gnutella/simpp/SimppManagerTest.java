@@ -51,7 +51,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertificateVerifierImpl;
-import com.limegroup.gnutella.security.DefaultDataProvider;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
 import com.limegroup.gnutella.util.MockUtils;
 
 public class SimppManagerTest extends LimeTestCase {
@@ -164,12 +164,12 @@ public class SimppManagerTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DefaultDataProvider.class).annotatedWith(Simpp.class).toInstance(new DefaultDataProvider() {
-                    public byte[] getDefaultData() {
+                bind(DefaultSignedMessageDataProvider.class).annotatedWith(Simpp.class).toInstance(new DefaultSignedMessageDataProvider() {
+                    public byte[] getDefaultSignedMessageData() {
                         return defaultSimppData;
                     }
-                    public byte[] getOldDefaultData() {
-                        return new SimppDataProviderImpl().getOldDefaultData();
+                    public byte[] getDisabledKeysSignedMessageData() {
+                        return new SimppDataProviderImpl().getDisabledKeysSignedMessageData();
                     }
                 });
                 bind(SimppDataVerifier.class).toInstance(new SimppDataVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAAHNFDNZU6UKXDJP5N7NGWAD2YQMOU23C5IRAJHNHHSDJQITAY3BRZGMUONFNOJFR74VMICCOS4UNEPZMDA46ACY5BCGRSRLPGU3XIIXZATSCOL5KFHWGOJZCZUAVFHHQHENYOIJVGFSFULPIXRK2AS45PHNNFCYCDLHZ4SQNFLZN43UIVR4DOO6EYGYP2QYCPLVU2LJXW745S"));
