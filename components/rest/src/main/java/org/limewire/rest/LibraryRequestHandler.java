@@ -116,10 +116,13 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
      * Creates the file description object for the specified file item.
      */
     private JSONObject createFileDescription(LocalFileItem fileItem) throws JSONException {
+        String sha1String = fileItem.getUrn().toString().substring(9);
+        
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("filename", fileItem.getFileName());
         jsonObj.put("category", fileItem.getCategory().getSingularName());
         jsonObj.put("size", fileItem.getSize());
+        jsonObj.put("sha1Urn", sha1String);
         return jsonObj;
     }
     

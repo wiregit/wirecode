@@ -21,6 +21,7 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
 
     private final Provider<LibraryRequestHandler> libraryHandlerFactory;
     private final Provider<SearchRequestHandler> searchHandlerFactory;
+    private final Provider<StreamRequestHandler> streamHandlerFactory;
     
     /**
      * Constructs a request handler factory using the specified services.
@@ -28,9 +29,11 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
     @Inject
     public RestRequestHandlerFactoryImpl(
             Provider<LibraryRequestHandler> libraryHandlerFactory,
-            Provider<SearchRequestHandler> searchHandlerFactory) {
+            Provider<SearchRequestHandler> searchHandlerFactory,
+            Provider<StreamRequestHandler> streamHandlerFactory) {
         this.libraryHandlerFactory = libraryHandlerFactory;
         this.searchHandlerFactory = searchHandlerFactory;
+        this.streamHandlerFactory = streamHandlerFactory;
     }
     
     @Override
@@ -42,6 +45,8 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
             return libraryHandlerFactory.get();
         case SEARCH:
             return searchHandlerFactory.get();
+        case STREAM:
+            return streamHandlerFactory.get();
         default:
             return new UnknownRequestHandler();
         }

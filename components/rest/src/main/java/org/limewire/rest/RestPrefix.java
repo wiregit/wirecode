@@ -4,7 +4,7 @@ package org.limewire.rest;
  * REST API request path prefixes.
  */
 public enum RestPrefix {
-    HELLO("hello"), LIBRARY("library"), SEARCH("search");
+    HELLO("hello"), LIBRARY("library"), SEARCH("search"), STREAM("stream");
     
     private final String pattern;
     
