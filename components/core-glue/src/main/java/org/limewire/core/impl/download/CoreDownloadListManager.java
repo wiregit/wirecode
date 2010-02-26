@@ -56,6 +56,7 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 
 @EagerSingleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -282,6 +283,9 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadAdded(Downloader downloader) {
+            // don't show currentDefinitionAVGCheck
+            if(isVirusScannerCurrentInfoDownload(downloader))
+                return;
             //Save the starting time if it hasn't been set
             if(downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE)== null){
                 downloader.setAttribute(DownloadItem.DOWNLOAD_START_DATE, new Date(), true);
@@ -302,6 +306,9 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(Downloader downloader) {
+            // don't show currentDefinitionAVGCheck
+            if(isVirusScannerCurrentInfoDownload(downloader))
+                return;
             DownloadItem item = getDownloadItem(downloader);            
             DownloadState state = item.getState();            
             if (state.isFinished()) {
@@ -330,6 +337,21 @@ public class CoreDownloadListManager implements DownloadListManager {
         DownloadItem getDownloadItem(Downloader downloader) {
             DownloadItem item = (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
             return item;
+        }
+                
+        /**
+         * Returns true if this is a VirusDefinitionCheck download, false otherwise. 
+         * This download checks if Virus Definitions are up to date. No need 
+         * to show this to the user as this will usually return true. If this download
+         * returns false, the user will see an AVG update download.
+         */
+        private boolean isVirusScannerCurrentInfoDownload(Downloader downloader) {
+            if(downloader instanceof VirusDefinitionDownloader) {
+                VirusDefinitionDownloader virusDownload = (VirusDefinitionDownloader) downloader;
+                if(virusDownload.getFile().getName().equals("current.nfo"))
+                    return true;
+            }
+            return false;
         }
     }
 
