@@ -17,7 +17,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 /**
  * Unit tests for DuplicateFilter
  */
-// TODO convert to BaseTestCase, get rid of LimeXMLDocument dependencies in last test case
 public class DuplicateFilterTest extends BaseTestCase {
 
     DuplicateFilter filter;
