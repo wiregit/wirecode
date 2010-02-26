@@ -35,7 +35,8 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
             // retrieve certificate with key version
             certificate = certificateProvider.get(message.getKeyVersion(), messageSource);
             if (certificate.getKeyVersion() != message.getKeyVersion()) {
-                LOG.debug("message key version greater than available key version");
+                if (LOG.isDebugEnabled())
+                    LOG.debugf("message key version {0} different from available key version {1}", message.getKeyVersion(), certificate.getKeyVersion());
                 throw new SignatureException("key version not equal to certificate version");
             }
         }

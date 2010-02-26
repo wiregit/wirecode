@@ -1187,7 +1187,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
                 int currentNewVersion = updateHandler.get().getNewVersion();
                 if (updateHandler.get().shouldRequestUpdateMessage(currentId, newVersion, capVM.supportsUpdateKeyVersion())) {
                     send(new UpdateRequest());
-                } else if (newVersion == currentNewVersion) {
+                } else if (newVersion == currentNewVersion && capVM.supportsUpdateKeyVersion() == updateHandler.get().getKeyVersion()) {
                     updateHandler.get().handleUpdateAvailable(this, newVersion);
                 }
             }

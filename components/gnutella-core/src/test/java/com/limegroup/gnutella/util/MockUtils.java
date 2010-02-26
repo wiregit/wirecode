@@ -23,6 +23,7 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.http.HttpClientListener;
+import com.limegroup.gnutella.http.HttpExecutor;
 
 public class MockUtils {
 
@@ -46,6 +47,10 @@ public class MockUtils {
         return connectionManager;
     }
 
+    /**
+     * @return a {@link CustomAction} that fails an asynchronous http request executed by calling
+     * {@link HttpExecutor#execute(HttpUriRequest, org.apache.http.params.HttpParams, HttpClientListener)}
+     */
     public static CustomAction failUpload() {
         return new CustomAction("fail upload") {
             @Override
@@ -57,19 +62,26 @@ public class MockUtils {
         };
     }
     
-    public static Matcher<HttpUriRequest> createUriRequestMatcher(final String uri) {
+    /**
+     * @return a {@link Matcher} that matches an {@link HttpUriRequest} that contains <code>uriPart</code> 
+     */
+    public static Matcher<HttpUriRequest> createUriRequestMatcher(final String uriPart) {
         return new TypeSafeMatcher<HttpUriRequest>() {
             @Override
             public boolean matchesSafely(HttpUriRequest item) {
-                return item.getURI().toString().contains(uri);
+                return item.getURI().toString().contains(uriPart);
             }
             @Override
             public void describeTo(Description description) {
-                description.appendText(uri);
+                description.appendText(uriPart);
             }
         };
     }
     
+    /**
+     * @return a {@link CustomAction} that will upload <code>data</code> in UTF-8 encoding to an aynchronous
+     * request made by {@link HttpExecutor#execute(HttpUriRequest, org.apache.http.params.HttpParams, HttpClientListener)}
+     */
     public static CustomAction upload(final byte[] data) {
         return new CustomAction("upload simpp file") {
             @Override

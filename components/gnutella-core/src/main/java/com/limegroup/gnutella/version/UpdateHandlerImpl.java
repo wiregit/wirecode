@@ -372,14 +372,12 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      */
     protected void handleDataInternal(byte[] data, CertifiedMessageSourceType updateType, ReplyHandler handler) {
         if (data == null) {
-            if (updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
             LOG.warn("No data to handle.");
             return;
         }
 
         String xml = updateMessageVerifier.getVerifiedData(data);
         if (xml == null) {
-            if (updateType == CertifiedMessageSourceType.FROM_NETWORK && handler != null)
             LOG.warn("Couldn't verify signature on data.");
             return;
         }
@@ -1146,11 +1144,11 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * field completely. This is the first if branch. In that case we request an
      * update message, if its newVersion number is greater and the key version is the
      * same as the current keyVersion.
-     * 
+     * <p>
      * If an old client is sending us a capabilities update, we are in the
      * second if branch, where we check that the advertised version is higher
      * than the currently known one.
-     * 
+     * <p>
      * If none of the two cases above was the case, it could be that a newer key
      * version is advertised and we should download the update regardless of its
      * version or its newVersion. That's the last if branch.

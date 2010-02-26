@@ -20,7 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class SimppParser {
     
-    public static final Log LOG = LogFactory.getLog(SimppParser.class);
+    private static final Log LOG = LogFactory.getLog(SimppParser.class);
 
     public static final String VERSION = "version";
     
