@@ -22,7 +22,6 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
     
     private Painter<JTextField> backgroundPainter;
     private Insets paintedInsets;
-    private boolean licenseIsCorrectLength = false;
 
     @Inject
     public LicenseKeyTextField() {
@@ -93,17 +92,10 @@ public class LicenseKeyTextField extends JTextField implements Paintable {
         }
         
         private void checkLicenseForCompleteness() {
-            if (getLength() == 14 || getLength() == 0) {
-                if (!licenseIsCorrectLength) {
-                    firePropertyChange(LICENSE_IS_CORRECT_LENGTH, licenseIsCorrectLength, true);
-                    licenseIsCorrectLength = true;
-                }
-            } else {
-                if (licenseIsCorrectLength) {
-                    firePropertyChange(LICENSE_IS_CORRECT_LENGTH, licenseIsCorrectLength, false);
-                    licenseIsCorrectLength = false;
-                }
-            }
+            boolean isCorrectLength = getLength() == 14 || getLength() == 0;
+            // this event needs to always fire since we can never be sure the last state
+            // and the current state are incremental changes
+            firePropertyChange(LICENSE_IS_CORRECT_LENGTH, !isCorrectLength, isCorrectLength);
         }
     }
 
