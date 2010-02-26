@@ -24,6 +24,8 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import org.limewire.io.IOUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 import org.w3c.dom.Node;
@@ -35,7 +37,7 @@ import org.w3c.dom.NodeList;
  */
 public class LimeXMLUtils {
     
-    //private static final Log LOG = LogFactory.getLog(LimeXMLUtils.class);
+    private static final Log LOG = LogFactory.getLog(LimeXMLUtils.class);
 
     private static final double MATCHING_RATE = .9;
 
@@ -710,5 +712,27 @@ public class LimeXMLUtils {
                 fis.close();
         }
         return retBytes;
+    }
+
+    /**
+     * Tries to parse <code>integer</code> to an int. If it fails, returns
+     * <code>defaultValue</code>.
+     */
+    public static int parseInteger(String integer, int defaultValue) {
+        try {
+            return Integer.parseInt(integer);
+        } catch(NumberFormatException nfx) {
+            LOG.error("Unable to parse number: " + integer, nfx);
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Removes <pre><elementName>.*</elementName></pre> from <code>input</code>.
+     * 
+     * @return <code>input</code> if element not found in the input
+     */
+    public static String stripElement(String input, String elementName) {
+        return input.replaceAll("<" + elementName + ">[^<]*</" + elementName +">", "");
     }
 }

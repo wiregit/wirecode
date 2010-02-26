@@ -1217,6 +1217,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
     	GUID qGUID = new GUID(reply.getGUID());
     	
         int numResults = searchResultHandler.get().getNumResultsForQuery(qGUID);
+        
+        LOG.debug(qGUID + " results to request " + numResults);
+                
     	
         if (numResults < 0) // this may be a proxy query
     		numResults = queryDispatcher.getLeafResultsForQuery(qGUID);

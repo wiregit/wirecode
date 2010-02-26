@@ -1,25 +1,24 @@
 package com.limegroup.gnutella.version;
 
-import org.limewire.activation.api.ActivationManager;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
+import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ApplicationServices;
 
 @Singleton
 public class UpdateCollectionFactoryImpl implements UpdateCollectionFactory {
 
-    private final ApplicationServices applicationServices;
-    private final ActivationManager activationManager;
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
 
     @Inject
-    public UpdateCollectionFactoryImpl(ApplicationServices applicationServices, ActivationManager activationManager) {
-        this.applicationServices = applicationServices;
-        this.activationManager = activationManager;
+    public UpdateCollectionFactoryImpl(HttpClientInstanceUtils httpClientInstanceUtils) {
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
+    
     }
     
-    public UpdateCollection createUpdateCollection(String xml) {
-        return new UpdateCollectionImpl(xml, applicationServices, activationManager);
+    public UpdateCollection createUpdateCollection(String xml) throws InvalidDataException {
+        return new UpdateCollectionImpl(xml, httpClientInstanceUtils);
     }
 
 }

@@ -19,9 +19,9 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -48,18 +48,17 @@ public abstract class PeerTestCase extends LimeTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    protected Injector injector;
-    protected LifecycleManager lifecycleManager;
-    protected ConnectionServices connectionServices;
-    protected BlockingConnectionFactory blockingConnectionFactory;
-    protected PingReplyFactory pingReplyFactory;
-    protected HeadersFactory headersFactory;
+    private Injector injector;
+    private LifecycleManager lifecycleManager;
+    private ConnectionServices connectionServices;
+    private BlockingConnectionFactory blockingConnectionFactory;
+    private PingReplyFactory pingReplyFactory;
+    private HeadersFactory headersFactory;
 
     public PeerTestCase(String name) {
         super(name);
     }
     
-    @SuppressWarnings({ "unused" })
     private static void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
@@ -84,7 +83,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setUp(LimeTestUtils.createInjector());
+        doSettings();
     }
     
     @Override
@@ -95,15 +94,8 @@ public abstract class PeerTestCase extends LimeTestCase {
             lifecycleManager.shutdown();
     }
     
-    protected void setUp(Injector injector) throws Exception  {
-        // calls all doSettings() for me and my parents
-        PrivilegedAccessor.invokeAllStaticMethods(this.getClass(), "doSettings",
-                                                  null);
-        
-        this.injector = injector;
-        // calls all doSettings() for me and my children
-        
-        //  rs=new RouterService(callback);
+    protected Injector createInjector(Module...modules)throws Exception  {
+        this.injector = LimeTestUtils.createInjector(modules);
         assertEquals("unexpected port",
                 SERVER_PORT, NetworkSettings.PORT.getValue());
         lifecycleManager = injector.getInstance(LifecycleManager.class);
@@ -117,6 +109,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         Thread.sleep(2000);
         assertEquals("unexpected port",
                 SERVER_PORT, NetworkSettings.PORT.getValue());
+        return this.injector;
     }
 
     protected BlockingConnection connect(boolean ultrapeer) throws Exception {

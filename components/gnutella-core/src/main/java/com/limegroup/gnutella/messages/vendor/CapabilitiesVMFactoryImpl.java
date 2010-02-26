@@ -67,6 +67,8 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
         supported.put(CapabilitiesVM.SIMPP_NEW_VERSION_BYTES, simppManager.get().getNewVersion());
         supported.put(CapabilitiesVM.SIMPP_KEY_VERSION_BYTES, simppManager.get().getKeyVersion());
         supported.put(CapabilitiesVM.UPDATE_BYTES, updateHandler.get().getLatestId());
+        supported.put(CapabilitiesVM.UPDATE_NEW_VERSION_BYTES, updateHandler.get().getNewVersion());
+        supported.put(CapabilitiesVM.UPDATE_KEY_VERSION_BYTES, updateHandler.get().getKeyVersion());
         supported.put(CapabilitiesVM.INCOMING_TCP_BYTES, networkManager.get().acceptedIncomingConnection() ? 1 : 0);
         supported.put(CapabilitiesVM.FWT_SUPPORT_BYTES, networkManager.get().supportsFWTVersion());
         

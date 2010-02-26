@@ -121,7 +121,7 @@ public interface ConnectionCapabilities {
     /**
      * Gets the remote host's 'update' version.
      */
-    public int getRemoteHostUpdateVersion();
+    public int getRemoteHostNewUpdateVersion();
 
     /**
      * Returns the DHT version if the remote host is an active DHT node or -1 if

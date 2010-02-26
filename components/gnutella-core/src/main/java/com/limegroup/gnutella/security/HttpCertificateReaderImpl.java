@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IpPort;
 
@@ -18,19 +19,22 @@ public class HttpCertificateReaderImpl implements HttpCertificateReader {
 
     private final Provider<LimeHttpClient> httpClient;
     private final CertificateParser certificateParser;
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
 
     @Inject
     public HttpCertificateReaderImpl(Provider<LimeHttpClient> httpClient, 
-            CertificateParser certificateParser) {
+            CertificateParser certificateParser,
+            HttpClientInstanceUtils httpClientInstanceUtils) {
         this.httpClient = httpClient;
         this.certificateParser = certificateParser;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.security.HttpCertificateReader#read(java.net.URI, org.limewire.io.IpPort)
      */
     public Certificate read(URI uri, IpPort messageSource) throws IOException {
-        HttpGet get = new HttpGet(uri);
+        HttpGet get = new HttpGet(httpClientInstanceUtils.addClientInfoToUrl(uri.toASCIIString()));
         if (messageSource != null) {
             get.addHeader("X-Message-Source", messageSource.getAddress() + ":" + messageSource.getPort());
         }

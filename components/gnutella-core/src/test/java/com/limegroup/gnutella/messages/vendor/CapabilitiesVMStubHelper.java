@@ -26,4 +26,12 @@ public class CapabilitiesVMStubHelper {
         caps.put(new byte[] { 'U', 'P', 'L', 'M' }, id);
         return new CapabilitiesVMImpl(caps);        
     }
+    
+    public static CapabilitiesVM makeCapabilitiesWithUpdate(int id, int newVersion, int keyVersion) {
+        Map<byte[], Integer> caps = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
+        caps.put(new byte[] { 'U', 'P', 'L', 'M' }, id);
+        caps.put(new byte[] { 'U', 'P', 'D', 'V' }, newVersion);
+        caps.put(new byte[] { 'U', 'P', 'D', 'K' }, keyVersion);
+        return new CapabilitiesVMImpl(caps);        
+    }
 }

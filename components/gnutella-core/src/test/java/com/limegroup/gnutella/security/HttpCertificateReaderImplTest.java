@@ -15,6 +15,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.http.httpclient.DefaultHttpClientInstanceUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.io.IpPortImpl;
@@ -36,7 +37,7 @@ public class HttpCertificateReaderImplTest extends BaseTestCase {
         context = new Mockery();
         limeHttpClient = context.mock(LimeHttpClient.class);
         certificateParser = context.mock(CertificateParser.class);
-        httpCertificateReaderImpl = new HttpCertificateReaderImpl(Providers.of(limeHttpClient), certificateParser);
+        httpCertificateReaderImpl = new HttpCertificateReaderImpl(Providers.of(limeHttpClient), certificateParser, new DefaultHttpClientInstanceUtils());
         
         context.checking(new Expectations() {{
             one(limeHttpClient).releaseConnection(with(any(BasicHttpResponse.class)));

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.SignatureException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.io.IpPort;
 import org.limewire.logging.Log;
@@ -21,7 +22,7 @@ public class CertificateProviderImpl implements CertificateProvider {
     private final HttpCertificateReader httpCertificateReader;
     private final CertificateVerifier certificateVerifier;
     
-    private volatile Certificate validCertificate;
+    private AtomicReference<Certificate> validCertificate = new AtomicReference<Certificate>(null);
 
     private final File file;
 
@@ -62,11 +63,14 @@ public class CertificateProviderImpl implements CertificateProvider {
 
     @Override
     public void set(Certificate certificate) {
+        LOG.debugf("setting certificate: {0}", certificate);
         try { 
-            Certificate localCopy = validCertificate;
+            Certificate localCopy = validCertificate.get();
             if (localCopy == null || certificate.getKeyVersion() > localCopy.getKeyVersion()) {
-                validCertificate = certificateVerifier.verify(certificate);
+                validCertificate.set(certificateVerifier.verify(certificate));
                 fileCertificateReader.write(certificate, file);
+            } else {
+                LOG.debugf("certificate version not greater than local one: {0}", certificate);
             }
         } catch (SignatureException se) {
             LOG.debugf(se, "certificate invalid {0} ", certificate);
@@ -85,23 +89,35 @@ public class CertificateProviderImpl implements CertificateProvider {
      */
     @Override
     public Certificate get() {
-        Certificate copy = validCertificate;
+        Certificate copy = validCertificate.get();
         if (copy != null) {
             return copy;
         }
-        validCertificate = getFromFile();
-        copy = validCertificate;
+        validCertificate.compareAndSet(null, getFromFile());
+        copy = validCertificate.get();
         if (copy != null) {
             return copy;
         }
-        validCertificate = getFromHttp(null);
-        return validCertificate;
+        return new NullCertificate();
+    }
+    
+    @Override
+    public Certificate get(int keyVersion, IpPort messageSource) {
+        Certificate copy = validCertificate.get();
+        if (copy == null) {
+            validCertificate.compareAndSet(null, getFromFile());
+        }
+        copy = validCertificate.get();
+        if (copy != null && copy.getKeyVersion() >= keyVersion) {
+            return copy;
+        }
+        return getFromHttp(messageSource);
     }
 
-    @Override
-    public Certificate getFromHttp(IpPort messageSource) {
+    Certificate getFromHttp(IpPort messageSource) {
         if (httpDone.compareAndSet(false, true)) {
             try {
+                LOG.debug("getting certifcate from http");
                 return certificateVerifier.verify(httpCertificateReader.read(uri, messageSource));
             } catch (IOException ie) {
                 LOG.debugf(ie, "certificate from invalid url: {0}", uri);
@@ -110,7 +126,7 @@ public class CertificateProviderImpl implements CertificateProvider {
             }
             return new NullCertificate();
         } else {
-            Certificate copy = validCertificate;
+            Certificate copy = validCertificate.get();
             if (copy != null) {
                 return copy;
             } else {

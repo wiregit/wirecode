@@ -429,9 +429,9 @@ public class ConnectionCapabilitiesImpl implements ConnectionCapabilities {
      * 
      * @see com.limegroup.gnutella.ConnectionCapabilities#getRemoteHostUpdateVersion()
      */
-    public int getRemoteHostUpdateVersion() {
+    public int getRemoteHostNewUpdateVersion() {
         if (capabilitiesVendorMessage != null)
-            return capabilitiesVendorMessage.supportsUpdate();
+            return capabilitiesVendorMessage.supportsNewUpdateVersion();
         else
             return -1;
     }

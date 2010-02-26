@@ -9,6 +9,24 @@ import org.limewire.io.IpPort;
  */
 public interface CertificateProvider extends MutableProvider<Certificate> {
 
-    Certificate getFromHttp(IpPort messageSource);
+    /**
+     * Potentially blocks.
+     * @returns NullCertificate if no valid certificate exists
+     */
+    @Override
+    Certificate get();
     
+    /**
+     * Potentially blocks.
+     */
+    @Override
+    void set(Certificate newValue);
+
+    /**
+     * Tries to retrieve a certificate with a key version >= <code>keyVersion</code>.
+     * <p>
+     * Potentially blocks.
+     * @returns NullCertificate if no valid certificate exists
+     */
+    Certificate get(int keyVersion, IpPort messageSource);
 }

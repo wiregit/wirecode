@@ -41,6 +41,7 @@ import com.limegroup.gnutella.security.CertificateProvider;
 import com.limegroup.gnutella.security.CertificateVerifier;
 import com.limegroup.gnutella.security.CertifiedMessageSourceType;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -74,7 +75,7 @@ public class SimppManagerImpl implements SimppManager {
     private final Provider<HttpExecutor> httpExecutor;
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<HttpParams> defaultParams;
-    private final SimppDataProvider simppDataProvider;
+    private final DefaultSignedMessageDataProvider simppDataProvider;
     private final HttpClientInstanceUtils httpClientUtils;
     
     /**
@@ -108,7 +109,7 @@ public class SimppManagerImpl implements SimppManager {
             Provider<HttpExecutor> httpExecutor,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            SimppDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
+            @Simpp DefaultSignedMessageDataProvider simppDataProvider, HttpClientInstanceUtils httpClientUtils,
             @Simpp CertifiedMessageVerifier simppMessageVerifier,
             SimppDataVerifier simppDataVerifier,
             @Simpp CertificateProvider certificateProvider) {
@@ -163,7 +164,7 @@ public class SimppManagerImpl implements SimppManager {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(new File(CommonUtils
                         .getUserSettingsDir(), FILENAME)), CertifiedMessageSourceType.FROM_DISK, null);
-                handleDataInternal(simppDataProvider.getDefaultData(), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(simppDataProvider.getDefaultSignedMessageData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
     }
@@ -249,7 +250,7 @@ public class SimppManagerImpl implements SimppManager {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Got data with version: " + parser.getVersion() + " from: " + updateType + ", current version is: " + _lastId);
+            LOG.debug("Got data with version: " + parser.getNewVersion() + " from: " + updateType + ", current version is: " + newVersion);
         }
         
         switch(updateType) {
@@ -257,7 +258,7 @@ public class SimppManagerImpl implements SimppManager {
             if(certifiedMessage.getKeyVersion() == IGNORE_ID) {
                 if(getKeyVersion() != IGNORE_ID)
                     doHttpMaxFailover();
-            } else if(parser.getNewVersion() > newVersion && certificate.getKeyVersion() >= getKeyVersion()) {
+            } else if(certificate.getKeyVersion() > getKeyVersion() || (certificate.getKeyVersion() == getKeyVersion() && parser.getNewVersion() > newVersion)) {
                 storeAndUpdate(data, parser, updateType, certificate);
             }
             break;
@@ -346,7 +347,7 @@ public class SimppManagerImpl implements SimppManager {
     }
     
     public byte[] getOldUpdateResponse() {
-        return simppDataProvider.getOldUpdateResponse();
+        return simppDataProvider.getDisabledKeysSignedMessageData();
     }
 
     
@@ -472,7 +473,7 @@ public class SimppManagerImpl implements SimppManager {
         } else if (version > getVersion()) {
             return true;
         }
-        if (getKeyVersion() > -1 && keyVersion > getKeyVersion()) {
+        if (getKeyVersion() > MIN_VERSION && keyVersion > getKeyVersion()) {
             return true;
         }
         return false;

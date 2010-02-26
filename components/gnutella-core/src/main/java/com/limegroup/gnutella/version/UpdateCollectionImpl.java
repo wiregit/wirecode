@@ -8,7 +8,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.activation.api.ActivationManager;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
+import org.limewire.io.InvalidDataException;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.XMLUtils;
@@ -17,13 +20,14 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.security.Certificate;
+import com.limegroup.gnutella.security.CertificateParserImpl;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class UpdateCollectionImpl implements UpdateCollection {
- private static final Log LOG = LogFactory.getLog(UpdateCollectionImpl.class);
+    private static final Log LOG = LogFactory.getLog(UpdateCollectionImpl.class);
     
     /**
      * The id of this UpdateCollection.
@@ -45,16 +49,24 @@ public class UpdateCollectionImpl implements UpdateCollection {
      */
     private List<DownloadInformation> downloadDataList = new LinkedList<DownloadInformation>();
 
-    private final ApplicationServices applicationServices;
-    private final ActivationManager activationManager;
+
+    private int keyVersion = -1;
+
+    private int newVersion = -1;
+
+    private byte[] signature;
+    
+    private byte[] signedPayload;
+
+    private Certificate certificate;
+
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
     
     /**
      * Ensure that this is only created by using the factory constructor.
      */
-    UpdateCollectionImpl(String xml, ApplicationServices applicationServices, 
-            ActivationManager activationManager) {
-        this.applicationServices = applicationServices;
-        this.activationManager = activationManager;
+    public UpdateCollectionImpl(String xml, HttpClientInstanceUtils httpClientInstanceUtils) throws InvalidDataException {
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
         if(LOG.isTraceEnabled())
             LOG.trace("Parsing Update XML: " + xml);
         List<UpdateData> updateData = new ArrayList<UpdateData>();
@@ -131,16 +143,16 @@ public class UpdateCollectionImpl implements UpdateCollection {
      * Parses the XML and fills in the data of this collection.
      * @param updateDataList 
      */
-    private void parse(String xml, List<UpdateData> updateDataList) {
+    private void parse(String xml, List<UpdateData> updateDataList) throws InvalidDataException {
         Document d;
         try {
             d = XMLUtils.getDocument(xml, LOG);
         } catch(IOException ioe) {
             LOG.error("Unable to parse: " + xml, ioe);
-            return;
+            throw new InvalidDataException(ioe);
         }
         
-        parseDocumentElement(d.getDocumentElement(), updateDataList);
+        parseDocumentElement(d.getDocumentElement(), updateDataList, xml);
     }
     
     /**
@@ -151,7 +163,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
      * elements.
      * @param updateDataList 
      */
-    private void parseDocumentElement(Node doc, List<UpdateData> updateDataList) {
+    private void parseDocumentElement(Node doc, List<UpdateData> updateDataList, String xml) throws InvalidDataException {
         // Ensure the document element is the 'update' element.
         if(!"update".equals(doc.getNodeName()))
             return;
@@ -186,8 +198,27 @@ public class UpdateCollectionImpl implements UpdateCollection {
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            if("msg".equals(child.getNodeName()))
+            String nodeName = child.getNodeName(); 
+            if("msg".equals(nodeName)) {
                 parseMsgItem(child, updateDataList);
+            } else if (KEY_VERSION.equals(nodeName)) {
+                keyVersion = LimeXMLUtils.parseInteger(LimeXMLUtils.getTextContent(child), -1);
+            } else if (NEW_VERSION.equals(nodeName)) {
+                newVersion = LimeXMLUtils.parseInteger(LimeXMLUtils.getTextContent(child), -1);
+            } else if (SIGNATURE.equals(nodeName)) {
+                signature = Base32.decode(LimeXMLUtils.getTextContent(child));
+                signedPayload = StringUtils.toUTF8Bytes(LimeXMLUtils.stripElement(xml, SIGNATURE));
+            } else if (CERTIFICATE.equals(nodeName)) {
+                try {
+                    certificate = new CertificateParserImpl().parseCertificate(LimeXMLUtils.getTextContent(child));
+                } catch (IOException ie) {
+                    throw new InvalidDataException(ie);
+                }
+            }
+        }
+        
+        if (keyVersion <= -1 || newVersion <= -1 || signature == null) {
+            throw new InvalidDataException("missing or invalid data: " + StringUtils.toString(this, keyVersion, newVersion, signature));
         }
     }
     
@@ -298,8 +329,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getModuleCode());
+        url = httpClientInstanceUtils.addClientInfoToUrl(url);
         data.setUpdateURL(url);
         
         try {
@@ -362,5 +392,41 @@ public class UpdateCollectionImpl implements UpdateCollection {
             return node.getNodeValue();
         else
             return null;
+    }
+
+    @Override
+    public CertifiedMessage getCertifiedMessage() {
+        return new CertifiedMessage() {
+            
+            @Override
+            public byte[] getSignedPayload() {
+                return signedPayload;
+            }
+            
+            @Override
+            public byte[] getSignature() {
+                return signature;
+            }
+            
+            @Override
+            public int getKeyVersion() {
+                return keyVersion;
+            }
+            
+            @Override
+            public Certificate getCertificate() {
+                return certificate;
+            }
+            
+            @Override
+            public String toString() {
+                return StringUtils.toString(UpdateCollectionImpl.this, keyVersion, signature, signedPayload, certificate);
+            }
+        };
+    }
+
+    @Override
+    public int getNewVersion() {
+        return newVersion;
     }
 }

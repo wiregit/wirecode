@@ -36,8 +36,8 @@ public class ConnectionCapabilitiesDelegator implements ConnectionCapabilities {
         return delegate.getRemoteHostSupportsFeatureQueries();
     }
 
-    public int getRemoteHostUpdateVersion() {
-        return delegate.getRemoteHostUpdateVersion();
+    public int getRemoteHostNewUpdateVersion() {
+        return delegate.getRemoteHostNewUpdateVersion();
     }
 
     public int getSupportedOOBProxyControlVersion() {

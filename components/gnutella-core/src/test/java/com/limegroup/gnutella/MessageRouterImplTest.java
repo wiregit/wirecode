@@ -1176,8 +1176,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
 
         private final Provider<MessageDispatcher> messageDispatcher;
 
-        private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
-
         private final Provider<SearchResultHandler> searchResultHandler;
 
         private final CapabilitiesVMFactory capabilitiesVMFactory;
@@ -1213,7 +1211,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
                 HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
                 QueryReplyFactory queryReplyFactory, Provider<MessageDispatcher> messageDispatcher,
-                Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
                 Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory, Provider<SocketsManager> socketsManager,
                 Provider<Acceptor> acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
@@ -1229,7 +1226,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
             this.handshakeResponderFactory = handshakeResponderFactory;
             this.queryReplyFactory = queryReplyFactory;
             this.messageDispatcher = messageDispatcher;
-            this.networkUpdateSanityChecker = networkUpdateSanityChecker;
             this.applicationServices = applicationServices;
             this.searchResultHandler = searchResultHandler;
             this.capabilitiesVMFactory = capabilitiesVMFactory;
@@ -1251,7 +1247,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         public ManagedConnectionStub createConnectionStub() {
             return new ManagedConnectionStub("1.2.3.4", 6346, ConnectType.PLAIN, connectionManager.get(), networkManager,
                     queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
-                    messageDispatcher.get(), networkUpdateSanityChecker.get(), searchResultHandler, 
+                    messageDispatcher.get(), searchResultHandler, 
                     capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
@@ -1269,7 +1265,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 QueryRequestFactory queryRequestFactory, HeadersFactory headersFactory,
                 HandshakeResponderFactory handshakeResponderFactory,
                 QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
-                NetworkUpdateSanityChecker networkUpdateSanityChecker,
                 Provider<SearchResultHandler> searchResultHandler,
                 CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
                 Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
@@ -1280,7 +1275,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
             super(host, port, type, connectionManager, networkManager, queryRequestFactory, headersFactory,
                     handshakeResponderFactory, queryReplyFactory, messageDispatcher,
-                    networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager,
+                    searchResultHandler, capabilitiesVMFactory, socketsManager,
                     acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
                     applicationServices, secureMessageVerifier, null, networkInstanceUtils);

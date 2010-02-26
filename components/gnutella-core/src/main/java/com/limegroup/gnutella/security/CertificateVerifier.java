@@ -8,6 +8,7 @@ import java.security.SignatureException;
 public interface CertificateVerifier {
 
     /**
+     * This call is potentially blocking.
      * @return certificate if it is valid
      * @throws SignatureException if the certificate fails verification
      */

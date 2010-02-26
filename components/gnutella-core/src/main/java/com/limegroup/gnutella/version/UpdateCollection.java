@@ -4,12 +4,22 @@ import java.util.List;
 
 import org.limewire.util.Version;
 
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
+
 /**
  * An abstraction for the update XML.
  * Contains the ID & timestamp of the message, as well as the list
  * of UpdateData information for individual messages.
  */
 public interface UpdateCollection {
+    
+    public static final String KEY_VERSION = "keyversion";
+    
+    public static final String NEW_VERSION = "newversion";
+    
+    public static final String SIGNATURE = "signature";
+    
+    public static final String CERTIFICATE = "certificate";
     
     /**
      * Gets the id of this UpdateCollection.
@@ -36,5 +46,9 @@ public interface UpdateCollection {
      * Returns null if there is no relevant update.
      */
     public UpdateData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
-            int currentStyle, Version currentJava);    
+            int currentStyle, Version currentJava);
+
+    public CertifiedMessage getCertifiedMessage();
+
+    public int getNewVersion();    
 }

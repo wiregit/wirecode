@@ -55,9 +55,7 @@ import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
@@ -277,9 +275,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      */
     private volatile boolean _useLocalPreference;
 
-    /** If we've received a capVM before. */
-    private boolean receivedCapVM = false;
-
     /**
      * The maximum protocol version for which OOB proxying has been turned off
      * by leaf peer. Defaults to 0 to allow all OOB versions to be proxied.
@@ -299,8 +294,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private final QueryReplyFactory queryReplyFactory;
 
     private final MessageDispatcher messageDispatcher;
-
-    private final NetworkUpdateSanityChecker networkUpdateSanityChecker;
 
     private final Provider<SearchResultHandler> searchResultHandler;
 
@@ -350,7 +343,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             QueryRequestFactory queryRequestFactory, HeadersFactory headersFactory,
             HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
-            NetworkUpdateSanityChecker networkUpdateSanityChecker,
             Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
@@ -369,7 +361,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.handshakeResponderFactory = handshakeResponderFactory;
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
@@ -398,7 +389,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             NetworkManager networkManager, QueryRequestFactory queryRequestFactory,
             HeadersFactory headersFactory, HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory, MessageDispatcher messageDispatcher,
-            NetworkUpdateSanityChecker networkUpdateSanityChecker,
             Provider<SearchResultHandler> searchResultHandler, CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
             Provider<SimppManager> simppManager, Provider<UpdateHandler> updateHandler,
@@ -416,7 +406,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.handshakeResponderFactory = handshakeResponderFactory;
         this.queryReplyFactory = queryReplyFactory;
         this.messageDispatcher = messageDispatcher;
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.searchResultHandler = searchResultHandler;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
@@ -1192,19 +1181,17 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
                 }
             }
 
-            // see if there's a new update message.
-            int latestId = updateHandler.get().getLatestId();
             int currentId = capVM.supportsUpdate();
             if (currentId != -1) {
-                if (currentId > latestId || (!receivedCapVM && MessageSettings.REREQUEST_SIGNED_MESSAGE.evaluateBoolean())) {
-                    networkUpdateSanityChecker.handleNewRequest(this, RequestType.VERSION);
+                int newVersion = capVM.supportsNewUpdateVersion();
+                int currentNewVersion = updateHandler.get().getNewVersion();
+                if (updateHandler.get().shouldRequestUpdateMessage(currentId, newVersion, capVM.supportsUpdateKeyVersion())) {
                     send(new UpdateRequest());
+                } else if (newVersion == currentNewVersion && capVM.supportsUpdateKeyVersion() == updateHandler.get().getKeyVersion()) {
+                    updateHandler.get().handleUpdateAvailable(this, newVersion);
                 }
-            } else if (currentId == latestId) {
-                updateHandler.get().handleUpdateAvailable(this, currentId);
             }
 
-            receivedCapVM = true;
             // fire a vendor event
             connectionManager.dispatchEvent(new ConnectionLifecycleEvent(this,
                     ConnectionLifecycleEventType.CONNECTION_CAPABILITIES, this));

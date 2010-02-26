@@ -89,11 +89,11 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
             one(message).getCertificate();
             will(returnValue(null));
             
-            one(certificateProvider).get();
-            will(returnValue(certificate));
-            
-            allowing(message).getKeyVersion();
+            exactly(2).of(message).getKeyVersion();
             will(returnValue(0));
+            
+            one(certificateProvider).get(0, null);
+            will(returnValue(certificate));
             
             allowing(certificate).getKeyVersion();
             will(returnValue(1));
@@ -108,23 +108,20 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    public void testMessageWithGreaterKeyVersionTriggersHttpFetch() throws Exception {
+    public void testMessageWithGreaterKeyVersionThanAvailableFails() throws Exception {
         context.checking(new Expectations() {{
             one(message).getCertificate();
             will(returnValue(null));
-            
-            one(certificateProvider).get();
-            will(returnValue(certificate));
-            
+
             allowing(message).getKeyVersion();
             will(returnValue(2));
+
+            one(certificateProvider).get(2, null);
+            will(returnValue(certificate));
             
             allowing(certificate).getKeyVersion();
             will(returnValue(1));
             
-            // causes http fetch, but returns same certificate
-            one(certificateProvider).getFromHttp(null);
-            will(returnValue(certificate));
         }});
         
         try {
@@ -141,12 +138,12 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
             one(message).getCertificate();
             will(returnValue(null));
             
-            one(certificateProvider).get();
-            will(returnValue(certificate));
-            
             allowing(message).getKeyVersion();
             will(returnValue(1));
             
+            one(certificateProvider).get(1, null);
+            will(returnValue(certificate));
+                        
             allowing(certificate).getKeyVersion();
             will(returnValue(1));
         }});
@@ -167,12 +164,12 @@ public class CertifiedMessageVerifierImplTest extends BaseTestCase {
             one(message).getCertificate();
             will(returnValue(null));
             
-            one(certificateProvider).get();
-            will(returnValue(certificate));
-            
             allowing(message).getKeyVersion();
             will(returnValue(1));
             
+            one(certificateProvider).get(1, null);
+            will(returnValue(certificate));
+
             allowing(certificate).getKeyVersion();
             will(returnValue(1));
         }});

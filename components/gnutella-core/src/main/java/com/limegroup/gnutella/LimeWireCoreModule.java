@@ -171,6 +171,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.FECUtils;
 import com.limegroup.gnutella.util.FECUtilsImpl;
+import com.limegroup.gnutella.version.LimeWireUpdateModule;
 import com.limegroup.gnutella.version.UpdateCollectionFactory;
 import com.limegroup.gnutella.version.UpdateCollectionFactoryImpl;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -222,6 +223,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSecurityModule());
         binder().install(new LimeWireSimppModule());
+        binder().install(new LimeWireUpdateModule());
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());
         binder().install(new LimeWireUploaderModule());
@@ -331,7 +333,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(Bootstrapper.Listener.class).to(HostCatcher.class);
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
-        bind(NetworkUpdateSanityChecker.class).to(NetworkUpdateSanityCheckerImpl.class);
         bind(CategoryManager.class).to(CategoryManagerImpl.class);
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        

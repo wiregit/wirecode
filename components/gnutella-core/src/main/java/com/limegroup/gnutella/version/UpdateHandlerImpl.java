@@ -3,6 +3,7 @@ package com.limegroup.gnutella.version;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -15,8 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -29,17 +28,20 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UpdateSettings;
+import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.util.Base32;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -51,17 +53,14 @@ import org.limewire.util.VersionUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -77,6 +76,13 @@ import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryStatusEvent;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.security.Certificate;
+import com.limegroup.gnutella.security.CertificateProvider;
+import com.limegroup.gnutella.security.CertificateVerifier;
+import com.limegroup.gnutella.security.CertifiedMessageSourceType;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier;
+import com.limegroup.gnutella.security.DefaultSignedMessageDataProvider;
+import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -101,12 +107,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private static final String FILENAME = "version.xml";
     
     // Package access for testing
-    protected static final int IGNORE_ID = Integer.MAX_VALUE;
-    
-    // Package access for testing
-    protected static enum UpdateType {
-        FROM_NETWORK, FROM_DISK, FROM_HTTP;
-    }
+    protected static final int IGNORE_ID = Certificate.IGNORE_ID;
     
     /**
      * init the random generator on class load time
@@ -132,6 +133,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * The most recent id of the update info.
      */
     private volatile int _lastId;
+    private volatile int newVersion;
     
     /**
      * The bytes to send on the wire.
@@ -159,68 +161,87 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     private final ConnectionServices connectionServices;
     private final Provider<HttpExecutor> httpExecutor;
     private final Provider<HttpParams> defaultParams;
-    private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<DownloadManager> downloadManager;
     private final Library library;
     private final FileView gnutellaFileView;
-    private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final EventListenerList<UpdateEvent> listeners;
     private final ActivationManager activationManager;
     
-    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
-            "http://update2.limewire.com/v2/update.def",
-            "http://update3.limewire.com/v2/update.def",
-            "http://update4.limewire.com/v2/update.def",
-            "http://update5.limewire.com/v2/update.def",
-            "http://update6.limewire.com/v2/update.def",
-            "http://update7.limewire.com/v2/update.def",
-            "http://update8.limewire.com/v2/update.def",
-            "http://update9.limewire.com/v2/update.def",
-            "http://update10.limewire.com/v2/update.def");
+    /**
+     * If the key used by {@link UpdateMessageVerifier} is leaked, but not the master
+     * key used by {@link CertificateVerifier}, the urls that would have to serve
+     * the final update message are the same as below, except for v3 has to be
+     * replaced with v2.
+     * <p>
+     * If the master key used by {@link CertificateVerifier} is leaked, the urls
+     * below will have to serve. 
+     */
+    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v3/update.def";
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v3/update.def",
+            "http://update2.limewire.com/v3/update.def",
+            "http://update3.limewire.com/v3/update.def",
+            "http://update4.limewire.com/v3/update.def",
+            "http://update5.limewire.com/v3/update.def",
+            "http://update6.limewire.com/v3/update.def",
+            "http://update7.limewire.com/v3/update.def",
+            "http://update8.limewire.com/v3/update.def",
+            "http://update9.limewire.com/v3/update.def",
+            "http://update10.limewire.com/v3/update.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
     
     private volatile UpdateCollection updateCollection;
+
+    private final HttpClientInstanceUtils httpClientInstanceUtils;
+
+    private final CertificateProvider certificateProvider;
+
+    private final CertifiedMessageVerifier certifiedMessageVerifier;
+
+    private final DefaultSignedMessageDataProvider updateDataProvider;
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             Provider<HttpExecutor> httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
             Provider<DownloadManager> downloadManager,
-            ApplicationServices applicationServices,
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
             UpdateMessageVerifier updateMessageVerifier, 
             RemoteFileDescFactory remoteFileDescFactory,
             @GnutellaFiles FileView gnutellaFileView,
-            Library library, ActivationManager activationManager) {
+            Library library, ActivationManager activationManager,
+            HttpClientInstanceUtils httpClientInstanceUtils,
+            @Update CertificateProvider certificateProvider,
+            @Update CertifiedMessageVerifier certifiedMessageVerifier,
+            @Update DefaultSignedMessageDataProvider updateDataProvider) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
         this.defaultParams = defaultParams;
-        this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.connectionManager = connectionManager;
         this.downloadManager = downloadManager;
         this.library = library;
-        this.applicationServices = applicationServices;
         this.updateCollectionFactory = updateCollectionFactory;
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.gnutellaFileView = gnutellaFileView;
         this.activationManager = activationManager;
+        this.httpClientInstanceUtils = httpClientInstanceUtils;
+        this.certificateProvider = certificateProvider;
+        this.certifiedMessageVerifier = certifiedMessageVerifier;
+        this.updateDataProvider = updateDataProvider;
         
         this.listeners = new EventListenerList<UpdateEvent>();
     }
@@ -253,7 +274,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         LOG.trace("Initializing UpdateHandler");
         backgroundExecutor.execute(new Runnable() {
             public void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), UpdateType.FROM_DISK, null);
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), CertifiedMessageSourceType.FROM_DISK, null);
+                handleDataInternal(updateDataProvider.getDefaultSignedMessageData(), CertifiedMessageSourceType.FROM_DISK, null);
             }
         });
         
@@ -283,15 +305,15 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     /**
      * Notification that a ReplyHandler has received a VM containing an update.
      */
-    public void handleUpdateAvailable(final ReplyHandler rh, final int version) {
-        if(version == _lastId) {
+    public void handleUpdateAvailable(final ReplyHandler rh, final int newVersion) {
+        if(newVersion == this.newVersion) {
             backgroundExecutor.execute(new Runnable() {
                 public void run() {
-                    addSourceIfIdMatches(rh, version);
+                    addSourceIfIdMatches(rh, newVersion);
                 }
             });
         } else if(LOG.isDebugEnabled())
-            LOG.debug("Another version from rh: " + rh + ", them: " + version + ", me: " + _lastId);
+            LOG.debug("Another version from rh: " + rh + ", them: " + newVersion + ", me: " + this.newVersion);
     }
     
     /**
@@ -301,14 +323,31 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      *  All notifications are processed in the same thread, sequentially.)
      */
     public void handleNewData(final byte[] data, final ReplyHandler handler) {
+        LOG.debug("handling new network data");
         if(data != null) {
-            backgroundExecutor.execute(new Runnable() {
-                public void run() {
-                    LOG.trace("Parsing new data...");
-                    handleDataInternal(data, UpdateType.FROM_NETWORK, handler);
-                }
-            });
+            backgroundExecutor.execute(new NetworkDataRunnable(data, handler));
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it
+     */
+    class NetworkDataRunnable implements Runnable {
+        
+        private final byte[] data;
+        private final ReplyHandler handler;
+
+        public NetworkDataRunnable(byte[] data, ReplyHandler handler) {
+            this.data = data;
+            this.handler = handler;
+        }
+
+        @Override
+        public void run() {
+            LOG.trace("Parsing new data...");
+            handleDataInternal(data, CertifiedMessageSourceType.FROM_NETWORK, handler);
+        }
+        
     }
     
     /**
@@ -331,46 +370,60 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * <p>
      * (Processes the data immediately.)
      */
-    protected void handleDataInternal(byte[] data, UpdateType updateType, ReplyHandler handler) {
+    protected void handleDataInternal(byte[] data, CertifiedMessageSourceType updateType, ReplyHandler handler) {
         if (data == null) {
-            if (updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get()
-                        .handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
             return;
         }
 
         String xml = updateMessageVerifier.getVerifiedData(data);
         if (xml == null) {
-            if (updateType == UpdateType.FROM_NETWORK && handler != null)
-                networkUpdateSanityChecker.get()
-                        .handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("Couldn't verify signature on data.");
             return;
         }
         
-        if (updateType == UpdateType.FROM_NETWORK && handler != null)
-            networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
-
-        UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
-        updateCollection = uc;
+        UpdateCollection uc = null;
+        try {
+            uc = updateCollectionFactory.createUpdateCollection(xml);
+        } catch (InvalidDataException e) {
+            LOG.debug("invalid update data", e);
+            return;
+        }
+        
+        CertifiedMessage certifiedMessage = uc.getCertifiedMessage();
+        Certificate certificate = null;
+        try {
+            certificate = certifiedMessageVerifier.verify(certifiedMessage, handler);
+        } catch (SignatureException se) {
+            LOG.error("message did not verify", se);
+            return;
+        }
+                
         if (LOG.isDebugEnabled())
-            LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
+            LOG.debug("Got a collection with id: " + uc.getNewVersion() + ", from " + updateType + ".  Current id is: " + this.newVersion);
 
+
+        int networkKeyVersion = certificate.getKeyVersion();
+        int localKeyVersion = getKeyVersion();
+        int networkNewVersion = uc.getNewVersion();
         switch (updateType) {
         case FROM_NETWORK:
-            // the common case:
-            // a) if max && no max already, do failover.
-            // b) if not max && <= last, check stale.
-            // c) if not max && > last, update
-            if (uc.getId() == IGNORE_ID) {
-                if (_lastId != IGNORE_ID)
+            if (localKeyVersion == IGNORE_ID) {
+                break;
+            }
+            // if key version is higher than the local one
+            if (networkKeyVersion > localKeyVersion) {
+                if (networkKeyVersion == IGNORE_ID) {
                     doHttpMaxFailover(uc);
-            } else if (uc.getId() <= _lastId) {
+                } else {
+                    storeAndUpdate(data, uc, updateType, certificate);
+                }
+            } else if(networkKeyVersion == localKeyVersion && networkNewVersion > newVersion) {
+                // if key versions are the same, but new version is higher than the local one
+                storeAndUpdate(data, uc, updateType, certificate);            
+            } else { // update is not accepted, check for stale
                 checkForStaleUpdateAndMaybeDoHttpFailover();
-                addSourceIfIdMatches(handler, uc.getId());
-            } else {// is greater
-                storeAndUpdate(data, uc, updateType);
+                addSourceIfIdMatches(handler, networkNewVersion);
             }
             break;
         case FROM_DISK:
@@ -378,16 +431,20 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             // a) always check for stale
             // b) update if we didn't get an update before this ran.
             checkForStaleUpdateAndMaybeDoHttpFailover();
-            if (uc.getId() > _lastId)
-                storeAndUpdate(data, uc, updateType);
+            // if key version is higher, or
+            // if key versions are the same, but new version is higher
+            if ((networkKeyVersion > localKeyVersion) || 
+                    (networkKeyVersion == localKeyVersion && networkNewVersion > newVersion)){                
+                storeAndUpdate(data, uc, updateType, certificate);
+            }
             break;
         case FROM_HTTP:
             // on HTTP response:
             // a) update if >= stored.
-            // (note this is >=, different than >, which is from
-            // network)
-            if (uc.getId() >= _lastId)
-                storeAndUpdate(data, uc, updateType);
+            // (note this is >=, different than >, which is from network)
+            if (networkKeyVersion > localKeyVersion || (networkKeyVersion == localKeyVersion && networkNewVersion >= newVersion)){
+                storeAndUpdate(data, uc, updateType, certificate);
+            }
             break;
         }
     }
@@ -396,19 +453,22 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Stores the given data to disk & posts an update to neighboring
      * connections. Starts the download of any updates
      */
-    private void storeAndUpdate(byte[] data, UpdateCollection uc, UpdateType updateType) {
+    private void storeAndUpdate(byte[] data, UpdateCollection uc, CertifiedMessageSourceType updateType, Certificate certificate) {
         if(LOG.isTraceEnabled())
             LOG.trace("Retrieved new data from: " + updateType + ", storing & updating.");
-        if(uc.getId() == IGNORE_ID && updateType == UpdateType.FROM_NETWORK)
+        if(uc.getId() == IGNORE_ID && updateType == CertifiedMessageSourceType.FROM_NETWORK)
             throw new IllegalStateException("shouldn't be here!");
         
         // If an http max request is pending, don't even bother with this stuff.
         // We want to get it straight from the source...
-        if (updateType == UpdateType.FROM_NETWORK && httpRequestControl.isRequestPending()
+        if (updateType == CertifiedMessageSourceType.FROM_NETWORK && httpRequestControl.isRequestPending()
                 && httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.MAX)
             return;
         
         _lastId = uc.getId();
+        newVersion = uc.getNewVersion();
+        updateCollection = uc;
+        certificateProvider.set(certificate);
         
         _lastTimestamp = uc.getTimestamp();
         UpdateSettings.LAST_UPDATE_TIMESTAMP.setValue(_lastTimestamp);
@@ -419,7 +479,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         
         _lastBytes = data;
         
-        if(updateType != UpdateType.FROM_DISK) {
+        if(updateType != CertifiedMessageSourceType.FROM_DISK) {
             // cancel any http and pretend we just updated.
             if(httpRequestControl.getRequestReason() == HttpRequestControl.RequestReason.TIMEOUT)
                 httpRequestControl.cancelRequest();
@@ -480,7 +540,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             
             updateInfo.setUpdateCommand(null);
             
-            backgroundExecutor.schedule(new NotificationFailover(_lastId),
+            backgroundExecutor.schedule(new NotificationFailover(newVersion),
                     delay(clock.now(), uc.getTimestamp()),
                     TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
@@ -504,17 +564,24 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             if (LOG.isDebugEnabled())
                 LOG.debug("scheduling http failover in "+when);
             
-            backgroundExecutor.schedule(new Runnable() {
-                public void run() {
-                    try {
-                        launchHTTPUpdate(timeoutUpdateLocation);
-                    } catch (URISyntaxException e) {
-                        httpRequestControl.requestFinished();
-                        httpRequestControl.cancelRequest();
-                        LOG.warn(e.toString(), e);
-                    }
-                }
-            }, when, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(new StaleHttpUpdateRunnable(), when, TimeUnit.MILLISECONDS);
+        }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it
+     */
+    class StaleHttpUpdateRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                launchHTTPUpdate(timeoutUpdateLocation);
+            } catch (URISyntaxException e) {
+                httpRequestControl.requestFinished();
+                httpRequestControl.cancelRequest();
+                LOG.warn(e.toString(), e);
+            }
         }
     }
     
@@ -523,21 +590,29 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if(!httpRequestControl.requestQueued(HttpRequestControl.RequestReason.MAX) &&
                 UpdateSettings.LAST_HTTP_FAILOVER.getValue() < maxTimeAgo) {
             LOG.debug("Scheduling http max failover...");
-            backgroundExecutor.schedule(new Runnable() {
-                public void run() {
-                    String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
-                    try {
-                        launchHTTPUpdate(url);
-                    } catch (URISyntaxException e) {
-                        httpRequestControl.requestFinished();
-                        httpRequestControl.cancelRequest();
-                        LOG.warn(e.toString(), e);
-                    }
-                }
-            }, RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
+            backgroundExecutor.schedule(new HttpMaxFailOverRunnable(), RANDOM.nextInt(maxMaxHttpRequestDelay) + minMaxHttpRequestDelay, TimeUnit.MILLISECONDS);
         } else {
             LOG.debug("Ignoring http max failover.");
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it.
+     */
+    class HttpMaxFailOverRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            String url = maxedUpdateList.get(RANDOM.nextInt(maxedUpdateList.size()));
+            try {
+                launchHTTPUpdate(url);
+            } catch (URISyntaxException e) {
+                httpRequestControl.requestFinished();
+                httpRequestControl.cancelRequest();
+                LOG.warn(e.toString(), e);
+            }
+        }
+        
     }
 
     /**
@@ -547,8 +622,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!httpRequestControl.isRequestPending())
             return;
         LOG.debug("about to issue http request method");
-        HttpGet get = new HttpGet(LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID(), 
-            activationManager.isProActive(), activationManager.getModuleCode()));
+        HttpGet get = new HttpGet(httpClientInstanceUtils.addClientInfoToUrl(url));
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
@@ -592,10 +666,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Notification that a given ReplyHandler may have an update we can use.
      */
     private void addSourceIfIdMatches(ReplyHandler rh, int version) {
-        if(version == _lastId)
+        if(version == this.newVersion)
             downloadUpdates(_updatesToDownload, rh);
         else if (LOG.isDebugEnabled())
-            LOG.debug("Another version? Me: " + version + ", here: " + _lastId);
+            LOG.debug("Another version? Me: " + version + ", here: " + this.newVersion);
     }
     
     /**
@@ -679,11 +753,11 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      */
     private void addCurrentDownloadSources(ManagedDownloader md, DownloadInformation info) {
         for(RoutedConnection mc : connectionManager.get().getConnections()) {
-            if(mc.getConnectionCapabilities().getRemoteHostUpdateVersion() == _lastId) {
+            if(mc.getConnectionCapabilities().getRemoteHostNewUpdateVersion() == newVersion) {
                 LOG.debug("Adding source: " + mc);
                 md.addDownload(rfd(mc, info), false);
             } else
-                LOG.debug("Not adding source because bad id: " + mc.getConnectionCapabilities().getRemoteHostUpdateVersion() + ", us: " + _lastId);
+                LOG.debug("Not adding source because bad id: " + mc.getConnectionCapabilities().getRemoteHostNewUpdateVersion() + ", us: " + newVersion);
         }
     }
     
@@ -715,7 +789,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Determines if we should notify about there being new information.
      */
     private void notifyAboutInfo(int id) {
-        if (id != _lastId)
+        if (id != newVersion)
             return;
         
         UpdateInformation update = _updateInfo;
@@ -771,7 +845,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
                         // register a notification to the user later on.
                         updateInfo.setUpdateCommand(null);
                         long delay = delay(clock.now(),_lastTimestamp);
-                        backgroundExecutor.schedule(new NotificationFailover(_lastId),delay,TimeUnit.MILLISECONDS);
+                        backgroundExecutor.schedule(new NotificationFailover(newVersion),delay,TimeUnit.MILLISECONDS);
                     } else {
                         fireUpdate(updateInfo);
                         connectionManager.get().sendUpdatedCapabilities();
@@ -911,14 +985,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             }
             
             // Handle the data in the background thread.
-            backgroundExecutor.execute(new Runnable() {
-                public void run() {
-                    httpRequestControl.requestFinished();
-                    
-                    LOG.trace("Parsing new data...");
-                    handleDataInternal(inflated, UpdateType.FROM_HTTP, null);
-                }
-            });
+            backgroundExecutor.execute(new RequestHandlerDataRunnable(inflated));
             
             return false; // no more requests
         }
@@ -937,6 +1004,26 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         public boolean allowRequest(HttpUriRequest request) {
             return true;
         }
+    }
+    
+    /**
+     * Package private and explicit so test code can check for it.
+     */
+    class RequestHandlerDataRunnable implements Runnable {
+
+        private final byte[] data;
+
+        public RequestHandlerDataRunnable(byte[] data) {
+            this.data = data;
+        }
+        
+        @Override
+        public void run() {
+            httpRequestControl.requestFinished();
+            LOG.trace("Parsing new data...");
+            handleDataInternal(data, CertifiedMessageSourceType.FROM_HTTP, null);
+        }
+        
     }
     
     /**
@@ -982,11 +1069,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             requestActive.set(false);
         }
     }
-
-    public byte[] getOldUpdateResponse() {
-        return Base32.decode("I5AVOQKFIZCE4Q2RKFATKVBWKBKVEWSOJRFU6WS2JVIUCR2QGRJESNBVIE3UESKDINIUCSSWIZKE2WCHGZKFMMS2GJAVSTKCGQ2TINSLIRFEQWCRG5KEITL4PQ6HK4DEMF2GKIDJMQ6SEMRRGQ3TIOBTGY2DOIRAORUW2ZLTORQW24B5EIYSEPQKEAQCAPDNONTSAZTSN5WT2IRXGYXDONZOG42SEIDGN5ZD2IRYGYXDQOBOHA2SEIDUN46SEOBWFY4DSLRYGURCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAON2HS3DFHURDAIRAN5ZT2ISXNFXGI33XOMRCA5LSNY6SE5LSNY5GE2LUOBZGS3TUHJIEYUCSKRIEET2BKJBE6U2BJNIECTKHKZJTEU2MGU3VGM2HIRGFCLRXIZIEGR2NG43VGSCPKFGVAUSQJU2UGNKMJ5NEKT2EG43EGRK2IQ2E2USBIVGESIRAOVRW63LNMFXGIPJHEISCKIRAF5JSOIDVNZQW2ZJ5EJGGS3LFK5UXEZKXNFXDILRRGYXDMLTFPBSSEIDTNF5GKPJCGQ2TANRSGU3CEPQKEAQCAIBAEA6GYYLOM4QGSZB5E5SW4JZ6BIQCAIBAEAQCAIB4EFNUGRCBKRAVWNBOGE3C4NRAKVJE4XK5HYFCAIBAEAQCAPBPNRQW4ZZ6BIQCAIB4F5WXGZZ6BIQCAIBAEAQDY3LTM4QGM4TPNU6SENBOHAXDCIRAMZXXEPJCGQXDCNROGYRCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAMZZGKZJ5EJ2HE5LFEIQG64Z5EJLWS3TEN53XGIRAON2HS3DFHURDIIRAOVZG4PJCOVZG4OTCNF2HA4TJNZ2DUUCMKBJFIUCCJ5AVEQSPKNAUWUCBJVDVMUZSKNGDKN2TGNDUITCRFY3UMUCDI5GTON2TJBHVCTKQKJIE2NKDGVGE6WSFJ5CDONSDIVNEINCNKJAUKTCJEIQHKY3PNVWWC3TEHUTSEJBFEIQC6UZHEB2W4YLNMU6SETDJNVSVO2LSMVLWS3RUFYYTMLRWFZSXQZJCEBZWS6TFHURDINJQGYZDKNRCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKEAQCAIBAEAFCAIBAEAQCAPDNONTSAZTSN5WT2IRUFY4C4MJCEBTG64R5EI2C4MJWFY3CEIDVOJWD2ITIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS65LQMRQXIZJCEBZXI6LMMU6SENBCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKHQXXK4DEMF2GKPQK");
-    }
-    
+        
     public String getServiceName() {
         return I18nMarker.marktr("Update Checks");
     }
@@ -1030,4 +1113,52 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
     public boolean removeListener(EventListener<UpdateEvent> listener) {
         return listeners.removeListener(listener);
     }
+    
+    public int getKeyVersion() {
+        return certificateProvider.get().getKeyVersion();
+    }
+
+    @Override
+    public byte[] getOldUpdateResponse() {
+        return updateDataProvider.getDisabledKeysSignedMessageData();
+    }
+
+    @Override
+    public int getNewVersion() {
+        return newVersion;
+    }
+
+    /**
+     * Old clients won't send us neither newVersion nor keyVersion, so their
+     * values will be -1. If we get a capabilities update from a new client, we
+     * will only look at newVersion and keyVersion and ignore the old version
+     * field completely. This is the first if branch. In that case we request an
+     * update message, if its newVersion number is greater and the key version is the
+     * same as the current keyVersion.
+     * <p>
+     * If an old client is sending us a capabilities update, we are in the
+     * second if branch, where we check that the advertised version is higher
+     * than the currently known one.
+     * <p>
+     * If none of the two cases above was the case, it could be that a newer key
+     * version is advertised and we should download the update regardless of its
+     * version or its newVersion. That's the last if branch.
+     */
+    @Override
+    public boolean shouldRequestUpdateMessage(int version, int newVersion, int keyVersion) {
+        if (LOG.isDebugEnabled())
+            LOG.debugf("version {0}, new version {1}, key version {2}", version, newVersion, keyVersion);
+        if (newVersion != -1) {
+            if (newVersion > getNewVersion() && keyVersion == getKeyVersion()) {
+                return true;
+            }
+        } else if (version > getLatestId()) {
+            return true;
+        }
+        if (getKeyVersion() > 3 && keyVersion > getKeyVersion()) {
+            return true;
+        }
+        return false;
+    }
+
 }

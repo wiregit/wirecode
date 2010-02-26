@@ -15,7 +15,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.MessageDispatcher;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
 import com.limegroup.gnutella.connection.GnutellaConnection;
@@ -67,7 +66,6 @@ public abstract class TestConnection extends GnutellaConnection {
             HandshakeResponderFactory handshakeResponderFactory,
             QueryReplyFactory queryReplyFactory,
             MessageDispatcher messageDispatcher,
-            NetworkUpdateSanityChecker networkUpdateSanityChecker,
             Provider<SearchResultHandler> searchResultHandler,
             CapabilitiesVMFactory capabilitiesVMFactory,
             SocketsManager socketsManager, Acceptor acceptor,
@@ -79,7 +77,7 @@ public abstract class TestConnection extends GnutellaConnection {
             ApplicationServices applicationServices,
             SecureMessageVerifier secureMessageVerifier,
             NetworkInstanceUtils networkInstanceUtils) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier, null, networkInstanceUtils);
+        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier, null, networkInstanceUtils);
 
         this.queriesMustBeInRoutingTables = queriesMustBeInRoutingTable;
         this.connections = connections;
