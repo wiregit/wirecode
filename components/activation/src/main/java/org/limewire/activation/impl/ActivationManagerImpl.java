@@ -404,6 +404,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
                 retryOnErrorIfNecessary();
             } catch (InvalidDataException e) {
                 response = activationResponseFactory.createErrorResponse(Type.ERROR);
+            } catch (InvalidTokenException e) {
+                response = activationResponseFactory.createErrorResponse(Type.NOTFOUND);
             }
             State state = getNextState(response.getResponseType());
             attemptedToContactActivationServer = true;

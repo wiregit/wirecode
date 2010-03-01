@@ -30,5 +30,5 @@ interface ActivationCommunicator {
      * @throws java.io.IOException if the client is unable to contact the server
      * @throws org.limewire.io.InvalidDataException if a problem occurs during parsing
      */
-    public ActivationResponse activate(final String key, RequestType type) throws IOException, InvalidDataException;
+    public ActivationResponse activate(final String key, RequestType type) throws IOException, InvalidDataException, InvalidTokenException;
 }
