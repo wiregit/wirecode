@@ -56,6 +56,21 @@ public class FilterSettings extends LimeProps {
     public static final BooleanSetting FILTERED_URNS_ARE_SPAM =
         FACTORY.createRemoteBooleanSetting("FILTERED_URNS_ARE_SPAM", true,
                 "FilterSettings.filteredUrnsAreSpam");
+
+    /**
+     * An array of base32-encoded hashes of spam templates.
+     */
+    public static final StringArraySetting SPAM_TEMPLATES =
+        FACTORY.createRemoteStringArraySetting("SPAM_TEMPLATES",
+                new String[0], "FilterSettings.spamTemplates");
+
+    /**
+     * An array of approximate sizes of spam files.
+     */
+    public static final StringArraySetting SPAM_SIZES =
+        FACTORY.createRemoteStringArraySetting("SPAM_SIZES",
+                new String[0], "FilterSettings.spamSizes");
+
     /**
      * Sets whether or not duplicate pings and queries are filtered.
      */

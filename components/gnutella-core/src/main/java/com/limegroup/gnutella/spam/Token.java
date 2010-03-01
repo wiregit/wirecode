@@ -13,7 +13,7 @@ public abstract class Token implements Serializable {
      * Initialised to 0.
      */
     protected float rating = 0;
-    
+
     /**
      * Returns a weight between 0 and 1 that determines how sensitive this
      * token's spam rating is to updates - 0 means an update has no effect on
@@ -22,7 +22,7 @@ public abstract class Token implements Serializable {
      * @return a weight between 0 (not sensitive) and 1 (sensitive)
      */
     abstract protected float getWeight();
-    
+
     /**
      * Gets this token's spam rating
      * 
@@ -31,7 +31,15 @@ public abstract class Token implements Serializable {
     protected float getRating() {
         return rating;
     }
-    
+
+    /** Sets this token's spam rating
+     * 
+     * @param rating a rating between 0 (not spam) and 1 (spam)
+     */
+    protected void setRating(float rating) {
+        this.rating = rating;
+    }
+
     /**
      * Updates this token's spam rating by using an exponential moving average
      * to combine the new rating with the current rating. Subclasses must

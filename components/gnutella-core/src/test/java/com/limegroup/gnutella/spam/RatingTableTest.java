@@ -5,11 +5,13 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
+import org.limewire.util.Base32;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -41,7 +43,7 @@ public class RatingTableTest extends LimeTestCase {
         manager = inject.getInstance(SpamManager.class);
         rfdFactory = inject.getInstance(RemoteFileDescFactory.class);
     }
-    
+
     /**
      * Tests that tokens with default ratings are not stored in the table
      */
@@ -52,7 +54,7 @@ public class RatingTableTest extends LimeTestCase {
         assertEquals(0f, rfd.getSpamRating());
         assertEquals(0, table.size());
     }
-    
+
     /**
      * Tests that tokens with non-default ratings are stored in the table
      */
@@ -93,7 +95,7 @@ public class RatingTableTest extends LimeTestCase {
         // Check that the least-recently-used token hasn't changed
         assertEquals(t, table.getLeastRecentlyUsed());
     }
-    
+
     public void testInspection() throws Exception {
         RatingTable table = manager.getRatingTable();
         // Create some tokens with non-default ratings
@@ -122,8 +124,81 @@ public class RatingTableTest extends LimeTestCase {
         }
     }
 
+    public void testTokensAreLoadedFromSettings() {
+        String template1 = "AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH";
+        String template2 = "BBBBCCCCDDDDEEEEFFFFGGGGHHHHIIII";
+        long size1 = 12345, size2 = 23456;
+
+        FilterSettings.SPAM_TEMPLATES.set(new String[] {template1, template2});
+        FilterSettings.SPAM_SIZES.set(new String[] {
+                String.valueOf(size1), String.valueOf(size2)});
+
+        Token t1 = new TemplateHashToken(Base32.decode(template1));
+        Token t2 = new TemplateHashToken(Base32.decode(template2));
+        Token t3 = new ApproximateSizeToken(size1);
+        Token t4 = new ApproximateSizeToken(size2);
+
+        RatingTable table = manager.getRatingTable();
+        assertEquals(0, table.size());
+        table.loadSpamTokensFromSettings();
+        assertEquals(4, table.size());
+        assertEquals(1f, table.lookupAndGetRating(t1));
+        assertEquals(1f, table.lookupAndGetRating(t2));
+        assertEquals(1f, table.lookupAndGetRating(t3));
+        assertEquals(1f, table.lookupAndGetRating(t4));
+    }
+
+    public void testNewTokensAreLoadedFromSettingsAfterSimppUpdate() {
+        // Start by loading 4 tokens as above
+        testTokensAreLoadedFromSettings();
+
+        String template3 = "CCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJ"; // New token
+        long size2 = 23456; // Already in table
+
+        FilterSettings.SPAM_TEMPLATES.set(new String[] {template3});
+        FilterSettings.SPAM_SIZES.set(new String[] {String.valueOf(size2)});
+
+        Token t5 = new TemplateHashToken(Base32.decode(template3));
+        Token t6 = new ApproximateSizeToken(size2);
+
+        RatingTable table = manager.getRatingTable();
+        assertEquals(4, table.size());
+        table.simppUpdated();;
+        assertEquals(5, table.size());
+        assertEquals(1f, table.lookupAndGetRating(t5));
+        assertEquals(1f, table.lookupAndGetRating(t6));
+    }
+
+    public void testSimppRatingsDoNotOverwriteUserRatings() throws Exception {
+        // Start by loading 4 tokens as above
+        testTokensAreLoadedFromSettings();
+
+        String template3 = "CCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJ"; // New token
+        long size2 = 23456; // Already in table
+
+        FilterSettings.SPAM_TEMPLATES.set(new String[] {template3});
+        FilterSettings.SPAM_SIZES.set(new String[] {String.valueOf(size2)});
+
+        Token t5 = new TemplateHashToken(Base32.decode(template3));
+        Token t6 = new ApproximateSizeToken(size2);
+
+        RatingTable table = manager.getRatingTable();
+        assertEquals(4, table.size());
+
+        // The user unmarks a result as spam, modifying one of the tokens
+        assertEquals(1f, table.lookupAndGetRating(t6));
+        RemoteFileDesc rfd = createRFD(addr, port, name, size2);
+        manager.handleUserMarkedGood(new RemoteFileDesc[]{rfd});
+        assertLessThan(1f, table.lookupAndGetRating(t6));
+
+        // The SIMPP update should not overwrite the user's rating
+        table.simppUpdated();
+        assertEquals(1f, table.lookupAndGetRating(t5));
+        assertLessThan(1f, table.lookupAndGetRating(t6));
+    }
+
     private RemoteFileDesc createRFD(String addr, int port, String name,
-            int size) throws UnknownHostException {
+            long size) throws UnknownHostException {
         RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
                 new ConnectableImpl(addr, port, false), 1, name, size,
                 GUID.makeGuid(), 3, 3, false, null, URN.NO_URN_SET, false,

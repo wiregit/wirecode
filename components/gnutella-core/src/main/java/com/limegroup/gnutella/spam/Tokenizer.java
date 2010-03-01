@@ -54,12 +54,15 @@ public class Tokenizer {
     private int MAX_KEYWORD_LENGTH = 8;
     private final NetworkInstanceUtils networkInstanceUtils;
     private final ResponseVerifier responseVerifier;
+    private final TemplateHashTokenFactory templateHashTokenFactory;
 
     @Inject
     Tokenizer(NetworkInstanceUtils networkInstanceUtils,
-            ResponseVerifier responseVerifier) {
+            ResponseVerifier responseVerifier,
+            TemplateHashTokenFactory templateHashTokenFactory) {
         this.networkInstanceUtils = networkInstanceUtils;
         this.responseVerifier = responseVerifier;
+        this.templateHashTokenFactory = templateHashTokenFactory;
     }
 
     /**
@@ -105,9 +108,9 @@ public class Tokenizer {
         if(queryGUID != null) {
             String query = responseVerifier.getQueryString(queryGUID);
             if(query != null) {
-                TemplateToken tt = TemplateToken.create(query, name);
-                if(tt != null)
-                    set.add(tt);
+                Token t = templateHashTokenFactory.create(query, name);
+                if(t != null)
+                    set.add(t);
             }
         }
         getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
@@ -154,9 +157,9 @@ public class Tokenizer {
             for (Response r : qr.getResultsArray()) {
                 // Template
                 if(query != null) {
-                    TemplateToken tt = TemplateToken.create(query, r.getName());
-                    if(tt != null)
-                        set.add(tt);
+                    Token t = templateHashTokenFactory.create(query, r.getName());
+                    if(t != null)
+                        set.add(t);
                 }
                 // URNs
                 for (URN urn : r.getUrns())

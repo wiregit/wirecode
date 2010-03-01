@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,12 +19,15 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -31,9 +35,11 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 @EagerSingleton
-public class RatingTable implements Service {
+public class RatingTable implements Service, SimppListener {
     private static final Log LOG = LogFactory.getLog(RatingTable.class);
 
     /**
@@ -90,7 +96,12 @@ public class RatingTable implements Service {
     }
 
     @Inject
-    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+    void register(SimppManager simppManager) {
+        simppManager.addListener(this);
+    }
+
+    @Inject
+    void register(ServiceRegistry registry) {
         registry.register(this);
     }
 
@@ -103,16 +114,38 @@ public class RatingTable implements Service {
 
     public synchronized void start() {
         load();
+        loadSpamTokensFromSettings();
     }
 
     public synchronized void stop() {
         save();
     }
 
+    @Override
+    public void simppUpdated() {
+        loadSpamTokensFromSettings();
+    }
+
+    synchronized void loadSpamTokensFromSettings() {
+        // Rate the received template hashes as spam
+        for(String hash : FilterSettings.SPAM_TEMPLATES.get()) {
+            setRatingIfUnrated(new TemplateHashToken(Base32.decode(hash)), 1f);
+        }
+        // Rate the received file sizes as spam
+        for(String size : FilterSettings.SPAM_SIZES.get()) {
+            try {
+                setRatingIfUnrated(new ApproximateSizeToken(Long.parseLong(size)), 1f);
+            } catch(NumberFormatException e) {
+                LOG.debug("Error parsing file size", e);
+                continue;
+            }
+        }
+    }
+
     /**
      * Clears the filter data
      */
-    protected synchronized void clear() {
+    synchronized void clear() {
         LOG.debug("Clearing ratings");
         tokenMap.clear();
     }
@@ -123,7 +156,7 @@ public class RatingTable implements Service {
      * @param desc the RemoteFileDesc to rate
      * @return the rating for the RemoteFileDesc
      */
-    protected synchronized float getRating(RemoteFileDesc desc) {
+    synchronized float getRating(RemoteFileDesc desc) {
         float rating = getRating(lookup(tokenizer.getTokens(desc)));
         if(LOG.isDebugEnabled()) {
             String addr = desc.getAddress().getAddressDescription();
@@ -151,7 +184,7 @@ public class RatingTable implements Service {
      * @param descs an array of RemoteFileDescs to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
      */
-    protected synchronized void rate(RemoteFileDesc[] descs, float rating) {
+    synchronized void rate(RemoteFileDesc[] descs, float rating) {
         rateInternal(lookup(tokenizer.getTokens(descs)), rating);
     }
 
@@ -161,8 +194,22 @@ public class RatingTable implements Service {
      * @param qr a QueryReply to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
      */
-    protected synchronized void rate(QueryReply qr, float rating) {
+    synchronized void rate(QueryReply qr, float rating) {
         rateInternal(lookup(tokenizer.getNonKeywordTokens(qr)), rating);
+    }
+
+    /**
+     * Assigns the given rating to the given token and stores it, unless the
+     * token is already stored, in which case the existing rating is preserved.
+     */
+    private void setRatingIfUnrated(Token t, float rating) {
+        if(rating == 0f)
+            return;
+        Token stored = tokenMap.get(t);
+        if(stored == null) {
+            t.setRating(rating);
+            tokenMap.put(t, t);
+        }
     }
 
     /**
@@ -171,7 +218,7 @@ public class RatingTable implements Service {
      * 
      * @param qr the QueryRequest to clear
      */
-    protected synchronized void clear(QueryRequest qr) {
+    synchronized void clear(QueryRequest qr) {
         for(Token t : tokenizer.getTokens(qr)) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Clearing search token " + t);
@@ -234,17 +281,27 @@ public class RatingTable implements Service {
     }
 
     /**
+     * Looks up a single token and returns its rating (for testing).
+     */
+    synchronized float lookupAndGetRating(Token token) {
+        return getRating(Collections.singleton(lookup(token)));
+    }
+
+    /**
      * Loads ratings from disk.
      */
     private void load() {
         tokenMap.clear();
+        if(!getSpamDat().exists()) {
+            LOG.debug("No ratings to load");
+            return;
+        }
         ObjectInputStream is = null;
         try {
             is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-            List<Token> list
-            = GenericsUtils.scanForList(is.readObject(),
+            List<Token> list = GenericsUtils.scanForList(is.readObject(),
                     Token.class, GenericsUtils.ScanMode.REMOVE);
             int zeroes = 0;
             for(Token t : list) {
@@ -260,8 +317,10 @@ public class RatingTable implements Service {
                 LOG.debug("Loaded " + tokenMap.size() + " entries, skipped " +
                         zeroes + " with zero scores");
             }
-        } catch(Throwable t) {
-            LOG.debug("Error loading spam ratings: ", t);
+        } catch(IOException e) {
+            LOG.debug("Error loading spam ratings: ", e);
+        } catch(ClassNotFoundException e) {
+            LOG.debug("Error loading spam ratings: ", e);
         } finally {
             IOUtils.close(is);
         }
@@ -301,14 +360,14 @@ public class RatingTable implements Service {
     /**
      * @return the number of tokens in the rating table (for testing)
      */
-    protected int size() {
+    int size() {
         return tokenMap.size();
     }
 
     /**
      * @return the least-recently-used token in the table (for testing)
      */
-    protected Token getLeastRecentlyUsed() {
+    Token getLeastRecentlyUsed() {
         for(Map.Entry<Token,Token> e : tokenMap.entrySet())
             return e.getKey();
         return null; // Empty
