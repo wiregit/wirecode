@@ -25,7 +25,5 @@ public interface ActivationSettingsController {
     
     public String getPassKey();
     
-    public String getServerKey();
-    
     public String getQueryString();
 }

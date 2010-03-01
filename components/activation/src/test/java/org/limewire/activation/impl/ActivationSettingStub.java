@@ -7,9 +7,6 @@ public class ActivationSettingStub implements ActivationSettingsController {
     private String activationKey = "";
     private String mcode = "";
     private String activationHost = "http://activation.limewire.int";
-    String serverPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC20OomYqv79KOq0ueRS5+OtTBQIMoqWY8lXdG6L8" +
-        "KUXj4ysNgEbS2ChsixLr7r3aLTuOjz2cRqNNbHBqaB95KOpjKANVjJ5t3jxcXfux+ilwdJhqjx+TdY6tCukl0i3oq/9or9kafBZ" +
-        "73CY29rDUKeoWE0OwPrcPvvy5AXJiVofwIDAQAB";
     
     @Override
     public String getActivationHost() {
@@ -33,11 +30,6 @@ public class ActivationSettingStub implements ActivationSettingsController {
     @Override
     public String getPassKey() {
         return "3A931AF193AC44F66540CFFC57C3978D";
-    }
-
-    @Override
-    public String getServerKey() {
-        return serverPublicKey;
     }
 
     @Override
