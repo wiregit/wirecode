@@ -12,6 +12,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ScheduledExecutorService;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.GeneralSecurityException;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+import javax.crypto.Cipher;
 
 import junit.framework.Test;
 
@@ -26,6 +33,9 @@ import org.limewire.util.PrivateAccessor;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.common.LimeWireCommonModule;
+import org.limewire.security.certificate.CipherProvider;
+import org.limewire.security.certificate.CipherProviderImpl;
+import org.limewire.io.InvalidDataException;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
@@ -35,6 +45,7 @@ import org.mortbay.http.SocketListener;
 import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.ResourceHandler;
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -58,6 +69,26 @@ import com.google.inject.name.Names;
  */
 public class ActivationCommunicatorTest extends BaseTestCase {
    
+    private static final String PUBLIC_KEY_A = 
+        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGmaLDX44w4H95Dd11OOUBWIb9TAQfsqCz4" +
+        "JcLD1vTtiwY5t07FWnheoU2fe07pAODXc+t0Bh4AqdjZqQxVOSiKRcZsVs18tL3SDwnHsdgZ4" +
+        "D5ewvXzcbHloLeNB1JmIAKkg/EkO1H8T+7Qy4h1G1urlEblxsGJ5+nK2ftlCL34wIDAQAB";
+
+    
+    private static final String PRIVATE_KEY_A =
+        "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMaZosNfjjDgf3kN3XU45QFYh" +
+        "v1MBB+yoLPglwsPW9O2LBjm3TsVaeF6hTZ97TukA4Ndz63QGHgCp2NmpDFU5KIpFxmxWzXy0v" +
+        "dIPCcex2BngPl7C9fNxseWgt40HUmYgAqSD8SQ7UfxP7tDLiHUbW6uURuXGwYnn6crZ+2UIvf" +
+        "jAgMBAAECgYB1DnEk/tlsbaY0z7tMMHCqTmeiPH/hvwOBgksEtdTGAIYVV13mSUTTJcgGykpd" +
+        "8NoxP8X9CL6jXc0ThZgZi5QGBoskyJQ0xtxRXM5yrNlaRiGoLTizGc0lBWzRCWZWjHh41W67g" +
+        "s3WG5l1CKflwwxg8jEi1+Wtg4p+csIy8oyOAQJBAOiekaiiS7wz/PTWqy+y3BPMz1kkfSOSQW" +
+        "EDABFvezOf3iimIPHZ204fmsuc8OGvmNgAjkdPEsoGM13EO9baRKMCQQDaj7tAdvo0YxC+wp1" +
+        "XGjIZQFSOALHj6gp/7OJPKmZuvl2S5wxZbVZ3SDRjVZvd+HlNg1Y+v23NyV4wnulMQHPBAkEA" +
+        "iU9YkZ9Db1OMxIWWxPAiInnqByeXypCBkR8xQhl5Mu7yNzJhDgHYBxR2zivUsJNzeEVTttoBM" +
+        "ElatsWnwNpUWwJBAKlfBwo+6UhdmOVrZYjRaQ9+dcgRq8lmXjqidQJKZlTduyATYtOOUppfXx" +
+        "G3jvFmE4LJC7XWnR4DNbXSABMyQ0ECQF10O3LOXJiYNo8w8/ziBJvqcSbbl67ZGkhDCh7Xi74" +
+        "5jhfokogBDwwDk7K+8nAdZlA23COBrNKJF3BnQKG1/bM=";
+    
     private ActivationSettingStub settingsStub;
     private ServerController serverController;
     private Injector injector;
@@ -98,6 +129,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
                 bind(ActivationCommunicator.class).to(ActivationCommunicatorImpl.class);
                 bind(ActivationResponseFactory.class).to(ActivationResponseFactoryImpl.class);
                 bind(ActivationItemFactory.class).to(ActivationItemFactoryImpl.class);
+                bind(CipherProvider.class).to(CipherProviderImpl.class);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new SimpleTimer(true));
             }
         });
@@ -110,10 +142,12 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     // test successful server response
     //
     public void testSuccessfulServerResponse() throws Exception {
+        settingsStub.serverPublicKey = PUBLIC_KEY_A;
+        String base64PrivateKey = PRIVATE_KEY_A;
         
         String json = "{\n" +
-                "  \"lid\":\"DAVV-XXME-BWU3\",\n" +
                 "  \"response\":\"valid\",\n" +
+                "@LID@" +
                 "  \"mcode\":\"0pd15.1xM6.2xM6.3xM6\",\n" +
                 "  \"refresh\":1440,\n" +
                 "  \"modules\":\n" +
@@ -128,7 +162,8 @@ public class ActivationCommunicatorTest extends BaseTestCase {
                 "    ]\n" +
                 "}";
         
-        serverController.setSetServerReturn(json);
+        serverController.setPrivateKey(base64PrivateKey);
+        serverController.setReturnJsonTemplate(json);
         serverController.startServer();
         
         ActivationCommunicator comm = injector.getInstance(ActivationCommunicator.class);
@@ -142,6 +177,66 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         assertEquals("20091001", format.format(item.getDatePurchased()));
         assertEquals("20191001", format.format(item.getDateExpired()));
+    }
+    
+    // test the case when the activation server is unable to decrypt the "lidtoken"
+    // which, when decrypted, would normally contain the String "[customer_lid],[random_number]"
+    //
+    public void testKeyMismatchServerUnsuccessfullyDecrypts() throws Exception {
+        settingsStub.serverPublicKey =
+            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZCXZYjgP" +
+            "Zw2OAyIuP7v8innxvatGO3xCKvWBftGq8LhJvwoTaRXOeGs" +
+            "SxROFx6pdzfJDi1ODN6OjXzMmSzcJP+SkgvTnl6ZJO3YVY7V" +
+            "sVVFrHl3TYzlPwhOcG+mk8867rPYyparOBtjau2mNnzHenFA" +
+            "GCFXMKGI5DNRE65hQFmQIDAQAB";
+        
+            
+        String json = "{\n" +
+                "  \"response\":\"valid\",\n" +
+                "@LID@" +
+                "  \"mcode\":\"0pd15.1xM6.2xM6.3xM6\",\n" +
+                "  \"refresh\":1440,\n" +
+                "  \"modules\":\n" +
+                "    [\n" +
+                "    ]\n" +
+                "}";
+        
+        serverController.setReturnJsonTemplate(json);
+        serverController.startServer();
+        
+        ActivationCommunicator comm = injector.getInstance(ActivationCommunicator.class);
+        try {
+            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
+            fail("Expected InvalidDataException");
+        } catch (InvalidDataException e) {
+            assertEquals("random number security check failed", e.getMessage());
+        }
+    }
+    
+    // lw client sends encrypted lidtoken, but server sends no token in response
+    // (as would happen in the case of a spoofed activation server)
+    //
+    public void testServerReturnsNoToken() throws Exception {
+        String forceJsonReturn = "{\n" +
+                "  \"response\":\"valid\",\n" +
+                "  \"lid\":\"DAVV-XXME-BWU3\",\n" +
+                "  \"mcode\":\"0pd15.1xM6.2xM6.3xM6\",\n" +
+                "  \"refresh\":1440,\n" +
+                "  \"modules\":\n" +
+                "    [\n" +
+                "    ]\n" +
+                "}";
+        
+        serverController.setForceJsonReturn(forceJsonReturn);
+        serverController.startServer();
+        
+        ActivationCommunicator comm = injector.getInstance(ActivationCommunicator.class);
+        try {
+            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
+            fail("Expected InvalidDataException");
+        } catch (InvalidDataException e) {
+            assertEquals("random number security check failed", e.getMessage());
+        }
     }
     
     // test server is down / connection refused
@@ -159,7 +254,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     //
     public void test404ErrorResponse() throws Exception {
         settingsStub.setActivationHost("http://127.0.0.1:8123/invalid");
-        serverController.setSetServerReturn("dfgdfgd");
+        serverController.setReturnJsonTemplate("dfgdfgd");
         serverController.startServer();
         try {
             comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
@@ -233,12 +328,18 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     private class ServerController extends ResourceHandler {
         
         private final String SERVER_ROOT_DIR = "";//_baseDir.getAbsolutePath();
+        private String base64PrivateKey;
         
         private final HttpServer server = new HttpServer();
-        private String serverReturn;
+        private String jsonTemplate;
+        private String forceJson;
+
+        void setReturnJsonTemplate(String serverReturn) {
+            this.jsonTemplate = serverReturn;
+        }
         
-        void setSetServerReturn(String serverReturn) {
-            this.serverReturn = serverReturn;
+        void setForceJsonReturn(String forceJson) {
+            this.forceJson = forceJson;    
         }
         
         void startServer() throws Exception {
@@ -274,7 +375,10 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         throws IOException {
             String path = httpRequest.getURI().getPath();
             if (path.equals("/activate")) {
-                httpResponse.getOutputStream().write(serverReturn.getBytes());
+                String lidTokenParam = httpRequest.getParameter("lidtoken");
+                String responseJson = getActivationJsonResponse(lidTokenParam);
+                byte[] serverReturnBytes = responseJson.getBytes();
+                httpResponse.getOutputStream().write(serverReturnBytes);
                 httpResponse.setStatus(org.mortbay.http.HttpResponse.__200_OK);
             } else {
                 httpResponse.setStatus(org.mortbay.http.HttpResponse.__404_Not_Found);
@@ -283,6 +387,54 @@ public class ActivationCommunicatorTest extends BaseTestCase {
             httpResponse.commit();
             httpRequest.setHandled(true);    
         }
-        
+
+        void setPrivateKey(String base64PrivateKey) {
+            this.base64PrivateKey = base64PrivateKey;    
+        }
+
+        private String getActivationJsonResponse(String lidTokenParam) {
+            if (forceJson != null) {
+                return forceJson;
+            }
+            
+            String lidAndTokenDecrypted = null;
+            String errorResponseJson = "{\"response\":\"error\",\"lid\":\"" + lidTokenParam + "\",\"message\":" +
+                    "\"Invalid 'lid'\"}";
+            String responseJson = errorResponseJson;
+
+            try {
+                lidAndTokenDecrypted = decryptLidToken(lidTokenParam);
+            } catch (GeneralSecurityException e) {
+                assertEquals(errorResponseJson, responseJson);
+            }
+
+            if (lidAndTokenDecrypted != null) {
+                String[] lidAndToken = lidAndTokenDecrypted.split(",");
+                if (lidAndToken.length == 2) {
+                    String lidReplace = "   \"lid\":\"" + lidAndToken[0] + "\",\n" +
+                            "   \"token\":\"" + lidAndToken[1] + "\",\n";
+                    responseJson = jsonTemplate.replace("@LID@", lidReplace);
+                }
+            }
+            return responseJson;
+        }
+
+        private String decryptLidToken(String lidtoken) throws GeneralSecurityException {
+            if (base64PrivateKey == null) {
+                return "";
+            }
+            byte[] privateKeyBytes = Base64.decodeBase64(base64PrivateKey.getBytes());
+            byte[] encryptedLidToken = Base64.decodeBase64(lidtoken.getBytes());
+            byte[] decryptedBytes;
+                KeyFactory fac = KeyFactory.getInstance("RSA");
+                EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
+                PrivateKey privateKey = fac.generatePrivate(spec);
+
+                Cipher cipher = Cipher.getInstance("RSA");
+                cipher.init(Cipher.DECRYPT_MODE, privateKey);
+                decryptedBytes = cipher.doFinal(encryptedLidToken);
+
+            return new String(decryptedBytes);
+        }
     }
 }
