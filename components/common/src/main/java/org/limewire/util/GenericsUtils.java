@@ -244,7 +244,8 @@ public class GenericsUtils {
 
     /**
      * Utility method for calling scanForList(o, v, mode, null). If
-     * NEW_COPY_REMOVED is the ScanMode, this will throw a NullPointerException.
+     * NEW_COPY_REMOVED is the ScanMode, this will throw an
+     * IllegalArgumentException.
      */
     public static <V> List<V> scanForList(Object o, Class<V> v, ScanMode mode) {
         if (mode == ScanMode.NEW_COPY_REMOVED)
