@@ -1,8 +1,13 @@
 package com.limegroup.gnutella.filters;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 import com.limegroup.gnutella.messages.Message;
 
 public class CompositeFilter implements SpamFilter {
+    
+    private static Log LOG = LogFactory.getLog(CompositeFilter.class);
     
     SpamFilter[] delegates;
     
@@ -17,8 +22,11 @@ public class CompositeFilter implements SpamFilter {
     
     public boolean allow(Message m) {
         for (int i=0; i<delegates.length; i++) {
-            if (! delegates[i].allow(m))
+            if (! delegates[i].allow(m)) {
+                if (LOG.isDebugEnabled())
+                    LOG.debugf("{0} blocked {1}", delegates[i].getClass(), m);
                 return false;
+            }
         }
         return true;
     }

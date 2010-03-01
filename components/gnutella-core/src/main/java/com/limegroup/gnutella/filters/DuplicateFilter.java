@@ -2,6 +2,8 @@ package com.limegroup.gnutella.filters;
 
 import org.limewire.collection.Buffer;
 import org.limewire.io.GUID;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -14,7 +16,10 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * similar GUIDs, arrived within BUF_SIZE messages of each other, and arrived
  * not more than LAG milliseconds apart.
  */
-public class DuplicateFilter implements SpamFilter {  
+public class DuplicateFilter implements SpamFilter {
+    
+    private static Log LOG = LogFactory.getLog(DuplicateFilter.class);
+    
     /**
      * The number of old messages to keep in memory.  If this is too small, we
      * won't be filtering properly.  If this is too large, lookup becomes
@@ -75,6 +80,8 @@ public class DuplicateFilter implements SpamFilter {
                     misses++;
             }
             if(misses <= TOLERANCE) {//really close GUIDS
+                if (LOG.isDebugEnabled()) 
+                    LOG.debugf("not allowing: {0}", m);
                 guids.add(me);
                 return false;
             }

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.filters;
 
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message;
@@ -9,6 +11,8 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 @Singleton
 public class RepetitiveQueryFilter implements SpamFilter {
+    
+    private static final Log LOG = LogFactory.getLog(RepetitiveQueryFilter.class);
 
     /** Recent incoming queries. */
     private final String[] recentQueries;
@@ -36,6 +40,8 @@ public class RepetitiveQueryFilter implements SpamFilter {
         assert query != null;
         for(String recentQuery : recentQueries) {
             if(query.equals(recentQuery)) {
+                if (LOG.isDebugEnabled())
+                    LOG.debugf("repetive query blocked: {0}", query);
                 dropped++;
                 return false;
             }
