@@ -28,6 +28,7 @@ public class WhiteListUpdateUrnFilterTest extends BaseTestCase {
 
     private static final String UPDATE_DATA_XML =
         "<update id='42' timestamp=\"150973213135\">" +
+        "<keyversion>4</keyversion><newversion>42</newversion><signature>ABCDEF</signature>" +
             "<msg for='4.2.18' url='http://limewire.com/hi' style='4' urn='" +
                 "urn:bitprint:QLFYIJMMI56ZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJOTZJLY2IKG5FQ2TCXK26SECFPP4DX7I" + "'>" +
                 "<lang id='en'>testivgfhghng testing.</lang>" +
