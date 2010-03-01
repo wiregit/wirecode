@@ -21,7 +21,6 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.URNFactory;
-//import org.limewire.core.impl.library.URNFactoryImpl;
 import org.limewire.http.handler.MimeTypeProvider;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
