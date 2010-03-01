@@ -59,7 +59,7 @@ public class CertificateProviderImplTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    public void testUnverifiedGetFromFileWillCauseHttpGet() throws Exception {
+    public void testUnverifiedGetFromFileWillReturnNullCertificate() throws Exception {
         context.checking(new Expectations() {{
             one(fileCertificateReader).read(file);
             will(returnValue(certificate));
@@ -67,18 +67,15 @@ public class CertificateProviderImplTest extends BaseTestCase {
             one(certificateVerifier).verify(certificate);
             will(throwException(new SignatureException()));
             
-            one(httpCertificateReader).read(uri, null);
-            will(throwException(new IOException()));
+            never(httpCertificateReader).read(uri, null);
         }});
         
-        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
-        // test again to ensure the same certificate is returned henceforth
         assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
     }
     
-    public void testVerifiedGetFromHttp() throws Exception {
+    public void testGetWithKeyVersion() throws Exception {
         context.checking(new SequencedExpectations(context) {{
             one(fileCertificateReader).read(file);
             will(returnValue(certificate));
@@ -86,6 +83,15 @@ public class CertificateProviderImplTest extends BaseTestCase {
             one(certificateVerifier).verify(certificate);
             will(throwException(new SignatureException()));
             
+            one(fileCertificateReader).read(file);
+            will(returnValue(certificate));
+            
+            one(certificateVerifier).verify(certificate);
+            will(returnValue(certificate));
+            
+            one(certificate).getKeyVersion();
+            will(returnValue(4));
+            
             one(httpCertificateReader).read(uri, null);
             will(returnValue(certificate));
             
@@ -93,12 +99,9 @@ public class CertificateProviderImplTest extends BaseTestCase {
             will(returnValue(certificate));
         }});
         
-        assertSame(certificate, certificateProviderImpl.get());
-        // test again to ensure the same certificate is returned henceforth
-        assertSame(certificate, certificateProviderImpl.get());
-        // http get is only called once, next time it's called it returns
-        // the local valid certificate
-        assertSame(certificate, certificateProviderImpl.getFromHttp(null));
+        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
+        
+        assertSame(certificate, certificateProviderImpl.get(5, null));
         
         context.assertIsSatisfied();
     }
@@ -169,16 +172,9 @@ public class CertificateProviderImplTest extends BaseTestCase {
             one(certificateVerifier).verify(certificate);
             will(throwException(new SignatureException()));
             
-            one(fileCertificateReader).read(file);
-            will(throwException(new IOException()));
-            
-            // fail
-            one(httpCertificateReader).read(uri, null);
-            will(throwException(new IOException()));
+            never(fileCertificateReader).write(certificate, file);
         }});
-        
         certificateProviderImpl.set(certificate);
-        assertInstanceof(NullCertificate.class, certificateProviderImpl.get());
         
         context.assertIsSatisfied();
     }
