@@ -41,12 +41,12 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
             throws HttpException, IOException {
         
         String method = request.getRequestLine().getMethod();
-        if (GET.equals(method)) {
+        if (RestUtils.GET.equals(method)) {
             // Get uri target.
-            String uriTarget = getUriTarget(request, RestPrefix.SEARCH.pattern());
+            String uriTarget = RestUtils.getUriTarget(request, RestPrefix.SEARCH.pattern());
 
             // Get query parameters.
-            Map<String, String> queryParams = getQueryParams(request);
+            Map<String, String> queryParams = RestUtils.getQueryParams(request);
 
             // Set response.
             processGet(uriTarget, queryParams, response);
@@ -74,7 +74,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
                 }
 
                 // Set response entity and status.
-                HttpEntity entity = createStringEntity(jsonArr.toString(2));
+                HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString(2));
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
 
@@ -89,7 +89,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
             // Get search result list; return empty object if null.
             SearchResultList searchList = searchManager.getSearchResultList(guidStr);
             if (searchList == null) {
-                response.setEntity(createStringEntity("{}"));
+                response.setEntity(RestUtils.createStringEntity("{}"));
                 response.setStatusCode(HttpStatus.SC_OK);
                 return;
             }
@@ -98,7 +98,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
                 if (uriTarget.indexOf(FILES) < 0) {
                     // Return search metadata.
                     JSONObject jsonObj = createSearchDescription(searchList);
-                    HttpEntity entity = createStringEntity(jsonObj.toString());
+                    HttpEntity entity = RestUtils.createStringEntity(jsonObj.toString());
                     response.setEntity(entity);
                     response.setStatusCode(HttpStatus.SC_OK);
 
@@ -118,7 +118,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
                     }
                     
                     // Set response entity and status.
-                    HttpEntity entity = createStringEntity(jsonArr.toString(2));
+                    HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString(2));
                     response.setEntity(entity);
                     response.setStatusCode(HttpStatus.SC_OK);
                 }

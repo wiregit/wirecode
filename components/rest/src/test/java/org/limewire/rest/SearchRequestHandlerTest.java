@@ -24,8 +24,6 @@ import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.io.GUID;
-import org.limewire.rest.AbstractRestRequestHandler;
-import org.limewire.rest.SearchRequestHandler;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -122,7 +120,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
             will(returnValue(groupedResults));
             
             allowing(mockRequestLine).getMethod();
-            will(returnValue(AbstractRestRequestHandler.GET));
+            will(returnValue(RestUtils.GET));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             
@@ -177,7 +175,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
             will(returnValue(groupedResults));
             
             allowing(mockRequestLine).getMethod();
-            will(returnValue(AbstractRestRequestHandler.GET));
+            will(returnValue(RestUtils.GET));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             
@@ -238,7 +236,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
             allowing(mockSearchResult);
             
             allowing(mockRequestLine).getMethod();
-            will(returnValue(AbstractRestRequestHandler.GET));
+            will(returnValue(RestUtils.GET));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             

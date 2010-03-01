@@ -41,12 +41,12 @@ class StreamRequestHandler extends AbstractRestRequestHandler {
             throws HttpException, IOException {
         
         String method = request.getRequestLine().getMethod();
-        if (GET.equals(method)) {
+        if (RestUtils.GET.equals(method)) {
             // Get uri target.
-            String uriTarget = getUriTarget(request, RestPrefix.STREAM.pattern());
+            String uriTarget = RestUtils.getUriTarget(request, RestPrefix.STREAM.pattern());
             
             // Get query parameters.
-            Map<String, String> queryParams = getQueryParams(request);
+            Map<String, String> queryParams = RestUtils.getQueryParams(request);
             
             // Set response.
             process(uriTarget, queryParams, response);

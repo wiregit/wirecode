@@ -61,10 +61,10 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
         public void handle(HttpRequest request, HttpResponse response, HttpContext context)
                 throws HttpException, IOException {
             
-            if (GET.equals(request.getRequestLine().getMethod())) {
+            if (RestUtils.GET.equals(request.getRequestLine().getMethod())) {
                 // Set entity and status in response.
                 Date dateTime = new Date(System.currentTimeMillis());
-                HttpEntity entity = createStringEntity(dateTime.toString() + ": Hello world!");
+                HttpEntity entity = RestUtils.createStringEntity(dateTime.toString() + ": Hello world!");
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 

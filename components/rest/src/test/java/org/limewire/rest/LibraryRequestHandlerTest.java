@@ -20,8 +20,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.rest.AbstractRestRequestHandler;
-import org.limewire.rest.LibraryRequestHandler;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -104,7 +102,7 @@ public class LibraryRequestHandlerTest extends BaseTestCase {
         
         context.checking(new Expectations() {{
             allowing(mockRequestLine).getMethod();
-            will(returnValue(AbstractRestRequestHandler.GET));
+            will(returnValue(RestUtils.GET));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             
@@ -150,7 +148,7 @@ public class LibraryRequestHandlerTest extends BaseTestCase {
         
         context.checking(new Expectations() {{
             allowing(mockRequestLine).getMethod();
-            will(returnValue(AbstractRestRequestHandler.GET));
+            will(returnValue(RestUtils.GET));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             

@@ -41,12 +41,12 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
             throws HttpException, IOException {
         
         String method = request.getRequestLine().getMethod();
-        if (GET.equals(method)) {
+        if (RestUtils.GET.equals(method)) {
             // Get uri target.
-            String uriTarget = getUriTarget(request, RestPrefix.LIBRARY.pattern());
+            String uriTarget = RestUtils.getUriTarget(request, RestPrefix.LIBRARY.pattern());
             
             // Get query parameters.
-            Map<String, String> queryParams = getQueryParams(request);
+            Map<String, String> queryParams = RestUtils.getQueryParams(request);
             
             // Set response.
             process(uriTarget, queryParams, response);
@@ -71,7 +71,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
                 JSONObject jsonObj = createLibraryDescription(fileList);
 
                 // Set response entity and status.
-                HttpEntity entity = createStringEntity(jsonObj.toString());
+                HttpEntity entity = RestUtils.createStringEntity(jsonObj.toString());
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 
@@ -99,7 +99,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
                 }
 
                 // Set response entity and status.
-                HttpEntity entity = createStringEntity(jsonArr.toString(2));
+                HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString(2));
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 

@@ -9,16 +9,16 @@ import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
 /**
- * JUnit test case for AbstractRestRequestHandler.
+ * JUnit test case for RestUtils.
  */
-public class AbstractRestRequestHandlerTest extends BaseTestCase {
-    
+public class RestUtilsTest extends BaseTestCase {
+
     private Mockery context = new Mockery();
 
     /**
      * Constructs a test case for the specified method name.
      */
-    public AbstractRestRequestHandlerTest(String name) {
+    public RestUtilsTest(String name) {
         super(name);
     }
 
@@ -46,9 +46,9 @@ public class AbstractRestRequestHandlerTest extends BaseTestCase {
             will(returnValue(mockRequestLine));
         }});
         
-        assertEquals("/files", AbstractRestRequestHandler.getUriTarget(mockRequest, testPrefix));
+        assertEquals("/files", RestUtils.getUriTarget(mockRequest, testPrefix));
     }
-    
+
     /** Tests method to get URI query parameters. */
     public void testGetQueryParams() throws Exception {
         final String testUri = "http://localhost/remote/library/files?offset=1";
@@ -62,7 +62,7 @@ public class AbstractRestRequestHandlerTest extends BaseTestCase {
             will(returnValue(mockRequestLine));
         }});
         
-        Map<String, String> queryParams = AbstractRestRequestHandler.getQueryParams(mockRequest);
+        Map<String, String> queryParams = RestUtils.getQueryParams(mockRequest);
         assertEquals(1, queryParams.size());
         assertEquals("1", queryParams.get("offset"));
     }
