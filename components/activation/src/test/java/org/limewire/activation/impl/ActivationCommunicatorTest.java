@@ -203,12 +203,8 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         serverController.startServer();
         
         ActivationCommunicator comm = injector.getInstance(ActivationCommunicator.class);
-        try {
-            comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
-            fail("Expected InvalidDataException");
-        } catch (InvalidTokenException e) {
-            assertEquals("random number security check failed", e.getMessage());
-        }
+        ActivationResponse resp = comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
+        assertEquals(ActivationResponse.Type.ERROR, resp.getResponseType());
     }
     
     // lw client sends encrypted lidtoken, but server sends no token in response
