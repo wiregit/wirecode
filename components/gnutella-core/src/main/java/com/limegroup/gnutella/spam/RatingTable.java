@@ -16,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +34,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -65,6 +68,8 @@ public class RatingTable implements Service, SimppListener {
      * least-recently-used order when the map is full, on the assumption that
      * the least-recently-used token is the least important to keep. Tokens
      * with zero ratings are not stored in the map.
+     * <p>
+     * LOCKING: this.
      */
     private final Map<Token, Token> tokenMap
     = new LinkedHashMap<Token, Token>(INITIAL_SIZE, 0.75f, true) {
@@ -88,14 +93,22 @@ public class RatingTable implements Service, SimppListener {
      */
     private final HashSet<Token> searchTokens = new HashSet<Token>();
 
+    /**
+     * Whether the rating table needs to be saved. LOCKING: this.
+     */
+    private boolean dirty = false;
+
     private final Tokenizer tokenizer;
     private final TemplateHashTokenFactory templateHashTokenFactory;
+    private final ScheduledExecutorService backgroundExecutor;
 
     @Inject
     RatingTable(Tokenizer tokenizer,
-            TemplateHashTokenFactory templateHashTokenFactory) {
+            TemplateHashTokenFactory templateHashTokenFactory,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.tokenizer = tokenizer;
         this.templateHashTokenFactory = templateHashTokenFactory;
+        this.backgroundExecutor = backgroundExecutor;
     }
 
     @Inject
@@ -118,6 +131,13 @@ public class RatingTable implements Service, SimppListener {
     public synchronized void start() {
         load();
         loadSpamTokensFromSettings();
+        // Save the ratings every five minutes (if necessary)
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                save();
+            }
+        }, 5, 5, TimeUnit.MINUTES);
     }
 
     public synchronized void stop() {
@@ -204,6 +224,7 @@ public class RatingTable implements Service, SimppListener {
     /**
      * Assigns the given rating to the given token and stores it, unless the
      * token is already stored, in which case the existing rating is preserved.
+     * LOCKING: this.
      */
     private void setRatingIfUnrated(Token t, float rating) {
         if(rating == 0f)
@@ -212,6 +233,7 @@ public class RatingTable implements Service, SimppListener {
         if(stored == null) {
             t.setRating(rating);
             tokenMap.put(t, t);
+            dirty = true;
         }
     }
 
@@ -226,14 +248,16 @@ public class RatingTable implements Service, SimppListener {
             if(LOG.isDebugEnabled())
                 LOG.debug("Clearing search token " + t);
             searchTokens.add(t); // Ignore the token for this session
-            tokenMap.remove(t); // Clear the rating for future sessions
+            // Clear the rating for future sessions
+            if(tokenMap.remove(t) != null)
+                dirty = true;
         }
     }
 
     /**
      * Assigns the given rating to a set of tokens, storing any that have
      * non-zero ratings after being updated and removing from the map any that
-     * have zero ratings after being updated.
+     * have zero ratings after being updated. LOCKING: this.
      * 
      * @param tokens a set of tokens to be rated
      * @param rating a rating between 0 (not spam) and 1 (spam)
@@ -249,6 +273,7 @@ public class RatingTable implements Service, SimppListener {
                 tokenMap.remove(t);
             else
                 tokenMap.put(t, t);
+            dirty = true;
         }
     }
 
@@ -273,7 +298,7 @@ public class RatingTable implements Service, SimppListener {
 
     /**
      * Returns an equivalent previously stored token if any such token exists,
-     * otherwise returns the token that was passed in.
+     * otherwise returns the token that was passed in. LOCKING: this.
      * 
      * @param token the token to look up
      * @return the same token or a previously stored equivalent
@@ -294,11 +319,11 @@ public class RatingTable implements Service, SimppListener {
      * Loads ratings from disk.
      */
     private void load() {
-        tokenMap.clear();
         if(!getSpamDat().exists()) {
             LOG.debug("No ratings to load");
             return;
         }
+        Map<Token, Token> temporaryMap = new HashMap<Token, Token>();
         ObjectInputStream is = null;
         try {
             is = new ObjectInputStream(
@@ -316,14 +341,21 @@ public class RatingTable implements Service, SimppListener {
                 if(t.getRating() > 0f) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Loading " + t + ", rated " + t.getRating());
-                    tokenMap.put(t, t);
+                    temporaryMap.put(t, t);
                 } else {
                     zeroes++;
                 }
             }
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Loaded " + tokenMap.size() + " entries, skipped " +
-                        zeroes + " with zero scores, converted " + converted);
+            synchronized(this) {
+                tokenMap.clear();
+                tokenMap.putAll(temporaryMap);
+                if(zeroes > 0 || converted > 0)
+                    dirty = true;
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Loaded " + tokenMap.size() +
+                            " entries, converted " + converted + ", skipped " +
+                            zeroes + " with zero scores");
+                }
             }
         } catch(IOException e) {
             LOG.debug("Error loading spam ratings: ", e);
@@ -335,11 +367,15 @@ public class RatingTable implements Service, SimppListener {
     }
 
     /**
-     * Saves ratings to disk (called whenever the user marks a search result).
+     * Saves ratings to disk.
      */
-    public void save() {
+    void save() {
         ArrayList<Token> list;
         synchronized(this) {
+            if(!dirty) {
+                LOG.debug("Ratings do not need to be saved");
+                return;
+            }
             list = new ArrayList<Token>(tokenMap.size());
             // The iterator returns the least-recently-used entry first
             for(Map.Entry<Token,Token> e : tokenMap.entrySet()) {
@@ -368,14 +404,14 @@ public class RatingTable implements Service, SimppListener {
     /**
      * @return the number of tokens in the rating table (for testing)
      */
-    int size() {
+    synchronized int size() {
         return tokenMap.size();
     }
 
     /**
      * @return the least-recently-used token in the table (for testing)
      */
-    Token getLeastRecentlyUsed() {
+    synchronized Token getLeastRecentlyUsed() {
         for(Map.Entry<Token,Token> e : tokenMap.entrySet())
             return e.getKey();
         return null; // Empty
