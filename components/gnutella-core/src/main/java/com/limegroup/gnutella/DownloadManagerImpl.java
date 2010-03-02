@@ -18,6 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
+import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.collection.DualIterator;
@@ -27,6 +29,7 @@ import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
@@ -874,6 +877,15 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             if(ret == null || ret.getTorrent() == null || !ret.getTorrent().isValid()) {
                 throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, torrentFile);
             }
+
+            // Does the torrent contain any files with banned extensions?
+            if(!overwrite) {
+                Torrent torrent = ret.getTorrent();
+                Set<String> banned = getBannedExtensions(torrent);
+                if(!banned.isEmpty() && !downloadCallback.get().promptAboutTorrentWithBannedExtensions(torrent, banned))
+                    throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
+            }
+
             ret.setSaveFile(saveDirectory, null, overwrite);
             if(!overwrite) {
                 File saveFile = ret.getSaveFile();
@@ -900,11 +912,35 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             torrentManager.get().removeTorrent(torrent);
             ret.deleteIncompleteFiles();
             throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
-        } else {
-            initializeDownload(ret, true);
         }
 
+        initializeDownload(ret, true);
         return ret;
+    }
+    
+    /**
+     * Returns a (possibly empty) set of banned file extensions belonging to
+     * files in the given torrent. This method should only be called for
+     * torrents with metadata. Package access for testing.
+     */
+    Set<String> getBannedExtensions(Torrent torrent) {
+        assert torrent.hasMetaData();
+        TorrentInfo info = torrent.getTorrentInfo();
+        assert info != null;
+        Set<String> extensions = new HashSet<String>();
+        for(TorrentFileEntry entry: info.getTorrentFileEntries()) {
+            String ext = FileUtils.getFileExtension(entry.getPath());
+            if(!ext.isEmpty())
+                extensions.add(ext);
+        }
+        Set<String> banned = new HashSet<String>();
+        for(String extWithDot : FilterSettings.BANNED_EXTENSIONS.get()) {
+            // Sanity check in case the user did something weird to the setting
+            if(extWithDot.length() > 1 && extWithDot.startsWith("."))
+                banned.add(extWithDot.substring(1));
+        }
+        extensions.retainAll(banned);
+        return extensions;
     }
 
     /**

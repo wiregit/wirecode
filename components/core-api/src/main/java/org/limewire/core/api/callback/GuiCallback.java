@@ -1,5 +1,7 @@
 package org.limewire.core.api.callback;
 
+import java.util.Set;
+
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
@@ -44,4 +46,12 @@ public interface GuiCallback {
      * torrent. Returns true if ok was selected in the end false if cancel.
      */
     boolean promptTorrentFilePriorities(Torrent torrent);
+
+    /**
+     * Asks the user whether to continue with a torrent download that contains
+     * files with banned extensions.
+     * @return true if the download should continue.
+     */
+    boolean promptAboutTorrentWithBannedExtensions(Torrent torrent,
+            Set<String> bannedExtensions);
 }

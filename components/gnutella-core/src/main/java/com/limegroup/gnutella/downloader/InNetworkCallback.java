@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.Set;
+
 import org.limewire.bittorrent.Torrent;
 
 import com.google.inject.Inject;
@@ -45,6 +47,11 @@ public class InNetworkCallback implements DownloadCallback {
 
     @Override
     public boolean promptTorrentFilePriorities(Torrent torrent) {
+        return true;
+    }
+
+    @Override
+    public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent, Set<String> bannedExtensions) {
         return true;
     }
 }

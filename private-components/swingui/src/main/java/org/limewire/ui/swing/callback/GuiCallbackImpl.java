@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.callback;
 
 import java.awt.event.ActionEvent;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Action;
@@ -24,6 +25,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MagnetHandler;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -56,8 +58,9 @@ public class GuiCallbackImpl implements GuiCallback {
     }
 
     private boolean yesNoQuestion(String message) {
-        return FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(), new MultiLineLabel(I18n
-                .tr(message), 400), "", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+        return FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
+                new MultiLineLabel(I18n.tr(message), 400), "",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     @Override
@@ -94,10 +97,27 @@ public class GuiCallbackImpl implements GuiCallback {
         SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
-                result.set(TorrentDownloadSelector.showBittorrentSelector(torrent, fileInfoPanelFactory
-                        .get()));
+                result.set(TorrentDownloadSelector.showBittorrentSelector(torrent,
+                        fileInfoPanelFactory.get()));
             }
         });
         return result.get() == JOptionPane.OK_OPTION;
+    }
+
+    /**
+     * Asks the user whether to continue with a torrent download that contains
+     * files with banned extensions.
+     * @return true if the download should continue.
+     */
+    @Override
+    public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent,
+            Set<String> bannedExtensions) {
+        String extensions = StringUtils.explode(bannedExtensions, ", ");
+        String warning = I18n.tr("This torrent contains files with the following extensions, which LimeWire is configured not to download: {0}.", extensions);
+        String prompt = I18n.tr("Downloading this torrent could damage your computer. Are you sure you want to continue?");
+        MultiLineLabel label = new MultiLineLabel(warning + "\n\n" + prompt, 400);
+        int ok = FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
+                label, torrent.getName(), JOptionPane.YES_NO_OPTION);
+        return ok == JOptionPane.YES_OPTION;
     }
 }

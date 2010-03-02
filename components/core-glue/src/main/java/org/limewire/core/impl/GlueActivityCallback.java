@@ -222,6 +222,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         if(guiCallback == null) {
             dloader.discardUnscannedPreview(true);
         } else {
+            // FIXME: replace this with a proper warning message
             String msg = I18nMarker.marktr("Oh noes! Preview anyway?");
             boolean previewAnyway = guiCallback.promptUserQuestion(msg);
             dloader.discardUnscannedPreview(!previewAnyway);
@@ -277,4 +278,15 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         return true;
     }
 
+    /**
+     * Asks the user whether to continue with a torrent download that contains
+     * files with banned extensions.
+     * @return true if the download should continue.
+     */
+    @Override
+    public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent, Set<String> bannedExtensions) {
+        if(guiCallback != null)
+            return guiCallback.promptAboutTorrentWithBannedExtensions(torrent, bannedExtensions);
+        return true;
+    }
 }

@@ -112,4 +112,9 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     public boolean promptTorrentFilePriorities(Torrent torrent) {
         return true;
     }
+
+    @Override
+    public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent, Set<String> bannedExtensions) {
+        return true;
+    }
 }
