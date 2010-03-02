@@ -68,7 +68,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         ActivationResponse activationResponse =  activationFactory.createFromJson(jsonResult);
         
         boolean responseHasSameRandomNumber = randomNumber.equals(activationResponse.getToken());
-        if (!responseHasSameRandomNumber) {
+        if ((activationResponse.getResponseType() == ActivationResponse.Type.VALID) && !responseHasSameRandomNumber) {
             throw new InvalidTokenException("random number security check failed");
         }
         
