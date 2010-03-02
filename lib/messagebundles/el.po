@@ -5,18 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-02-22 11:30-0500\n"
-"PO-Revision-Date: 2010-02-21 18:20+0000\n"
-"Last-Translator: George Kontis <giormatsis@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2010-03-01 11:30-0500\n"
+"PO-Revision-Date: 2010-03-01 17:27+0000\n"
+"Last-Translator: Jarret <jbattisti@limewire.com>\n"
+"Language-Team: EL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-02-23 04:32+0000\n"
+"X-Launchpad-Export-Date: 2010-03-02 04:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+"X-Poedit-Language: Greek\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:101
@@ -85,15 +86,15 @@ msgstr "Άλλα"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:38
 msgid "There is a disk problem"
-msgstr "Υπάρχει πρόβλημα δίσκου."
+msgstr "Υπάρχει πρόβλημα δίσκου"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:39
 msgid "The file is corrupted"
-msgstr "Το αρχείο είναι κατεσραμένο."
+msgstr "Το αρχείο είναι κατεστραμμένο"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
 msgid "The file is invalid"
-msgstr "Ο φάκελος είναι άκυρος"
+msgstr "Το αρχείο είναι άκυρο"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "Trouble connecting to people"
@@ -104,7 +105,7 @@ msgstr "Πρόβλημα σύνδεσης με άλλα άτομα"
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:46
 msgid "No problems."
-msgstr "Δεν υπάρχουν προβλήματα."
+msgstr "Κανένα πρόβλημα"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
@@ -114,13 +115,13 @@ msgid ""
 "the newest official version of LimeWire.</html>"
 msgstr ""
 "<html><b>Το LimeWire ίσως έχει προσβληθεί από ιό ή δούρειο "
-"ίππο!</b><br><br>Παρακαλώ επισκεφθείτε τη σελίδα<a "
+"ίππο!</b><br><br>Παρακαλώ μεταβείτε στο <a "
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> και "
 "κατεβάστε τη νεότερη επίσημη έκδοση του LimeWire.</html>"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:225
 msgid "Oh noes! Preview anyway?"
-msgstr ""
+msgstr "Ωχ, όχι! Να προχωρήσει η προεπισκόπηση;"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -130,21 +131,21 @@ msgstr "Υπηρεσία XMPP"
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
 msgid "Free to chat"
-msgstr "Ελεύθερος(η) για συνομιλία"
+msgstr "Ελεύθερος για συνομιλία"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:132
 msgid "Available"
-msgstr "Διαθέσιμο"
+msgstr "Διαθέσιμος"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:111
 msgid "Away"
-msgstr "Δε βρίσκομαι στον υπολογιστή"
+msgstr "Λείπω"
 
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:112
 msgid "Away for a while"
-msgstr "Δε θα βρίσκομαι στον υπολογιστή για λίγο"
+msgstr "Επιστρέφω αμέσως"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:113
 msgid "Do not disturb"
@@ -156,9 +157,8 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"Το LimeWire δεν μπόρεσε να ορίσει θύρα ακρόασης για εισερχόμενες συνδέσεις. "
-"Μερικά χαρακτηριστικά του LimeWire μπορεί να μην λειτουργήσουν όπως θα "
-"αναμενόταν."
+"Το LimeWire δεν μπόρεσε να ορίσει θύρα ακρόασης εισερχόμενων συνδέσεων. "
+"Μερικά χαρακτηριστικά του LimeWire μπορεί να μην λειτουργούν όπως πρέπει."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:407
 msgid "Connection Listener"
@@ -166,11 +166,11 @@ msgstr "Ακροατής Συνδέσεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
-msgstr "Αναζήτηση στον κεντρικό διαχειριστή δικτύου"
+msgstr "Περιήγηση στο Host Handler"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
-msgstr "Αναφορά σύνδεσης"
+msgstr "Διεκπεραίωση Συνδέσεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:401
 msgid "Connection Management"
@@ -178,7 +178,7 @@ msgstr "Διαχείριση Συνδέσεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:69
 msgid "Stale Connection Management"
-msgstr "Διαχείρηση σύνδεσης χωρίς ενημέρωση"
+msgstr "Διαχείρηση Παρωχημένων Συνδέσεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:99
 msgid "Various Core Services"
@@ -194,7 +194,7 @@ msgstr "Παλαιές Λήψεις"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:235
 msgid "Download Management"
-msgstr "Διαχείρηση Λήψεων"
+msgstr "Διαχείριση Λήψεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:285
 msgid ""
@@ -202,10 +202,10 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"Λυπούμαστε, αλλά το LimeWire δε μπορεί μα διαβάσει τις παλαιότερες λήψεις "
-"σας. Μπορείτε να τις επανεκκινήσετε κάνοντας κλικ στην επιλογή ''Προσπαθήστε "
-"ξανά'' στις λήψεις. Όταν το LimeWire εντοπίσει πηγή για το αρχείο, η λήψη θα "
-"συνεχιστεί απο εκεί που είχε σταματήσει."
+"Λυπούμαστε, το LimeWire δεν μπόρεσε να διαβάσει τις παλιές λήψεις σας. "
+"Μπορείτε να τις επανεκκινήσετε με κλικ στο ''Προσπαθήστε ξανά'' στις λήψεις. "
+"Όταν το LimeWire βρει πηγή για το αρχείο, η λήψη θα συνεχιστεί από όπου είχε "
+"σταματήσει."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:287
 msgid ""
@@ -213,10 +213,10 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"Λυπούμαστε, αλλά το LimeWire δεν μπορεί να διαβάσει κάποιες από τις "
-"παλαιότερες λήψεις σας. Μπορείτε να τις επανεκκινήσετε κάνοντας κλικ στην "
-"επιλογή ''Προσπαθήστε ξανά'' στις λήψεις. Όταν το LimeWire εντοπίσει πηγή "
-"για το αρχείο, η λήψη θα συνεχιστεί απο εκεί που είχε σταματήσει"
+"Λυπούμαστε, το LimeWire δεν μπόρεσε να διαβάσει μερικές παλιές λήψεις σας. "
+"Μπορείτε να τις επανεκκινήσετε με κλικ στο ''Προσπαθήστε ξανά'' στις λήψεις. "
+"Όταν το LimeWire βρει πηγή για το αρχείο, η λήψη θα συνεχιστεί από όπου είχε "
+"σταματήσει"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -228,11 +228,11 @@ msgstr "Διαχείρηση Αποστολών"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HostCatcher.java:375
 msgid "Peer Locator"
-msgstr "Εντοπισμός πηγών"
+msgstr "Εντοπισμός Ομοτίμων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/LimeCoreGlue.java:107
 msgid "Core Glue"
-msgstr "Γεφύρωμα Πυρήνα"
+msgstr "Core Glue"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:568
 msgid "Message Routing"
@@ -240,7 +240,7 @@ msgstr "Δρομολόγηση Μηνυμάτων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:190
 msgid "Network Management"
-msgstr "Διαχείρηση Δικτύου"
+msgstr "Διαχείριση Δικτύου"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:160
 msgid "Ultrapeer/DHT Management"
@@ -248,27 +248,27 @@ msgstr "Διαχείριση Ultrapeer/DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
-msgstr "Ακροατής Πηγών"
+msgstr "Ακροατής Ομοτίμων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
 msgid "Promotion System"
-msgstr "Σύστημα Προώθησης"
+msgstr "Σύστημα Προαγωγής"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
 msgid "Directed Querier"
-msgstr "Άμεσα ερωτώμενος"
+msgstr "Κατευθυνόμενος Ερωτών"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
-msgstr "Διαχείριση περιεχομένου"
+msgstr "Διαχείριση Περιεχομένου"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr "Ακροατής τοπικού υποδοχέα(Socket)"
+msgstr "Ακροατής Τοπικού Υποδοχέα"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
-msgstr "Επεξεργαστής αρχείων Magnet"
+msgstr "Επεξεργαστής Magnet"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:127
 msgid ""
@@ -276,14 +276,14 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
-"Το LimeWire δεν μπόρεσε να ξεκινήσει το Πρωτόκολλο Υπηρεσίας Πρόσβασης "
-"Ψηφιακού Ήχου (για μοίρασμα αρχείων στο iTunes). Αυτό το χαρακτηριστικό θα "
-"απενεργοποιηθεί. Μπορείτε να το επαναενεργοποιήσετε από την επιλογή "
-"Προηγμένες -> Αρχεία -> iTunes."
+"Το LimeWire δεν μπόρεσε να εκκινήσει την Υπηρεσία Πρωτοκόλλου Πρόσβασης "
+"Ψηφιακού Ήχου (για κοινή χρήση αρχείων στο iTunes). Αυτό το χαρακτηριστικό "
+"θα απενεργοποιηθεί. Μπορείτε να το επανενεργοποιήσετε από το Επιλογές -> Για "
+"προχωρημένους -> Αρχεία -> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:181
 msgid "What's New"
-msgstr "Τι νέο υπάρχει"
+msgstr "Νέα Χαρακτηριστικά"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:182
 msgid "Creative Commons"
@@ -307,7 +307,7 @@ msgstr "Κοινόχρηστα Αρχεία"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
-msgstr "Διαχειριστής ερωτήσεων ΟΟΒ"
+msgstr "Χειριστής Ερωτημάτων ΟΟΒ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
@@ -315,7 +315,7 @@ msgstr "Στατικά Μηνύματα"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr "Εκσυγχρονιστής QRP"
+msgstr "Ενημέρωση QRP"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
@@ -327,20 +327,20 @@ msgstr "Αποθήκευση Ρυθμίσεων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:98
 msgid "Spam Management"
-msgstr "Διαχείρηση SPAM"
+msgstr "Διαχείριση Ανεπιθύμητων"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
-msgstr "Στατιστικά χρόνου λειτουργίας"
+msgstr "Στατιστικά Χρόνου Λειτουργίας"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:74
 msgid "Browse"
 msgstr "Περιήγηση"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:991
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1074
 msgid "Update Checks"
-msgstr "Έλεγχοι για ενημερώσεις"
+msgstr "Έλεγχοι για Ενημερώσεις"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:102
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -411,7 +411,7 @@ msgstr "Κομμάτι"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:154
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:225
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:349
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:46
@@ -456,7 +456,7 @@ msgstr "Γλώσσα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:25
 msgid "Bitrate"
-msgstr "Ρυθμός μετάδοσης"
+msgstr "Ρυθμός Bit"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:129
@@ -471,7 +471,7 @@ msgstr "Ενέργεια"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 msgid "Copyright"
-msgstr "Πνευματικά δικαιώματα"
+msgstr "Πνευματικά Δικαιώματα"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:132
@@ -479,7 +479,7 @@ msgstr "Πνευματικά δικαιώματα"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:149
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:155
 msgid "License Type"
-msgstr "Τύπος αδείας"
+msgstr "Τύπος Άδειας"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Director"
@@ -495,7 +495,7 @@ msgstr "Στούντιο"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:122
 msgid "Stars"
-msgstr "Αστέρια"
+msgstr "Αστέρες"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 msgid "Subtitles"
@@ -539,7 +539,8 @@ msgstr "Περιγραφή"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:148
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:156
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:310
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:231
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:315
 msgid "License"
 msgstr "Άδεια"
 
@@ -597,25 +598,24 @@ msgstr "Πλατφόρμα"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:81
 msgid "Metadata Loader"
-msgstr "Φόρτωση μεταδεδομένων"
+msgstr "Φόρτωση Μεταδεδομένων"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Το Limewire δεν μπόρεσε να εγγράψει/δημιουργήσει ένα απαραίτητο αρχείο "
-"επειδή ο σκληρός σας δίσκος είναι γεμάτος.Για να συνεχίσετε να "
-"χρησιμοποιείτε το LimeWire θα πρέπει να ελευθερώσετε χώρο στο σκληρό σας "
-"δίσκο."
+"Το LimeWire δεν μπόρεσε να γράψει ένα απαραίτητο αρχείο επειδή ο σκληρός σας "
+"δίσκος είναι γεμάτος.Για να συνεχίσετε τη χρήση του LimeWire πρέπει να "
+"ελευθερώσετε χώρο στο σκληρό σας δίσκο."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Το LimeWire δε μπόρεσε να ανοίξει ένα απαραίτητο αρχείο επειδή έχει "
-"κλειδωθεί από άλλο πρόγραμμα. Το LimeWire μπορεί να συμπεριφερεί "
+"Το LimeWire δεν μπόρεσε να ανοίξει ένα απαραίτητο αρχείο επειδή το αρχείο "
+"είναι κλειδωμένο από άλλο πρόγραμμα. Το LimeWire μπορεί να συμπεριφέρεται "
 "απροσδόκητα, έως ότου το αρχείο ξεκλειδωθεί."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
@@ -624,10 +624,10 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"Το LimeWire δε μπόρεσε να εγγράψει/δημιουργήσει ένα απαραίτητο αρχείο επειδή "
-"δεν έχετε τα απαραίτητα δικαιώματα.Οι προτιμήσεις σας μπορεί να έχουν "
-"αλλάξει την επόμενη φορά που θα ξεκινήσετε το LimeWire, ή το LimeWire μπορεί "
-"να συμπεριφερθεί απροσδόκητα"
+"Το LimeWire δεν μπόρεσε να γράψει ένα απαραίτητο αρχείο επειδή δεν έχετε τα "
+"απαραίτητα δικαιώματα. Οι προτιμήσεις σας μπορεί να έχουν αλλάξει την "
+"επόμενη φορά που θα εκκινήσετε το LimeWire ή το LimeWire να συμπεριφέρεται "
+"απροσδόκητα."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
@@ -644,16 +644,16 @@ msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"Το LimeWire δεν μπορεί να κάνει λήψη του  επιλεγμένου αρχείου επειδή ο "
-"σκληρός σας δίσκος είναι γεμάτος. Για να κάνετε λήψη περισσότερων αρχείων, "
-"πρέπει να ελευθερώσετε χώρο στο σκληρό σας δίσκο."
+"Το LimeWire δεν μπορεί κατεβάσει το επιλεγμένο αρχείο επειδή ο σκληρός σας "
+"δίσκος είναι γεμάτος. Για να συνεχίσετε να κατεβάζετε, πρέπει να "
+"ελευθερώσετε χώρο στο σκληρό σας δίσκο."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"Το LimeWire δεν πραγματοποίησε τη λήψη του επιλεγμένου αρχείου γιατί "
+"Το LimeWire δεν κατέβασε το επιλεγμένο αρχείο γιατί το αρχείο "
 "χρησιμοποιείται από άλλο πρόγραμμα. Παρακαλούμε κλείστε το άλλο πρόγραμμα "
 "και ξαναπροσπαθήστε."
 
@@ -664,10 +664,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"Το LimeWire δε μπόρεσε να δημιουργήσει ή να συνεχίσει την εγγραφή στο "
+"Το LimeWire δεν μπόρεσε να δημιουργήσει ή να συνεχίσει την εγγραφή στο "
 "ημιτελές αρχείο της επιλεγμένης λήψης, επειδή δεν έχετε δικαιώματα εγγραφής "
-"στον κατάλογο ημιτελών λήψεων. Για να συνεχίσετε να χρησιμοποιείτε το "
-"LimeWire, παρακαλούμε επιλέξτε διαφορετικό φάκελο αποθήκευσης."
+"στο φάκελο ημιτελών λήψεων. Για να συνεχίσετε τη χρήση του LimeWire, "
+"παρακαλούμε επιλέξτε άλλο φάκελο αποθήκευσης."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
@@ -681,19 +681,19 @@ msgstr ""
 
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
 msgid "Firewall Manager"
-msgstr "Διαχειριστής Firewall"
+msgstr "Διαχειριστής Τείχους Προστασίας"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
-msgstr "Διαχείρηση Στατιστικών"
+msgstr "Διαχείριση Στατιστικών"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:375
 msgid "Oops!"
-msgstr "Ουπς!"
+msgstr "Ωχ!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:375
 msgid "A problem occurred..."
-msgstr "Παρουσιάστηκε κάποιο πρόβλημα..."
+msgstr "Προέκυψε πρόβλημα..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
 msgid ""
@@ -702,11 +702,10 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
-"Ουπς! Κάνατε κάτι που δεν έχουμε γράψει ακόμα. Ζητούμε συγγνώμη για αυτό. Το "
-"Limewire θα συνεχίζει να λειτουργε. Παρακαλούμε όμως να  κάνετε κλίκ στην "
-"επιλογή 'Αποστολή Σφάλματος' για να μας υπενθυμίσετε να γράψουμε σχετικά. "
-"Εάν θέλετε, μπορείτε να κάνετε κλίκ στο 'Εμφάνιση Σφάλματος' για να δείτε "
-"τις πληροφορίες που θα σταλθούν. Ευχαριστούμε!"
+"Ωχ! Κάνατε κάτι που δεν έχουμε γράψει ακόμη. Ζητούμε συγγνώμη. Το LimeWire "
+"θα συνεχίσει να λειτουργεί, αλλά παρακαλούμε κάντε κλικ στο \"Αποστολή "
+"Σφάλματος\" για να μάς θυμίσετε να το γράψουμε. Μπορείτε να δείτε τι θα "
+"σταλεί κάνοντας κλικ στο \"Εμφάνιση Σφάλματος\". Ευχαριστούμε!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
@@ -714,18 +713,17 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
-"Ουπς! Κάνατε κάτι που δεν έχουμε γράψει ακόμα. Ζητούμε συγγνώμη για αυτό. Το "
-"Limewire θα συνεχίζει να λειτουργεί, οπότε μην ανησυχείτε. Εάν θέλετε, "
-"μπορείτε να κάνετε κλίκ στο 'Εμφάνιση Σφάλματος' για να δείτε τις "
-"πληροφορίες σχετικά με το σφάλμα."
+"Ωχ! Κάνατε κάτι που δεν έχουμε γράψει ακόμη. Ζητούμε συγγνώμη. Το LimeWire "
+"θα συνεχίσει να λειτουργεί, μην ανησυχείτε. Εάν θέλετε, κάντε κλικ στο "
+"\"Εμφάνιση Σφάλματος\" για να δείτε πληροφορίες για το σφάλμα."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
-"Λυπούμαστε, το Limewire παρουσίασε πρόβλημα. To Limewire θα συνεχίσει να "
-"λειτουργεί κανονικά, αλλά μπορείτε να μας στείλετε το σφάλμα ώστε να το "
+"Λυπούμαστε, το LimeWire αντιμετώπισε πρόβλημα. To Limewire θα συνεχίσει να "
+"λειτουργεί κανονικά, αλλά καλό θα ήταν να μας στείλετε το σφάλμα ώστε να το "
 "διορθώσουμε."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
@@ -735,16 +733,14 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"Το Limewire προυσίασε εσωτερικό σφάλμα. Είναι δυνατό το Limewire να "
-"επανέλθει και να συνεχίσει να λειτουργεί κανονικά. Για να συνεχίσετε να "
-"χρησιμοποιείτε το Limewire, κλείστε αυτό το παράθυρο. Αν επιθυμείτε, "
-"μπορείτε να κάνετε κλικ στην επιλογή\"Εμφάνιση Σφάλματος\" για να δείτε "
-"πληροφορίες σχετικά με το σφάλμα."
+"Το LimeWire αντιμετώπισε εσωτερικό σφάλμα. Το LimeWire μπορεί να επανέλθει "
+"στην κανονική λειτουργία του. Για να συνεχίσετε να χρησιμοποιείτε το "
+"LimeWire, κλείστε αυτό το παράθυρο. Αν θέλετε, μπορείτε να δείτε πληροφορίες "
+"για το σφάλμα με κλικ στο \"Εμφάνιση Σφάλματος\"."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
-msgstr ""
-"Πείτε μας τι κάνατε πριν παρουσιαστεί το συγκεκριμένο πρόβλημα στο LimeWire."
+msgstr "Πείτε μας τι κάνατε πριν παρουσιαστεί το πρόβλημα στο LimeWire."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
@@ -757,12 +753,12 @@ msgstr "Απόκρυψη Σφάλματος"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:491
 msgid "Ask for help on the forums"
-msgstr "Ζητήστε βοήθεια στους χώρους συζήτησης"
+msgstr "Ζητήστε βοήθεια στα φόρουμ"
 
 #. the "always use this answer" checkbox
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:504
 msgid "Send bugs without asking me in the future"
-msgstr "Αποστολή Σφαλμάτων χωρίς να ζητείται η άδεια μου στο μέλλον."
+msgstr "Αποστολή σφαλμάτων χωρίς να ερωτώμαι"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:507
 msgid "Send Bug"
@@ -770,7 +766,7 @@ msgstr "Αποστολή Σφάλματος"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:592
 msgid "Internal Error"
-msgstr "Εσωτερικό σφάλμα"
+msgstr "Εσωτερικό Σφάλμα"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:601
 msgid ""
@@ -779,18 +775,18 @@ msgid ""
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 "Το LimeWire δεν κατάφερε να συνδεθεί με το διακομιστή σφαλμάτων και να "
-"στείλει την παρακάτω αναφορά σφάλματος. Για να μας βοηθήσετε στον εντοπισμό "
-"και στην εξάλειψη του σφάλματος, επισκεφθείτε το www.limewire.com και κάντε "
-"κλικ στο «Υποστήριξη». Σας ευχαριστούμε."
+"στείλει την παρακάτω αναφορά σφάλματος. Για περαιτέρω βοήθεια και συνεισφορά "
+"στην αποσφαλμάτωση, μεταβείτε στην \"Υποστήριξη\" του www.limewire.com. "
+"Ευχαριστούμε."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:630
 msgid "Copy Report"
-msgstr "Αντιγραφή αναφοράς"
+msgstr "Αντιγραφή Αναφοράς"
 
 #. Set OK button action.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:638
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:116
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:294
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:118
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:296
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:216
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:281
@@ -799,40 +795,40 @@ msgid "OK"
 msgstr "OK"
 
 #. Load up the HTML engine.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:547
 msgid "Muddling Mint..."
 msgstr "Muddling Mint..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:558
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:564
 msgid "Scouring NYC for Limes..."
-msgstr "Χτενίζει το NYC για Limes..."
+msgstr "Χτένισμα του NYC για Limes..."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:592
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:598
 msgid "Squeezing Limes..."
-msgstr "Στίβει Λεμόνια..."
+msgstr "Στύψιμο Limes..."
 
 #. Touch the I18N stuff to ensure it loads properly.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:633
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:639
 msgid "Prepping Mojitos..."
-msgstr "Ετοιμάζει Μοχίτος..."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:665
-msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr "H παρούσα έκδοση Alpha έχει λήξει. Πατήστε ΟΚ για έξοδο. "
+msgstr "Ετοιμασία Mojitos..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:671
+msgid "This Alpha version has expired.  Press Ok to exit. "
+msgstr "H έκδοση Alpha έχει λήξει. Πιέστε ΟΚ για έξοδο. "
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:677
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "security program blocking LimeWire's access to the internet or loopback "
 "connections on the local machine. Please add LimeWire as an exception to "
 "your security software and restart LimeWire.."
 msgstr ""
-"Το LimeWire δε μπόρεσε να ξεκινήσει. Αυτό συνήθως οφείλεται σε προγράμματα "
-"ασφαλείας τα οποία εμποδίζουν την πρόσβαση του LimeWire στο Ίντερνετ, ή "
-"εξαιτίας συνδέσεων επιστροφής στον υπολογιστή. Προσθέστε το LimeWire στις "
-"εξαιρέσεις του προγράμματος ασφαλείας και κάντε επανεκκίνηση."
+"Το LimeWire δεν μπόρεσε να εκκινήσει. Αυτό συνήθως οφείλεται σε πρόγραμμα "
+"ασφαλείας που εμποδίζει την πρόσβαση του LimeWire στο Διαδίκτυο ή εξαιτίας "
+"συνδέσεων επιστροφής στον τοπικό υπολογιστή. Προσθέστε το LimeWire στις "
+"εξαιρέσεις του προγράμματος ασφαλείας και επανεκκινήστε το LimeWire."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:676
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:682
 msgid ""
 "LimeWire could not create a temporary preferences folder.\n"
 "\n"
@@ -852,7 +848,7 @@ msgstr ""
 "\n"
 "Το LimeWire θα σταματήσει να λειτουργεί.  Σας ευχαριστούμε."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:686
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:692
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:45
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:76
@@ -861,19 +857,19 @@ msgstr ""
 msgid "Error"
 msgstr "Σφάλμα"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:702
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:708
 msgid ""
 "Another instance of LimeWire appears to be running. Please completely shut "
 "down all other instances of LimeWire before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
-"Δείχνει σα να εκτελείται κλώνος του Limewire. Παρακαλούμε κλείστε τελείως "
-"όλους τους κλώνους του Limewire πρίν συνεχίσετε. Εάν το πρόβλημα συνεχίσει, "
-"κάντε επανεκκίνηση του υπολογιστή σας."
+"Εκτελείται ήδη ένα στιγμιότυπο του LimeWire. Παρακαλούμε κλείστε όλα τα άλλα "
+"στιγμιότυπα του LimeWire πριν συνεχίσετε. Εάν το πρόβλημα επιμείνει, "
+"επανεκκινήστε τον υπολογιστή σας."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:711
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:717
 msgid "LimeWire is already running"
-msgstr "Το LimeWire είναι ήδη σε λειτουργία"
+msgstr "Το LimeWire εκτελείται ήδη"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
@@ -893,22 +889,21 @@ msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
-"Το LimeWire δεν κατάφερε να δημιουργήσει τον κατάλογο ρυθμίσεων σας και "
+"Το LimeWire δεν κατάφερε να δημιουργήσει το φάκελο ρυθμίσεων σας και "
 "χρησιμοποιεί έναν προσωρινό. Οι ρυθμίσεις σας μπορεί να διαγραφούν όταν "
-"κλείσετε το πρόγραμμα. "
+"κλείσετε το LimeWire. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
-"Το Limewire παρουσίασε προβλήματα στη διαχείριση των ρυθμίσεων σας. Οι "
-"αλλαγές των ρυθμίσεων μπορεί να μην αποθηκευθούν κατά τον τερματισμό του "
-"προγράμματος."
+"Το LimeWire αντιμετώπισε προβλήματα στη διαχείριση των ρυθμίσεων σας. Οι "
+"αλλαγές στις ρυθμίσεις ενδέχεται να χαθούν όταν τερματίσετε την εφαρμογή."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 msgid "Lookup on Bitzi"
-msgstr ""
+msgstr "Αναζήτηση στο Bitzi"
 
 #. *
 #. * The copy action.
@@ -960,129 +955,136 @@ msgstr "Επιλογή όλων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:24
 #, java-format
 msgid "{0} is no longer supported by LimeWire."
-msgstr ""
+msgstr "Το {0} δεν υποστηρίζεται πλέον από το LimeWire."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:67
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:30
 #, java-format
 msgid "{0} is not supported by LimeWire {1}. "
-msgstr ""
+msgstr "Το {0} δεν υποστηρίζεται από το LimeWire {1}. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:68
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:31
 #, java-format
 msgid "Please {0}upgrade{1} to the latest version."
-msgstr ""
+msgstr "Παρακαλώ {0}αναβαθμίστε{1} στην τελευταία έκδοση."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:71
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:38
 #, java-format
 msgid "{0} is not supported by {1} {2}. We apologize for the inconvenience."
-msgstr ""
+msgstr "Το {0} δεν υποστηρίζεται από τα {1} {2}. Ζητούμε συγγνώμη."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:73
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:41
 #, java-format
 msgid "{0} is expired."
-msgstr ""
+msgstr "Το {0} έχει λήξει."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:128
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:78
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:83
 msgid "License Key:"
-msgstr ""
+msgstr "Κλειδί Άδειας:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:424
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:431
 msgid "Your License Key has been used on too many installations."
 msgstr ""
+"Το κλειδί άδειάς σας έχει χρησιμοποιηθεί σε περισσότερες από τις "
+"επιτρεπόμενες εγκαταταστάσεις."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:426
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:433
 msgid "Connection error. Please try again later."
-msgstr ""
+msgstr "Σφάλμα σύνδεσης. Ξαναπροσπαθήστε αργότερα."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:428
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:435
 msgid "Invalid License Key."
-msgstr ""
+msgstr "Άκυρο Κλειδί Άδειας."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:449
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:456
 msgid "Go PRO"
-msgstr ""
+msgstr "Γίνετε PRO"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:450
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:457
 msgid "Upgrade to PRO"
-msgstr ""
+msgstr "Αναβαθμίστε στο PRO"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:451
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:86
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:458
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:91
 msgid "Activate"
-msgstr ""
+msgstr "Ενεργοποίηση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:451
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:458
 msgid "Activate the License Key"
-msgstr ""
+msgstr "Ενεργοποίηση Κλειδιού Άδειας"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:452
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:293
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:332
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:366
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:459
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:298
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:337
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:371
 msgid "Later"
 msgstr "Αργότερα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:452
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:459
 msgid "Activate License at a later time"
-msgstr ""
+msgstr "Ενεργοποίηση Άδειας αργότερα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:469
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:493
 msgid "Update"
-msgstr ""
+msgstr "Ενημέρωση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:469
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:493
 msgid "Update the saved key"
-msgstr ""
+msgstr "Ενημερώση αποθηκευμένου κλειδιού"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:487
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:102
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:198
 msgid "Refresh"
 msgstr "Ανανέωση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:487
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:528
 msgid "Refresh the list of features associated with the key"
-msgstr ""
+msgstr "Ανανέωση χαρακτηριστικών για αυτό το κλειδί"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:491
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:532
 msgid "Edit Account"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:492
-msgid "Edit information about the account associated with this License Key"
-msgstr ""
+msgstr "Επεξεργασία Λογαριασμού"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:533
+msgid "Edit information about the account associated with this License Key"
+msgstr "Επεξεργασία πληροφοριών λογαριασμού για αυτό το Κλειδί Άδειας"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:574
 #, java-format
 msgid "Please contact {0}Customer Support{1} to resolve the situation."
 msgstr ""
+"Επικοινωνήστε με την {0}Υποστήριξη Πελατών{1} για διευθέτηση του ζητήματος."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:540
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:583
 msgid ""
 "One or more of your features has expired. Click \"Edit Account\" to renew."
 msgstr ""
+"Η άδεια για ένα ή περισσότερα χαρακτηριστικά έχει λήξει. Κάντε κλικ στο "
+"\"Επεξεργασία Λογαριασμού\" για ανανέωση."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:547
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:591
 #, java-format
 msgid ""
 "One or more of your features is currently not active. Click on {0} for more "
 "information."
 msgstr ""
+"Ένα ή περισσότερα από τα επιτρεπόμενα χαρακτηριστικά είναι ανενεργά. Κάντε "
+"κλικ στο {0} για περισσότερες πληροφορίες."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:563
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:609
 msgid "Edit Key"
-msgstr ""
+msgstr "Επεξεργασία κλειδιού"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:564
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:610
 msgid "Edit the saved License Key"
-msgstr ""
+msgstr "Επεξεργασία αποθηκευμένου Κλειδιού Άδειας"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:575
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:621
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:36
@@ -1105,34 +1107,34 @@ msgstr ""
 msgid "Cancel"
 msgstr "Ακύρωση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:576
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:622
 msgid "Cancel editing"
-msgstr ""
+msgstr "Ακύρωση επεξεργασίας"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:144
 msgid "Feature"
-msgstr ""
+msgstr "Χαρακτηριστικό"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:144
 msgid "Registered"
-msgstr ""
+msgstr "Εγγεγραμμένος"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:135
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:144
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
 msgid "Expires"
-msgstr ""
+msgstr "Λήγει"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:176
 msgid "Lost your license?"
-msgstr ""
+msgstr "Χάσατε την άδειά σας;"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:242
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:251
 msgid "Expired"
-msgstr ""
+msgstr "Έληξε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/LostLicenseItem.java:35
 msgid "Don't see your features?"
-msgstr ""
+msgstr "Δεν βλέπετε τα χαρακτηριστικά σας;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:188
@@ -1141,7 +1143,7 @@ msgstr "Συνδέσεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "View connections to other P2P clients"
-msgstr "Εμφάνιση συνδέσεων σε άλλα Ρ2Ρ προγράμματα client"
+msgstr "Προβολή συνδέσεων σε άλλους πελάτες Ρ2Ρ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "Console"
@@ -1149,20 +1151,20 @@ msgstr "Κονσόλα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 msgid "View console messages"
-msgstr "Εμφάνιση μηνυμάτων κονσόλας"
+msgstr "Προβολή  μηνυμάτων κονσόλας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:54
 msgid "Mojito"
-msgstr "Μοχίτο"
+msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:54
 msgid "View incoming and outgoing DHT messages"
-msgstr "Εμφάνιση εισερχόμενων και εξερχόμενων μηνυμάτων DHT"
+msgstr "Προβολή εισερχόμενων και εξερχόμενων μηνυμάτων DHT"
 
 #. * Identifier for Advanced Tools window.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:75
 msgid "Advanced Tools"
-msgstr "Προηγμένα εργαλεία"
+msgstr "Προηγμένα Εργαλεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:191
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/ApplySharingAction.java:26
@@ -1172,7 +1174,7 @@ msgstr "Εφαρμογή"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:198
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:20
 msgid "Clear"
-msgstr "Καθαρισμός"
+msgstr "Εκκαθάριση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/Console.java:205
 msgid "Save"
@@ -1190,20 +1192,20 @@ msgstr "Αποθήκευση ως"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/ConsolePanel.java:45
 msgid "Console not available"
-msgstr "Το τερματικό δεν είναι διαθέσιμο"
+msgstr "Κονσόλα μη διαθέσιμη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/MojitoPanel.java:146
 msgid "Mojito Arcs View not available"
-msgstr "Η προβολή Mojito Arcs δεν είναι διαθέσιμη"
+msgstr "Προβολή Mojito Arcs μη διαθέσιμη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:60
 msgid "Add a Connection"
-msgstr "Προσθήκη σύνδεσης"
+msgstr "Πρόσθεση Σύνδεσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:68
 msgid "Host"
-msgstr "Κεντρικός υπολογιστής"
+msgstr "Ξενιστής"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:68
 msgid "Port"
@@ -1217,14 +1219,14 @@ msgstr "Χρήση TLS"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:157
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:372
 msgid "Add"
-msgstr "Προσθήκη"
+msgstr "Πρόσθεση"
 
 #. * Action to remove connection.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ImageTableFormat.java:23
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:46
 msgid "Remove"
-msgstr "Κατάργηση"
+msgstr "Αφαίρεση"
 
 #. * Action to view files on host.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:51
@@ -1233,12 +1235,11 @@ msgstr "Κατάργηση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:488
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/RemoteHostMenuFactory.java:38
 msgid "Browse Files"
-msgstr "Αναζήτηση Αρχείων"
+msgstr "Περιήγηση στα Αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:187
 msgid "Unable to view files - not yet connected to host"
-msgstr ""
-"Αδύνατη η προβολή αρχείων - δεν έχει συνδεθεί με τον κεντρικό υπολογιστή"
+msgstr "Αδύνατη η προβολή αρχείων - δεν έχετε συνδεθεί με τον ξενιστή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:62
 msgid "You are an Ultrapeer node"
@@ -1250,35 +1251,31 @@ msgstr "Είστε κόμβος Leaf"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:64
 msgid "You are not behind a firewall"
-msgstr "Δεν βρίσκεστε πίσω από firewall"
+msgstr "Δεν καλύπτεστε από τείχος προστασίας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:65
 msgid "You are behind a firewall and support firewall transfers"
-msgstr ""
-"Bρίσκεστε πίσω από firewall, και υποστηρίζετε μεταφορές μέσω firewall"
+msgstr "Καλύπτεστε από τείχος προστασίας και υποστηρίζετε διαπέρασή του"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:66
 msgid "You are behind a firewall and do not support firewall transfers"
-msgstr ""
-"Bρίσκεστε πίσω από firewall και δεν υποστηρίζετε μεταφορές μέσω αυτού"
+msgstr "Καλύπτεστε από τείχος προστασίας και δεν υποστηρίζετε διαπέρασή του"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:67
 msgid "Connected to:"
-msgstr "Συνδέθηκε στον:"
+msgstr "Συνδέθηκε με:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:68
 msgid "Show hostnames of connected peers"
-msgstr "Εμφάνιση ονομάτων κεντρικών υπολογιστών συνδεδεμένων peers"
+msgstr "Εμφάνιση ονομάτων ξενιστή συνδεδεμένων ομοτίμων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:244
 msgid "No internet connection!"
-msgstr "Δεν υπάρχει σύνδεση με το διαδίκτυο"
+msgstr "Καμία διαδικτυακή σύνδεση!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:247
 msgid "Gnutella is disconnected however internet connection detected!"
-msgstr ""
-"Το δίκτυο Gnutella είναι αποσυνδεδεμένο, όμως εντοπίστηκε σύνδεση στο "
-"διαδίκτυο"
+msgstr "Αποσυνδεδεμένο Gnutella αλλά εντοπίστηκε διαδικτυακή σύνδεση!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:260
 msgid ""
@@ -1286,94 +1283,93 @@ msgid ""
 "or firewall"
 msgstr ""
 "Το LimeWire δεν κατάφερε να προσδιορίσει την εξωτερική διεύθυνση IP του NAT "
-"ή του firewall"
+"ή του τείχους προστασίας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:262
 msgid "LimeWire has not received any incoming UDP messages"
-msgstr "Το LimeWire δεν έχει δεχτεί κανένα εισερχόμενο UDP μήνυμα"
+msgstr "Το LimeWire δεν έχει λάβει εισερχόμενο μήνυμα UDP"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:264
 msgid ""
 "LimeWire was not able to support firewall transfers in a previous session"
 msgstr ""
-"Το Limewire δεν είχε την δυνατότητα να υποστηρίξει μεταφορές firewall στην "
-"προηγούμενη συνεδρία"
+"Το Limewire δεν υποστήριξε διαπέραση τείχους προστασίας σε προηγούμενη "
+"εκτέλεσή του"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:266
 msgid ""
 "LimeWire is behind a NAT or firewall that assigns a different external port "
 "to each connection"
 msgstr ""
-"Το Limewire είναι πίσω από έναν μεταφραστή διευθύνσεων δικτύου (ΝΑΤ) ή ένα "
-"τείχος προστασίας το οποίο συνδέεται με μία διαφορετική εξωτερική θύρα σε "
-"κάθε σύνδεση."
+"Το Limewire καλύπτεται από ΝΑΤ ή τείχος προστασίας που αναθέτει διαφορετική "
+"εξωτερική θύρα σε κάθε σύνδεση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:404
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:28
 msgid "Connecting"
-msgstr "Γίνεται σύνδεση"
+msgstr "Σύνδεση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:405
 msgid "Leaves"
-msgstr "Δικτυακοί κόμβοι"
+msgstr "Leaves"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:406
 msgid "Peers"
-msgstr "Ομότιμοι Σύνδεσμοι"
+msgstr "Ομότιμοι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:407
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:41
 msgid "Standard"
-msgstr "Κανονικό"
+msgstr "Στάνταρ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:408
 msgid "Ultrapeers"
-msgstr "Υπέρ-διαμοιραστές"
+msgstr "Ultrapeers"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:57
 msgid "Revert To Default"
-msgstr "Επαναφορά των προεπιλογών"
+msgstr "Επαναφορά Προεπιλογών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:58
 msgid "Sort Automatically"
-msgstr "Αυτόματη ταξινόμηση"
+msgstr "Αυτόματη Ταξινόμηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:59
 msgid "Extended Tooltips"
-msgstr "Εκτεταμένες συμβουλές εργαλείων"
+msgstr "Εκτεταμένες Αναδυόμενες Συμβουλές"
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
 #. we check both the mousePressed and mouseReleased events.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:76
 msgid "Right-click to select columns to display"
-msgstr "Κάντε δεξί κλικ για να επιλέξετε στήλες για εμφάνιση"
+msgstr "Επιλέξτε τις στήλες προς εμφάνιση με δεξί κλικ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:301
 msgid "More Options"
-msgstr "Περισσότερες επιλογές"
+msgstr "Περισσότερες Επιλογές"
 
 #. * String for connecting status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:150
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:117
 msgid "Connecting..."
-msgstr "Γίνεται σύνδεση..."
+msgstr "Σύνδεση..."
 
 #. * String for outgoing status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:32
 msgid "Outgoing"
-msgstr "Εξερχόμενα"
+msgstr "Εξερχόμενες"
 
 #. * String for incoming status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:34
 msgid "Incoming"
-msgstr "Εισερχόμενα"
+msgstr "Εισερχόμενες"
 
 #. * String for 'Connected on' tooltip
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:36
 msgid "Connected on"
-msgstr "Συνδέθηκε στον"
+msgstr "Συνδέθηκε σε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:38
 msgid "Leaf"
@@ -1385,7 +1381,7 @@ msgstr "Ultrapeer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:40
 msgid "Peer"
-msgstr "Ομότιμος χρήστης"
+msgstr "Ομότιμο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:109
@@ -1399,11 +1395,11 @@ msgstr "Μηνύματα (Εισ/Εξ)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:74
 msgid "Messages In"
-msgstr "Εισερχόμενα μηνύματα"
+msgstr "Μηνύματα Εισ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:76
 msgid "Messages Out"
-msgstr "Εξερχόμενα μηνύματα"
+msgstr "Μηνύματα Εξ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:78
 msgid "Bandwidth (I/O)"
@@ -1411,23 +1407,23 @@ msgstr "Εύρος ζώνης (Εισ/Εξ)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:80
 msgid "Bandwidth In"
-msgstr "Εισερχόμενο εύρος ζώνης"
+msgstr "Εύρος ζώνης Εισ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:82
 msgid "Bandwidth Out"
-msgstr "Εξερχόμενο εύρος ζώνης"
+msgstr "Εύρος ζώνης Εξ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:84
 msgid "Dropped (I/O)"
-msgstr "Απορρίφθηκαν (I/O)"
+msgstr "Χαμένα (Εισ/Εξ)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:86
 msgid "Dropped In"
-msgstr "Εισερχόμενα που απορρίφθηκαν"
+msgstr "Χαμένα Εισ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:88
 msgid "Dropped Out"
-msgstr "Εξερχόμενα που απορρίφθηκαν"
+msgstr "Χαμένα Εξ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:90
 msgid "Protocol"
@@ -1443,31 +1439,31 @@ msgstr "Ώρα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:96
 msgid "Compressed (I/O)"
-msgstr "Συμπιεσμένα (I/O)"
+msgstr "Συμπιεσμένα (Εισ/Εξ)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:98
 msgid "Compressed In"
-msgstr "Συμπιεσμένα εισερχομένων"
+msgstr "Συμπιεσμένα Εισ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:100
 msgid "Compressed Out"
-msgstr "Συμπιεσμένα εξερχομένων"
+msgstr "Συμπιεσμένα Εξ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:102
 msgid "SSL Overhead (I/O)"
-msgstr "SSL Overhead (I/O)"
+msgstr "SSL Overhead (Εισ/Εξ)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:104
 msgid "SSL Overhead In"
-msgstr "SSL Overhead In"
+msgstr "SSL Overhead Εισ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:106
 msgid "SSL Overhead Out"
-msgstr "SSL Overhead Out"
+msgstr "SSL Overhead Εξ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:108
 msgid "QRP (%)"
-msgstr "(%) QRP"
+msgstr "QRP (%)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:110
 msgid "QRP Empty"
@@ -1477,7 +1473,7 @@ msgstr "Κενό QRP"
 msgid ""
 "Incoming Searches - people on the P2P Network are now searching for..."
 msgstr ""
-"Εισερχόμενες αναζητήσεις - άτομα στο Δίκτυο P2P αυτή τη στιγμή ψάχνουν για..."
+"Εισερχόμενες Αναζητήσεις - τα άτομα στο Δίκτυο P2P τώρα ψάχνουν για..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/browser/Browser.java:138
 msgid "Loading..."
@@ -1488,36 +1484,36 @@ msgstr "Φόρτωση..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AbstractFilterOptionPanel.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:273
 msgid "remove"
-msgstr "κατάργηση"
+msgstr "αφαίρεση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:625
 msgid "Marks all Items as Selected"
-msgstr "Σημείωση όλων των αντικειμένων ως επιλεγμένα"
+msgstr "Επιλογή όλων των Στοιχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:643
 msgid "Deselect All"
-msgstr "Αποεπιλογή όλων"
+msgstr "Αποεπιλογή Όλων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:645
 msgid "Deselects all Items in the List"
-msgstr "Απεπιλογή όλων των αντικειμένων της λίστας"
+msgstr "Αποεπιλογή όλων των Στοιχείων της λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:34
 msgid "Close Tab"
-msgstr "Κλείσιμο ετικέτας"
+msgstr "Κλείσιμο Καρτέλας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:35
 msgid "Close All Tabs"
-msgstr "Κλείσιμο όλων των ετικετών"
+msgstr "Κλείσιμο Κάθε Καρτέλας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:36
 msgid "Close Other Tabs"
-msgstr "Κλείσιμο άλλων ετικετών"
+msgstr "Κλείσιμο Λοιπών Καρτελών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FocusJOptionPane.java:182
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/YesNoCheckBoxDialog.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:50
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:291
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:296
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:196
 msgid "Yes"
 msgstr "Ναι"
@@ -1544,17 +1540,17 @@ msgstr "Συνομιλία με {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:119
 #, java-format
 msgid "Browse Files of {0}"
-msgstr "Εμφάνιση αρχείων {0}"
+msgstr "Περιήγηση στα αρχεία του {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:78
 msgid "Block User"
-msgstr "Αποκλεισμός χρήστη"
+msgstr "Αποκλεισμός Χρήστη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:136
 #, java-format
 msgid "Block User {0}"
-msgstr "Αποκλεισμός χρήστη {0}"
+msgstr "Αποκλεισμός Χρήστη {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:168
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:236
@@ -1607,7 +1603,7 @@ msgstr[1] "P2P Χρήστες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:116
 msgid "Loading LimeWire..."
-msgstr "Φόρτωση του LimeWire..."
+msgstr "Φόρτωση LimeWire..."
 
 #. *
 #. * The undo action.
@@ -1627,24 +1623,24 @@ msgstr "Ακύρωση όλων των λήψεων;"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:23
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:118
 msgid "All Error"
-msgstr "Όλες με σφάλμα"
+msgstr "Όσων έχουν σφάλμα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllErrorDownloadAction.java:30
 msgid "Cancel all error downloads?"
-msgstr "Ακύρωση όλων των εσφαλμένων λήψεων;"
+msgstr "Ακύρωση όσων λήψεων έχουν σφάλμα;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:23
 msgid "All Stalled"
-msgstr "Σταμάτημα Όλων"
+msgstr "Όσων είναι στάσιμες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllStalledDownloadAction.java:30
 msgid "Cancel all stalled downloads?"
-msgstr "Ακύρωση όλων των σταματημένων λήψεων;"
+msgstr "Ακύρωση όλων όσων είναι στάσιμες;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:67
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:236
 msgid "Clear When Finished"
-msgstr "Καθαρισμός όταν ολοκληρωθεί"
+msgstr "Εκκαθάριση Όταν Ολοκληρωθεί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:102
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:178
@@ -1653,17 +1649,17 @@ msgstr "Ταξινόμηση κατά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:104
 msgid "Order Added"
-msgstr "Εντολή Προστέθηκε"
+msgstr "Σειρά Πρόσθεσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:106
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:186
 msgid "Progress"
-msgstr "Πρόοδος"
+msgstr "Πρόοδο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:107
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:188
 msgid "Time Left"
-msgstr "Χρόνος που απομένει"
+msgstr "Υπολειπόμενο Χρόνο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:108
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:190
@@ -1673,7 +1669,7 @@ msgstr "Ταχύτητα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:194
 msgid "File Type"
-msgstr "Τύπος Αρχείου"
+msgstr "Τύπο Αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:353
@@ -1684,22 +1680,21 @@ msgstr "Επέκταση αρχείου"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadHeaderPopupMenu.java:123
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:283
 msgid "Reverse Order"
-msgstr "Αντιστροφή Εντολής"
+msgstr "Αντίστροφη Σειρά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadItemUtils.java:39
 msgid ""
 "This file has not been scanned for viruses.  Do you want to launch anyway?"
-msgstr ""
-"Αυτό το αρχείο δεν έχει ελεχθεί για ιούς. Θέλετε να το εκτελέσετε πάραυτα?"
+msgstr "Το αρχείο δεν έχει ελεχθεί για ιούς. Να εκτελεθεί παραταύτα;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:417
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadMediator.java:508
 msgid "Clear Finished"
-msgstr "Καθαρισμός ολοκληρωμένων"
+msgstr "Εκκαθάριση Ολοκληρωμένων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:432
 msgid "Fix Stalled"
-msgstr "Επιδιόρθωση στάσιμων"
+msgstr "Επιδιόρθωση Στάσιμων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:153
 msgid "Download Complete"
@@ -1708,73 +1703,77 @@ msgstr "Η λήψη ολοκληρώθηκε"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/PauseAllDownloadAction.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:85
 msgid "Pause All"
-msgstr "Παύση όλων"
+msgstr "Παύση Όλων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/ResumeAllDownloadAction.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:92
 msgid "Resume All"
-msgstr "Συνέχιση όλων"
+msgstr "Συνέχιση Όλων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/ShowDownloadOptionsAction.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:303
 msgid "More Transfer Options..."
-msgstr "Περισσότερες επιλογές μεταφοράς..."
+msgstr "Περισσότερες Επιλογές Μεταφοράς..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/ShowUploadsInTrayAction.java:22
 msgid "Show Uploads in Tray"
-msgstr "Εμφάνισε τα απεσταλμένα αρχεία στην μπάρα"
+msgstr "Εμφάνιση Αποστολών στην Περιοχή Ειδοποιήσεων"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:94
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:96
 msgid "Do not show message again"
-msgstr "Μην εμφανίσεις ξανά το μήνυμα αυτό"
+msgstr "Να μην εμφανιστεί ξανά"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:107
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:109
 msgid "Anti-Virus Protection"
-msgstr "Προστασία από ιούς"
+msgstr "Προστασία από Ιούς"
 
 #. Set message text.  We also set the preferred size to control the
 #. message and dialog width.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:113
 msgid ""
 "LimeWire's Anti-Virus protection is powered by AVG.  AVG scans, detects and "
 "deletes files that are suspected to contain viruses or spyware.  <a "
 "href=\"{0}\">Learn more</a>"
 msgstr ""
+"Την αντιιική προστασία του LimeWire προσφέρει το πρόγραμμα της AVG, που "
+"σαρώνει, εντοπίζει και διαγράφει όσα αρχεία είναι ύποπτα για ιούς ή κώδικα "
+"υποκλοπής.  <a href=\"{0}\">Μάθετε περισσότερα</a>"
 
 #. Display as modal dialog.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:133
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:135
 msgid "About AVG Anti-Virus"
-msgstr "Σχετικά με το πρόγραμμα προστασίας από ιούς AVG"
+msgstr "Περί του AVG Anti-Virus"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:144
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:146
 msgid "Dangerous File"
 msgstr "Επικίνδυνο αρχείο"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:147
 #, java-format
 msgid ""
 "{0} is considered a dangerous file and has automatically been deleted for "
-"your protection."
+"your protection.  <a href=\"{1}\">Learn more</a>"
 msgstr ""
-"{0} θεωρείται επικίνδυνο αρχείο και σβήστηκε αυτόματα για την προστασία σας"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:158
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:160
 msgid "Threat Detected"
-msgstr "Εντοπίστηκε απειλή"
+msgstr "Εντοπίστηκε Απειλή"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:161
 #, java-format
 msgid ""
 "{0} is suspected to contain a virus or spyware and has automatically been "
 "deleted for your protection.  LimeWire's Anti-Virus protection is powered by "
 "AVG."
 msgstr ""
+"Το {0} πιθανόν να περιέχει ιό ή κώδικα υποκλοπής και διαγράφτηκε αυτόματα "
+"για την προστασία σας.  Την αντιιική προστασία του LimeWire προσφέρει η AVG."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:180
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:182
 msgid "Can't Scan Yet"
 msgstr "Δεν μπορεί να σαρώσει ακόμα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:181
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:183
 #, java-format
 msgid ""
 "{0} could not be inspected because the virus scanner is still downloading "
@@ -1785,19 +1784,21 @@ msgstr ""
 "το πρώτο πακέτο ενημέρωσης.  Η προστασία από ιούς του Limewire παρέχεται από "
 "τo AVG"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:184
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:188
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:186
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:190
 msgid "Unable to Scan"
-msgstr "Αδύνατο να ελεχθεί"
+msgstr "Αδυναμία Σάρωσης"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:185
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:187
 #, java-format
 msgid ""
 "{0} could not be inspected because the virus scanner cannot be loaded.  "
 "LimeWire Anti-Virus protection is powered by AVG."
 msgstr ""
+"Το {0} δεν ήταν δυνατό να ελεγχθεί γιατί δεν φορτώνει ο σαρωτής ιών.  Την "
+"αντιιική προστασία του LimeWire προσφέρει η AVG."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:189
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:191
 #, java-format
 msgid ""
 "{0} could not be inspected due to a problem with the virus scanner.  "
@@ -1807,15 +1808,15 @@ msgstr ""
 "προστασία από ιούς του Limewire παρέχεται από τo AVG"
 
 #. Display as modal dialog.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:237
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:239
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:58
 msgid "Warning"
 msgstr "Προσοχή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:242
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:45
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:159
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:247
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:160
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:249
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadActionRendererEditor.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:289
 msgid "Pause"
@@ -1823,7 +1824,7 @@ msgstr "Παύση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:249
 msgid "Cancel Download"
-msgstr "Ακύρωση λήψης"
+msgstr "Ακύρωση Λήψης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:256
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:57
@@ -1835,7 +1836,7 @@ msgstr "Συνέχιση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:263
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:165
 msgid "Try Again"
-msgstr "Προσπαθήστε ξανά"
+msgstr "Ξαναπροσπαθήστε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:270
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LaunchFileAction.java:42
@@ -1847,7 +1848,7 @@ msgstr "Αναπαραγωγή/Άνοιγμα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:284
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:279
 msgid "Clear from Tray"
-msgstr "Εκαθάριση Περιεχομένων"
+msgstr "Εκκαθάριση από την Περιοχή Ειδοποιήσεων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:291
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LocateFileAction.java:28
@@ -1856,7 +1857,7 @@ msgstr "Εκαθάριση Περιεχομένων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:125
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:192
 msgid "Locate on Disk"
-msgstr "Εντόπισε στο Δίσκο"
+msgstr "Εντοπισμός στο Δίσκο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:298
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:265
@@ -1864,7 +1865,7 @@ msgstr "Εντόπισε στο Δίσκο"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:129
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:130
 msgid "Locate in Library"
-msgstr "Εντόπισε στη βιβλιοθήκη"
+msgstr "Εντοπισμός στη Βιβλιοθήκη"
 
 #. Add View File Info menu item.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:305
@@ -1872,15 +1873,15 @@ msgstr "Εντόπισε στη βιβλιοθήκη"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:168
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:309
 msgid "View File Info..."
-msgstr "Προβολή Λεπτομερειών Αρχείου..."
+msgstr "Προβολή Πληροφοριών Αρχείου..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:312
 msgid "Change Location..."
-msgstr "Αλλαγή Τοποθεσίας"
+msgstr "Αλλαγή Τοποθεσίας..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:334
 msgid "Preview File"
-msgstr "Προεπισκόπηση αρχείου"
+msgstr "Προεπισκόπηση Αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:48
 msgid "Pause download"
@@ -1889,7 +1890,7 @@ msgstr "Πάυση Λήψης"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:54
 msgid "Try again"
-msgstr "Προσπαθήστε ξανά"
+msgstr "Ξαναπροσπαθήστε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:61
 msgid "Resume download"
@@ -1898,7 +1899,7 @@ msgstr "Συνέχιση Λήψης"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:68
 msgid "Search Again"
-msgstr "Εύρεση ξανά"
+msgstr "Επανάληψη Αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadCancelRendererEditor.java:53
 msgid "Cancel download"
@@ -1906,7 +1907,7 @@ msgstr "Ακύρωση Λήψης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadCancelRendererEditor.java:57
 msgid "Remove download"
-msgstr "Απομάκρυνση Λήψηςεχει"
+msgstr "Αφαίρεση Λήψης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:65
 msgid "Info"
@@ -1922,7 +1923,7 @@ msgstr "Ακυρώθηκε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:144
 msgid "Finishing..."
-msgstr "Ολοκληρώνει..."
+msgstr "Ολοκλήρωση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:146
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:544
@@ -1956,64 +1957,64 @@ msgstr "Σφάλμα κατά τη λήψη του torrent"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:177
 #, java-format
 msgid "Stalled - {0} of {1}"
-msgstr "Κόλλησε - {0} από {1}"
+msgstr "Στάσιμες - {0} από {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:182
 msgid "Unable to download: "
-msgstr "Δεν μπορεί να γίνει λήψη: "
+msgstr "Αδυναμία λήψης: "
 
 #. {0}: current size, {1} total size
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:185
 #, java-format
 msgid "Paused - {0} of {1}"
-msgstr "Παύση - {0} από {1}"
+msgstr "Παυθείσες - {0} από {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:193
 #, java-format
 msgid "Waiting - Next in line"
 msgid_plural "Waiting - {0} in line"
-msgstr[0] "Περιμένετε - Επόμενο στη σειρά"
-msgstr[1] "Περιμένετε - {0} στη σειρά"
+msgstr[0] "Εν αναμονή - Επόμενο στη σειρά"
+msgstr[1] "Εν αναμονή - {0} στη σειρά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:197
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:137
 msgid "File deleted - Dangerous file"
-msgstr "Το αρχείο σβήστηκε - Επικίνδυνο αρχείο"
+msgstr "Επικίνδυνο αρχείο - Διαγράφτηκε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:199
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:127
 msgid "Scanning for viruses - Powered by AVG"
-msgstr "Έλεγχος για ιούς - Παρέχεται από το AVG"
+msgstr "Σάρωση για ιούς - Μια προσφορά της AVG"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:201
 msgid "Scanning preview - Powered by AVG"
-msgstr "Προεπισκόπηση ελέγχου - Παρέχεται από το AVG"
+msgstr "Προεπισκόπηση σάρωσης - Μια προσφορά της AVG"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:203
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:132
 msgid "File deleted - Threat detected by AVG"
-msgstr "Το αρχείο σβήστηκε - Η απειλή εντοπίστηκε από το AVG"
+msgstr "Το αρχείο διαγράφτηκε - το AVG εντόπισε απειλή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:205
 msgid "Done, but unable to scan for viruses"
-msgstr ""
+msgstr "Ολοκληρώθηκε, αλλά δεν ήταν δυνατή η σάρωση για ιούς"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:209
 msgid "Evaluating..."
-msgstr ""
+msgstr "Εκτίμηση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:211
 msgid "Applying update..."
-msgstr ""
+msgstr "Εφαρμογή ενημέρωσης..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:220
 msgid "Looking for file..."
-msgstr "Εύρεση του αρχείου..."
+msgstr "Αναζήτηση αρχείου..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:222
 #, java-format
 msgid "Looking for file ({0} left)"
-msgstr "Εύρεση του αρχείου  ({0} απομένουν)"
+msgstr "Αναζήτηση αρχείου  (απομένουν {0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:228
 msgid "Store"
@@ -2040,13 +2041,13 @@ msgstr "Αναμονή..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadProgressRenderer.java:53
 msgid "Finalizing..."
-msgstr ""
+msgstr "Τελικοποίηση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadProgressRenderer.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadProgressRenderer.java:59
 #, java-format
 msgid "{0} left"
-msgstr "{0} απομένουν"
+msgstr "Απομένουν {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTitleRenderer.java:71
@@ -2056,26 +2057,26 @@ msgstr "{0} (torrent)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:90
 msgid "Checking for AVG Anti-Virus updates"
-msgstr ""
+msgstr "Έλεγχος για ενημερώσεις του AVG Anti-Virus"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:93
 msgid "Updating AVG Anti-Virus"
-msgstr ""
+msgstr "Ενημέρωση του AVG Anti-Virus"
 
 #. {0}: current update, {1} total number of updates
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:99
 #, java-format
 msgid "Updating AVG Anti-Virus definitions - {0} of {1}"
-msgstr ""
+msgstr "Ενημέρωση ορισμών του AVG Anti-Virus - {0} από {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:102
 msgid "Updating AVG Anti-Virus definitions"
-msgstr ""
+msgstr "Ενημέρωση ορισμών του AVG Anti-Virus"
 
 #. * Text field for text filter.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:88
 msgid "Refine results..."
-msgstr "Βελτίωση αποτελεσμάτων"
+msgstr "Εξειδίκευση αποτελεσμάτων..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:413
 msgid "reset"
@@ -2117,11 +2118,11 @@ msgstr "Μέγεθος"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/FilterPopupPanel.java:60
 #, java-format
 msgid "All {0}"
-msgstr "Όλοι {0}"
+msgstr "{0}: όλα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/PropertyFilter.java:266
 msgid "Extensions"
-msgstr "Καταλήξεις"
+msgstr "Επεκτάσεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/PropertyFilter.java:271
 msgid "Artists"
@@ -2195,22 +2196,22 @@ msgstr "φίλοι"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:162
 msgid "P2P Users"
-msgstr "P2P Χρήστες"
+msgstr "Χρήστες P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:16
 msgid "Any Friend"
-msgstr "Οποιοσδήποτε Φίλος"
+msgstr "Οποιονδήποτε Φίλο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:42
 msgid "Add Friend"
-msgstr "Προσθήκη φίλου"
+msgstr "Πρόσθεση Φίλου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:246
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:109
 msgid "Username:"
-msgstr "Σύνδεση όταν ξεκινά το LimeWire"
+msgstr "Όνομα χρήστη:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:38
 msgid "Nickname:"
@@ -2223,7 +2224,7 @@ msgstr "Αποδοχή;"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/FriendRequestPanel.java:105
 #, java-format
 msgid "{0} wants to be your friend."
-msgstr "{0} θέλει να γίνει φίλος σας."
+msgstr "{0}: θέλει να γίνετε φίλοι."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/actions/AddFriendAction.java:31
 msgid "Add Friend..."
@@ -2252,22 +2253,22 @@ msgstr "&Μην ενοχλείτε"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatDocumentBuilder.java:102
 #, java-format
 msgid "{0} has signed off"
-msgstr "{0} αποσυνδέθηκε"
+msgstr "{0}: αποσυνδέθηκε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatDocumentBuilder.java:104
 #, java-format
 msgid "{0} is typing..."
-msgstr "{0} πληκτρολογεί..."
+msgstr "{0}: πληκτρολογεί..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatDocumentBuilder.java:106
 #, java-format
 msgid "{0} has entered text"
-msgstr "{0} έχει εισάγει κείμενο"
+msgstr "{0}: έγραψε κάτι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendList.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:83
 msgid "Close Conversation"
-msgstr "Λήξη συζήτησης"
+msgstr "Κλείσιμο Συζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendList.java:161
 msgid "Status: "
@@ -2275,11 +2276,11 @@ msgstr "Κατάσταση: "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:121
 msgid "Unable to access remote file"
-msgstr "Αδύνατη η πρόσβαση απομακρυσμένου αρχείου"
+msgstr "Αδυναμία πρόσβασης στο απομακρυσμένο αρχείο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatHyperlinkListener.java:122
 msgid "Hyperlink"
-msgstr "Υπερσύνδεση"
+msgstr "Υπερσύνδεσμος"
 
 #. todo: each message type should know how to display itself as a notification
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:277
@@ -2289,7 +2290,7 @@ msgstr "Μήνυμα απο το διακομιστή συνομιλίας"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:277
 #, java-format
 msgid "Chat from {0}"
-msgstr "Chat απο {0}"
+msgstr "Συνομιλία από {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:278
 msgid "Reply"
@@ -2298,7 +2299,7 @@ msgstr "Απάντηση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatMediator.java:297
 #, java-format
 msgid "Chat ({0})"
-msgstr "Chat ({0})"
+msgstr "Συνομιλία ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:97
 msgid "Open Conversation"
@@ -2306,7 +2307,7 @@ msgstr "Άνοιγμα συζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:111
 msgid "Share New List"
-msgstr "Μοίρασε τη Νέα Λίστα"
+msgstr "Διάδοση Νέας Λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:116
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/CreateListAction.java:37
@@ -2315,20 +2316,19 @@ msgstr "Χωρίς τίτλο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatPopupMenu.java:127
 msgid "Share List"
-msgstr "Μοίρασε Λίστα"
+msgstr "Διάδοση Λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:9
 msgid "Facebook chat is not supported in this version of LimeWire."
-msgstr ""
-"Η συνομιλία στο Facebook δεν υποστηρίζεται από αυτή την έκδοση του Limewire"
+msgstr "Αυτή η έκδοση του LimeWire δεν υποστηρίζει συνομιλίες Facebook"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:10
 msgid ""
 "We at Lime Wire are actively looking into remedies.  In the meantime, you "
 "will still be able to browse friends."
 msgstr ""
-"Στο Limewire κάνουμε τα πάντα για να βρούμε λύσεις. Στο ενδιάμεσο,μπορείτε "
-"ακόμα να ψάχνετε σε φίλους."
+"Στο LimeWire αναζητούμε ενεργά για λύσεις. Στο μεταξύ, μπορείτε να "
+"περιηγείστε στους φίλους σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:11
 msgid "Thank you for your patience."
@@ -2336,15 +2336,15 @@ msgstr "Ευχαριστούμε για την υπομονή σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:248
 msgid "On the Record"
-msgstr "Επίσημα"
+msgstr "Δημόσια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:249
 msgid "Off the Record"
-msgstr "Ανεπίσημα"
+msgstr "Ιδιωτική"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:543
 msgid "File offer not sent because friend signed off."
-msgstr "Η προσφορά αρχείου δεν στάλθηκε επειδή ο φίλος αποσυνδέθηκε."
+msgstr "Η προσφορά αρχείου δεν στάλθηκε - ο φίλος αποσυνδέθηκε."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:544
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:564
@@ -2365,7 +2365,7 @@ msgstr "Κοινή χρήση αρχείου με {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:80
 #, java-format
 msgid "{0} wants to share a file with you"
-msgstr "{0} θέλει να μοιραστεί ένα αρχείο μαζί σας"
+msgstr "{0}: θέλει να μοιραστεί ένα αρχείο μαζί σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:81
 #, java-format
@@ -2379,58 +2379,58 @@ msgstr "Λήψη {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:104
 msgid "Download cancelled.  Click button to retry"
-msgstr "Η λήψη ακυρώθηκε. Κάντε κλικ για να ξαναπροσπαθήσετε"
+msgstr "Η λήψη ακυρώθηκε. Πιέστε το κουμπί για να ξαναπροσπαθήσετε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:110
 msgid "Error downloading file.  Click button to retry"
-msgstr "Σφάλμα λήψης αρχείου. Κάντε κλικ για να ξαναπροσπαθήσετε"
+msgstr "Σφάλμα λήψης αρχείου. Πιέστε το κουμπί για να ξαναπροσπαθήσετε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:114
 #, java-format
 msgid "{0}Downloaded{1}"
-msgstr "{0}Έγινε λήψη{1}"
+msgstr "{0}Λήφθηκε{1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:120
 #, java-format
 msgid "{0}Downloaded but not scanned for viruses{1}"
-msgstr ""
+msgstr "{0}Λήφθηκε αλλά δεν σαρώθηκε για ιούς{1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageWriterImpl.java:44
 msgid "Message not sent because friend signed off."
-msgstr "Το μήνυμα δεν στάλθηκε επειδή ο φίλος αποσυνδέθηκε."
+msgstr "Το μήνυμα δεν στάλθηκε - ο φίλος αποσυνδέθηκε."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:32
 msgid "Chat is now off the record"
-msgstr "Η συνομιλία είναι ανεπίσημη"
+msgstr "Τώρα η συνομιλία είναι ιδιωτική"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/NoSaveStatusMessage.java:33
 msgid "Chat is now on the record"
-msgstr "Η συνομιλία είναι επίσημη"
+msgstr "Τώρα η συνομιλία είναι δημόσια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPopupPanel.java:63
 msgid "File sharing with friends"
-msgstr "Μοίρασμα αρχείου με φίλους"
+msgstr "Κοινή χρήση αρχείων με φίλους"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:370
 msgid "Share"
-msgstr "Διαμοιρασμός"
+msgstr "Κοινή χρήση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:93
 msgid "Share with friends on LimeWire with the following:"
-msgstr "Μοιραστείτε με φίλους στο Limewire με τα ακόλουθα:"
+msgstr "Κοινή χρήση με φίλους στο LimeWire με τα ακόλουθα:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:87
 msgid "Sign In"
-msgstr "Σύνδεση"
+msgstr "Είσοδος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:88
 msgid "Signing in..."
-msgstr "Γίνεται σύνδεση..."
+msgstr "Είσοδος..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:89
 msgid "Incorrect username or password."
-msgstr "Λανθασμένο όνομα χρήστη ή κωδικός πρόσβασης."
+msgstr "Λάθος όνομα χρήστη / κωδικός."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:90
 msgid "Network error."
@@ -2455,28 +2455,28 @@ msgstr "Όνομα χρήστη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:196
 msgid "Password"
-msgstr "Κωδικός πρόσβασης"
+msgstr "Κωδικός"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:218
 msgid "Sign in when I start LimeWire"
-msgstr "Να συνδέομαι όταν ξεκινάει το LimeWire"
+msgstr "Είσοδος όταν εκκινώ το LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:265
 msgid "Choose another account"
-msgstr "Επιλογή άλλου λογαριασμού"
+msgstr "Επιλέξτε άλλο λογαριασμό"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AddFileAction.java:28
 msgid "Add Files"
-msgstr "Προσθήκη αρχείων"
+msgstr "Πρόσθεση αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AddFileAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AddFileAction.java:37
 msgid "Add File(s)"
-msgstr "Προσθήκη αρχείου(ων)"
+msgstr "Πρόσθεση αρχείου(/ων)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AddFileAction.java:47
 msgid "All Files and Folders"
-msgstr "Όλα τα Αρχεία και Φάκελοι"
+msgstr "Όλα τα Αρχεία και οι Φάκελοι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:90
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:307
@@ -2486,20 +2486,19 @@ msgstr "Όλα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:99
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:464
 msgid "Filter"
-msgstr "Φιλτράρισμα"
+msgstr "Φίλτρο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:302
 msgid ""
 "LimeWire could not play this file. There may not be a sound device installed "
 "on your computer or your speakers may not be plugged in."
 msgstr ""
-"To LimeWire δεν μπόρεσε να αναπαράγει αυτό το αρχείο. Πιθανόν να μην έχει "
-"εγκατασταθεί κάποια συσκευή ήχου στον υπολογιστή σας ή τα ηχεία σας είναι "
-"αποσυνδεμένα."
+"To LimeWire δεν μπόρεσε να αναπαραγάγει αυτό το αρχείο. Ίσως δεν έχετε "
+"συσκευή ήχου στον υπολογιστή ή τα ηχεία δεν είναι συνδεδεμένα."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:302
 msgid "Problem Playing File"
-msgstr "Πρόβλημα αναπαραγωγής αρχείου"
+msgstr "Πρόβλημα Αναπαραγωγής Αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:529
 #, java-format
@@ -2513,18 +2512,18 @@ msgstr "{0} από {1} αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/PublicSharedFeedbackPanel.java:54
 msgid "Files in this list are shared anonymously with the world."
-msgstr "Τα αρχεία σε αυτή τη λίστα μοιράζονται ανώνυμα χωρίς περιορισμούς."
+msgstr "Τα αρχεία σε αυτήν είναι σε ανώνυμη κοινή χρήση."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:28
 msgid "Clear Files"
-msgstr "Εκκαθάριση αρχείων"
+msgstr "Εκκαθάριση Αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:39
 #, java-format
 msgid ""
 "Remove all files from {0}?  This will stop sharing all of these files."
 msgstr ""
-"Αφαίρεση όλων των αρχείων από το {0}; Αυτό θα σταματήσει το διαμοιρασμό τους."
+"Αφαίρεση όλων των αρχείων από το {0}; Θα σταματήσει η κοινή χρήση τους."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:49
@@ -2537,9 +2536,8 @@ msgid ""
 "Remove all files from your library?  This will remove all files you've "
 "downloaded and stop sharing every file you are sharing."
 msgstr ""
-"Κατάργηση όλων των αρχείων από τη βιβλιοθήκη σας; Η ενέργεια θα καταργήσει "
-"όλα τα αρχεία που έχετε λάβει και θα σταματήσει το μοίρασμα όλων των "
-"κοινόχρηστων αρχείων."
+"Αφαίρεση όλων των αρχείων από τη βιβλιοθήκη σας; Θα αφαιρεθούν όλα όσα έχετε "
+"κατεβάσει και θα σταματήσει η κοινή χρήση κάθε αρχείου."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:47
 #, java-format
@@ -2547,12 +2545,11 @@ msgid ""
 "Remove all files from {0}?  This will stop sharing all of these files with "
 "the world."
 msgstr ""
-"Κατάργηση όλων των αρχείων από {0}; Η συγκεκριμένη ενέργεια θα ποκαλέσει τη "
-"διακοπή του μοιράσματος των συγκεκριμένων αρχείων με όλους."
+"Αφαίρεση όλων των αρχείων από το {0}; Θα σταματήσει κάθε κοινή χρήση."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:33
 msgid "Delete List"
-msgstr "Διέγραψε Λίστα"
+msgstr "Διαγραφή Λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:43
 #, java-format
@@ -2560,8 +2557,8 @@ msgid ""
 "Delete list {0}?  This will stop sharing all of these files, but won't "
 "delete them from disk."
 msgstr ""
-"Διαγραφή Λίστας {0};  Η ενέργεια θα σταματήσει το μοίρασα όλων αυτών των "
-"αρχείων, αλλά δε θα τα διαγράψει από το δίσκο."
+"Διαγραφή λίστας {0};  Θα σταματήσει η κοινή χρήση τους αλλά θα παραμείνουν "
+"στο δίσκο."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:51
@@ -2575,8 +2572,8 @@ msgid ""
 "Delete list {0}?  This will stop sharing all of these files with the world, "
 "but won't delete them from disk."
 msgstr ""
-"Διαγραφή λίστας {0}; Αυτό θα σταματήσει τον διαμοιρασμό όλων αυτών των "
-"αρχείων με τον κόσμο, αλλά δεν θα τα διαγράψει από τον δίσκο σας."
+"Διαγραφή λίστας {0}; Θα σταματήσει η κοινή χρήση των αρχείων αλλά θα "
+"παραμείνουν στο δίσκο σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:26
 msgid "Export List..."
@@ -2584,7 +2581,7 @@ msgstr "Εξαγωγή Λίστας..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:36
 msgid "Export M3U List"
-msgstr "Εξαγωγή λίστας M3U"
+msgstr "Εξαγωγή Λίστας M3U"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ExportListAction.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ImportListAction.java:60
@@ -2609,18 +2606,18 @@ msgid "Library"
 msgstr "Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavItem.java:78
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:226
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:168
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:216
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:159
 msgid "Public Shared"
-msgstr "Δημόσια Κοινόχρηστη"
+msgstr "Δημόσια Κοινόχρηστα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavPopupMenu.java:34
 msgid "Add Files..."
-msgstr "Πρόσθεσε Αρχεία..."
+msgstr "Πρόσθεση Αρχείων..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavigatorPanel.java:118
 msgid "Private Shared"
-msgstr "Ιδιωτική Κοινόχρηστη"
+msgstr "Ιδιωτικά Κοινόχρηστα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavigatorPanel.java:126
 msgid "Create List"
@@ -2629,12 +2626,12 @@ msgstr "Δημιουργία Λίστας"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/RenameAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RenameFileAction.java:32
 msgid "Rename"
-msgstr "Μετανομασία"
+msgstr "Μετονομασία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:88
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:142
 msgid "Sharing list with..."
-msgstr "Η Λίστα μοιράζεται με..."
+msgstr "Λίστα κοινόχρηστη με..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:93
 msgid "Filter..."
@@ -2646,7 +2643,7 @@ msgstr "Φίλτρο..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:65
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FileChooser.java:85
 msgid "Select"
-msgstr "Επιλογή όλων"
+msgstr "Επιλογή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingEditablePanel.java:109
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:146
@@ -2662,21 +2659,21 @@ msgstr "{0} φίλοι από άλλους λογαριασμούς"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:99
 msgid "Edit Sharing"
-msgstr "Επεξεργασία Μοιράσματος"
+msgstr "Επεξεργασία Κοινής Χρήσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingFriendListPanel.java:144
 msgid "Not Shared"
-msgstr "Δε μοιράζεται"
+msgstr "Όχι Κοινόχρηστο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:83
 #, java-format
 msgid "<a href={0}>Sign in</a> to share this list."
-msgstr "<a href={0}>Συνδεθείτε</a> για να μοιραστείτε τη συγκεκριμένη λίστα."
+msgstr "<a href={0}>Εισέλθετε</a> για κοινή χρήση της λίστας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:79
 msgid "Logging in..."
-msgstr "Συνδέεται..."
+msgstr "Είσοδος..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:81
 #, java-format
@@ -2684,13 +2681,12 @@ msgid ""
 "<a href={0}>Sign in</a> to share this list or edit sharing, or <a "
 "href={1}>stop sharing</a> it now."
 msgstr ""
-"<a href={0}>Συνδεθείτε</a>για να μοιραστείτε τη συγκεκριμένη λίστα ή για να "
-"επεξεργαστείτε τις ρυθμίσεις των κοινόχρηστων, ή <a href={1}>για να "
-"διακόψετε το μοίρασμα</a> τώρα."
+"<a href={0}>Εισέλθετε</a> για κοινή χρήση της λίστας ή επεξεργασία της "
+"κοινής χρήσης, ή για <a href={1}>διακοπή της κοινής χρήσης</a> τώρα."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AddToListMenu.java:36
 msgid "Add to List"
-msgstr "Πρόσθεσε στη Λίστα"
+msgstr "Πρόσθεση στη Λίστα"
 
 #. place holder to get the -> on the parent menu
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AddToListMenu.java:80
@@ -2698,7 +2694,7 @@ msgstr "Πρόσθεσε στη Λίστα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShowInListMenu.java:89
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShowInListMenu.java:110
 msgid "empty"
-msgstr "άδειο"
+msgstr "κενό"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllTableFormat.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:60
@@ -2769,31 +2765,31 @@ msgstr "Διαγραφή από το Δίσκο"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:60
 msgid "Move File to the Recycle Bin"
 msgid_plural "Move Files to the Recycle Bin"
-msgstr[0] "Μεταφορά  Αρχείου στον Κάδο Ανακύκλωσης"
-msgstr[1] "Μεταφορά αρχείων στον Κάδο Αποριμμάτων"
+msgstr[0] "Μεταφορά Αρχείου στον Κάδο Ανακύκλωσης"
+msgstr[1] "Μεταφορά Αρχείων στον Κάδο Ανακύκλωσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:61
 msgid "Move this file to the Recycle Bin?"
 msgid_plural "Move this file to the Recycle Bin?"
-msgstr[0] "Να μεταφερθεί το Αρχείο στον Κάδο Ανακύκλωσης;"
-msgstr[1] "Να μεταφερθούν τα Αρχεία στον Κάδο Ανακύκλωσης;"
+msgstr[0] "Να μεταφερθεί το αρχείο στον Κάδο Ανακύκλωσης;"
+msgstr[1] "Να μεταφερθούν τα αρχεία στον Κάδο Ανακύκλωσης;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:63
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:54
 msgid "Move to Recycle Bin"
-msgstr "Μεταφορά στον κάδο ανακύκλωσης"
+msgstr "Μεταφορά στον Κάδο Ανακύκλωσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:66
 msgid "Move File to the Trash"
 msgid_plural "Move Files to the Trash"
 msgstr[0] "Μεταφορά Αρχείου στα Σκουπίδια"
-msgstr[1] "Μεταφορά Αρχείοων στα Σκουπίδια"
+msgstr[1] "Μεταφορά Αρχείων στα Σκουπίδια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:67
 msgid "Move this file to the Trash?"
 msgid_plural "Move these files to the Trash?"
-msgstr[0] "Μεταφορά του συγκεκριμένου αρχείου στα Σκουπίδια;"
-msgstr[1] "Μεταφορά των συγκεκριμένων αρχείων στα Σκουπίδια;"
+msgstr[0] "Μεταφορά του αρχείου στα Σκουπίδια;"
+msgstr[1] "Μεταφορά των αρχείων στα Σκουπίδια;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:61
@@ -2809,20 +2805,20 @@ msgstr[1] "Διαγραφή Αρχείων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:73
 msgid "Delete this file from disk?"
 msgid_plural "Delete these files from disk?"
-msgstr[0] "Διαγραφή του αρχείου από τον δίσκο;"
-msgstr[1] "Διαγραφή των αρχείων από τον δίσκο;"
+msgstr[0] "Διαγραφή του αρχείου από το δίσκο;"
+msgstr[1] "Διαγραφή των αρχείων από το δίσκο;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:46
 msgid "Remove from Library"
-msgstr "Κατάργηση από τη βιβλιοθήκη"
+msgstr "Αφαίρεση από τη βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:50
 msgid "Move File to the Recycle Bin or Remove from Library"
 msgid_plural "Move Files to the Recycle Bin or Remove from Library"
 msgstr[0] ""
-"Μεταφορά του Αρχείου στον Κάδο Ανακύκλωσης ή Διαγραφή από την Βιβλιοθήκη"
+"Μεταφορά του αρχείου στον Κάδο Ανακύκλωσης ή Αφαίρεση από τη Βιβλιοθήκη"
 msgstr[1] ""
-"Μεταφορά των Αρχείων στον Κάδο Ανακύκλωσης ή Διαγραφή από την Βιβλιοθήκη"
+"Μεταφορά των αρχείων στον Κάδο Ανακύκλωσης ή Διαγραφή από τη Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:52
 msgid ""
@@ -2832,17 +2828,17 @@ msgid_plural ""
 "Do you want to move this file to the Recycle Bin or just remove it from the "
 "Library?"
 msgstr[0] ""
-"Θέλετε να μεταφέρετε αυτό το αρχείο στον Κάδο Ανακύκλωσης ή μόνο να το "
-"αφαιρέσετε από την Βιβλιοθήκη;"
+"Θέλετε να μεταφέρετε το αρχείο στον Κάδο Ανακύκλωσης ή μόνο να το αφαιρέσετε "
+"από τη Βιβλιοθήκη;"
 msgstr[1] ""
-"Θέλετε να μεταφέρετε αυτά τα αρχεία στον Κάδο Ανακύκλωσης ή μόνο να τα "
-"αφαιρέσετε από την Βιβλιοθήκη;"
+"Θέλετε να μεταφέρετε τα αρχεία στον Κάδο Ανακύκλωσης ή μόνο να τα αφαιρέσετε "
+"από τη Βιβλιοθήκη;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:57
 msgid "Move File to the Trash or Remove from Library"
 msgid_plural "Move Files to the Trash or Remove from Library"
-msgstr[0] "Μεταφορά του Αρχείου στα Σκουπίδια ή Κατάργηση από τη Βιβλιοθήκη"
-msgstr[1] "Μεταφορά των Αρχείων στα Σκουπίδια ή Κατάργηση από τη Βιβλιοθήκη"
+msgstr[0] "Μεταφορά Αρχείου στα Σκουπίδια ή Κατάργηση από τη Βιβλιοθήκη"
+msgstr[1] "Μεταφορά Αρχείων στα Σκουπίδια ή Κατάργηση από τη Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
 msgid ""
@@ -2852,17 +2848,17 @@ msgid_plural ""
 "Do you want to move this file to the Trash or just remove it from the "
 "Library?"
 msgstr[0] ""
-"Θέλετε να μεταφέρετε το συγκεκριμένο αρχείο στα σκουπίδια ή απλά να το "
-"καταργήσετε από τη βιβλιοθήκη;"
+"Θέλετε να μεταφέρετε το αρχείο στα Σκουπίδια ή μόνο να το καταργήσετε από τη "
+"Βιβλιοθήκη;"
 msgstr[1] ""
-"Θέλετε να μεταφέρετε τα συγκεκριμένα αρχεία στα σκουπίδια ή απλά να τα "
-"καταργήσετε από τη βιβλιοθήκη;"
+"Θέλετε να μεταφέρετε τα αρχεία στα Σκουπίδια ή μόνο να τα καταργήσετε από τη "
+"Βιβλιοθήκη;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:64
 msgid "Delete File or Remove from Library"
 msgid_plural "Delete Files or Remove from Library"
-msgstr[0] "Διαγραφή του Αρχείου ή Αφαίρεση από την Βιβλιοθήκη"
-msgstr[1] "Διαγραφή των Αρχείων ή Αφαίρεση από την Βιβλιοθήκη"
+msgstr[0] "Διαγραφή Αρχείου ή Αφαίρεση από τη Βιβλιοθήκη"
+msgstr[1] "Διαγραφή Αρχείων ή Αφαίρεση από τη Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:66
 msgid ""
@@ -2870,26 +2866,26 @@ msgid ""
 msgid_plural ""
 "Do you want to delete this file from disk or just remove it from the Library?"
 msgstr[0] ""
-"Θέλετε να διαγράψετε αυτό το αρχείο από τον δίσκο ή μόνο να το αφαιρέσετε "
-"από την βιβλιοθήκη;"
+"Θέλετε να διαγράψετε το αρχείο από το δίσκο ή μόνο να το αφαιρέσετε από τη "
+"Βιβλιοθήκη;"
 msgstr[1] ""
-"Θέλετε να διαγράψετε αυτά τα αρχεία από τον δίσκο ή μόνο να τα αφαιρέσετε "
-"από την βιβλιοθήκη;"
+"Θέλετε να διαγράψετε τα αρχεία από το δίσκο ή μόνο να τα αφαιρέσετε από τη "
+"Βιβλιοθήκη;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:394
 msgid "This file is still processing."
-msgstr "Το αρχείο βρίσκεται ακόμα υπό επεξεργασία"
+msgstr "Το αρχείο είναι ακόμη υπό επεξεργασία."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:396
 msgid "This file cannot be shared."
-msgstr "Αυτό το αρχείο δεν μπορεί να διαμοιραστεί"
+msgstr "Δεν μπορεί να γίνει κοινή χρήση αυτού του αρχείου."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/NameCategoryRenderer.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:68
 #, java-format
 msgid "{0} (downloading)"
-msgstr "{0} (λήψεις)"
+msgstr "{0} (λήψη)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:39
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:243
@@ -2901,11 +2897,11 @@ msgstr "Εταιρεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveButton.java:22
 msgid "Remove this file from this list"
-msgstr "Αφαίρεση του αρχείου από τη λίστα"
+msgstr "Αφαίρεση αρχείου από τη λίστα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:38
 msgid "Remove from All Other Lists"
-msgstr "Αφάιρεση από όλες τις υπόλοιπες λίστες"
+msgstr "Αφάιρεση από Όλες τις Υπόλοιπες Λίστες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:40
 msgid "Remove from All Lists"
@@ -2913,7 +2909,7 @@ msgstr "Αφαίρεση από Όλες τις Λίστες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:51
 msgid "Remove from Lists"
-msgstr "Αφαίρεση από τις λίστες"
+msgstr "Αφαίρεση από τις Λίστες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:67
 msgid "Remove this file from All Lists?"
@@ -2926,52 +2922,50 @@ msgstr "Αφαίρεση {0} αρχείων από Όλες τις Λίστες;
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:35
 msgid "All Lists and Library"
-msgstr "Όλες οι λίστες και βιβλιοθήκη"
+msgstr "Όλες τις Λίστες και τη Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:194
 msgid "Remove File"
 msgid_plural "Remove Files"
-msgstr[0] "Κατάργηση Αρχείου"
-msgstr[1] "Κατάργηση Αρχείων"
+msgstr[0] "Αφαίρεση Αρχείου"
+msgstr[1] "Αφαίρεση Αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:63
 #, java-format
 msgid ""
 "Remove \"{0}\" from Library? This will unshare this file with everyone."
 msgstr ""
-"Κατάργηση \"{0}\" από τη Βιβλιοθήκη; Η ενέργεια θα καταργήσει το μοίρασμα με "
-"όλους."
+"Αφαίρεση του \"{0}\" από τη Βιβλιοθήκη; Θα καταργηθεί η κοινή χρήση του."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:65
 #, java-format
 msgid "Remove \"{0}\" from Library?"
-msgstr "Κατάργηση \"{0}\" από τη Βιβλιοθήκη;"
+msgstr "Αφαίρεση του \"{0}\" από τη Βιβλιοθήκη;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:68
 #, java-format
 msgid ""
 "Remove {0} files from Library? This will unshare these files with everyone."
 msgstr ""
-"Κατάργηση {0} αρχείων από τη Βιβλιοθήκη; Η ενέργεια θα καταργήσει το "
-"μοίρασμα των συγκεκριμένων αρχείων με όλους."
+"Κατάργηση {0} αρχείων από τη Βιβλιοθήκη; Θα καταρτηθεί η κοινή χρήση τους."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:70
 #, java-format
 msgid "Remove {0} files from Library?"
-msgstr "Κατάργηση {0} αρχείων από τη Βιβλιοθήκη;"
+msgstr "Αφαίρεση {0} αρχείων από τη Βιβλιοθήκη;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromListAction.java:27
 msgid "Remove from List"
-msgstr "Κατάργηση αππό τη Λίστα"
+msgstr "Αφαίρεση από τη Λίστα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromListMenu.java:37
 msgid "Remove from"
-msgstr "Αφαίρεσε από"
+msgstr "Αφαίρεση από"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromListMenu.java:45
 msgid "All Lists"
-msgstr "Όλες οι΄λίστες"
+msgstr "Όλες τις Λίστες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShowInListMenu.java:46
 msgid "Show in List"
@@ -2990,15 +2984,15 @@ msgstr "Ανάλυση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutAction.java:20
 msgid "&About LimeWire..."
-msgstr "&Σχετικά με το LimeWire..."
+msgstr "&Περί του LimeWire..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:38
 msgid "Automatically Scroll"
-msgstr "Αυτόματη κύλιση"
+msgstr "Αυτόματη Κύλιση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:52
 msgid "About LimeWire"
-msgstr "Πληροφορίες για το LimeWire"
+msgstr "Περί του LimeWire"
 
 #. set up limewire version label
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:74
@@ -3013,7 +3007,7 @@ msgstr "Κλείσιμο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:102
 msgid "Close This Window"
-msgstr "Κλείσιμο παραθύρου"
+msgstr "Κλείσιμο Παραθύρου"
 
 #. introduction
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:129
@@ -3024,10 +3018,10 @@ msgid ""
 "also, of course, the result of the countless hours of work by LimeWire's "
 "developers:"
 msgstr ""
-"Εμπνευσμένο από τον ιδιοκτήτη του LimeWire, Mark Gorton, το πρόγραμμα "
-"LimeWire αποτελεί μια προσπάθεια συνεργασίας <a "
-"href=\"http://www.limewire.org/\">ανοιχτού κώδικα</a> στην οποία "
-"συνεργάζονταιι προγραμματιστές και ερευνητές από ολόκληρο τον κόσμο.  Το "
+"Εμπνευσμένο από τον ιδιοκτήτη του LimeWire, Mark Gorton, το πρότζεκτ "
+"LimeWire είναι ένα συνεργατικό, <a "
+"href=\"http://www.limewire.org/\">ανοιχτού κώδικα εγχείρημα</a> στο οποίο "
+"συνεργάζονταιι προγραμματιστές και ερευνητές από όλον τον κόσμο.  Το "
 "LimeWire είναι επίσης, βέβαια, το αποτέλεσμα αμέτρητων ωρών εργασίας των "
 "προγραμματιστών του LimeWire:"
 
@@ -3037,8 +3031,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
-"Στα παρασκήνια, οι προγραμματιστές επιχείρησης χειρίζονται την "
-"επιχειρηματική στρατηγική και τις καθημερινές υποθέσεις του LimeWire:"
+"Η παρασκηνιακή επιχειρηματική στρατηγική και οι καθημερινές υποθέσεις του "
+"LimeWire διευθετούνται από το προσωπικό επιχειρηματικής ανάπτυξης:"
 
 #. previous developers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:187
@@ -3057,11 +3051,10 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
-"Επίσης, οι συντελεστές ανοιχτού κώδικα του LimeWire προσέφεραν σημαντικές "
-"διορθώσεις κώδικα και σφαλμάτων, ιδέες, έρευνα, κ.λπ. στο πρόγραμμα. Τα "
-"ονόματα που αναφέρονται παρακάτω είτε έχουν γράψει κώδικα που διανέμεται με "
-"κάθε έκδοση του LimeWire ή εντόπισαν σοβαρά σφάλματα στον κώδικα, ή και τα "
-"δύο:"
+"Οι συντελεστές στο ανοιχτού κώδικα πρότζεκτ LimeWire προσέφεραν πολύ κώδικα "
+"και διορθώσεις σφαλμάτων, ιδέες, έρευνα, κ.λπ. Όσοι αναγράφονται παρακάτω "
+"είτε έχουν γράψει κώδικα που διανέμεται με κάθε έκδοση του LimeWire ή "
+"εντόπισαν σοβαρά σφάλματα στον κώδικα, ή και τα δύο:"
 
 #. internationalization contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:341
@@ -3071,8 +3064,8 @@ msgid ""
 "LimeWire web site."
 msgstr ""
 "Το LimeWire θα ήθελε επίσης να ευχαριστήσει τους πολλούς συνεργάτες του "
-"εγχειρήματος τοπικοποίησης και για το ίδιο το πρόγραμμα αλλά και για την "
-"ιστοσελίδα του LimeWire."
+"εγχειρήματος διεθνοποίησης, τόσο της ίδιας της εφαρμογής αλλά και του "
+"ιστοτόπου του LimeWire."
 
 #. community VIPs
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:345
@@ -3080,8 +3073,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
-"Πολλοί συνάδελφοι από την κοινότητα Gnutella αξίζουν ιδιαιτερων ευχαριστιών. "
-"Σε αυτούς περιλαμβάνονται:"
+"Πολλοί συνάδελφοι από την κοινότητα Gnutella αξίζουν ιδιαίτερη ευγνωμοσύνη. "
+"Μεταξύ άλλων:"
 
 #. conclusion
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:367
@@ -3090,10 +3083,9 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the P2P Network would not exist."
 msgstr ""
-"Τέλος, το LimeWire θα ήθελε να εκφράσει τις ειλικρινείς του ευχαριστίες σε "
-"όλους εκείνους τους προγραμματιστές, τους χρήστες και όλους όσους συνέβαλλαν "
-"με τις ιδέες τους στο πρόγραμμα. Χωρίς τους χρήστες του LimeWire, το Δίκτυο "
-"P2P δεν θα υπήρχε."
+"Τέλος, το LimeWire θα ήθελε να ευχαριστήσει θερμά όλους τους "
+"προγραμματιστές, χρήστες και λοιπούς που συνέβαλαν με τις ιδέες τους στο "
+"πρότζεκτ. Χωρίς τους χρήστες του LimeWire, το Δίκτυο P2P δεν θα υπήρχε."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:372
 msgid ""
@@ -3108,6 +3100,16 @@ msgid ""
 "Lime&nbsp;Wire as the source of the respective Gmail, Jabber, and/or "
 "LiveJournal service or technology"
 msgstr ""
+"Το BitTorrent, το λογότυπο BitTorrent και το Torrent είναι εμπορικά σήματα "
+"της BitTorrent, Inc. Το Gmail είναι εμπορικό σήμα της Google Inc, τα Jabber "
+"και LiveJournal είναι σήματα κατατεθέντα της XMPP Standards Foundation και "
+"της LiveJournal, Inc., d/b/a LiveJournal. com, αντίστοιχα. Τόσο η Google "
+"Inc. όσο και η XMPP Standards Foundation και το LiveJournal.com ούτε είναι "
+"χορηγοί ή εταίροι του Lime Wire LLC ούτε προσυπογράφουν το Lime Wire LLC ή "
+"το λογισμικό LimeWire. Η χρήση αυτών των εμπορικών σημάτων γίνεται απλώς ως "
+"αναφορά στην τεχνολογία ή την υπηρεσία του οικείου ιδιοκτήτη και για την "
+"αποφυγή ταύτισης της Lime&nbspWire ως πηγής των οικείων υπηρεσίων ή "
+"τεχνολογιών που παρέχονται από τις Gmail, Jabber και/ή LiveJournal."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:151
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:408
@@ -3145,7 +3147,7 @@ msgstr "Αποστολές ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:345
 msgid "New Version Available!"
-msgstr "Νέα έκδοση διαθέσιμη"
+msgstr "Υπάρχει Νέα Έκδοση!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/OptionsAction.java:16
 msgid "&Options..."
@@ -3153,39 +3155,38 @@ msgstr "&Επιλογές..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:412
 msgid "Share with friends using your Private Shared list"
-msgstr ""
-"Μοιραστείτε με φίλους χρησιμοποιώντας την Ιδιωτική Λίστα Κοινοχρήστων"
+msgstr "Κοινή χρήση με φίλους με την Ιδιωτική Λίστα Κοινοχρήστων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:463
 msgid "Share this list with friends"
-msgstr "Μοίρασε τη συγκεκριμένη λίστα με φίλους"
+msgstr "Κοινή χρήση λίστας με φίλους"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:469
 msgid "Add files to it"
-msgstr "Πρόσθεσε αρχεία σ'αυτή"
+msgstr "Πρόσθεση Αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:101
 msgid "Repeat Search"
 msgstr "Επανάληψη Αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:147
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:215
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:205
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:58
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:162
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:153
 msgid "My Files"
 msgstr "Τα Αρχεία μου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:155
 msgid "Close All Searches"
-msgstr "Κλείσε όλες τις Αναζητήσεις"
+msgstr "Κλείσιμο Κάθε Αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:156
 msgid "Close Search"
-msgstr "Κλείσιμο αναζήτησης"
+msgstr "Κλείσιμο Αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:157
 msgid "Close Other Searches"
-msgstr "Κλείστε τις άλλες αναζητήσεις"
+msgstr "Κλείσιμο Λοιπών Αναζητήσεων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:210
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:172
@@ -3195,7 +3196,7 @@ msgstr "Προηγμένη Αναζήτηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:549
 msgid "Find More Results"
-msgstr "Εύρεση Περισσότερων Αποτελεσμάτων"
+msgstr "Εύρεση Περισσοτέρων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:601
 msgid "Stop Search"
@@ -3203,20 +3204,20 @@ msgstr "Διακοπή Αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ActivationAction.java:21
 msgid "&License..."
-msgstr ""
+msgstr "&Άδεια..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:29
 msgid "&Add to Library..."
-msgstr "&Πρόσθεσε στη Βιβλιοθήκη..."
+msgstr "&Πρόσθεση στη Βιβλιοθήκη..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:37
 msgid "Add to Library"
-msgstr "Πρόσθεσε στη βιβλιοθήκη"
+msgstr "Πρόσθεση στη Βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/AddFileAction.java:48
 msgid "Valid Files"
-msgstr "Έγκυρα αρχεία"
+msgstr "Έγκυρα Αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ExitAction.java:21
 msgid "E&xit"
@@ -3224,7 +3225,7 @@ msgstr "Έ&ξοδος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ExitAfterTransferAction.java:20
 msgid "Exit After &Transfers"
-msgstr "Έξοδος μετά από &Μεταφορές"
+msgstr "Έξοδος μετά τις &Μεταφορές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FileMenu.java:36
 msgid "&File"
@@ -3232,11 +3233,11 @@ msgstr "&Αρχείο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FixStalledDownloadsAction.java:25
 msgid "Fix Stalled Downloads"
-msgstr "Διόρθωση Σταματημένων Λήψεων"
+msgstr "Διόρθωση Στάσιμων Λήψεων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendsMenu.java:48
 msgid "F&riends"
-msgstr "Φ&ίλοι"
+msgstr "&Φίλοι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:35
 msgid "&Help"
@@ -3244,23 +3245,23 @@ msgstr "&Βοήθεια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:47
 msgid "&Using LimeWire"
-msgstr "&Χρησιμοποιώντας το LimeWire"
+msgstr "Οδηγίες &Χρήσης LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:49
 msgid "&FAQ"
-msgstr "&Συχνές ερωτήσεις"
+msgstr "&Συχνές Ερωτήσεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:52
 msgid "&Give Feedback"
-msgstr "&Πείτε μας τη γνώμη σας"
+msgstr "&Τα Σχόλιά σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
 msgid "Get Personalized &Tech Support"
-msgstr "Λήψη Ατομικής &Τεχνικής Υποστήριξης"
+msgstr "Λήψη Ατομικής Τεχ&νικής Υποστήριξης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HideTransferTrayAction.java:21
 msgid "Hide Transfer Tray"
-msgstr "Απόκρυψη Δίσκου Μεταφοράς"
+msgstr "Απόκρυψη Περιοχής Μεταφορών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:42
 msgid "Invalid Link"
@@ -3273,22 +3274,22 @@ msgstr "Άνοιγμα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:89
 msgid "Enter a magnet or torrent link below:"
-msgstr "Εισάγετε σύνδεσμο magnet ή torrent παρακάτω:"
+msgstr "Γράψτε σύνδεσμο magnet ή torrent παρακάτω:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:37
 msgid "&Open Torrent..."
-msgstr "&Άνοιξε Torrent..."
+msgstr "Άνοι&γμα Torrent..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:45
 msgid "Open Torrent"
-msgstr "Άνοιξε Torrent"
+msgstr "Άνοιγμα Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:101
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:86
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:104
 msgid "\".torrent\" files"
-msgstr "αρχεία «.torrent»"
+msgstr "Αρχεία «.torrent»"
 
 #. {0}: name of file
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
@@ -3298,49 +3299,49 @@ msgstr "Το αρχείο {0} δεν υπάρχει."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:85
 msgid "Unable to open torrent"
-msgstr "Δε μπορεί να ανοίξει το torrent"
+msgstr "Αδυναμία ανοίγματος torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:44
 msgid "Open &Link..."
-msgstr "Άνοιξε &Σύνδεσμο..."
+msgstr "Άνοιγμα Συν&δέσμου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:56
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:67
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:53
 msgid "Open Link"
-msgstr "Άνοιξε Σύνδεσμο"
+msgstr "Άνοιγμα Συνδέσμου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenLinkAction.java:67
 msgid "Magnet link is empty."
-msgstr "Ο σύνδεσμος magnet είναι άδειος."
+msgstr "Η λίστα magnet είναι κενή."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:26
 msgid "(empty)"
-msgstr "(άδειο)"
+msgstr "(κενή)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:32
 msgid "&Recent Downloads"
-msgstr "&Πρόσφατες Λήψεις"
+msgstr "Πρόσ&φατες Λήψεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/RecentDownloadsMenu.java:50
 msgid "Clear List"
-msgstr "Καθάρισε Λίστα"
+msgstr "Εκκαθάριση Λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShareListMenu.java:32
 msgid "&Share List"
-msgstr "&Μοίρασε Λίστα"
+msgstr "&Κοινή Χρήση Λίστας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:43
 msgid "&Store"
-msgstr ""
+msgstr "&Αποθήκευση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:54
 msgid "&Home"
-msgstr ""
+msgstr "Αρ&χική"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:63
 msgid "&Log In"
-msgstr "&Σύνδεση"
+msgstr "Εί&σοδος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:64
 msgid "&Sign Up"
@@ -3348,15 +3349,15 @@ msgstr "&Εγγραφή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:66
 msgid "&Genres"
-msgstr "&Είδος"
+msgstr "Είδ&η"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:67
 msgid "&Alternative"
-msgstr "&Εναλλακτικά"
+msgstr "Ενα&λλακτική"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:68
 msgid "&Country"
-msgstr "&Κάουντρυ"
+msgstr "&Κάντρι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:69
 msgid "&Electronica"
@@ -3364,11 +3365,11 @@ msgstr "&Ηλεκτρονική"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:70
 msgid "&Folk"
-msgstr "&Λαικά"
+msgstr "&Φολκ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:71
 msgid "&Jazz"
-msgstr "&Τζαζ"
+msgstr "Τ&ζαζ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:72
 msgid "&Pop"
@@ -3384,36 +3385,36 @@ msgstr "&R 'n' B"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:75
 msgid "&Rock"
-msgstr "&Ροκ"
+msgstr "Ρο&κ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:76
 msgid "&World"
-msgstr "&Παγκόσμια"
+msgstr "Έ&θνικ"
 
 #. add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:80
 msgid "LimeWire Store Hel&p"
-msgstr ""
+msgstr "&Βοήθεια για το Κατάστημα LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:84
 msgid "His&tory"
-msgstr ""
+msgstr "&Ιστορικό"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:50
 msgid "&Tools"
-msgstr "&Εργαλεία"
+msgstr "Εργαλεί&α"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:62
 msgid "Advanced &Search"
-msgstr "Προηγμένη &Αναζήτηση"
+msgstr "Προηγ&μένη Αναζήτηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:73
 msgid "&Advanced Tools..."
-msgstr "&Προηγμένα Εργαλεία..."
+msgstr "Προηγμέ&να Εργαλεία..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:105
 msgid "&What's New Search"
-msgstr "&Τι είναι καινούργιο Αναζήτηση"
+msgstr "Αναζή&τηση στα Νέα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:29
 msgid "Hide &Chat Window"
@@ -3425,7 +3426,7 @@ msgstr "Εμφάνιση &Παραθύρου Συνομιλιών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:57
 msgid "&View"
-msgstr "&Εμφάνιση"
+msgstr "Προ&βολή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:144
 msgid "&Home Screen"
@@ -3459,7 +3460,7 @@ msgstr "Φιλτράρισμα"
 msgid ""
 "We recommend you don't touch these unless you really know what you're doing."
 msgstr ""
-"Σας συνιστούμε να μην τις πειράξετε εκτός κι αν ξέρετε πολύ καλά τι κάνετε."
+"Συνιστούμε να μην τις πειράξετε εκτός κι αν ξέρετε πολύ καλά τι κάνετε."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:58
 msgid "Upload torrents forever"
@@ -3467,16 +3468,16 @@ msgstr "Αποστολή torrents πάντα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:65
 msgid "Upload torrents until either of the following:"
-msgstr "Αποστολή torrents μέχρι οποιαδήποτε από τις παρακάτω:"
+msgstr "Αποστολή torrents μέχρι οποιοδήποτε από τα παρακάτω:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:114
 msgid "Let me choose files to download when starting a torrent"
-msgstr "Να διαλέγω αρχεία για αποστολή όταν ξεκινάει ένα torrent"
+msgstr "Να επιλέγω αρχεία προς λήψη όταν ξεκινάει ένα torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:120
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:175
 msgid "Ratio:"
-msgstr "Αναλογία:"
+msgstr "Λόγος:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:122
 msgid "Maximum days:"
@@ -3487,15 +3488,15 @@ msgid ""
 "There was an error loading bittorrent. You will not be able to use "
 "bittorrent capabilities until this is resolved."
 msgstr ""
-"Παρουσιάστηκε σφάλμα στο φόρτωμα του bittorrent. Δε θα μπορείτε να "
-"χρησιμοποιήσετε τις δυνατότητες του bittorrent έως ότου το ζήτημα επιληθεί."
+"Προέκυψε σφάλμα στη φόρτωση του bittorrent. Δε θα μπορείτε να "
+"χρησιμοποιήσετε bittorrent έως ότου το ζήτημα επιλυθεί."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:83
 msgid ""
 "Below are the file extensions LimeWire knows about and how they are "
 "classified throughout the program"
 msgstr ""
-"Παρακάτω εμφανίζονται οι καταλήξεις τις οποίες καταλαβαίνει το LimeWire και "
+"Παρακάτω εμφανίζονται οι επεκτάσεις τις οποίες καταλαβαίνει το LimeWire και "
 "η ταξινόμηση τους στο πρόγραμα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:117
@@ -3506,13 +3507,13 @@ msgid ""
 msgstr ""
 "Οι τύποι αρχείων τους οποίους δεν καταλαβαίνει το LimeWire ταξινομούνται ως "
 "\"Άλλα\". Προσθέστε τους συγκεκριμένους τύπους αρχείων στη Λίστα σέρνοντας "
-"τους, ή όταν προσθέτετε ένα φάκελο κάντε κλικ στο \"Προηγμένες\" και "
-"επιλέξτε συγκεκριμένες καταλήξεις αρχείων"
+"τους ή, όταν προσθέτετε φάκελο, κάνοντας κλικ στο \"Για προχωρημένους\" και "
+"επιλέγοντας συγκεκριμένες επεκτάσεις αρχείων"
 
 #. Icon
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:149
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:225
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:226
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:47
@@ -3524,8 +3525,8 @@ msgid "Extension"
 msgstr "Επέκταση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:151
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:225
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:226
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:360
 msgid "Category"
 msgstr "Κατηγορία"
@@ -3536,96 +3537,94 @@ msgstr "Εμφάνιση:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:321
 msgid "File extension Classification"
-msgstr "Ταξινόμηση Κατάληξης Αρχείων"
+msgstr "Ταξινόμηση Επεκτάσεων Αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:76
 msgid "Add Extension"
-msgstr "Πρόσθεσε Επέκταση"
+msgstr "Πρόσθεση Επέκτασης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:131
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"Το LimeWire δεν θα εμφανίζει τα αρχεία με τις παρακάτω καταλήξεις στα "
-"αποτελέσματα των αναζητήσεων σας"
+"Το LimeWire δεν θα εμφανίζει τα αρχεία με τις παρακάτω επεκτάσεις στα "
+"αποτελέσματα των αναζητήσεών σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:202
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:261
 msgid "Use Default"
-msgstr "Χρήση προεπιλογής"
+msgstr "Χρήση Προεπιλογής"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:203
 msgid "Revert to default settings"
-msgstr "Επαναφορά στις Αρχικές Ρυθμίσεις"
+msgstr "Επαναφορά στις Προεπιλογές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:44
 msgid "Add Keyword"
-msgstr "Προσθήκη λέξης-κλειδί"
+msgstr "Πρόσθεση λέξης-κλειδί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:46
 msgid "Keyword"
-msgstr "Λέξη κλειδί"
+msgstr "Λέξη-κλειδί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:64
 msgid ""
 "LimeWire will not show files with the following keywords in your search "
 "results"
 msgstr ""
-"Το LimeWireδε  θα εμφανίσει στα αποτελέσματα αναζήτησης αρχεία με τις "
-"παρακάτω λέξεις-κλειδί"
+"Το LimeWire θα εμφανίσει τώρα στα αποτελέσματα αναζήτησης αρχεία με τις "
+"παρακάτω λέξεις-κλειδιά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:102
 msgid "Use LimeWire's blacklist to protect you from harmful people"
 msgstr ""
-"Χρήση της μαύρης λίστας του LimeWire για την προστασία από επικίνδυνα άτομα"
+"Χρησιμοποιήστε τη μαύρη λίστα του LimeWire για προστασία από επικίνδυνα άτομα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:105
 msgid "Block Hosts"
-msgstr "Μπλοκάρισμα κόμβου"
+msgstr "Φραγή Ξενιστών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:172
 msgid "Add Address"
-msgstr "Προσθήκη διεύθυνσης"
+msgstr "Πρόσθεση Διεύθυνσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:117
 msgid "Block contact with specific people by adding their IP address"
-msgstr ""
-"Αποκλεισμός επαφής με συγκεκριμένα άτομα προσθέτοντας τις διευθύνσεις ΙΡ"
+msgstr "Φραγή επαφής με άτομα με ορισμένα ΙΡ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:163
 msgid ""
 "Override the block list and allow specific people by adding their IP address"
 msgstr ""
-"Παράβλεψη της μαύρης λίστας και άδεια πρόσβασης ορισμένων ατόμων "
-"προσθέτοντας τις διευθύνσεις ΙΡ"
+"Παράβλεψη της μαύρης λίστας και άδεια πρόσβασης σε άτομα με ορισμένα ΙΡ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:166
 msgid "Allow Hosts"
-msgstr "Επιτρεπόμενοι κόμβοι"
+msgstr "Άδεια σε Ξενιστές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:37
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr "Πρόσθεσε τα αρχεία Ήχου που κατέβασα από το LimeWire στο iTunes"
+msgstr "Πρόσθεση αρχείων ήχου που κατέβασα από το LimeWire στο iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:84
 msgid ""
 "Share audio and video files in Public Shared list on my local network with "
 "iTunes"
 msgstr ""
-"Μοίρασε τα αρχεία ήχου και βίντεο στη Δημόσια Λίστα Κοινόχρηστων στο τοπικό "
-"μου δίκτυο με το iTunes"
+"Κοινή χρήση αρχείων ήχου και βίντεο στα Δημόσια Κοινόχρηστα εντός τοπικού "
+"δικτύου με το iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:92
 msgid "Require password"
-msgstr "Απαιτείται κωδικός πρόσβασης"
+msgstr "Απαίτηση κωδικού"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:124
 msgid "Daap Password cannot be null, iTunes settings not saved"
 msgstr ""
-"Ο κωδικός πρόσβασης Daap δεν μπορεί να είναι κενός. Οι ρυθμίσεις iTunes δεν "
-"αποθηκεύθηκαν"
+"Ο κωδικός Daap δεν μπορεί να είναι κενός - οι ρυθμίσεις iTunes δεν "
+"αποθηκεύτηκαν"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:125
 msgid "iTunes Error"
@@ -3633,7 +3632,7 @@ msgstr "Σφάλμα iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:172
 msgid "Could not restart the Daap connection"
-msgstr "Δεν ήταν δυνατή η επανεκκίνηση της σύνδεσης Daap"
+msgstr "Αδυναμία επανεκκίνησης σύνδεσης Daap"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:173
 msgid "Daap Error"
@@ -3642,8 +3641,7 @@ msgstr "Σφάλμα Daap"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:64
 msgid "Choose how to organize files you purchased from the LimeWire Store"
 msgstr ""
-"“Επιλέξτε πώς να οργανώσετε τα αρχεία που αγοράσατε από το Κατάστημα "
-"LimeWire”"
+"Επιλέξτε τρόπο οργάνωσης όσων αρχείων αγοράσατε από το Κατάστημα LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:66
 msgid "Subfolder"
@@ -3651,73 +3649,71 @@ msgstr "Υποφάκελος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:67
 msgid "File Name"
-msgstr "Όνομα αρχείου"
+msgstr "Όνομα Αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:149
 msgid "No Subfolder"
-msgstr "Κανένας υποφάκελος"
+msgstr "Κανείς Υποφάκελος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LearnMoreButton.java:11
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LearnMoreButton.java:15
 msgid "Learn more"
 msgstr "Μάθετε περισσότερα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:99
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:97
 msgid "iTunes Configuration"
 msgstr "Διαμόρφωση iTunes"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:100
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:188
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:98
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:186
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:199
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:229
 msgid "Configure..."
-msgstr "Ρύθμιση..."
+msgstr "Διαμόρφωση..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:100
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:98
 msgid "Configure iTunes"
 msgstr "Διαμόρφωση iTunes"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:102
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:100
 msgid "Configure how files in your LimeWire interact with iTunes"
-msgstr "Καθόρισε πως συνεργάζονται τα αρχεία σας στο LimeWire με το iTunes"
+msgstr "Ορίστε τον τρόπο διεπίδρασης των αρχείων του LimeWire με το iTunes"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:132
 msgid "Use the LimeWire player when I play Audio and Video files"
 msgstr ""
-"Χρησιμοποίησε τον αναπαραγωγέα του LimeWire όταν αναπαράγω αρχεία Ήχου και "
-"Βίντεο"
+"Χρήση του προγράμματος αναπαραγωγής του LimeWire για αρχεία ήχου και βίντεο"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:177
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:39
 msgid "Sharing"
-msgstr "Κοινή χρήση"
+msgstr "Κοινή Χρήση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:181
 msgid "Add files I download from P2P Users to my Public Shared List"
 msgstr ""
-"Πρόσθεσε τα αρχεία που λαμβάνω από Χρήστες Ρ2Ρ στη Δημόσια Κοινόχρηστη Λίστα "
-"μου"
+"Πρόσθεση αρχείων κατεβασμένων από χρήστες Ρ2Ρ στα Δημόσια Κοινόχρηστα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:187
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:250
 msgid "Unsafe File Sharing"
-msgstr "Επικίνδυνο Μοίρασμα Αρχείου"
+msgstr "Μη Ασφαλής Κοινή Χρήση"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:188
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:186
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:251
 msgid "Configure unsafe file sharing settings"
-msgstr "Διαμόρφωση ρυθμίσεων μοιράσματος επικίνδυνων αρχείων"
+msgstr "Διαμόρφωση ρυθμίσεων μη ασφαλούς κοινής χρήσης αρχείων"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:197
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:195
 msgid "Configure unsafe sharing settings"
-msgstr "Διαμόρφωση ρυθμίσεων επικίνδινου μοιράσματος"
+msgstr "Διαμόρφωση ρυθμίσεων μη ασφαλούς κοινής χρήσης"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:219
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:209
 msgid "To see or modify files in your Public Shared list, go to:"
 msgstr ""
-"Για να δείτε ή να τροποποιήσετε αρχεία στη Δημόσια Κοινόχρηστη Λίστα σας, "
-"πηγαίντε στο:"
+"Για να δείτε ή να τροποποιήσετε αρχεία στα Δημόσια Κοινόχρηστα, πηγαίνετε "
+"στο:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:64
 msgid ""
@@ -4298,7 +4294,7 @@ msgstr "Μάθετε περισσότερα..."
 msgid "Keep any changes made"
 msgstr "Διατήρηση των αλλαγών"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/AudioPlayerMediator.java:544
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/AudioPlayerMediator.java:547
 msgid "Unknown"
 msgstr "'Αγνωστο"
 
@@ -4306,103 +4302,107 @@ msgstr "'Αγνωστο"
 msgid "Nothing selected"
 msgstr "Δεν επιλέχτηκε τίποτα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:147
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:148
 msgid "Skip Back"
 msgstr "Παράλειψη Πίσω"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:153
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:216
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:154
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:218
 msgid "Play"
 msgstr "Αναπαραγωγή"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:168
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:169
 msgid "Skip Forward"
 msgstr "Παράλειψη Μπροστά"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:174
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:175
 msgid "Volume"
 msgstr "Ένταση (Ήχου)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:185
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:186
 msgid "Shuffle"
 msgstr "Ανακάτεμα"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:209
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:211
 msgid "Full Screen"
 msgstr "Πλήρης Οθόνη"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:227
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:229
 msgid "Fit to Screen"
 msgstr "Να χωρέσει στην οθόνη"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:258
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:260
 msgid "Close Video"
 msgstr "Κλείσε το Βίντεο"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPlayerMediator.java:53
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPlayerMediator.java:54
 msgid "Playlists not supported in video"
 msgstr "Οι λίστες αναπαραγωγής δεν υποστηρίζονται στο βίντεο"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:265
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:270
 msgid "Upgrade to Pro!"
 msgstr "Αναβάθμιση σε Pro!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:278
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:283
 msgid "Upgrade to PRO today!"
 msgstr "Αναβάθμιση σε Pro σήμερα!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:279
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:284
 msgid "Turbo-charged downloads"
 msgstr "Turbo λήψεις"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:280
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:285
 msgid "More search results"
 msgstr "Περισσότερα αποτελέσματα αναζήτησης"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:281
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:286
 msgid "Free tech support and upgrades"
 msgstr "Δωρεάν Τεχνική Υποστήριξη και Αναβαθμίσεις"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:289
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:294
 msgid "Upgrade to LimeWire PRO?"
 msgstr "Αναβάθμιση σε LimeWire PRO;"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:292
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:297
 msgid "Why"
 msgstr "Γιατί"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:319
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:324
 msgid "Sorry, your license key has been blocked"
-msgstr ""
+msgstr "Λυπούμαστε, το κλειδί άδειάς σας έχει φραγεί"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:322
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:327
 msgid "Your license key has been used on too many installations. "
 msgstr ""
+"Το κλειδί άδειάς σας έχει χρησιμοποιηθεί σε περισσότερες από τις "
+"επιτρεπόμενες εγκαταστάσεις. "
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:323
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:328
 #, java-format
 msgid "Please {0}contact support{1} to resolve the situation."
 msgstr ""
+"Παρακαλούμε {0}επικοινωνήστε με το τμήμα υποστήριξης{1} για διευθέτηση του "
+"ζητήματος."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:331
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:336
 msgid "Edit License Key"
-msgstr ""
+msgstr "Επεξεργασία Κλειδιού Άδειας"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:347
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:352
 msgid "Time to Renew Your LimeWire"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:353
-msgid "Your LimeWire subscription will be expiring shortly."
-msgstr ""
+msgstr "Ώρα για Ανανέωση του LimeWire σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:358
-msgid "Don't miss a thing - act now for special renewal pricing!"
-msgstr ""
+msgid "Your LimeWire subscription will be expiring shortly."
+msgstr "Η συνδρομή σας στο LimeWire λήγει σύντομα."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:364
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:363
+msgid "Don't miss a thing - act now for special renewal pricing!"
+msgstr "Μην χάσετε τίποτα! Εκμεταλλευτείτε τώρα τις ειδικές τιμές ανανέωσης!"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:369
 msgid "Renew Now"
-msgstr ""
+msgstr "Ανανεώστε Τώρα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentOverviewPanel.java:77
 msgid "Size:"
@@ -4452,11 +4452,11 @@ msgstr "Φραγή Διεύθυνσης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
-msgstr ""
+msgstr "Αντιγραφή Σύνδεσμου Magnet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:395
 msgid "Rename File"
-msgstr ""
+msgstr "Μετονομασία Αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:116
 msgid "Preparing View..."
@@ -4543,7 +4543,7 @@ msgstr "Γενικά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:40
 msgid "Trackers"
-msgstr ""
+msgstr "Ιχνηλάτες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:42
 msgid "Pieces"
@@ -4555,23 +4555,23 @@ msgstr "Αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:85
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:88
 msgid "Tier"
-msgstr ""
+msgstr "Βαθμίδα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:149
 msgid "Add Tracker:"
-msgstr ""
+msgstr "Πρόσθεση Ιχνηλάτη:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:151
 msgid "Tier:"
-msgstr ""
+msgstr "Βαθμίδα:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:153
 msgid "Tracker URL Invalid"
-msgstr ""
+msgstr "Άκυρο URL Ιχνηλάτη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:105
 msgid "Total Completed:"
@@ -4988,7 +4988,7 @@ msgstr "Αναζήτηση για την παρακάτω Κατηγορία:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 msgid "Copy Link"
-msgstr ""
+msgstr "Αντιγραφή Συνδέσμου"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -5352,7 +5352,7 @@ msgstr "Η εντολή ξεκίνησε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:198
 msgid "User Name"
-msgstr ""
+msgstr "Όνομα Χρήστη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadMediator.java:404
 msgid ""
@@ -5772,30 +5772,27 @@ msgid ""
 "distributing certain copyrighted content. Learn more information about <a "
 "href=\"{0}\">Copyright</a></body></html>."
 msgstr ""
-"<html><body> Το LimeWire Basic και το LimeWire PRO είναι προγράμματα peer-to-"
-"peer για τον διαμοιρασμό μόνο εξουσιοδοτημένων (πρέπει να κατέχεις την "
-"άδεια, πνευματικά δικαιώματα ή να είναι διέπονται από άδειες τύπου creative "
-"commons, ΕΛ/ΛΑΚ κλπ.) αρχείων. Οι νόμοι περί προστασίας πνευματικών "
-"δικαιωμάτων μπορεί να απαγορεύουν την απόκτηση ή διανομή συγκεκριμένου "
-"περιεχομένου προστατευόμενου ως πνευματική ιδιοκτησία. Μάθετε περισσότερες "
-"πληροφορίες σχετικά με τα <a href=\"{0}\">Πνευματικά "
-"Δικαιώματα</a></body></html>."
+"<html><body>Το LimeWire Basic και το LimeWire PRO είναι προγράμματα ομότιμης "
+"σύνδεσης για την ανταλλαγή μόνο νόμιμων αρχείων. Νόμοι Πνευματικής "
+"Ιδιοκτησίας μπορεί να απαγορεύουν την απόκτηση ή τη διανομή συγκεκριμένου "
+"προστατευόμενου υλικού. Μάθετε περισσότερες πληροφορίες στη σελίδα <a "
+"href=\"{0}\">Copyright</a></body></html>."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:290
 msgid "Copyright Infringement"
-msgstr "Παράβαση πνευματικών δικαιωμάτων"
+msgstr "Παράβαση Δικαιωμάτων Πνευματικής Ιδιοκτησίας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:291
 msgid "LimeWire Privacy Policy"
-msgstr ""
+msgstr "Πολιτική Ιδιωτικότητας της LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:292
 msgid "LimeWire License Agreement"
-msgstr ""
+msgstr "Συμφωνία Άδειας Χρήσης του LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:293
 msgid "AVG Anti-Virus License Agreement"
-msgstr ""
+msgstr "Συμφωνία Άδειας Χρήσης του AVG Anti-Virus"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
 msgid ""
@@ -5804,6 +5801,10 @@ msgid ""
 "LimeWire Privacy Policy. You also agree that you will not use LimeWire for "
 "copyright infringement."
 msgstr ""
+"Κάνοντας κλικ στο \"Συμφωνώ\", συμφωνείτε ότι έχετε διαβάσει, κατανοήσει και "
+"αποδεχτεί τους όρους των Συμφωνιών Άδειας Χρήσης του LimeWire και του AVG "
+"Anti-Virus και την Πολιτική Ιδιωτικότητας του LimeWire. Eπίσης συμφωνείτε "
+"ότι δεν θα χρησιμοποιήσετε το LimeWire για παραβίαση πνευματικών δικαιωμάτων."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
 msgid ""
@@ -5811,6 +5812,10 @@ msgid ""
 "to the terms of the LimeWire License Agreement and LimeWire Privacy Policy. "
 "You also agree that you will not use LimeWire for copyright infringement."
 msgstr ""
+"Κάνοντας κλικ στο \"Συμφωνώ\", συμφωνείτε ότι έχετε διαβάσει, κατανοήσει και "
+"αποδεχτεί τους όρους της Συμφωνίας Άδειας Χρήσης του LimeWire και την "
+"Πολιτική Ιδιωτικότητας του LimeWire. Eπίσης συμφωνείτε ότι δεν θα "
+"χρησιμοποιήσετε το LimeWire για παραβίαση πνευματικών δικαιωμάτων."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:295
 msgid "Choose your language"
@@ -5818,87 +5823,98 @@ msgstr "Επιλέξτε τη Γλώσσα σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:296
 msgid "Policies Governing Your Use:"
-msgstr "Πολιτικές που διέπουν τη χρήση σας:"
+msgstr "Επικρατούσες Πολιτικές σχετικά με τη χρήση σας:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:305
 msgid "I Agree"
 msgstr "Συμφωνώ"
 
 #. wrap
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:61
 msgid "Activate your LimeWire PRO."
-msgstr ""
+msgstr "Ενεργοποιήστε το LimeWire PRO."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:64
 msgid "Want to go PRO?"
-msgstr ""
+msgstr "Θέλετε να γίνετε PRO;"
 
 #. wrap
 #. wrap
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:70
 msgid ""
 "Enter your activation key below. This was sent to the email address you used "
 "when purchasing. You can always do this later on from the File menu."
 msgstr ""
+"Γράψτε το κλειδί ενεργοποίησής σας παρακάτω. Το κλειδί αυτό στάλθηκε στη "
+"διεύθυνση email που χρησιμοποιήσατε κατά την αγορά. Μπορείτε να "
+"ενεργοποιήσετε αργότερα από το μενού Αρχείο."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:97
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:112
 msgid "I don't know my license key"
-msgstr ""
+msgstr "Δεν γνωρίζω το κλειδί άδειάς μου"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:105
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:121
 #, java-format
 msgid "Please contact {0}customer support{1} for more information."
 msgstr ""
+"Παρακαλώ επικοινωνήστε με την {0}υποστήριξη πελατών{1} για περισσότερες "
+"πληροφορίες."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:157
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:177
 msgid "Invalid license key."
-msgstr ""
+msgstr "Άκυρο κλειδί άδειας."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:181
 msgid "Your license key has been used on too many installations."
 msgstr ""
+"Το κλειδί άδειας χρήσης σας έχει χρησιμοποιηθεί σε περισσότερες από τις "
+"επιτρεπόμενες εγκαταστάσεις."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:166
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:186
 msgid "Communication error. Please try again later."
-msgstr ""
+msgstr "Σφάλμα επικοινωνίας. Παρακαλούμε δοκιμάστε ξανά αργότερα."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
 msgid "Feature Type"
-msgstr ""
+msgstr "Τύπος Χαρακτηριστικού"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:44
 msgid "It appears that all of your features have expired."
-msgstr ""
+msgstr "Φαίνεται ότι όλα τα χαρακτηριστικά σας έχουν λήξει."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:47
 msgid "It appears that some of your features have expired."
-msgstr ""
+msgstr "Φαίνεται ότι μερικά από τα χαρακτηριστικά σας έχουν λήξει."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:50
 msgid "Your license has been activated, but..."
-msgstr ""
+msgstr "Η άδειά σας ενεργοποιήθηκε, αλλά..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:53
 msgid "Yay! Your license has been successfully activated."
-msgstr ""
+msgstr "Ζήτω! Η άδειά σας ενεργοποιήθηκε επιτυχώς."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:56
 msgid "Thank you! You have successfully activated your license."
-msgstr ""
+msgstr "Ευχαριστούμε! Ενεργοποιήσατε επιτυχώς την άδειά σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:85
 #, java-format
 msgid "You can renew your features at your {0}user account{1} page."
 msgstr ""
+"Μπορείτε να ανανεώσετε τα χαρακτηριστικά σας στην σελίδα {0}λογαριασμού "
+"χρήστη{1}."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:95
 msgid "* One or more of your features is currently not supported."
 msgstr ""
+"* Ένα ή περισσότερα από τα χαρακτηριστικά σας δεν υποστηρίζεται προς το "
+"παρόν."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:96
 #, java-format
 msgid "Click on {0} for more information."
-msgstr ""
+msgstr "Κάντε κλικ στο {0} για περισσότερες πληροφορίες."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:109
 #, java-format
@@ -5906,6 +5922,8 @@ msgid ""
 "If you have any questions about your license, please contact {0}Customer "
 "Support{1}."
 msgstr ""
+"Αν έχετε απορίες για την άδειά σας, παρακαλούμε επικοινωνήστε με την "
+"{0}υποστήριξη πελατών{1}."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:56
 msgid "File Associations and Startup"
@@ -5941,36 +5959,36 @@ msgstr ""
 "επιλογών πριν συνεχίσετε."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:110
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:106
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:104
 msgid "All settings can be changed later from LimeWire > Preferences"
 msgstr ""
 "Όλες οι ρυθμίσεις μπορούν να αλλάξουν αργότερα απο την επιλογή Limewire > "
 "Προτιμήσεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:111
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:107
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:105
 msgid "All settings can be changed later in Tools > Options"
 msgstr ""
 "Όλες οι ρυθμίσεις μπορούν να αλλάξουν αργότερα από την επιλογή Εργαλεία > "
 "Επιλογές"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:110
 msgid "Learn about sharing."
 msgstr "Μάθεται για την κοινή χρήση."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:128
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:126
 msgid "Files in your Public Shared list are shared with the world."
 msgstr ""
 "Τα αρχεία στη Δημόσια Κοινόχρηστη Λίστα σας μοιράζονται με τον υπόλοιπο "
 "κόσμο."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:133
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:131
 msgid "Add files I download from P2P Users to my Public Shared list."
 msgstr ""
 "Πρόσθεσε τα αρχεία που λαμβάνω από Χρήστες Ρ2Ρ στη Δημόσια Κοινόχρηστη Λίστα "
 "μου."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:138
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:136
 msgid ""
 "LimeWire will add files you download from P2P Users into your Public Shared "
 "list."
@@ -5978,20 +5996,20 @@ msgstr ""
 "Το LimeWire θα προσθέσει τα αρχεία που λαμβάνετε από χρήστες Ρ2Ρ στη Δημόσια "
 "Κοινόχρηστη Λίστα σας."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:150
 msgid "To see or modify files in your Public Shared list, go to"
 msgstr ""
 "Για να δείτε ή να τροποποιήσετε τα αρχεία στη Δημόσια Κοινόχρηστη Λίστα σας, "
 "πηγαίντε στο"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:188
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:179
 msgid ""
 "Shared files from your old version will continue to be shared with the world."
 msgstr ""
 "Τα κοινόχρηστα αρχεία από την παλαιότερη έκδοση σας θα συνεχίσουν να "
 "μοιράζονται με τον υπόλοιπο κόσμο."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:193
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:184
 #, java-format
 msgid ""
 "{0} shared files from your previous version will continue to be shared with "
@@ -6002,19 +6020,20 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:99
 msgid "LimeWire PRO"
-msgstr ""
+msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:108
 msgid "You can activate LimeWire PRO later from File > License"
 msgstr ""
+"Μπορείτε να ενεργοποιήσετε το LimeWire PRO αργότερα από το Αρχείο > Άδεια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:109
 msgid "No thanks"
-msgstr ""
+msgstr "Όχι, ευχαριστώ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:118
 msgid "You can edit your licenses from File > License"
-msgstr ""
+msgstr "Μπορείτε να επεξεργαστείτε τις άδειές σας από το Αρχείο > Άδεια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75
