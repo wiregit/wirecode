@@ -59,6 +59,11 @@ public class RatingTable implements Service, SimppListener {
     private static final int INITIAL_SIZE = 100;
 
     /**
+     * The file for storing tokens between sessions.
+     */
+    private final File spamDat;
+
+    /**
      * A map containing a limited number of tokens. We use a map rather than
      * a set so that we can retrieve a stored token by using an equivalent
      * token as a key. This allows us to use a token without rating data to
@@ -109,6 +114,7 @@ public class RatingTable implements Service, SimppListener {
         this.tokenizer = tokenizer;
         this.templateHashTokenFactory = templateHashTokenFactory;
         this.backgroundExecutor = backgroundExecutor;
+        spamDat = new File(CommonUtils.getUserSettingsDir(), "spam.dat");
     }
 
     @Inject
@@ -129,7 +135,7 @@ public class RatingTable implements Service, SimppListener {
     }
 
     public synchronized void start() {
-        load();
+        load(spamDat);
         loadSpamTokensFromSettings();
         // Save the ratings every five minutes (if necessary)
         backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -316,10 +322,10 @@ public class RatingTable implements Service, SimppListener {
     }
 
     /**
-     * Loads ratings from disk.
+     * Loads ratings from disk. Package access for testing.
      */
-    private void load() {
-        if(!getSpamDat().exists()) {
+    void load(File file) {
+        if(!file.exists()) {
             LOG.debug("No ratings to load");
             return;
         }
@@ -328,7 +334,7 @@ public class RatingTable implements Service, SimppListener {
         try {
             is = new ObjectInputStream(
                     new BufferedInputStream(
-                            new FileInputStream(getSpamDat())));
+                            new FileInputStream(file)));
             List<Token> list = GenericsUtils.scanForList(is.readObject(),
                     Token.class, GenericsUtils.ScanMode.REMOVE);
             int zeroes = 0, converted = 0;
@@ -390,7 +396,7 @@ public class RatingTable implements Service, SimppListener {
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
-                            new FileOutputStream(getSpamDat())));
+                            new FileOutputStream(spamDat)));
             oos.writeObject(list);
             oos.flush();
             if(LOG.isDebugEnabled())
@@ -416,10 +422,6 @@ public class RatingTable implements Service, SimppListener {
         for(Map.Entry<Token,Token> e : tokenMap.entrySet())
             return e.getKey();
         return null; // Empty
-    }
-
-    private static File getSpamDat() {
-        return new File(CommonUtils.getUserSettingsDir(), "spam.dat");
     }
 
     /** Inspectable that returns the number of each type of token */

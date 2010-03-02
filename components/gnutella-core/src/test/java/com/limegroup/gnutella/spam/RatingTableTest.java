@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.spam;
 
+import java.io.File;
 import java.net.UnknownHostException;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.util.Base32;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -195,6 +197,24 @@ public class RatingTableTest extends LimeTestCase {
         table.simppUpdated();
         assertEquals(1f, table.lookupAndGetRating(t5));
         assertLessThan(1f, table.lookupAndGetRating(t6));
+    }
+
+    public void testLoadingOldSpamDatSkipsZeroesAndConvertsTemplates() throws Exception {
+        // The old spam.dat file contains four tokens: a keyword token with a
+        // non-zero rating, a keyword token with a zero rating, a template token
+        // with a non-zero rating, and a template token with a zero rating
+        File oldSpamDat =
+            TestUtils.getResourceFile("com/limegroup/gnutella/resources/spam.dat");
+        RatingTable table = manager.getRatingTable();
+        assertEquals(0, table.size());
+        assertTrue(oldSpamDat.exists());
+        table.load(oldSpamDat);
+        // The tokens with zero ratings should have been skipped
+        assertEquals(2, table.size());
+        // The template token should have been converted to a template hash
+        String template = "N7GW4TYFZQAX3F2NXAD4BK6WULXRLXMT";
+        Token t = new TemplateHashToken(Base32.decode(template));
+        assertGreaterThan(0f, table.lookupAndGetRating(t));
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
