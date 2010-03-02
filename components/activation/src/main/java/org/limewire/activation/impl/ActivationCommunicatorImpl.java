@@ -20,6 +20,8 @@ import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProvider.CipherType;
 import org.limewire.util.EncodingUtils;
@@ -38,6 +40,8 @@ import com.google.inject.Provider;
  * </pre>
  */
 class ActivationCommunicatorImpl implements ActivationCommunicator {    
+    private static final Log log = LogFactory.getLog(ActivationCommunicatorImpl.class);
+    
     private static final String ENCRYPTION_ALGORITHM = "RSA";
     private static final CipherType CIPHER_TYPE = CipherType.RSA;
     
@@ -69,6 +73,7 @@ class ActivationCommunicatorImpl implements ActivationCommunicator {
         
         boolean responseHasSameRandomNumber = randomNumber.equals(activationResponse.getToken());
         if ((activationResponse.getResponseType() == ActivationResponse.Type.VALID) && !responseHasSameRandomNumber) {
+            log.debug("Invalid random number");
             throw new InvalidTokenException("random number security check failed");
         }
         
