@@ -146,18 +146,21 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         backButton.setActionCommand(BACK);
         backButton.setDisabledIcon(backIconDisabled);
         backButton.setToolTipText(I18n.tr("Skip Back"));
+        backButton.setFocusable(false);
         
         playButton = new IconButton(playIcon, playIconRollover, playIconPressed);
         playButton.addActionListener(playerListener);
         playButton.setActionCommand(PLAY);
         playButton.setDisabledIcon(playIconDisabled);
         playButton.setToolTipText(I18n.tr("Play"));
+        playButton.setFocusable(false);
 
         pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
         pauseButton.addActionListener(playerListener);
         pauseButton.setActionCommand(PAUSE);
         pauseButton.setVisible(false);
         pauseButton.setToolTipText(I18n.tr("Pause"));
+        pauseButton.setFocusable(false);
         
         pauseButton.setMinimumSize(playButton.getMinimumSize());
         pauseButton.setPreferredSize(playButton.getPreferredSize());
@@ -167,12 +170,14 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         forwardButton.setActionCommand(FORWARD);
         forwardButton.setDisabledIcon(forwardIconDisabled);
         forwardButton.setToolTipText(I18n.tr("Skip Forward"));
+        forwardButton.setFocusable(false);
         
         volumeButton = new IconButton(volumeIcon, volumeIconRollover, volumeIconPressed);
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
         volumeButton.setDisabledIcon(volumeIconDisabled);
         volumeButton.setToolTipText(I18n.tr("Volume"));
+        volumeButton.setFocusable(false);
         
         volumeSlider = new VolumeSlider(0, 100);
         volumeSlider.setValue((int)(SwingUiSettings.PLAYER_VOLUME.getValue() * volumeSlider.getMaximum()));        
@@ -184,6 +189,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             shuffleButton.setActionCommand(SHUFFLE);
             shuffleButton.setRolloverSelectedIcon(shuffleIconActive);
             shuffleButton.setToolTipText(I18n.tr("Shuffle"));
+            shuffleButton.setFocusable(false);
         }
         
         progressSlider = new LimeSliderBar();

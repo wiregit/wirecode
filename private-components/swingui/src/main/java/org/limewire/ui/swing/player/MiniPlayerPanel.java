@@ -86,6 +86,7 @@ public class MiniPlayerPanel extends JPanel {
             playPauseButton.setFocusPainted(false);
             playPauseButton.setRolloverEnabled(true);
             playPauseButton.setIcon(playIcon);
+            playPauseButton.setFocusable(false);
             Dimension playPauseDimensions = new Dimension(playIcon.getIconWidth(), playIcon.getIconHeight());
             playPauseButton.setMaximumSize(playPauseDimensions);
             playPauseButton.setPreferredSize(playPauseDimensions);
