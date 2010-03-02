@@ -290,49 +290,50 @@ class AboutWindow {
                 " </tr>" +
                 " <tr>" +
                 "   <td>Panayiotis Karabassis</td>" +
-                "   <td>Jens-Uwe Mager</td>" +
-                " </tr>" +
-                " <tr>" +
-                "   <td>Miguel Munoz</td>" +
-                "   <td>Gordon Mohr</td>" +
-                " </tr>" +
-                " <tr>" +
-                "   <td>Chance Moore</td>" +
                 "   <td>Marcin Koraszewski</td>" +
                 " </tr>" +
                 " <tr>" +
+                "   <td>Jens-Uwe Mager</td>" +
+                "   <td>Misagh Moayyed</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Gordon Mohr</td>" +
+                "   <td>Chance Moore</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Miguel Munoz</td>" +
                 "   <td>Rick T. Piazza</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Eugene Romanenko</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Gregorio Roper</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>William Rucklidge</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Claudio Santini</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Phil Schalm</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Eric Seidel</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Philippe Verdy</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Cameron Walsh</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Stephan Weber</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Jason Winzenried</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>'Tobias'</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>'deacon72'</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>'MaTZ'</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>'RickH'</td>" +
-                "   <td>'PNomolos'</td>" +
                 " </tr>" +
                 " <tr>" +
+                "   <td>'PNomolos'</td>" +
                 "   <td>'ultracross'</td>" +
                 " </tr>" + 
                 " </table>");
