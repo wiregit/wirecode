@@ -376,6 +376,7 @@ public class RatingTable implements Service, SimppListener {
                 LOG.debug("Ratings do not need to be saved");
                 return;
             }
+            dirty = false;
             list = new ArrayList<Token>(tokenMap.size());
             // The iterator returns the least-recently-used entry first
             for(Map.Entry<Token,Token> e : tokenMap.entrySet()) {
