@@ -92,6 +92,16 @@ final class BasicNotifier implements TrayNotifier {
             notificationWindow.setLocation(getNewWindowLocation(notificationWindow, -1
                     * notificationWindow.getPreferredSize().height));
             notificationWindows.add(notificationWindow);
+            
+            synchronized (notificationWindows) {
+                //guard to make sure not too many windows will be created
+                //we could try and calculate how many windows can display 
+                //on the screen as well but it is probably not worth it
+                if(notificationWindows.size() > 5) {
+                    disposeWindow(notificationWindows.get(0));
+                }
+            }
+            
             bumpWindows();
         }
 
@@ -144,10 +154,14 @@ final class BasicNotifier implements TrayNotifier {
         @Override
         public synchronized void handleEvent(WindowDisposedEvent event) {
             NotificationWindow notificationWindow = event.getNotWindow();
+            disposeWindow(notificationWindow);
+            bumpWindows();
+        }
+
+        private void disposeWindow(NotificationWindow notificationWindow) {
             notificationWindows.remove(notificationWindow);
             notifications.remove(notificationWindow.getNotification());
             notificationWindow.dispose();
-            bumpWindows();
         }
     }
 
