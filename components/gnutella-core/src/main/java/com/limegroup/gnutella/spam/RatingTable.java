@@ -238,9 +238,14 @@ public class RatingTable implements Service, SimppListener {
             return;
         Token stored = tokenMap.get(t);
         if(stored == null) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Setting rating of " + t + " to " + rating);
             t.setRating(rating);
             tokenMap.put(t, t);
             dirty = true;
+        } else {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Not replacing rating of " + t);
         }
     }
 
