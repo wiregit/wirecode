@@ -177,6 +177,7 @@ public class RatingTable implements Service, SimppListener {
     synchronized void clear() {
         LOG.debug("Clearing ratings");
         tokenMap.clear();
+        dirty = true;
     }
 
     /**
