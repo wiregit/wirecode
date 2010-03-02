@@ -34,17 +34,30 @@ public class TemplateHashTokenFactory {
             template = template.replaceFirst("^[0-9\\s]*", "");
             if(LOG.isDebugEnabled())
                 LOG.debug("Created template: " + template);
-            byte[] utf8 = StringUtils.toUTF8Bytes(template);
-            synchronized(this) {
-                sha1.reset();
-                sha1.engineUpdate(utf8, 0, utf8.length);
-                byte[] hash = sha1.digest();
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Template hash: " + Base32.encode(hash));
-                return new TemplateHashToken(hash);
-            }
+            return createFromTemplate(template);
         }
         LOG.debug("Did not create template");
         return null;
+    }
+
+    /**
+     * Creates a template hash token from a template token and returns it.
+     */
+    public TemplateHashToken convert(TemplateToken tt) {
+        TemplateHashToken tht = createFromTemplate(tt.keyword);
+        tht.setRating(tt.getRating());
+        return tht;
+    }
+
+    private TemplateHashToken createFromTemplate(String template) {
+        byte[] utf8 = StringUtils.toUTF8Bytes(template);
+        synchronized(this) {
+            sha1.reset();
+            sha1.engineUpdate(utf8, 0, utf8.length);
+            byte[] hash = sha1.digest();
+            if(LOG.isDebugEnabled())
+                LOG.debug("Template hash: " + Base32.encode(hash));
+            return new TemplateHashToken(hash);
+        }
     }
 }

@@ -8,6 +8,9 @@ import java.io.Serializable;
  * how sensitive its spam rating is to updates. 
  */
 public abstract class Token implements Serializable {
+
+    private static final long serialVersionUID = -1519906405576105402L;
+
     /**
      * The spam rating of this token, between 0 (not spam) and 1 (spam).
      * Initialised to 0.

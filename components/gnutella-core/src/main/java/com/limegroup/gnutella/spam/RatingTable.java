@@ -89,10 +89,13 @@ public class RatingTable implements Service, SimppListener {
     private final HashSet<Token> searchTokens = new HashSet<Token>();
 
     private final Tokenizer tokenizer;
+    private final TemplateHashTokenFactory templateHashTokenFactory;
 
     @Inject
-    RatingTable(Tokenizer tokenizer) {
+    RatingTable(Tokenizer tokenizer,
+            TemplateHashTokenFactory templateHashTokenFactory) {
         this.tokenizer = tokenizer;
+        this.templateHashTokenFactory = templateHashTokenFactory;
     }
 
     @Inject
@@ -303,8 +306,13 @@ public class RatingTable implements Service, SimppListener {
                             new FileInputStream(getSpamDat())));
             List<Token> list = GenericsUtils.scanForList(is.readObject(),
                     Token.class, GenericsUtils.ScanMode.REMOVE);
-            int zeroes = 0;
+            int zeroes = 0, converted = 0;
             for(Token t : list) {
+                // Convert old template tokens into template hash tokens
+                if(t instanceof TemplateToken) {
+                    t = templateHashTokenFactory.convert((TemplateToken) t);
+                    converted++;
+                }
                 if(t.getRating() > 0f) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Loading " + t + ", rated " + t.getRating());
@@ -315,7 +323,7 @@ public class RatingTable implements Service, SimppListener {
             }
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Loaded " + tokenMap.size() + " entries, skipped " +
-                        zeroes + " with zero scores");
+                        zeroes + " with zero scores, converted " + converted);
             }
         } catch(IOException e) {
             LOG.debug("Error loading spam ratings: ", e);
