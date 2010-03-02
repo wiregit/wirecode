@@ -27,6 +27,8 @@ public class SetupPage3 extends WizardPage {
     private String forwardText;
     private boolean hasBackButton;
     
+    private boolean showingThankYouPage = false;
+    
     private SetupActivationPanel activationPanel;
     
     public SetupPage3(SetupComponentDecorator decorator, 
@@ -35,7 +37,7 @@ public class SetupPage3 extends WizardPage {
                       ActivationManager activationManager,
                       Wizard wizard) {
         super(decorator, application);
-        
+
         GuiUtils.assignResources(this);
 
         this.application = application;
@@ -87,6 +89,9 @@ public class SetupPage3 extends WizardPage {
 
     @Override
     public void applySettings() {
+        if (!showingThankYouPage) {
+            activationPanel.applySettings();
+        }
     }
 
     @Override
@@ -119,6 +124,7 @@ public class SetupPage3 extends WizardPage {
         forwardText = I18n.tr("Done");
         hasBackButton = false;
         wizard.updateControls();
+        showingThankYouPage = true;
     }
 
     private class ActivationListener implements EventListener<ActivationEvent> {

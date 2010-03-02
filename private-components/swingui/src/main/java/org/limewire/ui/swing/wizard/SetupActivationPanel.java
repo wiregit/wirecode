@@ -31,6 +31,7 @@ import org.limewire.ui.swing.activation.LabelWithLinkSupport;
 import org.limewire.ui.swing.activation.LicenseKeyTextField;
 import org.limewire.ui.swing.activation.ActivationWarningPanel.Mode;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -46,9 +47,14 @@ public class SetupActivationPanel extends JPanel {
     private LabelWithLinkSupport customerSupportLabel;
     private JXButton okButton;
     
+    private ActivationState state = null;
+    private ActivationError error = null;
+    
     @Resource
     private Color errorColor;
-
+    @Resource
+    private Color greenButtonForeground;
+    
     public SetupActivationPanel(WizardPage wizardPage, ActivationManager activationManager, Application application) {
         super(new MigLayout("fillx, insets 75 60 10 60, gap 0, gapy 0", "[][grow][]", "[][][][][][][][][][]"));
         
@@ -89,6 +95,8 @@ public class SetupActivationPanel extends JPanel {
         add(licenseField, "cell 2 6, aligny 50%");
 
         okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
+        okButton.setBackgroundPainter(new GreenButtonBackgroundPainter());
+        okButton.setForeground(greenButtonForeground);
         okButton.addActionListener(new EnterActionListener());
         okButton.setEnabled(licenseField.getText().length() == 14);
         licenseField.addPropertyChangeListener(new PropertyChangeListener() {
@@ -129,6 +137,13 @@ public class SetupActivationPanel extends JPanel {
         this.activationManager.addListener(activationListener);
     }
     
+    public void applySettings() {
+        String licenseKey = licenseField.getText();
+        if (licenseKey.length() == 14 && (state == null || state != ActivationState.AUTHORIZED)) {
+            new EnterActionListener().actionPerformed(null);
+        }
+    }
+
     public void reset() {
         ActivationError activationError = activationManager.getActivationError();
         if (activationError != ActivationError.BLOCKED_KEY) {
@@ -140,8 +155,11 @@ public class SetupActivationPanel extends JPanel {
     }
     
     private void setActivationState(ActivationState state, ActivationError error) {
+        this.state = state;
+        this.error = error;
+
         okButton.setEnabled(true);
-        
+
         switch(state) {
         case NOT_AUTHORIZED:
             if (error != ActivationError.COMMUNICATION_ERROR) {
