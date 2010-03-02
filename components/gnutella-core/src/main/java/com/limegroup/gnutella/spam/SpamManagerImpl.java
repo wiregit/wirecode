@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.spam;
 
-import java.util.Locale;
-
 import org.limewire.core.settings.SearchSettings;
 
 import com.google.inject.Inject;
@@ -17,11 +15,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
  */
 @Singleton
 class SpamManagerImpl implements SpamManager {
-
-    /**
-     * Initial rating for a file that appears from its name to be incomplete.
-     */
-    private static final float INCOMPLETE_FILE_RATING = 0.8f;
 
     private final RatingTable ratingTable;
 
@@ -62,13 +55,6 @@ class SpamManagerImpl implements SpamManager {
             return 0;
 
         float rating = 0;
-        // TODO: these results should probably be ignored (possibly using the
-        // filters package) rather than treated as spam
-        if (isIncompleteFile(rfd.getFileName().toLowerCase(Locale.US))) {
-            rating = 1 - (1 - rating) * (1 - INCOMPLETE_FILE_RATING);
-        }
-
-        // Apply the 'Bayesian' filter
         rating = 1 - (1 - rating) * (1 - ratingTable.getRating(rfd));
         rfd.setSpamRating(rating);
         return rating;
@@ -115,47 +101,5 @@ class SpamManagerImpl implements SpamManager {
     @Override
     public void clearFilterData() {
         ratingTable.clear();
-    }
-
-    /**
-     * Checks whether a filename appears to indicate an incomplete file.
-     * 
-     * @param name the name of the file (from a search result)
-     * @return true if we think that this is an incomplete file
-     */
-    private boolean isIncompleteFile(String name) {
-        if (name.startsWith("incomplete_"))
-            return true;
-        if (name.startsWith("incomplete~"))
-            return true;
-        if (name.startsWith("inacheve_"))
-            return true;
-        if (name.startsWith("in_"))
-            return true;
-        if (name.startsWith("__incomplete"))
-            return true;
-        if (name.startsWith("___incompleted"))
-            return true;
-        if (name.startsWith("___arestra"))
-            return true;
-        if (name.startsWith("preview-t-"))
-            return true;
-        if (name.startsWith("t-")) {
-            for (int i = 2; i < name.length(); i++) {
-                if (Character.isDigit(name.charAt(i)))
-                    continue;
-                else
-                    return name.charAt(i) == '-';
-            }
-        }
-        if (name.startsWith("corrupt-")) {
-            for (int i = 8; i < name.length(); i++) {
-                if (Character.isDigit(name.charAt(i)))
-                    continue;
-                else
-                    return name.charAt(i) == '-';
-            }
-        }
-        return false;
     }
 }
