@@ -35,7 +35,6 @@ import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.CipherProviderImpl;
-import org.limewire.io.InvalidDataException;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
@@ -69,25 +68,24 @@ import com.google.inject.name.Names;
  */
 public class ActivationCommunicatorTest extends BaseTestCase {
    
-    private static final String PUBLIC_KEY_A = 
-        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGmaLDX44w4H95Dd11OOUBWIb9TAQfsqCz4" +
-        "JcLD1vTtiwY5t07FWnheoU2fe07pAODXc+t0Bh4AqdjZqQxVOSiKRcZsVs18tL3SDwnHsdgZ4" +
-        "D5ewvXzcbHloLeNB1JmIAKkg/EkO1H8T+7Qy4h1G1urlEblxsGJ5+nK2ftlCL34wIDAQAB";
-
+    private static final String PUBLIC_KEY_A =
+        "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDS7whaG5tPvYMe0HYRDOFjAi3T2vQ0C/rrYaDyP7kt5LdB" +
+        "+f8XG0/NThIiH7VN604UGMgQj7gV4ZvUysNtsQHJeOLR06QIpBnzYzEUzV6IfW7wcGferGIBOW6NU696d+2N" +
+        "EJMJGxPbXSKzk0+4mkCkiO6PhpTPMWVgDoxQ4KyV7wIDAQAB";
     
-    private static final String PRIVATE_KEY_A =
-        "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMaZosNfjjDgf3kN3XU45QFYh" +
-        "v1MBB+yoLPglwsPW9O2LBjm3TsVaeF6hTZ97TukA4Ndz63QGHgCp2NmpDFU5KIpFxmxWzXy0v" +
-        "dIPCcex2BngPl7C9fNxseWgt40HUmYgAqSD8SQ7UfxP7tDLiHUbW6uURuXGwYnn6crZ+2UIvf" +
-        "jAgMBAAECgYB1DnEk/tlsbaY0z7tMMHCqTmeiPH/hvwOBgksEtdTGAIYVV13mSUTTJcgGykpd" +
-        "8NoxP8X9CL6jXc0ThZgZi5QGBoskyJQ0xtxRXM5yrNlaRiGoLTizGc0lBWzRCWZWjHh41W67g" +
-        "s3WG5l1CKflwwxg8jEi1+Wtg4p+csIy8oyOAQJBAOiekaiiS7wz/PTWqy+y3BPMz1kkfSOSQW" +
-        "EDABFvezOf3iimIPHZ204fmsuc8OGvmNgAjkdPEsoGM13EO9baRKMCQQDaj7tAdvo0YxC+wp1" +
-        "XGjIZQFSOALHj6gp/7OJPKmZuvl2S5wxZbVZ3SDRjVZvd+HlNg1Y+v23NyV4wnulMQHPBAkEA" +
-        "iU9YkZ9Db1OMxIWWxPAiInnqByeXypCBkR8xQhl5Mu7yNzJhDgHYBxR2zivUsJNzeEVTttoBM" +
-        "ElatsWnwNpUWwJBAKlfBwo+6UhdmOVrZYjRaQ9+dcgRq8lmXjqidQJKZlTduyATYtOOUppfXx" +
-        "G3jvFmE4LJC7XWnR4DNbXSABMyQ0ECQF10O3LOXJiYNo8w8/ziBJvqcSbbl67ZGkhDCh7Xi74" +
-        "5jhfokogBDwwDk7K+8nAdZlA23COBrNKJF3BnQKG1/bM=";
+    private static final String PRIVATE_KEY_A = 
+        "MIICeQIBADANBgkqhkiG9w0BAQEFAASCAmMwggJfAgEAAoGBANLvCFobm0+9gx7QdhEM4WMCLdPa9DQL+uth" +
+        "oPI/uS3kt0H5/xcbT81OEiIftU3rThQYyBCPuBXhm9TKw22xAcl44tHTpAikGfNjMRTNXoh9bvBwZ96sYgE5" +
+        "bo1Tr3p37Y0QkwkbE9tdIrOTT7iaQKSI7o+GlM8xZWAOjFDgrJXvAgMBAAECgYEAkty21fYutuBeMNA3xDtR" +
+        "mhvkSINEUBCfTc+VvdU8W4XJSniDcVUkxO88lOG63Fue60Mt2MoYA7QnSYs7cl4xvQ9Usf1YsBdjkGWx4PC5" +
+        "KMPibuID6aopZ3dM37jBuALOI+309XBR69ZBzhyxgAC+xS6WNX0sQuPynmv7q3ns6sECQQDwdxTM44DdA5AJ" +
+        "G+MwfD+bZIBUJ/W1i04NsjxZskq+ANJ8x1KW+OTF0tpzvsuMPKcTkMABYbihOWEl0osLCI+xAkEA4I+MIznz" +
+        "3buUjCue0gZIldtXJE04NEyy4An4DfzHNr4oqbdLcOkKoVWAVMm7gLhobcvAIQXNE+Tu3DEQHiWHnwJBAMkW" +
+        "fBF+6uNoOEo1xP5l2PdEy0AVDpfbv9EaTPehbnmHzH3GXZ2c1AtOcZo7YpKKohltgfNl2fURO9laQSZf6XEC" +
+        "QQCm3aQ5zOeM3cWdfxBuaqLnUGzpmcPpARFub5n28t4prJZUvtJ9XX47smhBGQKOvPlElUH4h/IDFXv0/TRH" +
+        "4oVrAkEA6A0lKFX80ZS5+f5v3L6C0Lu78XOMHZGxDlM5u+7wF5+QUFfn1R3fQu04xwDnbEmuRAtbzHYq82BX" +
+        "XvV2nfnqig==";
+    
     
     private ActivationSettingStub settingsStub;
     private ServerController serverController;
@@ -208,7 +206,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         try {
             comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             fail("Expected InvalidDataException");
-        } catch (InvalidDataException e) {
+        } catch (InvalidTokenException e) {
             assertEquals("random number security check failed", e.getMessage());
         }
     }
@@ -234,7 +232,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         try {
             comm.activate("DAVV-XXME-BWU3", RequestType.USER_ACTIVATE);
             fail("Expected InvalidDataException");
-        } catch (InvalidDataException e) {
+        } catch (InvalidTokenException e) {
             assertEquals("random number security check failed", e.getMessage());
         }
     }
