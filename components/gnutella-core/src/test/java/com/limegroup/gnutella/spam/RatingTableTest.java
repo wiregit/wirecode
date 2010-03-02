@@ -211,10 +211,13 @@ public class RatingTableTest extends LimeTestCase {
         table.load(oldSpamDat);
         // The tokens with zero ratings should have been skipped
         assertEquals(2, table.size());
+        // The keyword token with a non-zero rating should have been loaded
+        Token t1 = new KeywordToken("foo");
+        assertGreaterThan(0f, table.lookupAndGetRating(t1));
         // The template token should have been converted to a template hash
         String template = "N7GW4TYFZQAX3F2NXAD4BK6WULXRLXMT";
-        Token t = new TemplateHashToken(Base32.decode(template));
-        assertGreaterThan(0f, table.lookupAndGetRating(t));
+        Token t2 = new TemplateHashToken(Base32.decode(template));
+        assertGreaterThan(0f, table.lookupAndGetRating(t2));
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
