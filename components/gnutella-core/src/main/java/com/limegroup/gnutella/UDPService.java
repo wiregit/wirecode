@@ -428,13 +428,17 @@ public class UDPService implements ReadWriteObserver {
 	/**
 	 * Processes a single message. Package access for testing.
 	 */
-    void processMessage(Message message, InetSocketAddress addr) {
-        // FIXME: why do we mutate the GUIDs of ping replies?
-        if(message instanceof PingReply)
-            mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
-        updateState(message, addr);
-        messageDispatcher.get().dispatchUDP(message, addr);
-    }
+	void processMessage(Message message, InetSocketAddress addr) {
+	    if(!ipFilter.get().allow(message)) {
+	        LOG.debug("Received packet from hostile host");
+	        return;
+	    }
+	    // FIXME: why do we mutate the GUIDs of ping replies?
+	    if(message instanceof PingReply)
+	        mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
+	    updateState(message, addr);
+	    messageDispatcher.get().dispatchUDP(message, addr);
+	}
 	
 	/** Updates internal state of the UDP Service. */
 	private void updateState(Message message, InetSocketAddress addr) {
