@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -61,6 +62,10 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
+        // Disable the repetitive query filter because we'll be sending the same
+        // query string with different flags
+        FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.setValue(0);
+
         Injector injector = LimeTestUtils.createInjector(MyCallback.class, LimeTestUtils.createModule(this));
         super.setUp(injector);
         
