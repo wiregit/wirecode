@@ -137,10 +137,10 @@ class LibraryWarningDialog extends OverlayPopupPanel {
 
         File folder = getFolderBeingAdded(files);
         int folderCount = getFolderCount(files);
-        recursiveButton = new JRadioButton(getRecursiveLabel(folder, folderCount));
+        recursiveButton = new JRadioButton("<HTML>" + getRecursiveLabel(folder, folderCount) + "</HTML>");
         recursiveButton.setBorder(BorderFactory.createEmptyBorder());
         decorateComponent(recursiveButton);
-        nonRecursiveButton = new JRadioButton(getNonRecursiveLabel(folder, folderCount));
+        nonRecursiveButton = new JRadioButton("<HTML>" + getNonRecursiveLabel(folder, folderCount) + "</HTML>");
         nonRecursiveButton.setBorder(BorderFactory.createEmptyBorder());
         decorateComponent(nonRecursiveButton);
         ButtonGroup radioButtonGroup = new ButtonGroup();
@@ -151,8 +151,8 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         JLabel fromLabel = new JLabel(I18n.tr("From:"));
         decorateComponent(fromLabel);
         p.add(fromLabel, "span, wrap");
-        p.add(recursiveButton, "span, wrap, gapleft 10");
-        p.add(nonRecursiveButton, "span, wrap, gapleft 10");
+        p.add(recursiveButton, "span, growy, wrap, gapleft 10");
+        p.add(nonRecursiveButton, "span, growy, wrap, gapleft 10");
         
         horizontalLine = Line.createHorizontalLine(border, 1);
         horizontalLine.setVisible(false);
