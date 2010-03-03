@@ -21,7 +21,7 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.malware.VirusEngine;
-import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.MalwareSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
@@ -243,9 +243,9 @@ public class TransferOptionPanel extends OptionPanel {
             
             if(virusEngine.isSupported()){
                 boolean isReEnable = useAntivirusCheckBox.isSelected()
-                        && FilterSettings.VIRUS_SCANNER_ENABLED.getValue() == false;
+                        && MalwareSettings.VIRUS_SCANNER_ENABLED.getValue() == false;
                 
-                FilterSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
+                MalwareSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
                 
                 if (isReEnable){
                     //check for av updates if the user re-enabled the scanner.
@@ -309,7 +309,7 @@ public class TransferOptionPanel extends OptionPanel {
                     || saveFolderPanel.hasChanged()
                     || singleLocationButton.isSelected()
                     && saveFolderPanel.isConfigCustom()
-                    ||FilterSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()
+                    ||MalwareSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()
                     || SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox
                             .isSelected() || storeOptionPanel.hasChanged();
         }
@@ -325,7 +325,7 @@ public class TransferOptionPanel extends OptionPanel {
             autoRenameDuplicateFilesCheckBox
                     .setSelected(SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
             
-            useAntivirusCheckBox.setSelected(FilterSettings.VIRUS_SCANNER_ENABLED.getValue());
+            useAntivirusCheckBox.setSelected(MalwareSettings.VIRUS_SCANNER_ENABLED.getValue());
 
             setAVGCheckBoxVisible();
             
