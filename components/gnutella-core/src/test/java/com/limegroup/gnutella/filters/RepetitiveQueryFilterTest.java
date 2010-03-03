@@ -34,28 +34,34 @@ public class RepetitiveQueryFilterTest extends LimeTestCase {
 
     public void testRepetitionNotAllowedAfterTen() {
         context.checking(new Expectations() {{
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("two"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("three"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("four"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("five"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("six"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("seven"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("eight"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("nine"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("ten"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
+            exactly(11).of(qr).getTTL();
+            will(returnValue((byte)1));
+            exactly(11).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(11).of(qr).isWhatIsNewRequest();
+            will(returnValue(false));
         }});
         for(int i = 0; i < 10; i++) {
             assertTrue(filter.allow(qr));
@@ -66,30 +72,36 @@ public class RepetitiveQueryFilterTest extends LimeTestCase {
 
     public void testRepetitionAllowedAfterEleven() {
         context.checking(new Expectations() {{
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("two"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("three"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("four"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("five"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("six"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("seven"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("eight"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("nine"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("ten"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("eleven"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
+            exactly(12).of(qr).getTTL();
+            will(returnValue((byte)1));
+            exactly(12).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(12).of(qr).isWhatIsNewRequest();
+            will(returnValue(false));
         }});
         for(int i = 0; i < 12; i++) {
             assertTrue(filter.allow(qr));
@@ -97,22 +109,68 @@ public class RepetitiveQueryFilterTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
 
+    public void testRepetitionAllowedWithDifferentTTL() {
+        context.checking(new Expectations() {{
+            one(qr).getQuery();
+            will(returnValue("one"));
+            one(qr).getQuery();
+            will(returnValue("two"));
+            one(qr).getQuery();
+            will(returnValue("three"));
+            one(qr).getQuery();
+            will(returnValue("four"));
+            one(qr).getQuery();
+            will(returnValue("five"));
+            one(qr).getQuery();
+            will(returnValue("six"));
+            one(qr).getQuery();
+            will(returnValue("seven"));
+            one(qr).getQuery();
+            will(returnValue("eight"));
+            one(qr).getQuery();
+            will(returnValue("nine"));
+            one(qr).getQuery();
+            will(returnValue("ten"));
+            one(qr).getQuery();
+            will(returnValue("one"));
+            exactly(10).of(qr).getTTL();
+            will(returnValue((byte)1));
+            // The last query request will have a different TTL
+            one(qr).getTTL();
+            will(returnValue((byte)2));
+            exactly(11).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(11).of(qr).isWhatIsNewRequest();
+            will(returnValue(false));
+        }});
+        for(int i = 0; i < 11; i++) {
+            assertTrue(filter.allow(qr));
+        }
+        context.assertIsSatisfied();
+    }
+        
     public void testSettingAdjustsFilterSize() {
         FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.setValue(5);
         filter = new RepetitiveQueryFilter();
         context.checking(new Expectations() {{
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("two"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("three"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("four"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("five"));
-            exactly(1).of(qr).getQuery();
+            one(qr).getQuery();
             will(returnValue("one"));
+            exactly(6).of(qr).getTTL();
+            will(returnValue((byte)1));
+            exactly(6).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(6).of(qr).isWhatIsNewRequest();
+            will(returnValue(false));
         }});
         for(int i = 0; i < 5; i++) {
             assertTrue(filter.allow(qr));
@@ -125,6 +183,30 @@ public class RepetitiveQueryFilterTest extends LimeTestCase {
         FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.setValue(0);
         filter = new RepetitiveQueryFilter();
         for(int i = 0; i < 1000; i++) {
+            assertTrue(filter.allow(qr));
+        }
+        context.assertIsSatisfied();
+    }
+
+    public void testBrowseHostQueriesAreAllowed() {
+        context.checking(new Expectations() {{
+            exactly(11).of(qr).isBrowseHostQuery();
+            will(returnValue(true));
+        }});
+        for(int i = 0; i < 11; i++) {
+            assertTrue(filter.allow(qr));
+        }
+        context.assertIsSatisfied();
+    }
+
+    public void testWhatIsNewQueriesAreAllowed() {
+        context.checking(new Expectations() {{
+            exactly(11).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(11).of(qr).isWhatIsNewRequest();
+            will(returnValue(true));
+        }});
+        for(int i = 0; i < 11; i++) {
             assertTrue(filter.allow(qr));
         }
         context.assertIsSatisfied();
