@@ -232,8 +232,11 @@ class NavigatorImpl implements Navigator {
         
         @Override
         public void select(NavSelectable selectable) {
-            assert valid;
-            selectNavItem(this, selectable, true);
+            // need to check this is still valid, there's a race condition when
+            // removing all open tabs and the user selecting one prior to
+            // to it being removed.
+            if(valid)
+                selectNavItem(this, selectable, true);                
         }
         
         @Override
