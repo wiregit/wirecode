@@ -15,6 +15,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -135,6 +136,10 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        // Disable the repetitive query filter because some tests send the
+        // same query string repeatedly
+        FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.setValue(0);
+
         networkManagerStub = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
