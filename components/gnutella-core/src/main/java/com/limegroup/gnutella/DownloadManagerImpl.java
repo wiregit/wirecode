@@ -881,9 +881,16 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             // Does the torrent contain any files with banned extensions?
             if(!overwrite) {
                 Torrent torrent = ret.getTorrent();
-                Set<String> banned = getBannedExtensions(torrent);
-                if(!banned.isEmpty() && !downloadCallback.get().promptAboutTorrentWithBannedExtensions(torrent, banned))
-                    throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
+                if(!torrent.hasMetaData() || torrent.getTorrentInfo() == null) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Torrent lacks info: " + torrentFile +
+                                ", size: " + torrentFile.length() +
+                                ", exists: " + torrentFile.exists());
+                } else {
+                    Set<String> banned = getBannedExtensions(torrent);
+                    if(!banned.isEmpty() && !downloadCallback.get().promptAboutTorrentWithBannedExtensions(torrent, banned))
+                        throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
+                }
             }
 
             ret.setSaveFile(saveDirectory, null, overwrite);
