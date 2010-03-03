@@ -8,6 +8,7 @@ import java.security.PublicKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.Tag;
@@ -202,7 +203,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
             }
             return;
         }
-
+        if (! DHTSettings.ALLOW_DHT_SECURE_MESSAGE.getValue()){
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping secureMessage " + secureMessage
+                        + " because secureMessages are not allowed.");
+            }
+            return;
+        }
         secureMessageVerifier.get().verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM,
                 secureMessage, smc);
     }

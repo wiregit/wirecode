@@ -352,4 +352,10 @@ public class DHTSettings extends LimeProps {
     public static final StringSetting DHT_MODE
         = FACTORY.createStringSetting("DHT_MODE", "");
     
+    /**
+     * Whether or not we allow DHTSecureMessage
+     */
+    public static final BooleanSetting ALLOW_DHT_SECURE_MESSAGE
+        = FACTORY.createRemoteBooleanSetting("ALLOW_DHT_SECURE_MESSAGE", 
+                false, "DHTSettings.allowDHTSecureMessage");
 }

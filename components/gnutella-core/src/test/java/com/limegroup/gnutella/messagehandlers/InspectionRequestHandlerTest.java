@@ -183,4 +183,28 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
             return true;
         }
     }
+    
+    /**
+     * tests that we can disable inspection requests by setting inspectorIP to empty string
+     * which will be simpped to the network if necessary.
+     * 
+     */
+    public void testDisable() throws Exception {
+        // set "nobody is allowed" 
+        FilterSettings.INSPECTOR_IP_ADDRESSES.set(new String[]{""}); 
+        final InspectionRequest request = mockery.mock(InspectionRequest.class);
+        final ReplyHandler handler = mockery.mock(ReplyHandler.class);
+        final InspectionResponseFactory inspectionResponseFactory = mockery.mock(InspectionResponseFactory.class);
+        mockery.checking(new Expectations() {{
+            one(handler).getAddress();
+            // inspector IP
+            will(returnValue("1.2.3.4"));
+            // the request should be dropped, so no response is created
+            never(inspectionResponseFactory).createResponses(request);
+        }});
+        InspectionRequestHandler irh = injector.getInstance(InspectionRequestHandler.class);
+        irh.handleMessage(request, new InetSocketAddress("1.2.3.4",1), handler);
+        // the inspection request is dropped since no further actions are taken 
+        mockery.assertIsSatisfied();
+    }    
 }
