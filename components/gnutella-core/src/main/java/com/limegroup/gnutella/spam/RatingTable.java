@@ -373,6 +373,8 @@ public class RatingTable implements Service, SimppListener {
             LOG.debug("Error loading spam ratings: ", e);
         } catch(ClassNotFoundException e) {
             LOG.debug("Error loading spam ratings: ", e);
+        } catch(ClassCastException e) {
+            LOG.debug("Error loading spam ratings: ", e);
         } finally {
             IOUtils.close(is);
         }
