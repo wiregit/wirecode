@@ -48,10 +48,13 @@ public class RepetitiveQueryFilter implements SpamFilter {
         // Don't drop browses or "what's new" queries
         if(q.isBrowseHostQuery() || q.isWhatIsNewRequest())
             return true;
-        // Drop repetitive queries
         String query = q.getQuery();
         assert query != null;
+        // Don't drop URN queries (though they may be dropped elsewhere)
+        if(query.equals(QueryRequest.DEFAULT_URN_QUERY) && q.hasQueryUrns())
+            return true;
         byte ttl = q.getTTL();
+        // Drop repetitive queries
         for(int i = 0; i < recentQueries.length; i++) {
             if(query.equals(recentQueries[i]) && ttl == recentTTLs[i]) {
                 LOG.debugf("Repetitive query blocked: {0}, {1}", query, ttl);

@@ -212,6 +212,23 @@ public class RepetitiveQueryFilterTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
 
+    public void testURNQueriesAreAllowed() {
+        context.checking(new Expectations() {{
+            exactly(11).of(qr).isBrowseHostQuery();
+            will(returnValue(false));
+            exactly(11).of(qr).isWhatIsNewRequest();
+            will(returnValue(false));
+            exactly(11).of(qr).getQuery();
+            will(returnValue(QueryRequest.DEFAULT_URN_QUERY));
+            exactly(11).of(qr).hasQueryUrns();
+            will(returnValue(true));
+        }});
+        for(int i = 0; i < 11; i++) {
+            assertTrue(filter.allow(qr));
+        }
+        context.assertIsSatisfied();
+    }
+
     public void testOtherMessagesAreAllowed() {
         PingRequest pr = context.mock(PingRequest.class);
         assertTrue(filter.allow(pr));
