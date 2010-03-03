@@ -5,7 +5,9 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -32,7 +34,11 @@ public class RepetitiveQueryFilter implements SpamFilter {
     @InspectablePrimitive("repetitive queries")
     private long dropped = 0;
 
-    RepetitiveQueryFilter() {
+    private final ConnectionManager connectionManager;
+
+    @Inject
+    RepetitiveQueryFilter(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
         int size = FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.getValue();
         recentQueries = new String[size];
         recentTTLs = new byte[size];
@@ -43,6 +49,8 @@ public class RepetitiveQueryFilter implements SpamFilter {
         if(!(m instanceof QueryRequest))
             return true;
         if(recentQueries.length == 0)
+            return true;
+        if(connectionManager.isShieldedLeaf())
             return true;
         QueryRequest q = (QueryRequest)m;
         // Don't drop browses or "what's new" queries
