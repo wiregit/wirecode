@@ -94,7 +94,8 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "UPnPManager", "UPnPManager",
         "simpp sender snapshot", "ScheduledService",
         "Virus Definition Service", "VirusDefinitionManagerImpl",
-        // WINDOWS ONLY: [AntiVirusService/VirusScannerImpl]]
+        "Activation-Manager Service", "ActivationManagerImpl",
+        // WINDOWS ONLY: "AntiVirusService", "VirusScannerImpl"
         };
         
         List<String> missing = new ArrayList<String>();
