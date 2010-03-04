@@ -15,6 +15,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
@@ -101,6 +102,9 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         ConnectionSettings.MULTICAST_PORT.setValue(10100);
         UDP_ACCESS = new DatagramSocket();
         UDP_ACCESS.setSoTimeout(500);
+        // Disable the repetitive query filter because we're going to be sending
+        // repetitive queries
+        FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.setValue(0);
     }
 
     @Override
