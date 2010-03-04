@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import junit.framework.Test;
 
@@ -59,21 +58,29 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
 	
     @Override
     public void setUpQRPTables() throws Exception {
-        //3. routed leaf, with route table for "test"
+        // QRT for leaf
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF[0].send((RouteTableMessage)iter.next());
+        // Include digits for testProbeIsTTL1Only
+        qrt.add("2");
+        qrt.add("3");
+        qrt.add("4");
+        for(RouteTableMessage r : qrt.encode(null)) {
+            LEAF[0].send(r);
 			LEAF[0].flush();
         }
 
-        // for Ultrapeer 1
+        // QRT for ultrapeer
         qrt = new QueryRouteTable();
         qrt.add("leehsus");
         qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER[0].send((RouteTableMessage)iter.next());
+        // Include digits for testProbeIsTTL1Only
+        qrt.add("2");
+        qrt.add("3");
+        qrt.add("4");
+        for(RouteTableMessage r : qrt.encode(null)) {
+            ULTRAPEER[0].send(r);
 			ULTRAPEER[0].flush();
         }
     }
@@ -272,20 +279,20 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         for (int i = 2; i < 5; i++) {
             drainAll();
 
-            QueryRequest request = queryRequestFactory.createQuery("berkeley");
+            QueryRequest request = queryRequestFactory.createQuery("berkeley " + i);
             request.setTTL((byte)i);
 
             ULTRAPEER[1].send(request);
             ULTRAPEER[1].flush();
 
             QueryRequest reqRecvd = (QueryRequest) LEAF[0].receive(TIMEOUT);
-            assertEquals("berkeley", reqRecvd.getQuery());
+            assertEquals("berkeley " + i, reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
             // should be forwarded to other Ultrapeer
             reqRecvd = BlockingConnectionUtils.getFirstQueryRequest(ULTRAPEER[0]);
             assertNotNull(reqRecvd);
-            assertEquals("berkeley", reqRecvd.getQuery());
+            assertEquals("berkeley " + i, reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
             assertEquals((byte)1, reqRecvd.getHops());
             
