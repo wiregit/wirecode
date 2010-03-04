@@ -64,7 +64,9 @@ public class DownloadManagerImplTest extends LimeTestCase {
         entries.add(mp3);
         entries.add(none);
         mockery.checking(new Expectations() {{
-            one(torrent).getTorrentInfo();
+            atMost(1).of(torrent).hasMetaData(); // Once with assertions enabled
+            will(returnValue(true));
+            atMost(2).of(torrent).getTorrentInfo(); // Twice with assertions
             will(returnValue(torrentInfo));
             one(torrentInfo).getTorrentFileEntries();
             will(returnValue(entries));
