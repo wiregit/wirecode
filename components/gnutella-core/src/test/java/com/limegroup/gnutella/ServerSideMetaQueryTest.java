@@ -71,12 +71,12 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         
         FileManagerTestUtils.waitForLoad(library, 500);
         LibrarySettings.ALLOW_PROGRAMS.setValue(true);
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(1, TimeUnit.SECONDS));
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta doc.txt")).get(1, TimeUnit.SECONDS));
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta image.png")).get(1, TimeUnit.SECONDS));
-        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta program txt.bin")).get(1, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(2, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(2, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(2, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta doc.txt")).get(2, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta image.png")).get(2, TimeUnit.SECONDS));
+        assertNotNull(gnutellaFileCollection.add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta program txt.bin")).get(2, TimeUnit.SECONDS));
     }
     
     @Singleton
