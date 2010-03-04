@@ -255,7 +255,8 @@ class LibraryWarningDialog extends OverlayPopupPanel {
         return "<style TYPE=\"text/css\"><!--" +
         "body {font-family: " + font.getFamily() + ";" +
         		"font-size: " + font.getSize() + "pt;" +
-        		"font-weight: lighter;}-->";     
+        		"font-weight: lighter;}-->" +
+        		"</style>";     
     }
     
     /**
