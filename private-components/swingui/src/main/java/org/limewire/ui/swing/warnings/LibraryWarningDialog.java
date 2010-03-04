@@ -137,12 +137,12 @@ class LibraryWarningDialog extends OverlayPopupPanel {
 
         File folder = getFolderBeingAdded(files);
         int folderCount = getFolderCount(files);
-        recursiveButton = new JRadioButton("<HTML>" + getRecursiveLabel(folder, folderCount) + "</HTML>");
+        String recursiveText = toHTML(getRecursiveLabel(folder, folderCount));
+        recursiveButton = new JRadioButton(recursiveText);
         recursiveButton.setBorder(BorderFactory.createEmptyBorder());
-        decorateComponent(recursiveButton);
-        nonRecursiveButton = new JRadioButton("<HTML>" + getNonRecursiveLabel(folder, folderCount) + "</HTML>");
+        String nonRecursiveText = toHTML(getNonRecursiveLabel(folder, folderCount));
+        nonRecursiveButton = new JRadioButton(nonRecursiveText);
         nonRecursiveButton.setBorder(BorderFactory.createEmptyBorder());
-        decorateComponent(nonRecursiveButton);
         ButtonGroup radioButtonGroup = new ButtonGroup();
         radioButtonGroup.add(recursiveButton);
         radioButtonGroup.add(nonRecursiveButton);
@@ -245,6 +245,17 @@ class LibraryWarningDialog extends OverlayPopupPanel {
     private void decorateComponent(JComponent component) {
         component.setFont(normalFont);
         component.setForeground(fontColor);
+    }
+    
+    private String toHTML(String text){
+        return "<HTML><HEAD>" + createFontCSS(normalFont) + "</HEAD>" + text + "</HTML>";
+    }
+    
+    private String createFontCSS(Font font) {
+        return "<style TYPE=\"text/css\"><!--" +
+        "body {font-family: " + font.getFamily() + ";" +
+        		"font-size: " + font.getSize() + "pt;" +
+        		"font-weight: lighter;}-->";     
     }
     
     /**
