@@ -38,12 +38,8 @@ public class RepetitiveQueryFilter implements SpamFilter {
 
     @Inject
     RepetitiveQueryFilter(ConnectionManager connectionManager) {
-        this(connectionManager, FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.getValue());
-    }
-
-    // Public constructor for use by diagnostic tools
-    public RepetitiveQueryFilter(ConnectionManager connectionManager, int size) {
         this.connectionManager = connectionManager;
+        int size = FilterSettings.REPETITIVE_QUERY_FILTER_SIZE.getValue();
         recentQueries = new String[size];
         recentTTLs = new byte[size];
     }
