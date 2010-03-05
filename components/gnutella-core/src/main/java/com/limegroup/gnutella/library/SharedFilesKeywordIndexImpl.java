@@ -74,7 +74,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * Not threadsafe, hold lock on field.
      */
     @InspectableForSize(value = "size of incomplete keyword trie", category = DataCategory.USAGE)
-    private final StringTrie<IntSet> incompleteKeywordTrie = new StringTrie<IntSet>(true);
+    private final StringTrie<IntSet> incompleteKeywordTrieV2 = new StringTrie<IntSet>(true);
 
     private final Provider<CreationTimeCache> creationTimeCache;
 
@@ -319,7 +319,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         if(complete) {
             keywordTrie.clear();
         } else {
-            incompleteKeywordTrie.clear();
+            incompleteKeywordTrieV2.clear();
         }
     }
     
@@ -374,7 +374,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         if(complete) {
             removeKeywords(keywordTrie, fileDesc);
         } else {
-            removeKeywords(incompleteKeywordTrie, fileDesc);
+            removeKeywords(incompleteKeywordTrieV2, fileDesc);
         }
     }
 
@@ -384,7 +384,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                                                 && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
             IncompleteFileDesc ifd = (IncompleteFileDesc) fileDesc;
             if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
-                loadKeywords(incompleteKeywordTrie, fileDesc);
+                loadKeywords(incompleteKeywordTrieV2, fileDesc);
             }
         } else {
             loadKeywords(keywordTrie, fileDesc);
@@ -462,14 +462,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
                     && SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() && partial) {
                 Iterator<IntSet> incompleteIndices;
-                synchronized (incompleteKeywordTrie) {
-                    incompleteIndices = incompleteKeywordTrie.getPrefixedBy(query, i, j);
+                synchronized (incompleteKeywordTrieV2) {
+                    incompleteIndices = incompleteKeywordTrieV2.getPrefixedBy(query, i, j);
                 }
                 iter = new MultiIterator<IntSet>(iter, incompleteIndices);
             }
 
             synchronized (keywordTrie) {
-                synchronized (incompleteKeywordTrie) {
+                synchronized (incompleteKeywordTrieV2) {
                     if (iter.hasNext()) {
                         // Got match. Union contents of the iterator and store
                         // in
@@ -532,7 +532,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * performance, not correctness; hence no modifies clause.
      */
     private void trim() {
-        for (StringTrie<IntSet> trie : new StringTrie[] { keywordTrie, incompleteKeywordTrie }) {
+        for (StringTrie<IntSet> trie : new StringTrie[] { keywordTrie, incompleteKeywordTrieV2 }) {
             synchronized (trie) {
                 trie.trim(new Function<IntSet, IntSet>() {
                     public IntSet apply(IntSet intSet) {
