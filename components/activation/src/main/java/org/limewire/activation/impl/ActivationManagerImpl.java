@@ -549,6 +549,8 @@ class ActivationManagerImpl implements ActivationManager, Service {
     private void activatedFromDisk(final ActivationResponse response) {
         setActivationItems(response.getActivationItems());
         activationSettings.setLastStartPro(isProActive());
+        activationSettings.setActivationKey(response.getLid());
+        activationSettings.setModuleCode(response.getMCode());
         activationError = ActivationError.NO_ERROR;
         setCurrentState(State.ACTIVATED_FROM_DISK);
     }
