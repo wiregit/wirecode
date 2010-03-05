@@ -364,7 +364,7 @@ public class StringTrie<V> {
      */
     public int size() {
         int ret = 0;
-        for (Iterator<V> iter = getIterator();iter.hasNext();)
+        for (Iterator<V> iter = getIterator();iter.hasNext();iter.next())
             ret++;
         return ret;
     }
