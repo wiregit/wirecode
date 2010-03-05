@@ -57,6 +57,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.filters.URNBlacklistManager;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;
@@ -66,6 +67,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.stubs.BandwidthCollectorStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.URNBlacklistManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 public abstract class DownloadTestCase extends LimeTestCase {
@@ -164,14 +166,15 @@ public abstract class DownloadTestCase extends LimeTestCase {
         setDownloadWaitTime(DEFAULT_WAIT_TIME);
 
         activityCallback = new MyCallback();
-        injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(), NetworkManagerStub.MODULE, 
-                new AbstractModule() {
+        injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(),
+                NetworkManagerStub.MODULE, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
                 bind(BandwidthCollector.class).to(BandwidthCollectorStub.class);
                 bind(BandwidthCollectorDriver.class).to(BandwidthCollectorStub.class);
+                bind(URNBlacklistManager.class).to(URNBlacklistManagerStub.class);
             }
         }, LimeTestUtils.createModule(this));
 
