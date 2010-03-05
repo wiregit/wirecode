@@ -1,18 +1,26 @@
 package org.limewire.core.impl.rest;
 
+import static org.limewire.rest.AuthorizationInterceptor.REMOTE_PREFIX;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.rest.AuthorizationInterceptor;
+import org.limewire.rest.AuthorizationInterceptorFactory;
+import org.limewire.rest.RestAuthority;
+import org.limewire.rest.RestAuthorityFactory;
 import org.limewire.rest.RestPrefix;
 import org.limewire.rest.RestRequestHandlerFactory;
+import org.limewire.rest.RestUtils;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 
 /**
@@ -21,17 +29,25 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 @EagerSingleton
 public class CoreGlueRestService implements Service {
 
-    private static final String REMOTE_PREFIX = "/remote/";
-    
     private final Provider<LocalHTTPAcceptor> localHttpAcceptorFactory;
+    private final Provider<LocalAcceptor> localAcceptorFactory;
+    private final AuthorizationInterceptorFactory authorizationInterceptorFactory;
+    private final RestAuthorityFactory restAuthorityFactory;
     private final RestRequestHandlerFactory restRequestHandlerFactory;
     
     private SettingListener localSettingListener;
+    private AuthorizationInterceptor localAuthorizationInterceptor;
     
     @Inject
     public CoreGlueRestService(Provider<LocalHTTPAcceptor> localHttpAcceptorFactory,
+            Provider<LocalAcceptor> localAcceptorFactory,
+            AuthorizationInterceptorFactory authorizationInterceptorFactory,
+            RestAuthorityFactory restAuthorityFactory,
             RestRequestHandlerFactory restRequestHandlerFactory) {
         this.localHttpAcceptorFactory = localHttpAcceptorFactory;
+        this.localAcceptorFactory = localAcceptorFactory;
+        this.authorizationInterceptorFactory = authorizationInterceptorFactory;
+        this.restAuthorityFactory = restAuthorityFactory;
         this.restRequestHandlerFactory = restRequestHandlerFactory;
     }
     
@@ -51,6 +67,10 @@ public class CoreGlueRestService implements Service {
 
     @Override
     public void start() {
+        // Generate new consumer secret.
+        ApplicationSettings.LOCAL_REST_ACCESS_SECRET.set(RestUtils.createRandomString(32));
+        ApplicationSettings.instance().save();
+        
         // Install setting listener.
         if (localSettingListener == null) {
             localSettingListener = new SettingListener() {
@@ -87,6 +107,17 @@ public class CoreGlueRestService implements Service {
      * Registers local handlers for all REST targets.
      */
     private void registerLocalHandlers() {
+        // Create interceptor for authorization.
+        if (localAuthorizationInterceptor == null) {
+            String localUrl = "http://localhost";
+            int port = localAcceptorFactory.get().getPort();
+            String secret = ApplicationSettings.LOCAL_REST_ACCESS_SECRET.get();
+            RestAuthority localAuthority = restAuthorityFactory.create(localUrl, port, secret);
+            localAuthorizationInterceptor = authorizationInterceptorFactory.create(localAuthority);
+        }
+        localHttpAcceptorFactory.get().addRequestInterceptor(localAuthorizationInterceptor);
+        
+        // Register REST handlers.
         for (RestPrefix restPrefix : RestPrefix.values()) {
             localHttpAcceptorFactory.get().registerHandler(createPattern(restPrefix.pattern()),
                     restRequestHandlerFactory.createRequestHandler(restPrefix));
@@ -97,9 +128,14 @@ public class CoreGlueRestService implements Service {
      * Unregisters local handlers for all REST targets.
      */
     private void unregisterLocalHandlers() {
+        // Unregister REST handlers.
         for (RestPrefix restPrefix : RestPrefix.values()) {
             localHttpAcceptorFactory.get().unregisterHandler(createPattern(restPrefix.pattern()));
         }
+        
+        // Remove authorization interceptor.
+        localHttpAcceptorFactory.get().removeRequestInterceptor(localAuthorizationInterceptor);
+        localAuthorizationInterceptor = null;
     }
     
     /**

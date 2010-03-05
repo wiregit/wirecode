@@ -32,6 +32,48 @@ public class RestUtilsTest extends BaseTestCase {
         super.tearDown();
     }
 
+    /** Tests method to perform percent decoding. */
+    public void testPercentDecode() {
+        // Verify unreserved characters not decoded.
+        String testStr = "first_name-last_name.bak~";
+        assertEquals(testStr, RestUtils.percentDecode(testStr));
+        
+        // Verify URL string decoded.
+        testStr = "http%3A%2F%2Fwww.limewire.com";
+        String expected = "http://www.limewire.com";
+        assertEquals(expected, RestUtils.percentDecode(testStr));
+        
+        // Verify parameter string decoded.
+        testStr = "find%3Falpha%3D1%26beta%3D2%2B3";
+        expected = "find?alpha=1&beta=2+3";
+        assertEquals(expected, RestUtils.percentDecode(testStr));
+    }
+
+    /** Tests method to perform percent encoding. */
+    public void testPercentEncode() {
+        // Verify unreserved characters not encoded.
+        String testStr = "first_name-last_name.bak~";
+        assertEquals(testStr, RestUtils.percentEncode(testStr));
+        
+        // Verify URL string encoded.
+        testStr = "http://www.limewire.com";
+        String expected = "http%3A%2F%2Fwww.limewire.com";
+        assertEquals(expected, RestUtils.percentEncode(testStr));
+        
+        // Verify parameter string encoded.
+        testStr = "find?alpha=1&beta=2+3";
+        expected = "find%3Falpha%3D1%26beta%3D2%2B3";
+        assertEquals(expected, RestUtils.percentEncode(testStr));
+    }
+    
+    /** Tests method to get base URI string. */
+    public void testGetBaseUri() throws Exception {
+        String testUri = "http://localhost/remote/library/files?offset=1";
+        String baseUri = "http://localhost/remote/library/files";
+        
+        assertEquals(baseUri, RestUtils.getBaseUri(testUri));
+    }
+
     /** Tests method to get URI target. */
     public void testGetUriTarget() throws Exception {
         final String testUri = "http://localhost/remote/library/files?offset=1";
@@ -49,8 +91,8 @@ public class RestUtilsTest extends BaseTestCase {
         assertEquals("/files", RestUtils.getUriTarget(mockRequest, testPrefix));
     }
 
-    /** Tests method to get URI query parameters. */
-    public void testGetQueryParams() throws Exception {
+    /** Tests method to get query parameters from HTTP request. */
+    public void testGetQueryParamsFromRequest() throws Exception {
         final String testUri = "http://localhost/remote/library/files?offset=1";
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
@@ -63,6 +105,15 @@ public class RestUtilsTest extends BaseTestCase {
         }});
         
         Map<String, String> queryParams = RestUtils.getQueryParams(mockRequest);
+        assertEquals(1, queryParams.size());
+        assertEquals("1", queryParams.get("offset"));
+    }
+
+    /** Tests method to get query parameters from URI string. */
+    public void testGetQueryParamsFromString() throws Exception {
+        String testUri = "http://localhost/remote/library/files?offset=1";
+        
+        Map<String, String> queryParams = RestUtils.getQueryParams(testUri);
         assertEquals(1, queryParams.size());
         assertEquals("1", queryParams.get("offset"));
     }

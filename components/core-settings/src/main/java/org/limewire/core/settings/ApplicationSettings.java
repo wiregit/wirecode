@@ -170,6 +170,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("LOCAL_REST_ACCESS_ENABLED", false);
     
     /**
+     * The consumer secret used to authorize requests to the REST API.
+     */
+    public static final StringSetting LOCAL_REST_ACCESS_SECRET =
+        FACTORY.createStringSetting("LOCAL_REST_ACCESS_SECRET", "");
+    
+    /**
      * Gets the current language setting.
      */
     public static String getLanguage() {
