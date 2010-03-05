@@ -5,7 +5,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.event.ActionListener;
-
+import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -13,15 +13,17 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.api.ActivationItem.Status;
+import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -35,10 +37,6 @@ import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 /**
  * Displays information about the Modules that are associated with the 
@@ -97,6 +95,11 @@ class ActivationTable extends MouseableTable {
         TableCellHeaderRenderer renderer = new TableCellHeaderRenderer();
         renderer.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         th.setDefaultRenderer(renderer);
+    }
+    
+    @Override
+    public String getToolTipText(MouseEvent event) {
+        return null;    
     }
     
     private void initTable() {
