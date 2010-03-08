@@ -77,7 +77,8 @@ public class SearchResultMenu extends JPopupMenu {
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
                 for (VisualSearchResult visualSearchResult : selectedItems) {
-                    if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                    if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED &&
+                            !visualSearchResult.isSpam()) {
                         downloadHandler.download(visualSearchResult);
                     }
                 }
@@ -89,7 +90,8 @@ public class SearchResultMenu extends JPopupMenu {
             add(new AbstractAction(tr("Download As...")) {
                 public void actionPerformed(ActionEvent e) {
                     for (VisualSearchResult visualSearchResult : selectedItems) {
-                        if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                        if (visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED &&
+                                !visualSearchResult.isSpam()) {
                             // Create suggested file.  We don't specify a directory
                             // path so we can use the last input directory.  To get
                             // the default save directory, we could call
@@ -147,16 +149,20 @@ public class SearchResultMenu extends JPopupMenu {
             addSeparator();
         }
 
+        final List<RemoteHost> allNonSpamHosts = new ArrayList<RemoteHost>();
+        for (VisualSearchResult result : selectedItems) {
+            if (!result.isSpam())
+                allNonSpamHosts.addAll(result.getSources());
+        }
+        if (allNonSpamHosts.size() > 0) {
+            add(browseMenuFactory.createBrowseMenu(allNonSpamHosts));
+        }
+
         final List<RemoteHost> allHosts = new ArrayList<RemoteHost>();
         for (VisualSearchResult result : selectedItems) {
             allHosts.addAll(result.getSources());
         }
-        
         if (allHosts.size() > 0) {
-            // TODO: don't show browse menuItem in browse view
-            add(browseMenuFactory.createBrowseMenu(allHosts));
-            //addSeparator();
-
             JMenu blockUserMenu = blockUserMenuFactory.createSearchBlockMenu(allHosts, selectedItems);
             if (blockUserMenu != null) {
                 add(blockUserMenu);
