@@ -215,7 +215,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         ResizeUtils.forceSize(usernameField, new Dimension(224, 26));
         ResizeUtils.forceSize(passwordField, new Dimension(224, 26));
 
-        autoLoginCheckBox = new JCheckBox(tr("Sign in when I start LimeWire"));
+        autoLoginCheckBox = new JCheckBox(tr("Sign in when I start LimeWire"), true);
         autoLoginCheckBox.setFont(autoLoginCheckBoxFont);
         autoLoginCheckBox.setIcon(autoLoginCheckBoxIcon);
         autoLoginCheckBox.setSelectedIcon(autoLoginCheckBoxSelectedIcon);
