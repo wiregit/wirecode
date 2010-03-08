@@ -48,6 +48,8 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
         
         add(new UrlAction(I18n.tr("&FAQ"), "http://www.limewire.com/client_redirect/?page=faq", application));
 
+        add(new UrlAction(I18n.tr("&Forum"), "http://www.limewire.com/forum.htm", application));
+
         if(application.isBetaVersion()) {
             add(new UrlAction(I18n.tr("&Give Feedback"), "http://www.limewire.com/client_redirect/?page=betaTesting", application));
         }
