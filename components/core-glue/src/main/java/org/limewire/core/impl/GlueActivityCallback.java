@@ -223,7 +223,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
             dloader.discardUnscannedPreview(true);
         } else {
             // FIXME: replace this with a proper warning message
-            String msg = I18nMarker.marktr("Oh noes! Preview anyway?");
+            String msg = I18nMarker.marktr("The file could not be scanned for viruses. Preview anyway?");
             boolean previewAnyway = guiCallback.promptUserQuestion(msg);
             dloader.discardUnscannedPreview(!previewAnyway);
         }
