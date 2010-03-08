@@ -24,12 +24,14 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadException.ErrorCode;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
@@ -887,7 +889,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                                 ", size: " + torrentFile.length() +
                                 ", exists: " + torrentFile.exists());
                 } else {
-                    Set<String> banned = getBannedExtensions(torrent);
+                    Set<String> banned = getBannedAndDisabledExtensions(torrent);
                     if(!banned.isEmpty() && !downloadCallback.get().promptAboutTorrentWithBannedExtensions(torrent, banned))
                         throw new DownloadException(DownloadException.ErrorCode.DOWNLOAD_CANCELLED, torrentFile);
                 }
@@ -926,11 +928,12 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
     
     /**
-     * Returns a (possibly empty) set of banned file extensions belonging to
-     * files in the given torrent. This method should only be called for
-     * torrents with metadata. Package access for testing.
+     * Returns a (possibly empty) set of banned or disabled file extensions
+     * belonging to files in the given torrent. This method should only be
+     * called for torrents with metadata and torrent info.
+     * Package access for testing.
      */
-    Set<String> getBannedExtensions(Torrent torrent) {
+    Set<String> getBannedAndDisabledExtensions(Torrent torrent) {
         assert torrent.hasMetaData();
         TorrentInfo info = torrent.getTorrentInfo();
         assert info != null;
@@ -945,6 +948,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             // Sanity check in case the user did something weird to the setting
             if(extWithDot.length() > 1 && extWithDot.startsWith("."))
                 banned.add(extWithDot.substring(1));
+        }
+        if(!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            banned.addAll(categoryManager.getExtensionsForCategory(Category.PROGRAM));
         }
         extensions.retainAll(banned);
         return extensions;

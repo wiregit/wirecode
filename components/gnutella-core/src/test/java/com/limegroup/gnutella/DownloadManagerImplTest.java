@@ -13,6 +13,7 @@ import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.GuiceUtils;
 
@@ -52,16 +53,17 @@ public class DownloadManagerImplTest extends LimeTestCase {
     }
 
     public void testGetBannedExtensions() {
+        LibrarySettings.ALLOW_PROGRAMS.setValue(true);
         FilterSettings.BANNED_EXTENSIONS.set(new String[] {".wma"});
         final Torrent torrent = mockery.mock(Torrent.class);
         final TorrentInfo torrentInfo = mockery.mock(TorrentInfo.class);
         final TorrentFileEntry wma = mockery.mock(TorrentFileEntry.class);
-        final TorrentFileEntry mp3 = mockery.mock(TorrentFileEntry.class);
+        final TorrentFileEntry exe = mockery.mock(TorrentFileEntry.class);
         final TorrentFileEntry none = mockery.mock(TorrentFileEntry.class);
         final ArrayList<TorrentFileEntry> entries =
             new ArrayList<TorrentFileEntry>();
         entries.add(wma);
-        entries.add(mp3);
+        entries.add(exe);
         entries.add(none);
         mockery.checking(new Expectations() {{
             atMost(1).of(torrent).hasMetaData(); // Once with assertions enabled
@@ -72,13 +74,45 @@ public class DownloadManagerImplTest extends LimeTestCase {
             will(returnValue(entries));
             one(wma).getPath();
             will(returnValue("foo/bar.wma"));
-            one(mp3).getPath();
-            will(returnValue("foo/bar.mp3"));
+            one(exe).getPath();
+            will(returnValue("foo/bar.exe"));
             one(none).getPath();
             will(returnValue("foo/bar"));
         }});
-        Set<String> banned = downloadManager.getBannedExtensions(torrent);
+        Set<String> banned = downloadManager.getBannedAndDisabledExtensions(torrent);
         assertEquals(banned, Collections.singleton("wma"));
+        mockery.assertIsSatisfied();
+    }
+
+    public void testGetDisabledExtensions() {
+        LibrarySettings.ALLOW_PROGRAMS.setValue(false);
+        FilterSettings.BANNED_EXTENSIONS.set(new String[] {".wma"});
+        final Torrent torrent = mockery.mock(Torrent.class);
+        final TorrentInfo torrentInfo = mockery.mock(TorrentInfo.class);
+        final TorrentFileEntry mp3 = mockery.mock(TorrentFileEntry.class);
+        final TorrentFileEntry exe = mockery.mock(TorrentFileEntry.class);
+        final TorrentFileEntry none = mockery.mock(TorrentFileEntry.class);
+        final ArrayList<TorrentFileEntry> entries =
+            new ArrayList<TorrentFileEntry>();
+        entries.add(mp3);
+        entries.add(exe);
+        entries.add(none);
+        mockery.checking(new Expectations() {{
+            atMost(1).of(torrent).hasMetaData(); // Once with assertions enabled
+            will(returnValue(true));
+            atMost(2).of(torrent).getTorrentInfo(); // Twice with assertions
+            will(returnValue(torrentInfo));
+            one(torrentInfo).getTorrentFileEntries();
+            will(returnValue(entries));
+            one(mp3).getPath();
+            will(returnValue("foo/bar.mp3"));
+            one(exe).getPath();
+            will(returnValue("foo/bar.exe"));
+            one(none).getPath();
+            will(returnValue("foo/bar"));
+        }});
+        Set<String> banned = downloadManager.getBannedAndDisabledExtensions(torrent);
+        assertEquals(banned, Collections.singleton("exe"));
         mockery.assertIsSatisfied();
     }
 
