@@ -114,16 +114,34 @@ public class SearchResultMenu extends JPopupMenu {
             }).setEnabled(downloadEnabled);
         }
 
-        // Add Mark/Unmark as Spam menu item.
-        add(new AbstractAction(firstItem.isSpam() ? tr("Unmark as Spam") : tr("Mark as Spam")) {
-            public void actionPerformed(ActionEvent e) {
-                boolean spam = !firstItem.isSpam();
-                for (VisualSearchResult visualSearchResult : selectedItems) {
-                    visualSearchResult.setSpam(spam);
+        // Work out whether we need Mark as Spam, Unmark as Spam, or both.
+        boolean anySpamItems = false, anyNonSpamItems = false;
+        for (VisualSearchResult visualSearchResult : selectedItems) {
+            if (visualSearchResult.isSpam())
+                anySpamItems = true;
+            else
+                anyNonSpamItems = true;
+        }
+        // Add Mark as Spam menu item if any items are not marked as spam.
+        if (anyNonSpamItems) {
+            add(new AbstractAction(tr("Mark as Spam")) {
+                public void actionPerformed(ActionEvent e) {
+                    for (VisualSearchResult visualSearchResult : selectedItems) {
+                        visualSearchResult.setSpam(true);
+                    }
                 }
-            }
-        });
-
+            });
+        }        
+        // Add Unmark as Spam menu item if any items are marked as spam.
+        if (anySpamItems) {
+            add(new AbstractAction(tr("Unmark as Spam")) {
+                public void actionPerformed(ActionEvent e) {
+                    for (VisualSearchResult visualSearchResult : selectedItems) {
+                        visualSearchResult.setSpam(false);
+                    }
+                }
+            });
+        }
         addSeparator();
         
         // Add Locate in Library menu item if visible.
