@@ -57,12 +57,6 @@ public class GuiCallbackImpl implements GuiCallback {
                 supportsNewSaveDir);
     }
 
-    private boolean yesNoQuestion(String message) {
-        return FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
-                new MultiLineLabel(I18n.tr(message), 400), "",
-                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
-    }
-
     @Override
     public void restoreApplication() {
         SwingUtils.invokeNowOrLater(new Runnable() {
@@ -71,7 +65,7 @@ public class GuiCallbackImpl implements GuiCallback {
                 ActionMap actionMap = Application.getInstance().getContext().getActionMap();
                 Action restoreView = actionMap.get("restoreView");
                 restoreView.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                        "restoreView"));
+                "restoreView"));
             }
         });
     }
@@ -87,8 +81,19 @@ public class GuiCallbackImpl implements GuiCallback {
     }
 
     @Override
-    public boolean promptUserQuestion(String marktr) {
-        return yesNoQuestion(I18n.tr(marktr));
+    public boolean promptUserQuestion(final String marktr) {
+        final MultiLineLabel label = new MultiLineLabel(I18n.tr(marktr), 400);
+        final String title = I18n.tr("Warning");
+        final AtomicInteger result = new AtomicInteger(JOptionPane.YES_OPTION);
+        SwingUtils.invokeNowOrWait(new Runnable() {
+            @Override
+            public void run() {
+                result.set(FocusJOptionPane.showConfirmDialog(
+                        GuiUtils.getMainFrame(), label, title,
+                        JOptionPane.YES_NO_OPTION));
+            }
+        });
+        return result.get() == JOptionPane.YES_OPTION;
     }
 
     @Override
@@ -115,9 +120,17 @@ public class GuiCallbackImpl implements GuiCallback {
         String extensions = StringUtils.explode(bannedExtensions, ", ");
         String warning = I18n.tr("This torrent contains files with the following extensions, which LimeWire is configured not to download: {0}.", extensions);
         String prompt = I18n.tr("Downloading this torrent could damage your computer. Are you sure you want to continue?");
-        MultiLineLabel label = new MultiLineLabel(warning + "\n\n" + prompt, 400);
-        int ok = FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
-                label, torrent.getName(), JOptionPane.YES_NO_OPTION);
-        return ok == JOptionPane.YES_OPTION;
+        final MultiLineLabel label = new MultiLineLabel(warning + "\n\n" + prompt, 400);
+        final String title = I18n.tr("Warning: {0}", torrent.getName());
+        final AtomicInteger result = new AtomicInteger(JOptionPane.YES_OPTION);
+        SwingUtils.invokeNowOrWait(new Runnable() {
+            @Override
+            public void run() {
+                result.set(FocusJOptionPane.showConfirmDialog(
+                        GuiUtils.getMainFrame(), label, title,
+                        JOptionPane.YES_NO_OPTION));
+            }
+        });
+        return result.get() == JOptionPane.YES_OPTION;
     }
 }
