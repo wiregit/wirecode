@@ -40,6 +40,7 @@ public class RatingTableTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        FilterSettings.USE_NETWORK_FILTER.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         Injector inject = LimeTestUtils.createInjectorNonEagerly();
         manager = inject.getInstance(SpamManager.class);
@@ -131,6 +132,7 @@ public class RatingTableTest extends LimeTestCase {
         String template2 = "BBBBCCCCDDDDEEEEFFFFGGGGHHHHIIII";
         long size1 = 12345, size2 = 23456;
 
+        FilterSettings.USE_NETWORK_FILTER.setValue(true);
         FilterSettings.SPAM_TEMPLATES.set(new String[] {template1, template2});
         FilterSettings.SPAM_SIZES.set(new String[] {
                 String.valueOf(size1), String.valueOf(size2)});
@@ -157,6 +159,7 @@ public class RatingTableTest extends LimeTestCase {
         String template3 = "CCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJ"; // New token
         long size2 = 23456; // Already in table
 
+        FilterSettings.USE_NETWORK_FILTER.setValue(true);
         FilterSettings.SPAM_TEMPLATES.set(new String[] {template3});
         FilterSettings.SPAM_SIZES.set(new String[] {String.valueOf(size2)});
 
@@ -178,6 +181,7 @@ public class RatingTableTest extends LimeTestCase {
         String template3 = "CCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJ"; // New token
         long size2 = 23456; // Already in table
 
+        FilterSettings.USE_NETWORK_FILTER.setValue(true);
         FilterSettings.SPAM_TEMPLATES.set(new String[] {template3});
         FilterSettings.SPAM_SIZES.set(new String[] {String.valueOf(size2)});
 

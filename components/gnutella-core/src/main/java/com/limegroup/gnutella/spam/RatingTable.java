@@ -156,6 +156,8 @@ public class RatingTable implements Service, SimppListener {
     }
 
     synchronized void loadSpamTokensFromSettings() {
+        if(!FilterSettings.USE_NETWORK_FILTER.getValue())
+            return;
         // Rate the received template hashes as spam
         for(String hash : FilterSettings.SPAM_TEMPLATES.get()) {
             setRatingIfUnrated(new TemplateHashToken(Base32.decode(hash)), 1f);
