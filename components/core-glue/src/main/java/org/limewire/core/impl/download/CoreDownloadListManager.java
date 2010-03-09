@@ -205,20 +205,19 @@ public class CoreDownloadListManager implements DownloadListManager {
 
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
             List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) {
-	    RemoteFileDesc[] rfds = new RemoteFileDesc[searchResults.size()];
+	    List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(searchResults.size());
         Set<IpPort> alts = new IpPortSet();
         
         for(int i = 0; i < searchResults.size(); i++) {
             RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)searchResults.get(i);
-            rfds[i] = rfdAdapter.getRfd();
+            rfds.add(rfdAdapter.getRfd());
             alts.addAll(rfdAdapter.getAlts());
         }        
         
         // Iterate through RFDs and remove matching alts.
         // Also store the first SHA1 capable RFD for collecting alts.
         RemoteFileDesc sha1RFD = null;
-        for(int i = 0; i < rfds.length; i++) {
-            RemoteFileDesc next = rfds[i];
+        for(RemoteFileDesc next : rfds) {
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
             Address address = next.getAddress();
@@ -231,14 +230,14 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         // If no SHA1 rfd, just use the first.
         if(sha1RFD == null)
-            sha1RFD = rfds[0];
+            sha1RFD = rfds.get(0);
         
         // Now iterate through alts & add more rfds.
         for(IpPort next : alts) {
             altList.add(remoteFileDescFactory.createRemoteFileDesc(sha1RFD, next));
         }
         
-        return rfds;
+        return rfds.toArray(new RemoteFileDesc[rfds.size()]);
     }
 
 	/**
