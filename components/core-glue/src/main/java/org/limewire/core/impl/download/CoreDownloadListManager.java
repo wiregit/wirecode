@@ -208,8 +208,10 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(searchResults.size());
         Set<IpPort> alts = new IpPortSet();
         
-        for(int i = 0; i < searchResults.size(); i++) {
-            RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)searchResults.get(i);
+        // size of searchResults can change, so iterate over list and make no
+        // assumptions about its size
+        for (SearchResult result : searchResults) {
+            RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter) result;
             rfds.add(rfdAdapter.getRfd());
             alts.addAll(rfdAdapter.getAlts());
         }        
