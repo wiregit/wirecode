@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-03-01 11:30-0500\n"
-"PO-Revision-Date: 2010-03-02 09:09+0000\n"
+"PO-Revision-Date: 2010-03-06 18:17+0000\n"
 "Last-Translator: Marcos X. <Unknown>\n"
 "Language-Team: Marcos Lans - Ciberirmandade <marcoslansgarza@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-03-05 16:22+0000\n"
+"X-Launchpad-Export-Date: 2010-03-09 04:42+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Galician\n"
 
@@ -4344,7 +4344,7 @@ msgstr "A chave da licenza xa foi empregada en demasiadas instalacións. "
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:328
 #, java-format
 msgid "Please {0}contact support{1} to resolve the situation."
-msgstr "{0}Contacte co soporte{1} para resolver a situación."
+msgstr "{0}Contacte co soporte{1} para resolver a incidencia."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:336
 msgid "Edit License Key"
@@ -4360,7 +4360,7 @@ msgstr "A subscrición a LimeWire expirará en pouco tempo."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:363
 msgid "Don't miss a thing - act now for special renewal pricing!"
-msgstr ""
+msgstr "Renove agora por un prezo especial"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:369
 msgid "Renew Now"
