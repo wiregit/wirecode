@@ -60,5 +60,6 @@
         
         <!-- test dependencies. -->
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
+        <dependency org="none" name="tests/inspTool" rev="${inspTool.version}" conf="test"/>
     </dependencies>
 </ivy-module>
