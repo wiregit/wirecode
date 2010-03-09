@@ -30,6 +30,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
+// Provided like a singleton by LimeWireLibraryModule.lfd()
 class LibraryFileData extends AbstractSettingsGroup {
     
     private static final Log LOG = LogFactory.getLog(LibraryFileData.class);
@@ -76,6 +77,8 @@ class LibraryFileData extends AbstractSettingsGroup {
         this.categoryManager = categoryManager;
         SettingsGroupManager.instance().addSettingsGroup(this);
     }
+    
+    private int originalNumPublicSharedFiles = -1;
     
     public boolean isLoaded() {
         return loaded;
@@ -131,6 +134,14 @@ class LibraryFileData extends AbstractSettingsGroup {
             failed = !loadFromFile(backupFile);
         }
         dirty = failed;
+        
+        // Save initial public share list size for inspection stats
+        if (fileData.size() > 0) {
+            originalNumPublicSharedFiles = peekPublicSharedListCount();
+        } else {
+            originalNumPublicSharedFiles = 0;
+        }
+        
         loaded = true;
     }
     
@@ -148,11 +159,10 @@ class LibraryFileData extends AbstractSettingsGroup {
                 
                 if(currentVersion instanceof Version) {
                     initializeFromVersion(((Version)currentVersion), readMap);
+                    return true;
                 } else {
                     return false;
                 }
-                
-                return true;
             }
         } catch(Throwable throwable) {
             LOG.error("Error loading library", throwable);
@@ -679,6 +689,17 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
         finally {
             lock.readLock().unlock();
+        }
+    }
+    
+    /**
+     * Helper method for inspections since this class can not contain inspections due to crazy guice stuff.
+     */
+    int getNumFilesAdded() {
+        if (originalNumPublicSharedFiles > -1) {
+            return peekPublicSharedListCount() - originalNumPublicSharedFiles;
+        } else {
+            return -1;
         }
     }
     

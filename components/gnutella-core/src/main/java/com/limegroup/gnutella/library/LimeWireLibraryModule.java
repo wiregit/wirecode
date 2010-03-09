@@ -80,7 +80,7 @@ public class LimeWireLibraryModule extends AbstractModule {
     @Provides LibraryFileData lfd(LibraryImpl library) {
         return library.getLibraryData();
     }
-        
+   
     @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManagerImpl manager) {
         return manager.getGnutellaCollection();
     }

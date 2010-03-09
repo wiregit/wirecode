@@ -28,15 +28,16 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.Application;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
+import org.limewire.ui.swing.util.EnabledType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.EnabledType;
-import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -51,7 +52,8 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
     public enum TabId {
         CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other P2P clients")), 
         CONSOLE(I18n.tr("Console"), I18n.tr("View console messages")),
-        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing DHT messages"));
+        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing DHT messages")),
+        INSPECTIONS("Inspections", "Inspections debug panel");
         
         private final String name;
         private final String tooltip;
@@ -111,12 +113,15 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
     /**
      * Constructs a window panel for the Advanced Tools window that uses the 
      * injected Provider instances to create the tab content panels.
+
      */
     @Inject
     public AdvancedToolsPanel(BarPainterFactory barPainterFactory, 
         Provider<ConnectionsPanel> connectionsPanel, 
         Provider<ConsolePanel> consolePanel,
-        Provider<MojitoPanel> mojitoPanel) {
+        Provider<MojitoPanel> mojitoPanel,
+        InspectionsPanelFactory inspectionsPanelFactory,
+        Application application) {
 
         // Inject annotated resource values.
         GuiUtils.assignResources(this);
@@ -128,6 +133,10 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
         addTab(TabId.CONNECTIONS, connectionsIcon, connectionsPanel);
         addTab(TabId.CONSOLE, consoleIcon, consolePanel);
         addTab(TabId.MOJITO, mojitoIcon, mojitoPanel);
+        
+        if (application.isTestingVersion()) {
+            addTab(TabId.INSPECTIONS, consoleIcon, inspectionsPanelFactory.getProvider());
+        }
     }
     
     /**
