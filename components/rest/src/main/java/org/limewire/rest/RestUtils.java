@@ -78,9 +78,6 @@ public abstract class RestUtils {
      * OAuth 1.0a specification.
      */
     public static String percentEncode(String s) {
-        if (s == null) {
-            return "";
-        }
         try {
             // Encode string.  For OAuth, unreserved characters like tilde
             // must not be encoded.

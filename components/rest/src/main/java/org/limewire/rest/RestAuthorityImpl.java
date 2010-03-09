@@ -4,6 +4,7 @@ import org.apache.http.HttpRequest;
 import org.limewire.rest.oauth.OAuthException;
 import org.limewire.rest.oauth.OAuthRequest;
 import org.limewire.rest.oauth.OAuthValidator;
+import org.limewire.rest.oauth.OAuthValidatorFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -24,8 +25,9 @@ class RestAuthorityImpl implements RestAuthority {
     public RestAuthorityImpl(
             @Assisted("baseUrl") String baseUrl,
             @Assisted int port,
-            @Assisted("secret") String secret) {
-        validator = new OAuthValidator(baseUrl, port, secret);
+            @Assisted("secret") String secret,
+            OAuthValidatorFactory validatorFactory) {
+        validator = validatorFactory.create(baseUrl, port, secret);
     }
     
     @Override

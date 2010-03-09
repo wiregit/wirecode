@@ -1,5 +1,8 @@
 package org.limewire.rest;
 
+import org.limewire.rest.oauth.OAuthValidatorFactory;
+import org.limewire.rest.oauth.OAuthValidatorImpl;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryProvider;
 
@@ -16,6 +19,8 @@ public class LimeWireRestModule extends AbstractModule {
                 FactoryProvider.newFactory(AuthorizationInterceptorFactory.class, AuthorizationInterceptor.class));
         bind(RestAuthorityFactory.class).toProvider(
                 FactoryProvider.newFactory(RestAuthorityFactory.class, RestAuthorityImpl.class));
+        bind(OAuthValidatorFactory.class).toProvider(
+                FactoryProvider.newFactory(OAuthValidatorFactory.class, OAuthValidatorImpl.class));
     }
 
 }
