@@ -1,5 +1,6 @@
 package org.limewire.core.impl.spam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.search.SearchResult;
@@ -41,14 +42,15 @@ public class SpamManagerImpl implements SpamManager {
     }
 
     private RemoteFileDesc[] buildArray(List<? extends SearchResult> searchResults) {
-        RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[searchResults.size()];
-        int index = 0;
+        List<RemoteFileDesc> remoteFileDescs = new ArrayList<RemoteFileDesc>(searchResults.size());
+        // this can be an instance of a copy on write array list, so only iterating
+        // over it is safe and assumptions about its size can be wrong
         for (SearchResult searchResult : searchResults) {
             RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter) searchResult;
             RemoteFileDesc remoteFileDesc = remoteFileDescAdapter.getRfd();
-            remoteFileDescs[index++] = remoteFileDesc;
+            remoteFileDescs.add(remoteFileDesc);
         }
-        return remoteFileDescs;
+        return remoteFileDescs.toArray(new RemoteFileDesc[remoteFileDescs.size()]);
     }
 
     @Override

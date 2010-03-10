@@ -61,10 +61,10 @@ import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 @EagerSingleton
 public class CoreDownloadListManager implements DownloadListManager {
     
-	private final EventList<DownloadItem> observableDownloadItems;
-	private EventList<DownloadItem> swingThreadDownloadItems;
-	private final DownloadManager downloadManager;
-	private final RemoteFileDescFactory remoteFileDescFactory;
+    private final EventList<DownloadItem> observableDownloadItems;
+    private EventList<DownloadItem> swingThreadDownloadItems;
+    private final DownloadManager downloadManager;
+    private final RemoteFileDescFactory remoteFileDescFactory;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
     private final TorrentDownloadListenerFactory torrentDownloadListenerFactory;
@@ -77,38 +77,38 @@ public class CoreDownloadListManager implements DownloadListManager {
     private static final int PERIOD = 1000;
     
     private Map<org.limewire.core.api.URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<org.limewire.core.api.URN, DownloadItem>());
-	
-	@Inject
-	public CoreDownloadListManager(DownloadManager downloadManager,
+    
+    @Inject
+    public CoreDownloadListManager(DownloadManager downloadManager,
             RemoteFileDescFactory remoteFileDescFactory, SpamManager spamManager, 
             ItunesDownloadListenerFactory itunesDownloadListenerFactory, 
             TorrentDownloadListenerFactory torrentDownloadListenerFactory,
             CoreDownloadItem.Factory coreDownloadItemFactory) {
-	    
-	    this.downloadManager = downloadManager;
-	    this.remoteFileDescFactory = remoteFileDescFactory;
+        
+        this.downloadManager = downloadManager;
+        this.remoteFileDescFactory = remoteFileDescFactory;
         this.spamManager = spamManager;
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
         this.torrentDownloadListenerFactory = torrentDownloadListenerFactory;
         this.coreDownloadItemFactory = coreDownloadItemFactory;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
-	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
-	    observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
-	}
-	
-	@Inject 
-	void registerDownloadListener(DownloadListenerList listenerList) {
-	    
-	    listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems,
+        ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
+        observableDownloadItems = GlazedListsFactory.observableElementList(threadSafeDownloadItems, downloadConnector);
+    }
+    
+    @Inject 
+    void registerDownloadListener(DownloadListenerList listenerList) {
+        
+        listenerList.addDownloadListener(new CoreDownloadListener(threadSafeDownloadItems,
                 new QueueTimeCalculator(observableDownloadItems)));
-	    
-	}
-	
-	@Inject 
+        
+    }
+    
+    @Inject 
     void registerService(ServiceScheduler scheduler, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
 
-	      Runnable command = new Runnable() {
+          Runnable command = new Runnable() {
               @Override
               public void run() {
                   update();
@@ -116,7 +116,7 @@ public class CoreDownloadListManager implements DownloadListManager {
           };
      
           scheduler.scheduleWithFixedDelay("UI Download Status Monitor", command, PERIOD*2, PERIOD, TimeUnit.MILLISECONDS, backgroundExecutor);
-	}
+    }
 
     // forces refresh
     private void update() {
@@ -132,25 +132,25 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
     }
     
-	@Override
-	public EventList<DownloadItem> getDownloads() {
-		return observableDownloadItems;
-	}
-	
-	@Override
-	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
-	    assert EventQueue.isDispatchThread();
-	    if(swingThreadDownloadItems == null) {
-	        swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(observableDownloadItems);
-	    }
-	    return swingThreadDownloadItems;
-	}
+    @Override
+    public EventList<DownloadItem> getDownloads() {
+        return observableDownloadItems;
+    }
+    
+    @Override
+    public EventList<DownloadItem> getSwingThreadSafeDownloads() {
+        assert EventQueue.isDispatchThread();
+        if(swingThreadDownloadItems == null) {
+            swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(observableDownloadItems);
+        }
+        return swingThreadDownloadItems;
+    }
 
-	@Override
-	public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults) throws DownloadException {
-	   return addDownload(search, searchResults, null, false);
-	}
-	
+    @Override
+    public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults) throws DownloadException {
+       return addDownload(search, searchResults, null, false);
+    }
+    
 
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
@@ -171,8 +171,8 @@ public class CoreDownloadListManager implements DownloadListManager {
         Category category = searchResults.iterator().next().getCategory();
         return createDownloader(files, alts, queryGUID, saveFile, overwrite, category);
     }
-	
-	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
+    
+    private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
                                           GUID queryGuid, File saveFile, boolean overwrite, Category category)
             throws DownloadException {
         
@@ -203,22 +203,23 @@ public class CoreDownloadListManager implements DownloadListManager {
         return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
     }
 
-	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
+    private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
             List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) {
-	    RemoteFileDesc[] rfds = new RemoteFileDesc[searchResults.size()];
+        List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(searchResults.size());
         Set<IpPort> alts = new IpPortSet();
         
-        for(int i = 0; i < searchResults.size(); i++) {
-            RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter)searchResults.get(i);
-            rfds[i] = rfdAdapter.getRfd();
+        // size of searchResults can change, so iterate over list and make no
+        // assumptions about its size
+        for (SearchResult result : searchResults) {
+            RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter) result;
+            rfds.add(rfdAdapter.getRfd());
             alts.addAll(rfdAdapter.getAlts());
         }        
         
         // Iterate through RFDs and remove matching alts.
         // Also store the first SHA1 capable RFD for collecting alts.
         RemoteFileDesc sha1RFD = null;
-        for(int i = 0; i < rfds.length; i++) {
-            RemoteFileDesc next = rfds[i];
+        for(RemoteFileDesc next : rfds) {
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
             Address address = next.getAddress();
@@ -231,21 +232,21 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         // If no SHA1 rfd, just use the first.
         if(sha1RFD == null)
-            sha1RFD = rfds[0];
+            sha1RFD = rfds.get(0);
         
         // Now iterate through alts & add more rfds.
         for(IpPort next : alts) {
             altList.add(remoteFileDescFactory.createRemoteFileDesc(sha1RFD, next));
         }
         
-        return rfds;
+        return rfds.toArray(new RemoteFileDesc[rfds.size()]);
     }
 
-	/**
-	 * Adds the specified listener to the list that is notified when a 
-	 * property value changes.  Listeners added from the Swing UI thread will 
-	 * always receive notification events on the Swing UI thread. 
-	 */
+    /**
+     * Adds the specified listener to the list that is notified when a 
+     * property value changes.  Listeners added from the Swing UI thread will 
+     * always receive notification events on the Swing UI thread. 
+     */
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.addPropertyChangeListener(listener);
@@ -272,14 +273,14 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
 
     class CoreDownloadListener implements DownloadListener {
-	    
-	    private final List<DownloadItem> list;
-	    private final QueueTimeCalculator queueTimeCalculator;
+        
+        private final List<DownloadItem> list;
+        private final QueueTimeCalculator queueTimeCalculator;
 
         public CoreDownloadListener(List<DownloadItem> list, QueueTimeCalculator queueTimeCalculator){
-	        this.list = list;
-	        this.queueTimeCalculator = queueTimeCalculator;
-	    }
+            this.list = list;
+            this.queueTimeCalculator = queueTimeCalculator;
+        }
 
         @Override
         public void downloadAdded(Downloader downloader) {
@@ -386,7 +387,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     public DownloadItem addTorrentDownload(File file, File saveDirectory, boolean overwrite)
             throws DownloadException {
         Downloader downloader = downloadManager.downloadTorrent(file, saveDirectory, overwrite);
-		return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
+        return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
     }
 
     @Override
