@@ -29,7 +29,7 @@ import com.google.inject.Singleton;
 class StoreMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     @InspectablePrimitive(value = "store visited", category = DataCategory.USAGE)
-    private int storeVisited;
+    private volatile int storeVisited = 0;
     
     private final Application application;    
     private final Navigator navigator;

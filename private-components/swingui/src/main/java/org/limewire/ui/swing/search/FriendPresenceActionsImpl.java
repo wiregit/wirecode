@@ -27,11 +27,11 @@ import com.google.inject.Provider;
 class FriendPresenceActionsImpl implements FriendPresenceActions {
     private static final Log LOG = LogFactory.getLog(FriendPresenceActionsImpl.class);
     @InspectablePrimitive(value = "browse all friends", category = DataCategory.USAGE)
-    private int numBrowseAll;
+    private volatile int numBrowseAll = 0;
     @InspectablePrimitive(value = "browse single friend", category = DataCategory.USAGE)
-    private int numBrowseFriend;
+    private volatile int numBrowseFriend = 0;
     @InspectablePrimitive(value = "browse host", category = DataCategory.USAGE)
-    private int numBrowseHost;
+    private volatile int numBrowseHost = 0;
 
 
     private final Provider<ChatMediator> chatMediator;

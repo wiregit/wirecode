@@ -29,6 +29,7 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.SwingInspectable;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -76,12 +77,12 @@ public class DownloadMediator {
     @InspectableContainer
     private class LazyInspectableContainer {
         @InspectionPoint(value = "active downloads", category = DataCategory.USAGE)
-        private final Inspectable activeDownloads = new Inspectable() {
+        private final Inspectable activeDownloads = new SwingInspectable() {
             @Override
-            public Object inspect() {
+            protected Object inspectOnEDT() {
                 return getActiveList().size();
-            }            
-        };  
+            }
+        };
     }
 	
 	@Inject

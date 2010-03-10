@@ -12,6 +12,7 @@ import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.SwingInspectable;
 
 import ca.odell.glazedlists.EventList;
 
@@ -42,9 +43,9 @@ public class LibraryInspections {
         private final Inspectable randomFileBytes = new GetRandomFileBytesInspectable();
     }
     
-    private class GetRandomPublicFileBytesInspectable implements Inspectable {
+    private class GetRandomPublicFileBytesInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             if (sharedFileListManager.getModel().size() <= 0) {
                 return -1;
             }
@@ -62,9 +63,9 @@ public class LibraryInspections {
         }
     }
     
-    private class GetRandomFileBytesInspectable implements Inspectable {
+    private class GetRandomFileBytesInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             if (sharedFileListManager.getModel().size() <= 0) {
                 return -1;
             }

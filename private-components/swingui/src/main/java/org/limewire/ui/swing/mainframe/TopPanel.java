@@ -31,8 +31,10 @@ import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.SwingInspectable;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FlexibleTabList;
 import org.limewire.ui.swing.components.FlexibleTabListFactory;
@@ -88,7 +90,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @InspectableContainer
     private final class LazyInspectableContainer {
         @InspectablePrimitive(value = "search tab count", category = DataCategory.USAGE)
-        private final int tabCount = searchList.getTabs().size();        
+        private final Inspectable tabCount = new SwingInspectable() {
+            @Override
+            protected Object inspectOnEDT() {
+                return searchList.getTabs().size();
+            }
+        };        
     }
     private final Navigator navigator;
     private final NavItem homeNav;
@@ -108,13 +115,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final AllFriendsRefreshManager allFriendsRefreshManager;    
     
     @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
-    private int advancedSearchesOpened;
+    private volatile int advancedSearchesOpened = 0;
     
     @InspectablePrimitive(value = "advanced searches executed", category = DataCategory.USAGE)
-    private int advancedSearchesMade;
+    private volatile int advancedSearchesMade = 0;
     
     @InspectablePrimitive(value = "textual advanced searches executed", category = DataCategory.USAGE)
-    private int textAdvancedSearchesMade;
+    private volatile int textAdvancedSearchesMade = 0;
     
     
     @Inject

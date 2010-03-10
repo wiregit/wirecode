@@ -11,7 +11,7 @@ public class ChatMessageEvent extends DefaultDataEvent<Message> {
     
     @SuppressWarnings("unused")
     @InspectablePrimitive(value = "has chatted", category = DataCategory.USAGE)
-    private static boolean hasChatted;
+    private static volatile boolean hasChatted;
     
     public ChatMessageEvent(Message message) {
         super(message);

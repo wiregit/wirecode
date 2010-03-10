@@ -11,6 +11,7 @@ import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.SwingInspectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.lifecycle.ServiceStage;
@@ -113,16 +114,16 @@ public class ActivityInspections implements Service {
     public void stop() {
     }
     
-    private class GetCurrentUptimeMilliSecsInspectable implements Inspectable {
+    private class GetCurrentUptimeMilliSecsInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
            return sessionInfo.getCurrentUptime();
         }
     }
     
-    private static class IsLimewireVisibleInspectable implements Inspectable {
+    private static class IsLimewireVisibleInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             JFrame frame = GuiUtils.getMainFrame();
             if (frame == null) {
                 return false;
@@ -132,9 +133,9 @@ public class ActivityInspections implements Service {
         }
     }
     
-    private static class IsLimewireActiveInspectable implements Inspectable {
+    private static class IsLimewireActiveInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             JFrame frame = GuiUtils.getMainFrame();
             if (frame == null) {
                 return false;
@@ -144,9 +145,9 @@ public class ActivityInspections implements Service {
         }
     }
     
-    private class GetActivatedTimeInspectable implements Inspectable {
+    private class GetActivatedTimeInspectable extends SwingInspectable {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             if (activatedTime != -1) {
                 return System.currentTimeMillis() - activatedTime;
             } else {
@@ -155,9 +156,9 @@ public class ActivityInspections implements Service {
         }
     }
 
-    private class GetDeactivatedTimeInspectable implements Inspectable {
+    private class GetDeactivatedTimeInspectable extends SwingInspectable  {
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             if (deactivatedTime != -1) {
                 return System.currentTimeMillis() - deactivatedTime;
             } else {
@@ -166,9 +167,9 @@ public class ActivityInspections implements Service {
         }
     }
     
-    private static class GetIdleTimeInspectable implements Inspectable { 
+    private static class GetIdleTimeInspectable extends SwingInspectable { 
         @Override
-        public Object inspect() {
+        public Object inspectOnEDT() {
             if (SystemUtils.supportsIdleTime()) {
                 return SystemUtils.getIdleTime();
             } else {
