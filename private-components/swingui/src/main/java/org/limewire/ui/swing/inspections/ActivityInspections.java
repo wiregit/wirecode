@@ -11,11 +11,11 @@ import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.inspection.SwingInspectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingInspectable;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.SystemUtils;
 

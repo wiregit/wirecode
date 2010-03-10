@@ -29,7 +29,6 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.SwingInspectable;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -38,16 +37,17 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingInspectable;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 @LazySingleton
 public class DownloadMediator {

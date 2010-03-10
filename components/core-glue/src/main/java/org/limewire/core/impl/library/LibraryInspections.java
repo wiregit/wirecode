@@ -12,7 +12,7 @@ import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.inspection.SwingInspectable;
+import org.limewire.ui.swing.util.SwingInspectable;
 
 import ca.odell.glazedlists.EventList;
 

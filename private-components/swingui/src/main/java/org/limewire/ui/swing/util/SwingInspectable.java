@@ -1,13 +1,15 @@
-package org.limewire.inspection;
+package org.limewire.ui.swing.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.inspection.Inspectable;
 
 public abstract class SwingInspectable implements Inspectable {
     @Override
     public Object inspect() {
         final AtomicReference<Object> result = new AtomicReference<Object>();
+        
+        
         SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
