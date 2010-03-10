@@ -15,6 +15,8 @@ public class CoreGlueLibraryModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        bind(LibraryInspections.class);
+        
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
         bind(RemoteLibraryManager.class).to(RemoteLibraryManagerImpl.class);
         bind(SharedFileListManager.class).to(SharedFileListManagerImpl.class);

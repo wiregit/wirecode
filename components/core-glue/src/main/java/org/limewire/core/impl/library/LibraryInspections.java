@@ -1,7 +1,12 @@
-package org.limewire.core.api.library;
+package org.limewire.core.impl.library;
 
 import java.util.Random;
 
+import org.limewire.core.api.library.LibraryFileList;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
@@ -12,6 +17,9 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
+/**
+ * Set of inspections for misc library stats. 
+ */
 @LazySingleton
 public class LibraryInspections {
 
