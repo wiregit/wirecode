@@ -1,7 +1,5 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
@@ -9,12 +7,10 @@ import org.limewire.setting.StringSetting;
 public class LibrarySettings extends LimeProps {
     
     /** True if documents can be shared with gnutella. */
-    @InspectionPoint(value = "document sharing enabled", category = DataCategory.USAGE)
     public static final BooleanSetting ALLOW_DOCUMENT_GNUTELLA_SHARING =
         FACTORY.createBooleanSetting("DOCUMENT_SHARING_ENABLED", false);
     
     /** True if programs are allowed in the library at all. */
-    @InspectionPoint(value = "allow programs", category = DataCategory.USAGE)
     public static final BooleanSetting ALLOW_PROGRAMS =
         FACTORY.createBooleanSetting("PROGRAMS_ALLOWED", false);
     

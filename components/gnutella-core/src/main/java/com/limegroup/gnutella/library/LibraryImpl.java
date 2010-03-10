@@ -127,6 +127,7 @@ class LibraryImpl implements Library, FileCollection {
     /** The number of files that are pending calculation. */
     private final AtomicInteger pendingFiles = new AtomicInteger(0);
     
+    
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
@@ -137,14 +138,6 @@ class LibraryImpl implements Library, FileCollection {
                 Map<String, Object> data = new HashMap<String, Object>();
                 data.put("size", size());
                 return data;
-            }
-        };
-
-        @InspectionPoint(value = "number of files added to public shared list this session", category = DataCategory.USAGE)
-        private final Inspectable numFilesAdded = new Inspectable() {
-            @Override
-            public Object inspect() {
-                return fileData.getNumFilesAdded();
             }
         };
     }

@@ -108,14 +108,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final AllFriendsRefreshManager allFriendsRefreshManager;    
     
     @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
-    private int advancedSearchesOpened;
-    
-    @InspectablePrimitive(value = "advanced searches executed", category = DataCategory.USAGE)
-    private int advancedSearchesMade;
-    
-    @InspectablePrimitive(value = "textual advanced searches executed", category = DataCategory.USAGE)
-    private int textAdvancedSearchesMade;
-    
+    private int advancedSearches;
     
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -213,7 +206,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     @Override
     public SearchNavItem addAdvancedSearch() {
-        advancedSearchesOpened++;
+        advancedSearches++;
         String title = I18n.tr("Advanced Search");
         AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
         
@@ -234,8 +227,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         advancedPanel.addSearchListener(new UiSearchListener() {
             @Override
             public void searchTriggered(SearchInfo searchInfo) {
-                advancedSearchesMade++;
-                
                 searchList.freezeTabLayout();
                 searchHandler.doSearch(searchInfo);
                 if ((searchInfo.getSearchCategory() != SearchCategory.PROGRAM || LibrarySettings.ALLOW_PROGRAMS.getValue())) {
@@ -429,9 +420,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 // Fall back on the normal search
                 if (search == null) {
                     search = DefaultSearchInfo.createKeywordSearch(query, category);
-                } 
-                else {
-                    textAdvancedSearchesMade++;
                 }
                 
                 if(searchHandler.doSearch(search)) {

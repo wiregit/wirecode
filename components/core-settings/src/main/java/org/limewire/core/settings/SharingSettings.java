@@ -6,7 +6,6 @@ import java.util.Hashtable;
 
 import org.limewire.core.api.Category;
 import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
@@ -29,28 +28,6 @@ public class SharingSettings extends LimeProps {
     private SharingSettings() {
     }
 
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private static class LazyInspectableContainer {
-        @InspectablePrimitive(value = "default download location changed", category = DataCategory.USAGE)
-        private static final Inspectable locationChanged = 
-            new Inspectable() {
-                @Override
-                public Object inspect() {
-                    return !SharingSettings.DIRECTORY_FOR_SAVING_FILES.get().equals(SharingSettings.DEFAULT_SAVE_DIR);
-                }
-            };
-            
-        
-        @InspectablePrimitive(value = "non default category save locations used", category = DataCategory.USAGE)
-        private static final Inspectable nonDefaultCategorySaveLocationsUsed = new Inspectable() {
-            @Override
-            public Object inspect() {
-                return SharingSettings.isNonDefaultCategorySaveLocationsUsed();
-            }
-        }; 
-    }
-    
     /**
      * Stores the download directory file settings for each media type by its
      * description key {@link Category#getSchemaName()}. The settings are
@@ -85,6 +62,13 @@ public class SharingSettings extends LimeProps {
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = FACTORY.createFileSetting(
             "DIRECTORY_FOR_SAVING_FILES", DEFAULT_SAVE_DIR).setAlwaysSave(true);
     
+    @SuppressWarnings("unused")
+    @InspectableContainer
+    private static class LazyInspectableContainer {
+        @InspectablePrimitive(value = "default download location changed", category = DataCategory.USAGE)
+        private static final boolean locationChanged = !DIRECTORY_FOR_SAVING_FILES.get().equals(DEFAULT_SAVE_DIR);
+    }
+
     /**
      * Template for substructure when saving songs purchased from LimeWire Store
      * (LWS). The template allows purchased songs to be saved in a unique
@@ -240,16 +224,6 @@ public class SharingSettings extends LimeProps {
         }
     }
 
-    private static final boolean isNonDefaultCategorySaveLocationsUsed() {
-        for ( Category category : Category.values() ) {
-            FileSetting fs = getFileSettingForCategory(category);
-            if (!fs.isDefault()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     public static final File getSaveDirectory() {
         return DIRECTORY_FOR_SAVING_FILES.get();
     }
@@ -330,7 +304,6 @@ public class SharingSettings extends LimeProps {
      * Specifies whether or not completed uploads should automatically be
      * cleared from the upload window.
      */
-    @InspectionPoint(value = "clear finished uploads", category = DataCategory.USAGE)
     public static final BooleanSetting CLEAR_UPLOAD = FACTORY.createBooleanSetting("CLEAR_UPLOAD",
             true);
 

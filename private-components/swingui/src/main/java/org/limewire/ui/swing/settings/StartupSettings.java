@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.settings; 
 
 import org.limewire.core.settings.LimeProps;
-import org.limewire.inspection.DataCategory;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 
 /** 
@@ -21,7 +19,6 @@ public final class StartupSettings extends LimeProps {
     /**
      * A boolean flag for whether or not to start LimeWire on system startup.
      */
-    @InspectionPoint(value = "run on startup", category = DataCategory.NETWORK)
     public static final BooleanSetting RUN_ON_STARTUP = 
         FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
     

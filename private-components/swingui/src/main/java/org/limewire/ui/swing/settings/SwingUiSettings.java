@@ -93,7 +93,6 @@ public final class SwingUiSettings extends LimeProps {
     /**
      * Setting for whether or not to group similar results
      */
-    @InspectionPoint(value = "group similar results enabled", category = DataCategory.USAGE)
     public static final BooleanSetting GROUP_SIMILAR_RESULTS_ENABLED =
         FACTORY.createBooleanSetting("GROUP_SIMILAR_RESULTS_ENABLED", true);
 
@@ -184,7 +183,6 @@ public final class SwingUiSettings extends LimeProps {
      * A flag for whether or not the application should be minimized
      * to the system tray on windows.
      */
-    @InspectionPoint(value = "minimize to tray", category = DataCategory.USAGE)
     public static final BooleanSetting MINIMIZE_TO_TRAY =
         FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
             OSUtils.supportsTray());
@@ -192,14 +190,12 @@ public final class SwingUiSettings extends LimeProps {
     /**
      * Whether LimeWire should handle magnets.
      */
-    @InspectionPoint(value = "handle magnets", category = DataCategory.USAGE)
     public static final BooleanSetting HANDLE_MAGNETS = 
     	FACTORY.createBooleanSetting("HANDLE_MAGNETS", true);
 
     /**
      * Whether LimeWire should handle torrents.
      */
-    @InspectionPoint(value = "handle torrents", category = DataCategory.USAGE)
     public static final BooleanSetting HANDLE_TORRENTS = 
     	FACTORY.createBooleanSetting("HANDLE_TORRENTS", true);
 
@@ -224,7 +220,6 @@ public final class SwingUiSettings extends LimeProps {
     /**
      * Setting that globally enables or disables notifications.
      */
-    @InspectionPoint(value = "show notifications", category = DataCategory.USAGE)
     public static final BooleanSetting SHOW_NOTIFICATIONS = 
         FACTORY.createBooleanSetting("SHOW_NOTIFICATIONS", true);
 
@@ -284,7 +279,6 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createIntSetting("DOWNLOAD_TRAY_SIZE", 0);
 
     /** Hides the bottom tray size when all transfers are cleared. */
-    @InspectionPoint(value = "hide bottom tray when no transfers", category = DataCategory.USAGE)
     public static final BooleanSetting HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS =
         FACTORY.createBooleanSetting("HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS", true);
     

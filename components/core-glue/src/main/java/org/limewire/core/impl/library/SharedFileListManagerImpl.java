@@ -78,6 +78,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
             }  
         }
         
+
         @InspectionPoint(value = "number of lists with friends in multiple lists", category = DataCategory.USAGE)
         private final Inspectable multipleFriendLists = new Inspectable() {
             @Override
@@ -150,22 +151,6 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                 }
             }
         };
-        
-        @InspectionPoint(value = "has custom list with file", category = DataCategory.USAGE)
-        private final Inspectable hasCustomListWithFile = new Inspectable() {
-            @Override
-            public Object inspect() {
-                if (getModel().size() > 2) {
-                    for ( SharedFileList list : getModel() ) {
-                        if (list.size() != 0) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-        };
-        
     }
 
 

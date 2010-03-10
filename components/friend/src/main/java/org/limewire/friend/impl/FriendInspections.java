@@ -20,13 +20,15 @@ import org.limewire.listener.EventUtils;
 import com.google.inject.Inject;
 
 /**
- * Friend feature usage inspections.
+ * Friend feature uasge inspections.
  */
 @LazySingleton
 public class FriendInspections {
     
+    
     // used for inspecting stats of most recent chat connection
     private EventBean<FriendConnectionEvent> connectionEventBean;
+
 
     @SuppressWarnings("unused")
     @InspectableContainer
