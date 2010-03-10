@@ -45,8 +45,16 @@ public class LibraryInspections {
     private class GetRandomPublicFileBytesInspectable implements Inspectable {
         @Override
         public Object inspect() {
+            if (sharedFileListManager.getModel().size() <= 0) {
+                return -1;
+            }
+            
             SharedFileList publicList = sharedFileListManager.getModel().get(0);
             EventList<LocalFileItem> publicFileList = publicList.getSwingModel();
+            
+            if (publicFileList.size() <= 0) {
+                return -1;
+            }
             
             double random = new Random(System.currentTimeMillis()).nextDouble();
             int randomFileIndex = (int) (random*publicFileList.size());
@@ -57,8 +65,16 @@ public class LibraryInspections {
     private class GetRandomFileBytesInspectable implements Inspectable {
         @Override
         public Object inspect() {
+            if (sharedFileListManager.getModel().size() <= 0) {
+                return -1;
+            }
+            
             LibraryFileList libraryList = libraryManager.getLibraryManagedList();
             EventList<LocalFileItem> libraryFileList = libraryList.getSwingModel();
+            
+            if (libraryFileList.size() <= 0) {
+                return -1;
+            }
             
             double random = new Random(System.currentTimeMillis()).nextDouble();
             int randomFileIndex = (int) (random*libraryFileList.size());
