@@ -89,7 +89,7 @@ public class SystemOptionPanel extends OptionPanel {
             setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
             setOpaque(false);
 
-            magnetCheckBox = new JCheckBox(I18n.tr("\".magnet\" files"));
+            magnetCheckBox = new JCheckBox(I18n.tr("\"magnet\" links"));
             magnetCheckBox.setContentAreaFilled(false);
             magnetCheckBox.addActionListener(new ActionListener() {
                 @Override

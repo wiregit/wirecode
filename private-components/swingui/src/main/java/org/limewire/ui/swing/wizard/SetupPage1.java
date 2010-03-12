@@ -58,7 +58,7 @@ public class SetupPage1 extends WizardPage {
              if (LimeAssociations.isMagnetAssociationSupported() 
                      || LimeAssociations.isTorrentAssociationSupported()) {
                  add(associationFileTypeCheckBox, "gaptop 5, gapleft 26");
-                 add(createAndDecorateMultiLine(I18n.tr("Associate .magnet and .torrent files with LimeWire"), associationFileTypeCheckBox), "gaptop 5, gapleft 5, wrap");
+                 add(createAndDecorateMultiLine(I18n.tr("Associate magnet links and torrent files with LimeWire"), associationFileTypeCheckBox), "gaptop 5, gapleft 5, wrap");
              }
              
              if (shouldShowStartOnStartupWindow()) {
