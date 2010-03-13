@@ -1,7 +1,12 @@
 package org.limewire.rest;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -13,6 +18,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.nio.entity.NStringEntity;
 import org.limewire.http.HttpCoreUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+import org.limewire.util.CommonUtils;
 
 /**
  * Static constants and utility methods to support REST functions.
@@ -25,6 +33,8 @@ public abstract class RestUtils {
     public static final String DELETE = "DELETE";
     
     private static final String ENCODING = "UTF-8";
+    private static final String ACCESS_FILE = "restaccess.txt";
+    private static final Log LOG = LogFactory.getLog(RestUtils.class);
 
     /** Symbols used for random string generator. */
     private static final char[] SYMBOLS = new char[62];
@@ -139,6 +149,56 @@ public abstract class RestUtils {
             
         } catch (URISyntaxException e) {
             throw new IOException(e);
+        }
+    }
+    
+    /**
+     * Returns the REST access secret.
+     */
+    public static String getAccessSecret() {
+        String secret = "";
+        
+        // Read access secret from file.
+        File accessFile = new File(CommonUtils.getUserSettingsDir(), ACCESS_FILE);
+        if (accessFile.exists()) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(accessFile));
+                secret = reader.readLine();
+            } catch (IOException e) {
+                LOG.debugf(e, "Unable to read access secret {0}", e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException ex) {}
+                }
+            }
+        }
+        
+        return secret;
+    }
+    
+    /**
+     * Updates the REST access secret if necessary.
+     */
+    public static void updateAccessSecret() {
+        // Update access secret only if not already saved.
+        File accessFile = new File(CommonUtils.getUserSettingsDir(), ACCESS_FILE);
+        if (!accessFile.exists()) {
+            Writer writer = null;
+            try {
+                writer = new FileWriter(accessFile);
+                writer.write(RestUtils.createRandomString(32));
+            } catch (IOException e) {
+                LOG.debugf(e, "Unable to save access secret {0}", e.getMessage());
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException ex) {}
+                }
+            }
         }
     }
 }

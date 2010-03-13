@@ -67,9 +67,8 @@ public class CoreGlueRestService implements Service {
 
     @Override
     public void start() {
-        // Generate new consumer secret.
-        ApplicationSettings.LOCAL_REST_ACCESS_SECRET.set(RestUtils.createRandomString(32));
-        ApplicationSettings.instance().save();
+        // Update REST access secret.
+        RestUtils.updateAccessSecret();
         
         // Install setting listener.
         if (localSettingListener == null) {
@@ -111,7 +110,7 @@ public class CoreGlueRestService implements Service {
         if (localAuthorizationInterceptor == null) {
             String localUrl = "http://localhost";
             int port = localAcceptorFactory.get().getPort();
-            String secret = ApplicationSettings.LOCAL_REST_ACCESS_SECRET.get();
+            String secret = RestUtils.getAccessSecret();
             RestAuthority localAuthority = restAuthorityFactory.create(localUrl, port, secret);
             localAuthorizationInterceptor = authorizationInterceptorFactory.create(localAuthority);
         }
