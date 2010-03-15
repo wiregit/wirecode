@@ -57,11 +57,11 @@ class ExternalAccessOptionPanel extends OptionPanel {
         localAccessCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                localAccessStateChanged(e);
+                localAccessStateChanged();
             }
         });
         
-        accessSecretLabel = new JLabel(I18n.tr("Secret:"));
+        accessSecretLabel = new JLabel(I18n.tr("Access Code:"));
         
         accessSecretField = new JTextField();
         accessSecretField.setColumns(32);
@@ -90,12 +90,13 @@ class ExternalAccessOptionPanel extends OptionPanel {
     public void initOptions() {
         localAccessCheckBox.setSelected(ApplicationSettings.LOCAL_REST_ACCESS_ENABLED.getValue());
         accessSecretField.setText(RestUtils.getAccessSecret());
+        localAccessStateChanged();
     }
 
     /**
      * Handles event when local access state is changed.
      */
-    private void localAccessStateChanged(ItemEvent e) {
+    private void localAccessStateChanged() {
         accessSecretLabel.setVisible(localAccessCheckBox.isSelected());
         accessSecretField.setVisible(localAccessCheckBox.isSelected());
     }

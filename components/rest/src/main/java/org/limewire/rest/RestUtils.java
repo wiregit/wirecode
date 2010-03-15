@@ -156,27 +156,24 @@ public abstract class RestUtils {
      * Returns the REST access secret.
      */
     public static String getAccessSecret() {
-        String secret = "";
-        
         // Read access secret from file.
         File accessFile = new File(CommonUtils.getUserSettingsDir(), ACCESS_FILE);
-        if (accessFile.exists()) {
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(accessFile));
-                secret = reader.readLine();
-            } catch (IOException e) {
-                LOG.debugf(e, "Unable to read access secret {0}", e.getMessage());
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException ex) {}
-                }
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(accessFile));
+            return reader.readLine();
+            
+        } catch (IOException e) {
+            LOG.debugf(e, "Unable to read REST OAuth secret {0}", e.getMessage());
+            return "";
+            
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ex) {}
             }
         }
-        
-        return secret;
     }
     
     /**
@@ -190,8 +187,10 @@ public abstract class RestUtils {
             try {
                 writer = new FileWriter(accessFile);
                 writer.write(RestUtils.createRandomString(32));
+                
             } catch (IOException e) {
-                LOG.debugf(e, "Unable to save access secret {0}", e.getMessage());
+                LOG.debugf(e, "Unable to save REST OAuth secret {0}", e.getMessage());
+                
             } finally {
                 if (writer != null) {
                     try {
