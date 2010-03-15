@@ -193,8 +193,8 @@ public class OAuthValidatorImpl implements OAuthValidator {
             if (buf.length() > 0) {
                 buf.append(AMPERSAND);
             }
-            buf.append(parameter.getName());
-            buf.append(EQUAL).append(parameter.getValue());
+            buf.append(RestUtils.percentEncode(parameter.getName()));
+            buf.append(EQUAL).append(RestUtils.percentEncode(parameter.getValue()));
         }
         
         // Return parameter string.

@@ -65,6 +65,14 @@ public class RestUtilsTest extends BaseTestCase {
         expected = "find%3Falpha%3D1%26beta%3D2%2B3";
         assertEquals(expected, RestUtils.percentEncode(testStr));
     }
+
+    /** Tests method to perform percent encoding on space characters. */
+    public void testPercentEncodeSpace() {
+        // Verify plus sign converted to encoded space.
+        String testStr = "parm=hello world";
+        String expected = "parm%3Dhello%20world";
+        assertEquals(expected, RestUtils.percentEncode(testStr));
+    }
     
     /** Tests method to get base URI string. */
     public void testGetBaseUri() throws Exception {
@@ -93,11 +101,14 @@ public class RestUtilsTest extends BaseTestCase {
 
     /** Tests method to get query parameters from HTTP request. */
     public void testGetQueryParamsFromRequest() throws Exception {
+        final String testMethod = "GET";
         final String testUri = "http://localhost/remote/library/files?offset=1";
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
         final RequestLine mockRequestLine = context.mock(RequestLine.class);
         context.checking(new Expectations() {{
+            allowing(mockRequestLine).getMethod();
+            will(returnValue(testMethod));
             allowing(mockRequestLine).getUri();
             will(returnValue(testUri));
             allowing(mockRequest).getRequestLine();

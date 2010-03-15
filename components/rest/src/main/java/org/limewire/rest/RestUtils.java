@@ -90,8 +90,9 @@ public abstract class RestUtils {
     public static String percentEncode(String s) {
         try {
             // Encode string.  For OAuth, unreserved characters like tilde
-            // must not be encoded.
-            return URLEncoder.encode(s, ENCODING).replace("%7E", "~");
+            // must not be encoded.  Also, space char should be percent encoded
+            // instead of changed to plus sign.
+            return URLEncoder.encode(s, ENCODING).replace("+", "%20").replace("%7E", "~");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
