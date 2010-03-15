@@ -105,13 +105,13 @@ public class MagnetOptionsTest extends BaseTestCase {
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be invalid", opts[0].isDownloadable());
 		
-		// downloadable: has kt and hash
-		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		// downloadable: has kt and hash and filesize
+		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=15");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		
-		// downloadable: has dn and hash
-		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		// downloadable: has dn and hash and filesize
+		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=18");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isDownloadable());
 		
@@ -281,6 +281,13 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals(1, magnets.length);
         assertEquals(1, magnets[0].getDefaultURLs().length);
         assertEquals("http://test.com/hello%20you&test=true", magnets[0].getDefaultURLs()[0]);
+    }
+    
+    public void testParseMagnetFileSizeWithTrailingSpace() {
+        MagnetOptions[] magnets = MagnetOptions.parseMagnet("magnet:?dn=hello.test&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xl=123%20");
+        assertEquals(1, magnets.length);
+        assertEquals(123, magnets[0].getFileSize());
+        assertTrue(magnets[0].isDownloadable());
     }
     
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {

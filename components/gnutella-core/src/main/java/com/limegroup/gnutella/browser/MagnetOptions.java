@@ -395,16 +395,14 @@ public class MagnetOptions implements Serializable {
      * download from it.
      * <p>
      * At any rate there has to be at least one default url or a sha1 and a non
-     * empty keyword topic/display name.
+     * empty keyword topic/display name and a the file size.
      */
     public boolean isDownloadable() {
         if (getDefaultURLs().length > 0) {
             return true;
         }
-        if (getSHA1Urn() != null) {
-            if (getQueryString() != null) {
-                return true;
-            }
+        if (getSHA1Urn() != null && getQueryString() != null && getFileSize() != -1) {
+            return true;
         }
         return false;
     }
@@ -639,7 +637,7 @@ public class MagnetOptions implements Serializable {
             long size = -1;
             for (String value : lengthValues) {
                 try {
-                    size = Long.parseLong(value);
+                    size = Long.parseLong(value.trim());
                 } catch (NumberFormatException nfe) {
                     // ignore
                 }

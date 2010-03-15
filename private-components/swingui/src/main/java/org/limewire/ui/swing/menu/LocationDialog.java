@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -13,14 +13,16 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.URIUtils;
-
-import net.miginfocom.swing.MigLayout;
 
 class LocationDialog extends LimeJDialog {
     private JButton openButton = null;
@@ -43,9 +45,33 @@ class LocationDialog extends LimeJDialog {
         errorLabel.setForeground(Color.RED);
         errorLabel.setVisible(false);
 
-        urlField.addKeyListener(new KeyListener() {
+        urlField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
+                if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    openButton.doClick();
+                }
+            }
+        });
+        
+        urlField.getDocument().addDocumentListener(new DocumentListener() {
+            
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                validateUri();
+            }
+            
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                validateUri();
+            }
+            
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                validateUri();
+            }
+            
+            private void validateUri() {
                 URI uri = getURI();
                 if (uri == null || uri.getScheme() == null) {
                     errorLabel.setVisible(true);
@@ -54,18 +80,6 @@ class LocationDialog extends LimeJDialog {
                     errorLabel.setVisible(false);
                     openButton.setEnabled(true);
                 }
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    openButton.doClick();
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-
             }
         });
 
@@ -110,7 +124,7 @@ class LocationDialog extends LimeJDialog {
      */
     public synchronized URI getURI() {
         try {
-            return URIUtils.toURI(urlField.getText());
+            return URIUtils.toURI(urlField.getText().trim());
         } catch (URISyntaxException e) {
             // eating exception and returning null for bad uris
             return null;
