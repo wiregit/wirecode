@@ -6,11 +6,16 @@ import java.util.Set;
 
 import org.limewire.io.GUID;
 
+/**
+ * search integration tests for Rest APIs
+ * 
+ * NOTE this test is utilizing library and query data provided by superclass
+ */
 public class SearchRestIntegrationTest extends BaseRestIntegrationTest {
 
     private static final String SEARCH = "search";
     private static final String FILES = "/files";
-
+ 
     
     public SearchRestIntegrationTest(String name) {
         super(name);
@@ -22,6 +27,9 @@ public class SearchRestIntegrationTest extends BaseRestIntegrationTest {
         loadLibraryFiles(10000);
         loadMockQueries();
     }
+
+    
+    // -------------------------- tests --------------------------
 
     public void testSearchAll() throws Exception {
         Set<Map> resultSet = listGET(SEARCH, NO_PARAMS);
@@ -42,6 +50,10 @@ public class SearchRestIntegrationTest extends BaseRestIntegrationTest {
             Collection<Map> filesByGUID = guidQueryFilesGET(guid);
             validateFileData(filesByGUID);
         }
+    }
+    
+    public void testByType() throws Exception {
+        // not implemented in API yet (LWC-5427)
     }
 
     /**
