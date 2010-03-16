@@ -8,7 +8,7 @@ import java.util.Set;
  * 
  * NOTE this test is utilizing library files provided by super.setUp()
  */
-public class LibraryIntegrationTest extends BaseRestIntegrationTest {
+public class LibraryRestIntegrationTest extends BaseRestIntegrationTest {
 
     private static final String LIBRARY = "library";
     private static final String FILES = "library/files";
@@ -16,7 +16,7 @@ public class LibraryIntegrationTest extends BaseRestIntegrationTest {
     private static final int MAX_FILES = 50; // LWC-5428
 
     
-    public LibraryIntegrationTest(String name) throws Exception {
+    public LibraryRestIntegrationTest(String name) throws Exception {
         super(name);
     }
 

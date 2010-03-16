@@ -6,13 +6,13 @@ import java.util.Set;
 
 import org.limewire.io.GUID;
 
-public class SearchIntegrationTest extends BaseRestIntegrationTest {
+public class SearchRestIntegrationTest extends BaseRestIntegrationTest {
 
     private static final String SEARCH = "search";
     private static final String FILES = "/files";
 
     
-    public SearchIntegrationTest(String name) {
+    public SearchRestIntegrationTest(String name) {
         super(name);
     }
 
@@ -40,7 +40,7 @@ public class SearchIntegrationTest extends BaseRestIntegrationTest {
     public void testSearchFiles() throws Exception {
         for (GUID guid : guids) {
             Collection<Map> filesByGUID = guidQueryFilesGET(guid);
-            System.out.println("fileByGUID: " + filesByGUID);
+            validateFileData(filesByGUID);
         }
     }
 
@@ -50,6 +50,19 @@ public class SearchIntegrationTest extends BaseRestIntegrationTest {
 
     // ---------------------- private ----------------------
 
+    private void validateFileData(Collection<Map> fileset) throws Exception {        
+        for (Map filemap : fileset) {
+            boolean found = false;
+            for (int i = 0; i < filenames.length && !found; i++) {
+                if (filemap.get("filename").equals(filenames[i]) 
+                        && filemap.get("category").equals(cats[i].getPluralName())) {
+                    found = true;
+                }
+            }
+            assertTrue("not all results found in: " + filemap, found);            
+        }
+    }
+    
     /**
      * validate results map expectations
      */
@@ -62,7 +75,7 @@ public class SearchIntegrationTest extends BaseRestIntegrationTest {
                 found = true;
             }
         }
-        assertTrue("result found: " + queryMap, found);
+        assertTrue("result not found: " + queryMap, found);
     }
 
     /**
