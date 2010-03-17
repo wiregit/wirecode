@@ -3,6 +3,7 @@ package org.limewire.core.impl.integration;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -52,7 +54,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     @Inject private LimeHttpClient client;
     @Inject protected LibraryManager libraryMgr;
 
-    protected HashSet<Map> libraryMap = new HashSet<Map>();
+    protected HashSet<Map<String, String>> libraryMap = null;
 
     
     public AbstractRestIntegrationTestcase(String name) {
@@ -69,6 +71,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         Module combined = Modules.combine(modules);        
         CoreGlueTestUtils.createInjectorAndStart(combined,new MockRestModule(),LimeTestUtils
                 .createModule(this));
+        libraryMap = new HashSet<Map<String, String>>();        
     }    
 
     @Override
@@ -81,7 +84,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     /**
      * returns target JSONObject metadata in Map
      */
-    protected Map metadataGET(String target, String params) throws Exception {
+    protected Map<String, String> metadataGET(String target, String params) throws Exception {
         String response = getHttpResponse(target, params);
         JSONObject jobj = new JSONObject(response);
         return buildResultsMap(jobj);
@@ -90,13 +93,22 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     /**
      * returns target JSONObject set in Hashset
      */
-    protected Set<Map> listGET(String target, String params) throws Exception {
+    protected Set<Map<String, String>> listGET(String target, String params) throws Exception {
         String response = getHttpResponse(target, params);
         JSONArray jarr = new JSONArray(response);
-        Set<Map> resultSet = buildResultSet(jarr);
+        Set<Map<String, String>> resultSet = buildResultSet(jarr);
         return resultSet;
     }
 
+    /**
+     * returns resulting JSONObject count
+     */
+    protected int listGETCount(String target, String params) throws Exception {
+        String response = getHttpResponse(target, params);
+        JSONArray jarr = new JSONArray(response);
+        return jarr.length();
+    }
+    
     /**
      * performs http GET and returns response content string
      */
@@ -121,13 +133,13 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      */
     protected void loadLibraryFiles(int timeout) throws Exception {
 
-        libraryMap = new HashSet<Map>();
+        libraryMap = new HashSet<Map<String, String>>();
         File folder = TestUtils.getResourceInPackage(SAMPLE_DIR, getClass());
 
         // load files
         final AtomicInteger aint = new AtomicInteger(0);
         LibraryFileList fileList = libraryMgr.getLibraryManagedList();
-        libraryMgr.getLibraryManagedList().addFolder(folder, new FileFilter() {
+        ListeningFuture future = fileList.addFolder(folder, new FileFilter() {
             public boolean accept(File pathname) {
                 if (!pathname.toString().contains("CVS")) {
                     aint.incrementAndGet();
@@ -136,6 +148,10 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
                 return false;
             }
         });
+        /*
+        FileManagerTestUtils.assertFutureListFinishes(future,10,TimeUnit.SECONDS);
+        */
+       
         // wait for load to complete
         final CountDownLatch latch = new CountDownLatch(aint.intValue());
         fileList.addFileProcessingListener(new EventListener<FileProcessingEvent>() {
@@ -147,7 +163,8 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         });
         latch.await(timeout, TimeUnit.MILLISECONDS);
         Thread.sleep(1000);
-
+      
+        
         // build library file map for expectations
         List<LocalFileItem> fileItemList = new ArrayList<LocalFileItem>(fileList.getModel());
         for (LocalFileItem file : fileItemList) {
@@ -161,8 +178,16 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     }
 
 
-
- 
+    /**
+     * generates a huge string for negative testing
+     */
+    protected String bigString(int size) {
+        char[] chars = new char[size];
+        Arrays.fill(chars,'a');        
+        return new String(chars);
+    }
+      
+    
     // ---------------------- private methods ----------------------
 
     /**
@@ -181,8 +206,8 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     /**
      * builds a Set containing JSONArray contents (as Strings)
      */
-    private Set<Map> buildResultSet(JSONArray jarr) throws Exception {
-        HashSet<Map> resultSet = new HashSet<Map>();
+    private Set<Map<String, String>> buildResultSet(JSONArray jarr) throws Exception {
+        HashSet<Map<String, String>> resultSet = new HashSet<Map<String, String>>();
         for (int i = 0; i < jarr.length(); i++) {
             JSONObject jobj = jarr.getJSONObject(i);
             resultSet.add(buildResultsMap(jobj));
@@ -211,7 +236,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         }
         return url.toString();
     }
-
+    
     /**
      * mock authentication
      */
