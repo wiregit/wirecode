@@ -288,6 +288,10 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals(1, magnets.length);
         assertEquals(123, magnets[0].getFileSize());
         assertTrue(magnets[0].isDownloadable());
+        magnets = MagnetOptions.parseMagnet("magnet:?dn=hello.test&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xl=123 ");
+        assertEquals(1, magnets.length);
+        assertEquals(123, magnets[0].getFileSize());
+        assertTrue(magnets[0].isDownloadable());
     }
     
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
