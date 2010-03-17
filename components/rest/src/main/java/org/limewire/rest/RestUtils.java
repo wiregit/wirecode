@@ -3,10 +3,8 @@ package org.limewire.rest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -18,9 +16,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.nio.entity.NStringEntity;
 import org.limewire.http.HttpCoreUtils;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
+import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 /**
  * Static constants and utility methods to support REST functions.
@@ -34,7 +33,6 @@ public abstract class RestUtils {
     
     private static final String ENCODING = "UTF-8";
     private static final String ACCESS_FILE = "restaccess.txt";
-    private static final Log LOG = LogFactory.getLog(RestUtils.class);
 
     /** Symbols used for random string generator. */
     private static final char[] SYMBOLS = new char[62];
@@ -156,24 +154,15 @@ public abstract class RestUtils {
     /**
      * Returns the REST access secret.
      */
-    public static String getAccessSecret() {
+    public static String getAccessSecret() throws IOException {
         // Read access secret from file.
         File accessFile = new File(CommonUtils.getUserSettingsDir(), ACCESS_FILE);
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(accessFile));
             return reader.readLine();
-            
-        } catch (IOException e) {
-            LOG.debugf(e, "Unable to read REST OAuth secret {0}", e.getMessage());
-            return "";
-            
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ex) {}
-            }
+            IOUtils.close(reader);
         }
     }
     
@@ -184,21 +173,9 @@ public abstract class RestUtils {
         // Update access secret only if not already saved.
         File accessFile = new File(CommonUtils.getUserSettingsDir(), ACCESS_FILE);
         if (!accessFile.exists()) {
-            Writer writer = null;
-            try {
-                writer = new FileWriter(accessFile);
-                writer.write(RestUtils.createRandomString(32));
-                
-            } catch (IOException e) {
-                LOG.debugf(e, "Unable to save REST OAuth secret {0}", e.getMessage());
-                
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (IOException ex) {}
-                }
-            }
+            String secret = RestUtils.createRandomString(32);
+            byte[] bytes = StringUtils.toUTF8Bytes(secret);
+            FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), ACCESS_FILE, bytes);
         }
     }
 }

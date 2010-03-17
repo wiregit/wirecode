@@ -2,11 +2,15 @@ package org.limewire.core.impl.rest;
 
 import static org.limewire.rest.AuthorizationInterceptor.REMOTE_PREFIX;
 
+import java.io.IOException;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.rest.AuthorizationInterceptor;
 import org.limewire.rest.AuthorizationInterceptorFactory;
 import org.limewire.rest.RestAuthority;
@@ -28,6 +32,7 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
  */
 @EagerSingleton
 public class CoreGlueRestService implements Service {
+    private static final Log LOG = LogFactory.getLog(CoreGlueRestService.class);
 
     private final Provider<LocalHTTPAcceptor> localHttpAcceptorFactory;
     private final Provider<LocalAcceptor> localAcceptorFactory;
@@ -106,20 +111,25 @@ public class CoreGlueRestService implements Service {
      * Registers local handlers for all REST targets.
      */
     private void registerLocalHandlers() {
-        // Create interceptor for authorization.
-        if (localAuthorizationInterceptor == null) {
-            String localUrl = "http://localhost";
-            int port = localAcceptorFactory.get().getPort();
-            String secret = RestUtils.getAccessSecret();
-            RestAuthority localAuthority = restAuthorityFactory.create(localUrl, port, secret);
-            localAuthorizationInterceptor = authorizationInterceptorFactory.create(localAuthority);
-        }
-        localHttpAcceptorFactory.get().addRequestInterceptor(localAuthorizationInterceptor);
-        
-        // Register REST handlers.
-        for (RestPrefix restPrefix : RestPrefix.values()) {
-            localHttpAcceptorFactory.get().registerHandler(createPattern(restPrefix.pattern()),
-                    restRequestHandlerFactory.createRequestHandler(restPrefix));
+        try {
+            // Create interceptor for authorization.
+            if (localAuthorizationInterceptor == null) {
+                String localUrl = "http://localhost";
+                int port = localAcceptorFactory.get().getPort();
+                String secret = RestUtils.getAccessSecret();
+                RestAuthority localAuthority = restAuthorityFactory.create(localUrl, port, secret);
+                localAuthorizationInterceptor = authorizationInterceptorFactory.create(localAuthority);
+            }
+            localHttpAcceptorFactory.get().addRequestInterceptor(localAuthorizationInterceptor);
+
+            // Register REST handlers.
+            for (RestPrefix restPrefix : RestPrefix.values()) {
+                localHttpAcceptorFactory.get().registerHandler(createPattern(restPrefix.pattern()),
+                        restRequestHandlerFactory.createRequestHandler(restPrefix));
+            }
+            
+        } catch (IOException ex) {
+            LOG.debugf(ex, "Unable to register REST handlers {0}", ex.getMessage());
         }
     }
     

@@ -1,18 +1,12 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.rest.RestUtils;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
@@ -25,8 +19,6 @@ class ExternalAccessOptionPanel extends OptionPanel {
 
     private MultiLineLabel localAccessLabel;
     private JCheckBox localAccessCheckBox;
-    private JLabel accessSecretLabel;
-    private JTextField accessSecretField;
 
     /**
      * Constructs an ExternalAccessOptionPanel.
@@ -54,23 +46,9 @@ class ExternalAccessOptionPanel extends OptionPanel {
         
         localAccessCheckBox = new JCheckBox(I18n.tr("Enable local access to REST service"));
         localAccessCheckBox.setOpaque(false);
-        localAccessCheckBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                localAccessStateChanged();
-            }
-        });
-        
-        accessSecretLabel = new JLabel(I18n.tr("Access Code:"));
-        
-        accessSecretField = new JTextField();
-        accessSecretField.setColumns(32);
-        accessSecretField.setEditable(false);
         
         panel.add(localAccessLabel, "growx, wrap");
         panel.add(localAccessCheckBox, "gapleft 25, wrap");
-        panel.add(accessSecretLabel, "gapleft 25, split");
-        panel.add(accessSecretField, "split, wrap");
         
         return panel;
     }
@@ -89,15 +67,5 @@ class ExternalAccessOptionPanel extends OptionPanel {
     @Override
     public void initOptions() {
         localAccessCheckBox.setSelected(ApplicationSettings.LOCAL_REST_ACCESS_ENABLED.getValue());
-        accessSecretField.setText(RestUtils.getAccessSecret());
-        localAccessStateChanged();
-    }
-
-    /**
-     * Handles event when local access state is changed.
-     */
-    private void localAccessStateChanged() {
-        accessSecretLabel.setVisible(localAccessCheckBox.isSelected());
-        accessSecretField.setVisible(localAccessCheckBox.isSelected());
     }
 }
