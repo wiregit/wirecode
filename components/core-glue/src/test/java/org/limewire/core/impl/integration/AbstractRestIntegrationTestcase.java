@@ -52,7 +52,7 @@ import com.google.inject.Injector;
 import com.google.inject.assistedinject.FactoryProvider;
 import com.limegroup.gnutella.LifecycleManager;
 
-public class BaseRestIntegrationTest extends LimeTestCase {
+public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
 
     protected static String LOCAL_REST_URL = "http://localhost:45100/remote/";
     protected static String SAMPLE_DIR = "sample_files";    
@@ -74,7 +74,7 @@ public class BaseRestIntegrationTest extends LimeTestCase {
     protected HashSet<Map> libraryMap = new HashSet<Map>();
 
     
-    public BaseRestIntegrationTest(String name) {
+    public AbstractRestIntegrationTestcase(String name) {
         super(name);
     }
 
@@ -90,12 +90,6 @@ public class BaseRestIntegrationTest extends LimeTestCase {
         injector.getInstance(LifecycleManager.class).shutdown();
     }
 
-    // -------------------------- tests --------------------------
-
-    public void testHelloWorld() throws Exception {
-        String response = getHttpResponse("hello", NO_PARAMS);
-        assertTrue("hello world response", response.endsWith("Hello world!"));
-    }
 
     // ---------------------- protected methods ----------------------
 
@@ -301,7 +295,6 @@ public class BaseRestIntegrationTest extends LimeTestCase {
         if (params != NO_PARAMS) {
             url.append("?").append(params);
         }
-        System.out.println("buildUrl: " + url.toString());
         return url.toString();
     }
 

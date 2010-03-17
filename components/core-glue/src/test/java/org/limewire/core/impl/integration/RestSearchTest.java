@@ -11,7 +11,7 @@ import org.limewire.io.GUID;
  * 
  * NOTE this test is utilizing library and query data provided by superclass
  */
-public class RestSearchTest extends BaseRestIntegrationTest {
+public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     private static final String SEARCH = "search";
     private static final String FILES = "/files";
@@ -24,7 +24,6 @@ public class RestSearchTest extends BaseRestIntegrationTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        loadLibraryFiles(10000);
         loadMockQueries();
     }
 

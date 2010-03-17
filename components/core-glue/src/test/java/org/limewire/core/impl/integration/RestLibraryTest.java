@@ -9,7 +9,7 @@ import java.util.Set;
  * 
  * NOTE this test is utilizing library files provided by superclass
  */
-public class RestLibraryTest extends BaseRestIntegrationTest {
+public class RestLibraryTest extends AbstractRestIntegrationTestcase {
 
     private static final String LIBRARY = "library";
     private static final String FILES = "library/files";
@@ -29,6 +29,11 @@ public class RestLibraryTest extends BaseRestIntegrationTest {
 
     // -------------------------- tests --------------------------
  
+    public void testHelloWorld() throws Exception {
+        String response = getHttpResponse("hello", NO_PARAMS);
+        assertTrue("hello world response", response.endsWith("Hello world!"));
+    }
+     
     public void testBasicGets() throws Exception {
         validateLibraryMetadata(LIBRARY, NO_PARAMS, TOTAL_FILES);
     }
@@ -108,5 +113,6 @@ public class RestLibraryTest extends BaseRestIntegrationTest {
         Arrays.fill(str,"a");
         return str;
     }
+      
     
 }
