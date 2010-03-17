@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
@@ -168,6 +169,12 @@ public class Tokenizer {
                 long size = r.getSize();
                 set.add(new SizeToken(size));
                 set.add(new ApproximateSizeToken(size));
+                // Alt-loc addresses, unless private
+                for(IpPort ipp : r.getLocations()) {
+                    ip = ipp.getInetAddress().getHostAddress();
+                    if (!networkInstanceUtils.isPrivateAddress(ip))
+                        set.add(new AddressToken(ip));
+                }
             }
         } catch (BadPacketException ignored) {}
         return set;
