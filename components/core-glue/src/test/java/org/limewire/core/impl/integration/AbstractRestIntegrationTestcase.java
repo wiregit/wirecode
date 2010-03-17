@@ -153,8 +153,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         });
         // wait for load to complete
         final CountDownLatch latch = new CountDownLatch(aint.intValue());
-        fileList.addFileProcessingListener(new EventListener<FileProcessingEvent>() {
-            @Override
+        fileList.addFileProcessingListener(new EventListener<FileProcessingEvent>() {            
             public void handleEvent(FileProcessingEvent event) {
                 if (event.getType().equals("FINISHED")) {
                     latch.countDown();
