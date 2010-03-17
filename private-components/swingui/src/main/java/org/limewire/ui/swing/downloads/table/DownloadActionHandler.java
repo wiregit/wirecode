@@ -104,24 +104,7 @@ public class DownloadActionHandler {
                 NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
             }
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            if(item.getState() != DownloadState.DONE &&
-                    item.getState() != DownloadState.SCAN_FAILED) {
-                JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
-                dialog.setVisible(true);
-            } else if(item.getLaunchableFile() != null) {
-                // if finished downloading, try showing all the information from the localFileItem
-                LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
-                if(localItem != null) {
-                    JDialog dialog = fileInfoFactory.createFileInfoDialog(localItem, FileInfoType.LOCAL_FILE);
-                    dialog.setVisible(true);
-                } else { // if can't find the localFileItem, revert to the downloadItem
-                    JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
-                    dialog.setVisible(true);
-                }
-            } else { // if can't find the localFileItem, revert to the downloadItem
-                JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
-                dialog.setVisible(true);
-            }
+            createFileInfoDialog(item);
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
         } else if (actionCommmand == SHARE_COMMAND){
@@ -137,6 +120,32 @@ public class DownloadActionHandler {
             searchHandler.doSearch(createSearchInfo(item));
         } else if (actionCommmand == INFO_COMMAND) {
             showInfoDialog(item);
+        }
+    }
+    
+    /**
+     * Opens a FileInfoDialog for the DownloadItem. If the item is
+     * already complete, it will attempt to show the LocalFileItem
+     * instead.
+     */
+    private void createFileInfoDialog(DownloadItem item) {
+        if(item.getState() != DownloadState.DONE &&
+                item.getState() != DownloadState.SCAN_FAILED) {
+            JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+            dialog.setVisible(true);
+        } else if(item.getLaunchableFile() != null) {
+            // if finished downloading, try showing all the information from the localFileItem
+            LocalFileItem localItem = libraryManager.getLibraryManagedList().getFileItem(item.getLaunchableFile());
+            if(localItem != null) {
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(localItem, FileInfoType.LOCAL_FILE);
+                dialog.setVisible(true);
+            } else { // if can't find the localFileItem, revert to the downloadItem
+                JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+                dialog.setVisible(true);
+            }
+        } else { // if can't find the localFileItem, revert to the downloadItem
+            JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
+            dialog.setVisible(true);
         }
     }
 
@@ -190,9 +199,26 @@ public class DownloadActionHandler {
         case ANTIVIRUS:
             avInfoPanelFactory.get().showVendorMessage();
             break;
-            
-        case GNUTELLA:
         case BITTORRENT:
+            switch (item.getState()) {
+            case DANGEROUS:
+                avInfoPanelFactory.get().showDangerMessage(item, false);
+                break;
+            case SCANNING:
+            case SCANNING_FRAGMENT:
+                avInfoPanelFactory.get().showVendorMessage();
+                break;
+            case THREAT_FOUND:
+                avInfoPanelFactory.get().showThreatMessage(item, false);
+                break;    
+            case SCAN_FAILED:
+                avInfoPanelFactory.get().showFailureMessage(item, false);
+                break;
+            default:
+                createFileInfoDialog(item);
+                break;
+            }
+        case GNUTELLA:
             switch (item.getState()) {
             case DANGEROUS:
                 avInfoPanelFactory.get().showDangerMessage(item, false);

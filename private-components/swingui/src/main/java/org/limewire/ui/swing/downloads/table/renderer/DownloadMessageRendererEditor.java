@@ -108,6 +108,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         }
         
         infoButton.setVisible(item.getDownloadItemType() == DownloadItemType.ANTIVIRUS ||
+                item.getDownloadItemType() == DownloadItemType.BITTORRENT ||
                 state == DownloadState.DANGEROUS ||
                 state == DownloadState.SCANNING ||
                 state == DownloadState.SCANNING_FRAGMENT || 
