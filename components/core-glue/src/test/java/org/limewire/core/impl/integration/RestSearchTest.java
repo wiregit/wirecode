@@ -15,6 +15,7 @@ import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.io.GUID;
+import org.limewire.rest.RestPrefix;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -29,8 +30,9 @@ import com.google.inject.Inject;
  */
 public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
-    private static final String SEARCH_PREFIX = "search";
+    private static final String SEARCH_PREFIX = RestPrefix.SEARCH.pattern();;
     private static final String FILES_PREFIX = "/files";
+    
     private static final String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
 
     // mock query data

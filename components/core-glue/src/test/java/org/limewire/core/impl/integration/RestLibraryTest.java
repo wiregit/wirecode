@@ -3,24 +3,26 @@ package org.limewire.core.impl.integration;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.rest.RestPrefix;
+
 /**
- * library integration tests for Rest APIs 
- * NOTE this test is utilizing library files provided by superclass
+ * library integration tests for Rest APIs NOTE this test is utilizing library
+ * files provided by superclass
  */
 public class RestLibraryTest extends AbstractRestIntegrationTestcase {
 
-    private static final String LIBRARY_PREFIX = "library";
-    private static final String FILES_PREFIX = "library/files";
+    private static final String LIBRARY_PREFIX = RestPrefix.LIBRARY.pattern();
+    private static final String FILES_PREFIX = LIBRARY_PREFIX + "/files";
+    
+    private static final int MAX_FILES   = 50; // LWC-5428    
     private static final int TOTAL_FILES = 54;
-    private static final int MAX_FILES = 50; // LWC-5428
 
     
     public RestLibraryTest(String name) throws Exception {
         super(name);
     }
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         loadLibraryFiles();
     }
