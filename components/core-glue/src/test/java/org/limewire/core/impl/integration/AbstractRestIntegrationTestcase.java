@@ -39,7 +39,6 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.library.Library;
 
-
 public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
 
     protected static String LOCAL_REST_URL = "http://localhost:45100/remote/";
@@ -53,13 +52,11 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
 
     protected HashSet<Map<String,String>> libraryMap = null;
 
-    
     public AbstractRestIntegrationTestcase(String name) {
         super(name);
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         setUpModules(Modules.EMPTY_MODULE);
     }
 
@@ -71,8 +68,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         libraryMap = new HashSet<Map<String,String>>();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @Override protected void tearDown() throws Exception {
         injector.getInstance(LifecycleManager.class).shutdown();
     }
 
@@ -154,6 +150,17 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     }
 
     /**
+     * response is empty
+     */
+    @SuppressWarnings("unused") 
+    protected void assertResponseEmpty(String target, String params)
+            throws Exception {
+        String r = getHttpResponse(target,params);
+        boolean isEmpty = r.isEmpty()|r.equals("{}")|r.equals("[]");
+        assertTrue("expected empty response: "+r,isEmpty);
+    }
+
+    /**
      * generates a huge string for negative testing
      */
     protected String bigString(int size) {
@@ -170,7 +177,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     private Map<String,String> buildResultsMap(JSONObject jobj) throws Exception {
         HashMap<String,String> testmap = new HashMap<String,String>();
         Iterator iter = jobj.keys();
-        while (iter.hasNext()) {
+        while(iter.hasNext()) {
             String key = (String) iter.next();
             testmap.put(key,String.valueOf(jobj.get(key)));
         }
@@ -182,7 +189,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      */
     private Set<Map<String,String>> buildResultSet(JSONArray jarr) throws Exception {
         HashSet<Map<String,String>> resultSet = new HashSet<Map<String,String>>();
-        for (int i = 0; i < jarr.length(); i++) {
+        for (int i = 0;i<jarr.length();i++) {
             JSONObject jobj = jarr.getJSONObject(i);
             resultSet.add(buildResultsMap(jobj));
         }
@@ -205,7 +212,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      */
     private String buildUrl(String target, String params) {
         StringBuffer url = new StringBuffer(LOCAL_REST_URL).append(target);
-        if (params != NO_PARAMS) {
+        if (params!=NO_PARAMS) {
             url.append("?").append(params);
         }
         return url.toString();
@@ -215,18 +222,14 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      * mock authentication
      */
     private static class MockRestModule extends AbstractModule {
-        @Override
-        protected void configure() {
-            bind(RestAuthorityFactory.class)
-                    .toProvider(
-                            FactoryProvider.newFactory(RestAuthorityFactory.class,
-                                    MockRestAuthority.class));
+        @Override protected void configure() {
+            bind(RestAuthorityFactory.class).toProvider(
+                    FactoryProvider.newFactory(RestAuthorityFactory.class,MockRestAuthority.class));
         }
     }
 
     private static class MockRestAuthority implements RestAuthority {
-        @Override
-        public boolean isAuthorized(HttpRequest request) {
+        @Override public boolean isAuthorized(HttpRequest request) {
             return true;
         }
     }

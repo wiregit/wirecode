@@ -32,7 +32,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     private static final String SEARCH_PREFIX = RestPrefix.SEARCH.pattern();;
     private static final String FILES_PREFIX = "/files";
-    
+
     // mock query data
     private final String[] queryNames = { "what is available", "speedster", "time runs by" };
     private final String[] filenames = { "superfly.mp3", "quantum.doc", "simplistic mind.mov",
@@ -42,16 +42,13 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
             Category.AUDIO };
     protected static Mockery context = new Mockery();
 
-    
     @Inject private SearchManager searchMgr;
 
-    
     public RestSearchTest(String name) {
         super(name);
     }
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
 
         String nm = getName();
         if (nm.contains("NoMock")) {
@@ -100,10 +97,10 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
 
         // invalid GUIDs,targets
-        assertResponseEmpty(SEARCH_PREFIX + FAKEGUID,NO_PARAMS);
-        assertResponseEmpty(SEARCH_PREFIX + FAKEGUID + FILES_PREFIX,NO_PARAMS);
-        assertResponseEmpty(SEARCH_PREFIX + "/garbage",NO_PARAMS);
-        assertResponseEmpty(SEARCH_PREFIX + FAKEGUID + "/foo",NO_PARAMS);
+        assertResponseEmpty(SEARCH_PREFIX+FAKEGUID,NO_PARAMS);
+        assertResponseEmpty(SEARCH_PREFIX+FAKEGUID+FILES_PREFIX,NO_PARAMS);
+        assertResponseEmpty(SEARCH_PREFIX+"/garbage",NO_PARAMS);
+        assertResponseEmpty(SEARCH_PREFIX+FAKEGUID+"/foo",NO_PARAMS);
 
         // garbage parameters
         assertResponseEmpty(SEARCH_PREFIX,"this=is_garbage");
@@ -118,15 +115,15 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         loadHugeQuerySet();
 
         int queryCnt = listGETCount(SEARCH_PREFIX,NO_PARAMS);
-        assertTrue("qryCnt invalid: " + queryCnt,queryCnt == 1000);
+        assertTrue("qryCnt invalid: "+queryCnt,queryCnt==1000);
 
         Map queryByGUID = guidQueryGET(guids[0]);
         String sz = (String) queryByGUID.get("size");
-        assertTrue("file sz invalid: " + sz,sz.equals("20000"));
+        assertTrue("file sz invalid: "+sz,sz.equals("20000"));
 
-        String target = SEARCH_PREFIX + "/" + guids[0].toString() + FILES_PREFIX;
+        String target = SEARCH_PREFIX+"/"+guids[0].toString()+FILES_PREFIX;
         int filecnt = listGETCount(target,NO_PARAMS);
-        assertTrue("filecnt " + filecnt,filecnt == 50); // LWC-5428
+        assertTrue("filecnt "+filecnt,filecnt==50); // LWC-5428
     }
 
     // ---------------------- private ----------------------
@@ -155,10 +152,10 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
         int queryCnt = (isHuge ? 1000 : queryNames.length);
         int fileCnt = (isHuge ? 20000 : filenames.length);
-        for (int i = 0; i < queryCnt; i++) {
+        for (int i = 0;i<queryCnt;i++) {
             searchResultLists.add(mockResultList);
         }
-        for (int j = 0; j < fileCnt; j++) {
+        for (int j = 0;j<fileCnt;j++) {
             groupedResults.add(mockGroupedResult);
         }
         searchResults.add(mockSearchResult);
@@ -231,13 +228,13 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     private void validateFileData(Collection<Map<String,String>> fileset) throws Exception {
         for (Map filemap : fileset) {
             boolean found = false;
-            for (int i = 0; i < filenames.length && !found; i++) {
+            for (int i = 0;i<filenames.length&&!found;i++) {
                 if (filemap.get("filename").equals(filenames[i])
-                        && filemap.get("category").equals(cats[i].getPluralName())) {
+                        &&filemap.get("category").equals(cats[i].getPluralName())) {
                     found = true;
                 }
             }
-            assertTrue("results not found for: " + filemap.get("name"),found);
+            assertTrue("results not found for: "+filemap.get("name"),found);
         }
     }
 
@@ -246,21 +243,21 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
      */
     private void validateMetadata(Map queryMap) throws Exception {
         boolean found = false;
-        for (int i = 0; i < guids.length && !found; i++) {
+        for (int i = 0;i<guids.length&&!found;i++) {
             if (queryMap.get("id").equals(guids[i].toString())
-                    && queryMap.get("name").equals(queryNames[i])
-                    && queryMap.get("size").equals("" + filenames.length)) {
+                    &&queryMap.get("name").equals(queryNames[i])
+                    &&queryMap.get("size").equals(""+filenames.length)) {
                 found = true;
             }
         }
-        assertTrue("results not found for: " + queryMap.get("name"),found);
+        assertTrue("results not found for: "+queryMap.get("name"),found);
     }
 
     /**
      * returns GET for a particular GUID query metadata
      */
     private Map<String,String> guidQueryGET(GUID guid) throws Exception {
-        String target = SEARCH_PREFIX + "/" + guid.toString();
+        String target = SEARCH_PREFIX+"/"+guid.toString();
         Map<String,String> queryByGUID = metadataGET(target,NO_PARAMS);
         return queryByGUID;
     }
@@ -269,25 +266,16 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
      * performs GET for a particular GUIDs results files
      */
     private Collection<Map<String,String>> guidQueryFilesGET(GUID guid) throws Exception {
-        String target = SEARCH_PREFIX + "/" + guid.toString() + FILES_PREFIX;
+        String target = SEARCH_PREFIX+"/"+guid.toString()+FILES_PREFIX;
         Collection<Map<String,String>> filesByGUID = listGET(target,NO_PARAMS);
         return filesByGUID;
-    }
-
-    /**
-     * response is empty
-     */
-    private void assertResponseEmpty(String target,String params) throws Exception {
-        String r = getHttpResponse(target,params);
-        assertTrue("expected empty response: " + r,r.equals("{}") | r.equals("[]"));
     }
 
     /**
      * mock search
      */
     private static class MockSearchModule extends AbstractModule {
-        @Override
-        protected void configure() {
+        @Override protected void configure() {
             bind(SearchManager.class).toInstance(context.mock(SearchManager.class));
         }
     }
