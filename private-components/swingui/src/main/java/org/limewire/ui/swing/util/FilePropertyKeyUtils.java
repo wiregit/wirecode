@@ -39,6 +39,7 @@ public class FilePropertyKeyUtils {
             case WIDTH: return I18nMarker.marktr("Width");
             case LOCATION: return I18nMarker.marktr("Location");
             case YEAR: return I18nMarker.marktr("Year");
+            case TORRENT: return I18nMarker.marktr("Torrent");
             default: throw new IllegalArgumentException("Unknown SearchCategory/FileProperyKey combination");
         }
     }
