@@ -10,13 +10,14 @@ import java.util.Set;
 import net.jcip.annotations.GuardedBy;
 
 import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -46,7 +47,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     private final BrowseFactory browseFactory;
     private final RemoteLibraryManager remoteLibraryManager;
-
+    private final TorrentFactory torrentFactory;
     private final SocketsManager socketsManager;
     
     /**
@@ -70,9 +71,11 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
-            SocketsManager socketsManager, FriendRemoteFileDescDeserializer remoteFileDescDeserializer) {
+            SocketsManager socketsManager, FriendRemoteFileDescDeserializer remoteFileDescDeserializer, 
+            TorrentFactory torrentFactory) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
+        this.torrentFactory = torrentFactory;
         this.socketsManager = socketsManager;
     }
 
@@ -177,7 +180,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
                 // need to upgrade the RFD to be use the friendpresence.
-                remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescAdapter, friendPresence);
+                remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescAdapter, friendPresence, torrentFactory);
                 if(transitList != null) {
                     transitList.add(remoteFileDescAdapter);
                 } else {

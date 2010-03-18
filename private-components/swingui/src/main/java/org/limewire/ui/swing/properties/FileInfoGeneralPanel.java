@@ -35,7 +35,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MetaDataException;
@@ -55,6 +54,7 @@ import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -172,14 +172,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
      * to help debug the situation.
      */
     private void createError() {
-        if(propertiableFile instanceof DownloadItem) {
-            DownloadItem downloadItem = (DownloadItem) propertiableFile;
-            Torrent torrent = (Torrent) downloadItem.getDownloadProperty(DownloadPropertyKey.TORRENT);
-            TorrentStatus status = torrent != null ? torrent.getStatus() : null;
-            if(status != null && status.isError()) {
-                component.add(createHeaderLabel(I18n.tr("Error")), "span, gaptop 15, wrap");
-                component.add(createLabelField(status.getError()), "span, growx, wrap");
-            }
+        Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
+        TorrentStatus status = torrent != null ? torrent.getStatus() : null;
+        if(status != null && status.isError()) {
+            component.add(createHeaderLabel(I18n.tr("Error")), "span, gaptop 15, wrap");
+            component.add(createLabelField(status.getError()), "span, growx, wrap");
         }
     }
 
@@ -286,6 +283,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             if(propertiableFile instanceof VisualSearchResult) {
                 final ReadOnlyTableModel model = new ReadOnlyTableModel();
                 final MouseableTable table = new MouseableTable(model);
+                table.setDefaultRenderer(Object.class, new DefaultLimeTableCellRenderer());
                 
                 model.setColumnIdentifiers(new Object[] { I18n.tr("Name"), I18n.tr("Address"), I18n.tr("Filename") });
     

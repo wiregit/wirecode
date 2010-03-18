@@ -5,13 +5,14 @@ import java.io.IOException;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
@@ -57,9 +58,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         final FriendPresence presence = context.mock(FriendPresence.class);
         final EventList<FriendLibrary> friendLibraryList = context.mock(EventList.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(null, remoteLibraryManager, socketsManager, null, torrentFactory);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -91,9 +93,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final SocketsManager socketsManager = context.mock(SocketsManager.class);
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager, null, torrentFactory);
         
         final MatchAndCopy<EventListener> socketsListenerCollector = new MatchAndCopy<EventListener>(EventListener.class);
         
@@ -139,9 +142,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             = new MatchAndCopy<ListEventListener>(ListEventListener.class);
         
         final ListEvent<FriendLibrary> listEventBlank = context.mock(ListEvent.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, remoteLibraryManager, null, null);
+            = new PresenceLibraryBrowser(null, remoteLibraryManager, null, null, torrentFactory);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -202,9 +206,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         
         final ListEvent<PresenceLibrary> updateAndRemoveEvent = context.mock(ListEvent.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null, torrentFactory);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -348,9 +353,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         
         final Address resolvedAddress = context.mock(Address.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null, torrentFactory);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -418,9 +424,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final Mockery context = new Mockery();
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, null, null);
+            = new PresenceLibraryBrowser(null, null, null, null, torrentFactory);
         
         context.checking(new Expectations() {{
             FriendPresence presence = context.mock(FriendPresence.class);
@@ -456,9 +463,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final SocketsManager socketsManager = context.mock(SocketsManager.class);
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager, null, torrentFactory);
         
         context.checking(new Expectations() {{
             FriendPresence presence = context.mock(FriendPresence.class);
@@ -510,9 +518,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         final Address resolvedAddress = context.mock(Address.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager, null, torrentFactory);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -587,9 +596,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         final Address resolvedAddress = context.mock(Address.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager, null, torrentFactory);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -659,9 +669,10 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         final RemoteFileDescAdapter searchResult = context.mock(RemoteFileDescAdapter.class);
+        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, null, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, null, socketsManager, null, torrentFactory);
         
         final MatchAndCopy<BrowseListener> listenerCollector 
             = new MatchAndCopy<BrowseListener>(BrowseListener.class);

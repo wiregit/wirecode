@@ -29,19 +29,16 @@ import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.swingx.JXTable;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentTracker;
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadPropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadPropertyKey;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.library.table.RemoveButton;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.util.I18n;
 
 public class FileInfoTrackersPanel implements FileInfoPanel {
@@ -54,29 +51,24 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     private final JPanel component;
     
     private List<TorrentTracker> trackerList = null;
-    private JXTable table;
+    private StripedJXTable table;
     
     public FileInfoTrackersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
-        component = new JPanel(new MigLayout("fillx, gap 0, insets 0 0 20 0"));
+        component = new JPanel(new MigLayout("fillx, gap 0, insets 7 7 20 7"));
         
-        if (propertiableFile instanceof DownloadItem) {
-            torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
-        }
-        else if (propertiableFile instanceof UploadItem) {
-            torrent = (Torrent)((UploadItem)propertiableFile).getUploadProperty(UploadPropertyKey.TORRENT);
-        } 
-        else {
-            torrent = null;
+        torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
+        if(torrent == null) {
             table = null;
             return;
         }
         
+        assert(torrent.isEditable());
         trackerList = torrent.getTrackers();
         
         if (trackerList == null) {
             return;
         }
-        
+       
         AbstractTableModel model = new AbstractTableModel() {
             
             @Override
@@ -114,7 +106,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
             }
         };
         
-        table = new JXTable(model) {
+        table = new StripedJXTable(model) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return column == REMOVE_COLUMN;

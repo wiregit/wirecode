@@ -497,7 +497,14 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
             }
             return ct == -1 ? null : ct;
         case FILE_SIZE:
-            return getTotalSize();            
+            return getTotalSize();     
+        case TORRENT:
+            if(downloadItemType == DownloadItemType.BITTORRENT) {
+                BTDownloader btDownloader = (BTDownloader)downloader;
+                return btDownloader.getTorrent();
+            } else {
+                return null;
+            }
         default:
             LimeXMLDocument doc = (LimeXMLDocument)downloader.getAttribute("LimeXMLDocument");
             if(doc != null) {
@@ -563,13 +570,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case ANTIVIRUS_INCREMENT_INDEX:
             Object index = downloader.getAttribute(VirusDefinitionDownloaderKeys.INDEX);
             return index == null ? 0 : index;
-        case TORRENT:
-            if(downloadItemType == DownloadItemType.BITTORRENT) {
-                BTDownloader btDownloader = (BTDownloader)downloader;
-                return btDownloader.getTorrent();
-            }
-            break;
-        }        
+        }
         return null;
     }
 }

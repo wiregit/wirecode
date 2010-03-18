@@ -526,4 +526,9 @@ class TorrentImpl implements Torrent {
             lock.unlock();
         }        
     }
+
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
 }

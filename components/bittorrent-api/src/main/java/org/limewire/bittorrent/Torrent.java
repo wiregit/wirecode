@@ -290,5 +290,11 @@ public interface Torrent {
      * Removes any tracker matching the url and tier. 
      */
     public void removeTracker(String url, int tier);
+    
+    /**
+     * Returns true if this file is editable. A non-editable Torrent
+     * is one that is constructed of XML data.
+     */
+    public boolean isEditable();
 
 }

@@ -24,9 +24,9 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;
-import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadPiecesInfo.PieceState;
@@ -164,7 +164,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
         infoPanel.add(failedDownloadLabel, "wrap");
         
         if (download.getDownloadItemType() == DownloadItemType.BITTORRENT) {
-            torrent = (Torrent) download.getDownloadProperty(DownloadPropertyKey.TORRENT);
+            torrent = (Torrent) download.getProperty(FilePropertyKey.TORRENT);
         
             uploadedLabel = createLabel("");
             ratioLabel = createLabel("");

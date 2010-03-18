@@ -23,14 +23,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadPropertyKey;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -169,21 +168,11 @@ public class FileInfoDialog extends LimeJDialog {
                     } else if(tab == Tabs.TRANSFERS) {
                         cards.put(tab, fileInfoFactory.createTransferPanel(type, propertiableFile));    
                     } else if(tab == Tabs.BITTORENT) {
-                        if(propertiableFile instanceof DownloadItem) {
-                            Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
-                            if (torrent != null && torrent.hasMetaData()) {
-                                //we can't show the file info panel for torrents without metadata.
-                                cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
-                            }
-                        } else if (propertiableFile instanceof UploadItem) {
-                            Torrent torrent = (Torrent)((UploadItem)propertiableFile).getUploadProperty(UploadPropertyKey.TORRENT);
-                            if (torrent != null && torrent.hasMetaData()) {
-                                //we can't show the file info panel for torrents without metadata.
-                                cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
-                            }
-                        } 
-                        else {
-                            throw new IllegalStateException("No Torrent found for BITTORENT tab.");
+                        Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
+                        
+                        //we can't show the file info panel for torrents without metadata.
+                        if(torrent != null && torrent.hasMetaData()) {
+                            cards.put(tab, fileInfoFactory.createBittorentPanel(torrent));
                         }
                     } else if (tab == Tabs.PIECES) {
                         if(propertiableFile instanceof DownloadItem) {
@@ -231,10 +220,18 @@ public class FileInfoDialog extends LimeJDialog {
         switch(type) {
         case LOCAL_FILE:
             tabs.add(Tabs.SHARING);
+            Torrent localTorrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
+            if(localTorrent != null && localTorrent.hasMetaData()) {
+                tabs.add(Tabs.BITTORENT);
+                if(localTorrent.isEditable()) {
+                    tabs.add(Tabs.TRACKERS);
+                    tabs.add(Tabs.TRANSFERS);
+                }
+            }
             break;
         case DOWNLOADING_FILE:
             if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadItemType() == DownloadItemType.BITTORRENT) {
-                Torrent torrent = (Torrent)((DownloadItem)propertiableFile).getDownloadProperty(DownloadPropertyKey.TORRENT);
+                Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
                 if(torrent != null && torrent.hasMetaData()) {
                     tabs.add(Tabs.BITTORENT);
                     tabs.add(Tabs.TRACKERS);
@@ -245,7 +242,7 @@ public class FileInfoDialog extends LimeJDialog {
             break;
         case UPLOADING_FILE:
             if(propertiableFile instanceof UploadItem && ((UploadItem)propertiableFile).getUploadItemType() == UploadItemType.BITTORRENT) {
-                Torrent torrent = (Torrent)((UploadItem)propertiableFile).getUploadProperty(UploadPropertyKey.TORRENT);
+                Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
                 if(torrent != null && torrent.hasMetaData()) {
                     tabs.add(Tabs.BITTORENT);
                     tabs.add(Tabs.TRACKERS);
@@ -254,11 +251,18 @@ public class FileInfoDialog extends LimeJDialog {
             tabs.add(Tabs.TRANSFERS);
             break;
         case REMOTE_FILE:
+            Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
+            if(torrent != null && torrent.hasMetaData()) {
+                tabs.add(Tabs.BITTORENT);
+                if(torrent.isEditable()) {
+                    tabs.add(Tabs.TRACKERS);
+                    tabs.add(Tabs.TRANSFERS);
+                }
+            }
             break;
         }
         tabPanel.setTabs(tabs);
     }
-
     
     /**
      * Adds a footer with the cancel/ok button to close the dialog.

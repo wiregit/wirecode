@@ -1,6 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;
@@ -47,6 +48,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(DownloadListenerList.class).to(GlueActivityCallback.class);
         bind(UploadListenerList.class).to(GlueActivityCallback.class);
         bind(IncomingSearchListenerList.class).to(GlueActivityCallback.class);
+        bind(TorrentFactory.class).to(TorrentFactoryImpl.class);
         bind(Application.class).to(ApplicationImpl.class);
 
         bind(LifeCycleManager.class).to(LifeCycleManagerImpl.class);

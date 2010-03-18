@@ -146,14 +146,17 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         HyperlinkButton noneButton = new HyperlinkButton(new SelectNone(I18n.tr("none")));
         noneButton.setFont(selectFont);
         
-        component.add(selectLabel, "gapleft 5, gaptop 2, split 3");
-        component.add(allButton, "gapleft 6, gaptop 2");
-        component.add(noneButton, "gapleft 6, gaptop 2, wrap");
+        // only show add/remove all buttons if is downloadng
+        if(!torrent.isFinished()) {
+            component.add(selectLabel, "gapleft 5, gaptop 2, split 3");
+            component.add(allButton, "gapleft 6, gaptop 2");
+            component.add(noneButton, "gapleft 6, gaptop 2, wrap");
+        }
         
         JScrollPane scrollPane = new JScrollPane(table);
         configureEnclosingScrollPane(scrollPane);
         
-        component.add(scrollPane, "grow");
+        component.add(scrollPane, "grow, gaptop 7");
         
         torrent.addListener(this);
     }

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
@@ -68,6 +69,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String extension;
     private final List<IpPort> locs;
     private final Category category;
+    private final TorrentFactory torrentFactory;
     private final int quality;
     
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
@@ -81,8 +83,9 @@ public class RemoteFileDescAdapter implements SearchResult {
     @AssistedInject
     RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
             @Assisted Set<? extends IpPort> locs,
-            CategoryManager categoryManager) {
-        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()), categoryManager);
+            CategoryManager categoryManager,
+            TorrentFactory torrentFactory) {
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()), categoryManager, torrentFactory);
     }
     
     /**
@@ -94,22 +97,25 @@ public class RemoteFileDescAdapter implements SearchResult {
     RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
             @Assisted Set<? extends IpPort> locs,
             @Assisted FriendPresence friendPresence, 
-            CategoryManager categoryManager) {    
+            CategoryManager categoryManager,
+            TorrentFactory torrentFactory) {    
         this.rfd = rfd;
         this.locs = ImmutableList.copyOf(locs);
         this.friendPresence = friendPresence;
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
         this.category = categoryManager.getCategoryForExtension(extension);
+        this.torrentFactory = torrentFactory;
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
     }
     
     /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
-    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence) {
+    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence, TorrentFactory torrentFactory) {
         this.rfd = copy.rfd;
         this.locs = copy.locs;
         this.friendPresence = presence;
         this.extension = copy.extension;
         this.category = copy.category;
+        this.torrentFactory = torrentFactory;
         this.quality = copy.quality;
         
         // and other items too, if they were constructed..
@@ -188,6 +194,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         case DATE_CREATED: return rfd.getCreationTime() == -1 ? null : rfd.getCreationTime();
         case FILE_SIZE: return rfd.getSize();      
         case QUALITY: return quality == -1 ? null : Long.valueOf(quality);
+        case TORRENT: return torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
         default: return FilePropertyKeyPopulator.get(category, property, rfd.getXMLDocument());
         }
     }
@@ -274,7 +281,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     public URN getUrn() {
         return rfd.getSHA1Urn();
     }
-
+    
     /**
      * @return the a magnet link URL string for the rfd.
      */

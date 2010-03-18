@@ -13,7 +13,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadPropertyKey;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
@@ -261,11 +260,6 @@ public class MockUploadItem implements UploadItem {
     @Override
     public String getRenderName() {
         return hostname;
-    }
-
-    @Override
-    public Object getUploadProperty(UploadPropertyKey key) {
-        return null;
     }
 
     @Override

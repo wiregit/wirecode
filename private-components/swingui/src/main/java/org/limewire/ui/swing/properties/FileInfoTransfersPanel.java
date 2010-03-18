@@ -24,28 +24,23 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXTable;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadPropertyKey;
-import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.core.api.transfer.SourceInfo;
-import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadPropertyKey;
-import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
+import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -57,41 +52,37 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     @Resource private Font smallFont;
     
     private final JPanel component;
-    private final DownloadItem download;
-    private final UploadItem upload;
+    private DownloadItem download = null;
     
     private DownloadStatusListener downloadStatus;
     
-    private JXTable infoTable;
-    private FileInfoTableModel infoModel;
+    private final StripedJXTable infoTable;
+    private final FileInfoTableModel infoModel;
     
-    private Timer refreshTimer;
-    private JLabel leechersLabel;
-    private JLabel seedersLabel;
+    private final Timer refreshTimer;
+    private final JLabel leechersLabel;
+    private final JLabel seedersLabel;
     
-    private Torrent torrent;
+    private Torrent torrent = null;
     
     public FileInfoTransfersPanel(FileInfoType type, PropertiableFile file, TableDecorator tableDecorator) {
         
-        component = new JPanel(new MigLayout("fillx, gap 0"));
-        
-        if (file instanceof DownloadItem) {
-            download = (DownloadItem) file;
-            upload = null;
+        Torrent localTorrent = (Torrent)file.getProperty(FilePropertyKey.TORRENT);
+        if(localTorrent != null) {
+            assert(localTorrent.isEditable());
+            torrent = localTorrent;
         }
-        else if (file instanceof UploadItem) {
-            download = null;
-            upload = (UploadItem) file;
-        } else {
-            download = null;
-            upload = null;
-            return;
+        
+        if(file instanceof DownloadItem) {
+            download = (DownloadItem) file;
         }
         
         GuiUtils.assignResources(this);
+
+        component = new JPanel(new MigLayout("fillx, gap 0"));
         
         infoModel = new FileInfoTableModel();
-        infoTable = new JXTable(infoModel);
+        infoTable = new StripedJXTable(infoModel);
         
         tableDecorator.decorate(infoTable);
         
@@ -110,31 +101,18 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             download.addPropertyChangeListener(downloadStatus);
         } 
 
-        if ((download != null && download.getDownloadItemType() ==  DownloadItemType.BITTORRENT) 
-            || (upload != null && upload.getUploadItemType() ==  UploadItemType.BITTORRENT)) {
-            
-            if (download != null) {
-                torrent = (Torrent)download.getDownloadProperty(DownloadPropertyKey.TORRENT);
-            } 
-            else {
-                torrent = (Torrent)upload.getUploadProperty(UploadPropertyKey.TORRENT);
-            }
-            
+        leechersLabel = createPlainLabel("");
+        seedersLabel = createPlainLabel("");
+        
+        if(torrent != null) {
             component.add(createBoldLabel(I18n.tr("Total Leechers:")), "split 2");
-            leechersLabel = createPlainLabel("");
             component.add(leechersLabel, "wrap");
         
             component.add(createBoldLabel(I18n.tr("Total Seeders:")), "split 2");
-            seedersLabel = createPlainLabel("");
             component.add(seedersLabel, "wrap");
-        } 
-        else {
-            leechersLabel = null;
-            seedersLabel = null;
-        }
+        }         
         
-        
-        init();
+        initTable();
         refreshTimer = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -145,6 +123,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         // Update by polling to avoid putting too much of a burden on the ui
         //  with an active torrent.
         refreshTimer.start();
+        refresh();
     }
     
     public JComponent getComponent() {
@@ -168,19 +147,22 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     
     @Override
     public void dispose() {
-        refreshTimer.stop();
+        if(refreshTimer != null)
+            refreshTimer.stop();
         
         if(downloadStatus != null) {
             download.removePropertyChangeListener(downloadStatus);
         }
     }
     
-    private void init() {        
+    private void initTable() {        
         TableColumn column = infoTable.getColumn(FileInfoTableModel.ENCRYPTED);
         column.setCellRenderer(new LockRenderer());
         column.setMaxWidth(12);
         column.setMinWidth(12);
         column.setWidth(12);
+        
+        infoTable.setDefaultRenderer(String.class, new DefaultLimeTableCellRenderer());
 
         infoTable.getColumnExt(FileInfoTableModel.IP).setComparator(IpPort.IP_COMPARATOR);
         TableColumn ipColumn = infoTable.getColumn(FileInfoTableModel.IP);
@@ -195,15 +177,10 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     
     private void refresh() {
         infoModel.clear();
-                
-        if (download != null) {
-            infoModel.addAll(download.getSourcesDetails());
-        } else {
-            infoModel.addAll(upload.getTransferDetails());
-        }
-            
+           
         // Add leecher/seeder info if BT
         if (torrent != null) {
+            infoModel.addAll(torrent.getTorrentPeers());
             TorrentStatus status = torrent.getStatus();
             seedersLabel.setText((status.getNumComplete() < 0) ? "?" : (""+status.getNumComplete()));
             leechersLabel.setText((status.getNumIncomplete() < 0) ? "?" : (""+status.getNumIncomplete()));
@@ -256,13 +233,11 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             
             if (value == Boolean.TRUE) {
                 setIcon(lockIcon);
-            }
-            else {
+            } else {
                 setIcon(null);
             }
   
             return this;
-            
         }
     }
     
@@ -274,7 +249,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         public static final int UPLOAD_SPEED = 3;
         public static final int DOWNLOAD_SPEED = 4;
         
-        private List<SourceInfo> sources = new ArrayList<SourceInfo>();
+        private List<TorrentPeer> sources = new ArrayList<TorrentPeer>();
         
         private String[] columnNames = new String[]{tr("Address"),
                 "", tr("Client"), tr("Upload"), tr("Download")};
@@ -283,7 +258,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             sources.clear();
         }
         
-        public void addAll(Collection<SourceInfo> info){
+        public void addAll(Collection<TorrentPeer> info){
             sources.addAll(info);
             fireTableDataChanged();
         }
@@ -301,7 +276,6 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             return null;
         }
 
-
         @Override
         public int getRowCount() {
             return sources.size();
@@ -310,12 +284,12 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             if (rowIndex >= getRowCount()){
-            return null;
+                return null;
             }
             return getColumnValue(sources.get(rowIndex), columnIndex);
         }    
         
-        private Object getColumnValue(SourceInfo info, int column) {
+        private Object getColumnValue(TorrentPeer info, int column) {
             switch (column){
             case IP:
                 try {
@@ -326,7 +300,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
                     return null;
                 }
             case ENCRYPTED:
-                return info.isEncyrpted();
+                return info.isEncrypted();
             case CLIENT_NAME:
                 return info.getClientName();
             case UPLOAD_SPEED:
@@ -339,7 +313,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
     }
 
-    private static class SpeedRenderer extends DefaultTableCellRenderer {
+    private static class SpeedRenderer extends DefaultLimeTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
@@ -348,9 +322,9 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             }
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
-        
     }
-    private static class IPRenderer extends DefaultTableCellRenderer {
+    
+    private static class IPRenderer extends DefaultLimeTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
@@ -359,7 +333,5 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
             }
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
-        
     }
-    
 }

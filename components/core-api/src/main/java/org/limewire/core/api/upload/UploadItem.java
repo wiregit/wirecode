@@ -132,12 +132,6 @@ public interface UploadItem extends PropertiableFile {
     public void resume();
     
     /**
-     * Returns the given Upload property that matches the UploadPropertyKey, null is returned if the 
-     * property does not exist for this UploadItem. 
-     */
-    public Object getUploadProperty(UploadPropertyKey key);
-    
-    /**
      * @return A list of details pertaining to the sources associated with the download.
      * 
      * <p>NOTE: May include upload only sources.

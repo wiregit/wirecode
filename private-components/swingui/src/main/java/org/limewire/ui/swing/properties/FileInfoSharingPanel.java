@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -133,9 +134,9 @@ public class FileInfoSharingPanel implements FileInfoPanel {
                         table.setTableHeader(null);
                         
                         table.getColumn(0).setCellRenderer(new IconRenderer());
-                        table.getColumn(0).setMinWidth(16);
-                        table.getColumn(0).setMaxWidth(16);
-                        table.getColumn(0).setWidth(16);
+                        table.getColumn(0).setMinWidth(26);
+                        table.getColumn(0).setMaxWidth(26);
+                        table.getColumn(0).setWidth(26);
                         
                         JScrollPane scroll = new JScrollPane(table);
                         scroll.setOpaque(false);
@@ -313,12 +314,14 @@ public class FileInfoSharingPanel implements FileInfoPanel {
     }
     
     private static class IconRenderer extends JPanel implements TableCellRenderer {
-        
+
+        private static final Border border = BorderFactory.createEmptyBorder(0,5,0,5);
         private final JLabel label = new JLabel();
         
         public IconRenderer() {
             super(new BorderLayout());
             add(label, BorderLayout.CENTER);
+            setBorder(border);
         }
         
         @Override

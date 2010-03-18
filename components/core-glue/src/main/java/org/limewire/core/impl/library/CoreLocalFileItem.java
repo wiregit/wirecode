@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.InvalidURN;
@@ -31,13 +32,16 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     private final FileDesc fileDesc;
     private final LocalFileDetailsFactory detailsFactory;
     private final CreationTimeCache creationTimeCache;
+    private final TorrentFactory torrentFactory;
 
     @Inject
     public CoreLocalFileItem(@Assisted FileDesc fileDesc, LocalFileDetailsFactory detailsFactory,
-            CreationTimeCache creationTimeCache, CategoryManager categoryManager) {
+            CreationTimeCache creationTimeCache, CategoryManager categoryManager,
+            TorrentFactory torrentFactory) {
         this.fileDesc = fileDesc;
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
+        this.torrentFactory = torrentFactory;
         this.category = categoryManager.getCategoryForFile(fileDesc.getFile());
     }
 
@@ -102,7 +106,9 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
             long ct = getCreationTime();
             return ct == -1 ? null : ct;
         case FILE_SIZE:
-            return getSize();            
+            return getSize();       
+        case TORRENT:
+            return torrentFactory.createTorrentFromXML(fileDesc.getXMLDocument());
         default:
             return FilePropertyKeyPopulator.get(category, property, fileDesc.getXMLDocument());
         }
@@ -211,5 +217,4 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     public boolean isLoaded() {
         return !InvalidURN.instance.equals(getUrn());
     }
-    
 }

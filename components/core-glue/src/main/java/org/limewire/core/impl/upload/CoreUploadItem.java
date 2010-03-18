@@ -14,7 +14,6 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadPropertyKey;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
@@ -270,21 +269,32 @@ class CoreUploadItem implements UploadItem {
     @Override
     public Object getProperty(FilePropertyKey property) {
         FileDesc fd = uploader.getFileDesc();
-        if(fd != null) {
-            switch(property) {
-            case NAME:
-                return FileUtils.getFilenameNoExtension(fd.getFileName());
-            case DATE_CREATED:
+        switch(property) {
+        case NAME:
+            return (fd == null) ? null : FileUtils.getFilenameNoExtension(fd.getFileName());
+        case DATE_CREATED:
+            if(fd == null) {
+                return null;
+            } else {
                 long ct = fd.lastModified();
                 return ct == -1 ? null : ct;
-            case FILE_SIZE:
-                return fd.getFileSize();            
-            default:
+            }
+        case FILE_SIZE:
+            return (fd == null) ? null : fd.getFileSize();            
+        case TORRENT:
+            if(UploadItemType.BITTORRENT == uploadItemType) {
+                BTUploader btUploader = (BTUploader)uploader;
+                return btUploader.getTorrent();
+            } else {
+                return null;
+            }
+        default:
+            if(fd == null) {
+                return null;
+            } else {
                 Category category = categoryManager.getCategoryForFilename(fd.getFileName());
                 return FilePropertyKeyPopulator.get(category, property, fd.getXMLDocument());
             }
-        } else {
-            return null;
         }
     }
 
@@ -395,16 +405,7 @@ class CoreUploadItem implements UploadItem {
     public void resume() {
         uploader.resume();        
     }
-    
-    @Override
-    public Object getUploadProperty(UploadPropertyKey key) {
-        if(key == UploadPropertyKey.TORRENT && UploadItemType.BITTORRENT == uploadItemType) {
-            BTUploader btUploader = (BTUploader)uploader;
-            return btUploader.getTorrent();
-        }
-        return null;
-    }
-    
+   
     /**
      * Creates a RemoteHost for this uploader. This allows browses on the 
      * person uploading this file.

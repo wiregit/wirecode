@@ -5,7 +5,6 @@ package org.limewire.core.api.download;
  * different properties from the different downloaders available.
  */
 public enum DownloadPropertyKey {
-    TORRENT, 
     /** The AntivirusUpdateType*/
     ANTIVIRUS_UPDATE_TYPE, 
     /**The index of the update (if the update is incremental)*/

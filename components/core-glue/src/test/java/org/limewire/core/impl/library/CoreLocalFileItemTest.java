@@ -11,6 +11,7 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.friend.api.FileMetaData;
 
@@ -27,6 +28,7 @@ public class CoreLocalFileItemTest extends TestCase {
 
     private CoreLocalFileItem coreLocalFileItem;
     private CategoryManager categoryManager;
+    private TorrentFactory torrentFactory;
 
     private FileDesc fileDesc;
 
@@ -50,6 +52,8 @@ public class CoreLocalFileItemTest extends TestCase {
         creationTimeCache = context.mock(CreationTimeCache.class);
         document = context.mock(LimeXMLDocument.class);
         categoryManager = context.mock(CategoryManager.class);
+        torrentFactory = context.mock(TorrentFactory.class);
+        
         file = new File("test.txt");
         context.checking(new Expectations() {{
             allowing(fileDesc).getFile();
@@ -57,7 +61,7 @@ public class CoreLocalFileItemTest extends TestCase {
             allowing(categoryManager).getCategoryForFile(file);
             will(returnValue(Category.DOCUMENT));
         }});
-        coreLocalFileItem = new CoreLocalFileItem(fileDesc, detailsFactory, creationTimeCache, categoryManager);
+        coreLocalFileItem = new CoreLocalFileItem(fileDesc, detailsFactory, creationTimeCache, categoryManager, torrentFactory);
     }
 
     public void testGetCreationTime() {
@@ -261,7 +265,7 @@ public class CoreLocalFileItemTest extends TestCase {
             one(incompleteFileDesc).getFile();
             will(returnValue(file));
         }});
-        coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory, creationTimeCache, categoryManager);
+        coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory, creationTimeCache, categoryManager, torrentFactory);
         context.assertIsSatisfied();
         
         context.checking(new Expectations() {{
@@ -300,7 +304,7 @@ public class CoreLocalFileItemTest extends TestCase {
             }
         });
         coreLocalFileItem = new CoreLocalFileItem(incompleteFileDesc, detailsFactory,
-                creationTimeCache, categoryManager);
+                creationTimeCache, categoryManager, torrentFactory);
 
         assertTrue(coreLocalFileItem.isIncomplete());
     }

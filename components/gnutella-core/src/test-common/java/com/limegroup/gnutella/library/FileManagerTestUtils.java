@@ -192,6 +192,11 @@ public class FileManagerTestUtils {
         return "<?xml version=\"1.0\"?><documents xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/document.xsd\">" +
                 "<document " + keyname + " /></documents>";    
     }
+    
+    public static String buildTorrentXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><torrents xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/torrent.xsd\">" +
+        "<torrent " + keyname + " /></torrents>";   
+    }
 
     
     /**
