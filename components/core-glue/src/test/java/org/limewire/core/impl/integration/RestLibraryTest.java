@@ -36,10 +36,6 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
         validateLibraryMetadata(LIBRARY_PREFIX, NO_PARAMS, TOTAL_FILES);
     }
 
-    public void testSpecificFiles() throws Exception {
-        // TODO:
-    }
-
     public void testLimits() throws Exception {
         validateLibraryResults(FILES_PREFIX, "limit=10", 10);
         validateLibraryResults(FILES_PREFIX, "limit=49", MAX_FILES - 1);
