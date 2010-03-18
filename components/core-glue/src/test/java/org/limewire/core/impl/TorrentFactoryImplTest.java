@@ -6,7 +6,6 @@ import junit.framework.Test;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;

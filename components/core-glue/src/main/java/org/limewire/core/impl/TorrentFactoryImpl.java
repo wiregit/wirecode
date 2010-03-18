@@ -2,7 +2,6 @@ package org.limewire.core.impl;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManager;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 
@@ -10,7 +9,7 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
-public class TorrentFactoryImpl implements TorrentFactory {
+class TorrentFactoryImpl implements TorrentFactory {
 
     private final TorrentManager torrentManager;
     

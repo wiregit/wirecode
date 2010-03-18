@@ -1,4 +1,4 @@
-package org.limewire.core.api;
+package org.limewire.core.impl;
 
 import org.limewire.bittorrent.Torrent;
 

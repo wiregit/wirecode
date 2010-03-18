@@ -1,7 +1,6 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;

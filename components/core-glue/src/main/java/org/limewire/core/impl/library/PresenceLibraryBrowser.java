@@ -10,7 +10,6 @@ import java.util.Set;
 import net.jcip.annotations.GuardedBy;
 
 import org.limewire.collection.glazedlists.AbstractListEventListener;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
@@ -19,6 +18,7 @@ import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendPresence;

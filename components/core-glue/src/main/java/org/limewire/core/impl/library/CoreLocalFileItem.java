@@ -7,10 +7,10 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.InvalidURN;
+import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.impl.FileMetaDataImpl;

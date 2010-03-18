@@ -11,8 +11,8 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.TorrentFactory;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.impl.TorrentFactory;
 import org.limewire.friend.api.FileMetaData;
 
 import com.limegroup.gnutella.URN;
