@@ -33,8 +33,6 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     private static final String SEARCH_PREFIX = RestPrefix.SEARCH.pattern();;
     private static final String FILES_PREFIX = "/files";
     
-    private static final String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
-
     // mock query data
     private final String[] queryNames = { "what is available", "speedster", "time runs by" };
     private final String[] filenames = { "superfly.mp3", "quantum.doc", "simplistic mind.mov",
@@ -98,6 +96,8 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     }
 
     public void testNegativesNoMock() throws Exception {
+
+        String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
 
         // invalid GUIDs,targets
         assertResponseEmpty(SEARCH_PREFIX + FAKEGUID,NO_PARAMS);
