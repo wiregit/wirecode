@@ -1,7 +1,10 @@
 package org.limewire.core.impl.integration;
 
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
+
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +53,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     @Inject protected Library library;
     @Inject protected CategoryManager categoryMgr;
 
-    protected HashSet<Map<String,String>> libraryMap = null;
+    protected HashSet<Map<String,String>> librarySet = null;
 
     public AbstractRestIntegrationTestcase(String name) {
         super(name);
@@ -65,7 +68,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         Module combined = Modules.combine(modules);
         CoreGlueTestUtils.createInjectorAndStart(combined,new MockRestModule(),LimeTestUtils
                 .createModule(this));
-        libraryMap = new HashSet<Map<String,String>>();
+        librarySet = new HashSet<Map<String,String>>();
     }
 
     @Override protected void tearDown() throws Exception {
@@ -122,6 +125,25 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     }
 
     /**
+     * performs http GET and returns response content byte[]
+     */
+    protected byte[] getHttpResponseBytes(String target, String params) throws Exception {
+
+        byte[] barr = null;
+        HttpResponse response = null;
+        HttpGet method = new HttpGet(buildUrl(target,params));
+
+        try {
+            response = client.execute(method);
+            HttpEntity entity = response.getEntity();
+            barr = EntityUtils.toByteArray(entity);
+        } finally {
+            client.releaseConnection(response);
+        }
+        return barr;
+    }
+    
+    /**
      * loads sample files to library
      */
     protected void loadLibraryFiles() throws Exception {
@@ -145,21 +167,58 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
             fileMap.put("size",String.valueOf(file.getFileSize()));
             fileMap.put("filename",file.getFileName());
             fileMap.put("sha1Urn",getUrn(file));
-            libraryMap.add(fileMap);
+            librarySet.add(fileMap);
         }
+    }
+
+    /**
+     * creates a temp file, adds to library, then deletes it locally; useful for
+     * negative testing
+     */
+    protected File forceMissingLibFile() throws Exception {
+        File tmpFile = createNewTestFile(10,_scratchDir);
+        FileManagerTestUtils.assertAdds(library,tmpFile);
+        tmpFile.delete();
+        return tmpFile;
+    }
+
+    /**
+     * creates a temp file, adds to library, then add some garbage bytes to the
+     * file locally; useful for negative testing
+     */
+    protected File forceCorruptLibFile() throws Exception {
+        File tmpFile = createNewTestFile(100,_scratchDir);
+        FileManagerTestUtils.assertAdds(library,tmpFile);
+        FileOutputStream fos = new FileOutputStream(tmpFile);
+        try {
+            fos.write(new byte[] { 0, 100, 4, 36, 6 });
+        } finally {
+            fos.flush();
+            fos.close();
+        }
+        return tmpFile;
     }
 
     /**
      * response is empty
      */
-    @SuppressWarnings("unused") 
-    protected void assertResponseEmpty(String target, String params)
-            throws Exception {
+    protected void assertResponseEmpty(String target, String params) throws Exception {
         String r = getHttpResponse(target,params);
         boolean isEmpty = r.isEmpty()|r.equals("{}")|r.equals("[]");
         assertTrue("expected empty response: "+r,isEmpty);
     }
 
+    /**
+     * urn for file item w/ workaround for LWC-5478
+     */
+    protected String getUrn(FileDesc file) {
+        String shortUrn = file.getSHA1Urn().toString();
+        if (shortUrn.startsWith("urn:sha1:")) {
+            shortUrn = shortUrn.substring(9);
+        }
+        return shortUrn;
+    }
+    
     /**
      * generates a huge string for negative testing
      */
@@ -194,17 +253,6 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
             resultSet.add(buildResultsMap(jobj));
         }
         return resultSet;
-    }
-
-    /**
-     * urn for file item w/ workaround for LWC-5478
-     */
-    private String getUrn(FileDesc file) {
-        String shortUrn = file.getSHA1Urn().toString();
-        if (shortUrn.startsWith("urn:sha1:")) {
-            shortUrn = shortUrn.substring(9);
-        }
-        return shortUrn;
     }
 
     /**

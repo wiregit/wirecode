@@ -35,6 +35,7 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
 
     public void testBasicGets() throws Exception {
         validateLibraryMetadata(LIBRARY_PREFIX,NO_PARAMS,TOTAL_FILES);
+        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);        
     }
 
     public void testLimits() throws Exception {
@@ -58,8 +59,6 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
      */
     public void testNegatives() throws Exception {
 
-        String response = "";
-
         // garbage parameters should be ignored & library data returned
         validateLibraryMetadata(LIBRARY_PREFIX,"this=is_garbage",TOTAL_FILES);
         validateLibraryMetadata(LIBRARY_PREFIX,"?something=test",TOTAL_FILES);
@@ -69,17 +68,23 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
         validateLibraryResults(FILES_PREFIX,"?limit=1",MAX_FILES);
 
         // unexpected api library targets should return empty page
-        response = getHttpResponse(LIBRARY_PREFIX+"/garbage",NO_PARAMS);
-        assertTrue("expected empty response "+response,response.isEmpty());
-        response = getHttpResponse("garbage",NO_PARAMS);
-        assertTrue("expected empty response "+response,response.isEmpty());
-
-        validateLibraryResults(FILES_PREFIX,"type="+bigString(4000),MAX_FILES);
+        assertResponseEmpty(LIBRARY_PREFIX+"/garbage",NO_PARAMS);
+        assertResponseEmpty("garbage",NO_PARAMS);
+        validateLibraryResults(FILES_PREFIX,"type="+bigString(4000),MAX_FILES);        
         /*
          * odd parameters don't throw exceptions (LWC-5523)
          * validateLibraryResults(FILES,"limit=2147483650",0); // longInt
          * response = getHttpResponse(FILES,"limit=not_a_number"); // datatype
-         */
+         */        
+        // library contains deleted file
+        forceMissingLibFile();
+        validateLibraryMetadata(LIBRARY_PREFIX,NO_PARAMS,TOTAL_FILES+1);
+        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);
+        
+        // library contains corrupt file
+        forceCorruptLibFile();
+        validateLibraryMetadata(LIBRARY_PREFIX,NO_PARAMS,TOTAL_FILES+2);
+        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);      
     }
 
     // ---------------------- private methods ----------------------
@@ -106,9 +111,9 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
             int expectedSize) throws Exception {
         Set<Map<String,String>> resultSet = listGET(target,params);
         assertEquals("result size invalid: "+resultSet.size(),expectedSize,resultSet.size());
-        String assertInfo = "results unexpected.  ----------EXPECT: "+libraryMap
+        String assertInfo = "results unexpected.  ----------EXPECT: "+librarySet
                 +"---------- FOUND: "+resultSet;
-        assertTrue(assertInfo,libraryMap.containsAll(resultSet));
+        assertTrue(assertInfo,librarySet.containsAll(resultSet));
         return resultSet;
     }
 
