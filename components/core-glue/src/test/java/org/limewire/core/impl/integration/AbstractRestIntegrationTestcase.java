@@ -128,7 +128,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     /**
      * loads sample files to library
      */
-    protected void loadLibraryFiles(int timeout) throws Exception {
+    protected void loadLibraryFiles() throws Exception {
 
         File folder = TestUtils.getResourceInPackage(SAMPLE_DIR,getClass());
         List<FileDesc> files = FileManagerTestUtils.assertAddsFolder(library,folder,

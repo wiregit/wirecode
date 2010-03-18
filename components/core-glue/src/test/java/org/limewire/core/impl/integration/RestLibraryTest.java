@@ -22,7 +22,7 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        loadLibraryFiles(10000);
+        loadLibraryFiles();
     }
 
     // -------------------------- tests --------------------------
