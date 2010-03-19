@@ -165,7 +165,10 @@ public class XMLTorrent implements Torrent {
 
     @Override
     public String getTrackerURL() {
-        return trackers.get(0);
+        if(trackers.size() == 0)
+            return "";
+        else
+            return trackers.get(0);
     }
 
     @Override
