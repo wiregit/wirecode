@@ -26,6 +26,11 @@ public class MockSearchManager implements SearchManager {
     }
     
     @Override
+    public SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails) {
+        return addSearch(search, searchDetails);
+    }
+    
+    @Override
     public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
         // Create result list.
         SearchResultList resultList = new MockSearchResultList(search, searchDetails);

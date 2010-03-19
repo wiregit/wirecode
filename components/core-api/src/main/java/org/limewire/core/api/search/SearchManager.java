@@ -9,9 +9,22 @@ public interface SearchManager {
 
     /**
      * Adds the specified search to the manager and returns its result list.
-     * This method should be called before starting the search; otherwise, the
+     * A monitored search will be automatically cancelled if no attempt is 
+     * made to reference its result list for a period of time.
+     * 
+     * <p>This method should be called before starting the search; otherwise, the
      * result list may not contain results generated before the list was
-     * created.
+     * created.</p>
+     */
+    SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails);
+    
+    /**
+     * Adds the specified search to the manager and returns its result list.
+     * The search will remain alive until it is explicitly stopped.
+     * 
+     * <p>This method should be called before starting the search; otherwise, the
+     * result list may not contain results generated before the list was
+     * created.</p>
      */
     SearchResultList addSearch(Search search, SearchDetails searchDetails);
     

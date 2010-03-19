@@ -10,6 +10,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
@@ -802,6 +803,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     private static class TestSearchManager implements SearchManager {
 
         @Override
+        public SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails) {
+            return addSearch(search, searchDetails);
+        }
+
+        @Override
         public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
             return new TestSearchResultList();
         }
@@ -845,6 +851,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public void dispose() {
+        }
+
+        @Override
+        public GroupedSearchResult getGroupedResult(URN urn) {
+            return null;
         }
 
         @Override

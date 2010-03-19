@@ -18,8 +18,12 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
@@ -30,17 +34,19 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
 /**
- * JUnit test case for LibraryRequestHandler.
+ * JUnit test case for SearchRequestHandler.
  */
 public class SearchRequestHandlerTest extends BaseTestCase {
     private static final String SEARCH_GUID = "BA8DB600AC11FE2EE3033F5AFF57F500";
     private static final String SEARCH_QUERY = "test";
     private static final String SEARCH_FILENAME = "test.mpg";
+    private static final URN SEARCH_URN = new MockURN("test");
     
     /** Instance of class being tested. */
     private SearchRequestHandler requestHandler;
 
     private Mockery context;
+    private SearchFactory mockSearchFactory;
     private SearchManager mockSearchManager;
     private SearchResultList mockResultList;
     private GroupedSearchResult mockGroupedResult;
@@ -64,6 +70,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         
         // Create mock objects.
         context = new Mockery();
+        mockSearchFactory = context.mock(SearchFactory.class);
         mockSearchManager = context.mock(SearchManager.class);
         mockResultList = context.mock(SearchResultList.class);
         mockGroupedResult = context.mock(GroupedSearchResult.class);
@@ -79,7 +86,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         searchResults.add(mockSearchResult);
 
         // Create instance to be tested.
-        requestHandler = new SearchRequestHandler(mockSearchManager);
+        requestHandler = new SearchRequestHandler(mockSearchManager, mockSearchFactory);
     }
 
     @Override
@@ -97,8 +104,8 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         super.tearDown();
     }
 
-    /** Tests method to handle request for searches. */
-    public void testHandleSearches() throws Exception {
+    /** Tests method to handle request for all searches. */
+    public void testGetAllSearches() throws Exception {
         final String testUri = "http://localhost/remote/search";
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
@@ -153,7 +160,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
     }
     
     /** Tests method to handle request for search metadata. */
-    public void testHandleSearch() throws Exception {
+    public void testGetSearchData() throws Exception {
         final String testUri = "http://localhost/remote/search/" + SEARCH_GUID;
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
@@ -209,7 +216,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
     }
     
     /** Tests method to handle request for search results. */
-    public void testHandleSearchResults() throws Exception {
+    public void testGetSearchResults() throws Exception {
         final String testUri = "http://localhost/remote/search/" + SEARCH_GUID + "/files";
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
@@ -232,8 +239,15 @@ public class SearchRequestHandlerTest extends BaseTestCase {
             will(returnValue(searchResults));
             allowing(mockGroupedResult).getSources();
             will(returnValue(remoteHosts));
+            allowing(mockGroupedResult).getUrn();
+            will(returnValue(SEARCH_URN));
             
-            allowing(mockSearchResult);
+            allowing(mockSearchResult).getCategory();
+            will(returnValue(Category.AUDIO));
+            allowing(mockSearchResult).getProperty(FilePropertyKey.AUTHOR);
+            will(returnValue("author"));
+            allowing(mockSearchResult).getProperty(FilePropertyKey.TITLE);
+            will(returnValue("title"));
             
             allowing(mockRequestLine).getMethod();
             will(returnValue(RestUtils.GET));

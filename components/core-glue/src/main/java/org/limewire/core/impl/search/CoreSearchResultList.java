@@ -86,6 +86,22 @@ class CoreSearchResultList implements SearchResultList {
     }
     
     @Override
+    public GroupedSearchResult getGroupedResult(URN urn) {
+        Lock lock = groupedUrnResultList.getReadWriteLock().writeLock();
+        lock.lock();
+        try {
+            int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
+            if (idx >= 0) {
+                return groupedUrnResultList.get(idx);
+            } else {            
+                return null;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    @Override
     public EventList<GroupedSearchResult> getGroupedResults() {
         return threadSafeResultList;
     }

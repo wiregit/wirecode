@@ -20,10 +20,28 @@ import com.google.inject.Inject;
 public class CoreSearchManager implements SearchManager {
 
     private final List<SearchResultList> threadSafeSearchList;
+    private final SearchMonitor searchMonitor;
     
+    /**
+     * Constructs a CoreSearchManager with the specified services.
+     */
     @Inject
-    public CoreSearchManager() {
+    public CoreSearchManager(SearchMonitor searchMonitor) {
+        this.searchMonitor = searchMonitor;
         this.threadSafeSearchList = new CopyOnWriteArrayList<SearchResultList>();
+    }
+    
+    @Override
+    public SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails) {
+        synchronized (searchMonitor) {
+            // Add search.
+            SearchResultList resultList = addSearch(search, searchDetails);
+            
+            // Add search result list to monitor.
+            searchMonitor.addSearch(resultList, new CancelTask(resultList));
+            
+            return resultList;
+        }
     }
     
     @Override
@@ -39,12 +57,17 @@ public class CoreSearchManager implements SearchManager {
 
     @Override
     public void removeSearch(Search search) {
-        // Dispose of result list and remove from collection.
-        for (SearchResultList resultList : threadSafeSearchList) {
-            if (search.equals(resultList.getSearch())) {
-                resultList.dispose();
-                threadSafeSearchList.remove(resultList);
-                break;
+        synchronized (searchMonitor) {
+            // Dispose of result list and remove from collection.
+            for (SearchResultList resultList : threadSafeSearchList) {
+                if (search.equals(resultList.getSearch())) {
+                    // Dispose search and remove from management.
+                    resultList.dispose();
+                    threadSafeSearchList.remove(resultList);
+                    // Remove from search monitor.
+                    searchMonitor.removeSearch(resultList);
+                    break;
+                }
             }
         }
     }
@@ -53,10 +76,14 @@ public class CoreSearchManager implements SearchManager {
     public List<SearchResultList> getActiveSearchLists() {
         List<SearchResultList> list = new ArrayList<SearchResultList>();
         
-        // Add active searches to list.
-        for (SearchResultList resultList : threadSafeSearchList) {
-            if (resultList.getGuid() != null) {
-                list.add(resultList);
+        synchronized (searchMonitor) {
+            // Add active searches to list.
+            for (SearchResultList resultList : threadSafeSearchList) {
+                if (resultList.getGuid() != null) {
+                    // Update search monitor.
+                    searchMonitor.updateSearch(resultList);
+                    list.add(resultList);
+                }
             }
         }
         
@@ -65,11 +92,15 @@ public class CoreSearchManager implements SearchManager {
 
     @Override
     public SearchResultList getSearchResultList(String guidStr) {
-        // Return result list from collection.
-        for (SearchResultList resultList : threadSafeSearchList) {
-            GUID guid = resultList.getGuid();
-            if ((guid != null) && guidStr.equalsIgnoreCase(guid.toString())) {
-                return resultList;
+        synchronized (searchMonitor) {
+            // Return result list from collection.
+            for (SearchResultList resultList : threadSafeSearchList) {
+                GUID guid = resultList.getGuid();
+                if ((guid != null) && guidStr.equalsIgnoreCase(guid.toString())) {
+                    // Update search monitor.
+                    searchMonitor.updateSearch(resultList);
+                    return resultList;
+                }
             }
         }
         
@@ -79,14 +110,42 @@ public class CoreSearchManager implements SearchManager {
 
     @Override
     public SearchResultList getSearchResultList(Search search) {
-        // Return result list from collection.
-        for (SearchResultList resultList : threadSafeSearchList) {
-            if (search.equals(resultList.getSearch())) {
-                return resultList;
+        synchronized (searchMonitor) {
+            // Return result list from collection.
+            for (SearchResultList resultList : threadSafeSearchList) {
+                if (search.equals(resultList.getSearch())) {
+                    // Update search monitor.
+                    searchMonitor.updateSearch(resultList);
+                    return resultList;
+                }
             }
         }
-        
+
         // Return null if search not found.
         return null;
+    }
+    
+    /**
+     * Task to cancel a search.  This is executed by the search monitor when
+     * it has determined that the search has timed out.
+     */
+    private class CancelTask implements Runnable {
+        private final SearchResultList resultList;
+        
+        public CancelTask(SearchResultList resultList) {
+            this.resultList = resultList;
+        }
+
+        @Override
+        public void run() {
+            synchronized (searchMonitor) {
+                // Stop search and remove from management.
+                resultList.getSearch().stop();
+                resultList.dispose();
+                threadSafeSearchList.remove(resultList);
+                // Remove from search monitor.
+                searchMonitor.removeSearch(resultList);
+            }
+        }
     }
 }

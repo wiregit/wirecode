@@ -21,6 +21,7 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
 
     private final Provider<LibraryRequestHandler> libraryHandlerFactory;
     private final Provider<SearchRequestHandler> searchHandlerFactory;
+    private final Provider<DownloadRequestHandler> downloadHandlerFactory;
     private final Provider<StreamRequestHandler> streamHandlerFactory;
     
     /**
@@ -30,9 +31,11 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
     public RestRequestHandlerFactoryImpl(
             Provider<LibraryRequestHandler> libraryHandlerFactory,
             Provider<SearchRequestHandler> searchHandlerFactory,
+            Provider<DownloadRequestHandler> downloadHandlerFactory,
             Provider<StreamRequestHandler> streamHandlerFactory) {
         this.libraryHandlerFactory = libraryHandlerFactory;
         this.searchHandlerFactory = searchHandlerFactory;
+        this.downloadHandlerFactory = downloadHandlerFactory;
         this.streamHandlerFactory = streamHandlerFactory;
     }
     
@@ -45,6 +48,8 @@ class RestRequestHandlerFactoryImpl implements RestRequestHandlerFactory {
             return libraryHandlerFactory.get();
         case SEARCH:
             return searchHandlerFactory.get();
+        case DOWNLOAD:
+            return downloadHandlerFactory.get();
         case STREAM:
             return streamHandlerFactory.get();
         default:
