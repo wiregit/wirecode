@@ -32,9 +32,6 @@ public class ActiveLimeWireCheck {
     // Old-fashioned singleton because it's used before the injector is created
     private static final ActiveLimeWireCheck instance = new ActiveLimeWireCheck();
 
-    private volatile RandomAccessFile file = null;
-    private volatile FileLock lock = null;
-
     public static ActiveLimeWireCheck instance() {
         return instance;
     }
@@ -58,70 +55,55 @@ public class ActiveLimeWireCheck {
     }
 
     /**
-     * Releases the file lock obtained at startup. If no lock was obtained,
-     * this method has no effect. If a lock was obtained and this method is
-     * never called, the OS *should* remove the lock when the JVM exits.
-     */
-    public void releaseLock() {
-        if(lock != null) {
-            try {
-                lock.release();
-                file.close(); // This also closes the channel
-                LOG.trace("Released lock");
-            } catch(IOException e) {
-                LOG.debug("Failed to release lock", e);
-            }
-        }
-    }
-
-    /**
      * Checks if the client is already running, and if so, tries to pass it the
      * argument, which may be null.
      * 
-     * @param handoffLink String representing the torrent/magnet link to hand of to
-     * existing LW instance if necessary
+     * @param handoffLink a string representing the torrent/magnet link to hand
+     * off to an existing LW instance if necessary.
      * @return true if another instance is running, in which case this instance
      * must quit.
      * @throws ActiveLimeWireException if another instance appears to be
      * running but it can't be contacted.
      */
     private boolean testForLimeWire(String handoffLink) throws ActiveLimeWireException {
-        // Try to lock a file in the settings dir; if the lock can't be
-        // acquired, another instance of LW is running.
-        try {
-            File f = new File(CommonUtils.getUserSettingsDir(), "lock");
-            f.createNewFile();
-            file = new RandomAccessFile(f, "rw");
-            lock = file.getChannel().tryLock(); // Null if we can't get the lock
-        } catch(IOException e) {
-            // Couldn't access the file - something's badly wrong, so quit
-            LOG.error("Failed to access lock file", e);
-            return true;
-        }
-        if(lock == null) {
+        File file = new File(CommonUtils.getUserSettingsDir(), "lock");
+        FileLock lock;
+        long start = System.currentTimeMillis();
+        while(System.currentTimeMillis() - start < 5 * 60 * 1000) {
+            // Try to lock a file in the settings dir; if the lock can't be
+            // acquired, another instance of LW is running.
+            try {
+                file.getParentFile().mkdirs(); // Ensure the settings dir exists
+                RandomAccessFile r = new RandomAccessFile(file, "rw");
+                lock = r.getChannel().tryLock(); // Null if we can't get the lock
+            } catch(IOException e) {
+                // Couldn't access the file - something's badly wrong, so quit.
+                LOG.error("Failed to access lock file", e);
+                return true;
+            }
+            if(lock != null) {
+                LOG.trace("Acquired lock");
+                // Don't do this without acquiring the lock first or we could
+                // delete a file locked by another instance, effectively
+                // removing its lock.
+                file.deleteOnExit();
+                return false;
+            }
             // Another instance is running, but it may not be listening on the
             // port yet; try for FIVE WHOLE MINUTES to contact it (on a
             // heavily loaded machine it can take that long for an instance to
             // start accepting connections after acquiring the lock). 
             LOG.trace("Could not acquire lock");
-            long start = System.currentTimeMillis();
-            while(System.currentTimeMillis() - start < 5 * 60 * 1000) {
-                if(tryToContactRunningLimeWire(handoffLink)) {
-                    LOG.trace("Contacted existing instance");
-                    return true;
-                }
-                try {
-                    Thread.sleep(2000);
-                } catch(InterruptedException ignored) {}
+            if(tryToContactRunningLimeWire(handoffLink)) {
+                LOG.trace("Contacted existing instance");
+                return true;
             }
-            LOG.trace("Could not contact existing instance");
-            throw new ActiveLimeWireException();
+            try {
+                Thread.sleep(2000);
+            } catch(InterruptedException ignored) {}
         }
-        LOG.trace("Acquired lock");
-        
-        // We acquired the lock.  
-        // Assuming no other version of LW, no other version of LW running.
-        return false;
+        LOG.trace("Could not contact existing instance");
+        throw new ActiveLimeWireException();
     }
 
     /**
