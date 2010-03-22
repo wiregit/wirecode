@@ -244,8 +244,18 @@ public class SearchRequestHandlerTest extends BaseTestCase {
             
             allowing(mockSearchResult).getCategory();
             will(returnValue(Category.AUDIO));
+            allowing(mockSearchResult).getSize();
+            will(returnValue(16384L));
+            allowing(mockSearchResult).getMagnetURL();
+            will(returnValue("magnet:?mt=whatever"));
+            allowing(mockSearchResult).isSpam();
+            will(returnValue(false));
             allowing(mockSearchResult).getProperty(FilePropertyKey.AUTHOR);
-            will(returnValue("author"));
+            will(returnValue("artist"));
+            allowing(mockSearchResult).getProperty(FilePropertyKey.ALBUM);
+            will(returnValue("album"));
+            allowing(mockSearchResult).getProperty(FilePropertyKey.GENRE);
+            will(returnValue("genre"));
             allowing(mockSearchResult).getProperty(FilePropertyKey.TITLE);
             will(returnValue("title"));
             

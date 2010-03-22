@@ -17,6 +17,7 @@ import org.jmock.Mockery;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -71,12 +72,33 @@ public class LibraryRequestHandlerTest extends BaseTestCase {
             will(returnValue(Category.IMAGE));
             allowing(mockFileItem1).getSize();
             will(returnValue((long) 1024));
+            allowing(mockFileItem1).getUrn();
+            will(returnValue(new MockURN("urn:sha1:testurn1")));
+            allowing(mockFileItem1).getProperty(FilePropertyKey.AUTHOR);
+            will(returnValue("artist"));
+            allowing(mockFileItem1).getProperty(FilePropertyKey.ALBUM);
+            will(returnValue("album"));
+            allowing(mockFileItem1).getProperty(FilePropertyKey.GENRE);
+            will(returnValue("genre"));
+            allowing(mockFileItem1).getProperty(FilePropertyKey.TITLE);
+            will(returnValue("title"));
+            
             allowing(mockFileItem2).getFileName();
             will(returnValue("test2.jpg"));
             allowing(mockFileItem2).getCategory();
             will(returnValue(Category.IMAGE));
             allowing(mockFileItem2).getSize();
             will(returnValue((long) 1024));
+            allowing(mockFileItem2).getUrn();
+            will(returnValue(new MockURN("urn:sha1:testurn2")));
+            allowing(mockFileItem2).getProperty(FilePropertyKey.AUTHOR);
+            will(returnValue("artist"));
+            allowing(mockFileItem2).getProperty(FilePropertyKey.ALBUM);
+            will(returnValue("album"));
+            allowing(mockFileItem2).getProperty(FilePropertyKey.GENRE);
+            will(returnValue("genre"));
+            allowing(mockFileItem2).getProperty(FilePropertyKey.TITLE);
+            will(returnValue("title"));
         }});
         
         // Create instance to be tested.

@@ -15,6 +15,15 @@ import java.util.Random;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.nio.entity.NStringEntity;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.LibraryFileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResultList;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
@@ -177,5 +186,77 @@ public abstract class RestUtils {
             byte[] bytes = StringUtils.toUTF8Bytes(secret);
             FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), ACCESS_FILE, bytes);
         }
+    }
+    
+    /**
+     * Creates the JSON description object for the specified local file item.
+     */
+    public static JSONObject createFileItemJson(LocalFileItem fileItem) throws JSONException {
+        String sha1String = fileItem.getUrn().toString().substring(9);
+        Category category = fileItem.getCategory();
+        String artist = (String) fileItem.getProperty(FilePropertyKey.AUTHOR);
+        String album = (String) fileItem.getProperty(FilePropertyKey.ALBUM);
+        String genre = (String) fileItem.getProperty(FilePropertyKey.GENRE);
+        String title = (String) fileItem.getProperty(FilePropertyKey.TITLE);
+        
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("filename", fileItem.getFileName());
+        jsonObj.put("category", category.getSingularName());
+        jsonObj.put("size", fileItem.getSize());
+        jsonObj.put("sha1Urn", sha1String);
+        jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
+        jsonObj.put("album", (category == Category.AUDIO && album != null) ? album : "");
+        jsonObj.put("genre", (category == Category.AUDIO && genre != null) ? genre : "");
+        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : fileItem.getFileName());
+        return jsonObj;
+    }
+    
+    /**
+     * Creates the JSON description object for the specified library file list.
+     */
+    public static JSONObject createLibraryJson(LibraryFileList fileList) throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("name", "Library");
+        jsonObj.put("size", fileList.size());
+        jsonObj.put("id", "library");
+        return jsonObj;
+    }
+    
+    /**
+     * Creates the JSON description object for the specified search list.
+     */
+    public static JSONObject createSearchJson(SearchResultList searchList) throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("name", searchList.getSearchQuery());
+        jsonObj.put("size", searchList.getGroupedResults().size());
+        jsonObj.put("id", searchList.getGuid());
+        return jsonObj;
+    }
+    
+    /**
+     * Creates the JSON description object for the specified grouped search
+     * result.
+     */
+    public static JSONObject createSearchResultJson(GroupedSearchResult result) throws JSONException {
+        SearchResult searchResult = result.getSearchResults().get(0);
+        Category category = searchResult.getCategory();
+        String artist = (String) searchResult.getProperty(FilePropertyKey.AUTHOR);
+        String album = (String) searchResult.getProperty(FilePropertyKey.ALBUM);
+        String genre = (String) searchResult.getProperty(FilePropertyKey.GENRE);
+        String title = (String) searchResult.getProperty(FilePropertyKey.TITLE);
+        
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("filename", result.getFileName());
+        jsonObj.put("category", category.getSingularName());
+        jsonObj.put("size", searchResult.getSize());
+        jsonObj.put("id", result.getUrn());
+        jsonObj.put("magnetUrl", searchResult.getMagnetURL());
+        jsonObj.put("sources", result.getSources().size());
+        jsonObj.put("spam", searchResult.isSpam());
+        jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
+        jsonObj.put("album", (category == Category.AUDIO && album != null) ? album : "");
+        jsonObj.put("genre", (category == Category.AUDIO && genre != null) ? genre : "");
+        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : result.getFileName());
+        return jsonObj;
     }
 }

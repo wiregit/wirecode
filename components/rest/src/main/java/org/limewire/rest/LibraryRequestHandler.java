@@ -68,7 +68,7 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
             
             try {
                 // Create JSON result.
-                JSONObject jsonObj = createLibraryDescription(fileList);
+                JSONObject jsonObj = RestUtils.createLibraryJson(fileList);
 
                 // Set response entity and status.
                 HttpEntity entity = RestUtils.createStringEntity(jsonObj.toString());
@@ -95,11 +95,11 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
                 JSONArray jsonArr = new JSONArray();
                 for (int i = offset, max = Math.min(offset + limit, fileItemList.size()); i < max; i++) {
                     LocalFileItem fileItem = fileItemList.get(i);
-                    jsonArr.put(createFileDescription(fileItem));
+                    jsonArr.put(RestUtils.createFileItemJson(fileItem));
                 }
 
                 // Set response entity and status.
-                HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString(2));
+                HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString());
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
                 
@@ -110,30 +110,5 @@ class LibraryRequestHandler extends AbstractRestRequestHandler {
         } else {
             response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
         }
-    }
-    
-    /**
-     * Creates the file description object for the specified file item.
-     */
-    private JSONObject createFileDescription(LocalFileItem fileItem) throws JSONException {
-        String sha1String = fileItem.getUrn().toString().substring(9);
-        
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("filename", fileItem.getFileName());
-        jsonObj.put("category", fileItem.getCategory().getSingularName());
-        jsonObj.put("size", fileItem.getSize());
-        jsonObj.put("sha1Urn", sha1String);
-        return jsonObj;
-    }
-    
-    /**
-     * Creates the JSON description object for the specified library file list.
-     */
-    private JSONObject createLibraryDescription(LibraryFileList fileList) throws JSONException {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("name", "Library");
-        jsonObj.put("size", fileList.size());
-        jsonObj.put("id", "library");
-        return jsonObj;
     }
 }

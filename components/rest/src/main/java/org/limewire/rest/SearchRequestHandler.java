@@ -14,8 +14,6 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
@@ -87,7 +85,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
             // Create JSON result.
             JSONArray jsonArr = new JSONArray();
             for (SearchResultList searchList : searchLists) {
-                jsonArr.put(createSearchDescription(searchList));
+                jsonArr.put(RestUtils.createSearchJson(searchList));
             }
 
             // Set response entity and status.
@@ -120,7 +118,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
         try {
             if (uriTarget.indexOf(FILES) < 0) {
                 // Return search metadata.
-                JSONObject jsonObj = createSearchDescription(searchList);
+                JSONObject jsonObj = RestUtils.createSearchJson(searchList);
                 HttpEntity entity = RestUtils.createStringEntity(jsonObj.toString());
                 response.setEntity(entity);
                 response.setStatusCode(HttpStatus.SC_OK);
@@ -137,7 +135,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
                 JSONArray jsonArr = new JSONArray();
                 for (int i = offset, max = Math.min(offset + limit, resultList.size()); i < max; i++) {
                     GroupedSearchResult result = resultList.get(i);
-                    jsonArr.put(createResultDescription(result));
+                    jsonArr.put(RestUtils.createSearchResultJson(result));
                 }
 
                 // Set response entity and status.
@@ -173,7 +171,7 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
 
         try {
             // Return search metadata.
-            JSONObject jsonObj = createSearchDescription(searchList);
+            JSONObject jsonObj = RestUtils.createSearchJson(searchList);
             HttpEntity entity = RestUtils.createStringEntity(jsonObj.toString());
             response.setEntity(entity);
             response.setStatusCode(HttpStatus.SC_OK);
@@ -206,35 +204,6 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
         } else {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
         }
-    }
-    
-    /**
-     * Creates the JSON description object for the specified grouped result.
-     */
-    private JSONObject createResultDescription(GroupedSearchResult result) throws JSONException {
-        Category category = result.getSearchResults().get(0).getCategory();
-        String artist = (String) result.getSearchResults().get(0).getProperty(FilePropertyKey.AUTHOR);
-        String title = (String) result.getSearchResults().get(0).getProperty(FilePropertyKey.TITLE);
-        
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("filename", result.getFileName());
-        jsonObj.put("category", category);
-        jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
-        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : result.getFileName());
-        jsonObj.put("sources", result.getSources().size());
-        jsonObj.put("id", result.getUrn());
-        return jsonObj;
-    }
-    
-    /**
-     * Creates the JSON description object for the specified search list.
-     */
-    private JSONObject createSearchDescription(SearchResultList searchList) throws JSONException {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("name", searchList.getSearchQuery());
-        jsonObj.put("size", searchList.getGroupedResults().size());
-        jsonObj.put("id", searchList.getGuid());
-        return jsonObj;
     }
     
     /**
