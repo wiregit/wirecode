@@ -20,6 +20,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        bind(LibraryInspections.class);
+        
         // Bind listener support for LibrarySharingEvent.
         EventListenerList<LibrarySharingEvent> listenerList = new EventListenerList<LibrarySharingEvent>();
         bind(new TypeLiteral<EventListenerList<LibrarySharingEvent>>(){}).toInstance(listenerList);

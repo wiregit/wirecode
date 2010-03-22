@@ -43,7 +43,7 @@ public class SearchServicesImpl implements SearchServices {
     private final OutOfBandStatistics outOfBandStatistics;
 
     @InspectionPoint(value = "searches by type", category = DataCategory.USAGE)
-    private final InspectionHistogram<String> searchesByType = new InspectionHistogram<String>();
+    private final InspectionHistogram<String> searchesByTypeV2 = new InspectionHistogram<String>();
     
     @Inject
     public SearchServicesImpl(Provider<ResponseVerifier> responseVerifier,
@@ -179,9 +179,9 @@ public class SearchServicesImpl implements SearchServices {
                 recordAndSendQuery(qr, type);
                 Category category = type.getCategory();
                 if (category != null) {
-                    searchesByType.count(category.getSchemaName());
+                    searchesByTypeV2.count(category.getSchemaName());
                 } else {
-                    searchesByType.count("no type");
+                    searchesByTypeV2.count("no type");
                 }
             }
     }

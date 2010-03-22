@@ -20,7 +20,7 @@ import org.limewire.util.FileUtils;
  
 public class FileArraySetting extends AbstractSetting<File[]> {
     
-    private File[] value;
+    private volatile File[] value;
 
     /**
      * Creates a new <tt>FileArraySetting</tt> instance with the specified

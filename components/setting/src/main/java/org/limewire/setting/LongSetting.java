@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public class LongSetting extends AbstractNumberSetting<Long> {
     
-    private long value;
+    private volatile long value;
 
 	/**
 	 * Creates a new <code>LongSetting</code> instance with the specified

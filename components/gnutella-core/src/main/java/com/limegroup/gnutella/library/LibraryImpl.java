@@ -130,6 +130,8 @@ class LibraryImpl implements Library, FileCollection {
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
+
+        // This inspection was previously unsafe - use numFiles
         @InspectionPoint(value = "managed files", category = DataCategory.USAGE)
         private final Inspectable inspectable = new Inspectable() {
             @Override
@@ -140,6 +142,14 @@ class LibraryImpl implements Library, FileCollection {
             }
         };
 
+        @InspectionPoint(value = "number of files managed", category = DataCategory.USAGE)
+        private final Inspectable numFiles = new Inspectable() {
+            @Override
+            public Object inspect() {
+                return size();
+            }
+        };
+        
         @InspectionPoint(value = "number of files added to public shared list this session", category = DataCategory.USAGE)
         private final Inspectable numFilesAdded = new Inspectable() {
             @Override

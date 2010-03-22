@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
  */
 public class StringSetSetting extends AbstractSetting<Set<String>> {
 
-    private Set<String> value;
+    private volatile Set<String> value;
 
     StringSetSetting(Properties defaultProps, Properties props,
             String key, String defaultValue) {

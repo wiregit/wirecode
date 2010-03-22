@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public final class ByteSetting extends AbstractNumberSetting<Byte> {
     
-    private byte value;
+    private volatile byte value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified

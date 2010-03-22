@@ -23,7 +23,7 @@ import java.util.StringTokenizer;
  
 public class FileSetSetting extends AbstractSetting<Set<? extends File>> {
     
-    private Set<File> value;
+    private volatile Set<File> value;
 
     /**
      * Creates a new <tt>FileSetSetting</tt> instance with the specified

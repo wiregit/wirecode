@@ -10,7 +10,9 @@ import java.util.Properties;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.player.api.AudioPlayer;
@@ -73,9 +75,12 @@ class AudioPlayerMediator implements PlayerMediator {
     /** Indicator for shuffle mode. */
     private boolean shuffle = false;
     
-    @InspectionPoint(value = "media-player")
+    @InspectionPoint(value = "media-player", category = DataCategory.USAGE)
     private final PlayerInspector inspectable;
     
+    @SuppressWarnings("unused")
+    @InspectablePrimitive(value = "audio played in session", category = DataCategory.USAGE)
+    private volatile boolean audioPlayedInSession = false;
     
     private long playingWindowStartTime = -1;
     private int playingSwitches = -1;
@@ -342,6 +347,7 @@ class AudioPlayerMediator implements PlayerMediator {
         player.loadSong(fileToPlay);
         player.playSong();
         inspectable.started(fileToPlay);
+        audioPlayedInSession = true;
     }
     
     /* (non-Javadoc)

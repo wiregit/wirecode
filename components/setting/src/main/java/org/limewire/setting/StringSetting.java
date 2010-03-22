@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public final class StringSetting extends AbstractSetting<String> {
     
-    private String value;
+    private volatile String value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified

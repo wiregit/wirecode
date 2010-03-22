@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectionHistogram;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 import org.limewire.util.Objects;
 
@@ -26,6 +29,9 @@ public class RecentDownloadListener implements EventListener<DownloadStateEvent>
     private final Downloader downloader;
     private final int maxTrackedDownloads; 
 
+    @InspectionPoint(value = "download state histogram", category = DataCategory.NETWORK)
+    private static volatile InspectionHistogram<String> downloadStateHistogram = new InspectionHistogram<String>();
+    
     public RecentDownloadListener(Downloader downloader, int maxTrackedDownloads) {
         assert maxTrackedDownloads > 0;
         this.downloader = Objects.nonNull(downloader, "downloader");
@@ -47,6 +53,9 @@ public class RecentDownloadListener implements EventListener<DownloadStateEvent>
     public void handleEvent(DownloadStateEvent event) {
         // TODO don't do anything for torrent downloads?
         DownloadState downloadStatus = event.getType();
+        
+        updateStats(downloadStatus);
+        
         if (DownloadState.COMPLETE == downloadStatus) {
             File saveFile = downloader.getSaveFile();
             if (saveFile != null) {
@@ -67,7 +76,11 @@ public class RecentDownloadListener implements EventListener<DownloadStateEvent>
             }
         }
     }
-
+    
+    private static void updateStats(DownloadState downloadStatus) {
+        downloadStateHistogram.count(downloadStatus.name());
+    }
+    
     /**
      * Orders files from least to most recent.
      */

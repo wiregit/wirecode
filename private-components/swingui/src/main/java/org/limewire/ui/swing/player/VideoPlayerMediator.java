@@ -32,6 +32,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -63,6 +65,10 @@ class VideoPlayerMediator implements PlayerMediator {
     
     private final ControllerListener controllerListener = new VideoControllerListener();
 
+    @SuppressWarnings("unused")
+    @InspectablePrimitive(value = "video played in session by the limewire player", category = DataCategory.USAGE)
+    private volatile boolean videoPlayedInSessionByLW = false;
+    
     @Inject
     VideoPlayerMediator(VideoDisplayDirector displayDirector, CategoryManager categoryManager) {
         this.displayDirector = displayDirector;
@@ -575,7 +581,9 @@ class VideoPlayerMediator implements PlayerMediator {
             @Override
             protected Player doInBackground() throws Exception {
                 try {
-                    return new VideoPlayerFactory().createVideoPlayer(mediaFile, renderPanel);
+                    Player player = new VideoPlayerFactory().createVideoPlayer(mediaFile, renderPanel);
+                    videoPlayedInSessionByLW = true;
+                    return player;
                 } catch (IncompatibleSourceException e) {
                     nativeLaunch(mediaFile);
                     return null;

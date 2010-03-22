@@ -1,6 +1,5 @@
 package org.limewire.setting;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
@@ -33,7 +32,6 @@ public class SettingTest extends BaseTestCase {
         SettingsFactory FACTORY;
         BooleanSetting BOOL_SETTING;
         ByteSetting BYTE_SETTING;
-        ColorSetting COLOR_SETTING;
         FileSetting FILE_SETTING;
         IntSetting INT_SETTING;
         LongSetting LONG_SETTING;
@@ -52,8 +50,7 @@ public class SettingTest extends BaseTestCase {
             
             BOOL_SETTING = FACTORY.createBooleanSetting("BOOL_SETTING", true);
             BYTE_SETTING = FACTORY.createByteSetting("BYTE_SETTING", (byte)23);
-            COLOR_SETTING = FACTORY.createColorSetting("COLOR_SETTING", 
-                                                       new Color(255, 127, 63));
+
             if(OSUtils.isUnix() || OSUtils.isMacOSX())
                 FILE_SETTING = FACTORY.createFileSetting("FILE_SETTING", 
                                                      new File("/temp/turkey.txt"));
@@ -145,8 +142,6 @@ public class SettingTest extends BaseTestCase {
         // (Which requires one full conversion to and from their string values 
         assertEquals("Bool default", true, settings.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings.BYTE_SETTING.getValue());
-        assertEquals("Color default", new Color(255,127,63), 
-                     settings.COLOR_SETTING.get());        
 
         assertEquals("Int default", 143, settings.INT_SETTING.getValue());
         assertEquals("Long default", 666666, settings.LONG_SETTING.getValue());
@@ -168,7 +163,6 @@ public class SettingTest extends BaseTestCase {
         // Confirm that we can set everything 
         settings.BOOL_SETTING.setValue(false);
         settings.BYTE_SETTING.setValue((byte)6);
-        settings.COLOR_SETTING.set(new Color(66, 44, 67));
         settings.FILE_SETTING.set(new File(testFilePath));
         settings.INT_SETTING.setValue(234);
         settings.LONG_SETTING.setValue(555555);
@@ -184,7 +178,6 @@ public class SettingTest extends BaseTestCase {
         
         assertEquals("Bool set", false, settings.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
                                  settings.FILE_SETTING.get());
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
@@ -209,7 +202,6 @@ public class SettingTest extends BaseTestCase {
         settings = new TestSettings(settingsFile);
         assertEquals("Bool set", false, settings.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
                                  settings.FILE_SETTING.get());
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
@@ -231,7 +223,6 @@ public class SettingTest extends BaseTestCase {
         // Confirm that the backup object still has its default settings 
         assertEquals("Bool default", true, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings2.BYTE_SETTING.getValue());
-        assertEquals("Color default", new Color(255,127,63), settings2.COLOR_SETTING.get());
         assertEquals("File default", new File(testFilePath2), 
                                      settings2.FILE_SETTING.get());
         assertEquals("Int default", 143, settings2.INT_SETTING.getValue());
@@ -254,7 +245,6 @@ public class SettingTest extends BaseTestCase {
         settings2.FACTORY.reload();
         assertEquals("Bool set", false, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings2.BYTE_SETTING.getValue());
-        assertEquals("Color set", new Color(66,44,67), settings2.COLOR_SETTING.get());
         assertEquals("File set", new File(testFilePath), 
                                  settings2.FILE_SETTING.get());
         assertEquals("Int set", 234, settings2.INT_SETTING.getValue());

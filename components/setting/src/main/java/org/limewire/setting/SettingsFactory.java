@@ -1,6 +1,5 @@
 package org.limewire.setting;
 
-import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -593,29 +592,6 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
 	}
 
     /**
-     * Creates a new <tt>ColorSetting</tt> instance with the specified
-     * key and default value.
-     *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
-     */
-    public synchronized ColorSetting createColorSetting(String key, 
-                                                        Color defaultValue) {
-        ColorSetting result = 
-        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key,defaultValue);
-        handleSettingInternal(result, null);
-        return result;
-    }
-
-    public synchronized ColorSetting createRemoteColorSetting(String key, 
-                   Color defaultValue, String remoteKey) {
-        ColorSetting result = 
-        ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, remoteKey);
-        return result;
-    }
-
-    /**
      * Creates a new <tt>CharArraySetting</tt> instance for a character array 
      * setting with the specified key and default value.
      *
@@ -804,29 +780,6 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         if (expired)
             result.revertToDefault();
         
-        return result;
-    }
-    
-    /**
-     * Creates a new <tt>FontNameSetting</tt> instance with the specified
-     * key and default value.
-     *
-     * @param key the key for the setting
-     * @param defaultValue the default value for the setting
-     */
-    public synchronized FontNameSetting createFontNameSetting(String key, 
-                                                           String defaultValue){
-        FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, null);
-        return result;
-    }
-
-    public synchronized FontNameSetting createRemoteFontNameSetting(
-            String key, String defaultValue, String remoteKey) {
-        FontNameSetting result = 
-        new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
-        handleSettingInternal(result, remoteKey);
         return result;
     }
     

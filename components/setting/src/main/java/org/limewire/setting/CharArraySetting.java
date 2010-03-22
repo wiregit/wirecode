@@ -15,7 +15,7 @@ public final class CharArraySetting extends AbstractSetting<char[]> {
     /**
      * Cached value.
      */
-    private char[] value;
+    private volatile char[] value;
 
 
 	/**
