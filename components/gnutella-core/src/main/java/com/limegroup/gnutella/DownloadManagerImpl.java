@@ -331,6 +331,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }      
     
     public void writeSnapshot() {
+        if (!downloadsReadFromDisk) {
+            LOG.debug("downloads not loaded yet, not writing snapshot");
+            return;
+        }
         List<DownloadMemento> mementos;
         synchronized(this) {
             mementos = new ArrayList<DownloadMemento>(active.size() + waiting.size());
