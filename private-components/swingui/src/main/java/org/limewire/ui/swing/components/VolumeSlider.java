@@ -2,12 +2,12 @@ package org.limewire.ui.swing.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.InputMap;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -45,7 +45,9 @@ public class VolumeSlider extends JSlider {
     private void initSlider() {
         setBackground(background);
         setOrientation(VERTICAL);
-        addKeyListener(new VolumeKeyListener());
+        InputMap inputMap = getInputMap();
+        inputMap.put(KeyStroke.getKeyStroke("HOME"), "maxScroll");
+        inputMap.put(KeyStroke.getKeyStroke("END"), "minScroll");
     }
 
     /**
@@ -77,19 +79,5 @@ public class VolumeSlider extends JSlider {
         popup.add(this, BorderLayout.CENTER);
         
         return popup;
-    }
-    
-    private class VolumeKeyListener extends KeyAdapter {
-        @Override
-        public void keyReleased(KeyEvent e) {
-            switch (e.getKeyCode()) {
-            case KeyEvent.VK_HOME:
-                setValue(getMaximum());
-                break;
-            case KeyEvent.VK_END:
-                setValue(getMinimum());
-                break;
-            }
-        }
     }
 }
