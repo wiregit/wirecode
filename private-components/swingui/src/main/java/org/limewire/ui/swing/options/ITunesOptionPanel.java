@@ -44,7 +44,7 @@ public class ITunesOptionPanel extends OptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         iTunesSettings.ITUNES_SUPPORT_ENABLED.setValue(addToITunesCheckBox.isSelected());;
         
         return getITunesSharePanel().applyOptions();
@@ -66,7 +66,14 @@ public class ITunesOptionPanel extends OptionPanel {
         if(iTunesSharePanel == null) {
             iTunesSharePanel = new ITunesSharePanel();
         }
+        
         return iTunesSharePanel;
+    }
+    
+    @Override
+    void setOptionTabItem(OptionTabItem tab) {
+        super.setOptionTabItem(tab);
+        getITunesSharePanel().setOptionTabItem(tab);
     }
     
     private class ITunesSharePanel extends OptionPanel {
@@ -109,7 +116,7 @@ public class ITunesOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if(hasChanged()) {
                 final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
                
@@ -126,7 +133,7 @@ public class ITunesOptionPanel extends OptionPanel {
                             JOptionPane.ERROR_MESSAGE);
                     
                     initOptions();
-                    return false;
+                    return new ApplyOptionResult(false,true);
                 }
                 
                 //enable daap setting
@@ -174,7 +181,7 @@ public class ITunesOptionPanel extends OptionPanel {
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override

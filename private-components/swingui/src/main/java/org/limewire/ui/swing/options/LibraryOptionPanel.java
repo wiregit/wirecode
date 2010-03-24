@@ -49,7 +49,7 @@ public class LibraryOptionPanel extends OptionPanel {
         GuiUtils.assignResources(this);
         
         this.playerPanel = new UsePlayerPanel();
-
+        
         setLayout(new MigLayout("insets 15, fillx, gap 4"));
 
         add(getSharingPanel(), "growx, wrap");
@@ -64,9 +64,17 @@ public class LibraryOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        return playerPanel.applyOptions() || getSharingPanel().applyOptions() 
-            || iTunesPanel != null ? iTunesPanel.applyOptions() : false;
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = playerPanel.applyOptions();
+        if (result.isSuccessful())
+            result.applyResult(getSharingPanel().applyOptions());
+        
+        if (iTunesPanel != null && result.isSuccessful())
+            result.applyResult(iTunesPanel.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -102,7 +110,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             return iTunesOptionPanel.applyOptions();
         }
 
@@ -136,9 +144,9 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -156,6 +164,7 @@ public class LibraryOptionPanel extends OptionPanel {
         if(sharingPanel == null) {
             sharingPanel = new SharingPanel();
         }
+        
         return sharingPanel;
     }
     
@@ -164,6 +173,15 @@ public class LibraryOptionPanel extends OptionPanel {
             iTunesPanel = new ITunesPanel();
         }
         return iTunesPanel;
+    }
+    
+    @Override
+    void setOptionTabItem(OptionTabItem tab) {
+        super.setOptionTabItem(tab);
+        getITunesPanel().setOptionTabItem(tab);
+        getSharingPanel().setOptionTabItem(tab);
+        this.playerPanel.setOptionTabItem(tab);
+
     }
     
     private class SharingPanel extends OptionPanel {
@@ -219,7 +237,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
             return unsafeTypeOptionPanel.applyOptions();

@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -116,12 +117,20 @@ public class AdvancedOptionPanel extends OptionPanel {
     }
 
     @Override
-    boolean applyOptions() {
-        boolean restartRequired = false;
-        for (OptionPanel panel : panels.values()) {
-            restartRequired |= panel.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        boolean done = false;
+        Iterator<OptionPanel> it = panels.values().iterator();
+        while (it.hasNext() && !done) {
+            OptionPanel panel = it.next();
+            if (result == null)
+                result = panel.applyOptions();
+            else
+                result.applyResult(panel.applyOptions());
+            done = !result.isSuccessful();
         }
-        return restartRequired;
+        
+        return result;
     }
 
     @Override

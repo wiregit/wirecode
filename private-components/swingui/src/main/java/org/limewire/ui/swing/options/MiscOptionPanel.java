@@ -13,6 +13,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -22,6 +23,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.UrlAction;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LanguageComboBox;
 import org.limewire.ui.swing.components.NonNullJComboBox;
@@ -94,6 +96,7 @@ public class MiscOptionPanel extends OptionPanel {
         if(notificationsPanel == null) {
             notificationsPanel = new NotificationsPanel();
         }
+        
         return notificationsPanel;
     }
 
@@ -101,25 +104,36 @@ public class MiscOptionPanel extends OptionPanel {
         if(friendsChatPanel == null) {
             friendsChatPanel = new FriendsChatPanel();
         }
+        
         return friendsChatPanel;
     }
 
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
+        
+        
         ApplicationSettings.ALLOW_ANONYMOUS_STATISTICS_GATHERING.setValue(shareUsageDataCheckBox.isSelected());
         
         Locale selectedLocale = (Locale) languageDropDown.getSelectedItem();
         
-        boolean restart = getNotificationsPanel().applyOptions();
-        restart |= getFriendChatPanel().applyOptions();
-        
+        ApplyOptionResult result = getNotificationsPanel().applyOptions();
+        if (result.isSuccessful())
+            result.applyResult(getFriendChatPanel().applyOptions());
+                
         // if the language changed, always notify about a required restart
-        if(selectedLocale != null && !currentLanguage.equals(selectedLocale)) {
+        if(selectedLocale != null && !currentLanguage.equals(selectedLocale) && result.isSuccessful()) {
             currentLanguage = selectedLocale;
             LanguageUtils.setLocale(selectedLocale);
-            restart = true;
+            result.updateRestart(true);
         }
-        return restart;
+        return result;
+    }
+
+    @Override
+    void setOptionTabItem(OptionTabItem tab) {
+        super.setOptionTabItem(tab);
+        getFriendChatPanel().setOptionTabItem(tab);
+        getNotificationsPanel().setOptionTabItem(tab);
     }
 
     @Override
@@ -171,9 +185,9 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -207,6 +221,8 @@ public class MiscOptionPanel extends OptionPanel {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
                     setComponentsEnabled(autoLoginCheckBox.isSelected());
+                    if (autoLoginCheckBox.isSelected())
+                        usernameField.requestFocusInWindow();
                 }
             });
 
@@ -227,7 +243,7 @@ public class MiscOptionPanel extends OptionPanel {
             serviceField = new JTextField(18);
             usernameField = new JTextField(18);
             passwordField = new JPasswordField(18);
-
+            
             TextFieldClipboardControl.install(serviceField);
             TextFieldClipboardControl.install(usernameField);
             TextFieldClipboardControl.install(passwordField);
@@ -250,6 +266,7 @@ public class MiscOptionPanel extends OptionPanel {
             servicePanel.add(passwordField, "wrap");
             
             add(servicePanel);
+            
         }
 
         private void populateInputs() {
@@ -286,21 +303,39 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             if(hasChanged()) {
                 if(autoLoginCheckBox.isSelected()) {
                     // Set this as the auto-login account
                     String user = usernameField.getText().trim();
                     String password = new String(passwordField.getPassword());
-                    if(user.equals("") || password.equals("")) {
-                        return false;
-                    }            
+                    if (user.length() == 0) {
+                        getOptionTabItem().select();
+                        usernameField.requestFocusInWindow();
+                        FocusJOptionPane.showMessageDialog(this, tr("Username cannot be blank."),
+                                tr("Username"), JOptionPane.ERROR_MESSAGE);
+                        return new ApplyOptionResult(false, false);
+                    }
+                    
+                    if (password.length() == 0) {
+                        getOptionTabItem().select();
+                        passwordField.requestFocusInWindow();
+                        FocusJOptionPane.showMessageDialog(this, tr("Password cannot be blank."),
+                                tr("Password"), JOptionPane.ERROR_MESSAGE);
+                        
+                        return new ApplyOptionResult(false, false);
+                    }
                     String label = (String)serviceComboBox.getSelectedItem();
                     FriendAccountConfiguration config = accountManager.get().getConfig(label);
                     if(label.equals("Jabber")) {
                         String service = serviceField.getText().trim();
-                        if(service.equals(""))
-                            return false;
+                        if(service.isEmpty()) {
+                            getOptionTabItem().select();
+                            serviceField.requestFocusInWindow();
+                            FocusJOptionPane.showMessageDialog(this, tr("Service cannot be blank."),
+                                    tr("Service"), JOptionPane.ERROR_MESSAGE);
+                            return new ApplyOptionResult(false, false);
+                        }
                         config.setServiceName(service);
                     }
                     config.setUsername(user);
@@ -310,7 +345,7 @@ public class MiscOptionPanel extends OptionPanel {
                     accountManager.get().setAutoLoginConfig(null);
                 }
             }
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -362,6 +397,7 @@ public class MiscOptionPanel extends OptionPanel {
                 }
             });
         }
+
     }
 
     private class Renderer extends DefaultListCellRenderer {
@@ -379,8 +415,6 @@ public class MiscOptionPanel extends OptionPanel {
             return this;
         }
     }
-    
-    
     
     private static void resetWarnings() {
         int skipWarningSettingValue = getLicenseSettingValueFromCheckboxValue(true);

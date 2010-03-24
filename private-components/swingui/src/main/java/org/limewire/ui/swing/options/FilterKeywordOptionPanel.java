@@ -70,7 +70,7 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
     }
     
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_WORDS.set(values);
         BackgroundExecutorService.execute(new Runnable() {
@@ -79,7 +79,7 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
                 spamManager.adjustSpamFilters();
             }
         });
-        return false;
+        return new ApplyOptionResult(false, true);
     }
 
     @Override

@@ -55,7 +55,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
 
         gnutellaListeningPorts = new GnutellaListeningPortsOptionPanel();
         torrentListeningPorts = new TorrentListeningPortsOptionPanel();
-
+        
         JPanel p = new JPanel();
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("fillx"));
@@ -69,10 +69,38 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         
         add(p, "pushx, growx");
     }
+    
+    @Override
+    void setOptionTabItem(OptionTabItem tab) {
+        super.setOptionTabItem(tab);
+        getTorrentListeningPorts().setOptionTabItem(tab);
+        getGnutellaListeningPorts().setOptionTabItem(tab);
+    }
+    
+
+    private TorrentListeningPortsOptionPanel getTorrentListeningPorts() {
+        return torrentListeningPorts;
+    }
+    
+
+
+
+    private GnutellaListeningPortsOptionPanel getGnutellaListeningPorts() {
+        return gnutellaListeningPorts;
+    }
+    
+
+
 
     @Override
-    boolean applyOptions() {
-        return gnutellaListeningPorts.applyOptions() || torrentListeningPorts.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = gnutellaListeningPorts.applyOptions();
+        if (result.isSuccessful())
+            result.applyResult(torrentListeningPorts.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -139,7 +167,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             int newGnutellaPort = gnutellaPortField.getValue(gnutellaPort);
             if (newGnutellaPort != gnutellaPort) {
                 try {
@@ -199,7 +227,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                 }
             });
 
-            return restart;
+            return new ApplyOptionResult(restart, true);
         }
 
         @Override
@@ -285,7 +313,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             int torrentStartPort = torrentStartPortField
                     .getValue(BittorrentSettings.LIBTORRENT_LISTEN_START_PORT.getValue());
             int torrentEndPort = torrentEndPortField
@@ -317,7 +345,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                 });
             }
 
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override

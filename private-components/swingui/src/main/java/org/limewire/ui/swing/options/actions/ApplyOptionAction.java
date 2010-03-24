@@ -5,20 +5,22 @@ import java.awt.event.ActionListener;
 
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.options.OptionPanel.ApplyOptionResult;
 
 public class ApplyOptionAction implements ActionListener {
 
-    private OptionsDialog optionDialog;
-    
-    public ApplyOptionAction(OptionsDialog optionDialog) {
+    private final OptionsDialog optionDialog;
+
+    public ApplyOptionAction(final OptionsDialog optionDialog) {
         this.optionDialog = optionDialog;
     }
-    
+
     @Override
-    public void actionPerformed(ActionEvent e) {
-        optionDialog.applyOptions();
-        SettingsGroupManager.instance().save();
-        
-        optionDialog.dispose();
+    public void actionPerformed(final ActionEvent e) {
+        final ApplyOptionResult result = optionDialog.applyOptions();
+        if (result.isSuccessful()) {
+            SettingsGroupManager.instance().save();
+            optionDialog.dispose();
+        }
     }
 }

@@ -123,7 +123,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     }
         
     @Override
-    boolean applyOptions() {
+    ApplyOptionResult applyOptions() {
         manager.saveSettings();
 
         if(!programCheckBox.isSelected()) {
@@ -138,7 +138,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         if (!documentCheckBox.isSelected()) {
             shareListManager.removeDocumentsFromPublicLists();
         }
-        return false;
+        return new ApplyOptionResult(false, true);
     }
 
     @Override

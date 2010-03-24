@@ -197,6 +197,12 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         passwordLabel.setFont(descriptionTextFont);
         passwordLabel.setForeground(descriptionTextForeground);
        
+        /*
+         * Populate the input fields on initialize. Otherwise, if the auto-login
+         * option is selected in application settings and the user exits out of
+         * the login panel with the auto-login option unchecked, settings are
+         * cleared from application settings.
+         */
         serviceField = new PromptTextField();
         textFieldDecorator.decoratePromptField(serviceField, AccentType.NONE);
         serviceField.setFont(inputTextFont);
@@ -205,12 +211,15 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         textFieldDecorator.decoratePromptField(usernameField, AccentType.NONE);
         usernameField.setFont(inputTextFont);
         usernameField.setForeground(inputTextForeground);
+        usernameField.setText(accountConfig.getUserInputLocalID());
+
         passwordField = new PromptPasswordField();
         textFieldDecorator.decoratePromptField(passwordField, AccentType.NONE);
         passwordField.setFont(inputTextFont);
         passwordField.setForeground(inputTextForeground);
         passwordField.setAction(signinAction);
-        
+        passwordField.setText(accountConfig.getPassword());
+
         ResizeUtils.forceSize(serviceField, new Dimension(224, 26));
         ResizeUtils.forceSize(usernameField, new Dimension(224, 26));
         ResizeUtils.forceSize(passwordField, new Dimension(224, 26));
@@ -219,6 +228,8 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         autoLoginCheckBox.setFont(autoLoginCheckBoxFont);
         autoLoginCheckBox.setIcon(autoLoginCheckBoxIcon);
         autoLoginCheckBox.setSelectedIcon(autoLoginCheckBoxSelectedIcon);
+        autoLoginCheckBox.setSelected(accountManager.getAutoLoginConfig() != null);
+        
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {

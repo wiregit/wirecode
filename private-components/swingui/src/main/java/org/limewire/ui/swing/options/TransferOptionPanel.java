@@ -79,8 +79,9 @@ public class TransferOptionPanel extends OptionPanel {
         add(getTrayPanel(), "pushx, growx, wrap");
         add(getTransfersPanel(), "pushx, growx, wrap");
         add(new JButton(new DialogDisplayAction(this, this.bitTorrentOptionPanel, I18n.tr("Configure Torrent Settings"), I18n.tr("Configure Torrent Settings..."), I18n.tr("Configure torrent settings."))), "wrap");
-    }
         
+    }
+    
     @Inject
     public void register(ActivationManager activationManager) {
         //when avg activation changes, update the virus scanning options
@@ -96,11 +97,11 @@ public class TransferOptionPanel extends OptionPanel {
             }
         });
     }
-
     private OptionPanel getDownloadsPanel() {
         if (downloadsPanel == null) {
             downloadsPanel = new DownloadsPanel();
         }
+        
         return downloadsPanel;
     }
 
@@ -108,6 +109,7 @@ public class TransferOptionPanel extends OptionPanel {
         if (trayPanel == null) {
             trayPanel = new TrayPanel();
         }
+        
         return trayPanel;
     }
     
@@ -115,12 +117,33 @@ public class TransferOptionPanel extends OptionPanel {
         if (transferPanel == null) {
             transferPanel = new TransferPanel();
         }
+        
         return transferPanel;
+    }
+    
+    @Override
+    void setOptionTabItem(OptionTabItem tab) {
+        super.setOptionTabItem(tab);
+        getDownloadsPanel().setOptionTabItem(tab);
+        getTrayPanel().setOptionTabItem(tab);
+        getTransfersPanel().setOptionTabItem(tab);
     }
 
     @Override
-    boolean applyOptions() {
-        return getDownloadsPanel().applyOptions() || getTrayPanel().applyOptions() || getTransfersPanel().applyOptions() || bitTorrentOptionPanel.applyOptions();
+    ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        
+        result = getDownloadsPanel().applyOptions();
+        if (result.isSuccessful())
+            result.applyResult(getTrayPanel().applyOptions());
+        
+        if (result.isSuccessful())
+            result.applyResult(getTransfersPanel().applyOptions());
+        
+        if (result.isSuccessful())
+            result.applyResult(bitTorrentOptionPanel.applyOptions());
+        
+        return result;
     }
 
     @Override
@@ -232,7 +255,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
 
             if (singleLocationButton.isSelected() && saveFolderPanel.isConfigCustom()) {
                 saveFolderPanel.revertToDefault();
@@ -271,8 +294,11 @@ public class TransferOptionPanel extends OptionPanel {
                     downloadSaveTextField.setText(currentSaveDirectory);
                 }
             }
-
-            return saveFolderPanel.applyOptions() || storeOptionPanel.applyOptions();
+            
+            ApplyOptionResult result = saveFolderPanel.applyOptions();
+            if (result.isSuccessful())
+                result.applyResult(storeOptionPanel.applyOptions());
+            return result;
         }
 
         /**
@@ -313,7 +339,7 @@ public class TransferOptionPanel extends OptionPanel {
                     || SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox
                             .isSelected() || storeOptionPanel.hasChanged();
         }
-
+        
         public void setAVGCheckBoxVisible() {
             boolean value = virusEngine.isSupported();
             useAntivirusCheckBox.setVisible(value);
@@ -399,7 +425,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.setValue(closeTrayCheckBox.isSelected());
             SwingUiSettings.SHOW_TOTAL_BANDWIDTH.setValue(showBandwidthCheckBox.isSelected());
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
@@ -407,7 +433,7 @@ public class TransferOptionPanel extends OptionPanel {
 
             // DownloadSettings.DELETE_CANCELED_DOWNLOADS.setValue(
             // deleteFileOnCancelCheckBox.isSelected());
-            return false;
+            return new ApplyOptionResult(false, true);
         }
 
         @Override
@@ -442,7 +468,7 @@ public class TransferOptionPanel extends OptionPanel {
         }
         
         @Override
-        boolean applyOptions() {
+        ApplyOptionResult applyOptions() {
             return connectionsOptionPanel.applyOptions();
         }
 

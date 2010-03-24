@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,6 +27,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.options.OptionPanel.ApplyOptionResult;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.HelpAction;
@@ -119,21 +121,28 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         pack();
     }
     
-    public void applyOptions() {
-        boolean restartRequired = false;
-        for(OptionPanel panel : panels.values()) {
-            restartRequired |= panel.applyOptions();
+    public ApplyOptionResult applyOptions() {
+        ApplyOptionResult result = null;
+        boolean done = false;
+        Iterator<OptionPanel> it = panels.values().iterator();
+        while (it.hasNext() && !done) {
+            OptionPanel panel = it.next();
+            if (result == null)
+                result = panel.applyOptions();
+            else
+                result.applyResult(panel.applyOptions());
+            done = !result.isSuccessful();
         }
         
-        //TODO: more checks here. Look at OptionsPaneManager.applyOptions
-
-        // if at least one option requires a restart before taking effect, notify user
-        if (restartRequired) {
-            FocusJOptionPane.showMessageDialog(this,
+        if (result != null && result.isRestartRequired() && result.isSuccessful()) {
+            FocusJOptionPane
+                    .showMessageDialog(
+                            this,
                             I18n.tr("One or more options will take effect the next time LimeWire is restarted."),
-                            I18n.tr("Message"),
-                            JOptionPane.INFORMATION_MESSAGE);
+                            I18n.tr("Message"), JOptionPane.INFORMATION_MESSAGE);
+
         }
+        return result;
 
     }
     
@@ -274,6 +283,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         cardPanel.add(panels.get(selectedItem.getId()), selectedItem.getId());
         // Library is always shown so it will always be initialized prior to being shown
         // no need to do it now.
+        
         if(!selectedItem.getId().equals(LIBRARY)) 
             panel.initOptions();
     }
@@ -310,7 +320,10 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         }
         
         public OptionPanel getOptionPanel() {
-            return provider.get();
+            OptionPanel panel = provider.get();
+            panel.setOptionTabItem(this);
+            
+            return panel;
         }
 
         @Override
