@@ -3,16 +3,17 @@ package org.limewire.rest.oauth;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.NameValuePair;
 import org.limewire.rest.RestUtils;
 import org.limewire.util.StringUtils;
 
@@ -28,13 +29,14 @@ public class OAuthValidatorImpl implements OAuthValidator {
     private static final String VERSION = "1.0";
     private static final String SIG_METHOD = "HMAC-SHA1";
     private static final String MAC_NAME = "HmacSHA1";
-    
-    private static final char AMPERSAND = '&';
-    private static final char EQUAL = '=';
+    /** Maximum timestamp age is 2 minutes. */
+    private static final long TIMESTAMP_AGE = 2 * 60 * 1000L;
 
     private final String baseUrl;
     private final String consumerSecret;
     private final String tokenSecret;
+    private final Map<String, Long> timestamps;
+    private final Set<Nonce> nonces;
 
     /**
      * Constructs an OAuthValidator with the specified base URL, port number,
@@ -49,6 +51,8 @@ public class OAuthValidatorImpl implements OAuthValidator {
         this.baseUrl = createBaseUrl(baseUrl, port);
         this.consumerSecret = secret;
         this.tokenSecret = "";
+        this.timestamps = new ConcurrentHashMap<String, Long>();
+        this.nonces = new ConcurrentSkipListSet<Nonce>();
     }
     
     /**
@@ -83,8 +87,11 @@ public class OAuthValidatorImpl implements OAuthValidator {
     
     @Override
     public void validateRequest(OAuthRequest request) throws OAuthException {
+        long currentMsec = System.currentTimeMillis();
         validateParameters(request);
         validateVersion(request);
+        validateTimestamp(request, currentMsec);
+        validateNonce(request, currentMsec);
         validateSignatureMethod(request);
         validateSignature(request);
     }
@@ -122,6 +129,55 @@ public class OAuthValidatorImpl implements OAuthValidator {
     }
     
     /**
+     * Validates the timestamp in the specified request.  According to OAuth 
+     * Core 1.0 Revision A, Section 8, this must be equal to or greater than 
+     * the timestamp in previous requests.
+     */
+    private void validateTimestamp(OAuthRequest request, long currentMsec) throws OAuthException {
+        // Get timestamp in seconds.
+        long timestamp = Long.parseLong(request.getParameter(OAuthRequest.OAUTH_TIMESTAMP));
+        
+        // Get previous timestamp.
+        String consumerKey = request.getParameter(OAuthRequest.OAUTH_CONSUMER_KEY);
+        Long prevTime = timestamps.get(consumerKey); 
+        
+        // Timestamp cannot be earlier than last request. 
+        if ((prevTime != null) && (prevTime.longValue() > timestamp)) {
+            throw new OAuthException("Invalid OAuth timestamp");
+        }
+        
+        // Timestamp cannot be too old.
+        long min = (currentMsec - TIMESTAMP_AGE) / 1000L;
+        if (timestamp < min) {
+            throw new OAuthException("OAuth timestamp too old");
+        }
+        
+        timestamps.put(consumerKey, timestamp);
+    }
+    
+    /**
+     * Validates the nonce in the specified request.  According to OAuth 
+     * Core 1.0 Revision A, Section 8, the nonce must be unique for all 
+     * requests with the same timestamp.
+     */
+    private void validateNonce(OAuthRequest request, long currentMsec) throws OAuthException {
+        // Get request parameters.
+        long timestamp = Long.parseLong(request.getParameter(OAuthRequest.OAUTH_TIMESTAMP));
+        String consumerKey = request.getParameter(OAuthRequest.OAUTH_CONSUMER_KEY);
+        String nonceStr = request.getParameter(OAuthRequest.OAUTH_NONCE);
+        
+        // Nonce must be unique.
+        Nonce nonce = new Nonce(timestamp, consumerKey, nonceStr);
+        boolean valid = nonces.add(nonce);
+        if (!valid) {
+            throw new OAuthException("OAuth nonce already used");
+        }
+        
+        // Remove old nonces.
+        removeOldNonces(currentMsec);
+    }
+    
+    /**
      * Validates the OAuth signature method in the specified request.  Only
      * HMAC-SHA1 is supported.
      */
@@ -142,7 +198,7 @@ public class OAuthValidatorImpl implements OAuthValidator {
         
         try {
             // Create base string and compute signature.
-            String baseString = createSignatureBaseString(request);
+            String baseString = OAuthUtils.createSignatureBaseString(request, baseUrl);
             byte[] signatureBytes = computeSignature(baseString);
             
             // Compare signatures.
@@ -155,50 +211,6 @@ public class OAuthValidatorImpl implements OAuthValidator {
         } catch (UnsupportedEncodingException ex) {
             throw new OAuthException(ex); 
         }
-    }
-    
-    /**
-     * Creates the signature base string for the specified request.  This is 
-     * composed of three elements: HTTP request method, request URL, and 
-     * normalized request parameters.
-     */
-    private String createSignatureBaseString(OAuthRequest request) {
-        StringBuilder buf = new StringBuilder();
-        
-        buf.append(request.getMethod().toUpperCase()).append(AMPERSAND);
-        buf.append(RestUtils.percentEncode(baseUrl + request.getUri())).append(AMPERSAND);
-        buf.append(RestUtils.percentEncode(createParameterString(request)));
-        
-        return buf.toString();
-    }
-    
-    /**
-     * Creates the request parameter string for the specified request.  This
-     * includes all parameters except the realm and signature, sorted by
-     * parameter name.
-     */
-    private String createParameterString(OAuthRequest request) {
-        StringBuilder buf = new StringBuilder();
-        
-        List<NameValuePair> parameters = request.getParameters();
-        Collections.sort(parameters, new NameValueComparator());
-        for (NameValuePair parameter : parameters) {
-            // Skip realm and signature parameters.
-            if (OAuthRequest.AUTH_REALM.equalsIgnoreCase(parameter.getName()) || 
-                OAuthRequest.OAUTH_SIGNATURE.equalsIgnoreCase(parameter.getName())) {
-                continue;
-            }
-            
-            // Append parameter to string.
-            if (buf.length() > 0) {
-                buf.append(AMPERSAND);
-            }
-            buf.append(RestUtils.percentEncode(parameter.getName()));
-            buf.append(EQUAL).append(RestUtils.percentEncode(parameter.getValue()));
-        }
-        
-        // Return parameter string.
-        return buf.toString();
     }
     
     /**
@@ -221,13 +233,75 @@ public class OAuthValidatorImpl implements OAuthValidator {
     }
     
     /**
-     * Comparator for sorting the request parameters by name.
+     * Removes old nonces from the internal cache.
      */
-    private static class NameValueComparator implements Comparator<NameValuePair> {
+    private void removeOldNonces(long currentMsec) {
+        // Calculate oldest timestamp.
+        long min = (currentMsec - TIMESTAMP_AGE) / 1000L;
+
+        // Remove old nonces from cache.  Nonces are stored in order from
+        // oldest to newest, so we can easily remove items that are too old.
+        for (Iterator<Nonce> iter = nonces.iterator(); iter.hasNext();) {
+            Nonce nonce = iter.next();
+            if (min < nonce.getTimestamp()) {
+                break;
+            }
+            iter.remove();
+        }
+    }
+    
+    /**
+     * Representation of a nonce.  Each timestamp/consumer key must use a 
+     * unique nonce string.
+     */
+    private static class Nonce implements Comparable<Nonce> {
+        private final long timestamp;
+        private final String consumerKey;
+        private final String nonce;
+        
+        public Nonce(long timestamp, String consumerKey, String nonce) {
+            this.timestamp = timestamp;
+            this.consumerKey = consumerKey;
+            this.nonce = nonce;
+        }
+        
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        @Override
+        public int compareTo(Nonce n2) {
+            // We order nonces by timestamp, consumer key and value.
+            int result = (timestamp < n2.timestamp) ? -1 : 
+                ((timestamp > n2.timestamp) ? 1 : 0);
+            if (result == 0) {
+                result = consumerKey.compareTo(n2.consumerKey);
+            }
+            if (result == 0) {
+                result = nonce.compareTo(n2.nonce);
+            }
+            return result;
+        }
         
         @Override
-        public int compare(NameValuePair o1, NameValuePair o2) {
-            return o1.getName().compareTo(o2.getName());
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj instanceof Nonce) {
+                Nonce n2 = (Nonce) obj;
+                return (timestamp == n2.timestamp) && 
+                    consumerKey.equals(n2.consumerKey) &&
+                    nonce.equals(n2.nonce);
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
+            result = 31 * result + consumerKey.hashCode();
+            result = 31 * result + nonce.hashCode();
+            return result;
         }
     }
 }
