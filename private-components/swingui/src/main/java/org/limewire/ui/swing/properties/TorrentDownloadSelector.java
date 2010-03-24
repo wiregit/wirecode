@@ -14,6 +14,10 @@ public class TorrentDownloadSelector extends LimeJDialog {
 
         TorrentSelectorPanel panel = new TorrentSelectorPanel(torrent, factory);
         
+        //this forces LW to take over focus, even if it was hidden before.
+        GuiUtils.getMainFrame().setAlwaysOnTop(true);
+        GuiUtils.getMainFrame().setAlwaysOnTop(false);
+        
         JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("Torrent Download"), 
                 null, panel.getComponent());
         dialog.getRootPane().setDefaultButton(panel.getOkButton());
