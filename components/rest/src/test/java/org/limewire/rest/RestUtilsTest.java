@@ -148,10 +148,10 @@ public class RestUtilsTest extends BaseTestCase {
     
     /** Tests method to create file item JSON. */
     public void testCreateFileItemJson() throws Exception {
-        final String urnId = "BA8DB600AC11FE2EE3033F5AFF57F500";
+        final String urn = "urn:sha1:BA8DB600AC11FE2EE3033F5AFF57F500";
         final String testFile = "test.mp3";
         final long testSize = 16384;
-        final URN testUrn = new MockURN("urn:sha1:" + urnId);
+        final URN testUrn = new MockURN("urn:sha1:" + urn);
         final String testArtist = "musician";
         final String testAlbum = "hitsville";
         final String testGenre = "rock";
@@ -182,9 +182,9 @@ public class RestUtilsTest extends BaseTestCase {
         JSONObject jsonObj = RestUtils.createFileItemJson(mockFileItem);
         
         assertEquals(testFile, jsonObj.get("filename"));
-        assertEquals(Category.AUDIO.getSingularName(), jsonObj.get("category"));
+        assertEquals(Category.AUDIO.getSchemaName(), jsonObj.get("category"));
         assertEquals(testSize, jsonObj.getLong("size"));
-        assertEquals(urnId, jsonObj.get("sha1Urn"));
+        assertEquals(testUrn, jsonObj.get("id"));
         assertEquals(testArtist, jsonObj.get("artist"));
         assertEquals(testAlbum, jsonObj.get("album"));
         assertEquals(testGenre, jsonObj.get("genre"));
@@ -282,7 +282,7 @@ public class RestUtilsTest extends BaseTestCase {
         JSONObject jsonObj = RestUtils.createSearchResultJson(mockGroupedResult);
         
         assertEquals(testFile, jsonObj.get("filename"));
-        assertEquals(Category.AUDIO.getSingularName(), jsonObj.get("category"));
+        assertEquals(Category.AUDIO.getSchemaName(), jsonObj.get("category"));
         assertEquals(testSize, jsonObj.getLong("size"));
         assertEquals(testUrn, jsonObj.get("id"));
         assertEquals(testMagnet, jsonObj.get("magnetUrl"));

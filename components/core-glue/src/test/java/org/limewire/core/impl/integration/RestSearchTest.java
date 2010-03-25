@@ -230,7 +230,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
             boolean found = false;
             for (int i = 0;i<filenames.length&&!found;i++) {
                 if (filemap.get("filename").equals(filenames[i])
-                        &&filemap.get("category").equals(cats[i].getPluralName())) {
+                        &&filemap.get("category").equals(cats[i].getSchemaName())) {
                     found = true;
                 }
             }

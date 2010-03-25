@@ -192,7 +192,6 @@ public abstract class RestUtils {
      * Creates the JSON description object for the specified local file item.
      */
     public static JSONObject createFileItemJson(LocalFileItem fileItem) throws JSONException {
-        String sha1String = fileItem.getUrn().toString().substring(9);
         Category category = fileItem.getCategory();
         String artist = (String) fileItem.getProperty(FilePropertyKey.AUTHOR);
         String album = (String) fileItem.getProperty(FilePropertyKey.ALBUM);
@@ -201,9 +200,9 @@ public abstract class RestUtils {
         
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("filename", fileItem.getFileName());
-        jsonObj.put("category", category.getSingularName());
+        jsonObj.put("category", category.getSchemaName());
         jsonObj.put("size", fileItem.getSize());
-        jsonObj.put("sha1Urn", sha1String);
+        jsonObj.put("id", fileItem.getUrn());
         jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
         jsonObj.put("album", (category == Category.AUDIO && album != null) ? album : "");
         jsonObj.put("genre", (category == Category.AUDIO && genre != null) ? genre : "");
@@ -247,7 +246,7 @@ public abstract class RestUtils {
         
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("filename", result.getFileName());
-        jsonObj.put("category", category.getSingularName());
+        jsonObj.put("category", category.getSchemaName());
         jsonObj.put("size", searchResult.getSize());
         jsonObj.put("id", result.getUrn());
         jsonObj.put("magnetUrl", searchResult.getMagnetURL());

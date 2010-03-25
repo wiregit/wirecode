@@ -183,7 +183,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
             HashMap<String,String> fileMap = new HashMap<String,String>();
             fileMap.put("size",String.valueOf(fd.getFileSize()));
             fileMap.put("filename",fd.getFileName());
-            fileMap.put("sha1Urn",getUrn(fd));
+            fileMap.put("id",getUrn(fd));
             librarySet.add(fileMap);
         }
     }
@@ -214,9 +214,6 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      */
     protected String getUrn(FileDesc file) {
         String shortUrn = file.getSHA1Urn().toString();
-        if (shortUrn.startsWith("urn:sha1:")) {
-            shortUrn = shortUrn.substring(9);
-        }
         return shortUrn;
     }
 
