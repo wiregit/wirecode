@@ -86,11 +86,51 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     }
 
     public void testLimits() throws Exception {
-        // not implemented in API yet (LWC-5528)
+        
+        int fcnt = filenames.length;
+        Collection<Map<String,String>> filesByGUID = null;
+        
+        // huge limit
+        filesByGUID = guidQueryFilesGET(guids[0],"limit=10000");
+        assertEquals("count unexpected",fcnt,filesByGUID.size());     
+        
+        // file count less one
+        filesByGUID = guidQueryFilesGET(guids[0],"limit="+(fcnt-1));
+        assertEquals("count unexpected",fcnt-1,filesByGUID.size());    
+
+        // file count plus one
+        filesByGUID = guidQueryFilesGET(guids[0],"limit="+(fcnt+1));
+        assertEquals("count unexpected",fcnt,filesByGUID.size());    
+        
+        // one item
+        filesByGUID = guidQueryFilesGET(guids[0],"limit=1");
+        assertEquals("count unexpected",1,filesByGUID.size());   
+        
+        // negative limit
+        filesByGUID = guidQueryFilesGET(guids[0],"limit=-10");
+        assertEquals("count unexpected",0,filesByGUID.size());         
     }
 
     public void testOffsets() throws Exception {
-        // not implemented in API yet (LWC-5528)
+
+        int fcnt = filenames.length;
+        Collection<Map<String,String>> filesByGUID = null;
+        
+        // huge limit
+        filesByGUID = guidQueryFilesGET(guids[0],"offset=10000");
+        assertEquals("count unexpected",0,filesByGUID.size());     
+        
+        // file count less one
+        filesByGUID = guidQueryFilesGET(guids[0],"offset="+(fcnt-1));
+        assertEquals("count unexpected",1,filesByGUID.size());    
+
+        // file count plus one
+        filesByGUID = guidQueryFilesGET(guids[0],"offset="+(fcnt+1));
+        assertEquals("count unexpected",0,filesByGUID.size());    
+        
+        // one item
+        filesByGUID = guidQueryFilesGET(guids[0],"offset=1");
+        assertEquals("count unexpected",(fcnt-1),filesByGUID.size());           
     }
 
     public void testNegativesNoMock() throws Exception {
@@ -107,7 +147,6 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         assertResponseEmpty(SEARCH_PREFIX,"this=is_garbage");
         assertResponseEmpty(SEARCH_PREFIX,"?something=test");
 
-        // TODO: limits,offsets unimplemented in API (LWC-5528)
         assertResponseEmpty(SEARCH_PREFIX,"this=is_garbage");
     }
 
@@ -273,10 +312,13 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     /**
      * performs GET for a particular GUIDs results files
      */
-    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid) throws Exception {
+    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid, String params) throws Exception {
         String target = SEARCH_PREFIX+"/"+guid.toString()+FILES_PREFIX;
-        Collection<Map<String,String>> filesByGUID = listGET(target,NO_PARAMS);
+        Collection<Map<String,String>> filesByGUID = listGET(target,params);
         return filesByGUID;
+    }
+    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid) throws Exception {
+        return guidQueryFilesGET(guid,NO_PARAMS);
     }
 
     /**
