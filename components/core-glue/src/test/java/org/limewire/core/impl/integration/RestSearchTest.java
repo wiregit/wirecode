@@ -9,6 +9,7 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchManager;
@@ -123,7 +124,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
         String target = SEARCH_PREFIX+"/"+guids[0].toString()+FILES_PREFIX;
         int filecnt = listGETCount(target,NO_PARAMS);
-        assertTrue("filecnt "+filecnt,filecnt==50); // LWC-5428
+        assertTrue("filecnt "+filecnt,filecnt==1000);
     }
 
     // ---------------------- private ----------------------
@@ -206,6 +207,12 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
                 allowing(mockGroupedResult).getSearchResults();
                 will(returnValue(searchResults));
+
+                allowing(mockSearchResult).getProperty(with(any(FilePropertyKey.class)));
+                will(returnValue("unset"));
+                allowing(mockSearchResult).getSize();
+                allowing(mockSearchResult).getMagnetURL();
+                allowing(mockSearchResult).isSpam();
                 allowing(mockSearchResult).getCategory();
                 if (!isHuge) {
                     will(onConsecutiveCalls(returnValue(cats[0]),returnValue(cats[1]),
@@ -219,6 +226,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
                 }
                 allowing(mockGroupedResult).getSources();
                 will(returnValue(remoteHosts));
+                allowing(mockGroupedResult).getUrn();
 
                 allowing(searchMgr);
             }
@@ -234,7 +242,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
                     found = true;
                 }
             }
-            assertTrue("results not found for: "+filemap.get("name"),found);
+            assertTrue("results not found for: "+filemap.get("filename"),found);
         }
     }
 
