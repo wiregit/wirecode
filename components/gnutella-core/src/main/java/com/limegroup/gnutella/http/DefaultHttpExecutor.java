@@ -50,6 +50,11 @@ public class DefaultHttpExecutor implements HttpExecutor {
     public Shutdownable execute(HttpUriRequest method, HttpParams params) {
         return execute(method, params, new DefaultHttpClientListener());
     }
+    
+    @Override
+    public Shutdownable execute(HttpUriRequest request, HttpClientListener listener) {
+        return execute(request, httpParams, listener);
+    }
 	
     @Override
     public Shutdownable execute(HttpUriRequest method, HttpParams params, HttpClientListener listener) {

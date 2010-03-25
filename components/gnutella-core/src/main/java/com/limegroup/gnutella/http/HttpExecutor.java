@@ -42,6 +42,12 @@ public interface HttpExecutor {
      */
     public Shutdownable execute(HttpUriRequest method, HttpParams params,
             HttpClientListener listener);
+    
+    /**
+     * Execute http request asynchronously.
+     * @return a {@link Shutdownable} to allow the request to be aborted
+     */
+    public Shutdownable execute(HttpUriRequest request, HttpClientListener listener);
 
     /**
      * Tries to execute any of the methods until the HttpClientListener
