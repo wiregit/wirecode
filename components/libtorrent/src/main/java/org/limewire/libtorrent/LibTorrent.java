@@ -182,6 +182,31 @@ interface LibTorrent extends Library {
      * Set the target seed ratio for this torrent.
      */
     public WrapperStatus set_seed_ratio(String id, float seed_ratio);
+    
+
+    /**
+     * Sets the upload limit on this Torrent. If this limit is higher than the
+     * global upload limit, it will not go higher than that limit.
+     */
+    public WrapperStatus set_upload_limit(String id, int limit);
+    
+    /**
+     * Returns the upload limit for this Torrent. If the global upload limit is
+     * being used, this will return 0.
+     */
+    public WrapperStatus get_upload_limit(String id, IntByReference limit);
+    
+    /**
+     * Sets the download limit on this Torrent. If this limit is higher than the
+     * global download limit, it will not go higher than that limit.
+     */
+    public WrapperStatus set_download_limit(String id, int limit);
+    
+    /**
+     * Returns the download limit for this Torrent. If the global download limit
+     * is being used, this will return 0.
+     */
+    public WrapperStatus get_download_limit(String id, IntByReference limit);
 
     /**
      * Sets the file priorities for the given torrent.

@@ -296,5 +296,25 @@ public interface Torrent {
      * is one that is constructed of XML data.
      */
     public boolean isEditable();
+    
+    /**
+     * Returns the maximum download bandwidth this Torrent will use.
+     */
+    public int getMaxDownloadBandwidth(); 
+    
+    /**
+     * Sets the maximum download bandwidth this Torrent will use.
+     */
+    public void setMaxDownloadBandwidth(int value);
+    
+    /**
+     * Returns the maximum upload bandwidth this Torrent will use.
+     */
+    public int getMaxUploadBandwidth();
+    
+    /**
+     * Sets the maximum upload bandwidth this Torrent can use.
+     */
+    public void setMaxUploadBandwidth(int value); 
 
 }

@@ -39,6 +39,14 @@ public interface TorrentParams {
 
     public void setPrivate(Boolean isPrivate);
 
+    public void setSeedRatioLimit(float value);
+    
+    public float getSeedRatioLimit();
+    
+    public void setTimeRatioLimit(int value);
+    
+    public int getTimeRatioLimit();
+    
     /**
      * Fills in missing fields from the data in the torrentFile field if it
      * exists and is valid.

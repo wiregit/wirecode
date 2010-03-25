@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.properties;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -34,6 +36,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     private final Provider<LibraryManager> libraryManager;
     private final Provider<BarPainterFactory> barPainterFactory;
     private final Provider<TableDecorator> tableDecorator;
+    private final @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings;
     
     @Inject
     public FileInfoPanelFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
@@ -41,7 +44,8 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
             Provider<PropertyDictionary> propertyDictionary, Provider<SpamManager> spamManager,
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,
             Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager,
-            Provider<BarPainterFactory> barPainterFactory, Provider<TableDecorator> tableDecorator) {
+            Provider<BarPainterFactory> barPainterFactory, Provider<TableDecorator> tableDecorator,
+            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
@@ -53,6 +57,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
         this.libraryManager = libraryManager;
         this.barPainterFactory = barPainterFactory;
         this.tableDecorator = tableDecorator;
+        this.torrentSettings = torrentSettings;
     }
     
     @Override
@@ -67,7 +72,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createGeneralPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoGeneralPanel(type, propertiableFile, propertyDictionary.get(), spamManager.get(), metaDataManager.get(), libraryMediator.get());
+        return new FileInfoGeneralPanel(type, propertiableFile, torrentSettings, propertyDictionary.get(), spamManager.get(), metaDataManager.get(), libraryMediator.get());
     }
 
     @Override

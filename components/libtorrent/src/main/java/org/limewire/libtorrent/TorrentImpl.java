@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.limewire.bittorrent.LimeWireTorrentProperties;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentAlert;
 import org.limewire.bittorrent.TorrentEvent;
@@ -55,7 +56,6 @@ class TorrentImpl implements Torrent {
     private final AtomicLong startTime = new AtomicLong(-1);
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
-
     // used to decide if the torrent was just newly completed or not.
     private final AtomicBoolean complete = new AtomicBoolean(false);
 
@@ -78,6 +78,8 @@ class TorrentImpl implements Torrent {
         this.torrentFile.set(params.getTorrentFile());
         this.fastResumeFile.set(params.getFastResumeFile());
         this.torrentDataFile.set(params.getTorrentDataFile());
+        setProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, params.getSeedRatioLimit());
+        setProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, params.getTimeRatioLimit());
         
         if (isPrivate != null) {
             this.isPrivate.set(isPrivate);
@@ -434,6 +436,8 @@ class TorrentImpl implements Torrent {
     @Override
     public void setProperty(String key, Object value) {
         properties.put(key, value);
+        if(key.equals(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT) && value instanceof Float)
+            setSeedRatioLimit((Float)value);
     }
 
     @Override
@@ -530,5 +534,54 @@ class TorrentImpl implements Torrent {
     @Override
     public boolean isEditable() {
         return true;
+    }
+
+    @Override
+    public void setMaxDownloadBandwidth(int value) {
+        lock.lock();
+        try {
+            libTorrent.set_download_limit(sha1, value);
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    @Override
+    public int getMaxDownloadBandwidth() {
+        lock.lock();
+        try {
+            return libTorrent.get_download_limit(sha1);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public int getMaxUploadBandwidth() {
+        lock.lock();
+        try {
+            return libTorrent.get_upload_limit(sha1);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void setMaxUploadBandwidth(int value) {
+        lock.lock();
+        try {
+            libTorrent.set_upload_limit(sha1, value);
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    private void setSeedRatioLimit(float value) {
+        lock.lock();
+        try {
+            libTorrent.set_seed_ratio(sha1, value);
+        } finally {
+            lock.unlock();
+        }
     }
 }

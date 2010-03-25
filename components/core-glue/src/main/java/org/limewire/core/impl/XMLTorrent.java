@@ -306,6 +306,27 @@ public class XMLTorrent implements Torrent {
         return false;
     }
     
+
+    @Override
+    public int getMaxDownloadBandwidth() {
+        return -1;
+    }
+
+    @Override
+    public int getMaxUploadBandwidth() {
+        return -1;
+    }
+
+    @Override
+    public void setMaxDownloadBandwidth(int value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setMaxUploadBandwidth(int value) {
+        throw new UnsupportedOperationException();
+    }
+    
     private List<TorrentFileEntry> parsePathEntries(String encodedPath, String encodedSizes) {
         String[] paths = encodedPath.split("//");
         String[] sizes = encodedSizes.split(" ");

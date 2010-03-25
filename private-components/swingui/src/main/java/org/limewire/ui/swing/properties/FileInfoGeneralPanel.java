@@ -30,6 +30,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -76,17 +77,20 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private final FileInfoType type;
     private PropertiableFile propertiableFile;
     private final PropertyDictionary propertyDictionary;
+    private final TorrentManagerSettings torrentSettings;
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
     private final LibraryMediator libraryMediator;
     private JTextField locationField;
+    private TorrentManagementPanel torrentManagementPanel;
     
     private final Map<FilePropertyKey, JComponent> changedProps = new HashMap<FilePropertyKey, JComponent>();
     
-    public FileInfoGeneralPanel(FileInfoType type, PropertiableFile propertiableFile,
+    public FileInfoGeneralPanel(FileInfoType type, PropertiableFile propertiableFile, TorrentManagerSettings torrentSettings,
             PropertyDictionary propertyDictionary, SpamManager spamManager, MetaDataManager metaDataManager, LibraryMediator libraryMediator) {
         this.type = type;
         this.propertiableFile = propertiableFile;
+        this.torrentSettings = torrentSettings;
         this.propertyDictionary = propertyDictionary;
         this.spamManager = spamManager;
         this.metaDataManager = metaDataManager;
@@ -142,6 +146,8 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             }     
             break;
         }
+        if(torrentManagementPanel != null && torrentManagementPanel.hasChanged())
+            torrentManagementPanel.save();
     }
     
     @Override
@@ -165,6 +171,8 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
             component.add(createLabelField(propertiableFile.getUrn().toString()), "growx, span, wrap");
         }
+        
+        createTorrentSettings();
     }
 
     /**
@@ -361,6 +369,17 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             }
             
             break;
+        }
+    }
+    
+    private void createTorrentSettings() {
+        Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
+        
+        if(torrent != null && torrent.isEditable()) {
+            component.add(createHeaderLabel(I18n.tr("Torrent Settings")), "span, gaptop 15, wrap");
+            
+            torrentManagementPanel = new TorrentManagementPanel(torrent, torrentSettings);
+            component.add(torrentManagementPanel.getComponent(), "span, wrap");
         }
     }
     

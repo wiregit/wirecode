@@ -31,6 +31,10 @@ public class LibTorrentParams implements TorrentParams {
     private File torrentDataFile = null;
 
     private Boolean isPrivate = null;
+    
+    private float seedRatioLimit = -1;
+    
+    private int timeRatioLimit = -1;
 
     private final AtomicBoolean filled = new AtomicBoolean(false);
 
@@ -131,6 +135,26 @@ public class LibTorrentParams implements TorrentParams {
     }
 
     @Override
+    public float getSeedRatioLimit() {
+        return seedRatioLimit;
+    }
+
+    @Override
+    public void setSeedRatioLimit(float value) {
+        this.seedRatioLimit = value;
+    }
+
+    @Override
+    public int getTimeRatioLimit() {
+        return timeRatioLimit;
+    }
+    
+    @Override
+    public void setTimeRatioLimit(int value) {
+        this.timeRatioLimit = value;
+    }
+
+    @Override
     public void fill() throws IOException {
         if (!filled.getAndSet(true)) {
             String sha1 = getSha1();
@@ -204,8 +228,9 @@ public class LibTorrentParams implements TorrentParams {
         sb.append("downloadFolder: ").append(downloadFolder).append("\n");
         sb.append("isPrivate: ").append(isPrivate).append("\n");
         sb.append("fastResumeFile: ").append(fastResumeFile).append("\n");
+        sb.append("seedRatioLimit: ").append(seedRatioLimit).append("\n");
+        sb.append("timeRatioLimit: ").append(timeRatioLimit).append("\n");
 
         return sb.toString();
     }
-
 }

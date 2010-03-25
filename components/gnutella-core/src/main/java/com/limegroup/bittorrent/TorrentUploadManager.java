@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.bittorrent.LimeWireTorrentProperties;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.bittorrent.TorrentInfo;
@@ -76,7 +77,8 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         String sha1 = (String) memento.get("sha1");
                         String trackerURL = (String) memento.get("trackerURL");
                         String name = (String) memento.get("name");
-
+                        Float seedRatioLimit = (Float) memento.get("seedRatioLimit");
+                        Integer timeRatioLimit = (Integer) memento.get("timeRatioLimit");
                         boolean torrentAdded = false;
                         boolean torrentLoaded = false;
                         Torrent torrent = null;
@@ -92,6 +94,10 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                     params.setFastResumeFile(fastResumeFile);
                                     params.setTorrentFile(torrentFile);
                                     params.setTorrentDataFile(torrentDataFile);
+                                    if(seedRatioLimit != null)
+                                        params.setSeedRatioLimit(seedRatioLimit);
+                                    if(timeRatioLimit != null)
+                                        params.setTimeRatioLimit(timeRatioLimit);
                                     torrent = torrentManager.get().seedTorrent(params); 
                                     if (torrent != null) {
                                         torrentAdded = true;
@@ -175,6 +181,14 @@ public class TorrentUploadManager implements BTUploaderFactory {
         map.put("sha1", torrent.getSha1());
         map.put("trackerURL", torrent.getTrackerURL());
         map.put("name", torrent.getName());
+        
+        float seedRatioLimit = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, -1f);
+        if(seedRatioLimit >= 0)
+            map.put("seedRatioLimit", seedRatioLimit);
+        
+        int seedTimeRatioLimit = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, -1);
+        if(seedTimeRatioLimit >= 0)
+            map.put("timeRatioLimit", seedTimeRatioLimit);
 
         FileUtils.writeObject(torrentMomento, map);
     }

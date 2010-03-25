@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.bittorrent.LimeWireTorrentProperties;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
@@ -76,8 +77,11 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
             TorrentStatus status = torrent.getStatus();
             int seedTime = status != null ? status.getSeedingTime() : 0;
 
-            float targetSeedRatio = torrentManager.getTorrentManagerSettings().getSeedRatioLimit();
-            int targetSeedTime = torrentManager.getTorrentManagerSettings().getSeedTimeLimit();
+            float targetSeedRatio = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, -1f);
+            targetSeedRatio = (targetSeedRatio < 0) ? torrentManager.getTorrentManagerSettings().getSeedRatioLimit() : targetSeedRatio;
+            
+            int targetSeedTime = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, -1);
+            targetSeedTime = (targetSeedTime < 0) ? torrentManager.getTorrentManagerSettings().getSeedTimeLimit() : targetSeedTime;
 
             if (finished && (seedRatio >= targetSeedRatio || seedTime >= targetSeedTime)) {
                 this.finished.set(true);

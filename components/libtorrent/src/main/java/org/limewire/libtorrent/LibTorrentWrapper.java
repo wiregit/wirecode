@@ -341,6 +341,48 @@ class LibTorrentWrapper {
     }
 
     /**
+     * Sets the upload limit for this particular Torrent.
+     */
+    public void set_upload_limit(String id, int limit) {
+        LOG.debugf("before set_upload_limit");
+        catchWrapperException(libTorrent.set_upload_limit(id, limit));
+        LOG.debugf("after set_upload_limit");
+    }
+    
+    /**
+     * Returns the upload limit for this particular Torrent. If
+     * the global upload limit is being used, this will return 0.
+     */
+    public int get_upload_limit(String id) {
+        LOG.debugf("before get_upload_limit");
+        IntByReference limit = new IntByReference();
+        catchWrapperException(libTorrent.get_upload_limit(id, limit));
+        LOG.debugf("after get_upload_limit");
+        return limit.getValue();
+    }
+    
+    /**
+     * Sets the download limit for this particular Torrent.
+     */
+    public void set_download_limit(String id, int limit) {
+        LOG.debugf("before set_download_limit");
+        catchWrapperException(libTorrent.set_download_limit(id, limit));
+        LOG.debugf("after set_download_limit");
+    }
+    
+    /**
+     * Returns the download limit for this particular Torrent. If
+     * the global download limit is being used, this will return 0.
+     */
+    public int get_download_limit(String id) {
+        LOG.debugf("before get_download_limit");
+        IntByReference limit = new IntByReference();
+        catchWrapperException(libTorrent.get_download_limit(id, limit));
+        LOG.debugf("after get_download_limit");
+        return limit.getValue();
+    }
+    
+    /**
      * Sets the file priority for the given index.
      */
     public void set_file_priorities(String id, int[] priorities) {
