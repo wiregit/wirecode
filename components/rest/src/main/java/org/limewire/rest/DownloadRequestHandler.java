@@ -3,6 +3,8 @@ package org.limewire.rest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -88,23 +90,11 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
     private void doGetAll(String uriTarget, Map<String, String> queryParams,
             HttpResponse response) throws IOException {
         
+        // Get list of downloads.
         List<DownloadItem> downloadItems = downloadListManager.getDownloads();
         
-        try {
-            // Create JSON result.
-            JSONArray jsonArr = new JSONArray();
-            for (DownloadItem downloadItem : downloadItems) {
-                jsonArr.put(createDownloadDescription(downloadItem));
-            }
-
-            // Set response entity and status.
-            HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString());
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
-            
-        } catch (JSONException ex) {
-            throw new IOException(ex);
-        }
+        // Set response entity and status.
+        updateDownloadResponse(response, downloadItems);
     }
     
     /**
@@ -149,7 +139,7 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
         String torrent = queryParams.get("torrent");
         
         // Start download.
-        DownloadItem[] downloadItems = null;
+        List<DownloadItem> downloadItems = null;
         if ((fileId != null) && (searchId != null)) {
             downloadItems = startResultDownload(fileId, searchId);
         } else if (magnet != null) {
@@ -159,23 +149,13 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
         }
         
         // Return not found if download not started.
-        if (downloadItems == null || downloadItems.length == 0) {
+        if (downloadItems == null || downloadItems.isEmpty()) {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return;
         }
 
-        try {
-            // Return download data.
-            JSONArray jsonArr = new JSONArray();
-            for (DownloadItem downloadItem : downloadItems) {
-                jsonArr.put(createDownloadDescription(downloadItem));
-            }
-            HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString());
-            response.setEntity(entity);
-            response.setStatusCode(HttpStatus.SC_OK);
-        } catch (JSONException ex) {
-            throw new IOException(ex);
-        }
+        // Set response entity and status.
+        updateDownloadResponse(response, downloadItems);
     }
     
     /**
@@ -207,36 +187,36 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
     }
     
     /**
-     * Starts a download of the specified search result and returns an array
-     * containing the download item.  The method returns an empty array if the
-     * download could not be started.
+     * Starts a download of the specified search result and returns a list
+     * containing the download item.  The list is empty if the download could
+     * not be started.
      */
-    private DownloadItem[] startResultDownload(String fileUrn, String searchGuid) throws IOException {
+    private List<DownloadItem> startResultDownload(String fileUrn, String searchGuid) throws IOException {
         // Get search.
         SearchResultList resultList = searchManager.getSearchResultList(searchGuid);
         if (resultList == null) {
-            return null;
+            return Collections.<DownloadItem>emptyList();
         }
 
         // Find search results for URN.
         URN urn = urnFactory.createSHA1Urn(fileUrn);
         GroupedSearchResult groupedResult = resultList.getGroupedResult(urn);
         if (groupedResult == null) {
-            return null;
+            return Collections.<DownloadItem>emptyList();
         }
 
         // Add download to manager.
         DownloadItem downloadItem = downloadListManager.addDownload(
                 resultList.getSearch(), groupedResult.getSearchResults(), null, true);
-        return (downloadItem == null) ? new DownloadItem[0] : new DownloadItem[] { downloadItem };
+        return (downloadItem == null) ? Collections.<DownloadItem>emptyList() :
+            Collections.<DownloadItem>singletonList(downloadItem);
     }
     
     /**
-     * Starts a download of the specified magnet link and returns an array of
-     * download items.  The method returns an empty array if the uri is not a
-     * magnet link.
+     * Starts a download of the specified magnet link and returns a list of
+     * download items.  The list is empty if the uri is not a magnet link.
      */
-    private DownloadItem[] startMagnetDownload(String magnetUri) throws IOException {
+    private List<DownloadItem> startMagnetDownload(String magnetUri) throws IOException {
         try {
             // Create URI.
             URI uri = URIUtils.toURI(magnetUri);
@@ -246,15 +226,16 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
                 MagnetLink[] magnetLinks = magnetFactory.parseMagnetLink(uri);
                 
                 // Add download to manager.
-                DownloadItem[] downloadItems = new DownloadItem[magnetLinks.length]; 
+                List<DownloadItem> downloadItems = new ArrayList<DownloadItem>(); 
                 for (int i = 0; i < magnetLinks.length; i++) {
-                    downloadItems[i] = downloadListManager.addDownload(magnetLinks[i], null, true);
+                    DownloadItem downloadItem = downloadListManager.addDownload(magnetLinks[i], null, true);
+                    if (downloadItem != null) downloadItems.add(downloadItem);
                 }
                 return downloadItems;
                 
             } else {
-                // Return empty array.
-                return new DownloadItem[0];
+                // Return empty list.
+                return Collections.<DownloadItem>emptyList();
             }
             
         } catch (URISyntaxException ex) {
@@ -263,11 +244,10 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
     }
     
     /**
-     * Starts a download of the specified torrent uri and returns an array of
-     * download items.  The method returns an empty array if the uri is really
-     * a magnet link.
+     * Starts a download of the specified torrent uri and returns a list of
+     * download items.  The list is empty if the uri is really a magnet link.
      */
-    private DownloadItem[] startTorrentDownload(String torrentUri) throws IOException {
+    private List<DownloadItem> startTorrentDownload(String torrentUri) throws IOException {
         try {
             // Create URI.
             URI uri = URIUtils.toURI(torrentUri);
@@ -275,11 +255,12 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
             if (!magnetFactory.isMagnetLink(uri)) {
                 // Add download to manager.
                 DownloadItem downloadItem = downloadListManager.addTorrentDownload(uri, true);
-                return (downloadItem == null) ? new DownloadItem[0] : new DownloadItem[] { downloadItem };
+                return (downloadItem == null) ? Collections.<DownloadItem>emptyList() :
+                    Collections.<DownloadItem>singletonList(downloadItem);
                 
             } else {
-                // Return empty array.
-                return new DownloadItem[0];
+                // Return empty list.
+                return Collections.<DownloadItem>emptyList();
             }
             
         } catch (URISyntaxException ex) {
@@ -298,6 +279,30 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
         jsonObj.put("bytesDownloaded", downloadItem.getCurrentSize());
         jsonObj.put("state", downloadItem.getState());
         return jsonObj;
+    }
+    
+    /**
+     * Updates the HTTP response with the specified list of download items.
+     */
+    private HttpResponse updateDownloadResponse(HttpResponse response, 
+            List<DownloadItem> downloadItems) throws IOException {
+        try {
+            // Create JSON result.
+            JSONArray jsonArr = new JSONArray();
+            for (DownloadItem downloadItem : downloadItems) {
+                jsonArr.put(createDownloadDescription(downloadItem));
+            }
+
+            // Set response entity and status.
+            HttpEntity entity = RestUtils.createStringEntity(jsonArr.toString());
+            response.setEntity(entity);
+            response.setStatusCode(HttpStatus.SC_OK);
+
+            return response;
+            
+        } catch (JSONException ex) {
+            throw new IOException(ex);
+        }
     }
     
     /**

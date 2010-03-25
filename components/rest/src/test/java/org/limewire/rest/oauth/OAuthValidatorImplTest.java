@@ -37,7 +37,7 @@ public class OAuthValidatorImplTest extends TestCase {
     }
 
     /** Tests method to validate request using OAuth. */
-    public void testValidateRequest() {
+    public void testValidateRequest() throws Exception {
         // Create HTTP request.
         HttpRequest httpRequest = new BasicHttpRequest("GET", "/remote/hello?type=test", HttpVersion.HTTP_1_1);
         
@@ -46,11 +46,7 @@ public class OAuthValidatorImplTest extends TestCase {
         httpRequest.addHeader(OAuthRequest.AUTH_HEADER, value);
         
         // Verify success.
-        try {
-            validator.validateRequest(new OAuthRequest(httpRequest));
-        } catch (OAuthException ex) {
-            fail("Authorized request failed: " + ex);
-        }
+        validator.validateRequest(new OAuthRequest(httpRequest));
     }
 
     /** Tests method to validate request with bad signature. */
@@ -90,7 +86,7 @@ public class OAuthValidatorImplTest extends TestCase {
     }
 
     /** Tests method to validate request replay. */
-    public void testValidateRequestReplay() {
+    public void testValidateRequestReplay() throws Exception {
         // Create HTTP request.
         HttpRequest httpRequest = new BasicHttpRequest("GET", "/remote/hello?type=test", HttpVersion.HTTP_1_1);
         
@@ -99,11 +95,7 @@ public class OAuthValidatorImplTest extends TestCase {
         httpRequest.addHeader(OAuthRequest.AUTH_HEADER, value);
         
         // Verify success.
-        try {
-            validator.validateRequest(new OAuthRequest(httpRequest));
-        } catch (OAuthException ex) {
-            fail("Authorized request failed: " + ex);
-        }
+        validator.validateRequest(new OAuthRequest(httpRequest));
         
         // Repeat request and verify failure.
         try {
@@ -114,19 +106,29 @@ public class OAuthValidatorImplTest extends TestCase {
         }
     }
 
-    /** Tests method to validate old request. */
-    public void testValidateRequestTooOld() {
+    /** Tests method to validate earlier request. */
+    public void testValidateRequestEarlier() throws Exception {
         // Create HTTP request.
         HttpRequest httpRequest = new BasicHttpRequest("GET", "/remote/hello?type=test", HttpVersion.HTTP_1_1);
         
         // Add valid authorization header.
-        String value = "OAuth oauth_consumer_key=\"restdemo\", oauth_version=\"1.0\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"1268258300\", oauth_nonce=\"2323977038244562009\", oauth_signature=\"zk%2BJ6xCnVU1AjTc6gNqMU5dkxkM%3D\"";
+        String value = "OAuth oauth_consumer_key=\"restdemo\", oauth_version=\"1.0\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"4421858300\", oauth_nonce=\"2323977038244562009\", oauth_signature=\"C0aRkw2fACAgy5PyplnUur1eNak%3D\"";
+        httpRequest.addHeader(OAuthRequest.AUTH_HEADER, value);
+        
+        // Verify success.
+        validator.validateRequest(new OAuthRequest(httpRequest));
+        
+        // Create HTTP request.
+        httpRequest = new BasicHttpRequest("GET", "/remote/hello?type=test", HttpVersion.HTTP_1_1);
+        
+        // Add earlier authorization header.
+        value = "OAuth oauth_consumer_key=\"restdemo\", oauth_version=\"1.0\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"1268258300\", oauth_nonce=\"2323977038244562009\", oauth_signature=\"zk%2BJ6xCnVU1AjTc6gNqMU5dkxkM%3D\"";
         httpRequest.addHeader(OAuthRequest.AUTH_HEADER, value);
         
         // Verify exception thrown.
         try {
             validator.validateRequest(new OAuthRequest(httpRequest));
-            fail("Old request did not fail");
+            fail("Earlier request did not fail");
         } catch (OAuthException ex) {
             assertNotNull(ex);
         }

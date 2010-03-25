@@ -3,6 +3,7 @@ package org.limewire.rest.oauth;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.NameValuePair;
 import org.limewire.rest.RestUtils;
@@ -22,7 +23,7 @@ class OAuthUtils {
     public static String createSignatureBaseString(OAuthRequest request, String baseUrl) {
         StringBuilder buf = new StringBuilder();
         
-        buf.append(request.getMethod().toUpperCase()).append(AMPERSAND);
+        buf.append(request.getMethod().toUpperCase(Locale.US)).append(AMPERSAND);
         buf.append(RestUtils.percentEncode(baseUrl + request.getUri())).append(AMPERSAND);
         buf.append(RestUtils.percentEncode(createParameterString(request)));
         

@@ -29,8 +29,8 @@ public class OAuthValidatorImpl implements OAuthValidator {
     private static final String VERSION = "1.0";
     private static final String SIG_METHOD = "HMAC-SHA1";
     private static final String MAC_NAME = "HmacSHA1";
-    /** Maximum timestamp age is 2 minutes. */
-    private static final long TIMESTAMP_AGE = 2 * 60 * 1000L;
+    /** Maximum nonce age is 2 minutes. */
+    private static final long NONCE_AGE = 2 * 60 * 1000L;
 
     private final String baseUrl;
     private final String consumerSecret;
@@ -130,12 +130,15 @@ public class OAuthValidatorImpl implements OAuthValidator {
     
     /**
      * Validates the timestamp in the specified request.  According to OAuth 
-     * Core 1.0 Revision A, Section 8, this must be equal to or greater than 
-     * the timestamp in previous requests.
+     * Core 1.0 Revision A, Section 8, the timestamp is in seconds, and must
+     * be equal to or greater than the timestamp in previous requests.
      */
     private void validateTimestamp(OAuthRequest request, long currentMsec) throws OAuthException {
         // Get timestamp in seconds.
-        long timestamp = Long.parseLong(request.getParameter(OAuthRequest.OAUTH_TIMESTAMP));
+        long timestamp = request.getParameter(OAuthRequest.OAUTH_TIMESTAMP, 0);
+        if (timestamp <= 0) {
+            throw new OAuthException("Invalid OAuth timestamp");
+        }
         
         // Get previous timestamp.
         String consumerKey = request.getParameter(OAuthRequest.OAUTH_CONSUMER_KEY);
@@ -143,13 +146,7 @@ public class OAuthValidatorImpl implements OAuthValidator {
         
         // Timestamp cannot be earlier than last request. 
         if ((prevTime != null) && (prevTime.longValue() > timestamp)) {
-            throw new OAuthException("Invalid OAuth timestamp");
-        }
-        
-        // Timestamp cannot be too old.
-        long min = (currentMsec - TIMESTAMP_AGE) / 1000L;
-        if (timestamp < min) {
-            throw new OAuthException("OAuth timestamp too old");
+            throw new OAuthException("OAuth timestamp earlier than previous");
         }
         
         timestamps.put(consumerKey, timestamp);
@@ -162,7 +159,7 @@ public class OAuthValidatorImpl implements OAuthValidator {
      */
     private void validateNonce(OAuthRequest request, long currentMsec) throws OAuthException {
         // Get request parameters.
-        long timestamp = Long.parseLong(request.getParameter(OAuthRequest.OAUTH_TIMESTAMP));
+        long timestamp = request.getParameter(OAuthRequest.OAUTH_TIMESTAMP, 0);
         String consumerKey = request.getParameter(OAuthRequest.OAUTH_CONSUMER_KEY);
         String nonceStr = request.getParameter(OAuthRequest.OAUTH_NONCE);
         
@@ -236,14 +233,14 @@ public class OAuthValidatorImpl implements OAuthValidator {
      * Removes old nonces from the internal cache.
      */
     private void removeOldNonces(long currentMsec) {
-        // Calculate oldest timestamp.
-        long min = (currentMsec - TIMESTAMP_AGE) / 1000L;
+        // Calculate oldest creation time.
+        long minMsec = currentMsec - NONCE_AGE;
 
-        // Remove old nonces from cache.  Nonces are stored in order from
-        // oldest to newest, so we can easily remove items that are too old.
+        // Remove old nonces from cache.  Nonces are stored in order of
+        // creation time so we can easily remove items that are too old.
         for (Iterator<Nonce> iter = nonces.iterator(); iter.hasNext();) {
             Nonce nonce = iter.next();
-            if (min < nonce.getTimestamp()) {
+            if (minMsec < nonce.getCreationTime()) {
                 break;
             }
             iter.remove();
@@ -255,37 +252,31 @@ public class OAuthValidatorImpl implements OAuthValidator {
      * unique nonce string.
      */
     private static class Nonce implements Comparable<Nonce> {
+        private final long creationTime;
         private final long timestamp;
         private final String consumerKey;
         private final String nonce;
         
         public Nonce(long timestamp, String consumerKey, String nonce) {
+            this.creationTime = System.currentTimeMillis();
             this.timestamp = timestamp;
             this.consumerKey = consumerKey;
             this.nonce = nonce;
         }
         
-        public long getTimestamp() {
-            return timestamp;
+        public long getCreationTime() {
+            return creationTime;
         }
 
         @Override
         public int compareTo(Nonce n2) {
-            // We order nonces by timestamp, consumer key and value.
-            int result = (timestamp < n2.timestamp) ? -1 : 
-                ((timestamp > n2.timestamp) ? 1 : 0);
-            if (result == 0) {
-                result = consumerKey.compareTo(n2.consumerKey);
-            }
-            if (result == 0) {
-                result = nonce.compareTo(n2.nonce);
-            }
-            return result;
+            // We order nonces by creation time.
+            return (creationTime < n2.creationTime) ? -1 : 
+                ((creationTime > n2.creationTime) ? 1 : 0);
         }
         
         @Override
         public boolean equals(Object obj) {
-            if (obj == this) return true;
             if (obj instanceof Nonce) {
                 Nonce n2 = (Nonce) obj;
                 return (timestamp == n2.timestamp) && 

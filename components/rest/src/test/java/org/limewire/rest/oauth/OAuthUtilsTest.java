@@ -59,12 +59,12 @@ public class OAuthUtilsTest extends BaseTestCase {
         StringBuilder buf = new StringBuilder();
         buf.append("OAuth");
         buf.append(" ").append(AUTH_REALM).append("=\"").append(REALM).append("\"");
-        buf.append(", ").append(createHeaderString(OAUTH_CONSUMER_KEY, CONSUMER_KEY));
-        buf.append(", ").append(createHeaderString(OAUTH_SIGNATURE_METHOD, SIG_METHOD));
-        buf.append(", ").append(createHeaderString(OAUTH_SIGNATURE, SIGNATURE));
-        buf.append(", ").append(createHeaderString(OAUTH_TIMESTAMP, TIMESTAMP));
-        buf.append(", ").append(createHeaderString(OAUTH_NONCE, NONCE));
-        buf.append(", ").append(createHeaderString(OAUTH_VERSION, VERSION));
+        buf.append(", ").append(createHeaderElementString(OAUTH_CONSUMER_KEY, CONSUMER_KEY));
+        buf.append(", ").append(createHeaderElementString(OAUTH_SIGNATURE_METHOD, SIG_METHOD));
+        buf.append(", ").append(createHeaderElementString(OAUTH_SIGNATURE, SIGNATURE));
+        buf.append(", ").append(createHeaderElementString(OAUTH_TIMESTAMP, TIMESTAMP));
+        buf.append(", ").append(createHeaderElementString(OAUTH_NONCE, NONCE));
+        buf.append(", ").append(createHeaderElementString(OAUTH_VERSION, VERSION));
         Header authHeader = new BasicHeader(AUTH_HEADER, buf.toString());
         
         // Create mock values.
@@ -98,7 +98,7 @@ public class OAuthUtilsTest extends BaseTestCase {
      * Creates a encoded header parameter string for the specified name and 
      * value.
      */
-    private String createHeaderString(String name, String value) {
+    private String createHeaderElementString(String name, String value) {
         StringBuilder buf = new StringBuilder();
         buf.append(name).append("=\"").append(RestUtils.percentEncode(value)).append("\"");
         return buf.toString();

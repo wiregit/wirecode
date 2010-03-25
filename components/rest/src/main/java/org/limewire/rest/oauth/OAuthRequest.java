@@ -125,6 +125,24 @@ public class OAuthRequest {
     }
     
     /**
+     * Returns the long value for the specified request parameter name.  If
+     * the parameter is not found, or cannot be parsed into a long, then the
+     * specified default value is returned.
+     */
+    public long getParameter(String name, long defaultValue) {
+        String value = parameterMap.get(name);
+        if (value != null) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ex) {
+                return defaultValue;
+            }
+        } else {
+            return defaultValue;
+        }
+    }
+    
+    /**
      * Returns a List of name/value pairs representing the request parameters.
      */
     public List<NameValuePair> getParameters() {

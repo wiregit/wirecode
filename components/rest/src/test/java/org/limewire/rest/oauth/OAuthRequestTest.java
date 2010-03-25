@@ -100,6 +100,15 @@ public class OAuthRequestTest extends BaseTestCase {
         assertEquals("audio", oauthRequest.getParameter("type"));
     }
     
+    /** Tests method to retrieve a long parameter. */
+    public void testGetParameterLongValue() {
+        // Verify long parameter is correctly parsed.
+        assertEquals(Long.parseLong(TIMESTAMP), oauthRequest.getParameter(OAUTH_TIMESTAMP, 0));
+        
+        // Verify non-long parameter returns default value.
+        assertEquals(0, oauthRequest.getParameter(OAUTH_NONCE, 0));
+    }
+    
     /** Tests method to retrieve parameters. */
     public void testGetParameters() {
         assertEquals(8, oauthRequest.getParameters().size());

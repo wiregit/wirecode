@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -18,7 +19,7 @@ class SearchMonitor {
     private static final long TIMEOUT_MSEC = 5 * 60 * 1000;
     
     private final ScheduledExecutorService backgroundExecutor;
-    private final ConcurrentHashMap<SearchResultList, Periodic> resultMap;
+    private final Map<SearchResultList, Periodic> resultMap;
     
     /**
      * Constructs a SearchMonitor.
@@ -45,11 +46,10 @@ class SearchMonitor {
      * Removes the specified search result list from the set being monitored.
      */
     public void removeSearch(SearchResultList resultList) {
-        Periodic periodic = resultMap.get(resultList);
+        Periodic periodic = resultMap.remove(resultList);
         if (periodic != null) {
             periodic.unschedule();
         }
-        resultMap.remove(resultList);
     }
     
     /**
