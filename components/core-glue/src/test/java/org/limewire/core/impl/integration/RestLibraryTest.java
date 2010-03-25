@@ -79,12 +79,7 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
         // library contains deleted file
         forceMissingLibFile();
         validateLibraryMetadata(LIBRARY_PREFIX,NO_PARAMS,TOTAL_FILES+1);
-        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);
-        
-        // library contains corrupt file
-        forceCorruptLibFile();
-        validateLibraryMetadata(LIBRARY_PREFIX,NO_PARAMS,TOTAL_FILES+2);
-        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);      
+        validateLibraryResults(FILES_PREFIX,NO_PARAMS,MAX_FILES);        
     }
 
     // ---------------------- private methods ----------------------
@@ -111,7 +106,7 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
             int expectedSize) throws Exception {
         Set<Map<String,String>> resultSet = listGET(target,params);
         assertEquals("result size invalid: "+resultSet.size(),expectedSize,resultSet.size());
-        String assertInfo = "results unexpected.  ----------EXPECT: "+librarySet
+        String assertInfo = "unexpected key diffs ----------EXPECT: "+librarySet
                 +"---------- FOUND: "+resultSet;
         assertTrue(assertInfo,librarySet.containsAll(resultSet));
         return resultSet;

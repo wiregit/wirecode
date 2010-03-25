@@ -4,7 +4,6 @@ import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestF
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
@@ -20,7 +20,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.tests.CoreGlueTestUtils;
 import org.limewire.core.settings.ApplicationSettings;
@@ -53,7 +52,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     @Inject protected Library library;
     @Inject protected CategoryManager categoryMgr;
 
-    protected HashSet<Map<String,String>> librarySet = null;
+    protected LibrarySet librarySet = null;
 
     public AbstractRestIntegrationTestcase(String name) {
         super(name);
@@ -68,7 +67,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         Module combined = Modules.combine(modules);
         CoreGlueTestUtils.createInjectorAndStart(combined,new MockRestModule(),LimeTestUtils
                 .createModule(this));
-        librarySet = new HashSet<Map<String,String>>();
+        librarySet = new LibrarySet();
     }
 
     @Override protected void tearDown() throws Exception {
@@ -118,10 +117,30 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
             response = client.execute(method);
             HttpEntity entity = response.getEntity();
             responseStr = EntityUtils.toString(entity);
+        } catch (Exception e) {
+            throw e;
         } finally {
             client.releaseConnection(response);
         }
         return responseStr;
+    }
+
+    /**
+     * performs http GET and returns status code
+     */
+    protected int getHTTPStatus(String target, String params) throws Exception {
+
+        int statusCode = -1;
+        HttpResponse response = null;
+        HttpGet method = new HttpGet(buildUrl(target,params));
+
+        try {
+            response = client.execute(method);
+            statusCode = response.getStatusLine().getStatusCode();
+        } finally {
+            client.releaseConnection(response);
+        }
+        return statusCode;
     }
 
     /**
@@ -142,7 +161,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         }
         return barr;
     }
-    
+
     /**
      * loads sample files to library
      */
@@ -160,13 +179,11 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
                 });
 
         // build library file map for expectations
-        for (FileDesc file : files) {
+        for (FileDesc fd : files) {
             HashMap<String,String> fileMap = new HashMap<String,String>();
-            Category category = categoryMgr.getCategoryForFilename(file.getFileName());
-            fileMap.put("category",category.getSingularName());
-            fileMap.put("size",String.valueOf(file.getFileSize()));
-            fileMap.put("filename",file.getFileName());
-            fileMap.put("sha1Urn",getUrn(file));
+            fileMap.put("size",String.valueOf(fd.getFileSize()));
+            fileMap.put("filename",fd.getFileName());
+            fileMap.put("sha1Urn",getUrn(fd));
             librarySet.add(fileMap);
         }
     }
@@ -175,28 +192,12 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      * creates a temp file, adds to library, then deletes it locally; useful for
      * negative testing
      */
-    protected File forceMissingLibFile() throws Exception {
+    protected FileDesc forceMissingLibFile() throws Exception {
         File tmpFile = createNewTestFile(10,_scratchDir);
         FileManagerTestUtils.assertAdds(library,tmpFile);
+        FileDesc fd = library.getFileDesc(tmpFile);
         tmpFile.delete();
-        return tmpFile;
-    }
-
-    /**
-     * creates a temp file, adds to library, then add some garbage bytes to the
-     * file locally; useful for negative testing
-     */
-    protected File forceCorruptLibFile() throws Exception {
-        File tmpFile = createNewTestFile(100,_scratchDir);
-        FileManagerTestUtils.assertAdds(library,tmpFile);
-        FileOutputStream fos = new FileOutputStream(tmpFile);
-        try {
-            fos.write(new byte[] { 0, 100, 4, 36, 6 });
-        } finally {
-            fos.flush();
-            fos.close();
-        }
-        return tmpFile;
+        return fd;
     }
 
     /**
@@ -218,7 +219,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         }
         return shortUrn;
     }
-    
+
     /**
      * generates a huge string for negative testing
      */
@@ -281,5 +282,25 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
             return true;
         }
     }
+
+    /**
+     * overrides default contains to only compare keys present in map parameter
+     */
+    protected class LibrarySet extends HashSet<Map<String,String>> {
+        @SuppressWarnings("unchecked") 
+        @Override public boolean contains(Object o) {
+            Map<String,String> omap = (Map<String,String>) o;
+            for (Entry<String,String> entry : omap.entrySet()) {
+                Iterator<Map<String,String>> i = iterator();
+                while(i.hasNext()) {
+                    String val = i.next().get(entry.getKey());
+                    if (entry.getValue().equals(val)) {
+                        return true;
+                    }
+                }           
+            }
+            return false;
+        }
+    };
 
 }
