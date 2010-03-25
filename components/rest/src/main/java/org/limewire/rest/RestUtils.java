@@ -192,6 +192,7 @@ public abstract class RestUtils {
      * Creates the JSON description object for the specified local file item.
      */
     public static JSONObject createFileItemJson(LocalFileItem fileItem) throws JSONException {
+        String filename = fileItem.getFileName();
         Category category = fileItem.getCategory();
         String artist = (String) fileItem.getProperty(FilePropertyKey.AUTHOR);
         String album = (String) fileItem.getProperty(FilePropertyKey.ALBUM);
@@ -199,14 +200,14 @@ public abstract class RestUtils {
         String title = (String) fileItem.getProperty(FilePropertyKey.TITLE);
         
         JSONObject jsonObj = new JSONObject();
-        jsonObj.put("filename", fileItem.getFileName());
+        jsonObj.put("filename", filename);
         jsonObj.put("category", category.getSchemaName());
         jsonObj.put("size", fileItem.getSize());
         jsonObj.put("id", fileItem.getUrn());
         jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
         jsonObj.put("album", (category == Category.AUDIO && album != null) ? album : "");
         jsonObj.put("genre", (category == Category.AUDIO && genre != null) ? genre : "");
-        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : fileItem.getFileName());
+        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : filename);
         return jsonObj;
     }
     
