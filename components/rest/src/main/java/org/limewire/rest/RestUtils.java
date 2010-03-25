@@ -237,6 +237,7 @@ public abstract class RestUtils {
      * result.
      */
     public static JSONObject createSearchResultJson(GroupedSearchResult result) throws JSONException {
+        String filename = result.getFileName();
         SearchResult searchResult = result.getSearchResults().get(0);
         Category category = searchResult.getCategory();
         String artist = (String) searchResult.getProperty(FilePropertyKey.AUTHOR);
@@ -245,7 +246,7 @@ public abstract class RestUtils {
         String title = (String) searchResult.getProperty(FilePropertyKey.TITLE);
         
         JSONObject jsonObj = new JSONObject();
-        jsonObj.put("filename", result.getFileName());
+        jsonObj.put("filename", filename);
         jsonObj.put("category", category.getSchemaName());
         jsonObj.put("size", searchResult.getSize());
         jsonObj.put("id", result.getUrn());
@@ -255,7 +256,7 @@ public abstract class RestUtils {
         jsonObj.put("artist", (category == Category.AUDIO && artist != null) ? artist : "");
         jsonObj.put("album", (category == Category.AUDIO && album != null) ? album : "");
         jsonObj.put("genre", (category == Category.AUDIO && genre != null) ? genre : "");
-        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : result.getFileName());
+        jsonObj.put("title", (category == Category.AUDIO && title != null) ? title : filename);
         return jsonObj;
     }
 }
