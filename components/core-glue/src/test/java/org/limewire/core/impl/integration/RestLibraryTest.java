@@ -62,6 +62,11 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
      */
     public void testNegatives() throws Exception {
 
+        // negative offsets and limits
+        // validateLibraryResults(FILES_PREFIX,"offset=-1",MAX_FILES); //LWC-5548
+        validateLibraryResults(FILES_PREFIX,"limit=-1",0);
+
+       
         // garbage parameters should be ignored & library data returned
         validateLibraryMetadata(LIBRARY_PREFIX,"this=is_garbage",TOTAL_FILES);
         validateLibraryMetadata(LIBRARY_PREFIX,"?something=test",TOTAL_FILES);
