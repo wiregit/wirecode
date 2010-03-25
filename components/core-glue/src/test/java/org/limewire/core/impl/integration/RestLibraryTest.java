@@ -51,7 +51,10 @@ public class RestLibraryTest extends AbstractRestIntegrationTestcase {
     }
 
     public void testOffsets() throws Exception {
-        // not implemented in API yet (LWC-5528)
+        validateLibraryResults(FILES_PREFIX,"offset=0",MAX_FILES);
+        validateLibraryResults(FILES_PREFIX,"offset=5",TOTAL_FILES-5);
+        validateLibraryResults(FILES_PREFIX,"offset="+(TOTAL_FILES-1),1);
+        validateLibraryResults(FILES_PREFIX,"offset=10000",0);
     }
 
     /**
