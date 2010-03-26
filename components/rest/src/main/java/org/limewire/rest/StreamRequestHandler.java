@@ -57,13 +57,8 @@ class StreamRequestHandler extends AbstractRestRequestHandler {
     }
     
     private URN getSha1UrnStringFromUri(String uri) throws IOException {
-        // Remove "/" from the start of the uri target.
-        String sha1 = uri.substring(1);
-      
-        // Append prefix to the sha1.
-        String urnString = "urn:sha1:" + sha1;
-      
-        return urnFactory.createSHA1Urn(urnString);
+        String sha1 = uri.substring(1);  // remove "/..."  
+        return urnFactory.createSHA1Urn(sha1);
     }
     
     /**
