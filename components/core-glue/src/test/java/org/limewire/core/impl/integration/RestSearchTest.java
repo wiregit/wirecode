@@ -149,23 +149,22 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         int statusCode = -1;
         HashSet<String> guidset = new HashSet<String>();
         
+        assertSearchCount(0);
+ 
         // post some queries        
         for (int i=0;i<10;i++) {
             String guid = queryPost("q=monkey+on+a+stick"+i).get("id");
-            assertResponseEmpty(SEARCH_PREFIX+guid,NO_PARAMS); // we can ask for files
+            assertResponseEmpty(SEARCH_PREFIX+guid+FILES_PREFIX,NO_PARAMS); // we can ask for files
             guidset.add(guid);
-            assertSearchCount(i+1);
-        }                           
-        // delete unknown query
-        statusCode = guidQueryDelete(FAKEGUID);
-        assertEquals("status code",HttpStatus.SC_NOT_FOUND,statusCode);
-
+        }       
+        assertSearchCount(10);
+        
          // delete all queries
         for (String guid : guidset) {
             statusCode = guidQueryDelete(guid);
             assertEquals("status code unexpected",HttpStatus.SC_OK,statusCode);
             statusCode = guidQueryDelete(guid);  // it's really gone
-            assertEquals("deleted query not deleted",HttpStatus.SC_NOT_FOUND,statusCode);    
+            assertEquals("query not deleted",HttpStatus.SC_NOT_FOUND,statusCode);    
             assertResponseEmpty(SEARCH_PREFIX+guid,NO_PARAMS);            
         }
         assertSearchCount(0);        
@@ -173,6 +172,8 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     public void testNegativesNoMock() throws Exception {
 
+        Map<String,String> map = null;
+        
         // invalid GUIDs,targets
         assertResponseEmpty(SEARCH_PREFIX+FAKEGUID,NO_PARAMS);
         assertResponseEmpty(SEARCH_PREFIX+FAKEGUID+FILES_PREFIX,NO_PARAMS);
@@ -182,8 +183,26 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         // garbage parameters
         assertResponseEmpty(SEARCH_PREFIX,"this=is_garbage");
         assertResponseEmpty(SEARCH_PREFIX,"?something=test");
-
         assertResponseEmpty(SEARCH_PREFIX,"this=is_garbage");
+        
+        // post checks
+        map = metadataPost(SEARCH_PREFIX,"q="+bigString(250));
+        assertTrue("guid should have been generated",map.get("id") != null);        
+        /** // LWC-5550
+         * map = metadataPost(SEARCH_PREFIX,"no_q_arg"); 
+         * map = metadataPost(SEARCH_PREFIX,"q=");         
+         * map = metadataPost(SEARCH_PREFIX,"t=bad_arg"); 
+         * assertEquals("query should not have been posted",0,map.size());
+         */
+        // check delete fake query
+        int statusCode = guidQueryDelete(FAKEGUID);
+        assertEquals("status code unexpected",HttpStatus.SC_NOT_FOUND,statusCode);  
+        
+        // can't delete twice
+        String guid = queryPost("q=monkey").get("id");        
+        statusCode = guidQueryDelete(guid);
+        statusCode = guidQueryDelete(guid);
+        assertEquals("status code unexpected",HttpStatus.SC_NOT_FOUND,statusCode);          
     }
 
     public void testHugeNoLoad() throws Exception {
