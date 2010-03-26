@@ -3,11 +3,13 @@ package org.limewire.rest.oauth;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -36,7 +38,7 @@ public class OAuthValidatorImpl implements OAuthValidator {
     private final String consumerSecret;
     private final String tokenSecret;
     private final Map<String, Long> timestamps;
-    private final Set<Nonce> nonces;
+    private final NonceTracker nonceTracker;
 
     /**
      * Constructs an OAuthValidator with the specified base URL, port number,
@@ -52,7 +54,7 @@ public class OAuthValidatorImpl implements OAuthValidator {
         this.consumerSecret = secret;
         this.tokenSecret = "";
         this.timestamps = new ConcurrentHashMap<String, Long>();
-        this.nonces = new ConcurrentSkipListSet<Nonce>();
+        this.nonceTracker = new NonceTracker();
     }
     
     /**
@@ -165,13 +167,13 @@ public class OAuthValidatorImpl implements OAuthValidator {
         
         // Nonce must be unique.
         Nonce nonce = new Nonce(timestamp, consumerKey, nonceStr);
-        boolean valid = nonces.add(nonce);
+        boolean valid = nonceTracker.add(nonce);
         if (!valid) {
             throw new OAuthException("OAuth nonce already used");
         }
         
         // Remove old nonces.
-        removeOldNonces(currentMsec);
+        nonceTracker.removeOldNonces(currentMsec);
     }
     
     /**
@@ -230,28 +232,10 @@ public class OAuthValidatorImpl implements OAuthValidator {
     }
     
     /**
-     * Removes old nonces from the internal cache.
-     */
-    private void removeOldNonces(long currentMsec) {
-        // Calculate oldest creation time.
-        long minMsec = currentMsec - NONCE_AGE;
-
-        // Remove old nonces from cache.  Nonces are stored in order of
-        // creation time so we can easily remove items that are too old.
-        for (Iterator<Nonce> iter = nonces.iterator(); iter.hasNext();) {
-            Nonce nonce = iter.next();
-            if (minMsec < nonce.getCreationTime()) {
-                break;
-            }
-            iter.remove();
-        }
-    }
-    
-    /**
      * Representation of a nonce.  Each timestamp/consumer key must use a 
      * unique nonce string.
      */
-    private static class Nonce implements Comparable<Nonce> {
+    private static class Nonce {
         private final long creationTime;
         private final long timestamp;
         private final String consumerKey;
@@ -266,13 +250,6 @@ public class OAuthValidatorImpl implements OAuthValidator {
         
         public long getCreationTime() {
             return creationTime;
-        }
-
-        @Override
-        public int compareTo(Nonce n2) {
-            // We order nonces by creation time.
-            return (creationTime < n2.creationTime) ? -1 : 
-                ((creationTime > n2.creationTime) ? 1 : 0);
         }
         
         @Override
@@ -293,6 +270,56 @@ public class OAuthValidatorImpl implements OAuthValidator {
             result = 31 * result + consumerKey.hashCode();
             result = 31 * result + nonce.hashCode();
             return result;
+        }
+    }
+    
+    /**
+     * Tracker to maintain Nonce values.  Each Nonce must be unique.  We also
+     * order nonces by their creation time so we can easily remove old values.
+     */
+    private static class NonceTracker {
+        private final Set<Nonce> nonces;
+        private final Set<Nonce> orderedNonces;
+        
+        public NonceTracker() {
+            nonces = new HashSet<Nonce>();
+            orderedNonces = new TreeSet<Nonce>(new Comparator<Nonce>() {
+                @Override
+                public int compare(Nonce o1, Nonce o2) {
+                    long time1 = o1.getCreationTime();
+                    long time2 = o2.getCreationTime();
+                    int result = (time1 < time2) ? -1 : ((time1 > time2) ? 1 : 0);
+                    return result;
+                }
+            });
+        }
+        
+        public boolean add(Nonce nonce) {
+            synchronized(nonces) {
+                boolean valid = nonces.add(nonce);
+                if (valid) {
+                    orderedNonces.add(nonce);
+                }
+                return valid;
+            }
+        }
+        
+        public void removeOldNonces(long currentMsec) {
+            // Calculate oldest creation time.
+            long minMsec = currentMsec - NONCE_AGE;
+
+            synchronized(nonces) {
+                // Remove old nonces from cache.  Nonces are stored in order of
+                // creation time so we can easily remove items that are too old.
+                for (Iterator<Nonce> iter = orderedNonces.iterator(); iter.hasNext();) {
+                    Nonce nonce = iter.next();
+                    if (minMsec < nonce.getCreationTime()) {
+                        break;
+                    }
+                    nonces.remove(nonce);
+                    iter.remove();
+                }
+            }
         }
     }
 }
