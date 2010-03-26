@@ -2,16 +2,26 @@ package org.limewire.core.impl.integration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.hsqldb.lib.Iterator;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
@@ -33,6 +43,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     private static final String SEARCH_PREFIX = RestPrefix.SEARCH.pattern();;
     private static final String FILES_PREFIX = "/files";
+    private static final String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
 
     // mock query data
     private final String[] queryNames = { "what is available", "speedster", "time runs by" };
@@ -73,7 +84,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     public void testSearchByGUID() throws Exception {
         for (GUID guid : guids) {
-            Map queryByGUID = guidQueryGET(guid);
+            Map<String,String> queryByGUID = guidQueryGET(guid);
             validateMetadata(queryByGUID);
         }
     }
@@ -86,56 +97,81 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
     }
 
     public void testLimits() throws Exception {
-        
+
         int fcnt = filenames.length;
         Collection<Map<String,String>> filesByGUID = null;
-        
+
         // huge limit
         filesByGUID = guidQueryFilesGET(guids[0],"limit=10000");
-        assertEquals("count unexpected",fcnt,filesByGUID.size());     
-        
+        assertEquals("count unexpected",fcnt,filesByGUID.size());
+
         // file count less one
         filesByGUID = guidQueryFilesGET(guids[0],"limit="+(fcnt-1));
-        assertEquals("count unexpected",fcnt-1,filesByGUID.size());    
+        assertEquals("count unexpected",fcnt-1,filesByGUID.size());
 
         // file count plus one
         filesByGUID = guidQueryFilesGET(guids[0],"limit="+(fcnt+1));
-        assertEquals("count unexpected",fcnt,filesByGUID.size());    
-        
+        assertEquals("count unexpected",fcnt,filesByGUID.size());
+
         // one item
         filesByGUID = guidQueryFilesGET(guids[0],"limit=1");
-        assertEquals("count unexpected",1,filesByGUID.size());   
-        
+        assertEquals("count unexpected",1,filesByGUID.size());
+
         // negative limit
         filesByGUID = guidQueryFilesGET(guids[0],"limit=-10");
-        assertEquals("count unexpected",0,filesByGUID.size());         
+        assertEquals("count unexpected",0,filesByGUID.size());
     }
 
     public void testOffsets() throws Exception {
 
         int fcnt = filenames.length;
         Collection<Map<String,String>> filesByGUID = null;
-        
+
         // huge limit
         filesByGUID = guidQueryFilesGET(guids[0],"offset=10000");
-        assertEquals("count unexpected",0,filesByGUID.size());     
-        
+        assertEquals("count unexpected",0,filesByGUID.size());
+
         // file count less one
         filesByGUID = guidQueryFilesGET(guids[0],"offset="+(fcnt-1));
-        assertEquals("count unexpected",1,filesByGUID.size());    
+        assertEquals("count unexpected",1,filesByGUID.size());
 
         // file count plus one
         filesByGUID = guidQueryFilesGET(guids[0],"offset="+(fcnt+1));
-        assertEquals("count unexpected",0,filesByGUID.size());    
-        
+        assertEquals("count unexpected",0,filesByGUID.size());
+
         // one item
         filesByGUID = guidQueryFilesGET(guids[0],"offset=1");
-        assertEquals("count unexpected",(fcnt-1),filesByGUID.size());           
+        assertEquals("count unexpected",(fcnt-1),filesByGUID.size());
+    }
+
+    public void testPostDeleteNoMock() throws Exception {
+
+        int statusCode = -1;
+        HashSet<String> guidset = new HashSet<String>();
+        
+        // post some queries        
+        for (int i=0;i<10;i++) {
+            String guid = queryPost("q=monkey+on+a+stick"+i).get("id");
+            assertResponseEmpty(SEARCH_PREFIX+guid,NO_PARAMS); // we can ask for files
+            guidset.add(guid);
+            assertSearchCount(i+1);
+        }                           
+        // delete unknown query
+        statusCode = guidQueryDelete(FAKEGUID);
+        assertEquals("status code",HttpStatus.SC_NOT_FOUND,statusCode);
+
+         // delete all queries
+        for (String guid : guidset) {
+            statusCode = guidQueryDelete(guid);
+            assertEquals("status code unexpected",HttpStatus.SC_OK,statusCode);
+            statusCode = guidQueryDelete(guid);  // it's really gone
+            assertEquals("deleted query not deleted",HttpStatus.SC_NOT_FOUND,statusCode);    
+            assertResponseEmpty(SEARCH_PREFIX+guid,NO_PARAMS);            
+        }
+        assertSearchCount(0);        
     }
 
     public void testNegativesNoMock() throws Exception {
-
-        String FAKEGUID = "/BA8DB600AC11FE2EE3033F5AFF57F500";
 
         // invalid GUIDs,targets
         assertResponseEmpty(SEARCH_PREFIX+FAKEGUID,NO_PARAMS);
@@ -168,6 +204,83 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
 
     // ---------------------- private ----------------------
 
+
+    private void validateFileData(Collection<Map<String,String>> fileset) throws Exception {
+        for (Map filemap : fileset) {
+            boolean found = false;
+            for (int i = 0;i<filenames.length&&!found;i++) {
+                if (filemap.get("filename").equals(filenames[i])
+                        &&filemap.get("category").equals(cats[i].getSchemaName())) {
+                    found = true;
+                }
+            }
+            assertTrue("results not found for: "+filemap.get("filename"),found);
+        }
+    }
+
+    /**
+     * validate results map expectations
+     */
+    private void validateMetadata(Map queryMap) throws Exception {
+        boolean found = false;
+        for (int i = 0;i<guids.length&&!found;i++) {
+            if (queryMap.get("id").equals(guids[i].toString())
+                    &&queryMap.get("name").equals(queryNames[i])
+                    &&queryMap.get("size").equals(""+filenames.length)) {
+                found = true;
+            }
+        }
+        assertTrue("results not found for: "+queryMap.get("name"),found);
+    }
+
+    /**
+     * returns GET for a particular GUID query metadata
+     */
+    private Map<String,String> guidQueryGET(GUID guid) throws Exception {
+        String target = SEARCH_PREFIX+"/"+guid.toString();
+        Map<String,String> queryByGUID = metadataGET(target,NO_PARAMS);
+        return queryByGUID;
+    }
+
+    /**
+     * performs GET for a particular GUIDs results files
+     */
+    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid, String params)
+            throws Exception {
+        String target = SEARCH_PREFIX+"/"+guid.toString()+FILES_PREFIX;
+        Collection<Map<String,String>> filesByGUID = listGET(target,params);
+        return filesByGUID;
+    }
+
+    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid) throws Exception {
+        return guidQueryFilesGET(guid,NO_PARAMS);
+    }
+
+    /**
+     * performs DELETE for a particular GUID search
+     */
+    private int guidQueryDelete(String guid) throws Exception {
+        String target = SEARCH_PREFIX+"/"+guid+FILES_PREFIX;
+        int status = httpDelete(target,NO_PARAMS);
+        return status;
+    }
+
+    /**
+     * check active search count
+     */
+    private void assertSearchCount(int expectCnt) {
+        int qsize = searchMgr.getActiveSearchLists().size();
+        assertEquals("unexpected queryCnt",expectCnt,qsize);
+    }
+    
+    /**
+     * creates a query
+     */
+    private Map<String,String> queryPost(String query) throws Exception {
+        Map<String,String> map = metadataPost(SEARCH_PREFIX,query);
+        return map;
+    }
+
     /**
      * populates mock query results. four result files for each query
      */
@@ -184,6 +297,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
         final SearchResultList mockResultList = context.mock(SearchResultList.class);
         final GroupedSearchResult mockGroupedResult = context.mock(GroupedSearchResult.class);
         final SearchResult mockSearchResult = context.mock(SearchResult.class);
+        final Search mockSearch = context.mock(Search.class);
 
         final List<SearchResultList> searchResultLists = new ArrayList<SearchResultList>();
         final EventList<GroupedSearchResult> groupedResults = new BasicEventList<GroupedSearchResult>();
@@ -229,6 +343,10 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
                 allowing(searchMgr).getSearchResultList(with(any(String.class)));
                 will(returnValue(mockResultList));
 
+                allowing(mockResultList).getSearch();
+                will(returnValue(mockSearch));
+                allowing(mockSearch);
+
                 // individual search files
                 allowing(mockGroupedResult).getFileName();
                 if (!isHuge) {
@@ -271,56 +389,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
             }
         });
     }
-
-    private void validateFileData(Collection<Map<String,String>> fileset) throws Exception {
-        for (Map filemap : fileset) {
-            boolean found = false;
-            for (int i = 0;i<filenames.length&&!found;i++) {
-                if (filemap.get("filename").equals(filenames[i])
-                        &&filemap.get("category").equals(cats[i].getSchemaName())) {
-                    found = true;
-                }
-            }
-            assertTrue("results not found for: "+filemap.get("filename"),found);
-        }
-    }
-
-    /**
-     * validate results map expectations
-     */
-    private void validateMetadata(Map queryMap) throws Exception {
-        boolean found = false;
-        for (int i = 0;i<guids.length&&!found;i++) {
-            if (queryMap.get("id").equals(guids[i].toString())
-                    &&queryMap.get("name").equals(queryNames[i])
-                    &&queryMap.get("size").equals(""+filenames.length)) {
-                found = true;
-            }
-        }
-        assertTrue("results not found for: "+queryMap.get("name"),found);
-    }
-
-    /**
-     * returns GET for a particular GUID query metadata
-     */
-    private Map<String,String> guidQueryGET(GUID guid) throws Exception {
-        String target = SEARCH_PREFIX+"/"+guid.toString();
-        Map<String,String> queryByGUID = metadataGET(target,NO_PARAMS);
-        return queryByGUID;
-    }
-
-    /**
-     * performs GET for a particular GUIDs results files
-     */
-    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid, String params) throws Exception {
-        String target = SEARCH_PREFIX+"/"+guid.toString()+FILES_PREFIX;
-        Collection<Map<String,String>> filesByGUID = listGET(target,params);
-        return filesByGUID;
-    }
-    private Collection<Map<String,String>> guidQueryFilesGET(GUID guid) throws Exception {
-        return guidQueryFilesGET(guid,NO_PARAMS);
-    }
-
+    
     /**
      * mock search
      */
