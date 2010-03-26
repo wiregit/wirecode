@@ -16,7 +16,9 @@ import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,6 +88,15 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     }
 
     /**
+     * returns target JSONObject metadata in Map
+     */
+    protected Map<String,String> metadataPost(String target, String params) throws Exception {
+        String response = httpPost(target,params);
+        JSONObject jobj = new JSONObject(response);
+        return buildResultsMap(jobj);
+    }
+    
+    /**
      * returns target JSONObject set in Hashset
      */
     protected Set<Map<String,String>> listGET(String target, String params) throws Exception {
@@ -112,6 +123,47 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
         String responseStr = null;
         HttpResponse response = null;
         HttpGet method = new HttpGet(buildUrl(target,params));
+
+        try {
+            response = client.execute(method);
+            HttpEntity entity = response.getEntity();
+            responseStr = EntityUtils.toString(entity);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            client.releaseConnection(response);
+        }
+        return responseStr;
+    }
+
+    /**
+     * performs http DELETE and returns status code
+     */
+    protected int httpDelete(String target, String params) throws Exception {
+
+        int statusCode = -1;
+        HttpResponse response = null;
+        HttpDelete method = new HttpDelete(buildUrl(target,params));
+
+        try {
+            response = client.execute(method);
+            statusCode = response.getStatusLine().getStatusCode();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            client.releaseConnection(response);
+        }
+        return statusCode;
+    }
+
+    /**
+     * performs http POST and returns status code
+     */
+    protected String httpPost(String target, String params) throws Exception {
+
+        String responseStr = null;
+        HttpResponse response = null;
+        HttpPost method = new HttpPost(buildUrl(target,params));
 
         try {
             response = client.execute(method);
@@ -284,8 +336,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      * overrides default contains to only compare keys present in map parameter
      */
     protected class LibrarySet extends HashSet<Map<String,String>> {
-        @SuppressWarnings("unchecked") 
-        @Override public boolean contains(Object o) {
+        @SuppressWarnings("unchecked") @Override public boolean contains(Object o) {
             Map<String,String> omap = (Map<String,String>) o;
             for (Entry<String,String> entry : omap.entrySet()) {
                 Iterator<Map<String,String>> i = iterator();
@@ -294,7 +345,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
                     if (entry.getValue().equals(val)) {
                         return true;
                     }
-                }           
+                }
             }
             return false;
         }
