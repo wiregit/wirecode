@@ -9,6 +9,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.io.GUID;
 
 import com.google.inject.Inject;
 
@@ -54,15 +55,22 @@ public class MockSearchManager implements SearchManager {
     }
 
     @Override
+    public void stopSearch(SearchResultList resultList) {
+        resultList.getSearch().stop();
+        resultList.dispose();
+        threadSafeSearchList.remove(resultList);
+    }
+
+    @Override
     public List<SearchResultList> getActiveSearchLists() {
         return Collections.emptyList();
     }
 
     @Override
-    public SearchResultList getSearchResultList(String guidStr) {
+    public SearchResultList getSearchResultList(GUID guid) {
         // Return result list from collection.
         for (SearchResultList resultList : threadSafeSearchList) {
-            if (guidStr.equalsIgnoreCase(resultList.getGuid().toString())) {
+            if (guid.equals(resultList.getGuid())) {
                 return resultList;
             }
         }

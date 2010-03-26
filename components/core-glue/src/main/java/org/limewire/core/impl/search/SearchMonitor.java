@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.Periodic;
+import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 
 import com.google.inject.Inject;
@@ -21,6 +22,8 @@ class SearchMonitor {
     private final ScheduledExecutorService backgroundExecutor;
     private final Map<SearchResultList, Periodic> resultMap;
     
+    private SearchManager searchManager;
+    
     /**
      * Constructs a SearchMonitor.
      */
@@ -31,11 +34,18 @@ class SearchMonitor {
     }
     
     /**
+     * Sets the search manager.
+     */
+    public void setSearchManager(SearchManager searchManager) {
+        this.searchManager = searchManager;
+    }
+    
+    /**
      * Adds the specified search result list to the set being monitored.
      */
-    public void addSearch(SearchResultList resultList, Runnable cancelTask) {
+    public void addSearch(SearchResultList resultList) {
         // Create periodic task and add to map of monitored results.
-        Periodic periodic = new Periodic(cancelTask, backgroundExecutor);
+        Periodic periodic = new Periodic(new CancelTask(resultList), backgroundExecutor);
         resultMap.put(resultList, periodic);
         
         // Schedule task to cancel search.
@@ -59,6 +69,26 @@ class SearchMonitor {
         Periodic periodic = resultMap.get(resultList);
         if (periodic != null) {
             periodic.rescheduleIfLater(TIMEOUT_MSEC);
+        }
+    }
+    
+    /**
+     * Task to cancel a search.  This is executed by the search monitor when
+     * it has determined that the search has timed out.
+     */
+    private class CancelTask implements Runnable {
+        private final SearchResultList resultList;
+        
+        public CancelTask(SearchResultList resultList) {
+            this.resultList = resultList;
+        }
+
+        @Override
+        public void run() {
+            // Stop search.
+            searchManager.stopSearch(resultList);
+            // Remove from search monitor.
+            removeSearch(resultList);
         }
     }
 }

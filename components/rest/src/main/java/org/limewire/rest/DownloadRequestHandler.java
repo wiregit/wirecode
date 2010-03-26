@@ -26,6 +26,7 @@ import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
+import org.limewire.io.GUID;
 import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
@@ -193,7 +194,7 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
      */
     private List<DownloadItem> startResultDownload(String fileUrn, String searchGuid) throws IOException {
         // Get search.
-        SearchResultList resultList = searchManager.getSearchResultList(searchGuid);
+        SearchResultList resultList = searchManager.getSearchResultList(new GUID(searchGuid));
         if (resultList == null) {
             return Collections.<DownloadItem>emptyList();
         }

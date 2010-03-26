@@ -2,6 +2,8 @@ package org.limewire.core.api.search;
 
 import java.util.List;
 
+import org.limewire.io.GUID;
+
 /**
  * Defines the API for the search manager.
  */
@@ -35,6 +37,12 @@ public interface SearchManager {
     void removeSearch(Search search);
     
     /**
+     * Stops the search associated with the specified result list, and removes
+     * the search from the manager.
+     */
+    void stopSearch(SearchResultList resultList);
+    
+    /**
      * Returns a list of active searches.  An active search has been assigned
      * a GUID, which includes network searches started but excludes unstarted
      * searches and browse searches.
@@ -42,10 +50,10 @@ public interface SearchManager {
     List<SearchResultList> getActiveSearchLists();
     
     /**
-     * Returns the result list for the specified GUID string.  The method 
-     * returns null if there is no list associated with the GUID.
+     * Returns the result list for the specified GUID.  The method returns null
+     * if there is no list associated with the GUID.
      */
-    SearchResultList getSearchResultList(String guidStr);
+    SearchResultList getSearchResultList(GUID guid);
     
     /**
      * Returns the result list for the specified search.  The method returns 

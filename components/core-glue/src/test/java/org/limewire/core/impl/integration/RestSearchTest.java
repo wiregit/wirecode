@@ -4,17 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.util.EntityUtils;
-import org.hsqldb.lib.Iterator;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
@@ -359,7 +352,7 @@ public class RestSearchTest extends AbstractRestIntegrationTestcase {
                 will(returnValue(groupedResults));
 
                 // individual search metadata
-                allowing(searchMgr).getSearchResultList(with(any(String.class)));
+                allowing(searchMgr).getSearchResultList(with(any(GUID.class)));
                 will(returnValue(mockResultList));
 
                 allowing(mockResultList).getSearch();

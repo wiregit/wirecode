@@ -813,7 +813,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public SearchResultList getSearchResultList(String guidStr) {
+        public SearchResultList getSearchResultList(GUID guid) {
             return null;
         }
 
@@ -829,6 +829,10 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public void removeSearch(Search search) {
+        }
+
+        @Override
+        public void stopSearch(SearchResultList resultList) {
         }
     }
     

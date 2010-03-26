@@ -1,7 +1,5 @@
 package org.limewire.rest;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +12,7 @@ import org.apache.http.RequestLine;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
@@ -145,23 +144,17 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify one search.
-        JSONArray jsonArr = new JSONArray(builder.toString());
+        JSONArray jsonArr = new JSONArray(entityStr);
         assertEquals(1, jsonArr.length());
     }
     
     /** Tests method to handle request for search metadata. */
     public void testGetSearchData() throws Exception {
         final String testUri = "http://localhost/remote/search/" + SEARCH_GUID;
+        final GUID testGuid = new GUID(SEARCH_GUID);
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
         final RequestLine mockRequestLine = context.mock(RequestLine.class);
@@ -171,7 +164,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
                 new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, ""));
         
         context.checking(new Expectations() {{
-            allowing(mockSearchManager).getSearchResultList(SEARCH_GUID);
+            allowing(mockSearchManager).getSearchResultList(testGuid);
             will(returnValue(mockResultList));
             
             allowing(mockResultList).getGuid();
@@ -200,17 +193,10 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify.
-        JSONObject jsonObj = new JSONObject(builder.toString());
+        JSONObject jsonObj = new JSONObject(entityStr);
         assertEquals(SEARCH_QUERY, jsonObj.getString("name"));
         assertEquals(SEARCH_GUID, jsonObj.getString("id"));
     }
@@ -218,6 +204,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for search results. */
     public void testGetSearchResults() throws Exception {
         final String testUri = "http://localhost/remote/search/" + SEARCH_GUID + "/files";
+        final GUID testGuid = new GUID(SEARCH_GUID);
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
         final RequestLine mockRequestLine = context.mock(RequestLine.class);
@@ -227,7 +214,7 @@ public class SearchRequestHandlerTest extends BaseTestCase {
                 new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, ""));
         
         context.checking(new Expectations() {{
-            allowing(mockSearchManager).getSearchResultList(SEARCH_GUID);
+            allowing(mockSearchManager).getSearchResultList(testGuid);
             will(returnValue(mockResultList));
             
             allowing(mockResultList).getGroupedResults();
@@ -278,17 +265,10 @@ public class SearchRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify one result.
-        JSONArray jsonArr = new JSONArray(builder.toString());
+        JSONArray jsonArr = new JSONArray(entityStr);
         assertEquals(1, jsonArr.length());
     }
 }

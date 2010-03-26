@@ -20,6 +20,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
+import org.limewire.io.GUID;
 
 import com.google.inject.Inject;
 
@@ -104,11 +105,16 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
     private void doGetSearch(String uriTarget, Map<String, String> queryParams,
             HttpResponse response) throws IOException {
 
-        // Get GUID string.
-        String guidStr = parseGuid(uriTarget);
-
-        // Get search result list; return empty object if null.
-        SearchResultList searchList = searchManager.getSearchResultList(guidStr);
+        // Use GUID to get search result list.
+        SearchResultList searchList;
+        try {
+            String guidStr = parseGuid(uriTarget);
+            searchList = searchManager.getSearchResultList(new GUID(guidStr));
+        } catch (Exception ex) {
+            searchList = null;
+        }
+        
+        // Return empty object if null.
         if (searchList == null) {
             response.setEntity(RestUtils.createStringEntity("{}"));
             response.setStatusCode(HttpStatus.SC_OK);
@@ -185,10 +191,15 @@ class SearchRequestHandler extends AbstractRestRequestHandler {
      * Deletes a search using the specified uri target.
      */
     private void doDelete(String uriTarget, HttpResponse response) throws IOException {
-        // Get GUID string.
-        String guidStr = parseGuid(uriTarget);
+        // Use GUID to get search result list.
+        SearchResultList searchList;
+        try {
+            String guidStr = parseGuid(uriTarget);
+            searchList = searchManager.getSearchResultList(new GUID(guidStr));
+        } catch (Exception ex) {
+            searchList = null;
+        }
         
-        SearchResultList searchList = searchManager.getSearchResultList(guidStr);
         if (searchList != null) {
             Search search = searchList.getSearch();
             

@@ -1,8 +1,5 @@
 package org.limewire.rest;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -12,6 +9,7 @@ import org.apache.http.RequestLine;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
@@ -142,17 +140,10 @@ public class LibraryRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify.
-        JSONObject jsonObj = new JSONObject(builder.toString());
+        JSONObject jsonObj = new JSONObject(entityStr);
         assertEquals("Library", jsonObj.get("name"));
         assertEquals(2, jsonObj.getInt("size"));
     }
@@ -188,17 +179,10 @@ public class LibraryRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify.
-        JSONArray jsonArr = new JSONArray(builder.toString());
+        JSONArray jsonArr = new JSONArray(entityStr);
         assertEquals(2, jsonArr.length());
     }
 }

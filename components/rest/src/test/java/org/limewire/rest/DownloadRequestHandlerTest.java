@@ -1,8 +1,5 @@
 package org.limewire.rest;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -12,6 +9,7 @@ import org.apache.http.RequestLine;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
@@ -83,6 +81,10 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for all downloads. */
     public void testGetAllDownloads() throws Exception {
         final String testUri = "http://localhost/remote/download";
+        final URN testUrn = new MockURN(DOWNLOAD_URN);
+        final Long testSize = Long.valueOf(32768L);
+        final Long testBytes = Long.valueOf(16384L);
+        final DownloadState testState = DownloadState.DOWNLOADING;
         
         final HttpRequest mockRequest = context.mock(HttpRequest.class);
         final RequestLine mockRequestLine = context.mock(RequestLine.class);
@@ -96,15 +98,15 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
             will(returnValue(downloadItems));
             
             allowing(mockDownloadItem).getFileName();
-            will(returnValue("filename"));
+            will(returnValue(DOWNLOAD_FILENAME));
             allowing(mockDownloadItem).getUrn();
-            will(returnValue(new MockURN(DOWNLOAD_URN)));
+            will(returnValue(testUrn));
             allowing(mockDownloadItem).getTotalSize();
-            will(returnValue(32768L));
+            will(returnValue(testSize));
             allowing(mockDownloadItem).getCurrentSize();
-            will(returnValue(16384L));
+            will(returnValue(testBytes));
             allowing(mockDownloadItem).getState();
-            will(returnValue(DownloadState.DOWNLOADING));
+            will(returnValue(testState));
             
             allowing(mockRequestLine).getMethod();
             will(returnValue(RestUtils.GET));
@@ -125,18 +127,18 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify one download.
-        JSONArray jsonArr = new JSONArray(builder.toString());
+        JSONArray jsonArr = new JSONArray(entityStr);
         assertEquals(1, jsonArr.length());
+        
+        JSONObject jsonObj = jsonArr.getJSONObject(0);
+        assertEquals(DOWNLOAD_FILENAME, jsonObj.getString("filename"));
+        assertEquals(DOWNLOAD_URN, jsonObj.getString("id"));
+        assertEquals(testSize.toString(), jsonObj.getString("size"));
+        assertEquals(testBytes.toString(), jsonObj.getString("bytesDownloaded"));
+        assertEquals(testState.toString(), jsonObj.getString("state"));
     }
 
     /** Tests method to handle request for download progress. */
@@ -191,17 +193,10 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
         
         // Convert response entity to text.
         HttpEntity entity = response.getEntity();
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-        String line = reader.readLine();
-        while (line != null) {
-            builder.append(line).append("\n");
-            line = reader.readLine();
-        }
-        reader.close();
+        String entityStr = EntityUtils.toString(entity);
         
         // Convert text to JSON and verify.
-        JSONObject jsonObj = new JSONObject(builder.toString());
+        JSONObject jsonObj = new JSONObject(entityStr);
         assertEquals(DOWNLOAD_FILENAME, jsonObj.getString("filename"));
         assertEquals(DOWNLOAD_URN, jsonObj.getString("id"));
         assertEquals(testSize.toString(), jsonObj.getString("size"));
