@@ -12,6 +12,9 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
@@ -22,6 +25,7 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
 
 import com.google.inject.Inject;
@@ -174,6 +178,22 @@ public class SearchResultMenu extends JPopupMenu {
         }
         if (allNonSpamHosts.size() > 0) {
             add(browseMenuFactory.createBrowseMenu(allNonSpamHosts));
+            
+            JMenu menu = new JMenu(I18n.tr("Follow User"));
+            for (RemoteHost remoteHost : allNonSpamHosts) {
+                try {
+                    // gotta validate it
+                    final GUID clientGuid = new GUID(remoteHost.getFriendPresence().getPresenceId());
+                    menu.add(new AbstractAction(remoteHost.getFriendPresence().getFriend().getRenderName()) {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            SearchSettings.FOLLOWEES.add(clientGuid.toHexString());
+                        }
+                    });
+                } catch (IllegalArgumentException iae) {
+                }
+            }
+            add(menu);
         }
 
         final List<RemoteHost> allHosts = new ArrayList<RemoteHost>();

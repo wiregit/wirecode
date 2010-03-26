@@ -24,6 +24,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.dht.db.FollowResolver;
 
 /**
  * Module to configure Guice bindings for the UI search classes.
@@ -66,6 +67,8 @@ public class LimeWireUiSearchModule extends AbstractModule {
         
         bind(FriendPresenceActions.class).toProvider(LazyBinder.newLazyProvider(
                 FriendPresenceActions.class, FriendPresenceActionsImpl.class));
+        
+        bind(FollowResolver.class);
         
         bind(SearchHeadingDocumentBuilder.class).toProvider(LazyBinder.newLazyProvider(
                 SearchHeadingDocumentBuilder.class, SearchHeadingDocumentBuilderImpl.class));

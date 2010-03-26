@@ -6,6 +6,7 @@ import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetSetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -419,4 +420,7 @@ public final class SearchSettings extends LimeProps {
      */
     public static final BooleanSetting DESIRES_NMS1_URNS = 
         FACTORY.createBooleanSetting("DESIRES_NMS1_URNS", false);
+    
+    public static final StringSetSetting FOLLOWEES =
+        FACTORY.createStringSetSetting("FOLLOWEES", "");
 }

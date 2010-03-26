@@ -3,6 +3,8 @@ package org.limewire.concurrent;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.limewire.util.StringUtils;
+
 /** An Event about a {@link Future}'s result. */
 public class FutureEvent<V> {
     public static enum Type { SUCCESS, EXCEPTION, CANCELLED }
@@ -71,5 +73,10 @@ public class FutureEvent<V> {
     /** Gets the exception, if any.  Null if none. */
     public ExecutionException getException() {
         return exception;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

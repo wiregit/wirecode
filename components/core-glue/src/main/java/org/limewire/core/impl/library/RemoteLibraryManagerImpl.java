@@ -57,6 +57,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
      * Common lock for all glazed lists in here.
      */
     private final ReadWriteLock listLock = LockFactory.DEFAULT.createReadWriteLock();
+    
+    private final FriendFileDbCache friendFileDbCache;
 
     @SuppressWarnings("unused")
     @InspectableContainer
@@ -82,7 +84,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
     
     @Inject
-    public RemoteLibraryManagerImpl() {
+    public RemoteLibraryManagerImpl(FriendFileDbCache friendFileDbCache) {
+        this.friendFileDbCache = friendFileDbCache;
         allFriendLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(listLock));
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries); 
     }
@@ -99,7 +102,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Override
     public boolean addPresenceLibrary(FriendPresence presence) {
-        assert !presence.getFriend().isAnonymous();
+//        assert !presence.getFriend().isAnonymous();
         listLock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
@@ -386,7 +389,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
     }
 
-    static class PresenceLibraryImpl implements PresenceLibrary {
+    class PresenceLibraryImpl implements PresenceLibrary {
 
         private final FriendPresence presence;
         private volatile RemoteLibraryState state = RemoteLibraryState.LOADING;
@@ -409,6 +412,10 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         @Override
         public void addNewResult(SearchResult file) {
+            if (!friendFileDbCache.addResult(presence, file)) {
+                LOG.debugf("old result: {0}", file);
+                return;
+            }
             int startIndex;
             synchronized (results) {
                 startIndex = results.size();

@@ -28,6 +28,7 @@ import org.jdesktop.swingx.painter.BusyPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.friend.api.FriendConnection;
 import org.limewire.friend.api.FriendConnectionEvent;
+import org.limewire.friend.api.FriendConnectionEvent.Type;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventUtils;
@@ -209,13 +210,7 @@ public class FriendsButton extends LimeComboBox {
 
         JLabel browseFriendMenuItem; 
             
-        if (signedIn) {    
-            browseFriendMenuItem = new ActionLabel(browseFriendsActionProvider.get());
-        }
-        else {
-            browseFriendMenuItem = new JLabel(I18n.tr(BrowseFriendsAction.DISPLAY_TEXT));
-            browseFriendMenuItem.setEnabled(false);
-        }
+        browseFriendMenuItem = new ActionLabel(browseFriendsActionProvider.get());
         menu.add(decorateItem(browseFriendMenuItem));
         if (newResultsAvailable) {
             browseFriendMenuItem.setFont(browseNotificationFont);
@@ -308,6 +303,7 @@ public class FriendsButton extends LimeComboBox {
         allFriendsRefreshManager.addBrowseRefreshStatusListener(new BrowseRefreshStatusListener(){
             @Override
             public void statusChanged(BrowseRefreshStatus status) {
+                Type eventType = EventUtils.getType(connectBean);
                 if (status == BrowseRefreshStatus.ADDED || status == BrowseRefreshStatus.CHANGED){
                     newResultsAvailable = true;
                     SwingUtils.invokeNowOrLater(new Runnable() {
@@ -319,7 +315,7 @@ public class FriendsButton extends LimeComboBox {
                     });
                 } else if (status == BrowseRefreshStatus.REFRESHED){  
                     newResultsAvailable = false;
-                    if (connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED) {
+                    if (eventType == FriendConnectionEvent.Type.CONNECTED) {
                         SwingUtils.invokeNowOrLater(new Runnable() {
                             @Override
                             public void run() {
@@ -331,7 +327,7 @@ public class FriendsButton extends LimeComboBox {
                 } else if (status == BrowseRefreshStatus.REMOVED){
                     if(!allFriendsRefreshManager.hasSharedFiles()){
                         newResultsAvailable = false;
-                        if(connectBean.getLastEvent().getType() == FriendConnectionEvent.Type.CONNECTED){
+                        if(eventType == FriendConnectionEvent.Type.CONNECTED){
                             SwingUtils.invokeNowOrLater(new Runnable() {
                                 @Override
                                 public void run() {

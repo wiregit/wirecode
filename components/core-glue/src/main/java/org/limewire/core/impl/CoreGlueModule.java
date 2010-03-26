@@ -15,6 +15,7 @@ import org.limewire.core.impl.inspections.InspectionsCommunicatorImpl;
 import org.limewire.core.impl.itunes.ItunesMediator;
 import org.limewire.core.impl.itunes.ItunesMediatorImpl;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
+import org.limewire.core.impl.library.FriendFileDbCache;
 import org.limewire.core.impl.lifecycle.LifeCycleManagerImpl;
 import org.limewire.core.impl.magnet.MagnetFactoryImpl;
 import org.limewire.core.impl.mojito.CoreGlueMojitoModule;
@@ -53,6 +54,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(MagnetFactory.class).to(MagnetFactoryImpl.class);
         bind(ItunesMediator.class).to(ItunesMediatorImpl.class);
         bind(InspectionsCommunicator.class).to(InspectionsCommunicatorImpl.class);
+        bind(FriendFileDbCache.class);
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueConnectionModule());

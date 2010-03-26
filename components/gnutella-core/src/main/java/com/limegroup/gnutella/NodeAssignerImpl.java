@@ -423,7 +423,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         if (DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-            mode = DHTMode.ACTIVE;
+            mode = DHTMode.PASSIVE_LEAF;
         }
         
         // We switch the mode if:
