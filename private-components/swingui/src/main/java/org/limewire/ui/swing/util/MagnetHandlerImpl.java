@@ -28,8 +28,11 @@ class MagnetHandlerImpl implements MagnetHandler {
 
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     
-    @InspectablePrimitive(value = "number of download magnets started", category = DataCategory.USAGE)
-    private static volatile int downloadMagnetCount = 0;
+    @InspectablePrimitive(value = "number of torrent download magnets started", category = DataCategory.USAGE)
+    private static volatile int torrentDownloadMagnetCount = 0;
+    
+    @InspectablePrimitive(value = "number of gnutella download magnets started", category = DataCategory.USAGE)
+    private static volatile int gnutellaDownloadMagnetCount = 0;
     
     @InspectablePrimitive(value = "number of search magnets started", category = DataCategory.USAGE)
     private static volatile int searchMagnetCount = 0;
@@ -51,15 +54,19 @@ class MagnetHandlerImpl implements MagnetHandler {
         SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
-                if (magnet.isDownloadable()) {
-                    downloadMagnet(downloadListManager, downloadExceptionHandler, magnet);
-                } else if (magnet.isKeywordTopicOnly()) {
-                    searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
-                            .getQueryString(), SearchCategory.ALL));
+                if(magnet.isTorrentDownloadable()) {
+                    downloadTorrent(magnet);
+                } else if(magnet.isGnutellaDownloadable()) {
+                    downloadMagnet(magnet);
+                } else if(magnet.isKeywordTopicOnly()) {
+                    searchHandler.doSearch(DefaultSearchInfo.
+                            createKeywordSearch(magnet.getQueryString(),
+                                    SearchCategory.ALL));
                     searchMagnetCount++;
                 } else {
-                    FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), I18n
-                            .tr("Invalid magnet option."), I18n.tr("Open Link"),
+                    FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(),
+                            I18n.tr("The magnet link is invalid."),
+                            I18n.tr("Invalid Magnet Link"),
                             JOptionPane.INFORMATION_MESSAGE);
                 }
             }
@@ -67,26 +74,65 @@ class MagnetHandlerImpl implements MagnetHandler {
 
     }
 
-    private void downloadMagnet(final DownloadListManager downloadListManager,
-            final Provider<DownloadExceptionHandler> downloadExceptionHandler, final MagnetLink magnet) {
+    private void downloadTorrent(MagnetLink magnet) {
         try {
-            downloadListManager.addDownload(magnet, null, false);
-            downloadMagnetCount++;
-        } catch (DownloadException e1) {
-            downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
-                @Override
-                public void download(File saveFile, boolean overwrite) throws DownloadException {
-                    downloadListManager
-                            .addDownload(magnet, saveFile, overwrite);
-                    downloadMagnetCount++;
-                }
-
-                @Override
-                public void downloadCanceled(DownloadException ignored) {
-                    //nothing to do                    
-                }
-
-            }, e1, true);
+            downloadListManager.addTorrentDownload(magnet.getName(),
+                    magnet.getURN(), magnet.getTrackerUrls());
+            torrentDownloadMagnetCount++;
+        } catch(DownloadException e) {
+            downloadExceptionHandler.get().handleDownloadException(
+                    new TorrentDownloadAction(magnet), e, true);
         }
     }
+    
+    private void downloadMagnet(MagnetLink magnet) {
+        try {
+            downloadListManager.addDownload(magnet, null, false);
+            gnutellaDownloadMagnetCount++;
+        } catch (DownloadException e) {
+            downloadExceptionHandler.get().handleDownloadException(
+                    new MagnetDownloadAction(magnet), e, true);
+        }
+    }
+    
+    private class TorrentDownloadAction implements DownloadAction {
+        private final MagnetLink magnet; 
+        
+        TorrentDownloadAction(MagnetLink magnet) {
+            this.magnet = magnet;
+        }
+        
+        @Override
+        public void download(File saveFile, boolean overwrite)
+            throws DownloadException {
+            
+            downloadListManager.addTorrentDownload(magnet.getName(),
+                    magnet.getURN(), magnet.getTrackerUrls());
+            torrentDownloadMagnetCount++;
+        }
+
+        @Override
+        public void downloadCanceled(DownloadException ignored) {
+        }
+    }
+
+    private class MagnetDownloadAction implements DownloadAction {
+        private final MagnetLink magnet;
+        
+        MagnetDownloadAction(MagnetLink magnet) {
+            this.magnet = magnet;
+        }
+        
+        @Override
+        public void download(File saveFile, boolean overwrite)
+            throws DownloadException {
+            
+            downloadListManager.addDownload(magnet, saveFile, overwrite);
+            gnutellaDownloadMagnetCount++;
+        }
+ 
+        @Override
+        public void downloadCanceled(DownloadException ignored) {}
+    }
+        
 }

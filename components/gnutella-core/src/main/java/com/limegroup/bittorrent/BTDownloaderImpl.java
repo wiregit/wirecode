@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -194,7 +195,19 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // nothing to do now.
         } else if (TorrentEventType.STARTED == event.getType()) {
             torrentsStarted.incrementAndGet();
-        } else {
+        } else if (TorrentEventType.META_DATA_RECIEVED == event.getType() && getTorrentFile() == null) {
+            // Hack to either cancel the torrent incase of collision or
+            //  fix the save path after metadata is received in a torrent 
+            //  file-less download
+            if (getSaveFile().exists()) {
+                stop();
+            } else {
+                String newName = event.getTorrent().getName();
+                setSaveFileInternal(new File(getSaveFile().getParentFile(), newName));
+                setDefaultFileName(newName);
+            }
+        }
+        else {
             DownloadState currentState = getState();
             if (lastState.getAndSet(currentState) != currentState) {
                 listeners.broadcast(new DownloadStateEvent(this, currentState));
@@ -365,10 +378,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             throw new IOException("Error adding torrent to TorrentManager.");
         }
         torrent.addListener(this);
-        //TODO need to eventually support torrents without torrent files. The name will be unknown.
+
         setDefaultFileName(torrent.getName());
     }
-
+    
     /**
      * Stops a torrent download. If the torrent is in seeding state, it does
      * nothing. (To stop a seeding torrent it must be stopped from the uploads
@@ -747,7 +760,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         btMemento.setName(torrent.getName());
         btMemento.setSha1Urn(getSha1Urn());
         btMemento.setIncompleteFile(getIncompleteFile());
-        btMemento.setTrackerURL(torrent.getTrackerURL());
+        btMemento.setTrackers(torrent.getTrackerURIS());
         File fastResumeFile = torrent.getFastResumeFile();
         String fastResumePath = fastResumeFile != null ? fastResumeFile.getAbsolutePath() : null;
         btMemento.setFastResumePath(fastResumePath);
@@ -782,7 +795,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         try {
             TorrentParams params = new LibTorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(),
                     memento.getName(), StringUtils.toHexString(urn.getBytes()));
-            params.setTrackerURL(memento.getTrackerURL());
+            params.setTrackers(memento.getTrackers());
             params.setFastResumeFile(fastResumeFile);
             params.setTorrentFile(torrentFile);
             params.setTorrentDataFile(memento.getIncompleteFile());
@@ -794,9 +807,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // the memento contents.
             try {
                 TorrentParams params = new LibTorrentParams(
-                        SharingSettings.INCOMPLETE_DIRECTORY.get(), memento.getName(), StringUtils
-                                .toHexString(urn.getBytes()));
-                params.setTrackerURL(memento.getTrackerURL());
+                        SharingSettings.INCOMPLETE_DIRECTORY.get(), memento.getName(), 
+                        StringUtils.toHexString(urn.getBytes()));
+                params.setTrackers(memento.getTrackers());
                 params.setFastResumeFile(fastResumeFile);
                 params.setTorrentDataFile(memento.getIncompleteFile());
                 params.setPrivate(memento.isPrivate());
@@ -811,13 +824,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         BTMetaInfoMemento btmetainfo = memento.getBtMetaInfoMemento();
 
         URI[] trackers = btmetainfo.getTrackers();
-        URI tracker1 = trackers[0];
 
         String name = btmetainfo.getFileSystem().getName();
 
         byte[] infoHash = btmetainfo.getInfoHash();
 
-        String sha1 = StringUtils.toHexString(infoHash);
+        URN sha1;
+        try {
+            sha1 = URN.createSHA1UrnFromBytes(infoHash);
+        } catch (IOException e1) {
+            throw new InvalidDataException(
+                    "Could not initialize the BTDownloader, memento hash was invalid", e1);
+        }
 
         boolean isPrivate = btmetainfo.isPrivate();
 
@@ -841,8 +859,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
 
         try {
-            TorrentParams params = new LibTorrentParams(newIncompleteFile.getParentFile(), name, sha1);
-            params.setTrackerURL(tracker1.toString());
+            TorrentParams params = new LibTorrentParams(newIncompleteFile.getParentFile(), name,
+                    StringUtils.toHexString(sha1.getBytes()));
+            params.setTrackers(Arrays.asList(trackers));
             params.setTorrentDataFile(newIncompleteFile);
             params.setPrivate(isPrivate);
             init(params);
@@ -885,7 +904,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
                 FileUtils.forceDeleteRecursive(incompleteFile);
             }
         }
-        if(torrent.getTorrentFile().getParentFile().equals(SharingSettings.INCOMPLETE_DIRECTORY.get())) {
+        if(torrent.getTorrentFile() != null && torrent.getTorrentFile().getParentFile().equals(SharingSettings.INCOMPLETE_DIRECTORY.get())) {
             FileUtils.forceDelete(torrent.getTorrentFile());
         }
         if(torrent.getFastResumeFile().getParentFile().equals(SharingSettings.INCOMPLETE_DIRECTORY.get())) {
@@ -952,5 +971,4 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     public Torrent getTorrent() {
         return torrent;
     }
-
 }

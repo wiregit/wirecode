@@ -79,7 +79,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
     	// is invalid because we don't have a url
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
 		try {
 			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
@@ -90,7 +90,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		// invalid: has empty kt
 		opts = MagnetOptions.parseMagnet("magnet:?kt=&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
 		try {
 			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
@@ -101,7 +101,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		// invalid: has only a display name
 		opts = MagnetOptions.parseMagnet("magnet:?dn=me");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
 		try {
 			downloadManager.download(opts[0], false, null, null);
 			fail("No illegal argument exception thrown");
@@ -114,38 +114,38 @@ public class MagnetDownloaderTest extends LimeTestCase {
     	// valid: has a url and a sha1
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 				
 		// valid: has a url and keyword topic
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 		
 		// valid: has everything
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:KRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be invalid", opts[0].isDownloadable());
+		assertTrue("Should be invalid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 	
 		
 		// downloadable: has kt and hash
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test2&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 		
 		// downloadable: has dn and hash
 		opts = MagnetOptions.parseMagnet("magnet:?dn=test3&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 		
 		// downloadable hash only magnet
 		opts = MagnetOptions.parseMagnet("magnet:?xt=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:YRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		assertTrue("Should be hash only", opts[0].isHashOnly());
 		downloadManager.download(opts[0], true, null, null);
     }

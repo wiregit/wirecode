@@ -1,6 +1,7 @@
 package org.limewire.bittorrent;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -83,10 +84,15 @@ public interface Torrent {
     public boolean isStarted();
 
     /**
-     * Returns the first tracker url to this torrent. Can be null.
+     * Returns the tracker uris to this torrent. Can be null.
      */
-    public String getTrackerURL();
+    public List<URI> getTrackerURIS();
 
+    /**
+     * Returns the list of trackers being used for this torrent.
+     */
+    public List<TorrentTracker> getTrackers();
+    
     /**
      * Returns the number of peers in this torrents swarm.
      */
@@ -275,11 +281,6 @@ public interface Torrent {
      */
     public TorrentPiecesInfo getPiecesInfo();
 
-    /**
-     * Returns the list of trackers being used for this torrent.
-     */
-    public List<TorrentTracker> getTrackers();
-    
     /**
      * Adds a tracker to a torrent at a given tier.
      */

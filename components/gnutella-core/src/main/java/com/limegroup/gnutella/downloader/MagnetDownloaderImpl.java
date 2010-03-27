@@ -85,7 +85,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * name of the complete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
      * @param magnet contains all the information for the download, must be
-     * {@link MagnetOptions#isDownloadable() downloadable}.
+     * {@link MagnetOptions#isGnutellaDownloadable() downloadable}.
      * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
      * @param fileName the final file name, can be <code>null</code>

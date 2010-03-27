@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.downloader.serial;
 
 import java.io.File;
+import java.net.URI;
+import java.util.List;
 
 import com.limegroup.gnutella.URN;
 
@@ -12,7 +14,7 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
     
     public URN getSha1Urn();
 
-    public String getTrackerURL();
+    public List<URI> getTrackers();
 
     public String getFastResumePath();
 
@@ -26,7 +28,7 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
     
     public void setSha1Urn(URN sha1Urn);
 
-    public void setTrackerURL(String url);
+    public void setTrackers(List<URI> trackers);
 
     public void setFastResumePath(String data);
 

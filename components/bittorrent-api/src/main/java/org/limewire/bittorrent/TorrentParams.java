@@ -2,6 +2,8 @@ package org.limewire.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 
 /**
  * Parameters used to create a torrent. Currently sha1 downloadFolder and name
@@ -17,9 +19,9 @@ public interface TorrentParams {
 
     public void setSha1(String sha1);
 
-    public String getTrackerURL();
+    public List<URI> getTrackers();
 
-    public void setTrackerURL(String trackerURL);
+    public void setTrackers(List<URI> trackers);
 
     public File getFastResumeFile();
 

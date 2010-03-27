@@ -3,7 +3,11 @@ package com.limegroup.gnutella.downloader.serial;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.limegroup.gnutella.URN;
@@ -63,9 +67,22 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         return sha1URN;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public String getTrackerURL() {
-        return (String) serialObjects.get("trackerURL");
+    public List<URI> getTrackers() {
+        Object trackersValue = serialObjects.get("trackers");
+        if (trackersValue != null) {
+            return (List<URI>) trackersValue;
+        }
+        
+        String tracker = (String) serialObjects.get("trackerURL");
+
+        try {
+            return Arrays.asList(new URI(tracker));
+        } catch (URISyntaxException e) {
+            // The tracker was invalid, have no other trackers
+            return null;
+        }
     }
 
     @Override
@@ -110,8 +127,8 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     }
 
     @Override
-    public void setTrackerURL(String url) {
-        serialObjects.put("trackerURL", url);
+    public void setTrackers(List<URI> url) {
+        serialObjects.put("trackers", url);
     }
 
     @Override

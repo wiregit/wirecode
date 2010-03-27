@@ -1,5 +1,6 @@
 package org.limewire.core.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Test;
@@ -67,7 +68,7 @@ public class TorrentFactoryImplTest extends BaseTestCase {
         assertNotNull(torrent);
         assertEquals("some_file_name",torrent.getName());
         assertEquals(getHash("1234GPLQSDW51234FDQQXXM5HYT51234"), torrent.getSha1());
-        assertEquals("http://tracker.legaltorrents.org/announce", torrent.getTrackerURL());
+        assertEquals(Arrays.asList("http://tracker.legaltorrents.org/announce"), torrent.getTrackers());
         assertEquals(3, torrent.getTorrentFileEntries().size());
         List<TorrentFileEntry> entries = torrent.getTorrentFileEntries();
         assertEquals(123, entries.get(0).getSize());

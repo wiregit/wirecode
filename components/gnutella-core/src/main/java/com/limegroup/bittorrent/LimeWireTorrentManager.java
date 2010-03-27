@@ -249,22 +249,24 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
 
     private Torrent addTorrentInternal(TorrentParams params) throws IOException {
         File torrentFile = params.getTorrentFile();
-        File torrentParent = torrentFile.getParentFile();
-        File torrentDownloadFolder = SharingSettings.INCOMPLETE_DIRECTORY.get();
-        File torrentUploadFolder = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
-        if (!torrentParent.equals(torrentDownloadFolder)
+        if (torrentFile != null) {
+            File torrentParent = torrentFile.getParentFile();
+            File torrentDownloadFolder = SharingSettings.INCOMPLETE_DIRECTORY.get();
+            File torrentUploadFolder = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
+            if (!torrentParent.equals(torrentDownloadFolder)
                 && !torrentParent.equals(torrentUploadFolder)) {
-            // if the torrent file is not located in the incomplete or
-            // upload
-            // directories it should be copied to the directory the torrent
-            // is
-            // being downloaded to. This is to prevent the user from
-            // deleting
-            // the torrent which we need to initiate a download properly.
-            torrentDownloadFolder.mkdirs();
-            File newTorrentFile = new File(torrentDownloadFolder, params.getName() + ".torrent");
-            FileUtils.copy(torrentFile, newTorrentFile);
-            params.setTorrentFile(newTorrentFile);
+                // if the torrent file is not located in the incomplete or
+                // upload
+                // directories it should be copied to the directory the torrent
+                // is
+                // being downloaded to. This is to prevent the user from
+                // deleting
+                // the torrent which we need to initiate a download properly.
+                torrentDownloadFolder.mkdirs();
+                File newTorrentFile = new File(torrentDownloadFolder, params.getName() + ".torrent");
+                FileUtils.copy(torrentFile, newTorrentFile);
+                params.setTorrentFile(newTorrentFile);
+            }
         }
 
         return torrentManager.get().addTorrent(params);

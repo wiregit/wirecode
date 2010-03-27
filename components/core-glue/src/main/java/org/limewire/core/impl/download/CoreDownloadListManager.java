@@ -356,12 +356,19 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
     }
 
-
     @Override
     public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws DownloadException {
-        Downloader downloader =  downloadManager.downloadTorrent(uri, overwrite);
-        DownloadItem downloadItem = (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
-        return downloadItem;
+        Downloader downloader = downloadManager.downloadTorrent(uri, overwrite);
+        return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
+    }
+    
+    @Override
+    public DownloadItem addTorrentDownload(String name, URN sha1, List<URI> trackers) throws DownloadException {
+        Downloader downloader = downloadManager.downloadTorrent(name, 
+                (com.limegroup.gnutella.URN)sha1,
+                trackers);
+        
+        return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
     }
     
     @Override

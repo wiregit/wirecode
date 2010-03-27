@@ -3,7 +3,11 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.bittorrent.LimeWireTorrentProperties;
@@ -45,6 +49,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
      * Iterates through the uploads folder finding saved torrent mementos and
      * starting off the uploads.
      */
+    @SuppressWarnings("unchecked")
     public void loadSavedUploads() {
         File uploadsDirectory = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
         if (uploadsDirectory.exists()) {
@@ -75,10 +80,20 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         File fastResumeFile = (File) memento.get("fastResumeFile");
                         File torrentDataFile = (File) memento.get("torrentDataFile");
                         String sha1 = (String) memento.get("sha1");
-                        String trackerURL = (String) memento.get("trackerURL");
                         String name = (String) memento.get("name");
                         Float seedRatioLimit = (Float) memento.get("seedRatioLimit");
                         Integer timeRatioLimit = (Integer) memento.get("timeRatioLimit");
+                        
+                        List<URI> trackers = (List<URI>) memento.get("trackers"); 
+                        if (trackers == null) { 
+                            String firstTracker = (String) memento.get("trackerURL");
+                            try {
+                                trackers = Arrays.asList(new URI(firstTracker));
+                            } catch (URISyntaxException e) {
+                                // No valid trackers found in memento
+                            }
+                        }
+
                         boolean torrentAdded = false;
                         boolean torrentLoaded = false;
                         Torrent torrent = null;
@@ -90,7 +105,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                                 try {
                                     TorrentParams params = new LibTorrentParams(torrentDataFile
                                             .getParentFile(), name, sha1);
-                                    params.setTrackerURL(trackerURL);
+                                    params.setTrackers(trackers);
                                     params.setFastResumeFile(fastResumeFile);
                                     params.setTorrentFile(torrentFile);
                                     params.setTorrentDataFile(torrentDataFile);
@@ -179,7 +194,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
         map.put("torrentFile", torrent.getTorrentFile().getAbsoluteFile());
         map.put("fastResumeFile", torrent.getFastResumeFile().getAbsoluteFile());
         map.put("sha1", torrent.getSha1());
-        map.put("trackerURL", torrent.getTrackerURL());
+        map.put("trackers", torrent.getTrackerURIS());
         map.put("name", torrent.getName());
         
         float seedRatioLimit = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, -1f);
@@ -207,7 +222,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
     public void removeMemento(Torrent torrent) {
         File torrentMomento = getMementoFile(torrent);
         FileUtils.forceDelete(torrentMomento);
-        if(torrent.getTorrentFile().getParentFile().equals(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get())) {
+        if(torrent.getTorrentFile() != null && torrent.getTorrentFile().getParentFile().equals(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get())) {
             FileUtils.forceDelete(torrent.getTorrentFile());
         }
         if(torrent.getFastResumeFile().getParentFile().equals(BittorrentSettings.TORRENT_UPLOADS_FOLDER.get())) {

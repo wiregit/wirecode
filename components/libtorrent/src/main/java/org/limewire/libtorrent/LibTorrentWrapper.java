@@ -334,9 +334,10 @@ class LibTorrentWrapper {
     /**
      * Set the target seed ratio for this torrent.
      */
+    // TODO: disable until talking to everrettt
     public void set_seed_ratio(String id, float seed_ratio) {
         LOG.debugf("before set_seed_ratio");
-        catchWrapperException(libTorrent.set_seed_ratio(id, seed_ratio));
+        //catchWrapperException(libTorrent.set_seed_ratio(id, seed_ratio));
         LOG.debugf("after set_seed_ratio");
     }
 

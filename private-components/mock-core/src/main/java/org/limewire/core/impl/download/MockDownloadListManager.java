@@ -145,6 +145,12 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
+    public DownloadItem addTorrentDownload(String name, URN sha1,
+            List<URI> trackers) throws DownloadException {
+        return null;
+    }
+
+    @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults,
             File saveFile, boolean overwrite) throws DownloadException {
        return addDownload(search, coreSearchResults);

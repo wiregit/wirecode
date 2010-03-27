@@ -3,7 +3,9 @@ package org.limewire.libtorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,23 +21,14 @@ public class LibTorrentParams implements TorrentParams {
     private final File downloadFolder;
 
     private String name = null;;
-
     private String sha1 = null;
-
-    private String trackerURL = null;
-
+    private List<URI> trackers = null;
     private File fastResumeFile = null;
-
     private File torrentFile = null;
-
     private File torrentDataFile = null;
-
     private Boolean isPrivate = null;
-    
     private float seedRatioLimit = -1;
-    
     private int timeRatioLimit = -1;
-
     private final AtomicBoolean filled = new AtomicBoolean(false);
 
     /**
@@ -45,6 +38,17 @@ public class LibTorrentParams implements TorrentParams {
     public LibTorrentParams(File downloadFolder, File torrentFile) {
         this.downloadFolder = downloadFolder;
         this.torrentFile = torrentFile;
+    }
+
+    /**
+     * Creates the torrent params using the required field download folder and 
+     *  the fields from a magnet link.
+     */
+    public LibTorrentParams(File downloadFolder, String name, String sha1, List<URI> trackers) {
+        this.downloadFolder = downloadFolder;
+        setName(name);
+        setSha1(sha1);
+        setTrackers(trackers);
     }
 
     /**
@@ -79,13 +83,13 @@ public class LibTorrentParams implements TorrentParams {
     }
 
     @Override
-    public String getTrackerURL() {
-        return trackerURL;
+    public List<URI> getTrackers() {
+        return trackers;
     }
 
     @Override
-    public void setTrackerURL(String trackerURL) {
-        this.trackerURL = trackerURL;
+    public void setTrackers(List<URI> trackers) {
+        this.trackers = trackers;
     }
 
     @Override
@@ -160,7 +164,7 @@ public class LibTorrentParams implements TorrentParams {
             String sha1 = getSha1();
             File torrentFile = getTorrentFile();
             String name = getName();
-            String trackerURL = getTrackerURL();
+            List<URI> trackerURIS = getTrackers();
             Boolean isPrivate = getPrivate();
             File torrentDataFile = getTorrentDataFile();
             File fastResumeFile = getFastResumeFile();
@@ -178,9 +182,9 @@ public class LibTorrentParams implements TorrentParams {
                         setName(name);
                     }
 
-                    if (trackerURL == null) {
-                        trackerURL = btData.getTrackerUris().get(0).toASCIIString();
-                        setTrackerURL(trackerURL);
+                    if (trackerURIS == null) {
+                        trackerURIS = btData.getTrackerUris();
+                        setTrackers(trackerURIS);
                     }
 
                     if (sha1 == null) {
@@ -211,8 +215,13 @@ public class LibTorrentParams implements TorrentParams {
                     + ".fastresume") : fastResumeFile);
             setTorrentDataFile(torrentDataFile == null ? new File(downloadFolder, name)
                     : torrentDataFile);
-            setTorrentFile(torrentFile == null ? new File(downloadFolder, name + ".torrent")
-                    : torrentFile);
+            
+            if (torrentFile != null) {
+                File possibleTorrentFile = new File(downloadFolder, name + ".torrent");
+                if (possibleTorrentFile.exists()) {
+                    setTorrentFile(new File(downloadFolder, name + ".torrent"));
+                }
+            }
         }
     }
 
@@ -221,7 +230,9 @@ public class LibTorrentParams implements TorrentParams {
         StringBuilder sb = new StringBuilder();
 
         sb.append("sha1: ").append(sha1).append("\n");
-        sb.append("trackerURL: ").append(trackerURL).append("\n");
+        for ( URI tracker : trackers ) {
+            sb.append("trackerURI: ").append(tracker.toASCIIString()).append("\n");
+        }
         sb.append("name: ").append(name).append("\n");
         sb.append("torrentFile: ").append(torrentFile).append("\n");
         sb.append("torrentDataFile: ").append(torrentDataFile).append("\n");

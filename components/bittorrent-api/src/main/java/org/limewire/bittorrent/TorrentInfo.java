@@ -10,6 +10,12 @@ public interface TorrentInfo {
     // on the Torrent. It has some additional fields that do not make sense.
 
     /**
+     * Returns the current name of the torrent.  Useful if the metadata wasn't
+     *  available when the download started.  Eg. magnet link start.
+     */
+    public String getName();
+    
+    /**
      * Returns the TorrentFileEntries for this torrent.
      */
     public List<TorrentFileEntry> getTorrentFileEntries();

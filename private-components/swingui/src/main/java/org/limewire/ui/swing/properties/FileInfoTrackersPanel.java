@@ -86,7 +86,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
                 if (columnIndex == URL_COLUMN) { 
-                    return trackerList.get(rowIndex).getURL();
+                    return trackerList.get(rowIndex).getURI();
                 }
                 else if (columnIndex == TIER_COLUMN) {
                     return trackerList.get(rowIndex).getTier();
@@ -216,7 +216,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     private boolean addTracker(String url, int tier) {
         boolean duplicate = false;
         for ( TorrentTracker tracker : trackerList ) {
-            if (tracker.getURL().equals(url)) {
+            if (tracker.getURI().equals(url)) {
                 duplicate = true;
                 break;
             }
@@ -249,7 +249,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
         TorrentTracker tracker = trackerList.get(row);
         
         if (tracker != null) {
-            torrent.removeTracker(tracker.getURL(), tracker.getTier());
+            torrent.removeTracker(tracker.getURI().toASCIIString(), tracker.getTier());
             return true;
         }
         return false;   
