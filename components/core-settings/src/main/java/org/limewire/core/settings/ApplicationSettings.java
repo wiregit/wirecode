@@ -164,6 +164,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("INITIALIZE_SIMPP", true);
     
     /**
+     * Returns true if local access to the REST API is enabled.
+     */
+    public static final BooleanSetting LOCAL_REST_ACCESS_ENABLED =
+        FACTORY.createBooleanSetting("LOCAL_REST_ACCESS_ENABLED", false);
+    
+    /**
      * Gets the current language setting.
      */
     public static String getLanguage() {

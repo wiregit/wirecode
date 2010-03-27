@@ -34,6 +34,10 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
         
     }
     
+    public LocalFileItem getFileItem(URN urn) {
+        return null;
+    }
+    
     public FileListAdapter(MockCombinedShareList combinedShareList) {
         eventList = combinedShareList.createMemberList();
         swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);

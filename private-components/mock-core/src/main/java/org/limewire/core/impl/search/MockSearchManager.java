@@ -9,6 +9,7 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.inject.LazySingleton;
+import org.limewire.io.GUID;
 
 import com.google.inject.Inject;
 
@@ -23,6 +24,11 @@ public class MockSearchManager implements SearchManager {
     @Inject
     public MockSearchManager() {
         this.threadSafeSearchList = new CopyOnWriteArrayList<SearchResultList>();
+    }
+    
+    @Override
+    public SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails) {
+        return addSearch(search, searchDetails);
     }
     
     @Override
@@ -49,8 +55,28 @@ public class MockSearchManager implements SearchManager {
     }
 
     @Override
-    public List<Search> getActiveSearches() {
+    public void stopSearch(SearchResultList resultList) {
+        resultList.getSearch().stop();
+        resultList.dispose();
+        threadSafeSearchList.remove(resultList);
+    }
+
+    @Override
+    public List<SearchResultList> getActiveSearchLists() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public SearchResultList getSearchResultList(GUID guid) {
+        // Return result list from collection.
+        for (SearchResultList resultList : threadSafeSearchList) {
+            if (guid.equals(resultList.getGuid())) {
+                return resultList;
+            }
+        }
+        
+        // Return null if search not found.
+        return null;
     }
 
     @Override

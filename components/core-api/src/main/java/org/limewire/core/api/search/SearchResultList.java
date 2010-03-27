@@ -2,6 +2,7 @@ package org.limewire.core.api.search;
 
 import java.util.Collection;
 
+import org.limewire.core.api.URN;
 import org.limewire.io.GUID;
 import org.limewire.listener.ListenerSupport;
 
@@ -29,6 +30,16 @@ public interface SearchResultList extends ListenerSupport<Collection<GroupedSear
      * Returns the search associated with this list.  Never null.
      */
     Search getSearch();
+    
+    /**
+     * Returns the query associated with the search.
+     */
+    String getSearchQuery();
+    
+    /**
+     * Returns the search result associated with the specified URN.
+     */
+    GroupedSearchResult getGroupedResult(URN urn);
     
     /**
      * Returns the list of search results sorted and grouped by URN.

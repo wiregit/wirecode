@@ -60,6 +60,11 @@ class MockSearchResultList implements SearchResultList {
     }
 
     @Override
+    public GroupedSearchResult getGroupedResult(URN urn) {
+        return null;
+    }
+
+    @Override
     public EventList<GroupedSearchResult> getGroupedResults() {
         return threadSafeResultList;
     }
@@ -77,6 +82,11 @@ class MockSearchResultList implements SearchResultList {
     @Override
     public Search getSearch() {
         return search;
+    }
+
+    @Override
+    public String getSearchQuery() {
+        return searchDetails.getSearchQuery();
     }
 
     @Override

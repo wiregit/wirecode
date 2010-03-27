@@ -29,7 +29,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
     private static final Log LOG = LogFactory.getLog(LocalHTTPAcceptor.class);
 
     private static final String[] SUPPORTED_METHODS = new String[] { "GET",
-        "HEAD", };
+        "HEAD", "POST", "DELETE"};
     
     private final Executor magnetExecutor = ExecutorsHelper.newProcessingQueue("magnet-handler");
 

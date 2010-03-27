@@ -39,6 +39,7 @@ public class BasicMimeTypeProvider implements MimeTypeProvider {
         addMimeTypeByExtension("html", "text/html");
         addMimeTypeByExtension("img", "image/gif");
         addMimeTypeByExtension("js", "application/x-javascript");
+        addMimeTypeByExtension("mp3", "audio/mpeg");
     }
 
     /**

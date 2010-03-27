@@ -244,6 +244,18 @@ abstract class LocalFileListImpl implements LocalFileList {
       }
       return null;
     }
+
+    @Override
+    public LocalFileItem getFileItem(URN urn) {
+        if (urn instanceof com.limegroup.gnutella.URN) {
+            FileDesc fd = getCoreCollection().getFileDesc((com.limegroup.gnutella.URN)urn);
+
+            if (fd != null) {
+                return (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);
+            }
+        }
+        return null;
+    }
     
     @Override
     public boolean isFileAllowed(File file) {
