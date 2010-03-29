@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
@@ -78,7 +80,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
         String tracker = (String) serialObjects.get("trackerURL");
 
         try {
-            return Arrays.asList(new URI(tracker));
+            return Collections.singletonList(URIUtils.toURI(tracker));
         } catch (URISyntaxException e) {
             // The tracker was invalid, have no other trackers
             return null;

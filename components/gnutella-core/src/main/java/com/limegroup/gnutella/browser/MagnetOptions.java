@@ -686,10 +686,28 @@ public class MagnetOptions implements Serializable {
     }
 
     /**
-     * Returns a list of BitTorrent tracker URLs.
+     * Returns a list of BitTorrent trackers as strings.
      */
     public List<String> getTR() {
         return getList(Option.TR);
+    }
+    
+    /**
+     * Returns a list of sanitised BitTorrent trackers in URI format.
+     */
+    public List<URI> getTrackers() {
+        List<String> stringResultsList = getTR();
+        List<URI> uriResultsList = new ArrayList<URI>(stringResultsList.size());
+        
+        for ( String uri : stringResultsList ) {
+            try {
+                uriResultsList.add(URIUtils.toURI(uri));
+            } catch (URISyntaxException e) {
+                // Throw out the tracker since it's not valid
+            }
+        }
+        
+        return uriResultsList;
     }
     
     private List<String> getList(Option key) {

@@ -195,7 +195,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // nothing to do now.
         } else if (TorrentEventType.STARTED == event.getType()) {
             torrentsStarted.incrementAndGet();
-        } else if (TorrentEventType.META_DATA_RECIEVED == event.getType() && getTorrentFile() == null) {
+        } else if (TorrentEventType.META_DATA_RECEIVED == event.getType() && getTorrentFile() == null) {
             // Hack to either cancel the torrent incase of collision or
             //  fix the save path after metadata is received in a torrent 
             //  file-less download

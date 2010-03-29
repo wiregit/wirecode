@@ -1,12 +1,9 @@
 package org.limewire.core.impl.magnet;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.magnet.MagnetLink;
-import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -50,18 +47,7 @@ public class MagnetLinkImpl implements MagnetLink {
     
     @Override
     public List<URI> getTrackerUrls() {
-        List<String> stringResultsList = magnetOptions.getTR();
-        List<URI> uriResultsList = new ArrayList<URI>(stringResultsList.size());
-        
-        for ( String uri : stringResultsList ) {
-            try {
-                uriResultsList.add(URIUtils.toURI(uri));
-            } catch (URISyntaxException e) {
-                // Throw out the tracker since it's not valid
-            }
-        }
-        
-        return uriResultsList;
+         return magnetOptions.getTrackers();
     }
     
     @Override

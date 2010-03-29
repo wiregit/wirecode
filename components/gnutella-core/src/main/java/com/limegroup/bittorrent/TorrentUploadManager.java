@@ -22,6 +22,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
+import org.limewire.util.URIUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.google.inject.Inject;
@@ -88,7 +89,7 @@ public class TorrentUploadManager implements BTUploaderFactory {
                         if (trackers == null) { 
                             String firstTracker = (String) memento.get("trackerURL");
                             try {
-                                trackers = Arrays.asList(new URI(firstTracker));
+                                trackers = Arrays.asList(URIUtils.toURI(firstTracker));
                             } catch (URISyntaxException e) {
                                 // No valid trackers found in memento
                             }

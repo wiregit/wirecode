@@ -425,7 +425,7 @@ class TorrentImpl implements Torrent {
             if (isValid() && hasMetaData() && torrentInfo.get() == null) {
                 TorrentInfo ti = libTorrent.get_torrent_info(sha1);
                 torrentInfo.set(ti);
-                listeners.broadcast(new TorrentEvent(this, TorrentEventType.META_DATA_RECIEVED));
+                listeners.broadcast(new TorrentEvent(this, TorrentEventType.META_DATA_RECEIVED));
             }
             return torrentInfo.get();
         } finally {

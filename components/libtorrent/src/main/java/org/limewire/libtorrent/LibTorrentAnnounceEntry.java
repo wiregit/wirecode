@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.limewire.bittorrent.TorrentTracker;
+import org.limewire.util.URIUtils;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -29,7 +30,7 @@ public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker
     @Override
     public URI getURI() {
         try {
-            return new URI(url);
+            return URIUtils.toURI(url);
         } catch (URISyntaxException e) {
             return null;
         }
