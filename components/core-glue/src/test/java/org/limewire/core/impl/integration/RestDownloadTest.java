@@ -11,7 +11,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.io.GUID;
 import org.limewire.rest.RestPrefix;
-import org.limewire.ui.swing.search.model.MockURN;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
