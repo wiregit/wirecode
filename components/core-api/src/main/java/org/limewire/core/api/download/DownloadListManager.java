@@ -3,7 +3,6 @@ package org.limewire.core.api.download;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
-import java.util.List;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.magnet.MagnetLink;
@@ -35,11 +34,6 @@ public interface DownloadListManager extends ResultDownloader {
      * Downloads the torrent file at the given uri.
      */
     public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws DownloadException;
-    
-    /**
-     * Tries to start a torrent download without a torrent file.
-     */
-    public DownloadItem addTorrentDownload(String name, URN sha1, List<URI> trackers) throws DownloadException;
 
     /**
      * Opens the given file and starts a downloader based on the information

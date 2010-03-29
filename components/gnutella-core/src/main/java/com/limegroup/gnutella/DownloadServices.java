@@ -34,7 +34,7 @@ public interface DownloadServices {
      * @return
      * @throws DownloadException
      * @throws IllegalArgumentException if the magnet is not
-     * {@link MagnetOptions#isGnutellaDownloadable() downloadable}.
+     * {@link MagnetOptions#isDownloadable() downloadable}.
      */
     public Downloader download(MagnetOptions magnet, boolean overwrite,
             File saveDir, String fileName) throws DownloadException;
@@ -48,7 +48,7 @@ public interface DownloadServices {
      * @return
      * @throws DownloadException
      * @throws IllegalArgumentException if the magnet is not 
-     * {@link MagnetOptions#isGnutellaDownloadable() valid}.
+     * {@link MagnetOptions#isDownloadable() valid}.
      */
     public Downloader download(MagnetOptions magnet, boolean overwrite)
             throws DownloadException;

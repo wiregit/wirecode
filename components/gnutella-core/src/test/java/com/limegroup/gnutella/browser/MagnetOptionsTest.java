@@ -41,6 +41,7 @@ public class MagnetOptionsTest extends BaseTestCase {
 	
 	public void testParseValidMagnet() {
 		
+
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?dn="
 				+ EncodingUtils.encode("compilc.:fileNm?7ßä") + "&kt="
 				+ EncodingUtils.encode("keyword topic string")
@@ -61,10 +62,6 @@ public class MagnetOptionsTest extends BaseTestCase {
 		// compound magnets
 		opts = MagnetOptions.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
 		assertEquals("Should have parsed 2 magnets", 2, opts.length);
-        
-        // BitTorrent
-		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:btih:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&tr=http://127.0.0.1/tracker/");
-        assertEquals("Should have parsed one magnet", 1, opts.length);
 	}
 	
 	public void testParseInvalidMagnet() {
@@ -72,109 +69,73 @@ public class MagnetOptionsTest extends BaseTestCase {
 		assertEquals("Wrong number of parsed magnets", 0, opts.length);
 	}
 	
-	public void testIsGnutellaDownloadable() {
+	public void testisDownloadable() {
 		
 		// invalid magnets
 		
 		// is invalid because we don't have a url
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		
 		// invalid: has empty kt
 		opts = MagnetOptions.parseMagnet("magnet:?kt=&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		
 		// invalid: has only a display name
 		opts = MagnetOptions.parseMagnet("magnet:?dn=me");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertFalse("Should not be downloadable", opts[0].isGnutellaDownloadable());
+		assertFalse("Should not be downloadable", opts[0].isDownloadable());
 		
 		// valid magnets
 		
 		// valid: has a url and a sha1
 		opts = MagnetOptions.parseMagnet("magnet:?xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 		// valid: has a url and keyword topic
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 		// valid: has everything
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be invalid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be invalid", opts[0].isDownloadable());
 		
 		// downloadable: has kt and hash and filesize
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=15");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isDownloadable());
 		
 		// downloadable: has dn and hash and filesize
 		opts = MagnetOptions.parseMagnet("magnet:?dn=test&xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=18");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isDownloadable());
 		
-	}
-	
-	public void testIsTorrentDownloadable() {
-	    // Not downloadable: has a tracker URL but no SHA1
-	    MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xs=http://127.0.0.1/data/foo&tr=http://127.0.0.1/tracker/");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertFalse("Should not be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Downloadable: has a tracker URL and a SHA1 (XS, urn:sha1)
-	    opts = MagnetOptions.parseMagnet("magnet:?xs=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&tr=http://127.0.0.1/tracker/");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Downloadable: has a tracker URL and a SHA1 (XT, urn:sha1)
-	    opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&tr=http://127.0.0.1/tracker/");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Downloadable: has a tracker URL and a SHA1 (AS, urn:sha1)
-	    opts = MagnetOptions.parseMagnet("magnet:?as=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&tr=http://127.0.0.1/tracker/");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Downloadable: has a tracker URL and a SHA1 (XT, urn:btih)
-	    opts = MagnetOptions.parseMagnet("magnet:?xt=urn:btih:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&tr=http://127.0.0.1/tracker/");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Not downloadable: has a SHA1 (XT, urn:btih) but no tracker URL
-	    opts = MagnetOptions.parseMagnet("magnet:?xt=urn:btih:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xs=http://127.0.0.1/data/foo");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
-
-	    // Downloadable: has everything
-	    opts = MagnetOptions.parseMagnet("magnet:?xs=http://127.0.0.1/data/foo&xt=urn:btih:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&tr=http://127.0.0.1/tracker/&dn=Foo&as=http://127.0.0.1/backup/foo&kt=Foo&xl=1234567");
-	    assertEquals("Wrong number of parsed magnets", 1, opts.length);
-	    assertTrue("Should be downloadable", opts[0].isTorrentDownloadable());
 	}
 
 	public void testIsHashOnly() {
 		
 		// hash only
+		
 		MagnetOptions[] opts = MagnetOptions.parseMagnet("magnet:?xt=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isDownloadable());
 		assertTrue("Should be hash only", opts[0].isHashOnly());
 		
 		// not hash only
 		
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be invalid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
 		
 		opts = MagnetOptions.parseMagnet("magnet:?kt=test&xs=http://magnet2.limewire.com:6346");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be invalid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be invalid", opts[0].isDownloadable());
 		assertFalse("Should not be hash only", opts[0].isHashOnly());
 		assertTrue(opts[0].getGUIDUrns().isEmpty());
 	}
@@ -326,11 +287,11 @@ public class MagnetOptionsTest extends BaseTestCase {
         MagnetOptions[] magnets = MagnetOptions.parseMagnet("magnet:?dn=hello.test&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xl=123%20");
         assertEquals(1, magnets.length);
         assertEquals(123, magnets[0].getFileSize());
-        assertTrue(magnets[0].isGnutellaDownloadable());
+        assertTrue(magnets[0].isDownloadable());
         magnets = MagnetOptions.parseMagnet("magnet:?dn=hello.test&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xl=123 ");
         assertEquals(1, magnets.length);
         assertEquals(123, magnets[0].getFileSize());
-        assertTrue(magnets[0].isGnutellaDownloadable());
+        assertTrue(magnets[0].isDownloadable());
     }
     
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {

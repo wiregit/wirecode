@@ -2,7 +2,6 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,12 +117,7 @@ public class LibTorrentSession implements TorrentManager {
             File torrentFile = params.getTorrentFile();
             File fastResumefile = params.getFastResumeFile();
 
-            List<URI> trackerList = params.getTrackers();
-            String firstTrackerURI = null;
-            if (trackerList != null && trackerList.size()>0) {
-                firstTrackerURI = trackerList.get(0).toASCIIString();
-            }
-            
+            String trackerURI = params.getTrackerURL() != null ? params.getTrackerURL() : "";
             String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath()
                     : null;
             
@@ -133,14 +127,8 @@ public class LibTorrentSession implements TorrentManager {
             String sha1 = params.getSha1();
             
             Torrent torrent = new TorrentImpl(params, libTorrent, fastExecutor);
-            libTorrent.add_torrent(sha1, firstTrackerURI, torrentPath, saveDirectory,
+            libTorrent.add_torrent(sha1, trackerURI, torrentPath, saveDirectory,
                     fastResumePath);
-            
-            if (trackerList != null) {
-                for ( int i=1 ; i<trackerList.size() ; i++ ) {
-                    libTorrent.add_tracker(sha1, trackerList.get(i).toASCIIString(), i);
-                }
-            }
             
             updateStatus(torrent);
             torrents.put(sha1, torrent);
@@ -326,13 +314,6 @@ public class LibTorrentSession implements TorrentManager {
                         libTorrent.save_fast_resume_data(alert, torrent.getFastResumeFile()
                                 .getAbsolutePath());
                         torrent.handleFastResumeAlert(alert);
-                    }
-                } else if (alert.getCategory() == LibTorrentAlert.status_notification 
-                        && alert.getMessage().indexOf("metadata successfully received") > -1) {
-                    Torrent torrent = getTorrent(sha1);
-                    if (torrent != null) {
-                        // Force update of torrent info
-                        torrent.getTorrentInfo();
                     }
                 }
             }

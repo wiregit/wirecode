@@ -64,7 +64,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
     @Override
     public MagnetDownloader createMagnetDownloader(MagnetOptions magnet, boolean overwrite,
             File saveDirectory, String fileName) throws DownloadException {
-        if (!magnet.isGnutellaDownloadable())
+        if (!magnet.isDownloadable())
             throw new IllegalArgumentException("magnet not downloadable");
         if (fileName == null)
             fileName = magnet.getFileNameForSaving();
@@ -111,7 +111,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         bd.init(params);
         return bd;
     }
-
+    
     @Override
     public BTTorrentFileDownloader createTorrentFileDownloader(URI torrentURI, boolean overwrite) {
         BTTorrentFileDownloader torrentFileDownloader = torrentFileDownloaderFactory.get();

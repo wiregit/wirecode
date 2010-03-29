@@ -232,10 +232,8 @@ public class FileInfoDialog extends LimeJDialog {
         case DOWNLOADING_FILE:
             if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadItemType() == DownloadItemType.BITTORRENT) {
                 Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
-                if(torrent != null) {
-                    if (torrent.hasMetaData()) {
-                        tabs.add(Tabs.BITTORENT);
-                    }
+                if(torrent != null && torrent.hasMetaData()) {
+                    tabs.add(Tabs.BITTORENT);
                     tabs.add(Tabs.TRACKERS);
                 }
             }
@@ -246,9 +244,7 @@ public class FileInfoDialog extends LimeJDialog {
             if(propertiableFile instanceof UploadItem && ((UploadItem)propertiableFile).getUploadItemType() == UploadItemType.BITTORRENT) {
                 Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
                 if(torrent != null && torrent.hasMetaData()) {
-                    if (torrent.hasMetaData()) {
-                        tabs.add(Tabs.BITTORENT);
-                    }
+                    tabs.add(Tabs.BITTORENT);
                     tabs.add(Tabs.TRACKERS);
                 }
             }

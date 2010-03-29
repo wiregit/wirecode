@@ -53,9 +53,6 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
         /** UrnType for a bitprint URN */
         BITPRINT("bitprint:",72),
         
-        /** UrnType for a BitTorrent infohash (SHA1) URN */
-        INFOHASH("btih:", 32),
-        
         /** UrnType for a Tiger Tree root URN */
         TTROOT("ttroot:",39),
         
@@ -275,12 +272,10 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
     		return createUrnFromString(urnString);
         else if (typeString.indexOf(Type.BITPRINT.getDescriptor()) == 4)
             return createSHA1UrnFromBitprint(urnString);
-        else if (typeString.indexOf(Type.INFOHASH.getDescriptor()) == 4)
-            return createUrnFromString(urnString.replace("btih", "sha1"));
         else
             throw new IOException("unsupported or malformed URN");
 	}
-    
+	
 	/**
 	 * Creates a GUID URN from a string.
 	 * 

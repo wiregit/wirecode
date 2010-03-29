@@ -1,9 +1,8 @@
 package org.limewire.core.impl;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -32,13 +31,14 @@ public class XMLTorrent implements Torrent {
 
     private final LimeXMLDocument xmlDocument;
     private final List<TorrentFileEntry> torrentFileEntries;
-    private final List<URI> trackers;
+    private final List<String> trackers;
     private final boolean isPrivate;
     private final String sha1;
     
     public XMLTorrent(LimeXMLDocument xmlDocument) {
         this.xmlDocument = xmlDocument;
         this.torrentFileEntries = parsePathEntries(xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_PATHS), xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_SIZES));
+        this.trackers = Arrays.asList(xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS).split(" "));
         String privateValue = xmlDocument.getValue(LimeXMLNames.TORRENT_PRIVATE);
         this.isPrivate = privateValue != null && Boolean.parseBoolean(privateValue);
         String hash = xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH);
@@ -47,17 +47,6 @@ public class XMLTorrent implements Torrent {
             sha1 = StringUtils.toHexString(bytes);
         } else {
             sha1 = null;
-        }
-        
-        String[] trackerStrings = xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS).split(" ");
-        
-        trackers = new ArrayList<URI>(trackerStrings.length);
-        for ( String trackerString : trackerStrings ) {
-            try {
-                trackers.add(new URI(trackerString));
-            } catch (URISyntaxException e) {
-                // Discard
-            }
         }
     }
     
@@ -175,8 +164,11 @@ public class XMLTorrent implements Torrent {
     }
 
     @Override
-    public List<URI> getTrackerURIS() {
-        return trackers;
+    public String getTrackerURL() {
+        if(trackers.size() == 0)
+            return "";
+        else
+            return trackers.get(0);
     }
 
     @Override

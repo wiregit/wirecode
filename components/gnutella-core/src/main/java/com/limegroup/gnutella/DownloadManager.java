@@ -220,11 +220,6 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     public Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite) throws DownloadException;
     
     /**
-     * Tries to start a torrent download without a torrent file.
-     */
-    public Downloader downloadTorrent(String name, URN sha1, List<URI> trackers) throws DownloadException;
-    
-    /**
      * Returns <code>true</code> if there already is a download with the same urn. 
      * @param urn may be <code>null</code>, then a check based on the fileName
      * and the fileSize is performed

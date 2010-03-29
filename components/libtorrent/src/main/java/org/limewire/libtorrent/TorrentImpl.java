@@ -1,8 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,15 +62,17 @@ class TorrentImpl implements Torrent {
     private final Lock lock = new ReentrantLock();
 
     private final String sha1;
-    private final String nameAtCreation;
+    private String name = null;
+    private String trackerURL = null;
     private final AtomicBoolean isPrivate = new AtomicBoolean(true);
 
     public TorrentImpl(TorrentParams params, LibTorrentWrapper libTorrent, ScheduledExecutorService fastExecutor) {
         this.libTorrent = libTorrent;
         listeners = new AsynchronousMulticasterImpl<TorrentEvent>(fastExecutor);
         
-        this.sha1 = params.getSha1();       
-        this.nameAtCreation = params.getName();
+        this.sha1 = params.getSha1();
+        this.trackerURL = params.getTrackerURL();
+        this.name = params.getName();
 
         Boolean isPrivate = params.getPrivate();
         this.torrentFile.set(params.getTorrentFile());
@@ -102,11 +102,7 @@ class TorrentImpl implements Torrent {
 
     @Override
     public String getName() {
-        TorrentInfo torrentInfo = getTorrentInfo();
-        if (torrentInfo != null && torrentInfo.getName() != null) {
-            return torrentInfo.getName();            
-        }
-        return nameAtCreation;
+        return name;
     }
 
     @Override
@@ -217,13 +213,8 @@ class TorrentImpl implements Torrent {
     }
 
     @Override
-    public List<URI> getTrackerURIS() {
-        List<TorrentTracker> trackers = getTrackers();
-        List<URI> trackerURIS = new ArrayList<URI>(trackers.size());
-        for ( TorrentTracker tracker : trackers ) {
-            trackerURIS.add(tracker.getURI());
-        }
-        return trackerURIS;
+    public String getTrackerURL() {
+        return trackerURL;
     }
 
     @Override
@@ -425,7 +416,6 @@ class TorrentImpl implements Torrent {
             if (isValid() && hasMetaData() && torrentInfo.get() == null) {
                 TorrentInfo ti = libTorrent.get_torrent_info(sha1);
                 torrentInfo.set(ti);
-                listeners.broadcast(new TorrentEvent(this, TorrentEventType.META_DATA_RECIEVED));
             }
             return torrentInfo.get();
         } finally {

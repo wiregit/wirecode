@@ -11,8 +11,6 @@ import com.sun.jna.Structure;
 public class LibTorrentInfo extends Structure {
     public String sha1;
 
-    public String name;
-    
     public long total_size;
 
     public int piece_length;

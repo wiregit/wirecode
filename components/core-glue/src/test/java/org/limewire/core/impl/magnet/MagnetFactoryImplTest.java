@@ -30,7 +30,7 @@ public class MagnetFactoryImplTest extends BaseTestCase {
                         "magnet:?&xt=urn:sha1:544FOK7DMKY2KBEHPPICGK5NVRJMWBSI&dn=limewire.gif&xs=urn:guid:5D4EBE04169604336CE2E3F9A5BDC800&xl=610"));
         assertEquals(1, magnetLinks.length);
 
-        assertTrue(magnetLinks[0].isGnutellaDownloadable());
+        assertTrue(magnetLinks[0].isDownloadable());
         assertEquals("limewire.gif", magnetLinks[0].getQueryString());
         assertFalse(magnetLinks[0].isKeywordTopicOnly());
     }

@@ -36,9 +36,4 @@ class TorrentInfoImpl implements TorrentInfo {
     public List<String> getSeeds() {
         return libTorrentInfo.getSeeds();
     }
-
-    @Override
-    public String getName() {
-        return libTorrentInfo.name;
-    }
 }

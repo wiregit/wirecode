@@ -43,7 +43,7 @@ public class MagnetOptions implements Serializable {
      * have a download name and can't calculate one from the URN.
      */
     private static final String DOWNLOAD_PREFIX = "MAGNET download from ";
-    
+
     private final Map<Option, List<String>> optionsMap;
 
     private enum Option {
@@ -64,9 +64,7 @@ public class MagnetOptions implements Serializable {
          */
         KT,
         /** Length of the file denoted by the magnet. */
-        XL,
-        /** BitTorrent tracker URL. */
-        TR;
+        XL;
 
         public static Option valueFor(String str) {
             for (Option option : values()) {
@@ -83,7 +81,7 @@ public class MagnetOptions implements Serializable {
     private transient String localizedErrorMessage;
 
     private transient URN urn;
-    
+
     private transient String extractedFileName;
 
     private transient Set<URN> guidUrns;
@@ -107,7 +105,8 @@ public class MagnetOptions implements Serializable {
     /**
      * Creates a MagnetOptions object from file details.
      * <p>
-     * The resulting MagnetOptions might not be downloadable.
+     * The resulting MagnetOptions might not be {@link #isDownloadable()
+     * downloadable}.
      */
     public static MagnetOptions createMagnet(FileDetails fileDetails,
             InetSocketAddress socketAddress, byte[] clientGuid) {
@@ -151,7 +150,8 @@ public class MagnetOptions implements Serializable {
     /**
      * Creates a MagnetOptions object from a several parameters.
      * <p>
-     * The resulting MagnetOptions might not be downloadable.
+     * The resulting MagnetOptions might not be {@link #isDownloadable()
+     * downloadable}.
      * 
      * @param keywordTopics can be <code>null</code>
      * @param fileName can be <code>null</code>
@@ -243,6 +243,7 @@ public class MagnetOptions implements Serializable {
             return new MagnetOptions[0];
 
         // Parse and assemble magnet options together.
+        //
         arg = arg.substring(8);
         StringTokenizer st = new StringTokenizer(arg, "&");
         String keystr;
@@ -341,9 +342,6 @@ public class MagnetOptions implements Serializable {
 
         for (String xl : getXL())
             ret.append("&xl=").append(xl);
-        
-        for (String tr : getTR())
-            ret.append("&tr=").append(tr);
 
         return ret.toString();
     }
@@ -394,10 +392,12 @@ public class MagnetOptions implements Serializable {
 
     /**
      * Returns true if there are enough pieces of information to start a
-     * Gnutella download. There has to be at least one default URL, or a SHA1
-     * and a non-empty keyword topic or display name.
+     * download from it.
+     * <p>
+     * At any rate there has to be at least one default url or a sha1 and a non
+     * empty keyword topic/display name and a the file size.
      */
-    public boolean isGnutellaDownloadable() {
+    public boolean isDownloadable() {
         if (getDefaultURLs().length > 0) {
             return true;
         }
@@ -405,15 +405,6 @@ public class MagnetOptions implements Serializable {
             return true;
         }
         return false;
-    }
-    
-    
-    /**
-     * Returns true if there are enough pieces of information to start a
-     * BitTorrent download. There has to be at a valid SHA1.
-     */
-    public boolean isTorrentDownloadable() {
-        return getSHA1Urn() != null;
     }
 
     /**
@@ -685,13 +676,6 @@ public class MagnetOptions implements Serializable {
         return getList(Option.AS);
     }
 
-    /**
-     * Returns a list of BitTorrent tracker URLs.
-     */
-    public List<String> getTR() {
-        return getList(Option.TR);
-    }
-    
     private List<String> getList(Option key) {
         List<String> l = optionsMap.get(key);
         if (l == null)
@@ -740,4 +724,5 @@ public class MagnetOptions implements Serializable {
             return DOWNLOAD_PREFIX;
         }
     }
+
 }

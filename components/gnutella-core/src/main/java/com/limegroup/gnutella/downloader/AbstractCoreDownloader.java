@@ -99,7 +99,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	}
 	
 	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.CoreDownloader#conflicts(java.io.File)
+     * @see com.limegroup.gnutella.downloader.CoreDownloader#conflictsSaveFile(java.io.File)
      */
 	public boolean conflictsSaveFile(File saveFile) {
 		return getSaveFile().equals(saveFile);
@@ -172,12 +172,8 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	    synchronized (this) {
 	        if (!isRelocatable())
 	            throw new DownloadException(ErrorCode.FILE_ALREADY_SAVED, candidateFile);
-	        setSaveFileInternal(candidateFile);
+	        this.saveFile = candidateFile;
 	    }
-	}
-	
-	protected synchronized void setSaveFileInternal(File saveFile) {
-	    this.saveFile = saveFile;
 	}
 	
 	public synchronized File getSaveFile() {

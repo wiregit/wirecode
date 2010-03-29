@@ -43,7 +43,7 @@ public class DownloadServicesImpl implements DownloadServices {
      */
     public Downloader download(MagnetOptions magnet, boolean overwrite) 
     	throws DownloadException {
-    	if (!magnet.isGnutellaDownloadable()) {
+    	if (!magnet.isDownloadable()) {
     		throw new IllegalArgumentException("invalid magnet: not have enough information for downloading");
     	}
     	return downloadManager.get().download(magnet, overwrite, null, magnet.getDisplayName());

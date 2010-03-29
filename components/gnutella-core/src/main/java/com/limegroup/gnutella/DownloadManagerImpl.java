@@ -50,7 +50,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
@@ -686,7 +685,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             String fileName)
     throws IllegalArgumentException, DownloadException {
         
-        if (!magnet.isGnutellaDownloadable()) 
+        if (!magnet.isDownloadable()) 
             throw new IllegalArgumentException("magnet not downloadable");
         
         //remove entry from IFM if the incomplete file was deleted.
@@ -931,41 +930,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         initializeDownload(ret, true);
         return ret;
     }
-
-    //TODO: this may overwrite files in the library after metadata is found
-    @Override
-    public synchronized Downloader downloadTorrent(String name, URN sha1,
-            List<URI> trackers) throws DownloadException {
-        
-        if(!isSavedDownloadsLoaded()) {
-            throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, null);
-        }
-        
-        if(!torrentManager.get().isValid()) {
-            throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, null);
-        }
-        
-        TorrentParams params = new LibTorrentParams(SharingSettings.INCOMPLETE_DIRECTORY.get(), 
-                name, StringUtils.toHexString(sha1.getBytes()), trackers);
-        checkIfAlreadyManagedTorrent(params);
-        
-        try {
-            final BTDownloader torrentDownloader = coreDownloaderFactory.createBTDownloader(params);
-            
-            initializeDownload(torrentDownloader, false);
-            
-            return torrentDownloader;
-        } catch (IOException e) {
-            LOG.error("Error creating BTDownloader", e);
-            if(e instanceof DownloadException) {
-                throw (DownloadException)e;
-            } else {
-                throw new DownloadException(e, null);
-            }
-        }
-        
-    }
-  
+    
     /**
      * Returns a (possibly empty) set of banned or disabled file extensions
      * belonging to files in the given torrent. This method should only be
@@ -1117,7 +1082,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      */
     public synchronized boolean isSaveLocationTaken(File candidateFile) {
         for (CoreDownloader md : activeAndWaiting) {
-            if (md.conflictsSaveFile(candidateFile))
+            if (md.conflictsSaveFile(candidateFile)) 
                 return true;
         }
         return false;

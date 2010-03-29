@@ -206,12 +206,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public Downloader downloadTorrent(String name, URN sha1,
-                    List<URI> trackerUrl) throws DownloadException {
-                return null;
-            }
-
-            @Override
             public Downloader downloadTorrent(File torrentFile, File saveDirectory, boolean overwrite)
                     throws DownloadException {
                 return null;

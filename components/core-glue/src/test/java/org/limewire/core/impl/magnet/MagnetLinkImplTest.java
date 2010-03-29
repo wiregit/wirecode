@@ -28,27 +28,27 @@ public class MagnetLinkImplTest extends BaseTestCase {
         magnetOptions = context.mock(MagnetOptions.class);
     }
 
-    public void testIsGnutellaDownloadable() {
+    public void testIsDownloadable() {
 
         MagnetLinkImpl magnetLinkImpl = new MagnetLinkImpl(magnetOptions);
 
         context.checking(new Expectations() {
             {
-                one(magnetOptions).isGnutellaDownloadable();
+                one(magnetOptions).isDownloadable();
                 will(returnValue(true));
             }
         });
 
-        assertTrue(magnetLinkImpl.isGnutellaDownloadable());
+        assertTrue(magnetLinkImpl.isDownloadable());
 
         context.checking(new Expectations() {
             {
-                one(magnetOptions).isGnutellaDownloadable();
+                one(magnetOptions).isDownloadable();
                 will(returnValue(false));
             }
         });
 
-        assertFalse(magnetLinkImpl.isGnutellaDownloadable());
+        assertFalse(magnetLinkImpl.isDownloadable());
         context.assertIsSatisfied();
     }
 
