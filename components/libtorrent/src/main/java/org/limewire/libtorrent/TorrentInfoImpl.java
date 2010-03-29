@@ -39,6 +39,6 @@ class TorrentInfoImpl implements TorrentInfo {
 
     @Override
     public String getName() {
-        return libTorrentInfo.name;
+        return libTorrentInfo.name.toString();
     }
 }

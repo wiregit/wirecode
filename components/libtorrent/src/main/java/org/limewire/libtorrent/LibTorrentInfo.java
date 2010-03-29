@@ -7,11 +7,12 @@ import org.limewire.bittorrent.TorrentTracker;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.WString;
 
 public class LibTorrentInfo extends Structure {
     public String sha1;
 
-    public String name;
+    public WString name;
     
     public long total_size;
 
