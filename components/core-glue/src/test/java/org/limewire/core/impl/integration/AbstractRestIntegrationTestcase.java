@@ -46,7 +46,7 @@ import com.limegroup.gnutella.library.Library;
 public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
 
     protected static String LOCAL_REST_URL = "http://localhost:45100/remote/";
-    protected static String SAMPLE_DIR = "sample_files";
+    protected static String SAMPLE_DIR = "test_files";
     protected static final String NO_PARAMS = null;
 
     @Inject protected Injector injector;
