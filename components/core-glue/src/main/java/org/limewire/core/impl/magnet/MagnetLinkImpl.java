@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.magnet.MagnetLink;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -54,9 +55,9 @@ public class MagnetLinkImpl implements MagnetLink {
         
         for ( String uri : stringResultsList ) {
             try {
-                uriResultsList.add(new URI(uri));
+                uriResultsList.add(URIUtils.toURI(uri));
             } catch (URISyntaxException e) {
-                // Throw out the tracker since its not valid
+                // Throw out the tracker since it's not valid
             }
         }
         

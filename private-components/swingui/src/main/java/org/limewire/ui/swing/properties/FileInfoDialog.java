@@ -245,7 +245,7 @@ public class FileInfoDialog extends LimeJDialog {
         case UPLOADING_FILE:
             if(propertiableFile instanceof UploadItem && ((UploadItem)propertiableFile).getUploadItemType() == UploadItemType.BITTORRENT) {
                 Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
-                if(torrent != null && torrent.hasMetaData()) {
+                if(torrent != null) {
                     if (torrent.hasMetaData()) {
                         tabs.add(Tabs.BITTORENT);
                     }
