@@ -184,9 +184,7 @@ class CoreSearchResultList implements SearchResultList {
                         groupedUrnResultList.add(idx, gsr);
                         newResults.add(gsr);
                     }
-
-                    // Add all sources to result count.
-                    resultCount += result.getSources().size();
+                    resultCount++;
                 }
             }
         } finally {

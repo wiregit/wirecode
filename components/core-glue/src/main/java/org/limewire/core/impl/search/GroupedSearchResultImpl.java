@@ -66,26 +66,26 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
         relevance += result.getRelevance(query);
         
         // Build collection of non-anonymous friends for filtering.
-        for (RemoteHost host : result.getSources()) {
-            remoteHosts.add(host);
-            
-            Friend friend = host.getFriendPresence().getFriend();
-            if (friend.isAnonymous()) {
-                anonymous = true;
+        RemoteHost host = result.getSource();
+        remoteHosts.add(host);
+
+        Friend friend = host.getFriendPresence().getFriend();
+        if (friend.isAnonymous()) {
+            anonymous = true;
+        } else {
+            if (friends == null) {
+                // optimize for a single friend having it
+                friends = Collections.singleton(friend);
             } else {
-                if (friends == null) {
-                    // optimize for a single friend having it
-                    friends = Collections.singleton(friend);
-                } else {
-                    // convert to CopyOnWriteArraySet if we need to.
-                    if (!(friends instanceof CopyOnWriteArraySet)) {
-                        Set<Friend> newFriends = new CopyOnWriteArraySet<Friend>();
-                        newFriends.addAll(friends);
-                        friends = newFriends;
-                    }
-                    friends.add(friend);
+                // convert to CopyOnWriteArraySet if we need to.
+                if (!(friends instanceof CopyOnWriteArraySet)) {
+                    Set<Friend> newFriends = new CopyOnWriteArraySet<Friend>();
+                    newFriends.addAll(friends);
+                    friends = newFriends;
                 }
+                friends.add(friend);
             }
+
         }
     }
     

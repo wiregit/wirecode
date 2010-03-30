@@ -75,8 +75,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
     }
 
     @Override
-    public List<RemoteHost> getSources() {
-        return sources;
+    public RemoteHost getSource() {
+        return sources.get(0);
     }
 
     @Override

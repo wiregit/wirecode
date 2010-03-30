@@ -1,7 +1,5 @@
 package org.limewire.core.api.search;
 
-import java.util.List;
-
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -17,11 +15,8 @@ public interface SearchResult {
 
     long getSize();
     
-    /**
-     * Returns a subset of sources identified for a file, limiting the number
-     * of alt-locs returned.
-     */
-    List<RemoteHost> getSources();
+    /** Returns the source of the search result. */
+    RemoteHost getSource();
     
     URN getUrn();
     

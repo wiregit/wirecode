@@ -2,8 +2,6 @@ package org.limewire.core.impl.search;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
@@ -82,8 +80,8 @@ class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public List<RemoteHost> getSources() {
-        return Collections.<RemoteHost>singletonList(remoteHost);
+    public RemoteHost getSource() {
+        return remoteHost;
     }
 
     @Override

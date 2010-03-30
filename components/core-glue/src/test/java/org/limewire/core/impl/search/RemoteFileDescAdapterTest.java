@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -122,13 +121,13 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         b = createRFDAdapter(context, query, false, false, 0, false);
         assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
 
-        // Altlocs increase relevance, (currently only one factored in though)
+        // Altlocs do not increase relevance
         a = createRFDAdapter(context, query, false, false, 0, true);
         b = createRFDAdapter(context, query, false, false, 1, false);
-        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+        assertEquals(a.getRelevance(query), b.getRelevance(query));
         a = createRFDAdapter(context, query, true, true, 0, true);
         b = createRFDAdapter(context, query, true, true, 1, true);
-        assertGreaterThan(a.getRelevance(query), b.getRelevance(query));
+        assertEquals(a.getRelevance(query), b.getRelevance(query));
 
         // Browseable is better than non browsable
         a = createRFDAdapter(context, query, true, false, 1, true);
@@ -137,11 +136,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
 
         // Try with lots of altlocs, return is irrelevant.
         createRFDAdapter(context, query, true, true, 30, false).getRelevance(query);
-
-        // Test altlocs are not factored into calculation after some point
-        a = createRFDAdapter(context, query, true, true, 100, true);
-        b = createRFDAdapter(context, query, true, true, 99, true);
-        assertEquals(a.getRelevance(query), b.getRelevance(query));
 
         context.assertIsSatisfied();
     }
@@ -213,165 +207,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         } else {
             return new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager, torrentFactory);
         }
-    }
-   
-    /**
-     * Mostly internal based test for testing forward compatibility for 
-     *  supporting relevances of new RemoteHost types.
-     */
-    public void testGetRelevanceWithAlternateHostTypes() {
-        final Mockery context = new Mockery() {{
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }};
-
-        final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
-        final CategoryManager categoryManager = context.mock(CategoryManager.class);
-        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
-        final Set<IpPort> locs = new HashSet<IpPort>();
-        final String filename = "foo bar";
-
-        context.checking(new Expectations() {{
-            allowing(rfd).getClientGUID();
-            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
-
-            allowing(rfd).getRelevance(with(equal(filename)));
-            will(returnValue(1f));
-
-            allowing(rfd);
-            allowing(categoryManager).getCategoryForExtension("");
-            will(returnValue(Category.OTHER));
-        }});
-
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory) {
-            @Override
-            public List<RemoteHost> getSources() {
-                List<RemoteHost> list = new LinkedList<RemoteHost>();
-
-                // Host without relevance
-                list.add(context.mock(RemoteHost.class));
-
-                final RelevantRemoteHost host = context.mock(RelevantRemoteHost.class);
-
-                context.checking(new Expectations() {{
-                    allowing(host).getRelevance();
-                    will(returnValue(99));
-                }});
-
-                // New host type with other relevance
-                list.add(host);
-
-                return list;
-            }
-        };
-
-        assertEquals(99f, rfdAdapter.getRelevance(filename));
-
-        context.assertIsSatisfied();
-    }
-    
-    /**
-     * Tests {@link RemoteFileDescAdapter#getSources()} under various loads.
-     */
-    public void testGetSources() {
-        final Mockery context = new Mockery() {{
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }};
-    
-        final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
-        final CategoryManager categoryManager = context.mock(CategoryManager.class);
-        final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
-        final FriendPresence friendPresence = context.mock(FriendPresence.class);
-        final Set<IpPort> locs = new HashSet<IpPort>();
-
-        final Address address = context.mock(Address.class);
-        final Connectable connectable = context.mock(Connectable.class);
-        final IpPort ipPort = context.mock(IpPort.class);
-        
-        context.checking(new Expectations() {{
-            allowing(rfd).getClientGUID();
-            will(returnValue(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }));
-            
-            allowing(friendPresence).getFeature(AddressFeature.ID);
-            will(returnValue(new AddressFeature(address)));
-            
-            allowing(rfd).getAddress();
-            will(returnValue(address));
-            allowing(address);
-            allowing(rfd);
-            allowing(categoryManager).getCategoryForExtension("");
-            will(returnValue(Category.OTHER));
-            
-            allowing(connectable);
-            
-            allowing(ipPort).getAddress();
-            will(returnValue("hello"));
-            allowing(ipPort);
-            
-        }});
-        
-        // Make sure the sources list contains a RemoteHost for the rfd and the single altloc
-        //  ensure the address' are correctly set.  Use a Connectable for the altloc.        
-        locs.add(connectable);
-        RemoteFileDescAdapter anonRfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
-        Iterable<RemoteHost> hosts1 = anonRfdAdapter.getSources();
-        locs.remove(connectable);
-        boolean rfdRemoteHostFound = false;
-        boolean altLocFound = false;
-        for ( RemoteHost host : hosts1 ) {
-            if (host instanceof RfdRemoteHost) {
-                assertSame(address, host.getFriendPresence().getFeature(AddressFeature.ID).getFeature());
-                rfdRemoteHostFound = true;
-            } 
-            else if (host instanceof AltLocRemoteHost) {
-                assertSame(connectable, host.getFriendPresence().getFeature(AddressFeature.ID).getFeature());
-                altLocFound = true;
-            }
-        }
-        assertTrue(rfdRemoteHostFound);
-        assertTrue(altLocFound);
-
-        // Make sure the sources list contains a RemoteHost for the friend and the single altloc
-        //  ensure the address' are correctly set.  Use a regular IpPort instead of Connectable.
-        locs.add(ipPort);
-        RemoteFileDescAdapter friendRfdAdapter = new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager, torrentFactory);
-        Iterable<RemoteHost> hosts2 = friendRfdAdapter.getSources();
-        locs.remove(ipPort);
-        rfdRemoteHostFound = false;
-        altLocFound = false;
-        for ( RemoteHost host : hosts2 ) {
-            if (host instanceof RfdRemoteHost) {
-                assertSame(address, host.getFriendPresence().getFeature(AddressFeature.ID).getFeature());
-                rfdRemoteHostFound = true;
-            } 
-            else if (host instanceof AltLocRemoteHost) {
-                Connectable addressCollected = (Connectable) host.getFriendPresence().getFeature(AddressFeature.ID).getFeature();
-                assertSame("hello", addressCollected.getAddress());
-                altLocFound = true;
-            }
-        }
-        assertTrue(rfdRemoteHostFound);
-        assertTrue(altLocFound);
-        
-        // Test duplicate getSources() call, ensure they are the same
-        Iterable<RemoteHost> hosts2repeat = friendRfdAdapter.getSources();
-        rfdRemoteHostFound = false;
-        altLocFound = false;
-        for ( RemoteHost host : hosts2repeat ) {
-            if (host instanceof RfdRemoteHost) {
-                assertSame(address, host.getFriendPresence().getFeature(AddressFeature.ID).getFeature());
-                rfdRemoteHostFound = true;
-            } 
-            else if (host instanceof AltLocRemoteHost) {
-                Connectable addressCollected = (Connectable) host.getFriendPresence().getFeature(AddressFeature.ID).getFeature();
-                assertSame("hello", addressCollected.getAddress());
-                altLocFound = true;
-            }
-        }
-        assertTrue(rfdRemoteHostFound);
-        assertTrue(altLocFound);
-        
-        context.assertIsSatisfied();
-        
     }
     
     /**

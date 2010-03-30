@@ -1,6 +1,5 @@
 package org.limewire.core.impl.search;
 
-import java.util.AbstractList;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +12,6 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.io.Connectable;
@@ -51,18 +49,14 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
    
     /**
-     * AltLocs are given a weight of one since we do not really know anything about them but
-     *  they will improve the quality of the result if they work or are not spam.
-     */
-    private static int ALTLOC_FACTOR = 1;
-    
-    private static int BROWSABLE_ANONYMOUS_PEER_FACTOR = 6;
-    private static int NON_BROWSABLE_ANONYMOUS_PEER_FACTOR = 1;
-
-    /**
      * Non anonymous sources, XMPP friends, are considered very important. 
      */
     private static int FRIENDLY_PEER_FACTOR = 20;
+    /**
+     * Browseable sources are considered more important than unbrowseable ones.
+     */
+    private static int BROWSEABLE_ANONYMOUS_PEER_FACTOR = 6;
+    private static int NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR = 1;
     
     private final FriendPresence friendPresence;
     private final RemoteFileDesc rfd;
@@ -134,12 +128,14 @@ public class RemoteFileDescAdapter implements SearchResult {
         if(relevance != -1) {
             return relevance;
         }
-        relevance = 0;
-        // Calculate the relevance based on the (truncated) sources list
-        for(RemoteHost remoteHost : getSources()) {
-	        if (remoteHost instanceof RelevantRemoteHost) {
-                relevance += ((RelevantRemoteHost) remoteHost).getRelevance();
-            }
+        // Ignore alt locs for relevance ranking
+        if(friendPresence.getFriend().isAnonymous()) {
+            if(rfd.isBrowseHostEnabled())
+                relevance = BROWSEABLE_ANONYMOUS_PEER_FACTOR;
+            else
+                relevance = NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR;
+        } else {
+            relevance = FRIENDLY_PEER_FACTOR;
         }
         // Consider how well the result matches the query
         if(query != null && !query.isEmpty())
@@ -237,43 +233,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         return rfd.isSpam();
     }
     
-    /**
-     * @return the sources that should be shown in the UI. Includes a limited
-     * number of alt-locs. 
-     */
     @Override
-    public List<RemoteHost> getSources() {
-        // This returns a pass-through list for memory optimizations.
-        // Do not cache this or the contents of this without doing
-        // memory profiling and ensuring things are OK.
-        return new AbstractList<RemoteHost>() {
-            
-          @Override public void clear() {
-              throw new UnsupportedOperationException();
-          }
-          
-          @Override public RemoteHost get(int index) {
-              if(index == 0) {
-                  return new RfdRemoteHost(friendPresence, rfd);
-              } else if(index - 1 < SearchSettings.ALT_LOCS_TO_DISPLAY.getValue()) {
-                  return new AltLocRemoteHost(locs.get(index-1));
-              } else {
-                  throw new IndexOutOfBoundsException("index: " + index + ", size: " + size());
-              }
-          }
-          @Override public boolean isEmpty() {
-            return false;
-          }
-          
-          @Override public RemoteHost remove(int index) {
-              throw new UnsupportedOperationException();
-          }
-          @Override public int size() {
-              return Math.min(SearchSettings.ALT_LOCS_TO_DISPLAY.getValue(), locs.size()) + 1;
-          }
-        };
+    public RemoteHost getSource() {
+        return new RfdRemoteHost(friendPresence, rfd);
     }
-   
+
     /**
      * @return the {@link URNImpl} for the rfd.
      */
@@ -300,7 +264,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      * An adapter that creates a compatible {@link RemoteHost} from the {@link RemoteFileDesc} and anonymous
      *  or non anonymous {@link FriendPresence} that the main {@link RemoteFileDescAdapter} was constructed with.
      */
-    static class RfdRemoteHost implements RelevantRemoteHost {
+    static class RfdRemoteHost implements RemoteHost {
         private final FriendPresence friendPresence;
         private final boolean browseHostEnabled;
         
@@ -343,23 +307,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         public FriendPresence getFriendPresence() {
             return friendPresence;
         }
-
-        /**
-         * @return the relevance for a primary host calculated from its
-         *          capabilities.
-         */
-        @Override
-        public int getRelevance() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                if (browseHostEnabled) {
-                    return BROWSABLE_ANONYMOUS_PEER_FACTOR;
-                } else {
-                    return NON_BROWSABLE_ANONYMOUS_PEER_FACTOR;
-                }
-            } else {
-                return FRIENDLY_PEER_FACTOR;
-            }
-        }
         
         @Override
         public String toString() {
@@ -370,7 +317,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     /**
      * An adapter class for an AltLoc based on {@link IpPort} and translated to a {@link RemoteHost}.
      */
-    static class AltLocRemoteHost implements RelevantRemoteHost {
+    static class AltLocRemoteHost implements RemoteHost {
         private final FriendPresence presence;        
 
         AltLocRemoteHost(IpPort ipPort) {
@@ -416,23 +363,10 @@ public class RemoteFileDescAdapter implements SearchResult {
         public FriendPresence getFriendPresence() {
             return presence;
         }
-
-        @Override
-        public int getRelevance() {
-            return ALTLOC_FACTOR;
-        }
         
         @Override
         public String toString() {
             return "AltLoc Host For: " + presence;
         }
     }
-
-    /**
-     * Defines a relevance calculation unique to a specific {@link RemoteHost} type.
-     */
-    protected static interface RelevantRemoteHost extends RemoteHost {
-        public int getRelevance();
-    }
-
 }

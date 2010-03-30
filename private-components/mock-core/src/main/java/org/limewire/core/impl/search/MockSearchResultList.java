@@ -143,8 +143,7 @@ class MockSearchResultList implements SearchResultList {
                     groupedUrnResultList.add(idx, gsr);
                     newResults.add(gsr);
                 }
-
-                resultCount += result.getSources().size();
+                resultCount++;
             }
         } finally {
             // Release lock.

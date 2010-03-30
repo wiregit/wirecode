@@ -59,9 +59,7 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     
     private void addSearchResult(SearchResult result) {
         searchResults.add(result);
-        for (RemoteHost host : result.getSources()) {
-            remoteHosts.add(host);
-        }
+        remoteHosts.add(result.getSource());
     }
     
     void setCategory(Category category) {

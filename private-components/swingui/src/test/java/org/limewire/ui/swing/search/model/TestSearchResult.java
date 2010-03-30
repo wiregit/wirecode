@@ -3,9 +3,7 @@
  */
 package org.limewire.ui.swing.search.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,9 +57,8 @@ public class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public List<RemoteHost> getSources() {
-        List<RemoteHost> sources = new ArrayList<RemoteHost>();
-        sources.add(new RemoteHost() {
+    public RemoteHost getSource() {
+        return new RemoteHost() {
             UUID randomUUID = UUID.randomUUID();
 
             @Override
@@ -83,8 +80,7 @@ public class TestSearchResult implements SearchResult {
             public FriendPresence getFriendPresence() {
                 return new MockFriendPresence(new MockFriend(randomUUID.toString()));
             }
-        });
-        return sources;
+        };
     }
 
     @Override

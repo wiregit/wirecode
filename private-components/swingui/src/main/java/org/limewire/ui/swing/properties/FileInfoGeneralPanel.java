@@ -296,14 +296,13 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                 model.setColumnIdentifiers(new Object[] { I18n.tr("Name"), I18n.tr("Address"), I18n.tr("Filename") });
     
                 for (SearchResult result : ((VisualSearchResult)propertiableFile).getCoreSearchResults()) {
-                    for (RemoteHost host : result.getSources()) {
-                        Friend f = host.getFriendPresence().getFriend();
-                        model.addRow(new Object[] {
-                                f.getRenderName(),
-                                f.getName(),
-                                result.getFileName()
-                        });
-                    }
+                    RemoteHost host = result.getSource();
+                    Friend f = host.getFriendPresence().getFriend();
+                    model.addRow(new Object[] {
+                            f.getRenderName(),
+                            f.getName(),
+                            result.getFileName()
+                    });
                 }
                 component.add(new JScrollPane(table), "span, grow, wrap");
                 
@@ -326,7 +325,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     }
                 });
             } else if(propertiableFile instanceof SearchResult) {
-                String friend = ((SearchResult)propertiableFile).getSources().get(0).getFriendPresence().getFriend().getRenderName();
+                String friend = ((SearchResult)propertiableFile).getSource().getFriendPresence().getFriend().getRenderName();
                 component.add(createLabelField(friend), "span, growx, wrap");
             }
             break;
