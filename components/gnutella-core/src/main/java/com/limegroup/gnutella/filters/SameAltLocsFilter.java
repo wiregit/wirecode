@@ -57,7 +57,6 @@ class SameAltLocsFilter implements SpamFilter {
                     } else {
                         sameAlts.retainAll(alts);
                         if(sameAlts.size() < alts.size() * minOverlap) {
-                            System.out.println("Overlap " + sameAlts.size());
                             LOG.debug("Allowing reply with different alt-locs");
                             return true;
                         } else {
