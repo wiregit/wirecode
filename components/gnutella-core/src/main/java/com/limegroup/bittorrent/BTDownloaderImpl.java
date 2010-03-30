@@ -153,19 +153,24 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.getLock().lock();
             try {
                 torrent.moveTorrent(completeDir);
-                File oldFastResumeFile = torrent.getFastResumeFile();
-                File oldTorrentFile = torrent.getTorrentFile();
 
                 File torrentUploadFolder = BittorrentSettings.TORRENT_UPLOADS_FOLDER.get();
-                File newFastResumeFile = new File(torrentUploadFolder, oldFastResumeFile.getName());
-                File newTorrentFile = new File(torrentUploadFolder, oldTorrentFile.getName());
-                torrent.setFastResumeFile(newFastResumeFile);
-                torrent.setTorrentFile(newTorrentFile);
 
-                FileUtils.copy(oldTorrentFile, newTorrentFile);
-                FileUtils.copy(oldFastResumeFile, newFastResumeFile);
-                FileUtils.forceDelete(oldTorrentFile);
-                FileUtils.forceDelete(oldFastResumeFile);
+                File oldTorrentFile = torrent.getTorrentFile();
+                if (oldTorrentFile != null) {
+                    File newTorrentFile = new File(torrentUploadFolder, oldTorrentFile.getName());
+                    torrent.setTorrentFile(newTorrentFile);
+                    FileUtils.copy(oldTorrentFile, newTorrentFile);
+                    FileUtils.forceDelete(oldTorrentFile);
+                }
+
+                File oldFastResumeFile = torrent.getFastResumeFile();
+                if (oldFastResumeFile != null) {
+                    File newFastResumeFile = new File(torrentUploadFolder, oldFastResumeFile.getName());
+                    torrent.setFastResumeFile(newFastResumeFile);
+                    FileUtils.copy(oldFastResumeFile, newFastResumeFile);
+                    FileUtils.forceDelete(oldFastResumeFile);
+                }
             } finally {
                 torrent.getLock().unlock();
             }
