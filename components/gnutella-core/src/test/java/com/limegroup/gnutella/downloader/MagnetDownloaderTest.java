@@ -126,18 +126,18 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		// valid: has everything
 		opts = MagnetOptions.parseMagnet("magnet:?xt=urn:sha1:KRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&dn=-weed-Soul%20Coughing-Rolling.wma&xs=http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:WRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
-		assertTrue("Should be invalid", opts[0].isGnutellaDownloadable());
+		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 	
 		
-		// downloadable: has kt and hash
-		opts = MagnetOptions.parseMagnet("magnet:?kt=test2&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		// downloadable: has kt, hash, and length
+		opts = MagnetOptions.parseMagnet("magnet:?kt=test2&xt=urn:sha1:MRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=555");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
 		
-		// downloadable: has dn and hash
-		opts = MagnetOptions.parseMagnet("magnet:?dn=test3&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT");
+		// downloadable: has dn, hash, and length
+		opts = MagnetOptions.parseMagnet("magnet:?dn=test3&xt=urn:sha1:TRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xl=444");
 		assertEquals("Wrong number of parsed magnets", 1, opts.length);
 		assertTrue("Should be valid", opts[0].isGnutellaDownloadable());
 		downloadManager.download(opts[0], true, null, null);
