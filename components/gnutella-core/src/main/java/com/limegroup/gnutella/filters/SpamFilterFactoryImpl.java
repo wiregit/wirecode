@@ -15,16 +15,19 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
     private final Provider<LocalIPFilter> ipFilter;
     private final Provider<URNFilter> urnFilter;
     private final Provider<RepetitiveQueryFilter> repetitiveQueryFilter;
+    private final Provider<SameAltLocsFilter> sameAltLocsFilter;
 
     @Inject
     public SpamFilterFactoryImpl(Provider<HostileFilter> hostileFilter,
             Provider<LocalIPFilter> ipFilter,
             Provider<URNFilter> urnFilter,
-            Provider<RepetitiveQueryFilter> repetitiveQueryFilter) {
+            Provider<RepetitiveQueryFilter> repetitiveQueryFilter,
+            Provider<SameAltLocsFilter> sameAltLocsFilter) {
         this.hostileFilter = hostileFilter;
         this.ipFilter = ipFilter;
         this.urnFilter = urnFilter;
         this.repetitiveQueryFilter = repetitiveQueryFilter;
+        this.sameAltLocsFilter = sameAltLocsFilter;
     }
 
     /* (non-Javadoc)
@@ -51,6 +54,9 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
         //4. URN filter.
         if(FilterSettings.FILTER_URNS.getValue())
             buf.add(urnFilter.get());
+
+        //5. Query replies in which every response has similar alt-locs.
+        buf.add(sameAltLocsFilter.get());
 
         return compose(buf);
     }
@@ -85,9 +91,6 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
 
         //5. Hostile IP addresses.
         buf.add(hostileFilter.get());
-
-        //6. Dodgy client GUIDs.
-        buf.add(new ClientGuidFilter());
 
         return compose(buf);
     }

@@ -2,6 +2,7 @@ package org.limewire.core.settings;
 
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
@@ -220,4 +221,33 @@ public class FilterSettings extends LimeProps {
      */
     public static final LongSetting NEXT_URN_BLACKLIST_UPDATE =
         FACTORY.createLongSetting("NEXT_URN_BLACKLIST_UPDATE", 0L);
+
+    /**
+     * Minimum number of responses to check for similar alts.
+     */
+    public static final IntSetting SAME_ALTS_MIN_RESPONSES =
+        FACTORY.createRemoteIntSetting("SAME_ALTS_MIN_RESPONSES", 2,
+                "FilterSettings.sameAltsMinResponses", 2, 100);
+
+    /**
+     * Minimum number of alts per response to check for similar alts.
+     */
+    public static final IntSetting SAME_ALTS_MIN_ALTS =
+        FACTORY.createRemoteIntSetting("SAME_ALTS_MIN_ALTS", 1,
+                "FilterSettings.sameAltsMinAlts", 1, 100);
+
+    /**
+     * Minimum fraction of alts that must overlap for a reply to be dropped.
+     */
+    public static final FloatSetting SAME_ALTS_MIN_OVERLAP =
+        FACTORY.createRemoteFloatSetting("SAME_ALTS_MIN_OVERLAP", 0.5f,
+                "FilterSettings.sameAltsMinOverlap", 0.1f, 1f);
+
+    /**
+     * Whether replies in which all the responses have similar alts should be
+     * marked as spam.
+     */
+    public static final BooleanSetting SAME_ALTS_ARE_SPAM =
+        FACTORY.createRemoteBooleanSetting("SAME_ALTS_ARE_SPAM", true,
+        "FilterSettings.sameAltsAreSpam");    
 }
