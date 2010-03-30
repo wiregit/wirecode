@@ -100,7 +100,7 @@ public final class AlternateLocationTest extends LimeTestCase {
 	    
 	    for(int i=0; i<UrnHelper.URNS.length; i++) {
 			RemoteFileDesc rfd = 
-				remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", 6346, false), 10, HTTPConstants.URI_RES_N2R+
+				remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.com", 6346, false), 10, HTTPConstants.URI_RES_N2R+
             				   UrnHelper.URNS[i].httpStringValue(), 10,
                     GUID.makeGuid(), 10, 2, true, null, UrnHelper.URN_SETS[i], false, "", -1);
 
@@ -274,7 +274,7 @@ public final class AlternateLocationTest extends LimeTestCase {
         } catch(IOException expected) {}
 
         try {
-            alternateLocationFactory.create("limewire.org", urn);
+            alternateLocationFactory.create("limewire.com", urn);
             fail("IOException expected");
         } catch(IOException expected) {}
 

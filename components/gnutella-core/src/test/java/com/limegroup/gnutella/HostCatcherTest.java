@@ -551,7 +551,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Test with a name in the cache.
         ggep = new GGEP();
-        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.com");
         pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
                     0, 0, false, ggep);
@@ -563,7 +563,7 @@ public class HostCatcherTest extends LimeTestCase {
         // assert that it had all our endpoints.
         assertContains(s, new ExtendedEndpoint("1.1.1.1", 1));
         assertContains(s, new ExtendedEndpoint("3.2.3.4", 6346));
-        assertContains(s, new ExtendedEndpoint("www.limewire.org", 1));
+        assertContains(s, new ExtendedEndpoint("www.limewire.com", 1));
     }
     
     public void testPackedIPPongsAreUsed() throws Exception {
