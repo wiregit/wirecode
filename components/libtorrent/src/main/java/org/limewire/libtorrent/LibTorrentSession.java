@@ -127,7 +127,7 @@ public class LibTorrentSession implements TorrentManager {
             String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath()
                     : null;
             
-            String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : "";
+            String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
             String saveDirectory = params.getDownloadFolder().getAbsolutePath();
             
             String sha1 = params.getSha1();

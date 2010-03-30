@@ -53,6 +53,23 @@ public class MagnetLinkImpl implements MagnetLink {
     @Override
     public String getName() {
         String name = magnetOptions.getDisplayName();
-        return name != null ? name : magnetOptions.getFileNameForSaving();
+        if (name == null) {
+            name = magnetOptions.getFileNameForSaving();
+        }
+        
+        return sanatiseName(name);
+    }
+    
+    /**
+     * Strip any strange characters out of the name so it is appropriate for 
+     *  naming files, etc. on all systems. 
+     */
+    private static String sanatiseName(String name) {
+        // sha1 is the only offending name possible so far
+        //  replace it with the word magnet for now
+        if (name.startsWith("urn:sha1:")) {
+            return "magnet " + name.substring(9);
+        }
+        return name;
     }
 }

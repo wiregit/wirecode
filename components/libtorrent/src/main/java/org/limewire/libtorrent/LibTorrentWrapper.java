@@ -104,8 +104,10 @@ class LibTorrentWrapper {
     public void add_torrent(String sha1, String trackerURI, String torrentPath, String savePath,
             String fastResumePath) {
         LOG.debugf("before add_torrent: {0}", sha1);
-        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, new WString(torrentPath),
-                new WString(savePath), new WString(fastResumePath)));
+        catchWrapperException(libTorrent.add_torrent(sha1, trackerURI, 
+                torrentPath != null ? new WString(torrentPath) : null,
+                new WString(savePath),
+                new WString(fastResumePath)));
         LOG.debugf("after add_torrent: {0}", sha1);
     }
 
