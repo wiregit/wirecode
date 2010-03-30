@@ -37,14 +37,14 @@ public class RestDownloadTest extends AbstractRestIntegrationTestcase {
     }
 
     @Override public void setUp() throws Exception {
-        
+
         String nm = getName();
         if (nm.contains("NoMock")) {
             super.setUp(); // no mocks
         } else {
             setUpModules(new MockDownloadModule());
-                loadMockDownloads(); 
-        }        
+            loadMockDownloads();
+        }
     }
 
     // -------------------------- tests --------------------------
@@ -62,57 +62,72 @@ public class RestDownloadTest extends AbstractRestIntegrationTestcase {
     }
 
     public void testCancel() throws Exception {
-        
+
         int statusCode = -1;
-        
+
         // before cancel
         int size = listGET(DOWNLOAD_PREFIX, NO_PARAMS).size();
-        assertEquals("list size unexpected",downItems.size(),size);
-                
+        assertEquals("list size unexpected", downItems.size(), size);
+
         /**
-         * delete all: 
-         * expectations for sequence of calls invoked by delete set in loadMockQueries
+         * delete all: expectations for sequence of calls invoked by delete set
+         * in loadMockQueries
          */
         for (DownloadItem item : downItems) {
             statusCode = httpDelete(DOWNLOAD_PREFIX + "/" + item.getUrn(), NO_PARAMS);
-            assertEquals("unexpected status",HttpStatus.SC_OK,statusCode);            
-        }       
-        
+            assertEquals("unexpected status", HttpStatus.SC_OK, statusCode);
+        }
+
         // let's ensure an invalid download item
-        context.checking(new Expectations() {{
+        context.checking(new Expectations() {
+            {
                 one(dlistMgr).getDownloadItem(with(any(URN.class)));
                 will(returnValue(null));
-        }});
-        
+            }
+        });
+
         // try to cancel item again
         URN urn = downItems.get(0).getUrn();
-        statusCode = httpDelete(DOWNLOAD_PREFIX + "/" + urn, NO_PARAMS);        
-        assertEquals("shouldn't be found",HttpStatus.SC_NOT_FOUND,statusCode);
+        statusCode = httpDelete(DOWNLOAD_PREFIX + "/" + urn, NO_PARAMS);
+        assertEquals("shouldn't be found", HttpStatus.SC_NOT_FOUND, statusCode);
     }
 
-    
-    public void testCancelNoMocks() throws Exception {
-        
+    public void testCancelNegativesNoMocks() throws Exception {
+
         int statusCode = -1;
-        
+
         // try to cancel random URN
         statusCode = httpDelete(DOWNLOAD_PREFIX + "/" + generateURN(), NO_PARAMS);
-        assertEquals("shouldn't be found",HttpStatus.SC_NOT_FOUND,statusCode);
-     
+        assertEquals("shouldn't be found", HttpStatus.SC_NOT_FOUND, statusCode);
+
         // try to cancel a target (i.e. no urn)
         statusCode = httpDelete(DOWNLOAD_PREFIX, NO_PARAMS);
-        assertEquals("no urn passed",HttpStatus.SC_NOT_IMPLEMENTED,statusCode);  
-        
+        assertEquals("no urn passed", HttpStatus.SC_NOT_IMPLEMENTED, statusCode);
+
         // try to cancel garbage URN (LWC-5565)
-        //statusCode = httpDelete(DOWNLOAD_PREFIX + "/GARBAGE_NOT_BASE16", NO_PARAMS);
-        //assertEquals("garbage urn",HttpStatus.SC_NOT_FOUND,statusCode);        
+        // statusCode = httpDelete(DOWNLOAD_PREFIX + "/GARBAGE_NOT_BASE16",NO_PARAMS);
+        // assertEquals("garbage urn",HttpStatus.SC_NOT_FOUND,statusCode);
     }
 
-    
-    public void testPost() throws Exception { 
-        
+    // TODO: test posts
+    public void testPost() throws Exception {    
     }
     
+    public void testPostNegativesNoMock() throws Exception {
+        
+        // some garbage parameters
+        String fakeID = "id=" + generateURN();
+        String fakeSrch = "searchId=BA8DB600AC11FE2EE3033F5AFF57F500";
+        String[] badParams = { NO_PARAMS, "id=", "searchId=", fakeID, fakeSrch,
+                fakeID + "&" + fakeSrch, "magnet=", "torrent=", "magnet=blah", "not_a_param=" }; // "torrent=blah"
+
+        // check missing/bad parameters
+        for (String param : badParams) {
+            int statusCode = httpPost(DOWNLOAD_PREFIX, param);
+            assertEquals("post shouldn't succeed", HttpStatus.SC_NOT_FOUND, statusCode);
+        }
+    }
+
     // ---------------------- private ----------------------
 
     /**
@@ -154,7 +169,7 @@ public class RestDownloadTest extends AbstractRestIntegrationTestcase {
                 }
             });
         }
-        final URN urn = generateURN();        
+        final URN urn = generateURN();
         final DownloadItem mockDownloadItem = context.mock(DownloadItem.class);
         downItems.add(mockDownloadItem);
 
@@ -172,13 +187,13 @@ public class RestDownloadTest extends AbstractRestIntegrationTestcase {
                 will(returnValue(state));
                 one(dlistMgr).getDownloadItem(with(any(URN.class)));
                 will(returnValue(mockDownloadItem));
-                
+
                 if (state.equals(DownloadState.DONE)) {
-                    exactly(1).of(dlistMgr).remove(mockDownloadItem);                    
+                    exactly(1).of(dlistMgr).remove(mockDownloadItem);
                 } else {
                     exactly(1).of(mockDownloadItem).cancel();
                 }
-                
+
             }
         });
     }

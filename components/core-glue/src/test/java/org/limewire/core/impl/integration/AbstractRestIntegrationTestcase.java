@@ -91,7 +91,7 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
      * returns target JSONObject metadata in Map
      */
     protected Map<String,String> metadataPost(String target, String params) throws Exception {
-        String response = httpPost(target,params);
+        String response = getPostResponse(target,params);
         JSONObject jobj = new JSONObject(response);
         return buildResultsMap(jobj);
     }
@@ -159,14 +159,34 @@ public abstract class AbstractRestIntegrationTestcase extends LimeTestCase {
     /**
      * performs http POST and returns status code
      */
-    protected String httpPost(String target, String params) throws Exception {
+    protected int httpPost(String target, String params) throws Exception {
+
+        int statusCode = -1;
+        HttpResponse response = null;
+        HttpPost method = new HttpPost(buildUrl(target,params));
+
+        try {
+            response = client.execute(method);            
+            statusCode = response.getStatusLine().getStatusCode();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            client.releaseConnection(response);
+        }
+        return statusCode;
+    }
+    
+    /**
+     * performs http POST and returns content String
+     */
+    protected String getPostResponse(String target, String params) throws Exception {
 
         String responseStr = null;
         HttpResponse response = null;
         HttpPost method = new HttpPost(buildUrl(target,params));
 
         try {
-            response = client.execute(method);
+            response = client.execute(method);                      
             HttpEntity entity = response.getEntity();
             responseStr = EntityUtils.toString(entity);
         } catch (Exception e) {
