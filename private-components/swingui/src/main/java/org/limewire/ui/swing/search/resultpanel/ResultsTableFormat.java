@@ -8,6 +8,7 @@ import java.util.List;
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.friend.api.Friend;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
@@ -206,22 +207,30 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
     }
     
     /**
-     * Compares the Spam Column. This column is never displayed to the user. Its used
-     * to sort classic search results based on files marked as spam and files not 
-     * marked as spam. 
+     * Compares the Spam Column. This column is never displayed to the user;
+     * it's used to push spam results and previously downloaded files to the
+     * bottom in table view.
      */
     public static class IsSpamComparator implements Comparator<VisualSearchResult> {
         @Override
         public int compare(VisualSearchResult o1, VisualSearchResult o2) {
             boolean spam1 = o1.isSpam();
             boolean spam2 = o2.isSpam();
-            
+
             if(!spam1 && spam2)
                 return -1;
-            else if(spam1 && !spam2)
+            if(spam1 && !spam2)
                 return 1;
-            else 
-                return 0;
+
+            boolean downloaded1 = o1.getDownloadState() == BasicDownloadState.LIBRARY;
+            boolean downloaded2 = o2.getDownloadState() == BasicDownloadState.LIBRARY;
+
+            if(!downloaded1 && downloaded2)
+                return -1;
+            if(downloaded1 && !downloaded2)
+                return 1;
+
+            return 0;
         }
     }
 }
