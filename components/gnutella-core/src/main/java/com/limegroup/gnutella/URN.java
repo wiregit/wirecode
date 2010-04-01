@@ -275,8 +275,14 @@ public final class URN implements HTTPHeaderValue, Serializable, org.limewire.co
     		return createUrnFromString(urnString);
         else if (typeString.indexOf(Type.BITPRINT.getDescriptor()) == 4)
             return createSHA1UrnFromBitprint(urnString);
-        else if (typeString.indexOf(Type.INFOHASH.getDescriptor()) == 4)
-            return createUrnFromString(urnString.replace("btih", "sha1"));
+        else if (typeString.indexOf(Type.INFOHASH.getDescriptor()) == 4) {
+            // bt sometimes uses base 16 urns
+            if (urnString.length() == 49) {
+                return URN.createSha1UrnFromHex(urnString.split(":")[2]);
+            } else {
+                return createUrnFromString(urnString.replace("btih:", "sha1:"));
+            }
+        }
         else
             throw new IOException("unsupported or malformed URN");
 	}

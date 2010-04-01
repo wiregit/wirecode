@@ -54,10 +54,10 @@ class MagnetHandlerImpl implements MagnetHandler {
         SwingUtils.invokeNowOrLater(new Runnable() {
             @Override
             public void run() {
-                if(magnet.isTorrentDownloadable()) {
-                    downloadTorrent(magnet);
-                } else if(magnet.isGnutellaDownloadable()) {
+                if(magnet.isGnutellaDownloadable()) {
                     downloadMagnet(magnet);
+                } else if(magnet.isTorrentDownloadable()) {
+                    downloadTorrent(magnet);
                 } else if(magnet.isKeywordTopicOnly()) {
                     searchHandler.doSearch(DefaultSearchInfo.
                             createKeywordSearch(magnet.getQueryString(),
