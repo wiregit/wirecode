@@ -210,4 +210,34 @@ public class LogImpl implements Log {
         }
     }
 
+    @Override
+    public void errorf(Throwable t, String message, Object... args) {
+        if (delegate.isErrorEnabled()) {
+            delegate.error(MessageFormat.format(message, args), t);
+        }
+    }
+
+    public void errorf(String message, Object... args) {
+        if (delegate.isErrorEnabled()) {
+            delegate.error(MessageFormat.format(message, args));
+        }
+    }
+
+    public void errorf(String message, Object arg) {
+        if (delegate.isErrorEnabled()) {
+            delegate.error(MessageFormat.format(message, arg));
+        }
+    }
+
+    public void errorf(String message, Object arg1, Object arg2) {
+        if (delegate.isErrorEnabled()) {
+            delegate.error(MessageFormat.format(message, arg1, arg2));
+        }
+    }
+
+    public void errorf(String message, Object arg1, Object arg2, Object arg3) {
+        if (delegate.isErrorEnabled()) {
+            delegate.error(MessageFormat.format(message, arg1, arg2, arg3));
+        }
+    }
 }

@@ -175,6 +175,9 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
     @Override
     public void save() {
+        if (!torrent.isEditable()) {
+            return;
+        }
         torrent.getLock().lock();
         try {
             if (hasChanged() && !torrent.isFinished() && torrent.isValid()) {

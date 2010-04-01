@@ -59,4 +59,17 @@ public interface Log extends org.apache.commons.logging.Log {
     
     void warnf(String message, Object arg1, Object arg2, Object arg3);
     
+    /**
+     * Logs <code>message</code> as error message and formats message
+     * with <code>args</code> if {@link #isErrorEnabled()} is true.
+     */
+    void errorf(Throwable t, String message, Object...args);
+    
+    void errorf(String message, Object...args);
+    
+    void errorf(String message, Object args);
+    
+    void errorf(String message, Object arg1, Object arg2);
+    
+    void errorf(String message, Object arg1, Object arg2, Object arg3);
 }

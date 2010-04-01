@@ -17,10 +17,16 @@ import org.limewire.bittorrent.TorrentPeer;
 import org.limewire.bittorrent.TorrentPiecesInfo;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.TorrentTracker;
+import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.security.SHA1;
 import org.limewire.util.Base32;
+import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
+import org.limewire.util.URIUtils;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
@@ -30,37 +36,55 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
  */
 public class XMLTorrent implements Torrent {
 
-    private final LimeXMLDocument xmlDocument;
+    private final String name;
     private final List<TorrentFileEntry> torrentFileEntries;
-    private final List<URI> trackers;
+    private final List<TorrentTracker> trackers;
     private final boolean isPrivate;
     private final String sha1;
+    private final long size;
+
+    private final List<URI> trackerUris;
     
-    public XMLTorrent(LimeXMLDocument xmlDocument) {
-        this.xmlDocument = xmlDocument;
-        this.torrentFileEntries = parsePathEntries(xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_PATHS), xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_SIZES));
+    public XMLTorrent(LimeXMLDocument xmlDocument) throws InvalidDataException {
+        this.name = parseTorrentName(xmlDocument);
+        this.torrentFileEntries = parsePathEntries(xmlDocument);
+        this.size = computeTotalSize(this.torrentFileEntries);
+        this.trackers = parseTrackers(xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+        this.trackerUris = getTrackerUris(this.trackers);
         String privateValue = xmlDocument.getValue(LimeXMLNames.TORRENT_PRIVATE);
         this.isPrivate = privateValue != null && Boolean.parseBoolean(privateValue);
         String hash = xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH);
         if(!StringUtils.isEmpty(hash)) {
             byte[] bytes = Base32.decode(hash);
+            if (bytes.length != SHA1.HASH_LENGTH) {
+                throw new InvalidDataException("torrent xml with invalid hash: " + xmlDocument); 
+            }
             sha1 = StringUtils.toHexString(bytes);
         } else {
-            sha1 = null;
-        }
-        
-        String[] trackerStrings = xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS).split(" ");
-        
-        trackers = new ArrayList<URI>(trackerStrings.length);
-        for ( String trackerString : trackerStrings ) {
-            try {
-                trackers.add(new URI(trackerString));
-            } catch (URISyntaxException e) {
-                // Discard
-            }
+            throw new InvalidDataException("torrent xml without info hash: " + xmlDocument);
         }
     }
     
+    private static String parseTorrentName(LimeXMLDocument xmlDocument) throws InvalidDataException {
+        String name = xmlDocument.getValue(LimeXMLNames.TORRENT_NAME);
+        if (name == null) {
+            throw new InvalidDataException("torrent xml without name: " + xmlDocument);
+        }
+        return name;
+    }
+
+    private static long computeTotalSize(List<TorrentFileEntry> torrentFileEntries) {
+        long sum = 0;
+        for (TorrentFileEntry file : torrentFileEntries) {
+            sum += file.getSize();
+        }
+        return sum;
+    }
+    
+    public long getTotalSize() {
+        return size;
+    }
+
     @Override
     public void addListener(EventListener<TorrentEvent> listener) {}
 
@@ -91,7 +115,7 @@ public class XMLTorrent implements Torrent {
 
     @Override
     public String getName() {
-        return xmlDocument.getValue(LimeXMLNames.TORRENT_NAME);
+        return name;
     }
 
     @Override
@@ -176,12 +200,12 @@ public class XMLTorrent implements Torrent {
 
     @Override
     public List<URI> getTrackerURIS() {
-        return trackers;
+        return trackerUris;
     }
 
     @Override
     public List<TorrentTracker> getTrackers() {
-        return null;
+        return trackers;
     }
 
     @Override
@@ -335,21 +359,88 @@ public class XMLTorrent implements Torrent {
         throw new UnsupportedOperationException();
     }
     
-    private List<TorrentFileEntry> parsePathEntries(String encodedPath, String encodedSizes) {
+    private static List<TorrentFileEntry> parsePathEntries(LimeXMLDocument xmlDocument) throws InvalidDataException {
+        String encodedPath = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_PATHS);
+        String encodedSizes = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_SIZES);
+        if (encodedPath == null || encodedSizes == null) {
+            String name = xmlDocument.getValue(LimeXMLNames.TORRENT_NAME);
+            String length = xmlDocument.getValue(LimeXMLNames.TORRENT_LENGTH);
+            if (name != null && length != null) {
+                try {
+                    long size = Long.parseLong(length);
+                    return Collections.<TorrentFileEntry>singletonList(new LimeXMLTorrentFileEntry(name, size, 0));
+                } catch (NumberFormatException nfe) {
+                    throw new InvalidDataException("torrent xml with invalid length: " + xmlDocument, nfe);
+                }
+            }
+            throw new InvalidDataException("torrent xml without files: " + xmlDocument);
+        }
         String[] paths = encodedPath.split("//");
         String[] sizes = encodedSizes.split(" ");
         if (paths.length != sizes.length) {
-            return Collections.emptyList();
+            throw new InvalidDataException("torrent xml with invalid files and sizes: " + xmlDocument);
         }
         List<TorrentFileEntry> entries = new ArrayList<TorrentFileEntry>(paths.length);
         for (int i = 0; i < paths.length; i++) {
             try {
+                String path = paths[i];
+                if (StringUtils.isEmpty(path)) {
+                    throw new InvalidDataException("torrent xml with empty path: " + xmlDocument);
+                }
                 entries.add(new LimeXMLTorrentFileEntry(paths[i].substring(1), Long.parseLong(sizes[i]), i));
             } catch (NumberFormatException nfe){
-                return Collections.emptyList();
+                throw new InvalidDataException("torrent xml with invalid file size: " + xmlDocument);
             }
         }
         return Collections.unmodifiableList(entries);
+    }
+    
+    private static List<TorrentTracker> parseTrackers(String encodedTrackers) throws InvalidDataException {
+        if (encodedTrackers == null) {
+            return Collections.emptyList();
+        }
+        Builder<TorrentTracker> builder = ImmutableList.builder();
+        for (String tracker : encodedTrackers.split(" ")) {
+            try {
+                URI uri = URIUtils.toURI(tracker);
+                builder.add(new LimeXMLTorrentTracker(uri));
+            } catch (URISyntaxException use) {
+                throw new InvalidDataException("torrent xml with invalid tracker: " + encodedTrackers, use);
+            }
+        }
+        return builder.build();
+    }
+    
+    private static List<URI> getTrackerUris(List<TorrentTracker> trackers) {
+        Builder<URI> builder = ImmutableList.builder();
+        for (TorrentTracker tracker : trackers) {
+            builder.add(tracker.getURI());
+        }
+        return builder.build();
+    }
+    
+    private static class LimeXMLTorrentTracker implements TorrentTracker {
+        
+        private final URI trackerUri;
+
+        public LimeXMLTorrentTracker(URI trackerUri) {
+            this.trackerUri = Objects.nonNull(trackerUri, "trackerUri");
+        }
+
+        @Override
+        public int getTier() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return trackerUri.toString();
+        }
+
+        @Override
+        public URI getURI() {
+            return trackerUri;
+        }
     }
     
     private static class LimeXMLTorrentFileEntry implements TorrentFileEntry {
@@ -358,7 +449,10 @@ public class XMLTorrent implements Torrent {
         private final long size;
         private final int index;
 
-        public LimeXMLTorrentFileEntry(String path, long size, int index) {
+        public LimeXMLTorrentFileEntry(String path, long size, int index) throws InvalidDataException {
+            if (StringUtils.isEmpty(path)) {
+                throw new InvalidDataException("empty path for index: " + index); 
+            }
             this.path = path;
             this.size = size;
             this.index = index;
@@ -393,5 +487,12 @@ public class XMLTorrent implements Torrent {
         public long getTotalDone() {
             return 0;
         }
+        
+        @Override
+        public String toString() {
+            return path;
+        }
     }
+
+
 }
