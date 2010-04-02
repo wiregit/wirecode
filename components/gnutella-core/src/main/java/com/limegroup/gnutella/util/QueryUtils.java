@@ -7,13 +7,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
-
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class QueryUtils {
     
@@ -202,28 +199,21 @@ public class QueryUtils {
     }
     
     /**
-     * Returns a score between 0 and 1 indicating how well the filename and XML
-     * document match the query. The XML document may be null.
+     * Returns true if the filename contains all the words in the query. The
+     * system locale is used for converting case, so it's possible for this
+     * method to return false for filenames that would match under other
+     * locales.
      */
-    public static float calculateRelevance(String filename, LimeXMLDocument doc,
-            String query) {
+    public static boolean filenameMatchesQuery(String filename, String query) {
         if(query.isEmpty())
-            return 1;
-        // Score between 0 and 1 for the fraction of relevant keywords. Note
-        // that this matches whole words, not prefixes.
-        Set<String> resultWords = extractKeywords(filename, false);
-        if(doc != null) {
-            for(Entry<String, String> entry : doc.getNameValueSet()) {
-                extractKeywords(entry.getValue(), false, resultWords);
-            }
+            return true;
+        filename = filename.toLowerCase();
+        query = query.toLowerCase();
+        for(String queryWord : extractKeywords(query, false)) {
+            if(!filename.contains(queryWord))
+                return false;
         }
-        Set<String> queryWords = QueryUtils.extractKeywords(query, false);
-        float matches = 0;
-        for(String queryWord : queryWords) {
-            if(resultWords.contains(queryWord))
-                matches++;
-        }
-        return matches / resultWords.size();
+        return true;
     }
     
     /**

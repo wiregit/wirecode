@@ -65,7 +65,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final Category category;
     private final TorrentFactory torrentFactory;
     private final int quality;
-    
+
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
     private float relevance = -1;
 
@@ -123,24 +123,18 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     @Override
     public float getRelevance(String query) {
-        // If the value has already been calculated take that one, since it
-        // cannot change during the lifecycle of this object
-        if(relevance != -1) {
-            return relevance;
-        }
+        // Consider whether the result matches the query
+        if(!StringUtils.isEmpty(query) && !rfd.matchesQuery(query))
+            return 0;
         // Ignore alt locs for relevance ranking
         if(friendPresence.getFriend().isAnonymous()) {
             if(rfd.isBrowseHostEnabled())
-                relevance = BROWSEABLE_ANONYMOUS_PEER_FACTOR;
+                return BROWSEABLE_ANONYMOUS_PEER_FACTOR;
             else
-                relevance = NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR;
+                return NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR;
         } else {
-            relevance = FRIENDLY_PEER_FACTOR;
+            return FRIENDLY_PEER_FACTOR;
         }
-        // Consider how well the result matches the query
-        if(query != null && !query.isEmpty())
-            relevance *= rfd.getRelevance(query);
-        return relevance;
     }
     
     /**

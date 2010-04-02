@@ -465,12 +465,8 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
         return null;
     }
 
-    /**
-     * Returns a score between 0 and 1 indicating how well the keywords in this
-     * RemoteFileDesc's filename and XML metadata match the specified query. 
-     */
     @Override
-    public float getRelevance(String query) {
-        return QueryUtils.calculateRelevance(_filename, _xmlDoc, query);
+    public boolean matchesQuery(String query) {
+        return _xmlDoc != null || QueryUtils.filenameMatchesQuery(_filename, query);
     }
 }

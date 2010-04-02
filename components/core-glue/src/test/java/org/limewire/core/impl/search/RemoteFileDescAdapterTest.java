@@ -193,8 +193,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd).isBrowseHostEnabled();
             will(returnValue(canBrowseHost));
 
-            allowing(rfd).getRelevance(with(equal(filename)));
-            will(returnValue(1f));
+            allowing(rfd).matchesQuery(with(equal(filename)));
+            will(returnValue(true));
 
             allowing(rfd);
             

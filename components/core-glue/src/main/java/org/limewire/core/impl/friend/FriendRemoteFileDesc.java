@@ -278,12 +278,8 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
         return StringUtils.toString(this, filename, address);
     }
 
-    /**
-     * Returns a score between 0 and 1 indicating how well the keywords in this
-     * RemoteFileDesc's filename and XML metadata match the specified query. 
-     */
     @Override
-    public float getRelevance(String query) {
-        return QueryUtils.calculateRelevance(filename, xmlDoc, query);
+    public boolean matchesQuery(String query) {
+        return xmlDoc != null || QueryUtils.filenameMatchesQuery(filename, query);
     }
 }
