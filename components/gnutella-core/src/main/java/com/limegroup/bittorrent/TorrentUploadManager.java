@@ -192,7 +192,9 @@ public class TorrentUploadManager implements BTUploaderFactory {
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("torrentDataFile", torrent.getTorrentDataFile().getAbsoluteFile());
-        map.put("torrentFile", torrent.getTorrentFile().getAbsoluteFile());
+        File torrentFile = torrent.getTorrentFile();
+        if(torrentFile != null)
+            map.put("torrentFile", torrentFile.getAbsoluteFile());
         map.put("fastResumeFile", torrent.getFastResumeFile().getAbsoluteFile());
         map.put("sha1", torrent.getSha1());
         map.put("trackers", torrent.getTrackerURIS());
