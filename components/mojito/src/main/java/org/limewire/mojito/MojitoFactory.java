@@ -28,6 +28,9 @@ import org.limewire.mojito.settings.ContextSettings;
  */
 public class MojitoFactory {
     
+    /**
+     * The default name of a Mojito DHT instance if none is specified.
+     */
     private static final String DEFAULT_NAME = "DHT";
     
     private MojitoFactory() {}
