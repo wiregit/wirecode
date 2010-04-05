@@ -17,6 +17,7 @@ public class SearchCategoryUtils {
         case IMAGE:    return "Images"; 
         case PROGRAM:  return "Programs"; 
         case VIDEO:    return "Videos"; 
+        case TORRENT:  return "Torrents";
         case OTHER: 
         default:
             return "Other";
@@ -32,6 +33,7 @@ public class SearchCategoryUtils {
         case IMAGE:    return I18n.tr("Images"); 
         case PROGRAM:  return I18n.tr("Programs"); 
         case VIDEO:    return I18n.tr("Videos"); 
+        case TORRENT:  return I18n.tr("Torrents");
         case OTHER: 
         default:
             return I18n.tr("Other");
@@ -47,6 +49,7 @@ public class SearchCategoryUtils {
         case IMAGE:    return I18n.tr("&Images"); 
         case PROGRAM:  return I18n.tr("&Programs"); 
         case VIDEO:    return I18n.tr("&Videos"); 
+        case TORRENT:  return I18n.tr("&Torrents");
         case OTHER: 
         default:
             return I18n.tr("&Other");
@@ -61,7 +64,8 @@ public class SearchCategoryUtils {
         case DOCUMENT: return I18n.tr("Only documents"); 
         case IMAGE:    return I18n.tr("Only images"); 
         case PROGRAM:  return I18n.tr("Only programs"); 
-        case VIDEO:    return I18n.tr("Only videos"); 
+        case VIDEO:    return I18n.tr("Only videos");
+        case TORRENT:  return I18n.tr("Only Torrents");
         case OTHER: 
         default:
             return I18n.tr("Other");

@@ -3,6 +3,8 @@ package org.limewire.core.impl.search;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -10,6 +12,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
+import org.limewire.core.impl.XMLTorrent;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
@@ -69,6 +72,8 @@ public class RemoteFileDescAdapter implements SearchResult {
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
     private float relevance = -1;
 
+    private Torrent torrent;
+
     /**
      * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
      *  address and a set of altlocs. 
@@ -100,6 +105,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.category = categoryManager.getCategoryForExtension(extension);
         this.torrentFactory = torrentFactory;
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
+        this.torrent = torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
     }
     
     /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
@@ -188,7 +194,21 @@ public class RemoteFileDescAdapter implements SearchResult {
         default: return FilePropertyKeyPopulator.get(category, property, rfd.getXMLDocument());
         }
     }
-
+    
+    @Override
+    public long getSize() {
+        if (torrent instanceof XMLTorrent) {
+            return ((XMLTorrent)torrent).getTotalSize();
+        } else if (torrent != null) {
+            long sum = 0;
+            for (TorrentFileEntry file : torrent.getTorrentFileEntries()) {
+                sum += file.getSize();
+            }
+            return sum;
+        }
+        return rfd.getSize();
+    }
+    
     /**
      * @return the category the rfd filetype falls into.
      */
@@ -212,14 +232,6 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
     
     /**
-     * @return the file size of the rfd.
-     */
-    @Override
-    public long getSize() {
-        return rfd.getSize();
-    }
-
-    /**
      * @return whether the rfd has been marked as spam or not.
      */
     @Override
@@ -238,6 +250,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public URN getUrn() {
         return rfd.getSHA1Urn();
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("a".substring(2
+                ));
     }
     
     /**

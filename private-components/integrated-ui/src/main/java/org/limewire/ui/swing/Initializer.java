@@ -25,8 +25,11 @@ import org.jdesktop.application.Application;
 import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ActivationSettings;
+import org.limewire.core.settings.GeocodeSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.geocode.GeocodeInformation;
+import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.net.FirewallService;
@@ -561,7 +564,7 @@ final class Initializer {
         });
         stopwatch.resetAndLog("return from evt queue");
         
-        splashRef.get().setStatusText(I18n.tr("Scouring NYC for Limes..."));           //loading browser
+        splashRef.get().setStatusText(I18n.tr("Scouring {0} for Limes...", GeocodeInformation.fromProperties(GeocodeSettings.GEO_LOCATION.get()).getProperty(Property.City)));           //loading browser
         // Not pretty but Mozilla initialization errors should not crash the
         // program
         if (LimeMozillaInitializer.shouldInitialize()) {

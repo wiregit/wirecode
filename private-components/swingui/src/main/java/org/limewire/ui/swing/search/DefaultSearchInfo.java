@@ -40,7 +40,8 @@ public class DefaultSearchInfo implements SearchInfo {
         case DOCUMENT: title = I18n.tr("New documents"); break;
         case IMAGE: title = I18n.tr("New images"); break;
         case PROGRAM: title = I18n.tr("New programs"); break;
-        case VIDEO: title = I18n.tr("New videos"); break;            
+        case VIDEO: title = I18n.tr("New videos"); break;
+        case TORRENT: title = I18n.tr("New Torrents"); break;
         case OTHER:
         case ALL:
         default: title = I18n.tr("New files"); break;

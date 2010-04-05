@@ -44,6 +44,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ResultEnterAction;
+import org.limewire.ui.swing.search.resultpanel.classic.TorrentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
@@ -55,6 +56,7 @@ import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
+import org.limewire.ui.swing.table.MultilineTooltipRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -446,6 +448,10 @@ public class BaseResultPanel extends JXPanel {
         case OTHER:
             setCellRenderer(OtherTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
+        case TORRENT:
+            setCellRenderer(TorrentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+            setCellRenderer(TorrentTableFormat.FILES_INDEX, new MultilineTooltipRenderer());
+            setCellRenderer(TorrentTableFormat.TRACKERS_INDEX, new MultilineTooltipRenderer());
         default:
             break;
         }

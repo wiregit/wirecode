@@ -53,6 +53,11 @@ public class CategoryManagerImplTest extends LimeTestCase {
         simppListener = listenRef.get();
     }
     
+    public void testTorrent() {
+        System.out.println(cmi.getExtensionsForCategory(Category.TORRENT));
+        assertEquals(Category.TORRENT, cmi.getCategoryForExtension("torrent"));
+    }
+    
     public void testBuiltInDocumentExtensions() {
         checkExtensions(Category.DOCUMENT, 
                 "123", "abw", "accdb", "accde", "accdr", "accdt", "ans", "asc", "asp", "bdr",

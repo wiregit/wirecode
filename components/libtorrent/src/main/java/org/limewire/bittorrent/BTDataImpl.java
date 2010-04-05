@@ -397,4 +397,9 @@ public class BTDataImpl implements BTData {
     public URI[] getWebSeeds() {
         return webSeeds;
     }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toStringBlacklist(this, pieces, pieceLength);
+    }
 }

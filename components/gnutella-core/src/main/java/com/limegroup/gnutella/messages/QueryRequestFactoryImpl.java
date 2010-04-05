@@ -524,7 +524,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery, SearchCategory type) {
-        return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URN.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, getMetaFlag(type));
     }
@@ -554,10 +554,18 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery, boolean canReceiveOutOfBandReplies, SearchCategory type) {
-        return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URN.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, canReceiveOutOfBandReplies, 0, false,
                 getMetaFlag(type));
+    }
+    
+    private String getQuery(String query, SearchCategory category) {
+        if (category == SearchCategory.TORRENT && !SearchSettings.USE_TORRENT_CATEGORY.getValue()) {
+            System.out.println("query: " + query + " torrent");
+            return query + " torrent";
+        }
+        return query;
     }
 
     private int getMetaFlag(SearchCategory type) {
@@ -572,6 +580,8 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             metaFlag |= QueryRequest.IMAGE_MASK;
         else if (type == SearchCategory.DOCUMENT)
             metaFlag |= QueryRequest.DOC_MASK;
+        else if (type == SearchCategory.TORRENT && SearchSettings.USE_TORRENT_CATEGORY.getValue())
+            metaFlag |= QueryRequest.TORRENT_MASK;
         else if (type == SearchCategory.PROGRAM) {
             if (OSUtils.isLinux() || OSUtils.isMacOSX())
                 metaFlag |= QueryRequest.LIN_PROG_MASK;

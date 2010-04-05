@@ -47,6 +47,9 @@ public class QueryCategoryFilterer {
         if (query.desiresImages()) {
             categories.add(Category.IMAGE);
         }
+        if (query.desiresTorrents()) {
+            categories.add(Category.TORRENT);
+        }
         return categories;
     }
 
@@ -74,6 +77,9 @@ public class QueryCategoryFilterer {
         }
         if (query.desiresImages()) {
             predicates.add(categoryManager.getExtensionFilterForCategory(Category.IMAGE));
+        }
+        if (query.desiresTorrents()) {
+            predicates.add(categoryManager.getExtensionFilterForCategory(Category.TORRENT));
         }
         
         return Predicates.or(predicates);

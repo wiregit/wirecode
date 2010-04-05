@@ -35,4 +35,9 @@ public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker
             return null;
         }
     }
+    
+    @Override
+    public String toString() {
+        return url;
+    }
 }

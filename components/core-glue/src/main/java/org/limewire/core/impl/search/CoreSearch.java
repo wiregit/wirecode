@@ -71,6 +71,7 @@ public class CoreSearch implements Search {
      * The guid of the last active search.
      */
     volatile byte[] searchGuid;
+    private final GoogleTorrentSearchFactory googleTorrentSearchFactory;
 
     @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
@@ -84,7 +85,8 @@ public class CoreSearch implements Search {
             LimeXMLDocumentFactory xmlDocumentFactory,
             Clock clock,
             AdvancedQueryStringBuilder compositeQueryBuilder,
-            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
+            RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory,
+            GoogleTorrentSearchFactory googleTorrentSearchFactory) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -96,6 +98,7 @@ public class CoreSearch implements Search {
         this.clock = clock;
         this.compositeQueryBuilder = compositeQueryBuilder;
         this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
+        this.googleTorrentSearchFactory = googleTorrentSearchFactory;
     }
     
     @Override
@@ -170,6 +173,34 @@ public class CoreSearch implements Search {
                 friendSearcher.doSearch(searchDetails, friendSearchListener);
             }
         });        
+        
+        if (initial && searchDetails.getSearchCategory() == SearchCategory.TORRENT) {
+            GoogleTorrentSearch googleTorrentSearch = googleTorrentSearchFactory.create(searchDetails.getSearchQuery(), new SearchListener() {
+                @Override
+                public void handleSearchResult(Search search, SearchResult searchResult) {
+                    CoreSearch.this.handleSearchResult(searchResult);
+                }
+
+                @Override
+                public void handleSearchResults(Search search,
+                        Collection<? extends SearchResult> searchResults) {
+                }
+
+                @Override
+                public void handleSponsoredResults(Search search,
+                        List<SponsoredResult> sponsoredResults) {
+                }
+
+                @Override
+                public void searchStarted(Search search) {
+                }
+
+                @Override
+                public void searchStopped(Search search) {
+                }
+            });
+            googleTorrentSearch.start();
+        }
         
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
@@ -255,6 +286,18 @@ public class CoreSearch implements Search {
         }
     }
     
+    private void handleSearchResult(SearchResult searchResult) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSearchResult(this, searchResult);
+        }   
+    }
+    
+    private void handleSearchResults(Collection<SearchResult> searchResults) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSearchResults(this, searchResults);
+        }
+    }
+    
     private class QrListener implements QueryReplyListener {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
@@ -262,17 +305,13 @@ public class CoreSearch implements Search {
             
             RemoteFileDescAdapter rfdAdapter = remoteFileDescAdapterFactory.create(rfd, locs);
             
-            for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(CoreSearch.this, rfdAdapter);
-            }
+            handleSearchResult(rfdAdapter);
         }
     }
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
         public void handleFriendResults(Collection<SearchResult> results) {
-            for (SearchListener listener : searchListeners) {
-                listener.handleSearchResults(CoreSearch.this, results);
-            }            
+            handleSearchResults(results);
         }
     }
 }

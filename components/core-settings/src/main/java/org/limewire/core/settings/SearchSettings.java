@@ -413,4 +413,7 @@ public final class SearchSettings extends LimeProps {
      */
     public static final BooleanSetting DESIRES_NMS1_URNS = 
         FACTORY.createBooleanSetting("DESIRES_NMS1_URNS", false);
+    
+    public static final BooleanSetting USE_TORRENT_CATEGORY =
+        FACTORY.createRemoteBooleanSetting("USE_TORRENT_CATEGORY", false, "SearchSettings.useTorrentCategory");
 }

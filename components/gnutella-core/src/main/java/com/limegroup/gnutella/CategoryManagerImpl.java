@@ -35,7 +35,8 @@ class CategoryManagerImpl implements CategoryManager {
         PROGRAM_OSX_LINUX(Category.PROGRAM),
         PROGRAM_WINDOWS(Category.PROGRAM),
         PROGRAM_ALL(Category.PROGRAM),
-        OTHER(Category.OTHER);
+        OTHER(Category.OTHER),
+        TORRENT(Category.TORRENT);
         
         private final Category category;
         InternalCategory(Category category) {
@@ -58,6 +59,8 @@ class CategoryManagerImpl implements CategoryManager {
                 return InternalCategory.VIDEO;
             case OTHER:
                 return InternalCategory.OTHER;
+            case  TORRENT:
+                return InternalCategory.TORRENT;
             default:
                 throw new IllegalArgumentException(category.toString());
             }
@@ -130,6 +133,9 @@ class CategoryManagerImpl implements CategoryManager {
                 String.CASE_INSENSITIVE_ORDER).add("mdb", "exe", "zip", "jar", "cab", "msi", "msp",
                 "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", "iso", "jnlp", "bat",
                 "lnk", "vbs").build());
+        
+        builtInExtensionMap.put(InternalCategory.TORRENT, ImmutableSortedSet.orderedBy(
+                String.CASE_INSENSITIVE_ORDER).add("torrent").build());
 
         extensionMap = new EnumMap<InternalCategory, AtomicReference<Collection<String>>>(InternalCategory.class);
         for(InternalCategory category : InternalCategory.values()) {
@@ -161,6 +167,7 @@ class CategoryManagerImpl implements CategoryManager {
         settingMap.put(InternalCategory.PROGRAM_OSX_LINUX, LibrarySettings.ADDITIONAL_PROGRAM_OSX_LINUX_EXTS);
         settingMap.put(InternalCategory.PROGRAM_WINDOWS, LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS);
         settingMap.put(InternalCategory.VIDEO, LibrarySettings.ADDITIONAL_VIDEO_EXTS);
+        settingMap.put(InternalCategory.TORRENT, LibrarySettings.ADDITIONAL_TORRENT_EXTS);
         
         rebuildExtensions();
     }

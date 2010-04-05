@@ -8,6 +8,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.DocumentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
+import org.limewire.ui.swing.search.resultpanel.classic.TorrentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.util.IconManager;
 
@@ -48,6 +49,8 @@ public class ResultsTableFormatFactory {
             return new ProgramTableFormat();
         case OTHER:
             return new OtherTableFormat();
+        case TORRENT:
+            return new TorrentTableFormat(); 
         default:
             throw new IllegalArgumentException("Invalid search category " + searchCategory);
         }
