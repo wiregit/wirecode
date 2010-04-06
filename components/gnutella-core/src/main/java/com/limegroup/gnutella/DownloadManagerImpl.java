@@ -937,11 +937,21 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     public synchronized Downloader downloadTorrent(String name, URN sha1,
             List<URI> trackers) throws DownloadException {
         
+        if(LOG.isInfoEnabled()) {
+            LOG.info("Downloading torrent:");
+            LOG.info(" " + name);
+            LOG.info(" " + sha1);
+            for(URI tracker : trackers) {
+                LOG.info(" " + tracker);
+            }
+        }
         if(!isSavedDownloadsLoaded()) {
+            LOG.info("Saved downloads not loaded");
             throw new DownloadException(DownloadException.ErrorCode.FILES_STILL_RESUMING, null);
         }
         
         if(!torrentManager.get().isValid()) {
+            LOG.info("Torrent manager is not valid");
             throw new DownloadException(DownloadException.ErrorCode.NO_TORRENT_MANAGER, null);
         }
         
@@ -1032,8 +1042,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         
         if(torrent != null) {
             if(!torrent.isFinished()) {
+                LOG.info("Already downloading");
                 throw new DownloadException(ErrorCode.FILE_ALREADY_DOWNLOADING, params.getTorrentDataFile());
             } else {
+                LOG.info("Already uploading");
                 throw new DownloadException(ErrorCode.FILE_ALREADY_UPLOADING, params.getTorrentDataFile());
             }
         }

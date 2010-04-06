@@ -68,7 +68,7 @@ public class MagnetLinkImpl implements MagnetLink {
         // sha1 is the only offending name possible so far
         //  replace it with the word magnet for now
         if (name.startsWith("urn:sha1:")) {
-            return "magnet " + name.substring(9);
+            return "Magnet " + name.substring(9);
         }
         return name;
     }
