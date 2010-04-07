@@ -24,7 +24,7 @@ class ProgramsFilter implements ResponseFilter {
             return LibrarySettings.ALLOW_PROGRAMS.getValue();
         } else if (category == Category.TORRENT) {
             return LibrarySettings.ALLOW_PROGRAMS.getValue() 
-                || categoryManager.containsCategory(Category.PROGRAM, response.getDocument());
+                || !categoryManager.containsCategory(Category.PROGRAM, response.getDocument());
         }
         else {
             return true;
