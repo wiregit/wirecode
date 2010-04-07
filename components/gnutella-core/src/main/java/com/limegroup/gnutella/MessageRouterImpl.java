@@ -623,7 +623,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
         LimeACKHandler ackHandler = limeAckHandler.get();
-        ackHandler.start();
         setUDPMessageHandler(LimeACKVendorMessage.class, ackHandler);
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
         setUDPMessageHandler(UDPCrawlerPing.class, udpCrawlerPingHandlerFactory.get());
