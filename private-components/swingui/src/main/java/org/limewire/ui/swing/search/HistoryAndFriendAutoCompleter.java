@@ -26,11 +26,11 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.NECallable;
-import org.limewire.collection.StringTrieSet;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.AutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedListModel;
 import org.limewire.ui.swing.components.ExtendedCompoundBorder;
@@ -39,6 +39,8 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
+
+import com.google.inject.Inject;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
 public class HistoryAndFriendAutoCompleter implements AutoCompleter {
@@ -57,19 +59,16 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     
     private boolean showSuggestions = true;
     private AutoCompleteDictionary historyDictionary;
-    private AutoCompleteDictionary suggestionDictionary;
+    private SmartAutoCompleteDictionary smartDictionary;
     
     private final AutoCompleteList entryList;
+    private final KeywordAssistedSearchBuilder keywordSearchBuilder; 
     
-    public HistoryAndFriendAutoCompleter() {
-        this(new StringTrieSet(true));
-    }
-    
-    public HistoryAndFriendAutoCompleter(AutoCompleteDictionary dictionary) {
+    @Inject
+    public HistoryAndFriendAutoCompleter(KeywordAssistedSearchBuilder keywordSearchBuilder) {
+        this.keywordSearchBuilder = keywordSearchBuilder;
         
         GuiUtils.assignResources(this);
-        
-        this.suggestionDictionary = dictionary;
         
         entryPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
         entryPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -87,13 +86,13 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     public void setSuggestionsShown(boolean value) {
         this.showSuggestions = value;
     }
-
-    public void setSuggestionDictionary(AutoCompleteDictionary dictionary) {
-        this.suggestionDictionary = dictionary;
-    }
     
     public void setHistoryDictionary(AutoCompleteDictionary dictionary) {
         this.historyDictionary = dictionary;
+    }
+
+    public void setSmartDictionary(SmartAutoCompleteDictionary dictionary) {
+        this.smartDictionary = dictionary;
     }
     
     @Override
@@ -139,7 +138,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         
         currentText = input;        
         // Only if both are immediate can we immediately show.
-        if(historyDictionary.isImmediate() && suggestionDictionary.isImmediate()) {
+        if (historyDictionary.isImmediate() && smartDictionary.isImmediate()) {
             try {
                 lookupAndSetItems(currentText);
             } catch(InterruptedException error) {
@@ -172,23 +171,35 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     }
     
     private void lookupAndSetItems(final String lookupText) throws InterruptedException {
+        // Create list of items.
         Collection<String> histories = historyDictionary.getPrefixedBy(lookupText);
         final ArrayList<Entry> items = new ArrayList<Entry>(histories.size());
-        for(String string : histories) {
-            items.add(new Entry(string, Entry.Reason.HISTORY));
-        }
         
-        if(showSuggestions) {
-            Collection<String> suggestions = suggestionDictionary.getPrefixedBy(lookupText);
+        // Add smart suggestion items.
+        if (showSuggestions) {
+            Collection<SmartQuery> suggestions = smartDictionary.getPrefixedBy(lookupText);
+            SearchCategory category = smartDictionary.getSearchCategory();
             items.ensureCapacity(items.size() + suggestions.size());
             boolean needFirstSuggestion = true;
-            for(String string : suggestions) {
-                if(needFirstSuggestion) {
-                    items.add(new Entry(string, Entry.Reason.FIRST_SUGGESTION));
+            for (SmartQuery query : suggestions) {
+                String queryText = keywordSearchBuilder.createCompositeQuery(query.getQueryData(), category);
+                if (needFirstSuggestion) {
+                    items.add(new Entry(queryText, query.toString(), Entry.Reason.FIRST_SUGGESTION));
                     needFirstSuggestion = false;
                 } else {
-                    items.add(new Entry(string, Entry.Reason.SUGGESTION));
+                    items.add(new Entry(queryText, query.toString(), Entry.Reason.SUGGESTION));
                 }
+            }
+        }
+        
+        // Add search history items.
+        boolean needFirstSuggestion = true;
+        for (String string : histories) {
+            if (needFirstSuggestion) {
+                items.add(new Entry(string, Entry.Reason.FIRST_HISTORY));
+                needFirstSuggestion = false;
+            } else {
+                items.add(new Entry(string, Entry.Reason.HISTORY));
             }
         }
         
@@ -290,7 +301,6 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             
             firstSuggestionLabel = new DefaultListCellRenderer();
             firstSuggestionTitle = new DefaultListCellRenderer();
-            firstSuggestionTitle.setText(I18n.tr("Friend Suggestions"));
             FontUtils.changeSize(firstSuggestionTitle, -1);
             firstSuggestionTitle.setForeground(Color.GRAY);
             
@@ -308,7 +318,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             } else {
                 render = value.toString();
                 if(value instanceof Entry) {
-                    if(((Entry)value).reason == Entry.Reason.FIRST_SUGGESTION) {
+                    render = ((Entry) value).getDisplayText();
+                    if(((Entry)value).reason == Entry.Reason.FIRST_HISTORY ||
+                            ((Entry)value).reason == Entry.Reason.FIRST_SUGGESTION) {
                         firstSuggestionLabel.getListCellRendererComponent(list, render, index, isSelected, cellHasFocus);
                         firstSuggestionLabel.setBorder(BorderFactory.createEmptyBorder());
                         if(isSelected) {
@@ -320,6 +332,11 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
                             compoundBorder.setOuterBorder(firstSuggestionBorder);
                         } else {
                             compoundBorder.setOuterBorder(BorderFactory.createEmptyBorder());
+                        }
+                        if (((Entry)value).reason == Entry.Reason.FIRST_HISTORY) {
+                            firstSuggestionTitle.setText(I18n.tr("History"));
+                        } else {
+                            firstSuggestionTitle.setText(I18n.tr("Smart Search"));
                         }
                         firstSuggestionTitle.setBackground(firstSuggestionLabel.getBackground());
                         firstSuggestionPanel.setBackground(firstSuggestionLabel.getBackground());
@@ -336,19 +353,29 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     }
     
     private static class Entry {
-        private static enum Reason { HISTORY, FIRST_SUGGESTION, SUGGESTION };
+        private static enum Reason { FIRST_HISTORY, HISTORY, FIRST_SUGGESTION, SUGGESTION };
         
-        private final String item;
+        private final String query;
+        private final String display;
         private final Reason reason;
         
-        public Entry(String item, Reason reason) {
-            this.item = item;
+        public Entry(String query, Reason reason) {
+            this(query, query, reason);
+        }
+        
+        public Entry(String query, String display, Reason reason) {
+            this.query = query;
+            this.display = display;
             this.reason = reason;
+        }
+        
+        public String getDisplayText() {
+            return display;
         }
         
         @Override
         public String toString() {
-            return item;
+            return query;
         }
         
         @Override
@@ -356,7 +383,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
             if(obj == this) {
                 return true;
             } else {
-                return ((Entry)obj).item.equals(item) && ((Entry)obj).reason == reason;
+                return ((Entry)obj).query.equals(query) && ((Entry)obj).reason == reason;
             }
         }
     }

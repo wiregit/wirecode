@@ -122,7 +122,7 @@ public class SearchOptionPanel extends OptionPanel {
 
         private JCheckBox searchTabNumberCheckBox;
 
-        private JCheckBox suggestFriendFiles;
+        private JCheckBox suggestSmartQueries;
 
         private JButton clearNowButton;
 
@@ -134,7 +134,7 @@ public class SearchOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("By default, search for")));
             add(defaultSearchSpinner, "wrap");
 
-            add(suggestFriendFiles, "wrap");
+            add(suggestSmartQueries, "wrap");
 
             add(searchTabNumberCheckBox, "gapright push");
 
@@ -150,8 +150,8 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends"));
-            suggestFriendFiles.setOpaque(false);
+            suggestSmartQueries = new JCheckBox(I18n.tr("Suggest smart searches"));
+            suggestSmartQueries.setOpaque(false);
 
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
             searchTabNumberCheckBox.setOpaque(false);
@@ -173,7 +173,7 @@ public class SearchOptionPanel extends OptionPanel {
                     .setValue(category.getId());
             }
             
-            SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
+            SwingUiSettings.SHOW_SMART_SUGGESTIONS.setValue(suggestSmartQueries.isSelected());
             SwingUiSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
             return new ApplyOptionResult(false, true);
         }
@@ -181,14 +181,14 @@ public class SearchOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() {
             return SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId()
-                    || SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue() != suggestFriendFiles.isSelected()
+                    || SwingUiSettings.SHOW_SMART_SUGGESTIONS.getValue() != suggestSmartQueries.isSelected()
                     || SwingUiSettings.KEEP_SEARCH_HISTORY.getValue() != searchTabNumberCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() {
             defaultSearchSpinner.setSelectedItem(SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
-            suggestFriendFiles.setSelected(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+            suggestSmartQueries.setSelected(SwingUiSettings.SHOW_SMART_SUGGESTIONS.getValue());
             searchTabNumberCheckBox.setSelected(SwingUiSettings.KEEP_SEARCH_HISTORY.getValue());
         }
     }

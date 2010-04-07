@@ -98,12 +98,11 @@ public final class SwingUiSettings extends LimeProps {
         FACTORY.createBooleanSetting("GROUP_SIMILAR_RESULTS_ENABLED", true);
 
     /**
-     * Setting for whether to display search tips based on file in 
-     * friends libraries. If true, tips should be displayed, if false
-     * they should not. 
+     * Setting for whether to display search tips for smart queries. 
+     * If true, tips should be displayed, if false they should not. 
      */
-    public static final BooleanSetting SHOW_FRIEND_SUGGESTIONS =
-        FACTORY.createBooleanSetting("SHOW_FRIEND_SUGGESTIONS", true);
+    public static final BooleanSetting SHOW_SMART_SUGGESTIONS =
+        FACTORY.createBooleanSetting("SHOW_SMART_SUGGESTIONS", true);
 
     /**
      * Setting for whether to display old searches as search tips. If true,
