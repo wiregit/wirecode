@@ -189,13 +189,13 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     }
 
     private void createEditableDetails() {
-        component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
-        
+               
         JScrollPane descriptionScrollPane = new JScrollPane(createEditableTextArea(propertiableFile.getPropertyString(FilePropertyKey.DESCRIPTION), FilePropertyKey.DESCRIPTION), 
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         switch(propertiableFile.getCategory()) {
         case AUDIO:
+            component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
             component.add(createPlainLabel(I18n.tr("Title")), "growx, pushx 100");
             component.add(createPlainLabel(I18n.tr("Artist")), "growx, span 3, pushx 50, wrap");
             component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "growx, pushx 100, gapright unrelated");
@@ -218,6 +218,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 //            component.add(descriptionScrollPane, "span, growx, hmin 42");
             break;
         case VIDEO:
+            component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
             component.add(createPlainLabel(I18n.tr("Title")), "wrap");
             component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "span, growx, wrap");
             component.add(createPlainLabel(I18n.tr("Genre")), "pushx 35");
@@ -230,18 +231,21 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             component.add(descriptionScrollPane, "span, growx, hmin 42, wrap");
             break;
         case IMAGE:
+            component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
             component.add(createPlainLabel(I18n.tr("Title")), "wrap");
             component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "span, growx, wrap");
             component.add(createPlainLabel(I18n.tr("Description")), "wrap");
             component.add(descriptionScrollPane, "span, growx, hmin 42, wrap");
             break;
         case DOCUMENT:
+            component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
             component.add(createPlainLabel(I18n.tr("Author")), "wrap");
             component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.AUTHOR), FilePropertyKey.AUTHOR), "span, growx, wrap");
             component.add(createPlainLabel(I18n.tr("Description")), "wrap");
             component.add(descriptionScrollPane, "span, growx, hmin 42, wrap");
             break;
         case PROGRAM:
+            component.add(createHeaderLabel(I18n.tr("Details")), "span, wrap");
             component.add(createPlainLabel(I18n.tr("Title")), "wrap");
             component.add(createEditableTextField(propertiableFile.getPropertyString(FilePropertyKey.TITLE), FilePropertyKey.TITLE), "growx, span, wrap");
             component.add(createPlainLabel(I18n.tr("Platform")), "growx 30");
