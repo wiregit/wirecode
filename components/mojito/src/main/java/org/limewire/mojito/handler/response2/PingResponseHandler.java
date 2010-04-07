@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -11,13 +12,14 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent2.AsyncFuture;
+import org.limewire.mojito.entity.DefaultPingEntity;
+import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTBadResponseException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.PingSettings;
 import org.limewire.mojito.util.ContactUtils;
@@ -26,7 +28,7 @@ import org.limewire.mojito.util.ContactUtils;
  * This class pings a given number of hosts in parallel and returns the 
  * first successful ping.
  */
-public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
+public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
 
     private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
@@ -85,7 +87,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    protected void doStart(AsyncFuture<PingResult> future) 
+    protected void doStart(AsyncFuture<PingEntity> future) 
             throws DHTException, IOException {
         
         if (!pinger.hasNext()) {
@@ -98,7 +100,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    protected void response(ResponseMessage message, long time) throws IOException {
+    protected void processResponse(ResponseMessage message, 
+            long time, TimeUnit unit) throws IOException {
+        
         PingResponse response = (PingResponse)message;
         
         active.decrementAndGet();
@@ -125,7 +129,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
                 pingNextAndThrowExceptionIfDone(new DHTBadResponseException(node 
                         + " is trying to spoof our Node ID"));
             } else {
-                setValue(new PingResult(node, externalAddress, estimatedSize, time));
+                setValue(new DefaultPingEntity(node, externalAddress, 
+                        estimatedSize, time, TimeUnit.MILLISECONDS));
             }
             return;
         }
@@ -133,12 +138,13 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         context.setExternalAddress(externalAddress);
         context.addEstimatedRemoteSize(estimatedSize);
         
-        setValue(new PingResult(node, externalAddress, estimatedSize, time));
+        setValue(new DefaultPingEntity(node, externalAddress, 
+                estimatedSize, time, unit));
     }
 
     @Override
-    protected void timeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time) throws IOException {
+    protected void processTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time, TimeUnit unit) throws IOException {
         
         active.decrementAndGet();
         failures.incrementAndGet();
@@ -158,7 +164,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    protected void error(KUID nodeId, SocketAddress dst, 
+    protected void processError(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         
         active.decrementAndGet();
@@ -166,7 +172,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         
         if(e instanceof SocketException && !giveUp()) {
             try {
-                timeout(nodeId, dst, message, -1L);
+                processTimeout(nodeId, dst, message, -1L, TimeUnit.MILLISECONDS);
             } catch (IOException err) {
                 LOG.error("IOException", err);
                 

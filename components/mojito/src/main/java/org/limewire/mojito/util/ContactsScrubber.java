@@ -40,7 +40,7 @@ public class ContactsScrubber {
     
     private static final Log LOG = LogFactory.getLog(ContactsScrubber.class);
     
-    private final Collection<? extends Contact> nodes;
+    private final Contact[] nodes;
     
     private final Map<KUID, Contact> scrubbed;
     
@@ -63,17 +63,30 @@ public class ContactsScrubber {
             throw new IllegalArgumentException();
         }
         
+        return scrub(context, sender, nodes.toArray(new Contact[0]), requiredRatio);
+    }
+    
+    /**
+     * Creates and returns a ContactsScrubber for the given arguments.
+     */
+    public static ContactsScrubber scrub(Context context, Contact sender, 
+            Contact[] nodes, float requiredRatio) {
+        
+        if (nodes.length == 0) {
+            throw new IllegalArgumentException();
+        }
+        
         return new ContactsScrubber(context, sender, nodes, requiredRatio);
     }
     
     private ContactsScrubber(Context context, Contact sender, 
-            Collection<? extends Contact> nodes, float requiredRatio) {
+            Contact[] nodes, float requiredRatio) {
         
-        assert (!nodes.isEmpty());
+        assert (nodes.length != 0);
         assert (requiredRatio >= 0f && requiredRatio <= 1f);
         
         this.nodes = nodes;
-        this.scrubbed = new LinkedHashMap<KUID, Contact>(nodes.size());
+        this.scrubbed = new LinkedHashMap<KUID, Contact>(nodes.length);
         this.collisions = new LinkedHashSet<Contact>(1);
         
         Contact localNode = context.getLocalNode();
@@ -180,7 +193,7 @@ public class ContactsScrubber {
                 total++;
             }
             
-            float ratio = (float)total / nodes.size();
+            float ratio = (float)total / nodes.length;
             this.isValidResponse = (ratio >= requiredRatio);
         } else {
             this.isValidResponse = true;
@@ -190,7 +203,7 @@ public class ContactsScrubber {
     /**
      * Returns all Contacts.
      */
-    public Collection<? extends Contact> getContacts() {
+    public Contact[] getContacts() {
         return nodes;
     }
     

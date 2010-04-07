@@ -11,15 +11,15 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent2.AsyncFuture;
 import org.limewire.mojito.concurrent2.AsyncProcess;
+import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.result.Result;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 
-public abstract class AbstractResponseHandler<V extends Result> 
+public abstract class AbstractResponseHandler<V extends Entity> 
         implements AsyncProcess<V>, ResponseHandler {
 
     private static final Log LOG 
@@ -35,10 +35,16 @@ public abstract class AbstractResponseHandler<V extends Result>
     
     private long lastResponseTime = 0L;
     
-    private volatile int maxErrors = 0;
+    private volatile int maxErrors;
     
     public AbstractResponseHandler(Context context) {
+        this (context, -1);
+    }
+    
+    public AbstractResponseHandler(Context context, int maxErrors) {
         this.context = context;
+        
+        setMaxErrors(maxErrors);
     }
     
     /**
@@ -131,8 +137,16 @@ public abstract class AbstractResponseHandler<V extends Result>
     /**
      * 
      */
-    protected long getLastResponseTime() {
-        return lastResponseTime;
+    protected long getLastResponseTime(TimeUnit unit) {
+        long time = System.currentTimeMillis() - lastResponseTime;
+        return unit.convert(time, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * 
+     */
+    protected long getLastResponseTimeInMillis() {
+        return getLastResponseTime(TimeUnit.MILLISECONDS);
     }
     
     @Override
@@ -160,7 +174,7 @@ public abstract class AbstractResponseHandler<V extends Result>
     }
 
     @Override
-    public final void handleResponse(ResponseMessage response, long time) 
+    public final void handleResponse(ResponseMessage response, long time, TimeUnit unit) 
             throws IOException {
         
         synchronized (future) {
@@ -168,46 +182,51 @@ public abstract class AbstractResponseHandler<V extends Result>
                 return;
             }
             
-            elapsedTime += time;
-            lastResponseTime = System.currentTimeMillis();
-            
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Received " + response + " from "
-                        + response.getContact() + " after " + errors
-                        + " errors and a total time of " + elapsedTime
-                        + "ms");
+            synchronized (this) {
+                elapsedTime += time;
+                lastResponseTime = System.currentTimeMillis();
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Received " + response + " from "
+                            + response.getContact() + " after " + errors
+                            + " errors and a total time of " + elapsedTime
+                            + "ms");
+                }
+                
+                processResponse(response, time, unit);
             }
-            
-            response(response, time);
         }
     }
     
     /**
      * 
      */
-    protected abstract void response(ResponseMessage message, long time) 
-            throws IOException;
+    protected abstract void processResponse(ResponseMessage message, 
+            long time, TimeUnit unit) throws IOException;
 
     @Override
     public final void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage request, long time) throws IOException {
+            RequestMessage request, long time, TimeUnit unit) throws IOException {
         
         synchronized (future) {
             if (future.isDone()) {
                 return;
             }
             
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst)
-                        + " failed after " + time + "ms");
-            }
-            
-            elapsedTime += time;
-            
-            if (errors.getAndIncrement() < maxErrors) {
-                resend(nodeId, dst, request);
-            } else {
-                timeout(nodeId, dst, request, elapsedTime);
+            synchronized (this) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst)
+                            + " failed after " + time + "ms");
+                }
+                
+                elapsedTime += unit.toMillis(time);
+                
+                if (errors.getAndIncrement() < maxErrors) {
+                    resend(nodeId, dst, request);
+                } else {
+                    processTimeout(nodeId, dst, request, 
+                            elapsedTime, TimeUnit.MILLISECONDS);
+                }
             }
         }
     }
@@ -215,13 +234,13 @@ public abstract class AbstractResponseHandler<V extends Result>
     /**
      * 
      */
-    protected abstract void timeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time) throws IOException;
+    protected abstract void processTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time, TimeUnit unit) throws IOException;
     
     /**
      * 
      */
-    protected void resend(KUID nodeId, SocketAddress dst, 
+    protected synchronized void resend(KUID nodeId, SocketAddress dst, 
             RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {
@@ -244,19 +263,21 @@ public abstract class AbstractResponseHandler<V extends Result>
                 return;
             }
 
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Sending a " + message + " to "
-                        + ContactUtils.toString(nodeId, dst) + " failed", e);
+            synchronized (this) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Sending a " + message + " to "
+                            + ContactUtils.toString(nodeId, dst) + " failed", e);
+                }
+    
+                processError(nodeId, dst, message, e);
             }
-
-            error(nodeId, dst, message, e);
         }
     }
     
     /**
      * 
      */
-    protected abstract void error(KUID nodeId, SocketAddress dst, 
+    protected abstract void processError(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e);
     
     /**
