@@ -12,14 +12,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.MessageSettings;
-import org.limewire.i18n.I18nMarker;
-import org.limewire.inject.EagerSingleton;
 import org.limewire.io.GUID;
-import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -30,8 +28,8 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 
-@EagerSingleton
-public class LimeACKHandler implements MessageHandler, Service {
+@Singleton
+public class LimeACKHandler implements MessageHandler {
     
     
     /**
@@ -52,19 +50,9 @@ public class LimeACKHandler implements MessageHandler, Service {
         this.udpService = udpService;
     }
     
-    public void initialize() {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    public void start() {
+    @Inject
+    void scheduleExpirer() {
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
-    }
-    
-    public void stop() {}
-    
-    public String getServiceName() {
-        return I18nMarker.marktr("OOB Query Handler");
     }
     
     /**
@@ -91,13 +79,13 @@ public class LimeACKHandler implements MessageHandler, Service {
           // convert responses to QueryReplies, but only send as many as the
           // node wants
             Iterable<QueryReply> iterable;
-            if (ack.getNumResults() < bundle._responses.length) {
+            if (ack.getNumResults() < bundle.responses.length) {
               // TODO move selection to responseToQueryReplies methods for randomization
                 Response[] desired = new Response[ack.getNumResults()];
-                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
+                System.arraycopy(bundle.responses, 0, desired, 0, desired.length);
                 iterable = messageRouter.get().responsesToQueryReplies(desired, bundle._query, 1, securityToken);
             } else { 
-                iterable = messageRouter.get().responsesToQueryReplies(bundle._responses, 
+                iterable = messageRouter.get().responsesToQueryReplies(bundle.responses, 
                         bundle._query, 1, securityToken);
             }
 
@@ -119,7 +107,7 @@ public class LimeACKHandler implements MessageHandler, Service {
      *  @return true if the operation failed, false if not (i.e. too busy)
      */
     public boolean bufferResponsesForLaterDelivery(QueryRequest query,
-                                                      Response[] resps) {
+            Response...responses) {
         // store responses by guid for later retrieval
         synchronized (_outOfBandReplies) {
             if (_outOfBandReplies.size() < MessageSettings.MAX_BUFFERED_OOB_REPLIES.getValue()) {
@@ -127,7 +115,7 @@ public class LimeACKHandler implements MessageHandler, Service {
                     new GUID.TimedGUID(new GUID(query.getGUID()),
                                        TIMED_GUID_LIFETIME);
                 _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
-                                                                     resps));
+                                                                     responses));
                 return true;
             }
             return false;
@@ -136,11 +124,11 @@ public class LimeACKHandler implements MessageHandler, Service {
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;
-        public final Response[] _responses;
+        public final Response[] responses;
         
-        public QueryResponseBundle(QueryRequest query, Response[] responses) {
+        public QueryResponseBundle(QueryRequest query, Response...responses) {
             _query = query;
-            _responses = responses;
+            this.responses = responses;
         }
     }
     
