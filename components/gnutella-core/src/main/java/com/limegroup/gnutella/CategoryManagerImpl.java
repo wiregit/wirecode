@@ -5,14 +5,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.impl.XMLTorrent;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.io.InvalidDataException;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
 
@@ -22,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
 class CategoryManagerImpl implements CategoryManager {
@@ -294,5 +299,28 @@ class CategoryManagerImpl implements CategoryManager {
         public boolean apply(String input) {
             return delegate.get().contains(input);
         }
+    }
+
+    @Override
+    public boolean containsCategory(Category category, LimeXMLDocument document) {
+        if (document == null) {
+            return false;
+        }
+        
+        List<TorrentFileEntry> paths = null;
+        try {
+            paths = XMLTorrent.parsePathEntries(document);
+        } catch (InvalidDataException e) {
+            // No files found in xml
+            return false;
+        }
+        
+        for ( TorrentFileEntry path : paths ) {
+            if (getCategoryForFilename(path.getPath()) == category) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

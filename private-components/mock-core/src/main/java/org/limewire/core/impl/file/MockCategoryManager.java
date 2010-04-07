@@ -10,6 +10,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class MockCategoryManager implements CategoryManager {
 
@@ -180,5 +181,11 @@ class MockCategoryManager implements CategoryManager {
         public boolean apply(String input) {
             return delegate.contains(input);
         }
+    }
+
+    @Override
+    public boolean containsCategory(Category category, LimeXMLDocument document) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

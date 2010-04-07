@@ -52,6 +52,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.FileServer;
 import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.mozilla.MozillaDownload;
 
 public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
@@ -487,6 +488,10 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             @Override
             public Category getCategoryForFilename(String filename) {
                 return null;
+            }
+            @Override
+            public boolean containsCategory(Category category, LimeXMLDocument document) {
+                return false;
             }
         }, new VirusScanner() {
             

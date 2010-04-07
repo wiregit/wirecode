@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.limewire.core.api.Category;
 
 import com.google.common.base.Predicate;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /** Utility methods for dealing with file categories. */
 public interface CategoryManager {
@@ -36,6 +37,8 @@ public interface CategoryManager {
     
     /** Returns the category that best matches the given file. */
     Category getCategoryForFile(File file);
+    
+    boolean containsCategory(Category category, LimeXMLDocument document);
     
     /** Gets all extensions for a given category. */
     Collection<String> getExtensionsForCategory(Category category);

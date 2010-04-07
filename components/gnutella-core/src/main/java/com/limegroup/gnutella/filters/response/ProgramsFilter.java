@@ -18,9 +18,15 @@ class ProgramsFilter implements ResponseFilter {
 
     @Override
     public boolean allow(QueryReply qr, Response response) {
-        if(categoryManager.getCategoryForFilename(response.getName()) == Category.PROGRAM) {
+        Category category = categoryManager.getCategoryForFilename(response.getName());
+        
+        if (category == Category.PROGRAM) {
             return LibrarySettings.ALLOW_PROGRAMS.getValue();
-        } else {
+        } else if (category == Category.TORRENT) {
+            return LibrarySettings.ALLOW_PROGRAMS.getValue() 
+                || categoryManager.containsCategory(Category.PROGRAM, response.getDocument());
+        }
+        else {
             return true;
         }
     }
