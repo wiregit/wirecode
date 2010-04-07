@@ -42,6 +42,13 @@ public class AsyncExchanger<V, E extends Throwable> {
     /**
      * 
      */
+    public Object getLock() {
+        return lock;
+    }
+    
+    /**
+     * 
+     */
     public boolean setValue(V value) {
         synchronized (lock) {
             if (done || cancelled) {

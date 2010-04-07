@@ -9,6 +9,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.concurrent.ExecutorsHelper;
+
 /**
  * 
  */
@@ -49,7 +51,8 @@ public class ExecutorUtils {
     public static ScheduledThreadPoolExecutor newScheduledThreadPool(
             String name, int corePoolSize, long frequency, TimeUnit unit) {
         
-        ThreadFactory threadFactory = new DefaultThreadFactory(name);
+        ThreadFactory threadFactory 
+            = ExecutorsHelper.defaultThreadFactory(name);
         final ScheduledThreadPoolExecutor executor 
             = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
         
@@ -71,7 +74,7 @@ public class ExecutorUtils {
      * 
      */
     public static ThreadPoolExecutor newSingleThreadExecutor(String name) {
-        return newSingleThreadExecutor(new DefaultThreadFactory(name));
+        return newSingleThreadExecutor(ExecutorsHelper.defaultThreadFactory(name));
     }
     
     /**
@@ -87,7 +90,7 @@ public class ExecutorUtils {
     public static ThreadPoolExecutor newSingleThreadExecutor(
             String name, long frequency, TimeUnit unit) {
         return newSingleThreadExecutor(
-                new DefaultThreadFactory(name), frequency, unit);
+                ExecutorsHelper.defaultThreadFactory(name), frequency, unit);
     }
     
     /**

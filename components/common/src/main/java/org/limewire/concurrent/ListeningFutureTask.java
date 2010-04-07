@@ -52,7 +52,7 @@ public class ListeningFutureTask<V> extends FutureTask<V> implements RunnableLis
         EventListenerList<FutureEvent<V>> listeners = listenersRef.getAndSet(null);
         assert listeners != null;
 
-        if (listeners.size() > 0) {
+        if (!listeners.isEmpty()) {
             listeners.broadcast(FutureEvent.createEvent(this));
         }
     }

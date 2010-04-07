@@ -155,6 +155,11 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
         return listenerList.size();
     }
     
+    /** Returns true if there are no listeners */
+    public boolean isEmpty() {
+        return listenerList.isEmpty();
+    }
+    
     private static final class ListenerProxy<E> implements EventListener<E> {
         private final Log log;
         private final EventListener<E> delegate;

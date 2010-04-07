@@ -1,17 +1,23 @@
 package org.limewire.mojito.concurrent2;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.RunnableListeningFuture;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventListenerList.EventListenerListContext;
 
 /**
  * 
  */
-public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
+public class AsyncFutureTask<V> implements RunnableListeningFuture<V>, AsyncFuture<V> {
 
     private static final ScheduledThreadPoolExecutor WATCHDOG 
         = ExecutorUtils.newSingleThreadScheduledExecutor("AsyncFutureWatchdogThread");
@@ -28,6 +34,17 @@ public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
         }
     };
     
+    private final AtomicReference<EventListenerList<FutureEvent<V>>> listenersRef 
+        = new AtomicReference<EventListenerList<FutureEvent<V>>>(
+            new EventListenerList<FutureEvent<V>>());
+    
+    // The listenerContext is required to make sure that listeners are 
+    // notified in the correct threads.  We eagerly clear the listenerRef 
+    // to release old listeners, but need to keep the context around to 
+    // make sure future listeners reuse the context.
+    private final EventListenerListContext listenerContext 
+        = listenersRef.get().getContext();
+    
     private final AsyncExchanger<V, ExecutionException> exchanger 
         = new AsyncExchanger<V, ExecutionException>(this);
     
@@ -36,10 +53,6 @@ public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
     private final long timeout;
     
     private final TimeUnit unit;
-    
-    private List<AsyncFutureListener<V>> beforeListeners = null;
-    
-    private List<AsyncFutureListener<V>> afterListeners = null;
     
     private ScheduledFuture<?> watchdog;
     
@@ -166,15 +179,12 @@ public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
 
     @Override
     public synchronized V get() throws InterruptedException, ExecutionException {
-        checkIfEventThread();
         return exchanger.get();
     }
 
     @Override
     public synchronized V get(long timeout, TimeUnit unit) 
-        throws InterruptedException, ExecutionException,
-            TimeoutException {
-        checkIfEventThread();
+            throws InterruptedException, ExecutionException, TimeoutException {
         return exchanger.get(timeout, unit);
     }
 
@@ -203,18 +213,28 @@ public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
      */
     private synchronized void complete() {
         
+        // Cancel the watchdog
         if (watchdog != null) {
             watchdog.cancel(true);
         }
         
+        // Stop the AsyncProcess if it isn't already
         try {
             stop();
         } catch (Exception err) {
             ExceptionUtils.exceptionCaught(err);
         }
         
+        // Fire the event
+        EventListenerList<FutureEvent<V>> listeners 
+            = listenersRef.getAndSet(null);
+        assert listeners != null;
+
+        if (!listeners.isEmpty()) {
+            listeners.broadcast(FutureEvent.createEvent(this));
+        }
+        
         done();
-        fireOperationComplete();
     }
     
     /**
@@ -225,104 +245,44 @@ public class AsyncFutureTask<V> implements Runnable, AsyncFuture<V> {
     }
 
     @Override
-    public synchronized void addAsyncFutureListener(final AsyncFutureListener<V> l) {
-        if (l == null) {
-            throw new NullArgumentException("l");
+    public void addFutureListener(EventListener<FutureEvent<V>> listener) {
+        boolean added = false;
+        EventListenerList<FutureEvent<V>> listeners = listenersRef.get();
+        // Add the listener & set it back -- we add a proxy listener
+        // because there's a chance that we add it to the list
+        // before another thread sets it to null, leaving us
+        // to potentially call methods on the listener twice.
+        // (Once from the done() thread, and once from this thread.)
+        if (!isDone() && listeners != null) {
+            listeners.addListener(new ProxyListener<V>(listener, listenerContext));
+            added = listenersRef.compareAndSet(listeners, listeners);
         }
-        
-        if (!isDone()) {
-            if (beforeListeners == null) {
-                beforeListeners = new ArrayList<AsyncFutureListener<V>>();
-            }
-            beforeListeners.add(l);
-            return;
-            
-        }
-        
-        if (afterListeners == null) {
-            afterListeners = new ArrayList<AsyncFutureListener<V>>();
-        }
-        
-        afterListeners.add(l);
-        
-        Runnable event = new Runnable() {
-            @Override
-            public void run() {
-                l.operationComplete(AsyncFutureTask.this);
-            }
-        };
-        
-        EventUtils.fireEvent(event);
-    }
 
-    @Override
-    public synchronized void removeAsyncFutureListener(AsyncFutureListener<V> l) {
-        if (l == null) {
-            throw new NullPointerException("l");
-        }
-        
-        boolean success = false;
-        if (beforeListeners != null) {
-            success = beforeListeners.remove(l);
-        }
-        
-        if (!success && afterListeners != null) {
-            afterListeners.remove(l);
+        if (!added) {
+            EventListenerList.dispatch(listener, 
+                    FutureEvent.createEvent(this), listenerContext);
         }
     }
     
-    @SuppressWarnings("unchecked")
-    @Override
-    public synchronized AsyncFutureListener<V>[] getAsyncFutureListeners() {
-        List<AsyncFutureListener<V>> copy 
-            = new ArrayList<AsyncFutureListener<V>>();
-        if (beforeListeners != null) {
-            copy.addAll(beforeListeners);
-        }
+    private static class ProxyListener<V> implements EventListener<FutureEvent<V>> {
         
-        if (afterListeners != null) {
-            copy.addAll(afterListeners);
-        }
-        
-        return copy.toArray(new AsyncFutureListener[0]);
-    }
+        private final AtomicBoolean called = new AtomicBoolean(false);
+        private final EventListenerListContext listenerContext;
 
-    /**
-     * 
-     */
-    @SuppressWarnings("unchecked")
-    private AsyncFutureListener<V>[] getBeforeAsyncFutureListeners() {
-        if (beforeListeners != null) {
-            return beforeListeners.toArray(new AsyncFutureListener[0]);
+        private final EventListener<FutureEvent<V>> delegate;
+
+        public ProxyListener(EventListener<FutureEvent<V>> delegate, 
+                EventListenerListContext listenerContext) {
+            this.delegate = delegate;
+            this.listenerContext = listenerContext;
         }
-        
-        return null;
-    }
-    
-    /**
-     * 
-     */
-    protected synchronized void fireOperationComplete() {
-        final AsyncFutureListener<V>[] listeners 
-            = getBeforeAsyncFutureListeners();
-        
-        if (listeners != null && listeners.length > 0) {
-            Runnable event = new Runnable() {
-                @Override
-                public void run() {
-                    for (AsyncFutureListener<V> l : listeners) {
-                        l.operationComplete(AsyncFutureTask.this);
-                    }
-                }
-            };
-            
-            EventUtils.fireEvent(event);
-        }
-    }
-    
-    private void checkIfEventThread() throws IllegalStateException {
-        if (!isDone() && EventUtils.isEventThread()) {
-            throw new IllegalStateException();
+
+        @Override
+        public void handleEvent(FutureEvent<V> event) {
+            if (!called.getAndSet(true)) {
+                // Dispatch via EventListenerList to support annotations.
+                EventListenerList.dispatch(delegate, event, listenerContext);
+            }
         }
     }
 }
