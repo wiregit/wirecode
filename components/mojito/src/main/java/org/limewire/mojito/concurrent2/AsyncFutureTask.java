@@ -149,21 +149,25 @@ public class AsyncFutureTask<V> implements RunnableListeningFuture<V>, AsyncFutu
     }
     
     @Override
-    public synchronized void setValue(V value) {
+    public synchronized boolean setValue(V value) {
         boolean success = exchanger.setValue(value);
         
         if (success) {
             complete();
         }
+        
+        return success;
     }
     
     @Override
-    public synchronized void setException(Throwable exception) {
+    public synchronized boolean setException(Throwable exception) {
         boolean success = exchanger.setException(new ExecutionException(exception));
         
         if (success) {
             complete();
         }
+        
+        return success;
     }
     
     @Override

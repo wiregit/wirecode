@@ -13,12 +13,12 @@ public interface AsyncFuture<V> extends ListeningFuture<V>, Cancellable {
     /**
      * 
      */
-    public void setValue(V value);
+    public boolean setValue(V value);
     
     /**
      * 
      */
-    public void setException(Throwable exception);
+    public boolean setException(Throwable exception);
     
     /**
      * 
