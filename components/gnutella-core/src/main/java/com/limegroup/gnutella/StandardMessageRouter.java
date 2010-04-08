@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.collection.Tuple;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inject.EagerSingleton;
@@ -70,6 +72,16 @@ public class StandardMessageRouter extends MessageRouterImpl {
     
     private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
     
+    /**
+     * Maximum number of bytes we're sending in a single udp packet to avoid
+     * ip fragmentation.
+     */
+    static final int UDP_MTU = 1400;
+    /**
+     * Gnutella message header size.
+     */
+    static final int GNUTELLA_HEADER_SIZE = 23;
+    
     private final Statistics statistics;
 
     private final ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
@@ -82,6 +94,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
     private final MessageCounter ignoredBusy = new Message.MessageCounter(500);
     
     private final SharedFilesKeywordIndex sharedFilesKeywordIndex;
+
+    private OutgoingQueryReplyFactory outgoingQueryReplyFactory;
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -141,6 +155,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
+        this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
     }
     
     /**
@@ -344,7 +359,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         
     }
 
-    private boolean sendResponses(Response[] responses, QueryRequest query,
+    boolean sendResponses(Response[] responses, QueryRequest query,
                                  ReplyHandler handler) {
         // if either there are no responses or, the
         // response array came back null for some reason,
@@ -367,6 +382,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
 			networkManager.canReceiveSolicited() &&
             NetworkUtils.isValidAddressAndPort(query.getReplyAddress(), query.getReplyPort())) {
             
+            Tuple<Response[], List<QueryReply>> split = splitLargeResponses(query, responses);
+            responses = split.getFirst();
+            List<QueryReply> largeQueryReplies = split.getSecond(); 
+                                    
             // send the replies out-of-band - we need to
             // 1) buffer the responses
             // 2) send a ReplyNumberVM with the number of responses
@@ -396,12 +415,15 @@ public class StandardMessageRouter extends MessageRouterImpl {
                             }
                         }, 100, TimeUnit.MILLISECONDS);
                     }
+                    if (!largeQueryReplies.isEmpty()) {
+                        sendQueryReplies(largeQueryReplies);
+                    }
                     return true;
                 }
             } else {
                 // else i couldn't buffer the responses due to busy-ness, oh, scrap
                 // them.....
-                return false;                
+                return false;
             }
         }
 
@@ -412,16 +434,84 @@ public class StandardMessageRouter extends MessageRouterImpl {
         Iterable<QueryReply> iterable = responsesToQueryReplies(responses,
                                                                   query);
         //send the query replies
-        try {
-            for(QueryReply queryReply : iterable)
-                sendQueryReply(queryReply);
-        }  catch (IOException e) {
-            // if there is an error, do nothing..
-        }
+        sendQueryReplies(iterable);
         // -----------------------------
         
         return true;
 
+    }
+    
+    private void sendQueryReplies(Iterable<QueryReply> queryReplies) {
+        try {
+            for(QueryReply queryReply : queryReplies)
+                sendQueryReply(queryReply);
+        }  catch (IOException e) {
+            LOG.debug("error sending", e);
+            // if there is an error, do nothing..
+        }
+    }
+
+    /**
+     * Splits reponses into a tuple of small responses that can be sent later 
+     * in an out-of-band fashion and into large single response query replies
+     * whose payload including Gnutella message header is too long to be sent
+     * in single udp packet without risking ip fragmentation. 
+     */
+    Tuple<Response[], List<QueryReply>> splitLargeResponses(QueryRequest queryRequest, Response...responses) {
+        List<Response> smallResponses = null;
+        List<QueryReply> largeResponses = null;
+        for (int i = 0; i < responses.length; i++) {
+            Response response = responses[i];
+            if (couldFragment(response)) {
+                QueryReply queryReply = createSingleResponseQueryReply(response, queryRequest);
+                if (fragments(queryReply)) {
+                    if (largeResponses == null) {
+                        smallResponses = new ArrayList<Response>(i);
+                        for (int j = 0; j < i; j++) {
+                            smallResponses.add(responses[j]);
+                        }
+                        largeResponses = new ArrayList<QueryReply>(4);
+                    }
+                    largeResponses.add(queryReply);
+                } else if (smallResponses != null) {
+                    smallResponses.add(response);
+                }
+            } else if (smallResponses != null) {
+                smallResponses.add(response);
+            }
+        }
+        if (smallResponses != null) {
+            return new Tuple<Response[], List<QueryReply>>(smallResponses.toArray(new Response[smallResponses.size()]), largeResponses); 
+        } else {
+            return new Tuple<Response[], List<QueryReply>>(responses, Collections.<QueryReply>emptyList());
+        }
+    }
+    
+    /**
+     * @return true if the response is large enough to be potentially ip fragmented
+     */
+    boolean couldFragment(Response response) {
+        byte[] compressedXmlBytes = outgoingQueryReplyFactory.getCompressedXmlBytes(response);
+        int queryReplySize = response.getWireSize() + compressedXmlBytes.length + 200; // 200: approximate size of data in QueryReplyImpl
+        if (queryReplySize >= UDP_MTU) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * @return true if query reply gets ip fragmented
+     */
+    boolean fragments(QueryReply queryReply) {
+        return queryReply.getPayload().length + GNUTELLA_HEADER_SIZE >= UDP_MTU;
+    }
+
+    /**
+     * @return a query reply with a single response
+     */
+    QueryReply createSingleResponseQueryReply(Response response, QueryRequest queryRequest) {
+        Iterable<QueryReply> queryReplies = responsesToQueryReplies(new Response[] { response }, queryRequest, 1, null);
+        return queryReplies.iterator().next();
     }
 
     /** Returns whether or not we are connected to the originator of this query.

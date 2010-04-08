@@ -93,7 +93,7 @@ public final class LimeXMLDocumentHelper{
      * Builds an XML string out of all the responses.
      * If no responses have XML, an empty string is returned.
      */
-    public static String getAggregateString(Response[] responses) {
+    public static String getAggregateString(Response... responses) {
         Map<LimeXMLSchema, StringBuilder> allXML = new HashMap<LimeXMLSchema, StringBuilder>();
         for(int i = 0; i < responses.length; i++) {
             LimeXMLDocument doc = responses[i].getDocument();

@@ -1,15 +1,6 @@
 package com.limegroup.gnutella;
 
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import org.limewire.collection.IntervalSet;
-import org.limewire.io.Address;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IpPort;
-import org.limewire.service.ErrorService;
-import org.limewire.util.ByteUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,6 +9,17 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
+
+import org.limewire.collection.IntervalSet;
+import org.limewire.io.Address;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPort;
+import org.limewire.service.ErrorService;
+import org.limewire.util.ByteUtils;
+
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class ResponseImpl implements Response {
 
@@ -83,6 +85,10 @@ class ResponseImpl implements Response {
     /** If the ranges carried in this response are verified */
     private final boolean verified;
 
+    /**
+     * Can be null if not set, empty array or array of compressed xml bytes.
+     */
+    private byte[] compressedXmlBytes = null;
 
     /**
      * Overloaded constructor that allows the creation of Responses with
@@ -297,5 +303,23 @@ class ResponseImpl implements Response {
                 "name:         "+name+"\r\n"+
                 "xml document: "+document+"\r\n"+
                 "urns:         "+urns);
+    }
+
+    @Override
+    public int getWireSize() {
+        int size = 10; // 10: see writeToStream()
+        size += nameBytes.length;
+        size += extBytes.length;
+        return size;
+    }
+
+    @Override
+    public byte[] getCompressedXmlBytes() {
+        return compressedXmlBytes;
+    }
+
+    @Override
+    public void setCompressedXmlBytes(byte[] compressedXmlBytes) {
+        this.compressedXmlBytes = compressedXmlBytes;
     }
 }

@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.messages;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +11,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -126,8 +125,7 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         }
         
         List<QueryReply> queryReplies = new ArrayList<QueryReply>();
-        QueryReply queryReply = null;
-
+        
         // pick the right address & port depending on multicast & fwtrans
         // if we cannot find a valid address & port, exit early.
         int port = -1;
@@ -161,52 +159,46 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
             }
         }
         
-        // get the xml collection string...
-        String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(responses);
-        if (xmlCollectionString == null)
-            xmlCollectionString = "";
-
-        byte[] xmlBytes = null;
-        try {
-            xmlBytes = xmlCollectionString.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException ueex) {
-            throw new IllegalStateException(ueex);
-        }
-        
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
         boolean notIncoming = !networkManager.acceptedIncomingConnection();
         Set<? extends IpPort> proxies = notIncoming ? connectionManager.getPushProxies() : null;
         
+        // if sending a single response, see if xml bytes have been constructed before already
+        if (responses.length == 1) {
+            byte[] compressedXmlBytes = responses[0].getCompressedXmlBytes();
+            if (compressedXmlBytes != null) {
+                // create the new queryReply
+                QueryReply queryReply = queryReplyFactory.createQueryReply(guid, ttl,
+                        port, ip, speed, responses, clientGUID,
+                        compressedXmlBytes, notIncoming, isBusy, hasUploaded, measuredSpeed,
+                        false /* chat */, isMulticast, isFWTransfer, proxies, securityToken);
+                queryReplies.add(queryReply);
+                return queryReplies;
+            }
+        }
+
+        byte[] xmlBytes = createXmlBytes(responses);
+                
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
             // ok, need to partition responses up once again and send out
             // multiple query replies.....
-            List<Response[]> splitResps = new LinkedList<Response[]>();
+            List<Response[]> splitResps = new ArrayList<Response[]>(2);
             splitAndAddResponses(splitResps, responses);
 
             while (!splitResps.isEmpty()) {
                 Response[] currResps = splitResps.remove(0);
-                String currXML = LimeXMLDocumentHelper.getAggregateString(currResps);
-                byte[] currXMLBytes = null;
-                try {
-                    currXMLBytes = currXML.getBytes("UTF-8");
-                } catch(UnsupportedEncodingException ueex) {
-                    throw new IllegalStateException(ueex);
-                }
+                byte[] currXMLBytes = createXmlBytes(currResps);
                 if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&
                                                         (currResps.length > 1)) 
                     splitAndAddResponses(splitResps, currResps);
                 else {
                     // create xml bytes if possible...
-                    byte[] xmlCompressed = null;
-                    if (!currXML.equals(""))
-                        xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
-                    else //there is no XML
-                        xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
+                    byte[] xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
                     
                     // create the new queryReply
-                    queryReply = queryReplyFactory.createQueryReply(guid, ttl,
+                    QueryReply queryReply = queryReplyFactory.createQueryReply(guid, ttl,
                             port, ip, speed, currResps, clientGUID,
                             xmlCompressed, notIncoming, isBusy, hasUploaded, measuredSpeed,
                             false /* chat */, isMulticast, isFWTransfer, proxies, securityToken);
@@ -216,16 +208,9 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
 
         }
         else {  // xml is small enough, no problem.....
-            // get xml bytes if possible....
-            byte[] xmlCompressed = null;
-            if (!xmlCollectionString.equals(""))
-                xmlCompressed = 
-                    LimeXMLUtils.compress(xmlBytes);
-            else //there is no XML
-                xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
-            
+            byte[] xmlCompressed = LimeXMLUtils.compress(xmlBytes);
             // create the new queryReply
-            queryReply = queryReplyFactory.createQueryReply(guid, ttl, port,
+            QueryReply queryReply = queryReplyFactory.createQueryReply(guid, ttl, port,
                     ip, speed, responses, clientGUID, xmlCompressed, notIncoming,
                     isBusy, hasUploaded, measuredSpeed, false /* chat */, isMulticast, isFWTransfer,
                     proxies, securityToken);
@@ -256,6 +241,29 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         addTo.add(splits[1]);
     }
 
+    private byte[] createXmlBytes(Response...responses) {
+        String xmlString = LimeXMLDocumentHelper.getAggregateString(responses);
+        if (xmlString.isEmpty()) {
+            return DataUtils.EMPTY_BYTE_ARRAY;
+        }
+        return StringUtils.toUTF8Bytes(xmlString);
+    }
     
+    @Override
+    public byte[] getCompressedXmlBytes(Response response) {
+        byte[] compressedXmlBytes = response.getCompressedXmlBytes();
+        if (compressedXmlBytes != null) {
+            return compressedXmlBytes;
+        }
+        byte[] xmlBytes = createXmlBytes(response);
+        if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
+            response.setCompressedXmlBytes(DataUtils.EMPTY_BYTE_ARRAY);
+            return DataUtils.EMPTY_BYTE_ARRAY;
+        } else {
+            xmlBytes = LimeXMLUtils.compress(xmlBytes);
+            response.setCompressedXmlBytes(xmlBytes);
+            return xmlBytes; 
+        }
+    }
         
 }

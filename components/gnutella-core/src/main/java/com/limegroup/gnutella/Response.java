@@ -111,5 +111,19 @@ public interface Response {
      * otherwise address will be constructed from <code>queryReply</code> 
      */
     public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, Address address, RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory) throws UnknownHostException;
+    
+    /**
+     * @return the number of bytes this response will need when written to the wire
+     */
+    public int getWireSize();
+    /**
+     * Sets the compressed xml bytes for later use to avoid
+     * recomputation.
+     */
+    public void setCompressedXmlBytes(byte[] compressedXmlBytes);
+    /**
+     * @return null if not set, empty or array of compressed xml bytes
+     */
+    public byte[] getCompressedXmlBytes();
 }
 

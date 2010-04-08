@@ -14,4 +14,9 @@ public interface OutgoingQueryReplyFactory {
     List<QueryReply> createReplies(Response[] responses, int responsesPerReply,
             SecurityToken securityToken, byte[] guid, byte ttl, boolean isMulticast,
             boolean requestorCanDoFWT);
+    
+    /**
+     * @return the compressed xml bytes for a response, can be empty byte array
+     */
+    byte[] getCompressedXmlBytes(Response response);
 }

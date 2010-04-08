@@ -42,10 +42,12 @@ public class TorrentMetaData implements MetaData {
         builder.add(LimeXMLNames.TORRENT_INFO_HASH, Base32.encode(data.getInfoHash()));
 
         List<URI> trackers = data.getTrackerUris();
-        // only add max of 3 trackers
-        int maxSize = Math.min(trackers.size(), 3);
-        String trackerUris = StringUtils.explode(trackers.subList(0, maxSize), " ");
-        builder.add(LimeXMLNames.TORRENT_TRACKERS, trackerUris);
+        if (!trackers.isEmpty()) {
+            // only add max of 3 trackers
+            int maxSize = Math.min(trackers.size(), 3);
+            String trackerUris = StringUtils.explode(trackers.subList(0, maxSize), " ");
+            builder.add(LimeXMLNames.TORRENT_TRACKERS, trackerUris);
+        }
         
         Long length = data.getLength();
         if (length != null) {

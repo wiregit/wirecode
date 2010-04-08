@@ -171,6 +171,13 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 		assertEquals("problem with doc constructor", d2, rb.getDocument());
 	}
 	
+	public void testGetWireSizeSameAsWrittenSize() throws Exception {
+	    Response response = responseFactoryImpl.createResponse(12, 231, "def1.txt", null, UrnHelper.SHA1);
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    response.writeToStream(out);
+	    assertEquals(response.getWireSize(), out.toByteArray().length);
+	}
+	
 	/**
 	 * Tests a simple response can be created from stream (no extensions)
 	 */
