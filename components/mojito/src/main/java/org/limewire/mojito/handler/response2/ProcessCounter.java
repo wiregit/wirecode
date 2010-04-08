@@ -32,8 +32,12 @@ class ProcessCounter {
     }
     
     public void decrement() {
-        if (0 < process) {
-            --process;
+        decrement(1);
+    }
+    
+    public void decrement(int count) {
+        if (0 < count) {
+            process = Math.max(process - count, 0);
         }
     }
     

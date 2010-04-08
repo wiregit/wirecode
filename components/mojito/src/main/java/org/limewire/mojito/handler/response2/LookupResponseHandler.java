@@ -143,9 +143,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
             startTime = System.currentTimeMillis();
         }
         
-        while (0 < decrement--) {
-            lookupCounter.decrement();
-        }
+        lookupCounter.decrement(decrement);
     }
     
     /**
