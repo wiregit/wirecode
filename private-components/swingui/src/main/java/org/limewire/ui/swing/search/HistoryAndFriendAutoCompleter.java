@@ -170,6 +170,10 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         }
     }
     
+    /**
+     * Builds a list of auto-completion entries and sets them in the
+     * displayable list.
+     */
     private void lookupAndSetItems(final String lookupText) throws InterruptedException {
         // Create list of items.
         Collection<String> histories = historyDictionary.getPrefixedBy(lookupText);
@@ -211,6 +215,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         });
     }
     
+    /**
+     * Updates the auto-completion list with the specified entries.
+     */
     private void setItems(Collection<Entry> items) {
         entryList.setModel(new CollectionBackedListModel(items));
         entryList.setVisibleRowCount(Math.min(8, items.size()));
@@ -285,6 +292,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         }
     }
     
+    /**
+     * Cell renderer for entries in the auto-completion list.
+     */
     private static class Renderer extends DefaultListCellRenderer {
         private final ExtendedCompoundBorder compoundBorder;
         private final JPanel firstSuggestionPanel;
@@ -352,6 +362,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         }
     }
     
+    /**
+     * An entry in the auto-completion list.
+     */
     private static class Entry {
         private static enum Reason { FIRST_HISTORY, HISTORY, FIRST_SUGGESTION, SUGGESTION };
         
