@@ -109,7 +109,9 @@ public interface SearchServices {
 
     /**
      * Initiates a non-blocking browse of <code>address</code> with
-     * session guid <code>browseGuid</code>.
+     * session guid <code>browseGuid</code>. Note: browse results will not be
+     * passed to the BrowseListener; you need to add a QueryReplyListener or
+     * use a CoreBrowse instead.
      */
     public BrowseHostHandler doAsynchronousBrowseHost(FriendPresence friendPresence, GUID browseGuid, BrowseListener browseListener);
 

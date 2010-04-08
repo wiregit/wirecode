@@ -32,6 +32,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.player.api.PlayerState;
@@ -60,6 +61,7 @@ class VideoPlayerMediator implements PlayerMediator {
     private final List<PlayerMediatorListener> listenerList;
     private volatile Timer updateTimer;
     private final CategoryManager categoryManager;
+    private final RelatedFiles relatedFiles;
     private boolean isSeeking;
     private final PlayerInitializer playerInitializer = new PlayerInitializer();
     
@@ -70,9 +72,11 @@ class VideoPlayerMediator implements PlayerMediator {
     private volatile boolean videoPlayedInSessionByLW = false;
     
     @Inject
-    VideoPlayerMediator(VideoDisplayDirector displayDirector, CategoryManager categoryManager) {
+    VideoPlayerMediator(VideoDisplayDirector displayDirector,
+            CategoryManager categoryManager, RelatedFiles relatedFiles) {
         this.displayDirector = displayDirector;
         this.categoryManager = categoryManager;
+        this.relatedFiles = relatedFiles;
         this.listenerList = new ArrayList<PlayerMediatorListener>();
 
         ThreadPoolListeningExecutor tpe =  new ThreadPoolListeningExecutor(1, 1,
@@ -223,6 +227,7 @@ class VideoPlayerMediator implements PlayerMediator {
 
     @Override
     public void play(LocalFileItem localFileItem) {
+        relatedFiles.increasePlayCount(localFileItem.getUrn());
         play(localFileItem.getFile());
     }
 

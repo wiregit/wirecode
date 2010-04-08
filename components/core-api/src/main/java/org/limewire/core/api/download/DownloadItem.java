@@ -247,4 +247,10 @@ public interface DownloadItem extends PropertiableFile {
      * property does not exist for this DownloadItem. 
      */
     public Object getDownloadProperty(DownloadPropertyKey key);
+    
+    /** Marks the item as good. */
+    public void markAsGood();
+
+    /** Returns true if the item has been marked as good. */
+    public boolean hasBeenMarkedAsGood();
 }

@@ -26,6 +26,7 @@ public class DownloadButtonPanel extends JPanel {
     private final JButton resumeButton;
     private final JButton tryAgainButton;
     private final JButton searchAgainButton;
+    private final JButton markAsGoodButton;
 
     public DownloadButtonPanel() {
         this(null);
@@ -64,15 +65,23 @@ public class DownloadButtonPanel extends JPanel {
         searchAgainButton =  new HyperlinkButton(I18n.tr("Search Again"));;
         searchAgainButton.setActionCommand(DownloadActionHandler.SEARCH_AGAIN_COMMAND);
         searchAgainButton.addActionListener(actionListener);
-        resumeButton.setVisible(false);
+        searchAgainButton.setVisible(false);
         searchAgainButton.setToolTipText(I18n.tr("Search Again"));    
         searchAgainButton.setFont(font);
 
+        markAsGoodButton =  new HyperlinkButton(I18n.tr("Mark as Good"));;
+        markAsGoodButton.setActionCommand(DownloadActionHandler.MARK_GOOD_COMMAND);
+        markAsGoodButton.addActionListener(actionListener);
+        markAsGoodButton.setVisible(false);
+        markAsGoodButton.setToolTipText(I18n.tr("{0}Marking the files you like will improve your search results.{1}Your ratings are private and won't be shared with anyone else.{2}",
+                "<html>", "<br/>", "</html>"));
+        markAsGoodButton.setFont(font);
 
         add(resumeButton, "hidemode 3");
         add(pauseButton, "hidemode 3");
         add(tryAgainButton, "hidemode 3");
         add(searchAgainButton, "hidemode 3");
+        add(markAsGoodButton, "hidemode 3");
     }
     
     public void addActionListener(ActionListener actionListener){
@@ -80,6 +89,7 @@ public class DownloadButtonPanel extends JPanel {
         resumeButton.addActionListener(actionListener);
         tryAgainButton.addActionListener(actionListener);
         searchAgainButton.addActionListener(actionListener);
+        markAsGoodButton.addActionListener(actionListener);
     }
 
 
@@ -92,13 +102,14 @@ public class DownloadButtonPanel extends JPanel {
             resumeButton.setVisible(state.isResumable());
             tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
             searchAgainButton.setVisible(state == DownloadState.STALLED && !canTryAgain && !item.isStoreDownload());
-            
+            markAsGoodButton.setVisible(state.isFinished() && !item.hasBeenMarkedAsGood());
         } else {
             // Hide all buttons for anti-virus updates.
             pauseButton.setVisible(false);
             resumeButton.setVisible(false);
             tryAgainButton.setVisible(false);
             searchAgainButton.setVisible(false);
+            markAsGoodButton.setVisible(false);
         }
     }
 }

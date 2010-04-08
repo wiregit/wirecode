@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchManager;
@@ -21,13 +22,16 @@ public class CoreSearchManager implements SearchManager {
 
     private final List<SearchResultList> threadSafeSearchList;
     private final SearchMonitor searchMonitor;
+    private final RelatedFiles relatedFiles;
     
     /**
      * Constructs a CoreSearchManager with the specified services.
      */
     @Inject
-    public CoreSearchManager(SearchMonitor searchMonitor) {
+    public CoreSearchManager(SearchMonitor searchMonitor,
+            RelatedFiles relatedFiles) {
         this.searchMonitor = searchMonitor;
+        this.relatedFiles = relatedFiles;
         this.threadSafeSearchList = new CopyOnWriteArrayList<SearchResultList>();
     }
     
@@ -50,7 +54,8 @@ public class CoreSearchManager implements SearchManager {
     @Override
     public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
         // Create result list.
-        SearchResultList resultList = new CoreSearchResultList(search, searchDetails);
+        SearchResultList resultList =
+            new CoreSearchResultList(search, searchDetails, relatedFiles);
         
         // Add result list to collection.
         threadSafeSearchList.add(resultList);

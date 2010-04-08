@@ -24,6 +24,7 @@ import org.limewire.core.impl.mozilla.CoreGlueMozillaModule;
 import org.limewire.core.impl.network.CoreGlueNetworkModule;
 import org.limewire.core.impl.player.CoreGluePlayerModule;
 import org.limewire.core.impl.properties.CoreGluePropertiesModule;
+import org.limewire.core.impl.related.CoreGlueRelatedFilesModule;
 import org.limewire.core.impl.rest.CoreGlueRestModule;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
@@ -76,6 +77,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
+        install(new CoreGlueRelatedFilesModule());
     }
 
 }

@@ -18,7 +18,7 @@ import org.limewire.ui.swing.util.I18n;
  * document descriptions.
  */
 public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
-    static final int FROM_INDEX = 0;
+    static final int RELEVANCE_INDEX = 0;
     static final int NAME_INDEX = 1;
     static final int TYPE_INDEX = 2;
     static final int EXTENSION_INDEX = 3;
@@ -26,8 +26,8 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 5;
     
     public OtherTableFormat() {
-        super("CLASSIC_SEARCH_OTHER_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_OTHER_FROM", I18n.tr("From"), 88, true, true), 
+        super("CLASSIC_SEARCH_OTHER_TABLE", NAME_INDEX, RELEVANCE_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+                new ColumnStateInfo(RELEVANCE_INDEX, "CLASSIC_SEARCH_OTHER_RELEVANCE", I18n.tr("Relevance"), 100, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_OTHER_NAME", I18n.tr("Name"), 525, true, true),     
                 new ColumnStateInfo(TYPE_INDEX, "CLASSIC_SEARCH_OTHER_TYPE", I18n.tr("Type"), 75, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_OTHER_EXTENSION", I18n.tr("Extension"), 80, true, true), 
@@ -41,7 +41,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
         switch(index) {
         case NAME_INDEX: return Component.class;
         case SIZE_INDEX: return Integer.class;
-        case FROM_INDEX: return VisualSearchResult.class;
+        case RELEVANCE_INDEX: return VisualSearchResult.class;
         }
         return super.getColumnClass(index);
     }
@@ -53,7 +53,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case EXTENSION_INDEX: return vsr.getFileExtension();
             case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
-            case FROM_INDEX: return vsr;
+            case RELEVANCE_INDEX: return vsr;
             case IS_SPAM_INDEX: return vsr;
         }
         throw new IllegalArgumentException("Unknown column:" + index);
@@ -64,7 +64,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
         if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
                 TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
             return Arrays.asList(
-                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.DESCENDING, RELEVANCE_INDEX),
                     new SortKey(SortOrder.ASCENDING, NAME_INDEX),
                     new SortKey(SortOrder.ASCENDING, TYPE_INDEX),
                     new SortKey(SortOrder.ASCENDING, SIZE_INDEX));

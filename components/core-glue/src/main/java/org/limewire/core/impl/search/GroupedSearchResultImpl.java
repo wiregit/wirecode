@@ -33,15 +33,16 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
     private volatile List<SearchResult> coreResults;
     private volatile Set<Friend> friends;
     private volatile boolean anonymous;
-    private volatile float relevance = 0;    
+    private volatile float relevance = 0;
     
     /**
-     * Constructs a GroupedSearchResult containing the specified search result.
+     * Constructs a GroupedSearchResult containing the specified search result,
+     * with the specified initial relevance.
      */
-    public GroupedSearchResultImpl(SearchResult searchResult, String query) {
+    public GroupedSearchResultImpl(SearchResult searchResult, String query, float relevance) {
         this.resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
         this.remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
-        
+        this.relevance = relevance;
         addNewSource(searchResult, query);
     }
 

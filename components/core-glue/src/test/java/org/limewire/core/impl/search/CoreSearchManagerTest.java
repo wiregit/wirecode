@@ -3,6 +3,7 @@ package org.limewire.core.impl.search;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResultList;
@@ -31,11 +32,13 @@ public class CoreSearchManagerTest extends BaseTestCase {
         super.setUp();
         
         final SearchMonitor searchMonitor = context.mock(SearchMonitor.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         context.checking(new Expectations() {{
             allowing(searchMonitor);
+            allowing(relatedFiles);
         }});
         
-        searchManager = new CoreSearchManager(searchMonitor);
+        searchManager = new CoreSearchManager(searchMonitor, relatedFiles);
     }    
 
     @Override

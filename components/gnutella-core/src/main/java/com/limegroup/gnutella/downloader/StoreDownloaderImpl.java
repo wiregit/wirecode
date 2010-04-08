@@ -45,6 +45,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.related.FileRelationManager;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
@@ -97,7 +98,9 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
-            BandwidthCollector bandwidthCollector, ActivationManager activationManager) {
+            BandwidthCollector bandwidthCollector,
+            ActivationManager activationManager,
+            FileRelationManager relatedFileManager) {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -108,7 +111,8 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, virusScanner, spamManager, library,
-                categoryManager, bandwidthCollector, activationManager);
+                categoryManager, bandwidthCollector, activationManager,
+                relatedFileManager);
         this.metaDataFactory = metaDataFactory;
         this.categoryManager = categoryManager;
     }

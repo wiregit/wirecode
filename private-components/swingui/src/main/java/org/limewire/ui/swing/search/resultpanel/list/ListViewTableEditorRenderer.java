@@ -101,14 +101,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     @Resource private Icon similarResultsIcon;
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
-    @Resource private Color downloadSourceCountColor;
+    @Resource private Color relevanceColor;
     @Resource private Color similarResultsBackgroundColor;
     @Resource private Color surplusRowLimitColor;
     @Resource private String headingColor;
     @Resource private Font headingFont;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
-    @Resource private Font downloadSourceCountFont;
+    @Resource private Font relevanceFont;
     @Resource private Font surplusRowLimitFont;
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
@@ -147,7 +147,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new NoDancingHtmlLabel();
     private JLabel metadataLabel = new NoDancingHtmlLabel();
-    private JLabel downloadSourceCount = new TransparentCellTableRenderer();
+    private JLabel relevanceLabel = new TransparentCellTableRenderer();
     private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
@@ -192,7 +192,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         GuiUtils.assignResources(this);
         
-        fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH_LIST);
+        fromWidget = fromWidgetFactory.create(RemoteWidgetType.SEARCH);
        
         makePanel(navigator, libraryMediator);       
 
@@ -282,7 +282,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         editorComponent.add(similarResultIndentation, "growy, hidemode 3, shrinkprio 0");
         editorComponent.add(itemIconButton, "left, aligny 50%, gapleft 4, shrinkprio 0");
         editorComponent.add(searchResultTextPanel, "left, , aligny 50%, gapleft 4, growx, shrinkprio 200, growprio 200, push");
-        editorComponent.add(downloadSourceCount, "gapbottom 3, gapright 2, shrinkprio 0");
+        editorComponent.add(relevanceLabel, "gapbottom 3, gapright 2, shrinkprio 0");
         editorComponent.add(new JLabel(dividerIcon), "shrinkprio 0");
         //TODO: better number for wmin
         editorComponent.add(fromWidget, "wmin 90, left, shrinkprio 0");
@@ -420,7 +420,12 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         };
 
         this.heading.setText(headingBuilder.get().getHeadingDocument(searchHeading, downloadState, result.isSpam()));
-        this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
+        int relevance = ((int) Math.sqrt(vsr.getRelevance())) - 1;
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < relevance && i < 10; i++) {
+            sb.append('\u2665');
+        }
+        this.relevanceLabel.setText(sb.toString());
     }
 
     private void populateSubheading(RowDisplayResult result) {
@@ -492,8 +497,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         metadataLabel.setFont(metadataFont);
         metadataLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 3, 3));
 
-        downloadSourceCount.setForeground(downloadSourceCountColor);
-        downloadSourceCount.setFont(downloadSourceCountFont);
+        relevanceLabel.setForeground(relevanceColor);
+        relevanceLabel.setFont(relevanceFont);
     }
 
     private void makeIndentation() {
@@ -514,7 +519,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             }
         });
         Component[] listenerComponents = new Component[]{editorComponent, heading, subheadingLabel, metadataLabel, 
-                similarResultIndentation, searchResultTextPanel, downloadSourceCount, itemIconButton};
+                similarResultIndentation, searchResultTextPanel, relevanceLabel, itemIconButton};
        
         MousePopupListener popupListener = new MousePopupListener() {
             @Override

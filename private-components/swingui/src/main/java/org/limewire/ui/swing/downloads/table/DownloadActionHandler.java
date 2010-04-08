@@ -52,6 +52,7 @@ public class DownloadActionHandler {
     public final static String SHARE_COMMAND = "share";
     public final static String CHANGE_LOCATION_COMMAND = "change location";
     public final static String SEARCH_AGAIN_COMMAND = "search again";
+    public final static String MARK_GOOD_COMMAND = "mark good";
     
    // private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
@@ -83,43 +84,45 @@ public class DownloadActionHandler {
         this.categoryManager = categoryManager;
     }
 
-    public void performAction(final String actionCommmand, final DownloadItem item){
-        if (actionCommmand == CANCEL_COMMAND) {
+    public void performAction(final String actionCommand, final DownloadItem item){
+        if (actionCommand == CANCEL_COMMAND) {
             item.cancel();
-        } else if (actionCommmand == PAUSE_COMMAND) {
+        } else if (actionCommand == PAUSE_COMMAND) {
             item.pause();
-        } else if (actionCommmand == RESUME_COMMAND) {
+        } else if (actionCommand == RESUME_COMMAND) {
             item.resume();
-        } else if (actionCommmand == TRY_AGAIN_COMMAND) {
+        } else if (actionCommand == TRY_AGAIN_COMMAND) {
             item.resume();
-        } else if (actionCommmand == LINK_COMMAND){
+        } else if (actionCommand == LINK_COMMAND){
             //Do nothing for now
            // NativeLaunchUtils.openURL(ERROR_URL);
-        } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND || actionCommmand == PLAY_COMMAND){
+        } else if (actionCommand == PREVIEW_COMMAND || actionCommand == LAUNCH_COMMAND || actionCommand == PLAY_COMMAND){
             if (item.isLaunchable()) {
                 DownloadItemUtils.launch(item, categoryManager);
             }
-        } else if (actionCommmand == LOCATE_COMMAND){
+        } else if (actionCommand == LOCATE_COMMAND){
             if(item.getDownloadingFile() != null) {
                 NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
             }
-        } else if (actionCommmand == PROPERTIES_COMMAND){
+        } else if (actionCommand == PROPERTIES_COMMAND){
             createFileInfoDialog(item);
-        } else if (actionCommmand == REMOVE_COMMAND){
+        } else if (actionCommand == REMOVE_COMMAND){
             downloadListManager.remove(item);
-        } else if (actionCommmand == SHARE_COMMAND){
+        } else if (actionCommand == SHARE_COMMAND){
 //            if(shareWidget == null)
 //                shareWidget = shareFactory.get().createFileShareWidget();
 //            shareWidget.setShareable(item.getDownloadingFile());
 //            shareWidget.show(null);
-        } else if( actionCommmand == LIBRARY_COMMAND) {
+        } else if( actionCommand == LIBRARY_COMMAND) {
             libraryMediator.locateInLibrary(item);
-        } else if (actionCommmand == CHANGE_LOCATION_COMMAND){
+        } else if (actionCommand == CHANGE_LOCATION_COMMAND){
             changeSaveLocation(item);
-        } else if (actionCommmand == SEARCH_AGAIN_COMMAND) {            
+        } else if (actionCommand == SEARCH_AGAIN_COMMAND) {            
             searchHandler.doSearch(createSearchInfo(item));
-        } else if (actionCommmand == INFO_COMMAND) {
+        } else if (actionCommand == INFO_COMMAND) {
             showInfoDialog(item);
+        } else if (actionCommand == MARK_GOOD_COMMAND) {
+            item.markAsGood();
         }
     }
     

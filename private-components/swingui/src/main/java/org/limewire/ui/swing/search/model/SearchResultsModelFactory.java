@@ -19,17 +19,11 @@ import com.google.inject.Provider;
 public class SearchResultsModelFactory {
 
     private final SearchManager searchManager;
-    
     private final SpamManager spamManager;
-
     private final SimilarResultsDetectorFactory similarResultsDetectorFactory;
-
     private final LibraryManager libraryManager;
-
     private final DownloadListManager downloadListManager;
-
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
-
     private final VisualSearchResultFactory vsrFactory;
 
     /**

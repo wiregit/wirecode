@@ -8,6 +8,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.friend.GnutellaPresence;
@@ -64,10 +65,8 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final List<IpPort> locs;
     private final Category category;
     private final TorrentFactory torrentFactory;
+    private final RelatedFiles relatedFiles;
     private final int quality;
-
-    /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
-    private float relevance = -1;
 
     /**
      * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
@@ -78,8 +77,10 @@ public class RemoteFileDescAdapter implements SearchResult {
     RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
             @Assisted Set<? extends IpPort> locs,
             CategoryManager categoryManager,
-            TorrentFactory torrentFactory) {
-        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()), categoryManager, torrentFactory);
+            TorrentFactory torrentFactory,
+            RelatedFiles relatedFiles) {
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()),
+                categoryManager, torrentFactory, relatedFiles);
     }
     
     /**
@@ -92,28 +93,28 @@ public class RemoteFileDescAdapter implements SearchResult {
             @Assisted Set<? extends IpPort> locs,
             @Assisted FriendPresence friendPresence, 
             CategoryManager categoryManager,
-            TorrentFactory torrentFactory) {    
+            TorrentFactory torrentFactory,
+            RelatedFiles relatedFiles) {    
         this.rfd = rfd;
         this.locs = ImmutableList.copyOf(locs);
         this.friendPresence = friendPresence;
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
         this.category = categoryManager.getCategoryForExtension(extension);
         this.torrentFactory = torrentFactory;
+        this.relatedFiles = relatedFiles;
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
     }
     
     /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
-    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence, TorrentFactory torrentFactory) {
+    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence) {
         this.rfd = copy.rfd;
         this.locs = copy.locs;
         this.friendPresence = presence;
         this.extension = copy.extension;
         this.category = copy.category;
-        this.torrentFactory = torrentFactory;
+        this.torrentFactory = copy.torrentFactory;
+        this.relatedFiles = copy.relatedFiles;
         this.quality = copy.quality;
-        
-        // and other items too, if they were constructed..
-        this.relevance = copy.relevance;
     }
 
     /**

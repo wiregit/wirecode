@@ -21,7 +21,7 @@ import org.limewire.ui.swing.util.I18n;
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     // Indices into ColumnStateInfo array. 
-    static final int FROM_INDEX = 0;
+    static final int RELEVANCE_INDEX = 0;
     static final int NAME_INDEX = 1;
     static final int TITLE_INDEX = 2;
     static final int EXTENSION_INDEX = 3;
@@ -37,8 +37,8 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 13;
     
     public VideoTableFormat() {
-        super("CLASSIC_SEARCH_VIDEO_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_VIDEO_FROM", I18n.tr("From"), 88, true, true), 
+        super("CLASSIC_SEARCH_VIDEO_TABLE", NAME_INDEX, RELEVANCE_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+                new ColumnStateInfo(RELEVANCE_INDEX, "CLASSIC_SEARCH_VIDEO_RELEVANCE", I18n.tr("Relevance"), 100, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_VIDEO_NAME", I18n.tr("Name"), 434, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_VIDEO_TITLE", I18n.tr("Title"), 100, true, false),
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_VIDEO_EXTENSION", I18n.tr("Extension"), 85, true, true), 
@@ -61,7 +61,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         case NAME_INDEX: return Component.class;
         case RATING_INDEX: return Integer.class;
         case YEAR_INDEX: return Integer.class;
-        case FROM_INDEX: return VisualSearchResult.class;
+        case RELEVANCE_INDEX: return VisualSearchResult.class;
         }
         return super.getColumnClass(index);
     }
@@ -87,7 +87,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case QUALITY_INDEX: return vsr;
             case MISC_INDEX: return vsr.getProperty(FilePropertyKey.DESCRIPTION);
             case DESCRIPTION_INDEX: return "";
-            case FROM_INDEX: return vsr;
+            case RELEVANCE_INDEX: return vsr;
             case RATING_INDEX: return vsr.getProperty(FilePropertyKey.RATING);
             case DIMENSION_INDEX:
                 if(vsr.getProperty(FilePropertyKey.WIDTH) == null || vsr.getProperty(FilePropertyKey.HEIGHT) == null)
@@ -106,7 +106,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
                 TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
             return Arrays.asList(
-                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.DESCENDING, RELEVANCE_INDEX),
                     new SortKey(SortOrder.ASCENDING, NAME_INDEX),
                     new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
         else

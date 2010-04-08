@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
@@ -38,13 +39,15 @@ public class CoreSearchResultListTest extends BaseTestCase {
         // Create mock search objects.
         final Search mockSearch = context.mock(Search.class);
         final SearchDetails mockDetails = context.mock(SearchDetails.class);
+        final RelatedFiles mockRelatedFiles = context.mock(RelatedFiles.class);
         context.checking(new Expectations() {{
             allowing(mockSearch);
             allowing(mockDetails);
+            allowing(mockRelatedFiles);
         }});
         
         // Create test instance.
-        resultList = new CoreSearchResultList(mockSearch, mockDetails);
+        resultList = new CoreSearchResultList(mockSearch, mockDetails, mockRelatedFiles);
     }
     
     @Override

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
@@ -36,6 +37,7 @@ class CoreSearchResultList implements SearchResultList {
     private final EventListenerList<Collection<GroupedSearchResult>> listListeners;
     private final Comparator<Object> resultFinder;
     private final SearchListener searchListener;
+    private final RelatedFiles relatedFiles;
     
     private final EventList<GroupedSearchResult> groupedUrnResultList;
     private final EventList<GroupedSearchResult> threadSafeResultList;
@@ -45,9 +47,11 @@ class CoreSearchResultList implements SearchResultList {
     /**
      * Constructs a SearchResultList for the specified search.
      */
-    public CoreSearchResultList(Search search, SearchDetails searchDetails) {
+    public CoreSearchResultList(Search search, SearchDetails searchDetails,
+            RelatedFiles relatedFiles) {
         this.search = search;
         this.searchDetails = searchDetails;
+        this.relatedFiles = relatedFiles;
         
         listListeners = new EventListenerList<Collection<GroupedSearchResult>>();
         resultFinder = new UrnResultFinder();
@@ -165,27 +169,29 @@ class CoreSearchResultList implements SearchResultList {
                 // Some results can be missing a URN, specifically secure results.
                 // For now, we drop these.  We should figure out a way to show 
                 // them later on.
-                if (urn != null) {
-                    int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
-                    if (idx >= 0) {
-                        // Found URN so add result to grouping.
-                        GroupedSearchResultImpl gsr = (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
-                        gsr.addNewSource(result, searchDetails.getSearchQuery());
-                        groupedUrnResultList.set(idx, gsr);
-                        // Notify listeners that result changed.
-                        gsr.notifyNewSource();
-
-                    } else {
-                        // URN not found so add new result at insertion point.
-                        // This keeps the list in sorted order.
-                        idx = -(idx + 1);
-                        GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
-                                searchDetails.getSearchQuery());
-                        groupedUrnResultList.add(idx, gsr);
-                        newResults.add(gsr);
-                    }
-                    resultCount++;
+                if (urn == null)
+                    continue;
+                int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
+                if (idx >= 0) {
+                    // Found URN so add result to grouping.
+                    GroupedSearchResultImpl gsr =
+                        (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
+                    gsr.addNewSource(result, searchDetails.getSearchQuery());
+                    groupedUrnResultList.set(idx, gsr);
+                    // Notify listeners that result changed.
+                    gsr.notifyNewSource();
+                } else {
+                    // URN not found so add new result at insertion point.
+                    // This keeps the list in sorted order.
+                    idx = -(idx + 1);
+                    // Calculate the relevance of the grouped result
+                    float relevance = calculateRelevance(result);
+                    GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
+                            searchDetails.getSearchQuery(), relevance);
+                    groupedUrnResultList.add(idx, gsr);
+                    newResults.add(gsr);
                 }
+                resultCount ++;
             }
         } finally {
             // Release lock.
@@ -197,7 +203,13 @@ class CoreSearchResultList implements SearchResultList {
             notifyResultsCreated(newResults);
         }
     }
-    
+
+    private float calculateRelevance(SearchResult result) {
+        float relevance = relatedFiles.getNumberOfRelatedGoodFiles(result.getUrn());
+        relevance += relatedFiles.guessDownloadProbability(result.getFileName());
+        return relevance;
+    }
+
     /**
      * Forwards the specified collection of new results to all registered
      * listeners. 

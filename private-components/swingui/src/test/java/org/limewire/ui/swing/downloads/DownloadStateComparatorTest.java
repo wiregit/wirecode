@@ -286,7 +286,14 @@ public class DownloadStateComparatorTest extends BaseTestCase {
             // do nothing
             return null;
         }
+                
+        @Override
+        public void markAsGood() {
+        }
         
+        @Override
+        public boolean hasBeenMarkedAsGood() {
+            return false;
+        }
     }
-    
 }

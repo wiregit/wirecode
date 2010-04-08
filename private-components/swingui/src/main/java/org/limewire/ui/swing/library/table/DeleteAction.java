@@ -14,6 +14,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibrarySelected;
@@ -34,15 +35,17 @@ class DeleteAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
+    private final RelatedFiles relatedFiles;
 
     @Inject
     public DeleteAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
             DownloadListManager downloadListManager,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager, RelatedFiles relatedFiles) {
        
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
+        this.relatedFiles = relatedFiles;
 
         putValue(Action.NAME, I18n.tr("Delete from Disk"));
     }
@@ -81,11 +84,13 @@ class DeleteAction extends AbstractAction {
                 options, noText);
         
         if (confirmation > -1 && options[confirmation] == yesText) {
-            deleteSelectedItems(libraryManager, downloadListManager, selectedItems);
+            deleteSelectedItems(libraryManager, downloadListManager, relatedFiles, selectedItems);
         }
     }
     
-    static void deleteSelectedItems(final LibraryManager libraryManager, final DownloadListManager downloadListManager,
+    static void deleteSelectedItems(final LibraryManager libraryManager,
+            final DownloadListManager downloadListManager,
+            final RelatedFiles relatedFiles,
             final List<LocalFileItem> selectedItems) {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {                  
@@ -98,6 +103,7 @@ class DeleteAction extends AbstractAction {
                         FileUtils.unlockFile(item.getFile());
                         removeDownloadItem(item.getUrn(), downloadListManager);
                         libraryManager.getLibraryManagedList().removeFile(item.getFile());
+                        relatedFiles.markFileAsBad(item.getUrn());
                         FileUtils.delete(item.getFile(), OSUtils.supportsTrash());
                     }
                 }
@@ -120,5 +126,4 @@ class DeleteAction extends AbstractAction {
             }
         });
     }
-  
 }

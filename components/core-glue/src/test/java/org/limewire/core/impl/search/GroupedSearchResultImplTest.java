@@ -26,7 +26,7 @@ public class GroupedSearchResultImplTest extends BaseTestCase {
         super.setUp();
         // Create a grouped result with a single source.
         urn = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
-        groupedResult = new GroupedSearchResultImpl(new TestSearchResult(urn, "test0"), "test");
+        groupedResult = new GroupedSearchResultImpl(new TestSearchResult(urn, "test0"), "test", 0);
     }
     
     @Override

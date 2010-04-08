@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -57,7 +59,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -94,6 +95,7 @@ import com.limegroup.gnutella.malware.VirusScanException;
 import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.related.FileRelationManager;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -472,10 +474,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private final BandwidthCollector bandwidthCollector;
     @SuppressWarnings("unused")
     private final ActivationManager activationManager;
-    
     private final SocketsManager socketsManager;
-
     private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
+    private final FileRelationManager relatedFileManager;
 
     private boolean isFriendDownload;
 
@@ -520,7 +521,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Library library,
             CategoryManager categoryManager,
             BandwidthCollector bandwidthCollector,
-            ActivationManager activationManager) {
+            ActivationManager activationManager,
+            FileRelationManager relatedFileManager) {
         super(saveLocationManager, categoryManager);
         this.listeners = new AsynchronousMulticasterImpl<DownloadStateEvent>(downloadStateProcessingQueue);
         this.downloadManager = downloadManager;
@@ -555,6 +557,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.categoryManager = categoryManager;
         this.bandwidthCollector = bandwidthCollector;
         this.activationManager = activationManager;
+        this.relatedFileManager = relatedFileManager;
     }
 
     @Override
@@ -2074,6 +2077,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Mark the file as spam in future search results
             RemoteFileDesc[] type = new RemoteFileDesc[0];
             spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
+            // Discard any browses that included the file
+            relatedFileManager.markFileAsBad(downloadSHA1);
             // Stop the download and delete the file
             stop();
             library.remove(file);
@@ -2093,6 +2098,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Mark the file as spam in future search results
             RemoteFileDesc[] type = new RemoteFileDesc[0];
             spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
+            // Discard any browses that included the file
+            relatedFileManager.markFileAsBad(downloadSHA1);
             // Stop the download and delete the file
             stop();                
             library.remove(file);
@@ -3356,5 +3363,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             incompleteFileManager.removeEntry(incompleteFile);
             FileUtils.delete(incompleteFile, false);
         }
+    }
+
+    @Override
+    public void chunkDownloaded(RemoteFileDesc rfd) {
+        relatedFileManager.chunkDownloaded(rfd);
     }
 }

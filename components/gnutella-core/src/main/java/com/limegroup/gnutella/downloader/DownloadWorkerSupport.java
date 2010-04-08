@@ -72,5 +72,5 @@ interface DownloadWorkerSupport extends ManagedDownloader {
 
     void workerStarted(DownloadWorker downloadWorker);
 
-    
+    void chunkDownloaded(RemoteFileDesc rfd);
 }

@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
@@ -49,6 +50,7 @@ class AudioPlayerMediator implements PlayerMediator {
     
     private final Provider<AudioPlayer> audioPlayerProvider;
     private final LibraryMediator libraryMediator;
+    private final RelatedFiles relatedFiles;
     private final List<PlayerMediatorListener> listenerList;
     
     /** Current list of songs. */
@@ -90,9 +92,10 @@ class AudioPlayerMediator implements PlayerMediator {
      */
     @Inject
     public AudioPlayerMediator(Provider<AudioPlayer> audioPlayerProvider,
-            LibraryMediator libraryMediator) {
+            LibraryMediator libraryMediator, RelatedFiles relatedFiles) {
         this.audioPlayerProvider = audioPlayerProvider;
         this.libraryMediator = libraryMediator;
+        this.relatedFiles = relatedFiles;
         
         this.listenerList = new ArrayList<PlayerMediatorListener>();
         this.playList = new ArrayList<LocalFileItem>();
@@ -334,6 +337,7 @@ class AudioPlayerMediator implements PlayerMediator {
         
         // Play new song.
         this.fileItem = localFileItem;
+        relatedFiles.increasePlayCount(localFileItem.getUrn());
         loadAndPlay(localFileItem.getFile());
         
         // Update shuffle list when enabled.

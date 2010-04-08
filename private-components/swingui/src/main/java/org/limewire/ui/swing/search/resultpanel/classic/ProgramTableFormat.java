@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.I18n;
  * document descriptions.
  */
 public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
-    static final int FROM_INDEX = 0;
+    static final int RELEVANCE_INDEX = 0;
     static final int NAME_INDEX = 1;
     public static final int SIZE_INDEX = 2;
     static final int EXTENSION_INDEX = 3;
@@ -29,8 +29,8 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 7;
     
     public ProgramTableFormat() {
-        super("CLASSIC_SEARCH_PROGRAM_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_PROGRAM_FROM", I18n.tr("From"), 88, true, true), 
+        super("CLASSIC_SEARCH_PROGRAM_TABLE", NAME_INDEX, RELEVANCE_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+                new ColumnStateInfo(RELEVANCE_INDEX, "CLASSIC_SEARCH_PROGRAM_RELEVANCE", I18n.tr("Relevance"), 100, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_PROGRAM_NAME", I18n.tr("Name"), 489, true, true),     
                 new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_PROGRAM_SIZE", I18n.tr("Size"), 93, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_PROGRAM_EXTENSION", I18n.tr("Extension"), 70, true, true), 
@@ -46,7 +46,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
         switch(index) {
         case NAME_INDEX: return Component.class;
         case SIZE_INDEX: return Integer.class;
-        case FROM_INDEX: return VisualSearchResult.class;
+        case RELEVANCE_INDEX: return VisualSearchResult.class;
         }
         return  super.getColumnClass(index);
     }
@@ -59,7 +59,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case PLATFORM_INDEX: return vsr.getProperty(FilePropertyKey.PLATFORM);
             case COMPANY_INDEX: return vsr.getProperty(FilePropertyKey.COMPANY);
             case EXTENSION_INDEX: return vsr.getFileExtension();
-            case FROM_INDEX: return vsr;
+            case RELEVANCE_INDEX: return vsr;
             case DESCRIPTION_INDEX: return "";
             case IS_SPAM_INDEX: return vsr;
         }
@@ -71,7 +71,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
         if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
                 TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
             return Arrays.asList(
-                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.DESCENDING, RELEVANCE_INDEX),
                     new SortKey(SortOrder.ASCENDING, NAME_INDEX),
                     new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
         else

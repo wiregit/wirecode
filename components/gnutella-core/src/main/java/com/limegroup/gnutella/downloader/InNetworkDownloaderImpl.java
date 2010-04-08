@@ -39,6 +39,7 @@ import com.limegroup.gnutella.malware.DangerousFileChecker;
 import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.related.FileRelationManager;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -86,8 +87,10 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             VirusScanner virusScanner,
             SpamManager spamManager,
             Library library,
-            CategoryManager categoryManager, BandwidthCollector bandwidthCollector,
-            ActivationManager activationManager) throws DownloadException {
+            CategoryManager categoryManager,
+            BandwidthCollector bandwidthCollector,
+            ActivationManager activationManager,
+            FileRelationManager relatedFileManager) throws DownloadException {
         super(saveLocationManager, downloadManager, gnutellaFileCollection,
                 incompleteFileManager, downloadCallback, networkManager,
                 alternateLocationFactory, requeryManagerFactory,
@@ -98,7 +101,8 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
                 dangerousFileChecker, virusScanner, spamManager, library,
-                categoryManager, bandwidthCollector, activationManager);
+                categoryManager, bandwidthCollector, activationManager,
+                relatedFileManager);
     }
     
     /* (non-Javadoc)

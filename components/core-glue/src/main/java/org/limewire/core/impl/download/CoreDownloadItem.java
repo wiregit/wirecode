@@ -21,6 +21,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.malware.VirusEngine;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.friend.GnutellaPresence;
@@ -57,18 +58,24 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
     private volatile boolean scanningFragment = false;
+    private volatile boolean markedAsGood = false;
 
     private final QueueTimeCalculator queueTimeCalculator;
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
     private final CategoryManager categoryManager;
+    private final RelatedFiles relatedFiles;
     
     @Inject
-    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
+    public CoreDownloadItem(@Assisted Downloader downloader,
+            @Assisted QueueTimeCalculator queueTimeCalculator,
+            FriendManager friendManager, CategoryManager categoryManager,
+            RelatedFiles relatedFiles) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
         this.categoryManager = categoryManager;
+        this.relatedFiles = relatedFiles;
         if(downloader instanceof BTDownloader)
             downloadItemType = DownloadItemType.BITTORRENT;
         else if(downloader instanceof VirusDefinitionDownloader)
@@ -572,5 +579,18 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
             return index == null ? 0 : index;
         }
         return null;
+    }
+
+    @Override
+    public void markAsGood() {
+        markedAsGood = true;
+        relatedFiles.markFileAsGood(getUrn());
+        // Re-broadcast the current state to update the UI
+        support.firePropertyChange("state", null, getState());
+    }
+
+    @Override
+    public boolean hasBeenMarkedAsGood() {
+        return markedAsGood;
     }
 }

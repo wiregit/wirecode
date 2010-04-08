@@ -495,6 +495,7 @@ public class DownloadWorker {
                                                             // _activeWorkers to
                                                             // files
                                 _manager.addToRanker(rfdContext);
+                            _manager.chunkDownloaded(_rfd);
                         }
                     }
                 }

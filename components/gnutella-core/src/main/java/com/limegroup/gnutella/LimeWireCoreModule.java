@@ -146,6 +146,7 @@ import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
 import com.limegroup.gnutella.net.address.ConnectableConnector;
 import com.limegroup.gnutella.net.address.SameNATAddressResolver;
+import com.limegroup.gnutella.related.LimeWireRelatedFilesModule;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.LimeWireSearchModule;
@@ -234,6 +235,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireBootstrapModule());
         binder().install(new LimeWireMalwareModule());
         binder().install(new LimeWireXmlModule());
+        binder().install(new LimeWireRelatedFilesModule());
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);

@@ -13,6 +13,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.AltLocRemoteHost;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.RfdRemoteHost;
@@ -44,6 +45,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc remoteFileDesc1 = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final Address address1 = context.mock(Address.class);
         final byte[] guid1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
@@ -76,7 +78,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }});
 
         RemoteFileDescAdapter remoteFileDescAdapter1 =
-            new RemoteFileDescAdapter(remoteFileDesc1, ipPorts, categoryManager, torrentFactory);
+            new RemoteFileDescAdapter(remoteFileDesc1, ipPorts, categoryManager,
+                    torrentFactory, relatedFiles);
 
         assertEquals(Category.DOCUMENT, remoteFileDescAdapter1.getCategory());
         assertEquals("txt", remoteFileDescAdapter1.getFileExtension());
@@ -148,6 +151,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         final FriendPresence friendPresence;
@@ -193,6 +197,9 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd).isBrowseHostEnabled();
             will(returnValue(canBrowseHost));
 
+            allowing(rfd).getSHA1Urn();
+            allowing(relatedFiles).getNumberOfRelatedGoodFiles(with(any(URN.class)));
+
             allowing(rfd).matchesQuery(with(equal(filename)));
             will(returnValue(true));
 
@@ -203,9 +210,11 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }});
 
         if(anonymous) {
-            return new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+            return new RemoteFileDescAdapter(rfd, locs, categoryManager,
+                    torrentFactory, relatedFiles);
         } else {
-            return new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager, torrentFactory);
+            return new RemoteFileDescAdapter(rfd, locs, friendPresence,
+                    categoryManager, torrentFactory, relatedFiles);
         }
     }
     
@@ -234,6 +243,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -247,7 +257,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs,
+                categoryManager, torrentFactory, relatedFiles);
         
         assertEquals("JPG", rfdAdapter.getFileExtension());
         assertEquals("Giant Guitar.JPG", rfdAdapter.getFileName());
@@ -269,6 +280,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfdGood = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -299,13 +311,19 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterWithNull1 =
+            new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager,
+                    torrentFactory, relatedFiles);
         assertFalse(rfdAdapterWithNull1.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterWithNull2 = new RemoteFileDescAdapter(rfdWithNull2, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterWithNull2 =
+            new RemoteFileDescAdapter(rfdWithNull2, locs, categoryManager,
+                    torrentFactory, relatedFiles);
         assertFalse(rfdAdapterWithNull2.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterGood = new RemoteFileDescAdapter(rfdGood, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterGood =
+            new RemoteFileDescAdapter(rfdGood, locs, categoryManager,
+                    torrentFactory, relatedFiles);
         assertTrue(rfdAdapterGood.isLicensed());
         
         context.assertIsSatisfied();
@@ -321,6 +339,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         context.checking(new Expectations() {{
@@ -340,7 +359,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs,
+                categoryManager, torrentFactory, relatedFiles);
         
         assertSame(rfd, rfdAdapter.getRfd());
         assertEquals(Long.MAX_VALUE-3, rfdAdapter.getSize());
@@ -360,6 +380,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
         final URN urn = URN.createSHA1Urn("urn:sha1:XXSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -376,7 +397,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs,
+                categoryManager, torrentFactory, relatedFiles);
         
         assertEquals(urn, rfdAdapter.getUrn());
         
@@ -393,6 +415,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
@@ -403,7 +426,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs,
+                categoryManager, torrentFactory, relatedFiles);
         
         assertNotNull(rfdAdapter.getMagnetURL());
         assertGreaterThan(0, rfdAdapter.getMagnetURL().length());
@@ -418,6 +442,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final RemoteFileDesc rfd = context.mock(RemoteFileDesc.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
+        final RelatedFiles relatedFiles = context.mock(RelatedFiles.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();
@@ -428,7 +453,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs,
+                categoryManager, torrentFactory, relatedFiles);
         
         assertNotNull(rfdAdapter1.toString());
     }

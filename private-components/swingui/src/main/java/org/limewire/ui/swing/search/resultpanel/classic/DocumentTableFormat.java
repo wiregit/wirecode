@@ -25,7 +25,7 @@ import com.google.inject.Provider;
  */
 public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> {
     // Indices into ColumnStateInfo array.
-    static final int FROM_INDEX = 0;
+    static final int RELEVANCE_INDEX = 0;
     static final int NAME_INDEX = 1;
     static final int TYPE_INDEX = 2;
     static final int EXTENSION_INDEX = 3;
@@ -40,8 +40,8 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     
     @Inject
     public DocumentTableFormat(Provider<IconManager> iconManager) {
-        super("CLASSIC_SEARCH_DOCUMENT_TABLE", NAME_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_DOCUMENT_FROM", I18n.tr("From"), 88, true, true), 
+        super("CLASSIC_SEARCH_DOCUMENT_TABLE", NAME_INDEX, RELEVANCE_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+                new ColumnStateInfo(RELEVANCE_INDEX, "CLASSIC_SEARCH_DOCUMENT_RELEVANCE", I18n.tr("Relevance"), 100, true, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_DOCUMENT_NAME", I18n.tr("Name"), 493, true, true), 
                 new ColumnStateInfo(TYPE_INDEX, "CLASSIC_SEARCH_DOCUMENT_TYPE", I18n.tr("Type"), 180, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_DOCUMENT_EXTENSION", I18n.tr("Extension"), 83, true, true), 
@@ -61,7 +61,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
         case NAME_INDEX: return Component.class;
         case DATE_INDEX: return Calendar.class;
         case SIZE_INDEX: return Integer.class;
-        case FROM_INDEX: return VisualSearchResult.class;
+        case RELEVANCE_INDEX: return VisualSearchResult.class;
         }
         return super.getColumnClass(column);
     }
@@ -77,7 +77,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
                     vsr.getFileExtension();
             case SIZE_INDEX: return vsr.getSize();
             case DATE_INDEX: return vsr.getProperty(FilePropertyKey.DATE_CREATED);
-            case FROM_INDEX: return vsr;
+            case RELEVANCE_INDEX: return vsr;
             case EXTENSION_INDEX: return vsr.getFileExtension();
             case AUTHOR_INDEX: return vsr.getProperty(FilePropertyKey.AUTHOR);
             case DESCRIPTION_INDEX: return "";
@@ -91,7 +91,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
         if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
                 TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
             return Arrays.asList(
-                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.DESCENDING, RELEVANCE_INDEX),
                     new SortKey(SortOrder.ASCENDING, NAME_INDEX),
                     new SortKey(SortOrder.ASCENDING, TYPE_INDEX),
                     new SortKey(SortOrder.ASCENDING, SIZE_INDEX));

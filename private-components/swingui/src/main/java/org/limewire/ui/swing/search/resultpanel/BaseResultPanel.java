@@ -28,8 +28,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.DisposalListener;
-import org.limewire.ui.swing.components.RemoteHostWidgetFactory;
-import org.limewire.ui.swing.components.RemoteHostWidget.RemoteWidgetType;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.search.SearchViewType;
@@ -39,7 +37,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.AllTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.AudioTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
 import org.limewire.ui.swing.search.resultpanel.classic.DocumentTableFormat;
-import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.RelevanceRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
@@ -113,13 +111,13 @@ public class BaseResultPanel extends JXPanel {
     
     private final ResultsTableFormatFactory tableFormatFactory;
     private final ListViewRowHeightRule rowHeightRule;
-    private final RemoteHostWidgetFactory fromWidgetfactory;
     private final Provider<IconLabelRendererFactory> iconLabelRendererFactory;
     private final DownloadHandler downloadHandler;
     private final Provider<TimeRenderer> timeRenderer;
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<CalendarRenderer> calendarRenderer;
     private final Provider<QualityRenderer> qualityRenderer;
+    private final Provider<RelevanceRenderer> loveRenderer;
     private final DefaultLimeTableCellRenderer defaultTableCellRenderer;
     
     private RangeList<VisualSearchResult> maxSizedList;
@@ -142,14 +140,14 @@ public class BaseResultPanel extends JXPanel {
             ResultsTableFormatFactory tableFormatFactory,
             ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             ListViewRowHeightRule rowHeightRule,
-            RemoteHostWidgetFactory fromWidgetFactory,
             SearchResultMenuFactory menuFactory,
             Provider<IconLabelRendererFactory> iconLabelRendererFactory,
             Provider<TimeRenderer> timeRenderer,
             Provider<FileSizeRenderer> fileSizeRenderer, 
             Provider<CalendarRenderer> calendarRenderer,
             LibraryMediator libraryMediator,
-            Provider<QualityRenderer> qualityRenderer, 
+            Provider<QualityRenderer> qualityRenderer,
+            Provider<RelevanceRenderer> loveRenderer,
             DefaultLimeTableCellRenderer defaultTableCellRenderer,
             DownloadMediator downloadMediator) {
         
@@ -157,13 +155,13 @@ public class BaseResultPanel extends JXPanel {
         this.tableFormatFactory = tableFormatFactory;
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.rowHeightRule = rowHeightRule;
-        this.fromWidgetfactory = fromWidgetFactory;
         this.iconLabelRendererFactory = iconLabelRendererFactory;
         this.downloadHandler = new DownloadHandlerImpl(searchResultsModel, libraryMediator, downloadMediator);
         this.timeRenderer = timeRenderer;
         this.fileSizeRenderer = fileSizeRenderer;
         this.calendarRenderer = calendarRenderer;
         this.qualityRenderer = qualityRenderer;
+        this.loveRenderer = loveRenderer;
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
         
@@ -412,8 +410,8 @@ public class BaseResultPanel extends JXPanel {
                 setCellRenderer(i, nameRenderer);
                 setCellEditor(i, null);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                setCellRenderer(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
-                setCellEditor(i, new FromTableCellRenderer(fromWidgetfactory.create(RemoteWidgetType.TABLE)));
+                setCellRenderer(i, loveRenderer.get());
+                setCellEditor(i, null);
             }
         }
         

@@ -21,7 +21,7 @@ import org.limewire.ui.swing.util.I18n;
  * music track descriptions.
  */
 public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
-    static final int FROM_INDEX = 0;
+    static final int RELEVANCE_INDEX = 0;
     static final int TITLE_INDEX = 1;
     static final int ARTIST_INDEX = 2;
     static final int ALBUM_INDEX = 3;
@@ -38,8 +38,8 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int IS_SPAM_INDEX = 14;
     
     public AudioTableFormat() {
-        super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
-                new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_AUDIO_FROM", I18n.tr("From"), 88, true, true), 
+        super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, RELEVANCE_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+                new ColumnStateInfo(RELEVANCE_INDEX, "CLASSIC_SEARCH_AUDIO_RELEVANCE", I18n.tr("Relevance"), 100, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_AUDIO_TITLE", I18n.tr("Name"), 255, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "CLASSIC_SEARCH_AUDIO_ARTIST", I18n.tr("Artist"), 174, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "CLASSIC_SEARCH_AUDIO_ALBUM", I18n.tr("Album"), 157, true, true), 
@@ -63,7 +63,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
         case TITLE_INDEX: return Component.class;
         case BITRATE_INDEX: return Integer.class;
         case TRACK_INDEX: return Integer.class;
-        case FROM_INDEX: return VisualSearchResult.class;
+        case RELEVANCE_INDEX: return VisualSearchResult.class;
         }
         return super.getColumnClass(column);
     }
@@ -83,7 +83,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Object getColumnValue(VisualSearchResult vsr, int column) {
         switch(column) {
-            case FROM_INDEX: return vsr;
+            case RELEVANCE_INDEX: return vsr;
             case TITLE_INDEX: return vsr;
             case ARTIST_INDEX: return vsr.getProperty(FilePropertyKey.AUTHOR);
             case ALBUM_INDEX: return vsr.getProperty(FilePropertyKey.ALBUM);
@@ -107,7 +107,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
         if(TablesHandler.getSortedColumn(getSortOrderID(), getSortedColumn()).getValue() == getSortedColumn() &&
                 TablesHandler.getSortedOrder(getSortOrderID(), getSortOrder()).getValue() == getSortOrder())
             return Arrays.asList(
-                    new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                    new SortKey(SortOrder.DESCENDING, RELEVANCE_INDEX),
                     new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
                     new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
                     new SortKey(SortOrder.ASCENDING, TRACK_INDEX),

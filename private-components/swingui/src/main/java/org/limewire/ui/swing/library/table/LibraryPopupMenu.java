@@ -27,6 +27,7 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<RemoveFromListAction> removeFromListAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
+    private final MarkGoodAction markGoodAction;
     
     @Inject
     public LibraryPopupMenu(
@@ -37,7 +38,8 @@ public class LibraryPopupMenu extends JPopupMenu {
             Provider<RemoveFromListAction> removeFromListAction,
             Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
             Provider<RenameFileAction> renameFileAction,
-            DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
+            DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction,
+            MarkGoodAction markGoodAction) {
         this.selectedFiles = selectedFiles;
         this.selectedLocalFileList = selectedLocalFileList;
         this.selectedLocalFileItems = selectedLocalFileItems;
@@ -49,6 +51,7 @@ public class LibraryPopupMenu extends JPopupMenu {
         this.removeFromListAction = removeFromListAction;
         this.deleteAction = deleteAction;
         this.fileInfoAction = fileInfoAction;
+        this.markGoodAction = markGoodAction;
         
         init();
     }
@@ -67,19 +70,21 @@ public class LibraryPopupMenu extends JPopupMenu {
         if(localFileItem.size() == 1) {
             add(launchAction.get());
             addSeparator();
-            
+            add(markGoodAction);
+            addSeparator();
             // add to list, show in list, remove from list
             add(listMenuFactory.createAddToListMenu(selectedFiles));
             add(listMenuFactory.createShowInListMenu(selectedFiles, selectedLocalFileList, false));
             add(removeFromListMenu.get());
             addSeparator();
-            
             add(renameFileAction.get()).setEnabled(!localFileItem.get(0).isIncomplete());
             add(locateAction.get());
             add(deleteAction);
             addSeparator();
             add(fileInfoAction.get());
         } else {
+            add(markGoodAction);
+            addSeparator();
             add(listMenuFactory.createAddToListMenu(selectedFiles));
             add(removeFromListMenu.get());
             addSeparator();

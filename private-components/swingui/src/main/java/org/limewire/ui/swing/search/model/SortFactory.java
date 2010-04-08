@@ -194,8 +194,8 @@ public class SortFactory {
             public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 float r1 = vsr1.getRelevance();
                 float r2 = vsr2.getRelevance();
-                return ascending ? compareToNull(r1, r2, false) 
-                        : compareToNull(r2, r1, false);
+                return ascending ? Float.compare(r1, r2) 
+                        : Float.compare(r2, r1);
             }
         };
     }

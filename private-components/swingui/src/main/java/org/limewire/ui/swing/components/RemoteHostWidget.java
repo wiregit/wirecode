@@ -40,7 +40,7 @@ import com.google.inject.assistedinject.Assisted;
 public class RemoteHostWidget extends JPanel {
 
     public static enum RemoteWidgetType {
-        SEARCH_LIST, TABLE, UPLOAD
+        SEARCH, UPLOAD
     }
     
     private final LimeComboBox comboBox;
@@ -184,19 +184,19 @@ public class RemoteHostWidget extends JPanel {
                 }
             }
             if(foundFriend && foundAnon) {
-                if(type == RemoteWidgetType.TABLE) {
+                if(type == RemoteWidgetType.SEARCH) {
                     return trn("{0} Person", "{0} People", people.size());
                 } else {
                     return trn("Person", "People", people.size());
                 }
             } else if(foundFriend) {
-                if(type == RemoteWidgetType.TABLE) {
+                if(type == RemoteWidgetType.SEARCH) {
                     return (people.size() == 1) ? people.get(0).getFriendPresence().getFriend().getRenderName() : tr("{0} Friends", people.size());
                 } else {
                     return (people.size() == 1) ? people.get(0).getFriendPresence().getFriend().getRenderName() : tr("Friends");
                 }
             } else { // foundAnon
-                if(type == RemoteWidgetType.TABLE) {
+                if(type == RemoteWidgetType.SEARCH) {
                     return trn("{0} P2P User", "{0} P2P Users", people.size());
                 } else {
                     return trn("P2P User", "P2P Users", people.size());

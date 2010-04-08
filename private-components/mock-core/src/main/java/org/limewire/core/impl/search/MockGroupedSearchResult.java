@@ -58,10 +58,10 @@ class MockGroupedSearchResult implements GroupedSearchResult {
             }
             coreResults.add(result);
         }
-        
+
         // Accumulate relevance score.
         relevance += result.getRelevance(query);
-        
+
         // Build collection of non-anonymous friends for filtering.
         RemoteHost host = result.getSource();
         remoteHosts.add(host);

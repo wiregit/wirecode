@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.util.I18n;
@@ -22,14 +23,17 @@ public class DeletionKeyListener implements KeyListener {
     
     private final LibraryManager libraryManager;
     private final DownloadListManager downloadListManager;
-    private final Provider<List<LocalFileItem>> selectedLocalFileItems;    
+    private final RelatedFiles relatedFiles;
+    private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     
     @Inject
     public DeletionKeyListener(LibraryManager libraryManager, 
             DownloadListManager downloadListManager,
+            RelatedFiles relatedFiles,
             @LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems) {
         this.libraryManager = libraryManager;
         this.downloadListManager = downloadListManager;
+        this.relatedFiles = relatedFiles;
         this.selectedLocalFileItems = selectedLocalFileItems;
     }
     
@@ -79,7 +83,7 @@ public class DeletionKeyListener implements KeyListener {
             }
             
             if (options[confirmation] == deleteText) {
-                DeleteAction.deleteSelectedItems(libraryManager, downloadListManager, selectedItems);
+                DeleteAction.deleteSelectedItems(libraryManager, downloadListManager, relatedFiles, selectedItems);
             } 
             else if (options[confirmation] == removeText) {
                 RemoveFromLibraryAction.removeFromLibrary(libraryManager, selectedItems);

@@ -3,6 +3,7 @@ package org.limewire.core.impl.spam;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.core.api.related.RelatedFiles;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -17,11 +18,14 @@ public class SpamManagerImpl implements SpamManager {
 
     private final com.limegroup.gnutella.spam.SpamManager spamManager;
     private final SpamServices spamServices;
+    private final RelatedFiles relatedFiles;
     
     @Inject
-    public SpamManagerImpl(com.limegroup.gnutella.spam.SpamManager spamManager, SpamServices spamServices) {
+    public SpamManagerImpl(com.limegroup.gnutella.spam.SpamManager spamManager,
+            SpamServices spamServices, RelatedFiles relatedFiles) {
         this.spamManager = spamManager;
         this.spamServices = spamServices;
+        this.relatedFiles = relatedFiles;
     }
 
     @Override
@@ -33,12 +37,18 @@ public class SpamManagerImpl implements SpamManager {
     public void handleUserMarkedGood(List<? extends SearchResult> searchResults) {
         RemoteFileDesc[] remoteFileDescs = buildArray(searchResults);
         spamManager.handleUserMarkedGood(remoteFileDescs);
+        for(RemoteFileDesc rfd : remoteFileDescs) {
+            relatedFiles.unmarkFileAsBad(rfd.getSHA1Urn());
+        }
     }
 
     @Override
     public void handleUserMarkedSpam(List<? extends SearchResult> searchResults) {
         RemoteFileDesc[] remoteFileDescs = buildArray(searchResults);
         spamManager.handleUserMarkedSpam(remoteFileDescs);
+        for(RemoteFileDesc rfd : remoteFileDescs) {
+            relatedFiles.markFileAsBad(rfd.getSHA1Urn());
+        }
     }
 
     private RemoteFileDesc[] buildArray(List<? extends SearchResult> searchResults) {

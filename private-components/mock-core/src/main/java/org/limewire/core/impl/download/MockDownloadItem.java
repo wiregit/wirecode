@@ -333,5 +333,13 @@ public class MockDownloadItem implements DownloadItem {
     public long getAmountVerified() {
         return 0;
     }
-
+    
+    @Override
+    public void markAsGood() {
+    }
+    
+    @Override
+    public boolean hasBeenMarkedAsGood() {
+        return false;
+    }
 }

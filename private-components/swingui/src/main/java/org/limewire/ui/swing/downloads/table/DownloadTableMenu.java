@@ -82,6 +82,8 @@ public class DownloadTableMenu extends JPopupMenu{
             add(createLaunchMenuItem()).setEnabled(downloadItem.isLaunchable());
             add(createRemoveMenuItem());
             addSeparator();
+            add(createMarkGoodMenuItem()).setEnabled(!downloadItem.hasBeenMarkedAsGood());
+            addSeparator();
             add(createLocateOnDiskMenuItem());
             add(createLocateInLibraryMenuItem());
             addSeparator();
@@ -140,6 +142,7 @@ public class DownloadTableMenu extends JPopupMenu{
         boolean hasCancel = false;
         boolean hasResume = false;
         boolean allDone = true;
+        boolean allMarkedAsGood = true;
 
         //hosts to browse or block
         List<RemoteHost> hosts = new ArrayList<RemoteHost>();
@@ -166,7 +169,10 @@ public class DownloadTableMenu extends JPopupMenu{
             }
             if(isCancelable(item.getState())){
                 hasCancel = true;
-            } 
+            }
+            if(!item.hasBeenMarkedAsGood()) {
+                allMarkedAsGood = false;
+            }
             
             if(!item.isStoreDownload()){
                 //no browsing or blocking the store
@@ -176,6 +182,7 @@ public class DownloadTableMenu extends JPopupMenu{
         
         if(allDone){
             add(createCancelWithRemoveNameMenuItem());
+            add(createMarkGoodMenuItem()).setEnabled(!allMarkedAsGood);
             add(listMenuFactory.createAddToListMenu(selectedFiles));
         } else {
             if (hasPause) {
@@ -278,7 +285,14 @@ public class DownloadTableMenu extends JPopupMenu{
         removeMenuItem.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
         removeMenuItem.addActionListener(menuListener);
         return removeMenuItem;
-    }   
+    }
+
+    private JMenuItem createMarkGoodMenuItem() {
+        JMenuItem markGoodMenuItem = new JMenuItem(I18n.tr("Mark as Good"));
+        markGoodMenuItem.setActionCommand(DownloadActionHandler.MARK_GOOD_COMMAND);
+        markGoodMenuItem.addActionListener(menuListener);
+        return markGoodMenuItem;
+    }
     
     private JMenuItem createCancelWithRemoveNameMenuItem(){
         JMenuItem cancelWithRemoveNameMenuItem = new JMenuItem(I18n.tr("Clear from Tray"));
