@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.collection.Tuple;
 import org.limewire.core.settings.ConnectionSettings;
@@ -23,6 +21,8 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
@@ -463,8 +463,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
         for (int i = 0; i < responses.length; i++) {
             Response response = responses[i];
             if (couldFragment(response)) {
+                LOG.debugf("could fragment: {0}", response);
                 QueryReply queryReply = createSingleResponseQueryReply(response, queryRequest);
                 if (fragments(queryReply)) {
+                    LOG.debugf("fragments: {0}", queryReply);
                     if (largeResponses == null) {
                         smallResponses = new ArrayList<Response>(i);
                         for (int j = 0; j < i; j++) {
@@ -474,7 +476,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
                     }
                     largeResponses.add(queryReply);
                 } else if (smallResponses != null) {
+                    LOG.debugf("false positive {0}", queryReply);
                     smallResponses.add(response);
+                } else {
+                    LOG.debugf("false positive {0}", queryReply);
                 }
             } else if (smallResponses != null) {
                 smallResponses.add(response);
