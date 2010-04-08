@@ -20,14 +20,20 @@ public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
             Collection<? extends DHTValueEntity> entities, 
             Collection<? extends EntityKey> entityKeys, 
             State state) {
+        this(lookupKey, entities, entityKeys, 
+                state.getTimeInMillis(), TimeUnit.MILLISECONDS);
+    }
+    
+    public DefaultValueEntity(EntityKey lookupKey, 
+            Collection<? extends DHTValueEntity> entities, 
+            Collection<? extends EntityKey> entityKeys, 
+            long time, TimeUnit unit) {
         
-        super(state.getTimeInMillis(), TimeUnit.MILLISECONDS);
+        super(time, unit);
         
         this.lookupKey = lookupKey;
         this.entities = entities;
         this.entityKeys = entityKeys;
-        
-        
     }
 
     @Override
