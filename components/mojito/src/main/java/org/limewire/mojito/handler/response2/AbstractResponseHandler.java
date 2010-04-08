@@ -174,8 +174,8 @@ public abstract class AbstractResponseHandler<V extends Entity>
     }
 
     @Override
-    public final void handleResponse(ResponseMessage response, long time, TimeUnit unit) 
-            throws IOException {
+    public final void handleResponse(ResponseMessage response, 
+            long time, TimeUnit unit) throws IOException {
         
         synchronized (future) {
             if (future.isDone()) {
@@ -256,7 +256,8 @@ public abstract class AbstractResponseHandler<V extends Entity>
      * 
      */
     @Override
-    public final void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+    public final void handleError(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, IOException e) {
         
         synchronized (future) {
             if (future.isDone()) {
@@ -277,8 +278,10 @@ public abstract class AbstractResponseHandler<V extends Entity>
     /**
      * 
      */
-    protected abstract void processError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e);
+    protected void processError(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, IOException e) {
+        setException(e);
+    }
     
     /**
      * 

@@ -220,22 +220,6 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
     /**
      * 
      */
-    @Override
-    protected final void processError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
-        processError0(nodeId, dst, message, e);
-    }
-    
-    /**
-     * 
-     */
-    protected final void processError0(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
-    }
-
-    /**
-     * 
-     */
     protected synchronized State getState() {
         if (startTime == -1L) {
             throw new IllegalStateException("startTime=" + startTime);

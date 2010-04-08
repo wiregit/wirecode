@@ -213,11 +213,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         list.add(new StoreStatusCode(entity, code));
     }
     
-    @Override
-    protected void processError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
-    }
-    
     private abstract class StoreProcess {
         
         protected final Contact dst;

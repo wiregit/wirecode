@@ -1,7 +1,6 @@
 package org.limewire.mojito.handler.response2;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -97,10 +96,5 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     protected void processTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time, TimeUnit unit) {
         setException(new FileNotFoundException());
-    }
-    
-    @Override
-    protected void processError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
     }
 }
