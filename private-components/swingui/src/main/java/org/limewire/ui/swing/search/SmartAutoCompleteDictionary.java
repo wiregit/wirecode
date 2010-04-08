@@ -18,23 +18,26 @@ import com.google.inject.assistedinject.Assisted;
 class SmartAutoCompleteDictionary {
 
     private final SearchCategory searchCategory;
+    private final String keySeparator;
     
     /**
      * Constructs a SmartAutoCompleteDictionary for the specified search
      * category.
      */
     @Inject
-    public SmartAutoCompleteDictionary(@Assisted SearchCategory searchCategory) {
+    public SmartAutoCompleteDictionary(@Assisted SearchCategory searchCategory,
+            KeywordAssistedSearchBuilder keywordSearchBuilder) {
         this.searchCategory = searchCategory;
+        this.keySeparator = keywordSearchBuilder.getTranslatedKeySeprator();
     }
 
     /**
      * Returns a collection of smart queries for the specified input text.
      */
     public Collection<SmartQuery> getPrefixedBy(String s) {
-        // Return empty set if colon found.  This means the user is manually
-        // entering a field-specific query.
-        if (s.indexOf(':') >= 0) {
+        // Return empty set if key separator is found. (Colon in US English.)
+        // This means the user is manually entering a field-specific query.
+        if (s.indexOf(keySeparator) >= 0) {
             return Collections.<SmartQuery>emptySet();
         }
         
