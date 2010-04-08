@@ -96,6 +96,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     @Override
     protected void processTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time, TimeUnit unit) {
+        setException(new FileNotFoundException());
     }
     
     @Override
