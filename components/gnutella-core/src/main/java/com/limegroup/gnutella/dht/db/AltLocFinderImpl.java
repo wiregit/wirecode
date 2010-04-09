@@ -14,7 +14,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.FindValueResult;
@@ -66,7 +66,7 @@ class AltLocFinderImpl implements AltLocFinder {
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
       
           
-          final DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
+          final DHTFuture2<FindValueResult> future = dhtManager.get(lookupKey);
           if(future == null) {
               return null;
           } else {

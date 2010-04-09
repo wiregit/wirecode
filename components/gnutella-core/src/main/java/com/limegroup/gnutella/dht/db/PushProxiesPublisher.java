@@ -14,7 +14,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -96,7 +96,7 @@ public class PushProxiesPublisher implements DHTEventListener {
             }
             GUID guid = new GUID(lastPublishedValue.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
-            DHTFuture<StoreResult> future = dhtManager.put(primaryKey, lastPublishedValue);
+            DHTFuture2<StoreResult> future = dhtManager.put(primaryKey, lastPublishedValue);
             if (LOG.isDebugEnabled() && future != null) {
                 future.addDHTFutureListener(new DHTFutureListener<StoreResult>() {
                     public void handleCancellationException(CancellationException e) {
