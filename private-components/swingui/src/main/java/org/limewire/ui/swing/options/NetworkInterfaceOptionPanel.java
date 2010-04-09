@@ -107,13 +107,19 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     
     @Override
     ApplyOptionResult applyOptions() {
-        ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(meChooseRadioButton.isSelected());
+        boolean customBefore = ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue();
+        boolean customNow = meChooseRadioButton.isSelected();
+        ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(customNow);
+        String addressBefore = ConnectionSettings.CUSTOM_INETADRESS.get();
+        String addressNow = null;
         for(NetworkItem item : eventList) {
             if(item.isSelected()) {
-                ConnectionSettings.CUSTOM_INETADRESS.set(item.getAddress());
+                addressNow = item.getAddress();
+                ConnectionSettings.CUSTOM_INETADRESS.set(addressNow);
                 break;
             }
         }
+        boolean restart = customBefore != customNow || !addressBefore.equals(addressNow);
         
         if(torrentManager.get().isInitialized() && torrentManager.get().isValid()) {
             BackgroundExecutorService.execute(new Runnable() {
@@ -123,7 +129,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
                 } 
             });
         }
-        return new ApplyOptionResult(false, true);
+        return new ApplyOptionResult(restart, true);
     }
 
     @Override

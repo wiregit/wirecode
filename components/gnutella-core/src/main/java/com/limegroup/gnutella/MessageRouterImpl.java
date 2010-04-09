@@ -632,9 +632,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
-        //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
         setMulticastMessageHandler(PingRequest.class, new MulticastPingRequestHandler());
-        //setMulticastMessageHandler(PingReply.class, new MulticastPingReplyHandler());
     }
     
     public void stop() {
@@ -2907,13 +2905,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
-    public class MulticastQueryReplyHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, 
-                ReplyHandler handler) {
-            handleQueryReply((QueryReply)msg, handler);
-        }
-    }
-    
     public class MulticastPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
@@ -2921,13 +2912,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
-    public class MulticastPingReplyHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, 
-                ReplyHandler handler) {
-            handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
-        }
-    }
- 
     /**
      * This class handles UDP query replies and forwards them to the 
      * {@link OOBHandler} if they are not replies to multicast or unicast

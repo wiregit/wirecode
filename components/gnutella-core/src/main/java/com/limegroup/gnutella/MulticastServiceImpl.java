@@ -8,11 +8,15 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
@@ -121,19 +125,63 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
             LOG.debug("Binding port " + port + ", group address " + group);
         try {
             MulticastSocket sock = new MulticastSocket(port);
+            sock.setInterface(chooseInterface());
             sock.setTimeToLive(3);
             sock.joinGroup(group);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Bound to " + sock.getInterface().getHostAddress());
             _port = port;
-            _group = group;            
+            _group = group;
             return sock;
-        }
-        catch (SocketException se) {
+        } catch(SocketException se) {
             LOG.debug("Could not bind port", se);
             throw new IOException("socket could not be set on port: "+port);
-        }
-        catch (SecurityException se) {
+        } catch(SecurityException se) {
             LOG.debug("Could not bind port", se);
             throw new IOException("security exception on port: "+port);
+        }
+    }
+
+    /**
+     * Returns the interface to which the multicast socket should be bound.
+     */
+    static InetAddress chooseInterface() throws SocketException {
+        // If the user has chosen a specific network interface, bind to it.
+        if(ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue()) {
+            try {
+                String addr = ConnectionSettings.CUSTOM_INETADRESS.get();
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Binding to configured interface " + addr);
+                return InetAddress.getByName(addr);
+            } catch(UnknownHostException fallThrough) {
+                LOG.debug("Failed to bind to configured interface", fallThrough);
+            }
+        }
+        // Try to find a LAN interface to bind to.
+        Enumeration<NetworkInterface> ifaces =
+            NetworkInterface.getNetworkInterfaces();
+        while(ifaces.hasMoreElements()) {
+            NetworkInterface iface = ifaces.nextElement();
+            if(iface.supportsMulticast()) {
+                Enumeration<InetAddress> addrs = iface.getInetAddresses();
+                while(addrs.hasMoreElements()) {
+                    InetAddress addr = addrs.nextElement();
+                    if(addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
+                        LOG.debug("Binding to LAN interface " + addr.getHostAddress());
+                        return addr;
+                    }
+                }
+            }
+        }
+        // If there are no LAN interfaces, bind to 0.0.0.0. We try to avoid this
+        // because calling joinGroup() on a socket bound to 0.0.0.0 doesn't join
+        // the multicast group on all interfaces.
+        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4082533
+        LOG.debug("No suitable interfaces found");
+        try {
+            return InetAddress.getByAddress(new byte[]{0, 0, 0, 0});
+        } catch(UnknownHostException onlyIfAddressLengthIsIllegal) {
+            throw new RuntimeException(onlyIfAddressLengthIsIllegal);
         }
     }
 
