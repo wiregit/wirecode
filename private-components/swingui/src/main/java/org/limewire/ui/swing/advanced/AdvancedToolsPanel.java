@@ -261,9 +261,12 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
             
             // Start tab panels.
             for (TabId tabId : TabId.values()) {
-                TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
-                if (tabPanel != null) {
-                    tabPanel.initData();
+                AdvancedTabItem tab = tabItemMap.get(tabId);
+                if (tab != null) {
+                    TabPanel tabPanel = tab.getTabPanel();
+                    if (tabPanel != null) {
+                        tabPanel.initData();
+                    }
                 }
             }
         }
@@ -281,9 +284,12 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
         if (frame != null) {
             // Stop tab panels.
             for (TabId tabId : TabId.values()) {
-                TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
-                if (tabPanel != null) {
-                    tabPanel.dispose();
+                AdvancedTabItem tab = tabItemMap.get(tabId);
+                if (tab != null) {
+                    TabPanel tabPanel = tab.getTabPanel();
+                    if (tabPanel != null) {
+                        tabPanel.dispose();
+                    }
                 }
             }
             
@@ -334,13 +340,23 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
         
         // Get index of next/previous tab.
         int nextTab = (startIndex + (forward ? 1 : -1) + tabIds.length) % tabIds.length;
-        boolean enabled = tabItemMap.get(tabIds[nextTab]).isEnabled();
+        
+        AdvancedTabItem tab = tabItemMap.get(tabIds[nextTab]);
+        boolean enabled = false;
+        
+        if (tab != null) {
+            enabled = tab.isEnabled();
+        }
         
         // Find next/previous enabled tab.  If no enabled tabs are found, 
         // then return the start index.
         while (!enabled && (nextTab != startIndex)) {
             nextTab = (nextTab + (forward ? 1 : -1) + tabIds.length) % tabIds.length;
-            enabled = tabItemMap.get(tabIds[nextTab]).isEnabled();
+            
+            tab = tabItemMap.get(tabIds[nextTab]);
+            if (tab != null) {
+                enabled = tab.isEnabled();
+            }
         }
         
         // Return enabled tab, or null if none found.
