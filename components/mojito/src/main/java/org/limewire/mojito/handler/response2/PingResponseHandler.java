@@ -37,13 +37,15 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     
     private final ProcessCounter processCounter = new ProcessCounter(4);
     
-    public PingResponseHandler(Context context, PingIterator pinger) {
-        this(context, null, pinger);
+    public PingResponseHandler(Context context, PingIterator pinger, 
+            long timeout, TimeUnit unit) {
+        this(context, null, pinger, timeout, unit);
     }
     
     public PingResponseHandler(Context context, 
-            Contact sender, PingIterator pinger) {
-        super(context);
+            Contact sender, PingIterator pinger, 
+            long timeout, TimeUnit unit) {
+        super(context, timeout, unit);
         
         this.sender = sender;
         this.pinger = pinger;
@@ -92,7 +94,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
                     break;
                 }
                 
-                pinger.pingNext(context, this);
+                pinger.pingNext(context, this, timeout, unit);
                 processCounter.increment();
             }
         } finally {
@@ -198,6 +200,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
          * Sends a ping to the next element.
          */
         public boolean pingNext(Context context, 
-                PingResponseHandler responseHandler) throws IOException;
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException;
     }
 }

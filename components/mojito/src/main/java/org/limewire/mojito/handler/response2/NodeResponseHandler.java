@@ -19,8 +19,8 @@ import org.limewire.security.SecurityToken;
 
 public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
 
-    public NodeResponseHandler(Context context, KUID key) {
-        super(context, key);
+    public NodeResponseHandler(Context context, KUID key, long timeout, TimeUnit unit) {
+        super(context, key, timeout, unit);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
                 dst.getContactAddress(), key);
         
         MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        messageDispatcher.send(dst, request, this);
+        messageDispatcher.send(dst, request, this, timeout, unit);
     }
 
     @Override

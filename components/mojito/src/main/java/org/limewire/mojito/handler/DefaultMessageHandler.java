@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +47,6 @@ import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
-
 
 /**
  * Performs basic Kademlia {@link RouteTable}
@@ -78,7 +78,7 @@ public class DefaultMessageHandler {
         databaseStats = context.getDatabaseStats();
     }
     
-    public void handleResponse(ResponseMessage message, long time) {
+    public void handleResponse(ResponseMessage message, long time, TimeUnit unit) {
         addLiveContactInfo(message.getContact(), message);
     }
 
@@ -91,7 +91,7 @@ public class DefaultMessageHandler {
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time) {
+            RequestMessage message, long time, TimeUnit unit) {
         context.getRouteTable().handleFailure(nodeId, dst);
     }
 

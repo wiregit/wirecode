@@ -34,7 +34,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     
     public GetValueResponseHandler(Context context, 
             EntityKey lookupKey) {
-        super(context);
+        super(context, -1L, TimeUnit.MILLISECONDS);
         
         this.lookupKey = lookupKey;
     }
@@ -56,7 +56,8 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         }
         
         MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        messageDispatcher.send(node, request, this);
+        messageDispatcher.send(node, request, this, 
+                node.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

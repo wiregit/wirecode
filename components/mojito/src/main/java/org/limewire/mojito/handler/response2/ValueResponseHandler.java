@@ -60,7 +60,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
                 noKeys, lookupKey.getDHTValueType());
         
         MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        messageDispatcher.send(dst, request, this);
+        messageDispatcher.send(dst, request, this, timeout, unit);
     }
     
     @Override

@@ -51,8 +51,6 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
     
     private final ProcessCounter lookupCounter;
     
-    private volatile long timeout = 3000L;
-    
     private volatile long boostTimeout = 3000L;
     
     private volatile int alpha = ALPHA;
@@ -61,8 +59,9 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
     
     private volatile ScheduledFuture<?> boostFuture = null;
     
-    public LookupResponseHandler(Context context, KUID key) {
-        super(context);
+    public LookupResponseHandler(Context context, KUID key, 
+            long timeout, TimeUnit unit) {
+        super(context, timeout, unit);
         
         this.key = key;
         
@@ -105,7 +104,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
             if (getLastResponseTime(TimeUnit.MILLISECONDS) >= boostTimeout) {
                 try {
                     Contact contact = lookupManager.next();
-                    lookup(contact, key, timeout, TimeUnit.MILLISECONDS);
+                    lookup(contact, key, contact.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
                     lookupCounter.increment(true);
                 } finally {
                     postProcess();
@@ -126,7 +125,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity> extends Abst
                }
                
                Contact contact = lookupManager.next();
-               lookup(contact, key, timeout, TimeUnit.MILLISECONDS);
+               lookup(contact, key, contact.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
                
                lookupCounter.increment();
             }

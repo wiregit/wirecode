@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -247,6 +248,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
          * Sends a ping to the next element.
          */
         public boolean pingNext(Context context, 
-                PingResponseHandler responseHandler) throws IOException;
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException;
     }
 }

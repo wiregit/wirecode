@@ -55,8 +55,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     public StoreResponseHandler(Context context, 
             Entry<Contact, SecurityToken>[] contacts, 
-            DHTValueEntity[] entities) {
-        super(context);
+            DHTValueEntity[] entities, long timeout, TimeUnit unit) {
+        super(context, timeout, unit);
         
         for (Entry<Contact, SecurityToken> entry : contacts) {
             Contact node = entry.getKey();
@@ -267,7 +267,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
                     Collections.singleton(entity));
         
             MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-            messageDispatcher.send(dst, request, StoreResponseHandler.this);
+            messageDispatcher.send(dst, request, StoreResponseHandler.this, 
+                    dst.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
         
             return false;
         }

@@ -101,7 +101,7 @@ public abstract class MessageDispatcher {
     /**
      * Handle of the cleanup task future.
      */
-    private ScheduledFuture cleanupTaskFuture;
+    private ScheduledFuture<?> cleanupTaskFuture;
     
     /** A list of MessageDispatcherListeners */
     private final List<MessageDispatcherListener> listeners 
@@ -165,6 +165,7 @@ public abstract class MessageDispatcher {
                 long delay = NetworkSettings.CLEANUP_RECEIPTS_DELAY.getValue();
                 
                 Runnable task = new Runnable() {
+                    @Override
                     public void run() {
                         process(new CleanupProcessor());
                     }
@@ -228,17 +229,25 @@ public abstract class MessageDispatcher {
      * a ResponseHandler.
      */
     public boolean send(SocketAddress dst, RequestMessage request, 
-            ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(dst, request, responseHandler));
+            ResponseHandler responseHandler, long timeout, TimeUnit unit) throws IOException {
+        return send(new Tag(dst, request, responseHandler, timeout, unit));
     }
     
     /**
      * Sends a RequestMessage to the given SocketAddress and registers
      * a ResponseHandler.
      */
-    public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
+    public boolean send(KUID nodeId, SocketAddress dst, 
+            RequestMessage request, ResponseHandler responseHandler, 
+            long timeout, TimeUnit unit) throws IOException {
+        return send(new Tag(nodeId, dst, request, responseHandler, timeout, unit));
+    }
+    
+    public boolean send(Contact contact, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(nodeId, dst, request, responseHandler));
+        return send(contact, request, responseHandler, 
+                contact.getAdaptativeTimeoutInMillis(), 
+                TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -246,8 +255,9 @@ public abstract class MessageDispatcher {
      * a ResponseHandler.
      */
     public boolean send(Contact contact, RequestMessage request, 
-            ResponseHandler responseHandler) throws IOException {
-        return send(new Tag(contact, request, responseHandler));
+            ResponseHandler responseHandler, 
+            long timeout, TimeUnit unit) throws IOException {
+        return send(new Tag(contact, request, responseHandler, timeout, unit));
     }
     
     /**
@@ -482,7 +492,10 @@ public abstract class MessageDispatcher {
                     }
                     
                     // Set the Round Trip Time (RTT)
-                    message.getContact().setRoundTripTime(receipt.time());
+                    Contact contact = message.getContact();
+                    contact.setRoundTripTime(
+                            receipt.getTimeInMillis(), 
+                            TimeUnit.MILLISECONDS);
                     
                     // OK, all checks passed. We can remove the receipt now!
                     receiptMap.remove(messageId);
@@ -667,7 +680,7 @@ public abstract class MessageDispatcher {
                     // The user cancelled the Future
                     it.remove();
                 	
-                } else if (receipt.timeout()) {
+                } else if (receipt.isTimeout()) {
                     receipt.received();
                     it.remove();
                     
@@ -682,7 +695,7 @@ public abstract class MessageDispatcher {
         protected boolean removeEldestEntry(Map.Entry<MessageID, Receipt> eldest) {
             Receipt receipt = eldest.getValue();
             
-            boolean timeout = receipt.timeout();
+            boolean timeout = receipt.isTimeout();
             if (super.removeEldestEntry(eldest) || timeout) {
                 receipt.received();
                 process(new TimeoutProcessor(receipt, timeout));
@@ -773,8 +786,14 @@ public abstract class MessageDispatcher {
          */
         private void processResponse() {
             try {
-                defaultHandler.handleResponse(response, receipt.time());
-                receipt.getResponseHandler().handleResponse(response, receipt.time());
+                
+                long time = receipt.getTimeInMillis();
+                defaultHandler.handleResponse(response, 
+                        time, TimeUnit.MILLISECONDS);
+                
+                receipt.getResponseHandler().handleResponse(response, 
+                        time, TimeUnit.MILLISECONDS);
+                
             } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("An error occured dusring processing the response", e);
@@ -834,6 +853,7 @@ public abstract class MessageDispatcher {
             }
         }
         
+        @Override
         public void run() {
             // Make sure a singe Node cannot monopolize our resources
             if (!allow(request)) {
@@ -897,6 +917,7 @@ public abstract class MessageDispatcher {
             this.timeout = timeout;
         }
         
+        @Override
         public void run() {
             
             if (timeout) {
@@ -909,10 +930,14 @@ public abstract class MessageDispatcher {
                 KUID nodeId = receipt.getNodeID();
                 SocketAddress dst = receipt.getSocketAddress();
                 RequestMessage msg = receipt.getRequestMessage();
-                long time = receipt.time();
                 
-                defaultHandler.handleTimeout(nodeId, dst, msg, time);
-                receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
+                long time = receipt.getTimeInMillis();
+                defaultHandler.handleTimeout(nodeId, dst, 
+                        msg, time, TimeUnit.MILLISECONDS);
+                
+                receipt.getResponseHandler().handleTimeout(nodeId, dst, 
+                        msg, time, TimeUnit.MILLISECONDS);
+                
             } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
@@ -931,6 +956,7 @@ public abstract class MessageDispatcher {
             this.receipt = receipt;
         }
         
+        @Override
         public void run() {
             receipt.handleTick();
         }
@@ -950,6 +976,7 @@ public abstract class MessageDispatcher {
             this.exception = exception;
         }
         
+        @Override
         public void run() {
             tag.handleError(exception);
         }

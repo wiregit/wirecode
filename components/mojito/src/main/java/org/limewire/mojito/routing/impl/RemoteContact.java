@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -173,7 +174,7 @@ public class RemoteContact implements Contact {
         }
         
         if (rtt < 0L) {
-            rtt = existing.getRoundTripTime();
+            rtt = existing.getRoundTripTimeInMillis();
         }
         
         if (!isAlive() || (getTimeStamp() < existing.getTimeStamp())) {
@@ -211,12 +212,17 @@ public class RemoteContact implements Contact {
         return sourceAddress;
     }
     
-    public long getRoundTripTime() {
-        return rtt;
+    public long getRoundTripTime(TimeUnit unit) {
+        return unit.convert(rtt, TimeUnit.MILLISECONDS);
     }
     
-    public void setRoundTripTime(long rtt) {
-        this.rtt = rtt;
+    @Override
+    public long getRoundTripTimeInMillis() {
+        return getRoundTripTime(TimeUnit.MILLISECONDS);
+    }
+    
+    public void setRoundTripTime(long rtt, TimeUnit unit) {
+        this.rtt = unit.toMillis(rtt);
     }
     
     public void setTimeStamp(long timeStamp) {
@@ -242,18 +248,25 @@ public class RemoteContact implements Contact {
         }
     }
     
-    public long getAdaptativeTimeout() {
+    @Override
+    public long getAdaptativeTimeout(TimeUnit unit) {
         //for now, based on failures and previous round trip time
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-        if (rtt <= 0L || !isAlive()) {
-            return timeout;
-        } else {
+        
+        if (0 < rtt && isAlive()) {
             // Should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.DEFAULT_TIMEOUT
             long rttFactor = NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue();
             long adaptiveTimeout = ((rttFactor * rtt) + failures * rtt);
-            return Math.max(Math.min(timeout, adaptiveTimeout), 
+            timeout = Math.max(Math.min(timeout, adaptiveTimeout), 
                     NetworkSettings.MIN_TIMEOUT_RTT.getValue());
         }
+        
+        return unit.convert(timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
+    public long getAdaptativeTimeoutInMillis() {
+        return getAdaptativeTimeout(TimeUnit.MILLISECONDS);
     }
     
     public void alive() {
@@ -369,7 +382,7 @@ public class RemoteContact implements Contact {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))
-            .append(", rtt=").append(getRoundTripTime())
+            .append(", rtt=").append(getRoundTripTimeInMillis())
             .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceID())
             .append(", state=").append(isShutdown() ? "DOWN" : getState())

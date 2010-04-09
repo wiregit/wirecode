@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +68,9 @@ public class Tag {
     
     private long sent = -1L;
     
-    private long timeout = -1L;
+    private final long timeout;
+    
+    private final TimeUnit unit;
     
     Tag(Contact contact, ResponseMessage message) {
         
@@ -76,24 +79,26 @@ public class Tag {
         
         this.message = message;
         this.responseHandler = null;
+        
+        this.timeout = -1L;
+        this.unit = TimeUnit.MILLISECONDS;
     }
     
-    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) {
-        this(null, dst, message, handler, -1L);
+    Tag(SocketAddress dst, RequestMessage message, 
+            ResponseHandler handler, long timeout, TimeUnit unit) {
+        this(null, dst, message, handler, timeout, unit);
     }
     
-    Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) {
+    Tag(Contact contact, RequestMessage message, 
+            ResponseHandler responseHandler, long timeout, TimeUnit unit) {
+        /*this(contact.getNodeID(), contact.getContactAddress(), message, 
+                responseHandler, contact.getAdaptativeTimeout());*/
         this(contact.getNodeID(), contact.getContactAddress(), message, 
-                responseHandler, contact.getAdaptativeTimeout());
+                responseHandler, timeout, unit);
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
-            ResponseHandler responseHandler) {
-        this(nodeId, dst, message, responseHandler, -1L);
-    }
-    
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
-            ResponseHandler responseHandler, long timeout) {
+            ResponseHandler responseHandler, long timeout, TimeUnit unit) {
         
         this.nodeId = nodeId;
         this.dst = dst;
@@ -101,7 +106,17 @@ public class Tag {
         this.message = message;
         
         this.responseHandler = responseHandler;
+        
         this.timeout = timeout;
+        this.unit = unit;
+    }
+    
+    public long getTimeout(TimeUnit unit) {
+        return unit.convert(timeout, this.unit);
+    }
+    
+    public long getTimeoutInMillis() {
+        return getTimeout(TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -278,40 +293,39 @@ public class Tag {
         /**
          * Returns the Round Trip Time (RTT).
          */
-        public long time() {
+        public long getTime(TimeUnit unit) {
             if (received < 0L) {
-                throw new IllegalStateException("The RTT is unknown as we have not received a response yet");
+                throw new IllegalStateException(
+                        "The RTT is unknown as we have not received a response yet");
             }
             
-            return received - sent;
+            return unit.convert(received - sent, TimeUnit.MILLISECONDS);
+        }
+        
+        public long getTimeInMillis() {
+            return getTime(TimeUnit.MILLISECONDS);
         }
         
         /**
          * Returns the amount of time that has elapsed since
          * the request was sent.
          */
-        private long elapsedTime() {
-            return System.currentTimeMillis() - sent;
+        private long getElapsedTime(TimeUnit unit) {
+            long duration = System.currentTimeMillis() - sent;
+            return unit.convert(duration, TimeUnit.MILLISECONDS);
         }
         
         /**
          * Returns whether or not this request has timed-out.
          */
-        public boolean timeout() {
-            long elapsed = elapsedTime();
+        public boolean isTimeout() {
+            long elapsed = getElapsedTime(Tag.this.unit);
             
-            if(timeout < 0L) {
-                long t = responseHandler.getTimeout();
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Default timeout: " + t + "ms for " + ContactUtils.toString(nodeId, dst));
-                }
-                return elapsed >= t;
-            } else {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Timeout: " + timeout + "ms for " + ContactUtils.toString(nodeId, dst));
-                }
-                return elapsed >= timeout;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Timeout: " + timeout + " " + Tag.this.unit 
+                        + " for " + ContactUtils.toString(nodeId, dst));
             }
+            return elapsed >= timeout;
         }
         
         /**

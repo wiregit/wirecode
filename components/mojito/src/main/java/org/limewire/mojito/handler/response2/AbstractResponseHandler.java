@@ -11,6 +11,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent2.AsyncFuture;
 import org.limewire.mojito.concurrent2.AsyncProcess;
+import org.limewire.mojito.concurrent2.NullArgumentException;
 import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.io.MessageDispatcher;
@@ -29,6 +30,10 @@ public abstract class AbstractResponseHandler<V extends Entity>
     
     protected final Context context;
     
+    protected final long timeout;
+    
+    protected final TimeUnit unit;
+    
     private volatile AsyncFuture<V> future = null;
     
     private long elapsedTime = 0L;
@@ -37,14 +42,38 @@ public abstract class AbstractResponseHandler<V extends Entity>
     
     private volatile int maxErrors;
     
-    public AbstractResponseHandler(Context context) {
-        this (context, -1);
+    public AbstractResponseHandler(Context context, 
+            long timeout, TimeUnit unit) {
+        
+        if (context == null) {
+            throw new NullArgumentException("context");
+        }
+        
+        if (timeout < 0L) {
+            throw new IllegalArgumentException("timeout=" + timeout);
+        }
+        
+        if (unit == null) {
+            throw new NullArgumentException("unit");
+        }
+        
+        this.context = context;
+        this.timeout = timeout;
+        this.unit = unit;
     }
     
-    public AbstractResponseHandler(Context context, int maxErrors) {
-        this.context = context;
-        
-        setMaxErrors(maxErrors);
+    /**
+     * 
+     */
+    public long getTimeout(TimeUnit unit) {
+        return unit.convert(timeout, this.unit);
+    }
+    
+    /**
+     * 
+     */
+    public long getTimeoutInMillis() {
+        return getTimeout(TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -85,20 +114,6 @@ public abstract class AbstractResponseHandler<V extends Entity>
      */
     protected boolean setException(Throwable exception) {
         return getAsyncFuture().setException(exception);
-    }
-    
-    /**
-     * 
-     */
-    protected long getTimeout(TimeUnit unit) {
-        return getAsyncFuture().getTimeout(unit);
-    }
-    
-    /**
-     * 
-     */
-    protected long getTimeoutInMillis() {
-        return getAsyncFuture().getTimeoutInMillis();
     }
     
     /**
@@ -249,7 +264,7 @@ public abstract class AbstractResponseHandler<V extends Entity>
         }
         
         MessageDispatcher messageDispatcher = context.getMessageDispatcher();
-        messageDispatcher.send(nodeId, dst, message, this);
+        messageDispatcher.send(nodeId, dst, message, this, timeout, unit);
     }
     
     /**
@@ -281,13 +296,6 @@ public abstract class AbstractResponseHandler<V extends Entity>
     protected void processError(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         setException(e);
-    }
-    
-    /**
-     * 
-     */
-    protected void done() {
-        
     }
     
     /**

@@ -26,11 +26,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
+import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.messages.MessageFactory;
+import org.limewire.mojito.messages.MessageHelper;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
@@ -75,19 +79,27 @@ class PingIteratorFactory {
             this.it = nodes.iterator();
         }
         
+        @Override
         public boolean hasNext() {
             return it.hasNext();
         }
         
-        public boolean pingNext(Context context, PingResponseHandler responseHandler) 
-                throws IOException {
+        @Override
+        public boolean pingNext(Context context, 
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException {
             Contact node = it.next();
             
             KUID nodeId = node.getNodeID();
             SocketAddress dst = node.getContactAddress();
             
-            RequestMessage request = context.getMessageHelper().createPingRequest(dst);
-            return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+            MessageHelper messageHelper = context.getMessageHelper();
+            RequestMessage request = messageHelper.createPingRequest(dst);
+            
+            MessageDispatcher messageDispatcher 
+                = context.getMessageDispatcher();
+            return messageDispatcher.send(nodeId, dst, 
+                    request, responseHandler, timeout, unit);
         }
         
         @Override
@@ -137,17 +149,22 @@ class PingIteratorFactory {
         }
         
         @Override
-        public boolean pingNext(Context context, PingResponseHandler responseHandler) 
-                throws IOException {
+        public boolean pingNext(Context context, 
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException {
             Contact node = it.next();
             
             KUID nodeId = node.getNodeID();
             SocketAddress dst = node.getContactAddress();
             
             // Send a collision test ping instead of a regular ping
-            RequestMessage request = context.getMessageFactory().createPingRequest(sender, dst);
+            MessageFactory messageFactory = context.getMessageFactory();
+            RequestMessage request = messageFactory.createPingRequest(sender, dst);
             
-            return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+            MessageDispatcher messageDispatcher 
+                = context.getMessageDispatcher();
+            return messageDispatcher.send(nodeId, dst, 
+                    request, responseHandler, timeout, unit);
         }
         
         @Override
@@ -184,16 +201,24 @@ class PingIteratorFactory {
             this.it = hosts.iterator();
         }
         
+        @Override
         public boolean hasNext() {
             return it.hasNext();
         }
         
-        public boolean pingNext(Context context, PingResponseHandler responseHandler) 
-                throws IOException {
+        @Override
+        public boolean pingNext(Context context, 
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException {
             SocketAddress dst = it.next();
             
-            RequestMessage request = context.getMessageHelper().createPingRequest(dst);
-            return context.getMessageDispatcher().send(null, dst, request, responseHandler);
+            MessageHelper messageHelper = context.getMessageHelper();
+            RequestMessage request = messageHelper.createPingRequest(dst);
+            
+            MessageDispatcher messageDispatcher 
+                = context.getMessageDispatcher();
+            return messageDispatcher.send(dst, request, 
+                    responseHandler, timeout, unit);
         }
         
         @Override
@@ -239,20 +264,28 @@ class PingIteratorFactory {
             this.it = entries.iterator();
         }
         
+        @Override
         public boolean hasNext() {
             return it.hasNext();
         }
         
-        public boolean pingNext(Context context, PingResponseHandler responseHandler) 
-                throws IOException {
+        @Override
+        public boolean pingNext(Context context, 
+                PingResponseHandler responseHandler, 
+                long timeout, TimeUnit unit) throws IOException {
             
             Entry<KUID, ? extends SocketAddress> entry = it.next();
             
             KUID nodeId = entry.getKey();
             SocketAddress dst = entry.getValue();
             
-            RequestMessage request = context.getMessageHelper().createPingRequest(dst);
-            return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
+            MessageHelper messageHelper = context.getMessageHelper();
+            RequestMessage request = messageHelper.createPingRequest(dst);
+            
+            MessageDispatcher messageDispatcher 
+                = context.getMessageDispatcher();
+            return messageDispatcher.send(nodeId, dst, 
+                    request, responseHandler, timeout, unit);
         }
         
         @Override

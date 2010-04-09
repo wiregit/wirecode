@@ -25,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -268,14 +269,21 @@ public class LocalContact implements Contact {
     /**
      * Does nothing.
      */
-    public void setRoundTripTime(long rtt) {
+    @Override
+    public void setRoundTripTime(long rtt, TimeUnit unit) {
     }
     
     /**
      * Hard coded to return 0L.
      */
-    public long getRoundTripTime() {
+    @Override
+    public long getRoundTripTime(TimeUnit unit) {
         return 0L;
+    }
+    
+    @Override
+    public long getRoundTripTimeInMillis() {
+        return getRoundTripTime(TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -294,10 +302,15 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return 0L.
      */
-    public long getAdaptativeTimeout() {
+    public long getAdaptativeTimeout(TimeUnit unit) {
         return 0L;
     }
     
+    @Override
+    public long getAdaptativeTimeoutInMillis() {
+        return getAdaptativeTimeout(TimeUnit.MILLISECONDS);
+    }
+
     /**
      * Does nothing.
      */
