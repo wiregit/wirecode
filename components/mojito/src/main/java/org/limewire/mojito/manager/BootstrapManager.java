@@ -23,8 +23,8 @@ import java.net.SocketAddress;
 import java.util.Set;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFutureTask2;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.routing.Contact;
@@ -86,7 +86,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * Tries to bootstrap the local Node from the given Contact.
      */
-    public DHTFuture<BootstrapResult> bootstrap(Contact node) {
+    public DHTFuture2<BootstrapResult> bootstrap(Contact node) {
         if (node == null) {
             throw new NullPointerException("Contact is null");
         }
@@ -113,7 +113,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * Tries to bootstrap the local Node from any of the given SocketAddresses.
      */
-    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> dst) {
+    public DHTFuture2<BootstrapResult> bootstrap(Set<? extends SocketAddress> dst) {
         if (dst == null) {
             throw new NullPointerException("Set<SocketAddress> is null");
         }
@@ -133,14 +133,14 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         return future;
     }
     
-    private class BootstrapFuture extends DHTFutureTask<BootstrapResult> {
+    private class BootstrapFuture extends DHTFutureTask2<BootstrapResult> {
 
         public BootstrapFuture(DHTTask<BootstrapResult> task) {
             super(context, task);
         }
 
         @Override
-        protected void done() {
+        protected void bla() {
             stop();
         }
     }

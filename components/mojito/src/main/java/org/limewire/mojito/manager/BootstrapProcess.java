@@ -26,15 +26,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.concurrent.SyncWrapper;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.concurrent.DHTTask;
+import org.limewire.mojito.concurrent.SimpleDHTFuture;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler;
@@ -75,7 +75,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     
     private enum Status { BOOTSTRAPPING, RETRYING_BOOTSTRAP, FINISHED};
     
-    private OnewayExchanger<BootstrapResult, ExecutionException> exchanger;
+    private DHTFuture2<BootstrapResult> exchanger;
     
     private final Context context;
     
@@ -124,8 +124,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         return waitOnLock;
     }
 
-    public void start(OnewayExchanger<BootstrapResult, 
-            ExecutionException> exchanger) {
+    public void start(DHTFuture2<BootstrapResult> exchanger) {
         
         synchronized(status.getLock()) {
             if (status.get() != null)
@@ -136,13 +135,6 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         if (LOG.isDebugEnabled())
             LOG.debug("starting bootstrap "+getPercentage(context.getRouteTable())+"% alive");
         
-        if (exchanger == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Starting ResponseHandler without an OnewayExchanger");
-            }
-            exchanger = new OnewayExchanger<BootstrapResult, ExecutionException>(true);
-        }
-
         this.exchanger = exchanger;
 
         startTime = System.currentTimeMillis();
@@ -154,23 +146,29 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void findInitialContact() {
-        OnewayExchanger<PingResult, ExecutionException> c 
-                = new OnewayExchanger<PingResult, ExecutionException>(true) {
+        DHTFuture2<PingResult> c = new SimpleDHTFuture<PingResult>() {
             @Override
-            public synchronized void setValue(PingResult value) {
+            public synchronized boolean setValue(PingResult value) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Found initial bootstrap Node: " + value);
                 }
                 
-                super.setValue(value);
-                handlePong(value);
+                if (super.setValue(value)) {
+                    handlePong(value);
+                    return true;
+                }
+                return false;
             }
-
+            
             @Override
-            public synchronized void setException(ExecutionException exception) {
+            public synchronized boolean setException(Throwable exception) {
                 LOG.info("ExecutionException", exception);
-                super.setException(exception);
-                exchanger.setException(exception);
+                
+                if (super.setException(exception)) {
+                    exchanger.setException(exception);
+                    return true;
+                }
+                return false;
             }
         };
         
@@ -186,22 +184,29 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void findNearestNodes() {
-        OnewayExchanger<FindNodeResult, ExecutionException> c 
-                = new OnewayExchanger<FindNodeResult, ExecutionException>(true) {
+        DHTFuture2<FindNodeResult> c = new SimpleDHTFuture<FindNodeResult>() {
             @Override
-            public synchronized void setValue(FindNodeResult value) {
+            public synchronized boolean setValue(FindNodeResult value) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Found nearest Nodes: " + value);
                 }
                 
-                super.setValue(value);
-                handleNearestNodes(value);
+                if (super.setValue(value)) {
+                    handleNearestNodes(value);
+                    return true;
+                }
+                return false;
             }
-
+            
             @Override
-            public synchronized void setException(ExecutionException exception) {
-                super.setException(exception);
-                handleExecutionException(exception);
+            public synchronized boolean setException(Throwable exception) {
+                LOG.info("ExecutionException", exception);
+                
+                if (super.setException(exception)) {
+                    handleExecutionException(exception);
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -210,7 +215,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         start(handler, c);
     }
     
-    void handleExecutionException(ExecutionException ee) {
+    void handleExecutionException(Throwable ee) {
         LOG.info("ExecutionException", ee);
         exchanger.setException(ee);
     }
@@ -241,33 +246,39 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void checkCollisions(Collection<? extends Contact> collisions) {
-        OnewayExchanger<PingResult, ExecutionException> c 
-                = new OnewayExchanger<PingResult, ExecutionException>(true) {
+        DHTFuture2<PingResult> c = new SimpleDHTFuture<PingResult>() {
             @Override
-            public synchronized void setValue(PingResult value) {
+            public synchronized boolean setValue(PingResult value) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error(context.getLocalNode() + " collides with " + value.getContact());
                 }
                 
-                super.setValue(value);
-                handleCollision(value);
-            }
-
-            @Override
-            public synchronized void setException(ExecutionException exception) {
-                LOG.info("ExecutionException", exception);
-                super.setException(exception);
-                
-                Throwable cause = exception.getCause();
-                if (cause instanceof DHTTimeoutException) {
-                    // Ignore, everything is fine! Nobody did respond
-                    // and we can keep our Node ID which is good!
-                    // Continue with finding random Node IDs
-                    refreshAllBuckets();
-
-                } else {
-                    exchanger.setException(exception);
+                if (super.setValue(value)) {
+                    handleCollision(value);
+                    return true;
                 }
+                return false;
+            }
+            
+            @Override
+            public synchronized boolean setException(Throwable exception) {
+                LOG.info("ExecutionException", exception);
+                
+                if (super.setException(exception)) {
+                    Throwable cause = exception.getCause();
+                    if (cause instanceof DHTTimeoutException) {
+                        // Ignore, everything is fine! Nobody did respond
+                        // and we can keep our Node ID which is good!
+                        // Continue with finding random Node IDs
+                        refreshAllBuckets();
+
+                    } else {
+                        exchanger.setException(exception);
+                    }
+                    
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -468,7 +479,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         exchanger.setValue(new BootstrapResult(node, time, type));
     }
     
-    private <T> void start(DHTTask<T> task, OnewayExchanger<T, ExecutionException> c) {
+    private <T> void start(DHTTask<T> task, DHTFuture2<T> c) {
         boolean doStart = false;
         synchronized (this) {
             if (!cancelled) {

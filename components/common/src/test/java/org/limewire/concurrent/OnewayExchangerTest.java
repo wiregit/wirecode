@@ -124,27 +124,20 @@ public class OnewayExchangerTest extends BaseTestCase {
     public void testOneShot() throws Exception {
         OnewayExchanger<String, Exception> e1 = new OnewayExchanger<String, Exception>(true);
         e1.setValue("Hello World!");
-        try {
-            e1.setValue("Should fail!");
-            fail("Setting value should have failed with an IllegalStateException");
-        } catch (IllegalStateException ignore) {
-        }
+        
+        boolean success = e1.setValue("Should fail!");
+        assertFalse("Setting value should have failed!", success);
         assertEquals("Hello World!", e1.tryGet());
         
-        try {
-            e1.reset();
-            fail("Reset should have failed");
-        } catch (IllegalStateException ignore) {
-        }
+        success = e1.reset();
+        assertFalse("Reset should have failed", success);
         
         // Same test but with Exceptions
         OnewayExchanger<String, Exception> e2 = new OnewayExchanger<String, Exception>(true);
         e2.setException(new IllegalArgumentException("Hello World!"));
-        try {
-            e2.setException(new IllegalArgumentException("Should fail!"));
-            fail("Setting Exception should have failed with an IllegalStateException");
-        } catch (IllegalStateException ignore) {
-        }
+        
+        success = e2.setException(new IllegalArgumentException("Should fail!"));
+        assertFalse("Setting Exception should have failed!", success);
         
         try {
             e2.tryGet();

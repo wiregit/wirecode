@@ -36,6 +36,7 @@ import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Database;
@@ -435,7 +436,7 @@ public class DHTManagerImpl implements DHTManager, Service {
                 count(result.isSuccess());
             }
         };
-        DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
+        DHTFuture2<FindValueResult> future = mojitoDHT.get(eKey);
         future.addDHTFutureListener(inspector);
         return future;
     }
@@ -468,7 +469,7 @@ public class DHTManagerImpl implements DHTManager, Service {
                 count(success);
             }   
         };
-        DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
+        DHTFuture2<StoreResult> future = mojitoDHT.put(key, value);
         future.addDHTFutureListener(inspector);
         return future;
     }

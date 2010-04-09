@@ -11,7 +11,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
@@ -71,7 +71,7 @@ public class DHTBootstrapperTest extends DHTTestCase {
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap();
-        DHTFuture future = bootstrapper.getPingFuture();
+        DHTFuture2 future = bootstrapper.getPingFuture();
         Thread.sleep(300);
         assertTrue(bootstrapper.isBootstrappingFromRouteTable());
         

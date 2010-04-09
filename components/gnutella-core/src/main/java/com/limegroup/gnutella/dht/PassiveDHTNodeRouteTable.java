@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
@@ -72,7 +72,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         }
         
         final InetSocketAddress addr = new InetSocketAddress(host, port);
-        DHTFuture<PingResult> future = dht.ping(addr);
+        DHTFuture2<PingResult> future = dht.ping(addr);
         
         DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
             @Override

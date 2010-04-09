@@ -21,18 +21,18 @@ package org.limewire.mojito.routing;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFutureListener2;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
@@ -92,6 +92,7 @@ public class BucketRefresher implements Runnable {
         }
     }
     
+    @Override
     public void run() {
         synchronized (refreshTask) {
             
@@ -115,15 +116,19 @@ public class BucketRefresher implements Runnable {
                         // Nodes in our RouteTable, try to bootstrap
                         // from the RouteTable
                         
-                        DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+                        DHTFutureListener2<PingResult> listener 
+                                = new DHTFutureListener2<PingResult>() {
                             @Override
-                            public void handleFutureSuccess(PingResult result) {
-                                context.bootstrap(result.getContact());
+                            protected void operationComplete(FutureEvent<PingResult> event) {
+                                if (event.getType() == Type.SUCCESS) {
+                                    context.bootstrap(event.getResult().getContact());
+                                }
                             }
                         };
                         
-                        DHTFuture<PingResult> future = context.findActiveContact();
-                        future.addDHTFutureListener(listener);
+                        DHTFuture2<PingResult> future = context.findActiveContact();
+                        future.addFutureListener(listener);
+                        
                     } else {
                         if (LOG.isInfoEnabled()) {
                             LOG.info(context.getName() + " is bootstrapping");
@@ -173,11 +178,11 @@ public class BucketRefresher implements Runnable {
      * starts a new lookup for the next ID until all KUIDs have been
      * looked up.
      */
-    private class RefreshTask implements DHTFutureListener<FindNodeResult> {
+    private class RefreshTask extends DHTFutureListener2<FindNodeResult> {
         
         private Iterator<KUID> bucketIds = null;
         
-        private DHTFuture<FindNodeResult> future = null;
+        private DHTFuture2<FindNodeResult> future = null;
         
         /**
          * Returns whether or not the refresh task has 
@@ -226,7 +231,7 @@ public class BucketRefresher implements Runnable {
             
             KUID lookupId = bucketIds.next();
             future = context.lookup(lookupId);
-            future.addDHTFutureListener(this);
+            future.addFutureListener(this);
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " started a Bucket refresh lookup for " + lookupId);
@@ -235,7 +240,22 @@ public class BucketRefresher implements Runnable {
             return true;
         }
         
-        public void handleFutureSuccess(FindNodeResult result) {
+        @Override
+        protected void operationComplete(FutureEvent<FindNodeResult> event) {
+            switch (event.getType()) {
+                case SUCCESS:
+                    handleFutureSuccess(event.getResult());
+                    break;
+                case CANCELLED:
+                    handleCancellationException();
+                    break;
+                case EXCEPTION:
+                    handleExecutionException(event.getException());
+                    break;
+            }
+        }
+
+        private void handleFutureSuccess(FindNodeResult result) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(result);
             }
@@ -245,7 +265,7 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleExecutionException(ExecutionException e) {
+        private void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
             
             if (!next()) {
@@ -253,13 +273,8 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleCancellationException(CancellationException e) {
-            LOG.debug("CancellationException", e);
-            stop();
-        }
-        
-        public void handleInterruptedException(InterruptedException e) {
-            LOG.debug("InterruptedException", e);
+        private void handleCancellationException() {
+            LOG.trace("Cancelled");
             stop();
         }
     }

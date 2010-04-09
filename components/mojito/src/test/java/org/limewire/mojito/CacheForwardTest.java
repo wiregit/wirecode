@@ -35,7 +35,7 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.concurrent.CallableDHTTask;
-import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture2;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -427,7 +427,7 @@ public class CacheForwardTest extends MojitoTestCase {
             DHTValueEntity entity2 = DHTValueEntity.createFromValue(context1, primaryKey2, value2);
             
             Collection<DHTValueEntity> entities = Arrays.asList(entity1, entity2);
-            DHTFuture<StoreResult> future = context1.store(
+            DHTFuture2<StoreResult> future = context1.store(
                     dht2.getLocalNode(), null, entities);
           /*  StoreResult result = */ future.get(); // TODO: should result be tested?
             
