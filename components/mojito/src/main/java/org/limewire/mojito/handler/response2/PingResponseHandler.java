@@ -37,15 +37,13 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     
     private final ProcessCounter processCounter = new ProcessCounter(4);
     
-    public PingResponseHandler(Context context, PingIterator pinger, 
-            long timeout, TimeUnit unit) {
-        this(context, null, pinger, timeout, unit);
+    public PingResponseHandler(Context context, PingIterator pinger) {
+        this(context, null, pinger);
     }
     
     public PingResponseHandler(Context context, 
-            Contact sender, PingIterator pinger, 
-            long timeout, TimeUnit unit) {
-        super(context, timeout, unit);
+            Contact sender, PingIterator pinger) {
+        super(context, -1L, TimeUnit.MILLISECONDS);
         
         this.sender = sender;
         this.pinger = pinger;

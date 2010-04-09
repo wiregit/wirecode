@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.handler.response.PingResponseHandler;
-import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
+import org.limewire.mojito.handler.response2.PingResponseHandler;
+import org.limewire.mojito.handler.response2.PingResponseHandler.PingIterator;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;

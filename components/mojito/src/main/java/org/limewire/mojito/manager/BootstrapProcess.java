@@ -36,9 +36,9 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
-import org.limewire.mojito.handler.response.FindNodeResponseHandler;
-import org.limewire.mojito.handler.response.PingResponseHandler;
-import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
+import org.limewire.mojito.handler.response2.NodeResponseHandler;
+import org.limewire.mojito.handler.response2.PingResponseHandler;
+import org.limewire.mojito.handler.response2.PingResponseHandler.PingIterator;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
@@ -205,7 +205,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
             }
         };
 
-        FindNodeResponseHandler handler = new FindNodeResponseHandler(
+        NodeResponseHandler handler = new NodeResponseHandler(
                 context, node, context.getLocalNodeID());
         start(handler, c);
     }

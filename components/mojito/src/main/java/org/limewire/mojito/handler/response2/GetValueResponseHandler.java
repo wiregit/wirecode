@@ -1,6 +1,7 @@
 package org.limewire.mojito.handler.response2;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +41,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     }
 
     @Override
-    protected void doStart(AsyncFuture<ValueEntity> future) {
+    protected void doStart(AsyncFuture<ValueEntity> future) throws IOException {
         Contact node = lookupKey.getContact();
         KUID primaryKey = lookupKey.getPrimaryKey();
         KUID secondaryKey = lookupKey.getSecondaryKey();

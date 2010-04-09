@@ -13,7 +13,6 @@ import org.limewire.mojito.concurrent2.AsyncFuture;
 import org.limewire.mojito.concurrent2.AsyncProcess;
 import org.limewire.mojito.concurrent2.NullArgumentException;
 import org.limewire.mojito.entity.Entity;
-import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
@@ -40,7 +39,7 @@ public abstract class AbstractResponseHandler<V extends Entity>
     
     private long lastResponseTime = 0L;
     
-    private volatile int maxErrors;
+    private final int maxErrors = NetworkSettings.MAX_ERRORS.getValue();
     
     public AbstractResponseHandler(Context context, 
             long timeout, TimeUnit unit) {
@@ -91,8 +90,10 @@ public abstract class AbstractResponseHandler<V extends Entity>
     /**
      * 
      */
-    protected boolean isDone() {
-        return getAsyncFuture().isDone();
+    @Override
+    public boolean isDone() {
+        AsyncFuture<V> future = this.future;
+        return future != null ? future.isDone() : false;
     }
     
     /**
@@ -121,25 +122,6 @@ public abstract class AbstractResponseHandler<V extends Entity>
      */
     public int getErrors() {
         return errors.get();
-    }
-    
-    /**
-     * 
-     */
-    public int getMaxErrors() {
-        return maxErrors;
-    }
-    
-    /**
-     * Sets the maximum number of errors that may occur before
-     * we're giving up to re-send a request.
-     */
-    public void setMaxErrors(int maxErrors) {
-        if (maxErrors < 0) {
-            this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
-        } else {
-            this.maxErrors = maxErrors;
-        }
     }
     
     /**
@@ -296,21 +278,5 @@ public abstract class AbstractResponseHandler<V extends Entity>
     protected void processError(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         setException(e);
-    }
-    
-    /**
-     * A helper method to throw Timeout Exceptions.
-     */
-    protected void fireTimeoutException(KUID nodeId, SocketAddress address, 
-            RequestMessage request, long time) {
-        setException(createTimeoutException(nodeId, address, request, time));
-    }
-    
-    /**
-     * A helper method to create Timeout Exceptions.
-     */
-    protected DHTTimeoutException createTimeoutException(KUID nodeId, SocketAddress address, 
-            RequestMessage request, long time) {
-        return new DHTTimeoutException(nodeId, address, request, time);
     }
 }

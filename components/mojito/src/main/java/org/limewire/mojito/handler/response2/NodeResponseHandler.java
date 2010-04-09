@@ -19,8 +19,8 @@ import org.limewire.security.SecurityToken;
 
 public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
 
-    public NodeResponseHandler(Context context, KUID key, long timeout, TimeUnit unit) {
-        super(context, key, timeout, unit);
+    public NodeResponseHandler(Context context, KUID key) {
+        super(context, key, -1L, TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.handler.ResponseHandler;
+import org.limewire.mojito.handler.response2.ResponseHandler;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -224,7 +224,7 @@ public class Tag {
      */
     public boolean isCancelled() {
         if (responseHandler != null) {
-            return responseHandler.isCancelled();
+            return responseHandler.isDone();
         }
         return false;
     }
@@ -399,16 +399,6 @@ public class Tag {
         public void handleError(IOException e) {
             if (responseHandler != null) {
                 responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
-            }
-        }
-        
-        /**
-         * A delegate method to notify the ResponseHandler that
-         * a tick has passed.
-         */
-        public void handleTick() {
-            if (responseHandler != null) {
-                responseHandler.handleTick();
             }
         }
         

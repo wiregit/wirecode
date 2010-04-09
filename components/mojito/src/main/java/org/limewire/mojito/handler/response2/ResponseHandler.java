@@ -13,6 +13,8 @@ import org.limewire.mojito.messages.ResponseMessage;
  */
 public interface ResponseHandler {
 
+    public boolean isDone();
+    
     /**
      * 
      */

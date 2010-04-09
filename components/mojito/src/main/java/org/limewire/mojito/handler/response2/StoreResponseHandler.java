@@ -55,8 +55,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     public StoreResponseHandler(Context context, 
             Entry<Contact, SecurityToken>[] contacts, 
-            DHTValueEntity[] entities, long timeout, TimeUnit unit) {
-        super(context, timeout, unit);
+            DHTValueEntity[] entities) {
+        super(context, -1L, TimeUnit.MILLISECONDS);
         
         for (Entry<Contact, SecurityToken> entry : contacts) {
             Contact node = entry.getKey();

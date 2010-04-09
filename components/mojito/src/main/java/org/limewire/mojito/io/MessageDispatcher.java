@@ -37,12 +37,12 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.IllegalSocketAddressException;
 import org.limewire.mojito.handler.DefaultMessageHandler;
 import org.limewire.mojito.handler.RequestHandler;
-import org.limewire.mojito.handler.ResponseHandler;
 import org.limewire.mojito.handler.request.FindNodeRequestHandler;
 import org.limewire.mojito.handler.request.FindValueRequestHandler;
 import org.limewire.mojito.handler.request.PingRequestHandler;
 import org.limewire.mojito.handler.request.StatsRequestHandler;
 import org.limewire.mojito.handler.request.StoreRequestHandler;
+import org.limewire.mojito.handler.response2.ResponseHandler;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import org.limewire.mojito.io.Tag.Receipt;
 import org.limewire.mojito.messages.DHTMessage;
@@ -684,9 +684,7 @@ public abstract class MessageDispatcher {
                     receipt.received();
                     it.remove();
                     
-                    process(new TimeoutProcessor(receipt, true));
-                } else {
-                    process(new TickProcessor(receipt));
+                    process(new TimeoutProcessor(receipt, yeatrue));
                 }
             }
         }
@@ -942,23 +940,6 @@ public abstract class MessageDispatcher {
                 receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
-        }
-    }
-    
-    /**
-     * An implementation of Runnable to handle Ticks.
-     */
-    private static class TickProcessor implements Runnable {
-        
-        private final Receipt receipt;
-        
-        private TickProcessor(Receipt receipt) {
-            this.receipt = receipt;
-        }
-        
-        @Override
-        public void run() {
-            receipt.handleTick();
         }
     }
     

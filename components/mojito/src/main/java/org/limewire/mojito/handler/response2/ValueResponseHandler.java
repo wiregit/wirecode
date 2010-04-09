@@ -44,7 +44,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
         = new ArrayList<DHTValueEntity>();
     
     public ValueResponseHandler(Context context, EntityKey lookupKey) {
-        super(context, lookupKey.getPrimaryKey());
+        super(context, lookupKey.getPrimaryKey(), -1L, TimeUnit.MILLISECONDS);
         this.lookupKey = lookupKey;
     }
 
