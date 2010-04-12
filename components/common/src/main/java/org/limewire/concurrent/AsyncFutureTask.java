@@ -69,7 +69,8 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
     }
     
     /**
-     * 
+     * The actual implementation of the {@link AsyncFutureTask}'s 
+     * run method.
      */
     protected void doRun() {
         try {
