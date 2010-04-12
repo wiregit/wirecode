@@ -70,22 +70,18 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     }
     
     /**
-     * 
+     * Starts the {@link DHTTask}
      */
-    protected synchronized void start() throws Exception {
+    protected synchronized void start() {
         task.start(this);
     }
     
     /**
-     * 
+     * Starts the watchdog task
      */
-    private synchronized void watchdog() {
-        if (timeout == -1L) {
-            return;
-        }
-        
-        if (isDone()) {
-            return;
+    private synchronized boolean watchdog() {
+        if (timeout == -1L || isDone()) {
+            return false;
         }
         
         Runnable task = new Runnable() {
@@ -101,6 +97,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         };
         
         watchdog = WATCHDOG.schedule(task, timeout, unit);
+        return true;
     }
     
     @Override
