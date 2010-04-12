@@ -15,6 +15,17 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         implements RunnableAsyncFuture<V> {
     
     /**
+     * This {@link Callable} is used by the default constructor.
+     * It makes it very easy to extend {@link AsyncFutureTask}
+     * and override the {@link #doRun()} method.
+     */
+    private static Callable<Object> NOP = new Callable<Object>() {
+        public Object call() {
+            throw new IllegalStateException("Override doRun()");
+        }
+    };
+    
+    /**
      * We use this {@link AtomicReference} to manage the {@link Thread}
      * that is executing this {@link AsyncFutureTask}.
      * 
@@ -29,6 +40,14 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * or throw an {@link Exception}.
      */
     private final Callable<V> callable;
+    
+    /**
+     * Creates an {@link AsyncFutureTask}
+     */
+    @SuppressWarnings("unchecked")
+    public AsyncFutureTask() {
+        this((Callable<V>)NOP);
+    }
     
     /**
      * Creates an {@link AsyncFutureTask} with the given 
