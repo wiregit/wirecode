@@ -81,18 +81,18 @@ class SmartAutoCompleteDictionary {
         String[] fields = s.split("-", 3);
         
         // Add smart query entries.
-        if (fields.length > 0) {
+        if (fields.length == 1) {
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim()));
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim()));
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.ALBUM, fields[0].trim()));
-        }
-        if (fields.length > 1 && !fields[1].trim().isEmpty()) {
+            
+        } else if (fields.length == 2) {
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
                     FilePropertyKey.TITLE, fields[1].trim()));
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim(),
                     FilePropertyKey.AUTHOR, fields[1].trim()));
-        }
-        if (fields.length > 2 && !fields[2].trim().isEmpty()) {
+            
+        } else if (fields.length > 2) {
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
                     FilePropertyKey.ALBUM, fields[1].trim(), FilePropertyKey.TITLE, fields[2].trim()));
             entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
