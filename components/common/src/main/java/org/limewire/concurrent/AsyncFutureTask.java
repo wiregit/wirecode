@@ -53,15 +53,19 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * Called before {@link #doRun()} to initialize the 
      * current {@link Thread}. Returns true upon success.
      */
-    private synchronized boolean preRun() {
-        return thread.compareAndSet(Interruptible.INIT, new CurrentThread());
+    private boolean preRun() {
+        synchronized (thread) {
+            return thread.compareAndSet(Interruptible.INIT, new CurrentThread());
+        }
     }
     
     /**
      * Called after {@link #doRun()} to cleanup the current {@link Thread}.
      */
-    private synchronized void postRun() {
-        thread.set(Interruptible.DONE);
+    private void postRun() {
+        synchronized (thread) {
+            thread.set(Interruptible.DONE);
+        }
     }
     
     /**
@@ -81,7 +85,7 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         boolean success = super.cancel(mayInterruptIfRunning);
         
         if (success && mayInterruptIfRunning) {
-            synchronized (this) {
+            synchronized (thread) {
                 thread.getAndSet(Interruptible.DONE).interrupt();
             }
         }
