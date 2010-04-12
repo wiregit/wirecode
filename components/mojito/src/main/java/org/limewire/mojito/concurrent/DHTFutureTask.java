@@ -1,6 +1,5 @@
 package org.limewire.mojito.concurrent;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -12,19 +11,17 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.Context;
 
 /**
+ * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
+ * interrupts all waiting {@link Thread}s after a predefined period of
+ * time.
  * 
+ * @see AsyncFutureTask
  */
 public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V> {
 
     private static final ScheduledExecutorService WATCHDOG 
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
-    
-    private static Callable<Object> NOP = new Callable<Object>() {
-        public Object call() {
-            throw new IllegalStateException("Override doRun()");
-        }
-    };
     
     private final Context context;
     
@@ -39,11 +36,9 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     private boolean wasTimeout = false;
     
     /**
-     * 
+     * Creates an {@link DHTFutureTask}
      */
-    @SuppressWarnings("unchecked")
     public DHTFutureTask(Context context, DHTTask<V> task) {
-        super((Callable<V>)NOP);
         
         this.context = context;
         this.task = task;
