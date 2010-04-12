@@ -45,11 +45,14 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         this.context = context;
         this.task = task;
         
+        // Thrown by some Unit-Tests. We will pass the timeout
+        // through the constructor at some point and this is
+        // just a temporary fix which doesn't break anything
+        // in the production environment.
         long timeout = -1L;
         try {
             timeout = task.getWaitOnLockTimeout();
         } catch (UnsupportedOperationException ignore) {
-            
         }
         
         this.timeout = timeout;
