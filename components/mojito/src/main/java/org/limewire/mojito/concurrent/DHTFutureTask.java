@@ -1,12 +1,14 @@
 package org.limewire.mojito.concurrent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.Context;
 
 /**
@@ -14,8 +16,9 @@ import org.limewire.mojito.Context;
  */
 public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V> {
 
-    private static final ScheduledThreadPoolExecutor WATCHDOG 
-        = ExecutorUtils.newSingleThreadScheduledExecutor("WatchdogThread");
+    private static final ScheduledExecutorService WATCHDOG 
+        = Executors.newSingleThreadScheduledExecutor(
+            ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
     
     private static Callable<Object> NOP = new Callable<Object>() {
         public Object call() {
