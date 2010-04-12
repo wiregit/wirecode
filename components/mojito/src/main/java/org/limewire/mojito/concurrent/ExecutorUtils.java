@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.util.ExceptionUtils;
 
 /**
  * 
@@ -63,7 +64,7 @@ public class ExecutorUtils {
                     try {
                         executor.purge();
                     } catch (Exception err) {
-                        ExceptionUtils.exceptionCaught(err);
+                        ExceptionUtils.reportOrReturn(err);
                     }
                 }
             };
@@ -153,7 +154,7 @@ public class ExecutorUtils {
                         try {
                             executor.purge();
                         } catch (Exception err) {
-                            ExceptionUtils.exceptionCaught(err);
+                            ExceptionUtils.reportOrReturn(err);
                         }
                     }
                 };
