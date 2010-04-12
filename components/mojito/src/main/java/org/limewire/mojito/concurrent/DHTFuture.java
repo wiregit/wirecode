@@ -2,27 +2,25 @@ package org.limewire.mojito.concurrent;
 
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.AsyncFuture;
 
 /**
  * 
  */
-public interface DHTFuture<V> extends ListeningFuture<V> {
-
-    /**
-     * Sets the {@link DHTFuture}'s value and returns true on success
-     */
-    public boolean setValue(V value);
+public interface DHTFuture<V> extends AsyncFuture<V> {
     
     /**
-     * Sets the {@link DHTFuture}'s exception and returns true on success
+     * Returns the {@link DHTFuture}'s timeout in the given {@link TimeUnit}
      */
-    public boolean setException(Throwable exception);
+    public long getTimeout(TimeUnit unit);
     
     /**
-     * Returns true if the {@link DHTFuture} completed abnormally 
-     * (i.e. {@link #get()} and {@link #get(long, TimeUnit)} will
-     * throw an {@link Exception}).
+     * Returns the {@link DHTFuture}'s timeout in milliseconds
      */
-    public boolean isCompletedAbnormally();
+    public long getTimeoutInMillis();
+    
+    /**
+     * Returns true if the {@link DHTFuture} completed due to a timeout
+     */
+    public boolean isTimeout();
 }

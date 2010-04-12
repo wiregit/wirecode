@@ -4,18 +4,25 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.concurrent.AsyncValueFuture;
 import org.limewire.concurrent.RunnableListeningFuture;
+import org.limewire.concurrent.AsyncFutureTask.CurrentThread;
+import org.limewire.concurrent.AsyncFutureTask.Interruptible;
 import org.limewire.mojito.Context;
 
 /**
  * 
  */
-public class DHTFutureTask<V> extends DHTValueFuture<V> 
-        implements RunnableListeningFuture<V> {
+public class DHTFutureTask<V> extends AsyncValueFuture<V> 
+        implements DHTFuture<V>, RunnableListeningFuture<V> {
 
     private static final ScheduledThreadPoolExecutor WATCHDOG 
         = ExecutorUtils.newSingleThreadScheduledExecutor("WatchdogThread");
+    
+    private final AtomicReference<Interruptible> thread 
+        = new AtomicReference<Interruptible>(Interruptible.INIT);
     
     private final Context context;
     
@@ -40,22 +47,41 @@ public class DHTFutureTask<V> extends DHTValueFuture<V>
         this.unit = TimeUnit.MILLISECONDS;
     }
     
-    public Context getContect() {
+    public Context getContext() {
         return context;
     }
     
     @Override
-    public synchronized void run() {
-        if (!isDone()) {
+    public void run() {
+        if (thread.compareAndSet(Interruptible.INIT, new CurrentThread())) {
             try {
-                start();
-                watchdog();
-            } catch (Exception err) {
-                setException(err);
+                synchronized (this) {
+                    if (!isDone()) {
+                        try {
+                            start();
+                            watchdog();
+                        } catch (Exception err) {
+                            setException(err);
+                        }
+                    }
+                }
+            } finally {
+                thread.set(Interruptible.DONE);
             }
         }
     }
     
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        boolean success = super.cancel(mayInterruptIfRunning);
+        
+        if (success && mayInterruptIfRunning) {
+            thread.getAndSet(Interruptible.DONE).interrupt();
+        }
+        
+        return success;
+    }
+
     /**
      * 
      */
@@ -90,23 +116,17 @@ public class DHTFutureTask<V> extends DHTValueFuture<V>
         watchdog = WATCHDOG.schedule(task, timeout, unit);
     }
     
-    /**
-     * Returns the timeout of the watchdog in the given {@link TimeUnit}
-     */
+    @Override
     public long getTimeout(TimeUnit unit) {
         return unit.convert(timeout, this.unit);
     }
     
-    /**
-     * Returns the timeout of the watchdog in milliseconds
-     */
+    @Override
     public long getTimeoutInMillis() {
         return getTimeout(TimeUnit.MILLISECONDS);
     }
     
-    /**
-     * Returns true if the {@link DHTFuture} completed due to a timeout
-     */
+    @Override
     public synchronized boolean isTimeout() {
         return wasTimeout;
     }
