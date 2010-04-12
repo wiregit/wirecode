@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.Objects;
 
 /**
@@ -119,8 +120,13 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         try {
             V value = callable.call();
             setValue(value);
-        } catch (Exception err) {
-            setException(err);
+        } catch (Throwable t) {
+            if (t instanceof RuntimeException
+                    || t instanceof Error) {
+                ExceptionUtils.reportOrReturn(t);
+            }
+            
+            setException(t);
         }
     }
     

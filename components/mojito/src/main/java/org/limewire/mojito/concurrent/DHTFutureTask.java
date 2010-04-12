@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.Context;
+import org.limewire.util.ExceptionUtils;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -57,8 +58,13 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             try {
                 start();
                 watchdog();
-            } catch (Exception err) {
-                setException(err);
+            } catch (Throwable t) {
+                if (t instanceof RuntimeException
+                        || t instanceof Error) {
+                    ExceptionUtils.reportOrReturn(t);
+                }
+                
+                setException(t);
             }
         }
     }
