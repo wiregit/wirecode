@@ -5,6 +5,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.util.Objects;
+
 /**
  * An {@link AsyncFuture} that implements the {@link Runnable} interface.
  * 
@@ -32,7 +34,7 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * that is executing this {@link AsyncFutureTask}.
      * 
      * <p>NOTE: It doesn't have to be an {@link AtomicReference}. We could
-     * use a plain handle but this is very convenient.
+     * use a plain handle but this is very elegant.
      */
     private final AtomicReference<Interruptible> thread 
         = new AtomicReference<Interruptible>(Interruptible.INIT);
@@ -63,13 +65,9 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * Creates an {@link AsyncFutureTask} with the given {@link Callable}
      */
     public AsyncFutureTask(Callable<V> callable) {
-        if (callable == null) {
-            throw new NullPointerException("callable");
-        }
-        
-        this.callable = callable;
+        this.callable = Objects.nonNull(callable, "callable");
     }
-
+    
     @Override
     public final void run() {
         if (preRun()) {
@@ -86,15 +84,28 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * current {@link Thread}. Returns true upon success.
      */
     private boolean preRun() {
-        synchronized (thread) {
-            return thread.compareAndSet(Interruptible.INIT, new CurrentThread());
-        }
+        return thread.compareAndSet(Interruptible.INIT, new CurrentThread());
     }
     
     /**
      * Called after {@link #doRun()} to cleanup the current {@link Thread}.
      */
     private void postRun() {
+        
+        // We must use synchronized here and in cancel(boolean) to
+        // ensure that Threads are not being interrupted after 
+        // completion of the Task.
+        //
+        // Example: Thread X enters the run() method and passes the
+        // preRun() method. We call cancel(true) and the Interruptible
+        // handle is being replaced but we haven't called the interrupt()
+        // method yet. Thread X passes through the finally-block and
+        // moves on to execute the next Runnable in its parent's
+        // Executor queue. We call interrupt() and boom!
+        //
+        // The synchronized blocks make sure we're never calling after
+        // completion of the task!
+        
         synchronized (thread) {
             thread.set(Interruptible.DONE);
         }
@@ -118,6 +129,9 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         boolean success = super.cancel(mayInterruptIfRunning);
         
         if (success && mayInterruptIfRunning) {
+            
+            // See postRun() regards the synchronized block!
+            
             synchronized (thread) {
                 thread.getAndSet(Interruptible.DONE).interrupt();
             }
