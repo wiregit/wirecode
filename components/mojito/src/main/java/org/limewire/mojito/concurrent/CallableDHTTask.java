@@ -22,16 +22,13 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.concurrent.OnewayExchanger;
-
 /**
  * A CallableDHTTask takes a DHTTask, starts it and waits for
  * the result.
  */
 public class CallableDHTTask<T> implements Callable<T> {
-
-    private final OnewayExchanger<T, ExecutionException> exchanger
-        = new OnewayExchanger<T, ExecutionException>(true);
+    
+    private final SimpleDHTFuture<T> future = new SimpleDHTFuture<T>();
     
     private final DHTTask<T> task;
     
@@ -42,13 +39,13 @@ public class CallableDHTTask<T> implements Callable<T> {
     }
 
     public T call() throws InterruptedException, ExecutionException {
-        synchronized (exchanger) {
+        synchronized (future) {
             if (!started) {
-                task.start(exchanger);
+                task.start(future);
                 started = true;
             }
             
-            return exchanger.get();
+            return future.get();
         }
     }
 }

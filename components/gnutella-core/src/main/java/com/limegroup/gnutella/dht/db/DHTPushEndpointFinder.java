@@ -54,7 +54,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
       
         DHTFuture2<FindValueResult> future = dhtManager.get(lookupKey);
         if(future != null) {                        
-            future.addDHTFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
+            future.addFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
         } else {
             LOG.debug("dht manager not bootstrapped or no dht");
             listener.searchFailed();

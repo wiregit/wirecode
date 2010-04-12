@@ -70,7 +70,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
         this.context = context;
         
         exchanger = new OnewayExchanger<T, ExecutionException>(true) {
-            @Override
+            /*@Override
             public synchronized void setValue(T value) {
                 if (!isDone()) {
                     super.setValue(value);
@@ -96,7 +96,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                     return true;
                 }
                 return false;
-            }
+            }*/
         };
     }
     
@@ -108,7 +108,7 @@ public class DHTFutureTask<T> implements Runnable, DHTFuture<T>, Cancellable {
                 }
                 taskIsActive = true;
             }
-            task.start(exchanger);
+            //task.start(exchanger);
             
             synchronized (exchanger) {
                 if (!isDone()) {
