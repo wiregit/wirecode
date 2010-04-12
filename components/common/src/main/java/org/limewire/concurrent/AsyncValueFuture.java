@@ -1,6 +1,8 @@
 package org.limewire.concurrent;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,7 +15,31 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
 /**
  * The base implementation of {@link AsyncFuture}.
  * 
+ * <p>NOTE: The documentation for {@link FutureTask} is lying a 
+ * bit. A {@link FutureTask} is not the result of an asynchronous
+ * computation. It's an asynchronously scheduled but otherwise 
+ * totally synchronous computation.
+ * 
+ * <p>That means the underlying computation (represented by a
+ * {@link Runnable} or {@link Callable} task) is synchronous 
+ * and it's assumed there is a result available at the end
+ * of the computation.
+ * 
+ * <p>But what if we want to start a computation and let an
+ * another {@link Thread} deliver the result at some future 
+ * point in time. In the mean time we want the {@link Thread} 
+ * that  started this computation do other things and not 
+ * wait for the result?
+ * 
+ * <p>{@link AsyncFuture}s allow us to decouple the staring 
+ * and finishing of operations.
+ * 
+ * <p>Example: Sending a message over the Network from one
+ * {@link Thread} and an another {@link Thread} delivers the
+ * response at some future point in time.
+ * 
  * @see AsyncFuture
+ * @see AsyncFutureTask
  */
 public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
@@ -129,7 +155,7 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
     /**
      * Protected method invoked when this task transitions to state
      * <tt>isDone</tt> (whether normally or via cancellation). The
-     * default implementation does nothing.  Subclasses may override
+     * default implementation does nothing. Subclasses may override
      * this method to invoke completion callbacks or perform
      * bookkeeping. Note that you can query status inside the
      * implementation of this method to determine whether this task

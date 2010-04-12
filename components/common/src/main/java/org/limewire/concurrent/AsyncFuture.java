@@ -1,5 +1,6 @@
 package org.limewire.concurrent;
 
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -7,6 +8,7 @@ import java.util.concurrent.TimeUnit;
  * to set the result value or {@link Exception} asynchronously.
  * 
  * @see ListeningFuture
+ * @see FutureTask
  */
 public interface AsyncFuture<V> extends ListeningFuture<V> {
 
