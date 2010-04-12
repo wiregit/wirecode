@@ -11,7 +11,9 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventListenerList.EventListenerListContext;
 
 /**
+ * The base implementation of {@link AsyncFuture}.
  * 
+ * @see AsyncFuture
  */
 public class AsyncValueFuture<V> implements AsyncFuture<V> {
 

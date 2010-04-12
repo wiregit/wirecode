@@ -1,28 +1,27 @@
 package org.limewire.mojito.concurrent;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.concurrent.AsyncValueFuture;
-import org.limewire.concurrent.RunnableListeningFuture;
-import org.limewire.concurrent.AsyncFutureTask.CurrentThread;
-import org.limewire.concurrent.AsyncFutureTask.Interruptible;
+import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.mojito.Context;
 
 /**
  * 
  */
-public class DHTFutureTask<V> extends AsyncValueFuture<V> 
-        implements DHTFuture<V>, RunnableListeningFuture<V> {
+public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V> {
 
     private static final ScheduledThreadPoolExecutor WATCHDOG 
         = ExecutorUtils.newSingleThreadScheduledExecutor("WatchdogThread");
     
-    private final AtomicReference<Interruptible> thread 
-        = new AtomicReference<Interruptible>(Interruptible.INIT);
+    private static Callable<Object> NOP = new Callable<Object>() {
+        public Object call() {
+            throw new IllegalStateException("Override doRun()");
+        }
+    };
     
     private final Context context;
     
@@ -39,11 +38,21 @@ public class DHTFutureTask<V> extends AsyncValueFuture<V>
     /**
      * 
      */
-    public DHTFutureTask(final Context context, DHTTask<V> task) {
+    @SuppressWarnings("unchecked")
+    public DHTFutureTask(Context context, DHTTask<V> task) {
+        super((Callable<V>)NOP);
+        
         this.context = context;
         this.task = task;
         
-        this.timeout = task.getWaitOnLockTimeout();
+        long timeout = -1L;
+        try {
+            timeout = task.getWaitOnLockTimeout();
+        } catch (UnsupportedOperationException ignore) {
+            
+        }
+        
+        this.timeout = timeout;
         this.unit = TimeUnit.MILLISECONDS;
     }
     
@@ -52,36 +61,17 @@ public class DHTFutureTask<V> extends AsyncValueFuture<V>
     }
     
     @Override
-    public void run() {
-        if (thread.compareAndSet(Interruptible.INIT, new CurrentThread())) {
+    protected synchronized void doRun() {
+        if (!isDone()) {
             try {
-                synchronized (this) {
-                    if (!isDone()) {
-                        try {
-                            start();
-                            watchdog();
-                        } catch (Exception err) {
-                            setException(err);
-                        }
-                    }
-                }
-            } finally {
-                thread.set(Interruptible.DONE);
+                start();
+                watchdog();
+            } catch (Exception err) {
+                setException(err);
             }
         }
     }
     
-    @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        boolean success = super.cancel(mayInterruptIfRunning);
-        
-        if (success && mayInterruptIfRunning) {
-            thread.getAndSet(Interruptible.DONE).interrupt();
-        }
-        
-        return success;
-    }
-
     /**
      * 
      */

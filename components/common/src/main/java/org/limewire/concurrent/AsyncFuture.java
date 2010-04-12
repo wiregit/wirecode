@@ -3,7 +3,10 @@ package org.limewire.concurrent;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * An {@link AsyncFuture} is an {@link ListeningFuture} with the ability
+ * to set the result value or {@link Exception} asynchronously.
  * 
+ * @see ListeningFuture
  */
 public interface AsyncFuture<V> extends ListeningFuture<V> {
 
