@@ -73,7 +73,7 @@ public class FriendInspections {
                 data.put("limewire friends", count);
                 data.put("online friends", onlineFriends);   
                 // counts of the number of instances per presence (0 = # not logged in, 1 = # logged in 1 instance, 2 = # logged in 2 instances, etc
-                data.put("presences", presencesHistogram.inspect());   // includes counts of the number of 
+                data.put("presences", presencesHistogram.inspect());
             }
         };
     }
