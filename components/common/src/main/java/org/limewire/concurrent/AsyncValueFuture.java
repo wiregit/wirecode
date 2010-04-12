@@ -111,7 +111,7 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
     }
 
     /**
-     * 
+     * Notifies all {@link EventListener}s and calls {@link #done()}.
      */
     private void complete() {
         // Fire the event
@@ -127,7 +127,13 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
     }
     
     /**
-     * 
+     * Protected method invoked when this task transitions to state
+     * <tt>isDone</tt> (whether normally or via cancellation). The
+     * default implementation does nothing.  Subclasses may override
+     * this method to invoke completion callbacks or perform
+     * bookkeeping. Note that you can query status inside the
+     * implementation of this method to determine whether this task
+     * has been cancelled.
      */
     protected void done() {
         // Override

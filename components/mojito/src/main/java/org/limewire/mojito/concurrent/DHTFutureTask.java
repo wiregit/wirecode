@@ -125,7 +125,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     }
     
     /**
-     * 
+     * Overridden and declared final to do some critical bookkeeping. 
+     * Please override {@link #done0()} in custom implementations.
      */
     @Override
     protected final void done() {
@@ -140,7 +141,10 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     }
     
     /**
+     * Protected method that is invoked when this {@link DHTFutureTask}
+     * completes. You may override this method.
      * 
+     * @see #done()
      */
     protected void done0() {
         // Override
