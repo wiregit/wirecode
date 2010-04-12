@@ -112,12 +112,10 @@ public class OnewayExchanger<V, E extends Throwable> {
      * will return immediately.
      */
     public V get() throws InterruptedException, E {
-        synchronized (lock) {
-            try {
-                return get(0L, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException cannotHappen) {
-                throw new Error(cannotHappen);
-            }
+        try {
+            return get(0L, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException cannotHappen) {
+            throw new Error(cannotHappen);
         }
     }
     
@@ -132,9 +130,9 @@ public class OnewayExchanger<V, E extends Throwable> {
         synchronized (lock) {
             if (!done) {
                 if (timeout == 0L) {
-                    wait();
+                    lock.wait();
                 } else {
-                    unit.timedWait(this, timeout);
+                    unit.timedWait(lock, timeout);
                 }
                 
                 // Not done? Must be a timeout!
@@ -272,15 +270,14 @@ public class OnewayExchanger<V, E extends Throwable> {
      */
     public boolean reset() {
         synchronized (lock) {
-            if (oneShot) {
-                return false;
+            if (!oneShot && done) {
+                done = false;
+                cancelled = false;
+                value = null;
+                exception = null;
+                return true;
             }
-            
-            done = false;
-            cancelled = false;
-            value = null;
-            exception = null;
-            return true;
+            return false;
         }
     }
 }
