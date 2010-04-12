@@ -34,7 +34,7 @@ public interface DHTTask<T> {
     /**
      * Starts the DHTTask.
      */
-    public void start(DHTFuture2<T> future);
+    public void start(DHTFuture<T> future);
     
     /**
      * Cancels the DHTTask.

@@ -40,10 +40,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
-import org.limewire.mojito.concurrent.SimpleDHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
@@ -986,14 +986,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#ping()
      */
-    public DHTFuture2<PingResult> findActiveContact() {
+    public DHTFuture<PingResult> findActiveContact() {
         return pingManager.ping(getActiveContacts());
     }
     
     /**
      * Tries to ping a Set of hosts
      */
-    public DHTFuture2<PingResult> ping(Set<? extends SocketAddress> hosts) {
+    public DHTFuture<PingResult> ping(Set<? extends SocketAddress> hosts) {
         return pingManager.pingAddresses(hosts);
     }
     
@@ -1002,22 +1002,22 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * 
      * @param address The address of the remote Node
      */
-    public DHTFuture2<PingResult> ping(SocketAddress address) {
+    public DHTFuture<PingResult> ping(SocketAddress address) {
         return pingManager.ping(address);
     }
     
     /** 
      * Pings the given Node 
      */
-    public DHTFuture2<PingResult> ping(Contact node) {
+    public DHTFuture<PingResult> ping(Contact node) {
         return pingManager.ping(node);
     }
     
-    public void ping(final Contact node, final DHTFutureListener2<PingResult> listener) {
+    public void ping(final Contact node, final DHTFutureAdapter<PingResult> listener) {
         Runnable command = new Runnable() {
             public void run() {
                 try {
-                    DHTFuture2<PingResult> future = ping(node);
+                    DHTFuture<PingResult> future = ping(node);
                     if (listener != null) {
                         future.addFutureListener(listener);
                     }
@@ -1033,14 +1033,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** 
      * Sends a special collision test Ping to the given Node 
      */
-    public DHTFuture2<PingResult> collisionPing(Contact node) {
+    public DHTFuture<PingResult> collisionPing(Contact node) {
         return pingManager.collisionPing(node);
     }
     
     /** 
      * Sends a special collision test Ping to the given Node 
      */
-    public DHTFuture2<PingResult> collisionPing(Set<? extends Contact> nodes) {
+    public DHTFuture<PingResult> collisionPing(Set<? extends Contact> nodes) {
         return pingManager.collisionPing(nodes);
     }
     
@@ -1062,7 +1062,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see org.limewire.mojito.MojitoDHT#get(org.limewire.mojito.db.EntityKey)
      */
-    public DHTFuture2<FindValueResult> get(EntityKey entityKey) {
+    public DHTFuture<FindValueResult> get(EntityKey entityKey) {
         if (entityKey.isLookupKey()) {
             throwExceptionIfNotBootstrapped("get()");
             return findValueManager.lookup(entityKey);
@@ -1074,7 +1074,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** 
      * Starts a Node lookup for the given KUID 
      */
-    public DHTFuture2<FindNodeResult> lookup(KUID lookupId) {
+    public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
         return findNodeManager.lookup(lookupId);
     }
     
@@ -1082,7 +1082,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bootstrap(com.limegroup.mojito.routing.Contact)
      */
-    public DHTFuture2<BootstrapResult> bootstrap(Contact node) {
+    public DHTFuture<BootstrapResult> bootstrap(Contact node) {
         return bootstrapManager.bootstrap(node);
     }
     
@@ -1090,7 +1090,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bootstrap(com.limegroup.mojito.routing.Contact)
      */
-    public DHTFuture2<BootstrapResult> bootstrap(SocketAddress dst) {
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
         return bootstrapManager.bootstrap(Collections.singleton(dst));
     }
     
@@ -1098,7 +1098,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
-    public DHTFuture2<StoreResult> put(KUID key, DHTValue value) {
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
         return put(DHTValueEntity.createFromValue(this, key, value));
     }
     
@@ -1106,7 +1106,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @param entity The value to store
      * @param immediateStore Whether or not to store the value immediately
      */
-    public DHTFuture2<StoreResult> put(DHTValueEntity entity) {
+    public DHTFuture<StoreResult> put(DHTValueEntity entity) {
         if (!isRunning()) {
             throw new IllegalStateException(getName() + " is not running");
         }
@@ -1121,7 +1121,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         } else {
             String operation = (entity.getValue().size() == 0) ? "remove()" : "put()";
             Exception ex = new NotBootstrappedException(getName(), operation);
-            return new SimpleDHTFuture<StoreResult>(ex);
+            return new DHTValueFuture<StoreResult>(ex);
         }
     }
     
@@ -1129,7 +1129,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#remove(com.limegroup.mojito.KUID)
      */
-    public DHTFuture2<StoreResult> remove(KUID key) {
+    public DHTFuture<StoreResult> remove(KUID key) {
         // To remove a KeyValue you just store an empty value!
         return put(key, DHTValue.EMPTY_VALUE);
     }
@@ -1137,14 +1137,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Stores the given Storable
      */
-    public DHTFuture2<StoreResult> store(Storable storable) {
+    public DHTFuture<StoreResult> store(Storable storable) {
         return store(DHTValueEntity.createFromStorable(this, storable));
     }
     
     /** 
      * Stores the given DHTValue 
      */
-    public DHTFuture2<StoreResult> store(DHTValueEntity entity) {
+    public DHTFuture<StoreResult> store(DHTValueEntity entity) {
         return store(Collections.singleton(entity));
     }
    
@@ -1152,7 +1152,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Stores a Collection of DHTValue(s). All values must have the same
      * valueId!
      */
-    public DHTFuture2<StoreResult> store(Collection<? extends DHTValueEntity> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
         throwExceptionIfNotBootstrapped("store()");
         return storeManager.store(values);
     }
@@ -1161,7 +1161,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Stores a Collection of DHTValue(s) at the given Node. 
      * All values must have the same valueId!
      */
-    public DHTFuture2<StoreResult> store(Contact node, SecurityToken securityToken, 
+    public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
         
         return storeManager.store(node, securityToken, values);

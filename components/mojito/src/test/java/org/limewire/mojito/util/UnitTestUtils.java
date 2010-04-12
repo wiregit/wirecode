@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.manager.BootstrapManager;
 
@@ -43,7 +43,7 @@ public class UnitTestUtils {
                         throw new UnsupportedOperationException();
                     }
 
-                    public void start(DHTFuture2 future) {
+                    public void start(DHTFuture future) {
                         throw new UnsupportedOperationException();
                     } 
                 });

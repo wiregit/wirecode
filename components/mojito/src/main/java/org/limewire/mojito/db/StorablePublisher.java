@@ -11,8 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -101,7 +101,7 @@ public class StorablePublisher implements Runnable {
         
         private Iterator<Storable> values = null;
         
-        private DHTFuture2<StoreResult> future = null;
+        private DHTFuture<StoreResult> future = null;
         
         /**
          * Stops the PublishTask
@@ -179,7 +179,7 @@ public class StorablePublisher implements Runnable {
         }
     }
     
-    private class StoreResultHandler extends DHTFutureListener2<StoreResult> {
+    private class StoreResultHandler extends DHTFutureAdapter<StoreResult> {
         
         private final Storable storable;
         

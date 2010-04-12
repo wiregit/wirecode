@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class CallableDHTTask<T> implements Callable<T> {
     
-    private final SimpleDHTFuture<T> future = new SimpleDHTFuture<T>();
+    private final DHTValueFuture<T> future = new DHTValueFuture<T>();
     
     private final DHTTask<T> task;
     

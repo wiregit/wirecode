@@ -21,8 +21,8 @@ package org.limewire.mojito.manager;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureTask2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.handler.response.GetValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
 
@@ -42,7 +42,7 @@ public class GetValueManager extends AbstractManager<FindValueResult> {
     /**
      * Tries to get one or more values from the remote Node.
      */
-    public DHTFuture2<FindValueResult> get(EntityKey entityKey) {
+    public DHTFuture<FindValueResult> get(EntityKey entityKey) {
         
         GetValueResponseHandler handler 
             = new GetValueResponseHandler(context, entityKey);
@@ -54,7 +54,7 @@ public class GetValueManager extends AbstractManager<FindValueResult> {
     /**
      * A "get value" specific implementation of DHTFuture.
      */
-    private class GetValueFuture extends DHTFutureTask2<FindValueResult> {
+    private class GetValueFuture extends DHTFutureTask<FindValueResult> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
             super(context, callable);

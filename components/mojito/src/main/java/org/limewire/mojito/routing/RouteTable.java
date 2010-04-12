@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
 
 
@@ -221,7 +221,7 @@ public interface RouteTable extends Serializable {
     public static interface ContactPinger {
         
         /** Sends a PING to the given Node */
-        public void ping(Contact node, DHTFutureListener2<PingResult> listener);
+        public void ping(Contact node, DHTFutureAdapter<PingResult> listener);
     }
     
     /**

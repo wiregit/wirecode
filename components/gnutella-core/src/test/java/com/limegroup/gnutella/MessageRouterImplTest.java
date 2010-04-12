@@ -38,7 +38,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
@@ -1370,11 +1370,11 @@ public final class MessageRouterImplTest extends LimeTestCase {
         public void setEnabled(boolean enabled) {
         }
         
-        public DHTFuture2<FindValueResult> get(EntityKey eKey) {
+        public DHTFuture<FindValueResult> get(EntityKey eKey) {
             return null;
         }
         
-        public DHTFuture2<StoreResult> put(KUID key, DHTValue value) {
+        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
         }
     }

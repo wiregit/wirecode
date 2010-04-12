@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
@@ -62,7 +62,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     /** A handle to Context. */
     protected final Context context;
     
-    private volatile DHTFuture2<V> future;
+    private volatile DHTFuture<V> future;
     
     /** The time of the last response we received. */
     protected long lastResponseTime = 0L;
@@ -100,7 +100,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see org.limewire.mojito.concurrent.DHTTask#start(org.limewire.mojito.util.OnewayExchanger)
      */
-    public void start(DHTFuture2<V> future) {
+    public void start(DHTFuture<V> future) {
     	this.future = future;
     	
     	synchronized (getLock()) {

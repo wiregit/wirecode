@@ -25,8 +25,8 @@ import java.util.Map;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureTask2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
@@ -51,7 +51,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
     /**
      * Starts a lookup for the given KUID.
      */
-    public DHTFuture2<FindValueResult> lookup(EntityKey entityKey) {
+    public DHTFuture<FindValueResult> lookup(EntityKey entityKey) {
         return lookup(entityKey, -1);
     }
     
@@ -59,7 +59,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
      * Starts a lookup for the given KUID and expects 'count' 
      * number of results.
      */
-    private DHTFuture2<FindValueResult> lookup(EntityKey entityKey, int count) {
+    private DHTFuture<FindValueResult> lookup(EntityKey entityKey, int count) {
         
         FindValueFuture future = null;
         synchronized(futureMap) {
@@ -80,7 +80,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
     /**
      * The DHTFuture for FIND_VALUE.
      */
-    private class FindValueFuture extends DHTFutureTask2<FindValueResult> {
+    private class FindValueFuture extends DHTFutureTask<FindValueResult> {
 
         private final EntityKey entityKey;
         
@@ -93,7 +93,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
         }
 
         @Override
-        protected void bla() {
+        protected void done0() {
             futureMap.remove(entityKey);
         }
 

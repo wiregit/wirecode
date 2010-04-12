@@ -38,7 +38,7 @@ import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
@@ -354,7 +354,7 @@ public class RouteTableImpl implements RouteTable {
      * state is that both Contacts have the same Node ID.
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
-        DHTFutureListener2<PingResult> listener = new DHTFutureListener2<PingResult>() {
+        DHTFutureAdapter<PingResult> listener = new DHTFutureAdapter<PingResult>() {
             
             @Override
             protected void operationComplete(FutureEvent<PingResult> event) {
@@ -924,7 +924,7 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null.
      */
-    private void ping(Contact node, DHTFutureListener2<PingResult> listener) {
+    private void ping(Contact node, DHTFutureAdapter<PingResult> listener) {
         ContactPinger pinger = this.pinger;
         if (pinger != null) {
             pinger.ping(node, listener);

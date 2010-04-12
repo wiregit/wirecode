@@ -30,8 +30,8 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
@@ -90,8 +90,8 @@ public class DHTValueTest extends MojitoTestCase {
             assertTrue(DatabaseUtils.isPublishingRequired(storable));
             
             // Store...
-            DHTFuture2<StoreResult> future = context.store(storable);
-            future.addFutureListener(new DHTFutureListener2<StoreResult>() {
+            DHTFuture<StoreResult> future = context.store(storable);
+            future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
                 @Override
                 public void operationComplete(FutureEvent<StoreResult> event) {
                     assertEquals(Type.SUCCESS, event.getType());

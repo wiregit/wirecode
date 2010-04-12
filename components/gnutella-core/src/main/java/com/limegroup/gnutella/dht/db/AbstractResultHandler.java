@@ -7,8 +7,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
@@ -22,7 +22,7 @@ import com.limegroup.gnutella.dht.DHTManager;
  * Iterates over entity keys and retrieves their values from the node and
  * calls {@link #handleDHTValueEntity(DHTValueEntity)} for them.
  */
-abstract class AbstractResultHandler extends DHTFutureListener2<FindValueResult> {
+abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResultHandler.class);
     
@@ -103,7 +103,7 @@ abstract class AbstractResultHandler extends DHTFutureListener2<FindValueResult>
                 if (!entityKey.getDHTValueType().equals(valueType)) {
                     continue;
                 }
-                DHTFuture2<FindValueResult> future = dhtManager.get(entityKey);
+                DHTFuture<FindValueResult> future = dhtManager.get(entityKey);
                 if(future != null) {
                     try {                        
                         // TODO make this a non-blocking call

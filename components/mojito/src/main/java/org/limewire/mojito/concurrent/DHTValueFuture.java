@@ -15,7 +15,7 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
 /**
  * 
  */
-public class SimpleDHTFuture<V> implements DHTFuture2<V> {
+public class DHTValueFuture<V> implements DHTFuture<V> {
 
     private final AtomicReference<EventListenerList<FutureEvent<V>>> listenersRef 
         = new AtomicReference<EventListenerList<FutureEvent<V>>>(
@@ -31,19 +31,28 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     private final OnewayExchanger<V, ExecutionException> exchanger 
         = new OnewayExchanger<V, ExecutionException>(this, true);
     
-    public SimpleDHTFuture() {
+    /**
+     * Creates a {@link DHTValueFuture}
+     */
+    public DHTValueFuture() {
     }
     
-    public SimpleDHTFuture(V value) {
+    /**
+     * Creates a {@link DHTValueFuture} with the given value
+     */
+    public DHTValueFuture(V value) {
         setValue(value);
     }
     
-    public SimpleDHTFuture(Throwable exception) {
+    /**
+     * Creates a {@link DHTValueFuture} with the given {@link Throwable}
+     */
+    public DHTValueFuture(Throwable exception) {
         setException(exception);
     }
     
     @Override
-    public synchronized boolean setValue(V value) {
+    public boolean setValue(V value) {
         boolean success = exchanger.setValue(value);
         
         if (success) {
@@ -54,7 +63,7 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     }
     
     @Override
-    public synchronized boolean setException(Throwable exception) {
+    public boolean setException(Throwable exception) {
         boolean success = exchanger.setException(wrap(exception));
         
         if (success) {
@@ -73,7 +82,7 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     }
     
     @Override
-    public synchronized boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(boolean mayInterruptIfRunning) {
         boolean success = exchanger.cancel();
         
         if (success) {
@@ -84,23 +93,23 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     }
 
     @Override
-    public synchronized V get() throws InterruptedException, ExecutionException {
+    public V get() throws InterruptedException, ExecutionException {
         return exchanger.get();
     }
 
     @Override
-    public synchronized V get(long timeout, TimeUnit unit) 
+    public V get(long timeout, TimeUnit unit) 
             throws InterruptedException, ExecutionException, TimeoutException {
         return exchanger.get(timeout, unit);
     }
 
     @Override
-    public synchronized boolean isCancelled() {
+    public boolean isCancelled() {
         return exchanger.isCancelled();
     }
 
     @Override
-    public synchronized boolean isDone() {
+    public boolean isDone() {
         return exchanger.isDone();
     }
     
@@ -112,7 +121,7 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     /**
      * 
      */
-    private synchronized void complete() {
+    private void complete() {
         // Fire the event
         EventListenerList<FutureEvent<V>> listeners 
             = listenersRef.getAndSet(null);
@@ -128,8 +137,8 @@ public class SimpleDHTFuture<V> implements DHTFuture2<V> {
     /**
      * 
      */
-    protected synchronized void done() {
-        
+    protected void done() {
+        // Override
     }
 
     @Override

@@ -37,8 +37,8 @@ import org.limewire.lifecycle.Service;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.FindValueResult;
@@ -419,7 +419,7 @@ public class DHTManagerImpl implements DHTManager, Service {
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      *          
      */
-    public synchronized DHTFuture2<FindValueResult> get(EntityKey eKey) {
+    public synchronized DHTFuture<FindValueResult> get(EntityKey eKey) {
         MojitoDHT mojitoDHT = getMojitoDHT();
         
         if (LOG.isDebugEnabled())
@@ -440,7 +440,7 @@ public class DHTManagerImpl implements DHTManager, Service {
                 }
             }
         };
-        DHTFuture2<FindValueResult> future = mojitoDHT.get(eKey);
+        DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
         future.addFutureListener(inspector);
         return future;
     }
@@ -455,7 +455,7 @@ public class DHTManagerImpl implements DHTManager, Service {
      * @return an instance of <code>DHTFuture</code> containing the result of the storage.
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      */
-    public synchronized DHTFuture2<StoreResult> put(KUID key, DHTValue value) {
+    public synchronized DHTFuture<StoreResult> put(KUID key, DHTValue value) {
         MojitoDHT mojitoDHT = getMojitoDHT();
 
         if (LOG.isDebugEnabled())
@@ -475,7 +475,7 @@ public class DHTManagerImpl implements DHTManager, Service {
                 }
             }
         };
-        DHTFuture2<StoreResult> future = mojitoDHT.put(key, value);
+        DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
         future.addFutureListener(inspector);
         return future;
     }
@@ -889,7 +889,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         }
     }
     
-    abstract static class TimeInspector<T> extends DHTFutureListener2<T> {
+    abstract static class TimeInspector<T> extends DHTFutureAdapter<T> {
         
         private final long startTime = System.currentTimeMillis();
         private final TimeValuesInspectable values;

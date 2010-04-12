@@ -32,9 +32,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SyncWrapper;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.concurrent.SimpleDHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler;
@@ -75,7 +75,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     
     private enum Status { BOOTSTRAPPING, RETRYING_BOOTSTRAP, FINISHED};
     
-    private DHTFuture2<BootstrapResult> exchanger;
+    private DHTFuture<BootstrapResult> exchanger;
     
     private final Context context;
     
@@ -124,7 +124,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         return waitOnLock;
     }
 
-    public void start(DHTFuture2<BootstrapResult> exchanger) {
+    public void start(DHTFuture<BootstrapResult> exchanger) {
         
         synchronized(status.getLock()) {
             if (status.get() != null)
@@ -146,7 +146,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void findInitialContact() {
-        DHTFuture2<PingResult> c = new SimpleDHTFuture<PingResult>() {
+        DHTFuture<PingResult> c = new DHTValueFuture<PingResult>() {
             @Override
             public synchronized boolean setValue(PingResult value) {
                 if (LOG.isTraceEnabled()) {
@@ -184,7 +184,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void findNearestNodes() {
-        DHTFuture2<FindNodeResult> c = new SimpleDHTFuture<FindNodeResult>() {
+        DHTFuture<FindNodeResult> c = new DHTValueFuture<FindNodeResult>() {
             @Override
             public synchronized boolean setValue(FindNodeResult value) {
                 if (LOG.isTraceEnabled()) {
@@ -246,7 +246,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private void checkCollisions(Collection<? extends Contact> collisions) {
-        DHTFuture2<PingResult> c = new SimpleDHTFuture<PingResult>() {
+        DHTFuture<PingResult> c = new DHTValueFuture<PingResult>() {
             @Override
             public synchronized boolean setValue(PingResult value) {
                 if (LOG.isErrorEnabled()) {
@@ -479,7 +479,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
         exchanger.setValue(new BootstrapResult(node, time, type));
     }
     
-    private <T> void start(DHTTask<T> task, DHTFuture2<T> c) {
+    private <T> void start(DHTTask<T> task, DHTFuture<T> c) {
         boolean doStart = false;
         synchronized (this) {
             if (!cancelled) {

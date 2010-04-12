@@ -27,7 +27,7 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
@@ -239,39 +239,39 @@ public interface MojitoDHT extends Closeable {
      * Bootstraps the MojitoDHT from the given Contact. Use
      * the ping() methods to find a Contact!
      */
-    public DHTFuture2<BootstrapResult> bootstrap(Contact node);
+    public DHTFuture<BootstrapResult> bootstrap(Contact node);
     
     /**
      * Bootstraps the MojitoDHT from the given SocketAddress.
      */
-    public DHTFuture2<BootstrapResult> bootstrap(SocketAddress dst);
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst);
     
     /**
      * Tries to ping Contacts in the RouteTable. You may use
      * this method to find a remote Node from where you can
      * bootstrap your MojitoDHT instance.
      */
-    public DHTFuture2<PingResult> findActiveContact();
+    public DHTFuture<PingResult> findActiveContact();
     
     /**
      * Tries to ping the given address.
      */
-    public DHTFuture2<PingResult> ping(SocketAddress dst);
+    public DHTFuture<PingResult> ping(SocketAddress dst);
     
     /**
      * Tries to find and get a DHTValue with the given EntityKey.
      */
-    public DHTFuture2<FindValueResult> get(EntityKey entityKey);
+    public DHTFuture<FindValueResult> get(EntityKey entityKey);
     
     /**
      * Stores the given key, value pair.
      */
-    public DHTFuture2<StoreResult> put(KUID key, DHTValue value);
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
     
     /**
      * Removes the value for the given key.
      */
-    public DHTFuture2<StoreResult> remove(KUID key);
+    public DHTFuture<StoreResult> remove(KUID key);
     
     /**
      * Sets the DHTExecutorService.

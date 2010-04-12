@@ -17,7 +17,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
@@ -85,7 +85,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             RouteTable rt = context.getRouteTable();
             rt.setContactPinger(new RouteTable.ContactPinger() {
                 public void ping(Contact node,
-                        DHTFutureListener2<PingResult> listener) {
+                        DHTFutureAdapter<PingResult> listener) {
                 }
             });
             

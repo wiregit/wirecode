@@ -7,7 +7,7 @@ import org.limewire.listener.EventListener;
 /**
  * 
  */
-public abstract class DHTFutureListener2<V> implements EventListener<FutureEvent<V>> {
+public abstract class DHTFutureAdapter<V> implements EventListener<FutureEvent<V>> {
 
     @BlockingEvent(queueName="AsyncFuture")
     @Override

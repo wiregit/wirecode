@@ -27,8 +27,8 @@ import java.util.Set;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureTask2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
@@ -61,12 +61,12 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Host.
      */
-    public DHTFuture2<PingResult> ping(SocketAddress host) {
+    public DHTFuture<PingResult> ping(SocketAddress host) {
         PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(host);
         return ping(null, host, pinger);
     }
 
-    public DHTFuture2<PingResult> pingAddresses(Set<? extends SocketAddress> hosts) {
+    public DHTFuture<PingResult> pingAddresses(Set<? extends SocketAddress> hosts) {
         PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(hosts);
         return ping(null, null, pinger);
     }
@@ -74,7 +74,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Node.
      */
-    public DHTFuture2<PingResult> ping(Contact node) {
+    public DHTFuture<PingResult> ping(Contact node) {
         PingIterator pinger = new PingIteratorFactory.ContactPinger(node);
         return ping(null, node.getContactAddress(), pinger);
     }
@@ -82,7 +82,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Node.
      */
-    public DHTFuture2<PingResult> ping(KUID nodeId, SocketAddress address) {
+    public DHTFuture<PingResult> ping(KUID nodeId, SocketAddress address) {
         PingIterator pinger = new PingIteratorFactory.EntryPinger(nodeId, address);
         return ping(null, address, pinger);
     }
@@ -90,7 +90,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Node.
      */
-    public DHTFuture2<PingResult> ping(Set<? extends Contact> nodes) {
+    public DHTFuture<PingResult> ping(Set<? extends Contact> nodes) {
         PingIterator pinger = new PingIteratorFactory.ContactPinger(nodes);
         return ping(null, null, pinger);
     }
@@ -99,11 +99,11 @@ public class PingManager extends AbstractManager<PingResult> {
      * Sends a special ping to the given Node to test if there
      * is a Node ID collision.
      */
-    public DHTFuture2<PingResult> collisionPing(Contact node) {
+    public DHTFuture<PingResult> collisionPing(Contact node) {
         return collisionPing(node.getContactAddress(), Collections.singleton(node));
     }
     
-    public DHTFuture2<PingResult> collisionPing(Set<? extends Contact> nodes) {
+    public DHTFuture<PingResult> collisionPing(Set<? extends Contact> nodes) {
         return collisionPing(null, nodes);
     }
     
@@ -111,7 +111,7 @@ public class PingManager extends AbstractManager<PingResult> {
      * Sends a special ping to the given Node to test if there
      * is a Node ID collision.
      */
-    private DHTFuture2<PingResult> collisionPing(SocketAddress key, Set<? extends Contact> nodes) {
+    private DHTFuture<PingResult> collisionPing(SocketAddress key, Set<? extends Contact> nodes) {
         Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
         PingIterator pinger = new PingIteratorFactory.CollisionPinger(context, sender, nodes);
         return ping(sender, key, pinger);
@@ -124,7 +124,7 @@ public class PingManager extends AbstractManager<PingResult> {
      * @param key the remote Node's address
      * @param pinger sends ping requests
      */
-    private DHTFuture2<PingResult> ping(Contact sender, SocketAddress key, PingIterator pinger) {
+    private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, PingIterator pinger) {
         PingFuture future = null;
         synchronized (futureMap) {
             future = (key != null ? futureMap.get(key) : null);
@@ -148,7 +148,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * A ping specific implementation of DHTFuture. 
      */
-    private class PingFuture extends DHTFutureTask2<PingResult> {
+    private class PingFuture extends DHTFutureTask<PingResult> {
 
         private final SocketAddress key;
         
@@ -158,7 +158,7 @@ public class PingManager extends AbstractManager<PingResult> {
         }
         
         @Override
-        protected void bla() {
+        protected void done0() {
             if (key != null) {
                 futureMap.remove(key);
             }

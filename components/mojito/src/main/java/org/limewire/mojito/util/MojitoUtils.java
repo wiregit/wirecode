@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -49,7 +49,7 @@ public class MojitoUtils {
      * case of a success it will kick off a bootstrap process and returns
      * a DHTFuture for the process.
      */
-    public static DHTFuture2<BootstrapResult> bootstrap(MojitoDHT dht, SocketAddress addr) 
+    public static DHTFuture<BootstrapResult> bootstrap(MojitoDHT dht, SocketAddress addr) 
             throws ExecutionException, InterruptedException {
         PingResult pong = dht.ping(addr).get();
         return dht.bootstrap(pong.getContact());

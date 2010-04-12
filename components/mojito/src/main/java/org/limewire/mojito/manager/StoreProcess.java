@@ -33,9 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.concurrent.SimpleDHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
@@ -92,7 +92,7 @@ class StoreProcess implements DHTTask<StoreResult> {
     
     private boolean cancelled = false;
     
-    private DHTFuture2<StoreResult> future;
+    private DHTFuture<StoreResult> future;
     
     private final KUID primaryKey;
     
@@ -140,7 +140,7 @@ class StoreProcess implements DHTTask<StoreResult> {
         return waitOnLock;
     }
 
-    public void start(DHTFuture2<StoreResult> future) {
+    public void start(DHTFuture<StoreResult> future) {
         
         this.future = future;
         
@@ -160,7 +160,7 @@ class StoreProcess implements DHTTask<StoreResult> {
     }
     
     private void findNearestNodes() {
-        DHTFuture2<LookupResult> c = new SimpleDHTFuture<LookupResult>() {
+        DHTFuture<LookupResult> c = new DHTValueFuture<LookupResult>() {
             @Override
             public synchronized boolean setValue(LookupResult value) {
                 if (super.setValue(value)) {
@@ -195,7 +195,7 @@ class StoreProcess implements DHTTask<StoreResult> {
     }
     
     private void doGetSecurityToken() {
-        DHTFuture2<GetSecurityTokenResult> c = new SimpleDHTFuture<GetSecurityTokenResult>() {
+        DHTFuture<GetSecurityTokenResult> c = new DHTValueFuture<GetSecurityTokenResult>() {
             @Override
             public synchronized boolean setValue(GetSecurityTokenResult value) {
                 if (super.setValue(value)) {
@@ -241,7 +241,7 @@ class StoreProcess implements DHTTask<StoreResult> {
         start(handler, future);
     }
     
-    private <T> void start(DHTTask<T> task, DHTFuture2<T> c) {
+    private <T> void start(DHTTask<T> task, DHTFuture<T> c) {
         boolean doStart = false;
         synchronized (tasks) {
             if (!cancelled) {

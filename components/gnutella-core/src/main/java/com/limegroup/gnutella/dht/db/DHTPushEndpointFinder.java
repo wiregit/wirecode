@@ -12,7 +12,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.FindValueResult;
@@ -52,7 +52,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         KUID key = KUIDUtils.toKUID(guid);
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);        
       
-        DHTFuture2<FindValueResult> future = dhtManager.get(lookupKey);
+        DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
         if(future != null) {                        
             future.addFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
         } else {

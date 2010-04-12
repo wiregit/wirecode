@@ -25,8 +25,8 @@ import java.util.Map;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureTask2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
@@ -51,7 +51,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
     /**
      * Starts a lookup for the given KUID.
      */
-    public DHTFuture2<FindNodeResult> lookup(KUID lookupId) {
+    public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
         return lookup(lookupId, -1);
     }
     
@@ -59,7 +59,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
      * Starts a lookup for the given KUID and expects 'count' 
      * number of results.
      */
-    private DHTFuture2<FindNodeResult> lookup(KUID lookupId, int count) {
+    private DHTFuture<FindNodeResult> lookup(KUID lookupId, int count) {
         FindNodeFuture future = null;
         synchronized(futureMap) {
             future = futureMap.get(lookupId);
@@ -87,7 +87,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
     /**
      * The DHTFuture for FIND_NODE.
      */
-    private class FindNodeFuture extends DHTFutureTask2<FindNodeResult> {
+    private class FindNodeFuture extends DHTFutureTask<FindNodeResult> {
 
         private final KUID lookupId;
         
@@ -100,7 +100,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
         }
 
         @Override
-        protected void bla() {
+        protected void done0() {
             futureMap.remove(lookupId);
         }
 

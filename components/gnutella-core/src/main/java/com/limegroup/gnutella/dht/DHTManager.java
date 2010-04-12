@@ -7,7 +7,7 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
@@ -228,7 +228,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      */
-    public DHTFuture2<FindValueResult> get(EntityKey eKey);
+    public DHTFuture<FindValueResult> get(EntityKey eKey);
     
     /**
      * Calls the {@link MojitoDHT#put(KUID, DHTValue)} if a bootstrappable DHT is available.
@@ -239,5 +239,5 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      */
-    public DHTFuture2<StoreResult> put(KUID key, DHTValue value);
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
 }

@@ -31,8 +31,8 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
@@ -116,8 +116,8 @@ public class BucketRefresher implements Runnable {
                         // Nodes in our RouteTable, try to bootstrap
                         // from the RouteTable
                         
-                        DHTFutureListener2<PingResult> listener 
-                                = new DHTFutureListener2<PingResult>() {
+                        DHTFutureAdapter<PingResult> listener 
+                                = new DHTFutureAdapter<PingResult>() {
                             @Override
                             protected void operationComplete(FutureEvent<PingResult> event) {
                                 if (event.getType() == Type.SUCCESS) {
@@ -126,7 +126,7 @@ public class BucketRefresher implements Runnable {
                             }
                         };
                         
-                        DHTFuture2<PingResult> future = context.findActiveContact();
+                        DHTFuture<PingResult> future = context.findActiveContact();
                         future.addFutureListener(listener);
                         
                     } else {
@@ -178,11 +178,11 @@ public class BucketRefresher implements Runnable {
      * starts a new lookup for the next ID until all KUIDs have been
      * looked up.
      */
-    private class RefreshTask extends DHTFutureListener2<FindNodeResult> {
+    private class RefreshTask extends DHTFutureAdapter<FindNodeResult> {
         
         private Iterator<KUID> bucketIds = null;
         
-        private DHTFuture2<FindNodeResult> future = null;
+        private DHTFuture<FindNodeResult> future = null;
         
         /**
          * Returns whether or not the refresh task has 

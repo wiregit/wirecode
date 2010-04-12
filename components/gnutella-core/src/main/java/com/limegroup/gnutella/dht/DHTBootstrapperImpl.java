@@ -17,8 +17,8 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureListener2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
@@ -49,7 +49,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     /**
      * The future of the ping process
      */
-    private DHTFuture2<PingResult> pingFuture;
+    private DHTFuture<PingResult> pingFuture;
     
     /**
      * A flag that indicates whether or not the current
@@ -61,7 +61,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     /**
      * The future of the bootstrap process
      */
-    private DHTFuture2<BootstrapResult> bootstrapFuture;
+    private DHTFuture<BootstrapResult> bootstrapFuture;
     
     /**
      * The DHT controller
@@ -335,12 +335,12 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
     
     /** For testing. */
-    DHTFuture2<PingResult> getPingFuture() {
+    DHTFuture<PingResult> getPingFuture() {
         return pingFuture;
     }
     
     /** For testing */
-    DHTFuture2<BootstrapResult> getBootstrapFuture() {
+    DHTFuture<BootstrapResult> getBootstrapFuture() {
         return bootstrapFuture;
     }
     
@@ -353,11 +353,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * <li>check the hosts Set for other Nodes and ping 'em
      * </ol>
      */
-    private class PongListener extends DHTFutureListener2<PingResult> {
+    private class PongListener extends DHTFutureAdapter<PingResult> {
         
-        private final DHTFuture2<PingResult> myFuture;
+        private final DHTFuture<PingResult> myFuture;
         
-        public PongListener(DHTFuture2<PingResult> myFuture) {
+        public PongListener(DHTFuture<PingResult> myFuture) {
             this.myFuture = myFuture;
         }
         
@@ -452,7 +452,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * On a success we'll update our capabilities and if bootstrapping failed
      * we'll just try it again. 
      */
-    private class BootstrapListener extends DHTFutureListener2<BootstrapResult> {
+    private class BootstrapListener extends DHTFutureAdapter<BootstrapResult> {
         
         @Override
         protected void operationComplete(FutureEvent<BootstrapResult> event) {

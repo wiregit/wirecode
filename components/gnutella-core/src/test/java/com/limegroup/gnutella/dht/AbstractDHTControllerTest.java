@@ -17,7 +17,7 @@ import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFuture2;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
@@ -179,12 +179,12 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return true;
         }
 
-        @Override public DHTFuture2<PingResult> ping(SocketAddress dst) {
+        @Override public DHTFuture<PingResult> ping(SocketAddress dst) {
             pingedList.add(dst);
             return null;
         }
 
-        @Override public DHTFuture2<StoreResult> remove(KUID key) {
+        @Override public DHTFuture<StoreResult> remove(KUID key) {
             return null;
         }
 
@@ -236,19 +236,19 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         @Override public void setDHTExecutorService(DHTExecutorService executors) {
         }
 
-        @Override public DHTFuture2<BootstrapResult> bootstrap(Contact node) {
+        @Override public DHTFuture<BootstrapResult> bootstrap(Contact node) {
             return null;
         }
 
-        @Override public DHTFuture2<BootstrapResult> bootstrap(SocketAddress dst) {
+        @Override public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
             return null;
         }
         
-        @Override public DHTFuture2<PingResult> findActiveContact() {
+        @Override public DHTFuture<PingResult> findActiveContact() {
             return null;
         }
 
-        @Override public DHTFuture2<StoreResult> put(KUID key, DHTValue value) {
+        @Override public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
         }
 
@@ -259,7 +259,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         @Override public void setKeyPair(KeyPair keyPair) {
         }
 
-        @Override public DHTFuture2<FindValueResult> get(EntityKey entityKey) {
+        @Override public DHTFuture<FindValueResult> get(EntityKey entityKey) {
             return null;
         }
 

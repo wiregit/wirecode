@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFuture2;
-import org.limewire.mojito.concurrent.DHTFutureTask2;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.StoreResult;
@@ -45,7 +45,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * Stores a collection of <code>DHTValueEntity</code>s on the DHT. All 
      * <code>DHTValueEntity</code>s must have the same valueId.
      */
-    public DHTFuture2<StoreResult> store(Collection<? extends DHTValueEntity> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
         StoreProcess task = new StoreProcess(context, values);
         StoreFuture future = new StoreFuture(task);
         
@@ -57,7 +57,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * Stores a collection of <code>DHTValueEntity</code> at the given 
      * <code>Contact</code>.
      */
-    public DHTFuture2<StoreResult> store(Contact node, SecurityToken securityToken, 
+    public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
         
         Entry<Contact, SecurityToken> entry 
@@ -72,7 +72,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
     /**
      * A store specific implementation of DHTFuture.
      */
-    private class StoreFuture extends DHTFutureTask2<StoreResult> {
+    private class StoreFuture extends DHTFutureTask<StoreResult> {
         
         public StoreFuture(DHTTask<StoreResult> task) {
             super(context, task);
