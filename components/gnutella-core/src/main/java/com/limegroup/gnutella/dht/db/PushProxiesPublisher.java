@@ -4,14 +4,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
@@ -102,7 +102,7 @@ public class PushProxiesPublisher implements DHTEventListener {
                     protected void operationComplete(FutureEvent<StoreResult> event) {
                         switch (event.getType()) {
                             case SUCCESS:
-                                LOG.debug("Success: " + event.getResult());
+                                LOG.debugf("Success: {0}", event.getResult());
                                 break;
                             case EXCEPTION:
                                 LOG.debug("Exception", event.getException());
