@@ -17,11 +17,13 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
     /**
      * This {@link Callable} is used by the default constructor.
      * It makes it very easy to extend {@link AsyncFutureTask}
-     * and override the {@link #doRun()} method.
+     * and override the {@link #doRun()} method. The {@link Callable}
+     * does nothing but throw an {@link UnsupportedOperationException}
+     * and remind the user to override the {@link #doRun()} method.
      */
     private static Callable<Object> NOP = new Callable<Object>() {
         public Object call() {
-            throw new IllegalStateException("Override doRun()");
+            throw new UnsupportedOperationException("Override doRun()");
         }
     };
     
