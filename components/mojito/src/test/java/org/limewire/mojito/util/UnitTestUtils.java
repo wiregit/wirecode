@@ -40,7 +40,7 @@ public class UnitTestUtils {
                     }
 
                     public long getWaitOnLockTimeout() {
-                        throw new UnsupportedOperationException();
+                        return -1L;
                     }
 
                     public void start(DHTFuture future) {
