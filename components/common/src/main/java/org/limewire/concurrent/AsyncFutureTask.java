@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see FutureTask
  */
 public class AsyncFutureTask<V> extends AsyncValueFuture<V> 
-        implements RunnableListeningFuture<V> {
+        implements RunnableAsyncFuture<V> {
     
     private final AtomicReference<Interruptible> thread 
         = new AtomicReference<Interruptible>(Interruptible.INIT);
