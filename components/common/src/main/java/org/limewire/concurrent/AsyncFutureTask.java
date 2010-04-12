@@ -31,7 +31,7 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * We use this {@link AtomicReference} to manage the {@link Thread}
      * that is executing this {@link AsyncFutureTask}.
      * 
-     * NOTE: It doesn't have to be an {@link AtomicReference}. We could
+     * <p>NOTE: It doesn't have to be an {@link AtomicReference}. We could
      * use a plain handle but this is very convenient.
      */
     private final AtomicReference<Interruptible> thread 
