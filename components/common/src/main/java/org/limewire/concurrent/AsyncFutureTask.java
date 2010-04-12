@@ -14,9 +14,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AsyncFutureTask<V> extends AsyncValueFuture<V> 
         implements RunnableAsyncFuture<V> {
     
+    /**
+     * We use this {@link AtomicReference} to manage the {@link Thread}
+     * that is executing this {@link AsyncFutureTask}.
+     * 
+     * NOTE: It doesn't have to be an {@link AtomicReference}. We could
+     * use a plain handle but this is very convenient.
+     */
     private final AtomicReference<Interruptible> thread 
         = new AtomicReference<Interruptible>(Interruptible.INIT);
     
+    /**
+     * The {@link Callable} that will provide the result value
+     * or throw an {@link Exception}.
+     */
     private final Callable<V> callable;
     
     /**
@@ -94,23 +105,42 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         return success;
     }
 
+    /**
+     * An interface for interruptible objects such as {@link Thread}s
+     */
     private static interface Interruptible {
         
+        /**
+         * An initial value for {@link AtomicReference}s that does nothing but 
+         * allows us to use {@link AtomicReference#compareAndSet(Object, Object)}.
+         */
         public static final Interruptible INIT = new Interruptible() {
             @Override
             public void interrupt() {
             }
         };
         
+        /**
+         * An final value for {@link AtomicReference}s that does nothing but 
+         * allows us to use {@link AtomicReference#compareAndSet(Object, Object)}.
+         */
         public static final Interruptible DONE = new Interruptible() {
             @Override
             public void interrupt() {
             }
         };
         
+        /**
+         * Interrupt!
+         */
         public void interrupt();
     }
     
+    /**
+     * An implementation of {@link Interruptible} that holds a reference
+     * to the {@link Thread} (as returned by {@link Thread#currentThread()})
+     * the created it.
+     */
     private static class CurrentThread implements Interruptible {
         
         private final Thread currentThread = Thread.currentThread();
