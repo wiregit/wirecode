@@ -56,7 +56,7 @@ public class FriendInspections {
                 int onlineFriends = 0;
                 if (connection != null) {
                     for (Friend user : connection.getFriends()) {
-                        if(user.isSignedIn()) {
+                        if(user.isSignedIn() && !user.getId().equals(connection.getConfiguration().getCanonicalizedLocalID())) {
                             onlineFriends++;
                         }
                         Map<String, FriendPresence> presences = user.getPresences();
@@ -71,8 +71,9 @@ public class FriendInspections {
                     }
                 }
                 data.put("limewire friends", count);
-                data.put("online friends", onlineFriends);                
-                data.put("presences", presencesHistogram.inspect());
+                data.put("online friends", onlineFriends);   
+                // counts of the number of instances per presence (0 = # not logged in, 1 = # logged in 1 instance, 2 = # logged in 2 instances, etc
+                data.put("presences", presencesHistogram.inspect());   // includes counts of the number of 
             }
         };
     }
