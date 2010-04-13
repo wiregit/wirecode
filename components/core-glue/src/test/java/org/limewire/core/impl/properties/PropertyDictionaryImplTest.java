@@ -46,10 +46,10 @@ public class PropertyDictionaryImplTest extends BaseTestCase {
 
     public void testGetAudioGenres() {
         List<String> propertyValues = propertyDictionaryImpl.getAudioGenres();
-        assertEquals(127, propertyValues.size());
+        assertEquals(126, propertyValues.size());
         assertContains(propertyValues, "", "Blues", "Classic Rock", "Country", "Funk");
         propertyValues = propertyDictionaryImpl.getAudioGenres();
-        assertEquals(127, propertyValues.size());
+        assertEquals(126, propertyValues.size());
         assertContains(propertyValues, "", "Blues", "Classic Rock", "Country", "Funk");
     }
 
