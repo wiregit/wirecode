@@ -21,6 +21,8 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.PrimaryIndex;
+import com.sleepycat.persist.SecondaryIndex;
 import com.sleepycat.persist.StoreConfig;
 
 @EagerSingleton
@@ -31,12 +33,12 @@ public class BerkeleyFileRelationService implements Service {
 
     private final BerkeleyFileRelationCache fileRelationCache;
     private final BerkeleyCache<URN> goodFileCache, badFileCache, playCountCache;
-    private final BerkeleyCache<String> extensionCountCache;
+    private final BerkeleyCache<String> extCountCache;
     private final AtomicBoolean open = new AtomicBoolean(false);
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private Environment environment;
     private EntityStore fileRelationStore, goodFileStore, badFileStore;
-    private EntityStore playCountStore, extensionCountStore;
+    private EntityStore playCountStore, extCountStore;
 
     @Inject
     BerkeleyFileRelationService(BerkeleyFileRelationCache fileRelationCache,
@@ -48,7 +50,7 @@ public class BerkeleyFileRelationService implements Service {
         this.goodFileCache = goodFileCache;
         this.badFileCache = badFileCache;
         this.playCountCache = playCountCache;
-        this.extensionCountCache = extensionCountCache;
+        this.extCountCache = extensionCountCache;
     }
 
     @Inject
@@ -90,27 +92,25 @@ public class BerkeleyFileRelationService implements Service {
             environment = new Environment(getFile(), environmentConfig);
             fileRelationStore =
                 new EntityStore(environment, "related", txnStoreConfig);
-            fileRelationCache.setIndex(fileRelationStore.getPrimaryIndex(
-                    String.class, UrnSet.class));
+            PrimaryIndex<String, UrnSet> index =
+                fileRelationStore.getPrimaryIndex(String.class, UrnSet.class);
+            SecondaryIndex<Long, String, UrnSet> accessTimeIndex =
+                fileRelationStore.getSecondaryIndex(index, long.class, "accessTime");
+            fileRelationCache.setIndex(index);
+            fileRelationCache.setAccessTimeIndex(accessTimeIndex);
             fileRelationCache.setEnvironment(environment);
             goodFileStore = new EntityStore(environment, "good", storeConfig);
-            goodFileCache.setIndex(goodFileStore.getPrimaryIndex(
-                    String.class, Count.class));
+            goodFileCache.setIndex(goodFileStore.getPrimaryIndex(String.class, Count.class));
             goodFileCache.setEnvironment(environment);
             badFileStore = new EntityStore(environment, "bad", storeConfig);
-            badFileCache.setIndex(badFileStore.getPrimaryIndex(
-                    String.class, Count.class));
+            badFileCache.setIndex(badFileStore.getPrimaryIndex(String.class, Count.class));
             badFileCache.setEnvironment(environment);
-            playCountStore =
-                new EntityStore(environment, "plays", txnStoreConfig);
-            playCountCache.setIndex(playCountStore.getPrimaryIndex(
-                    String.class, Count.class));
+            playCountStore = new EntityStore(environment, "plays", txnStoreConfig);
+            playCountCache.setIndex(playCountStore.getPrimaryIndex(String.class, Count.class));
             playCountCache.setEnvironment(environment);
-            extensionCountStore =
-                new EntityStore(environment, "extensions", txnStoreConfig);
-            extensionCountCache.setIndex(extensionCountStore.getPrimaryIndex(
-                    String.class, Count.class));
-            extensionCountCache.setEnvironment(environment);
+            extCountStore = new EntityStore(environment, "extensions", txnStoreConfig);
+            extCountCache.setIndex(extCountStore.getPrimaryIndex(String.class, Count.class));
+            extCountCache.setEnvironment(environment);
             LOG.debug("Opened database");
         } catch(DatabaseException e) {
             LOG.error("Error opening database", e);
@@ -131,8 +131,8 @@ public class BerkeleyFileRelationService implements Service {
                 badFileStore.close();
             if(playCountStore != null)
                 playCountStore.close();
-            if(extensionCountStore != null)
-                extensionCountStore.close();
+            if(extCountStore != null)
+                extCountStore.close();
             if(environment != null)
                 environment.close();
             LOG.debug("Closed database");
