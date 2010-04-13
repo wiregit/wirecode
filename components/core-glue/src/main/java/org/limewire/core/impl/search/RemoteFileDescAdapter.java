@@ -190,9 +190,21 @@ public class RemoteFileDescAdapter implements SearchResult {
         case DATE_CREATED: return rfd.getCreationTime() == -1 ? null : rfd.getCreationTime();
         case FILE_SIZE: return rfd.getSize();      
         case QUALITY: return quality == -1 ? null : Long.valueOf(quality);
-        case TORRENT: return torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
+        // TODO: what was going on here?? why do we need to recreate?
+        case TORRENT: return getTorrent(property);
         default: return FilePropertyKeyPopulator.get(category, property, rfd.getXMLDocument());
         }
+    }
+    
+    /**
+     * Caches the xml torrent so it is not created and parsed for every call.
+     */
+    private Torrent getTorrent(FilePropertyKey property) {
+        if (torrent == null) {
+            torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
+        }
+        
+        return torrent;
     }
     
     @Override
