@@ -159,18 +159,16 @@ public class TorrentManagementPanel implements FileInfoPanel {
             } else { // default values 
                 defaultRadioButton.setSelected(true);
                 initTimeSpinners(getTime(torrent));
-
             }
 
-            limitUploadBandwidthCheckBox.setSelected(uploadRate >= (Integer)((SpinnerNumberModel)maxUploadSpeedSpinner.getModel()).getMinimum() && uploadRate != torrentSettings.getMaxUploadBandwidth());
-            if(limitDownloadBandWidthCheckBox.isSelected() && 
-                    uploadRate >= (Integer)((SpinnerNumberModel)maxUploadSpeedSpinner.getModel()).getMinimum())
+            limitUploadBandwidthCheckBox.setSelected(uploadRate >= (Integer)((SpinnerNumberModel)maxUploadSpeedSpinner.getModel()).getMinimum() && uploadRate != torrentSettings.getMaxUploadBandwidth()/1024);
+            if(limitUploadBandwidthCheckBox.isSelected())
                 maxUploadSpeedSpinner.setValue(uploadRate);
             
-            limitDownloadBandWidthCheckBox.setSelected(downloadRate >= 0 && downloadRate != torrentSettings.getMaxDownloadBandwidth());
-            if(limitDownloadBandWidthCheckBox.isSelected() &&
-                    downloadRate > (Integer)((SpinnerNumberModel)maxDownloadSpeedSpinner.getModel()).getMinimum())
+            limitDownloadBandWidthCheckBox.setSelected(downloadRate >= (Integer) ((SpinnerNumberModel)maxDownloadSpeedSpinner.getModel()).getMinimum() && downloadRate != torrentSettings.getMaxDownloadBandwidth()/1024);
+            if(limitDownloadBandWidthCheckBox.isSelected()) {
                 maxDownloadSpeedSpinner.setValue(downloadRate);
+            }
         }
     }
     
@@ -268,9 +266,11 @@ public class TorrentManagementPanel implements FileInfoPanel {
      */
     private JSpinner createDownloadSpinner() {
         SpinnerNumberModel maxSpinnerModel = new SpinnerNumberModel(
-                DownloadSettings.MAX_DOWNLOAD_SPEED.getValue() / 1024,
-                DownloadSettings.MAX_DOWNLOAD_SPEED.getMinValue().intValue() / 1024,
-                DownloadSettings.MAX_DOWNLOAD_SPEED.getMaxValue().intValue() / 1024, 1);
+                DownloadSettings.MAX_DOWNLOAD_SPEED.getValue()/1024,
+                DownloadSettings.MAX_DOWNLOAD_SPEED.getMinValue().intValue()/1024,
+                DownloadSettings.LIMIT_MAX_DOWNLOAD_SPEED.get() ? 
+                        (DownloadSettings.MAX_DOWNLOAD_SPEED.getValue()/1024):
+                        (DownloadSettings.MAX_DOWNLOAD_SPEED.getMaxValue().intValue()/1024), 1);
         return createSpinner(maxSpinnerModel);
     }
     
@@ -281,7 +281,9 @@ public class TorrentManagementPanel implements FileInfoPanel {
         SpinnerNumberModel maxUploadSpinnerModel = new SpinnerNumberModel(
                 UploadSettings.MAX_UPLOAD_SPEED.getValue()/1024, 
                 UploadSettings.MAX_UPLOAD_SPEED.getMinValue().intValue()/1024,
-                UploadSettings.MAX_UPLOAD_SPEED.getMaxValue().intValue()/1024, 1);
+                UploadSettings.LIMIT_MAX_UPLOAD_SPEED.get() ? 
+                    (UploadSettings.MAX_UPLOAD_SPEED.getValue()/1024) :
+                    (UploadSettings.MAX_UPLOAD_SPEED.getMaxValue().intValue()/1024), 1);
         return createSpinner(maxUploadSpinnerModel);
     }
     
