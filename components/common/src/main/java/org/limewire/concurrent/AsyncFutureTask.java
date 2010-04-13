@@ -74,6 +74,8 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
         if (preRun()) {
             try {
                 doRun();
+            } catch (Throwable t) {
+                uncaughtException(t);
             } finally {
                 postRun();
             }
@@ -116,17 +118,26 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
      * The actual implementation of the {@link AsyncFutureTask}'s 
      * run method.
      */
-    protected void doRun() {
-        try {
-            V value = callable.call();
-            setValue(value);
-        } catch (Throwable t) {
-            if (t instanceof RuntimeException
-                    || t instanceof Error) {
-                ExceptionUtils.reportOrReturn(t);
-            }
-            
-            setException(t);
+    protected void doRun() throws Exception {
+        V value = callable.call();
+        setValue(value);
+    }
+    
+    /**
+     * Called for all {@link Throwable}s that are caught in the 
+     * {@link #run()} method. The default implementation passes it
+     * on to {@link #setException(Throwable)} and it is forwarded
+     * to {@link ExceptionUtils#reportOrReturn(Throwable)} if it's 
+     * of type {@link RuntimeException} or {@link Error}.
+     * 
+     * <p>You may override this method to change the default behavior.
+     */
+    protected void uncaughtException(Throwable t) {
+        setException(t);
+        
+        if (t instanceof RuntimeException
+                || t instanceof Error) {
+            ExceptionUtils.reportOrReturn(t);
         }
     }
     
