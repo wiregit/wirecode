@@ -4,10 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.manager.BootstrapManager;
 
@@ -40,10 +40,10 @@ public class UnitTestUtils {
                     }
 
                     public long getWaitOnLockTimeout() {
-                        throw new UnsupportedOperationException();
+                        return -1L;
                     }
 
-                    public void start(OnewayExchanger exchanger) {
+                    public void start(DHTFuture future) {
                         throw new UnsupportedOperationException();
                     } 
                 });

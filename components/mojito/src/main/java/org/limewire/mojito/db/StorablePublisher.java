@@ -3,22 +3,20 @@ package org.limewire.mojito.db;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureListener;
-import org.limewire.mojito.exceptions.DHTException;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.service.ErrorService;
 
 /**
  * Publishes {@link Storable} values in the DHT.
@@ -176,12 +174,12 @@ public class StorablePublisher implements Runnable {
             databaseStats.REPUBLISHED_VALUES.incrementStat();
             
             future = context.store(DHTValueEntity.createFromStorable(context, storable));
-            future.addDHTFutureListener(new StoreResultHandler(storable));
+            future.addFutureListener(new StoreResultHandler(storable));
             return true;
         }
     }
     
-    private class StoreResultHandler implements DHTFutureListener<StoreResult> {
+    private class StoreResultHandler extends DHTFutureAdapter<StoreResult> {
         
         private final Storable storable;
         
@@ -189,8 +187,21 @@ public class StorablePublisher implements Runnable {
             this.storable = storable;
         }
         
-        public void handleFutureSuccess(final StoreResult result) {
+        @Override
+        protected void operationComplete(FutureEvent<StoreResult> event) {
+            FutureEvent.Type type = event.getType();
             
+            if (type == Type.SUCCESS) {
+                handleSuccess(event.getResult());
+            } else {
+                if (!publishTask.next() 
+                        || type == Type.CANCELLED) {
+                    publishTask.stop();
+                }
+            }
+        }
+        
+        private void handleSuccess(final StoreResult result) {
             if (LOG.isInfoEnabled()) {
                 Collection<? extends Contact> locations = result.getLocations();
                 if (!locations.isEmpty()) {
@@ -211,28 +222,6 @@ public class StorablePublisher implements Runnable {
             if (!publishTask.next()) {
                 publishTask.stop();
             }
-        }
-        
-        public void handleExecutionException(ExecutionException e) {
-            LOG.error("ExecutionException", e);
-
-            if (!(e.getCause() instanceof DHTException)) {
-                ErrorService.error(e);
-            }
-            
-            if (!publishTask.next()) {
-                publishTask.stop();
-            }
-        }
-
-        public void handleCancellationException(CancellationException e) {
-            LOG.debug("CancellationException", e);
-            publishTask.stop();
-        }
-        
-        public void handleInterruptedException(InterruptedException e) {
-            LOG.debug("InterruptedException", e);
-            publishTask.stop();
         }
     }
 }

@@ -41,9 +41,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
-import org.limewire.mojito.concurrent.FixedDHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
@@ -1013,13 +1013,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return pingManager.ping(node);
     }
     
-    public void ping(final Contact node, final DHTFutureListener<PingResult> listener) {
+    public void ping(final Contact node, final DHTFutureAdapter<PingResult> listener) {
         Runnable command = new Runnable() {
             public void run() {
                 try {
                     DHTFuture<PingResult> future = ping(node);
                     if (listener != null) {
-                        future.addDHTFutureListener(listener);
+                        future.addFutureListener(listener);
                     }
                 } catch (RejectedExecutionException err) {
                     ErrorService.error(err);
@@ -1121,7 +1121,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         } else {
             String operation = (entity.getValue().size() == 0) ? "remove()" : "put()";
             Exception ex = new NotBootstrappedException(getName(), operation);
-            return new FixedDHTFuture<StoreResult>(ex);
+            return new DHTValueFuture<StoreResult>(ex);
         }
     }
     

@@ -70,7 +70,7 @@ class AltLocFinderImpl implements AltLocFinder {
           if(future == null) {
               return null;
           } else {
-              future.addDHTFutureListener(new AltLocsHandler(dhtManager, urn, key, listener));
+              future.addFutureListener(new AltLocsHandler(dhtManager, urn, key, listener));
               return new Shutdownable() {
                   public void shutdown() {
                       future.cancel(true);

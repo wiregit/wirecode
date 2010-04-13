@@ -100,7 +100,7 @@ public class FindNodeManager extends AbstractManager<FindNodeResult> {
         }
 
         @Override
-        protected void done() {
+        protected void done0() {
             futureMap.remove(lookupId);
         }
 

@@ -35,10 +35,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
@@ -354,9 +354,21 @@ public class RouteTableImpl implements RouteTable {
      * state is that both Contacts have the same Node ID.
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
-        DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+        DHTFutureAdapter<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+            
             @Override
-            public void handleFutureSuccess(PingResult result) {
+            protected void operationComplete(FutureEvent<PingResult> event) {
+                switch (event.getType()) {
+                    case SUCCESS:
+                        handleFutureSuccess(event.getResult());
+                        break;
+                    case EXCEPTION:
+                        handleExecutionException(event.getException());
+                        break;
+                }
+            }
+
+            private void handleFutureSuccess(PingResult result) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to spoof " + result);
                 }
@@ -366,8 +378,7 @@ public class RouteTableImpl implements RouteTable {
                 // Reason: It was maybe just a Node ID collision!
             }
             
-            @Override
-            public void handleExecutionException(ExecutionException e) {
+            private void handleExecutionException(ExecutionException e) {
                 DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
                 
                 // We can only make decisions for timeouts! 
@@ -913,7 +924,7 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null.
      */
-    private void ping(Contact node, DHTFutureListener<PingResult> listener) {
+    private void ping(Contact node, DHTFutureAdapter<PingResult> listener) {
         ContactPinger pinger = this.pinger;
         if (pinger != null) {
             pinger.ping(node, listener);
@@ -922,8 +933,12 @@ public class RouteTableImpl implements RouteTable {
             
             if (listener != null) {
                 ExecutionException exception = new ExecutionException(
-                        new DHTTimeoutException(node.getNodeID(), node.getContactAddress(), null, 0L));
-                listener.handleExecutionException(exception);
+                        new DHTTimeoutException(node.getNodeID(), 
+                                node.getContactAddress(), null, 0L));
+                
+                FutureEvent<PingResult> event 
+                    = FutureEvent.createException(exception);
+                listener.handleEvent(event);
             }
         }
     }

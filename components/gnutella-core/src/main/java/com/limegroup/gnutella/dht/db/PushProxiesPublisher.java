@@ -1,21 +1,20 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
 
@@ -98,18 +97,20 @@ public class PushProxiesPublisher implements DHTEventListener {
             KUID primaryKey = KUIDUtils.toKUID(guid);
             DHTFuture<StoreResult> future = dhtManager.put(primaryKey, lastPublishedValue);
             if (LOG.isDebugEnabled() && future != null) {
-                future.addDHTFutureListener(new DHTFutureListener<StoreResult>() {
-                    public void handleCancellationException(CancellationException e) {
-                        LOG.debug("cancelled", e);
-                    }
-                    public void handleExecutionException(ExecutionException e) {
-                        LOG.debug("execution", e);
-                    }
-                    public void handleFutureSuccess(StoreResult result) {
-                        LOG.debug("success: " + result);
-                    }
-                    public void handleInterruptedException(InterruptedException e) {
-                        LOG.debug("interrupted", e);
+                future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
+                    @Override
+                    protected void operationComplete(FutureEvent<StoreResult> event) {
+                        switch (event.getType()) {
+                            case SUCCESS:
+                                LOG.debugf("Success: {0}", event.getResult());
+                                break;
+                            case EXCEPTION:
+                                LOG.debug("Exception", event.getException());
+                                break;
+                            case CANCELLED:
+                                LOG.debug("Cancelled");
+                                break;
+                        }   
                     }
                 });
             }

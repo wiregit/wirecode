@@ -25,9 +25,9 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
@@ -62,7 +62,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     /** A handle to Context. */
     protected final Context context;
     
-    private volatile OnewayExchanger<V, ExecutionException> exchanger;
+    private volatile DHTFuture<V> future;
     
     /** The time of the last response we received. */
     protected long lastResponseTime = 0L;
@@ -90,29 +90,21 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * Returns the lock Object for the ResponseHandler.
      */
     protected Object getLock() {
-    	Object lock = exchanger;
-    	if (lock == null) {
+    	if (future == null) {
     	    throw new IllegalStateException("Lock is null");
     	}
-    	return lock;
+    	return future;
     }
     
     /*
      * (non-Javadoc)
      * @see org.limewire.mojito.concurrent.DHTTask#start(org.limewire.mojito.util.OnewayExchanger)
      */
-    public void start(OnewayExchanger<V, ExecutionException> exchanger) {
-    	if (exchanger == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Starting ResponseHandler without an OnewayExchanger");
-            }
-            exchanger = new OnewayExchanger<V, ExecutionException>(true);
-        }
-    	
-    	this.exchanger = exchanger;
+    public void start(DHTFuture<V> future) {
+    	this.future = future;
     	
     	synchronized (getLock()) {
-            if (isDone() || isCancelled()) {
+            if (isDone()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Cannot start " + this + " because it's already done");
                 }
@@ -137,7 +129,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * @see org.limewire.mojito.concurrent.DHTTask#cancel()
      */
     public void cancel() {
-    	exchanger.cancel();
+    	future.cancel(true);
     }
     
     /**
@@ -342,7 +334,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * @see com.limegroup.mojito.handler.ResponseHandler#isCancelled()
      */
     public boolean isCancelled() {
-        return exchanger.isCancelled();            
+        return future.isCancelled();            
     }
     
     /**
@@ -351,7 +343,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * Exception.
      */
     public boolean isDone() {
-        return exchanger.isDone();
+        return future.isDone();
     }
     
     /**
@@ -359,7 +351,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * call() method.
      */
     protected void setReturnValue(V value) {
-    	exchanger.setValue(value);
+        future.setValue(value);
     }
     
     /**
@@ -369,7 +361,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     protected void setException(DHTException ex) {
         ExecutionException e = new ExecutionException(ex);
         e.setStackTrace(ex.getStackTrace());
-        exchanger.setException(e);
+        future.setException(e);
     }
     
     /**

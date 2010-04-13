@@ -93,7 +93,7 @@ public class FindValueManager extends AbstractManager<FindValueResult> {
         }
 
         @Override
-        protected void done() {
+        protected void done0() {
             futureMap.remove(entityKey);
         }
 

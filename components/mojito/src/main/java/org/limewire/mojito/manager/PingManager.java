@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -159,22 +158,16 @@ public class PingManager extends AbstractManager<PingResult> {
         }
         
         @Override
-        protected void done() {
+        protected void done0() {
             if (key != null) {
                 futureMap.remove(key);
             }
-        }
-
-        @Override
-        protected void fireFutureResult(PingResult value) {
-            networkStats.PINGS_OK.incrementStat();
-            super.fireFutureResult(value);
-        }
-        
-        @Override
-        protected void fireExecutionException(ExecutionException e) {
-            networkStats.PINGS_FAILED.incrementStat();
-            super.fireExecutionException(e);
+            
+            if (!isCompletedAbnormally()) {
+                networkStats.PINGS_OK.incrementStat();
+            } else {
+                networkStats.PINGS_FAILED.incrementStat();
+            }
         }
     }
 }

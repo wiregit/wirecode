@@ -6,9 +6,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
 
@@ -22,7 +23,7 @@ class BootstrapWorker implements Runnable {
     private final BootstrapProcess process;
     private final Context context;
     
-    private volatile OnewayExchanger<FindNodeResult, ExecutionException> exchanger;
+    private volatile DHTFuture<FindNodeResult> exchanger;
     
     private final AtomicBoolean shutdown = new AtomicBoolean();
     
@@ -44,9 +45,8 @@ class BootstrapWorker implements Runnable {
     }
     
     private void refreshBucket(KUID randomId) {
-        OnewayExchanger<FindNodeResult, ExecutionException> c 
-            = new OnewayExchanger<FindNodeResult, ExecutionException>(true);
-
+        DHTFuture<FindNodeResult> c = new DHTValueFuture<FindNodeResult>();
+        
         FindNodeResponseHandler handler 
             = new FindNodeResponseHandler(context, randomId);
 
@@ -77,8 +77,8 @@ class BootstrapWorker implements Runnable {
         if (shutdown.getAndSet(true))
             return;
         
-        OnewayExchanger<FindNodeResult, ExecutionException> e = exchanger;
+        DHTFuture<FindNodeResult> e = exchanger;
         if (e != null)
-            e.cancel();
+            e.cancel(true);
     }
 }

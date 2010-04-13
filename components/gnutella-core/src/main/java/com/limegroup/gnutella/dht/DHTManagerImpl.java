@@ -23,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.Inspectable;
@@ -429,14 +431,17 @@ public class DHTManagerImpl implements DHTManager, Service {
         }            
 
         // instantiated here so it can record its instantiation time
-        TimeInspector<FindValueResult> inspector = new TimeInspector<FindValueResult>(getInspectable) {
+        TimeInspector<FindValueResult> inspector 
+                = new TimeInspector<FindValueResult>(getInspectable) {
             @Override
-            public void handleFutureSuccess(FindValueResult result) {
-                count(result.isSuccess());
+            protected void operationComplete(FutureEvent<FindValueResult> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    count(event.getResult().isSuccess());
+                }
             }
         };
         DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
-        future.addDHTFutureListener(inspector);
+        future.addFutureListener(inspector);
         return future;
     }
     
@@ -463,13 +468,15 @@ public class DHTManagerImpl implements DHTManager, Service {
         // instantiated here so it can record its instantiation time
         TimeInspector<StoreResult> inspector = new TimeInspector<StoreResult>(putInspectable) {
             @Override
-            public void handleFutureSuccess(StoreResult result) {
-                boolean success = result.getLocations().size() > 0.8 * KademliaSettings.REPLICATION_PARAMETER.getValue();
-                count(success);
-            }   
+            protected void operationComplete(FutureEvent<StoreResult> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    boolean success = event.getResult().getLocations().size() > 0.8 * KademliaSettings.REPLICATION_PARAMETER.getValue();
+                    count(success);
+                }
+            }
         };
         DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
-        future.addDHTFutureListener(inspector);
+        future.addFutureListener(inspector);
         return future;
     }
 
@@ -882,7 +889,7 @@ public class DHTManagerImpl implements DHTManager, Service {
         }
     }
     
-    static class TimeInspector<T> extends DHTFutureAdapter<T> {
+    abstract static class TimeInspector<T> extends DHTFutureAdapter<T> {
         
         private final long startTime = System.currentTimeMillis();
         private final TimeValuesInspectable values;

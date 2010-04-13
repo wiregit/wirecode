@@ -24,6 +24,8 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -89,10 +91,12 @@ public class DHTValueTest extends MojitoTestCase {
             
             // Store...
             DHTFuture<StoreResult> future = context.store(storable);
-            future.addDHTFutureListener(new DHTFutureAdapter<StoreResult>() {
+            future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
                 @Override
-                public void handleFutureSuccess(StoreResult result) {
-                    storable.handleStoreResult(result);
+                public void operationComplete(FutureEvent<StoreResult> event) {
+                    assertEquals(Type.SUCCESS, event.getType());
+                    
+                    storable.handleStoreResult(event.getResult());
                     synchronized (lock) {
                         lock.notifyAll();
                     }

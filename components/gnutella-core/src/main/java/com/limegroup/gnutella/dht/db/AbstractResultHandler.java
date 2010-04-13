@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -12,6 +12,7 @@ import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
+
 import com.limegroup.gnutella.dht.DHTManager;
 
 /**
@@ -72,7 +73,21 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     }
     
     @Override
-    public void handleFutureSuccess(FindValueResult result) {
+    protected void operationComplete(FutureEvent<FindValueResult> event) {
+        switch (event.getType()) {
+            case SUCCESS:
+                handleFutureSuccess(event.getResult());
+                break;
+            case EXCEPTION:
+                handleExecutionException(event.getException());
+                break;
+            case CANCELLED:
+                handleCancellation();
+                break;
+        }
+    }
+
+    private void handleFutureSuccess(FindValueResult result) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("result: " + result);
         }
@@ -141,24 +156,16 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
      */
     protected abstract Result handleDHTValueEntity(DHTValueEntity entity);
     
-    @Override
-    public void handleCancellationException(CancellationException e) {
-        LOG.error("CancellationException", e);
+    private void handleCancellation() {
+        LOG.error("Cancelled");
         listener.searchFailed();
     }
 
-    @Override
-    public void handleExecutionException(ExecutionException e) {
+    private void handleExecutionException(ExecutionException e) {
         LOG.error("ExecutionException", e);
         listener.searchFailed();
     }
 
-    @Override
-    public void handleInterruptedException(InterruptedException e) {
-        LOG.error("InterruptedException", e);
-        listener.searchFailed();
-    }
-    
     @Override
     public int hashCode() {
         return key.hashCode();

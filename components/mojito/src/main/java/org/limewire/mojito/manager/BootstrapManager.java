@@ -140,7 +140,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
 
         @Override
-        protected void done() {
+        protected void done0() {
             stop();
         }
     }
