@@ -8,13 +8,13 @@ import org.limewire.ui.swing.search.resultpanel.classic.DocumentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
-import org.limewire.ui.swing.search.resultpanel.classic.TorrentScrapeScheduler;
 import org.limewire.ui.swing.search.resultpanel.classic.TorrentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.limegroup.bittorrent.TorrentScrapeScheduler;
 
 /**
  * Implements a factory for creating a TableFormat to display search results.

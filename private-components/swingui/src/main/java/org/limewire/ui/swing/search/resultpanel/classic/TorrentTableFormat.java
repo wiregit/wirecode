@@ -19,6 +19,8 @@ import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.bittorrent.TorrentScrapeScheduler;
+
 /**
  * This class specifies the content of a table that contains
  * music track descriptions.

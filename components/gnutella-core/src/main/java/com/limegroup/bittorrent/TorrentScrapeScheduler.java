@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel.classic;
+package com.limegroup.bittorrent;
 
 import java.io.IOException;
 import java.net.URI;
