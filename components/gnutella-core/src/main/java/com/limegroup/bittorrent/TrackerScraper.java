@@ -14,6 +14,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.bencoding.Token;
 
 import com.google.inject.Inject;
@@ -28,6 +29,9 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * Reimplementation of libtorrents scrape code in java that detaches if 
  *  from the torrent manager control logic.
+ *  
+ * <p> Only supports HTTP scrape right now but UDP scrape is possible
+ *      TODO: decouple udp_tracker_connection::send_udp_scrape()
  */
 public class TrackerScraper {
 
@@ -70,10 +74,15 @@ public class TrackerScraper {
     public boolean submitScrape(URI trackerAnnounceUri, URN urn,
             final ScrapeCallback callback) {
 
-        if (!canScrape(trackerAnnounceUri)) {
-            // Tracker does not support scraping so dont attempt
+        System.out.println("submitting: " + trackerAnnounceUri);
+        
+        if (!canHTTPScrape(trackerAnnounceUri)) {
+            System.out.println("scraping not available");
+            
+            // Tracker does not support scraping so don't attempt
             return false;
         }
+        
 
         URI uri;
         try {
@@ -83,6 +92,8 @@ public class TrackerScraper {
             return false;
         }
 
+        System.out.println(uri.toString());
+       
         HttpGet get = new HttpGet(uri);
 
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
@@ -179,7 +190,7 @@ public class TrackerScraper {
     }
 
 
-    public static class ScrapeData {
+    private static class ScrapeData implements TorrentScrapeData {
         private final long complete, incomplete, downloaded;
 
         private ScrapeData(long complete, long incomplete, long downloaded) {
@@ -198,20 +209,22 @@ public class TrackerScraper {
         }
         @Override
         public String toString() {
-            return "[TrackerScraper compelte=" + complete 
+            return "[TrackerScraper complete=" + complete 
             + " incomplete=" + incomplete + 
             " downloaded=" + downloaded + "]";
         }
     }
 
     public static interface ScrapeCallback {
-        void success(ScrapeData data);
+        void success(TorrentScrapeData data);
         void failure(String reason);
     }
 
 
-    private static boolean canScrape(URI trackerAnnounceUri) {
-        return trackerAnnounceUri.toString().indexOf(ANNOUNCE_PATH) > 0;
+    private static boolean canHTTPScrape(URI trackerAnnounceUri) {
+        String announceString = trackerAnnounceUri.toString();
+        
+        return announceString.startsWith("http") && announceString.indexOf(ANNOUNCE_PATH) > 0;
     }
     
     private static URI createScrapingRequest(URI trackerAnnounceUri, URN urn) throws URISyntaxException {

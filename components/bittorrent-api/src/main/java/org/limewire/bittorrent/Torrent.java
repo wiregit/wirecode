@@ -317,5 +317,5 @@ public interface Torrent {
      * Sets the maximum upload bandwidth this Torrent can use.
      */
     public void setMaxUploadBandwidth(int value); 
-
+    
 }

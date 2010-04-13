@@ -8,6 +8,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.DocumentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ImageTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
+import org.limewire.ui.swing.search.resultpanel.classic.TorrentScrapeScheduler;
 import org.limewire.ui.swing.search.resultpanel.classic.TorrentTableFormat;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.util.IconManager;
@@ -21,13 +22,16 @@ import com.google.inject.Provider;
 public class ResultsTableFormatFactory {
 
     private final Provider<IconManager> iconManager;
+    private final Provider<TorrentScrapeScheduler> torrentScrapeAdaptorProvider;
     
     /**
      * Constructs a ResultsTableFormatFactory with the specified icon manager.
      */
     @Inject
-    public ResultsTableFormatFactory(Provider<IconManager> iconManager) {
+    public ResultsTableFormatFactory(Provider<IconManager> iconManager,
+            Provider<TorrentScrapeScheduler> torrentScrapeAdaptorProvider) {
         this.iconManager = iconManager;
+        this.torrentScrapeAdaptorProvider = torrentScrapeAdaptorProvider;
     }
 
     /**
@@ -50,7 +54,7 @@ public class ResultsTableFormatFactory {
         case OTHER:
             return new OtherTableFormat();
         case TORRENT:
-            return new TorrentTableFormat(); 
+            return new TorrentTableFormat(torrentScrapeAdaptorProvider.get()); 
         default:
             throw new IllegalArgumentException("Invalid search category " + searchCategory);
         }

@@ -44,12 +44,8 @@ public class EventListColumnComparator<E> implements Comparator<E>  {
         try {
             return comparator.compare(alphaField, betaField);
         } catch (Exception e) {
-            // Throw exception with table format name and column.
-            IllegalStateException ise = new IllegalStateException(
-                    "Cannot compare \"" + alphaField + "\" to \"" + betaField + 
-                    "\" in " + tableFormat.getClass().getName() + ", column " + column);
-            ise.initCause(e);
-            throw ise;
+            // Send non comparables to the bottom
+            return -1;
         }
     }
 
