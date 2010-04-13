@@ -1,5 +1,7 @@
 package org.limewire.concurrent;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -7,22 +9,21 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.util.BaseTestCase;
 
 public class AsyncFutureTest extends BaseTestCase {
 
-    private static final Runnable DO_NOTHING = new Runnable() {
+    private static final Callable<String> DO_NOTHING = new Callable<String>() {
         @Override
-        public void run() {
-            // Do nothing!
+        public String call() {
+            return "Hello World!";
         }
     };
     
-    private static final Runnable THROW_EXCEPTION = new Runnable() {
+    private static final Callable<String> THROW_EXCEPTION = new Callable<String>() {
         @Override
-        public void run() {
-            throw new IllegalStateException("Expected!");
+        public String call() throws IOException {
+            throw new IOException("Expected!");
         }
     };
     
@@ -44,7 +45,7 @@ public class AsyncFutureTest extends BaseTestCase {
      */
     public void testPreAndPostState() throws InterruptedException, ExecutionException {
         AsyncFutureTask<String> future 
-            = new AsyncFutureTask<String>(DO_NOTHING, "Hello World!");
+            = new AsyncFutureTask<String>(DO_NOTHING);
         
         assertFalse("Done", future.isDone());
         assertFalse("Cancelled", future.isCancelled());
@@ -65,7 +66,7 @@ public class AsyncFutureTest extends BaseTestCase {
      */
     public void testPreAndPostStateWithException() throws InterruptedException {
         AsyncFutureTask<String> future 
-            = new AsyncFutureTask<String>(THROW_EXCEPTION, "Hello World!");
+            = new AsyncFutureTask<String>(THROW_EXCEPTION);
         
         assertFalse("Done", future.isDone());
         assertFalse("Cancelled", future.isCancelled());
@@ -95,14 +96,14 @@ public class AsyncFutureTest extends BaseTestCase {
     }
     
     private static AsyncFuture<String> checkListenerNotification(
-            Runnable task) throws InterruptedException {
+            Callable<String> task) throws InterruptedException {
         AsyncFutureTask<String> future 
-            = new AsyncFutureTask<String>(task, "Hello World!");
+            = new AsyncFutureTask<String>(task);
         
         final CountDownLatch latch = new CountDownLatch(1);
-        future.addFutureListener(new DHTFutureAdapter<String>() {
+        future.addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
-            protected void operationComplete(FutureEvent<String> event) {
+            public void handleEvent(FutureEvent<String> event) {
                 latch.countDown();
             }
         });
@@ -123,9 +124,9 @@ public class AsyncFutureTest extends BaseTestCase {
             = new AsyncValueFuture<String>();
         
         final CountDownLatch latch = new CountDownLatch(1);
-        future.addFutureListener(new DHTFutureAdapter<String>() {
+        future.addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
-            protected void operationComplete(FutureEvent<String> event) {
+            public void handleEvent(FutureEvent<String> event) {
                 latch.countDown();
             }
         });
@@ -144,9 +145,9 @@ public class AsyncFutureTest extends BaseTestCase {
             = new AsyncValueFuture<String>();
         
         final CountDownLatch latch = new CountDownLatch(1);
-        future.addFutureListener(new DHTFutureAdapter<String>() {
+        future.addFutureListener(new EventListener<FutureEvent<String>>() {
             @Override
-            protected void operationComplete(FutureEvent<String> event) {
+            public void handleEvent(FutureEvent<String> event) {
                 latch.countDown();
             }
         });
