@@ -151,7 +151,6 @@ public class TorrentManagementPanel implements FileInfoPanel {
             // seed forever
             if(ratio == Float.MAX_VALUE && time == Integer.MAX_VALUE) {
                 uploadForeverRadioButton.setSelected(true);
-                seedRatioSpinner.setValue(torrentSettings.getSeedRatioLimit());
                 initTimeSpinners(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.get());
             } else if((ratio >= 0 && ratio != torrentSettings.getSeedRatioLimit()) || (time >= 0 && time != torrentSettings.getSeedTimeLimit())) { // user set values 
                 uploadControlRadioButton.setSelected(true);
@@ -159,7 +158,6 @@ public class TorrentManagementPanel implements FileInfoPanel {
                 initTimeSpinners(getTime(torrent));
             } else { // default values 
                 defaultRadioButton.setSelected(true);
-                seedRatioSpinner.setValue(torrentSettings.getSeedRatioLimit());
                 initTimeSpinners(getTime(torrent));
 
             }
