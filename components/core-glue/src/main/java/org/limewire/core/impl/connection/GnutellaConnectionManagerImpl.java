@@ -15,6 +15,7 @@ import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -151,6 +152,9 @@ public class GnutellaConnectionManagerImpl
     }
     
     ConnectionStrength calculateStrength() {
+        if(ConnectionSettings.LAN_MODE.getValue())
+            return ConnectionStrength.LAN_MODE;
+
         int stable = connectionManager.countConnectionsWithNMessages(STABLE_THRESHOLD);
             
         ConnectionStrength strength;

@@ -519,7 +519,12 @@ public class NetworkManagerImpl implements NetworkManager {
         LOG.debugf("firing new address: {0}", newAddress);
         listeners.broadcast(new AddressEvent(newAddress, AddressEvent.Type.ADDRESS_CHANGED));
     }
-    
+
+    @Override
+    public InetSocketAddress getMulticastReplyAddress() {
+        return acceptor.get().getMulticastReplyAddress();
+    }
+
     private static class SSLSettings extends LimeProps {
     
         private SSLSettings() {}
@@ -543,5 +548,4 @@ public class NetworkManagerImpl implements NetworkManager {
             FACTORY.createRemoteBooleanSetting("IGNORE_SSL_EXCEPTIONS", true, "TLS.ignoreException");
     
     }
-
 }

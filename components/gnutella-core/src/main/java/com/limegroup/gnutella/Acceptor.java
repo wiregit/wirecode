@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public interface Acceptor extends SocketProcessor {
 
@@ -90,4 +91,9 @@ public interface Acceptor extends SocketProcessor {
     long getWaitTimeAfterRequests();
     void resetLastConnectBackTime();
 
+    /**
+     * Returns the address and port that should be used in replies to multicast
+     * queries, or null if multicast is not in use.
+     */
+    InetSocketAddress getMulticastReplyAddress();
 }

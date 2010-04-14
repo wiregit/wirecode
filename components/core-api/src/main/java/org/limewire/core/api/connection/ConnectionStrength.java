@@ -32,8 +32,11 @@ public enum ConnectionStrength {
     FULL(7, true), 
     
     /** You have a kickass connection to Gnutella. */
-    TURBO(8, true);
+    TURBO(8, true),
     
+    /** You are running in LAN mode. */
+    LAN_MODE(9, false);
+
     private final int strengthId;
     private final boolean online;
     

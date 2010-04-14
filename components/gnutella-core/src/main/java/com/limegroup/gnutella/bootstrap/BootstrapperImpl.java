@@ -98,15 +98,23 @@ class BootstrapperImpl implements Bootstrapper {
      * and if we need them, gets them.
      */
     @Override
-    public synchronized void run() {            
+    public synchronized void run() {
         if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
             LOG.trace("Not bootstrapping");
             return;
         }
+        if(ConnectionSettings.LAN_MODE.getValue()) {
+            LOG.trace("LAN mode");
+            return;
+        }
 
         long now = System.currentTimeMillis();
-        if(firstBootstrapCheck == 0)
+        if(firstBootstrapCheck == 0) {
+            // Reload the defaults in case we discarded them in LAN mode
+            tcpBootstrap.loadDefaults();
+            udpHostCache.loadDefaults();
             firstBootstrapCheck = now;
+        }
 
         // If we need endpoints, try any bootstrapping methods that
         // haven't been tried too recently

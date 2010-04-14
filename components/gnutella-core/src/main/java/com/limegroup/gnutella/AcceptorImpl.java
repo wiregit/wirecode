@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -77,9 +78,6 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     /**
      * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
-     *
-     * LOCKING: obtain _socketLock before modifying either.  Notify _socketLock
-     * when done.
      */
     private volatile ServerSocket _socket=null;
 
@@ -87,7 +85,12 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * The port of the server socket.
      */
     private volatile int _port = 6346;
-    
+
+    /**
+     * The multicast address, or null if multicast is not in use.
+     */
+    private volatile InetAddress multicastAddress;
+
     /**
      * The real address of this host--assuming there's only one--used for pongs
      * and query replies.  This value is ignored if FORCE_IP_ADDRESS is
@@ -517,7 +520,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             //Shut off UDPService also!
             udpService.get().setListeningSocket(null);
             //Shut off MulticastServier too!
-            multicastService.get().setListeningSocket(null);            
+            multicastService.get().setListeningSocket(null);
+            multicastAddress = null;
 
             LOG.trace("service OFF.");
             return;
@@ -586,6 +590,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             // if we were able to get it
             if (mcastServiceSocket != null) {
                 multicastService.get().setListeningSocket(mcastServiceSocket);
+                multicastAddress = mcastServiceSocket.getInterface();
             }
 
             if(LOG.isDebugEnabled())
@@ -861,4 +866,11 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         this.timeBetweenValidates = timeBetweenValidates;
     }
     
+    @Override
+    public InetSocketAddress getMulticastReplyAddress() {
+        final InetAddress addr = multicastAddress;
+        if(addr == null)
+            return null;
+        return new InetSocketAddress(addr, _port);
+    }
 }

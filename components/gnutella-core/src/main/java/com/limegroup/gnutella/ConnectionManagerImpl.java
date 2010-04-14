@@ -756,6 +756,9 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      *  another Gnutella client, <tt>false</tt> otherwise
      */
     public boolean isConnected() {
+        // In LAN mode we always consider ourselves connected
+        if(ConnectionSettings.LAN_MODE.getValue())
+            return true;
         return ((_initializedClientConnections.size() > 0) ||
                 (_initializedConnections.size() > 0));
     }
@@ -2229,7 +2232,9 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
            _disconnectTime != 0)
             return;
 
-        if(isSupernode())
+        if(ConnectionSettings.LAN_MODE.getValue())
+            setPreferredConnections(0);
+        else if(isSupernode())
             setPreferredConnections(ConnectionSettings.NUM_CONNECTIONS.getValue());
         else if(isIdle())
             setPreferredConnections(ConnectionSettings.IDLE_CONNECTIONS.getValue());

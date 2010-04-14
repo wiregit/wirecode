@@ -25,7 +25,8 @@ public class LocalSocketAddressProviderImpl implements LocalSocketAddressProvide
     }
 
     public boolean isLocalAddressPrivate() {
-        return ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
+        return ConnectionSettings.LOCAL_IS_PRIVATE.getValue() ||
+        ConnectionSettings.LAN_MODE.getValue();
     }
     
     public boolean isTLSCapable() {

@@ -150,6 +150,11 @@ class ConnectionStatusPanel extends JXPanel {
             tooltipText = I18n.tr("You have a turbo-charged connection");
             strengthIcon = turbo; 
             break;
+        case LAN_MODE:
+            statusMessage = I18n.tr("LAN mode");
+            tooltipText = I18n.tr("LimeWire is running in LAN mode");
+            strengthIcon = turbo; // TODO: icon for LAN mode?
+            break;
         }
                
         if (shouldHideStatusLater) {

@@ -37,6 +37,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private final IPList hostilesTXTHosts = new IPList();
     
     private final IPFilter hostileNetworkFilter;
+    private final IPFilter lanFilter;
     private final ScheduledExecutorService ipLoader;
     /** Marker for whether or not hostiles need to be loaded. */
     private volatile boolean shouldLoadHostiles;
@@ -44,13 +45,16 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private volatile long whitelistings; // # of times we whitelisted an ip 
     private volatile long blacklistings; // # of times we blacklisted an ip 
     private volatile long netblockings;  // # of times net blacklisted an ip 
+    private volatile long lanblockings; // # of times lan filter blacklisted an ip
     private volatile long implicitings;  // # of times an ip was implicitly allowed
     
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
-    public LocalIPFilter(@Named("hostileFilter") IPFilter hostileNetworkFilter, 
+    public LocalIPFilter(@Named("hostileFilter") IPFilter hostileNetworkFilter,
+            LanFilter lanFilter,
             @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
         this.hostileNetworkFilter = hostileNetworkFilter;
+        this.lanFilter = lanFilter;
         this.ipLoader = ipLoader;
         
         File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
@@ -69,6 +73,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
         Runnable load = new Runnable() {
             public void run() {
                 hostileNetworkFilter.refreshHosts();
+                lanFilter.refreshHosts();
                 refreshHostsImpl();
                 if (callback != null)
                     callback.spamFilterLoaded();
@@ -137,9 +142,10 @@ public final class LocalIPFilter extends AbstractIPFilter {
     /** Determines if any blacklisted hosts exist. */
     @Override
     public boolean hasBlacklistedHosts() {
-        return 
-          (FilterSettings.USE_NETWORK_FILTER.getValue() && hostileNetworkFilter.hasBlacklistedHosts())
-          || !badHosts.isEmpty();
+        return (FilterSettings.USE_NETWORK_FILTER.getValue() &&
+                hostileNetworkFilter.hasBlacklistedHosts())
+                || lanFilter.hasBlacklistedHosts()
+                || !badHosts.isEmpty();
     }
     
     @Override
@@ -159,6 +165,11 @@ public final class LocalIPFilter extends AbstractIPFilter {
             return false;
         }
 
+        if(!lanFilter.allow(ip)) {
+            lanblockings++;
+            return false;
+        }
+        
         implicitings++;
         return true;
     }
@@ -175,6 +186,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
                 ret.put("white",whitelistings);
                 ret.put("block",blacklistings);
                 ret.put("netblock", netblockings);
+                ret.put("lanblock", lanblockings);
                 ret.put("implicit", implicitings);
                 return ret;
             }

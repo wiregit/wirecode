@@ -137,6 +137,7 @@ class TextSearchHandlerImpl implements SearchHandler {
         switch(type) {
         case TURBO:
         case FULL:
+        case LAN_MODE:
             searchPanel.setFullyConnected(true);
             return true;
         }

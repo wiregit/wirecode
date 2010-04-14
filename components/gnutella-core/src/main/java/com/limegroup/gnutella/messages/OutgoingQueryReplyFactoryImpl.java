@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.messages;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UploadSettings;
@@ -26,6 +29,9 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 @Singleton
 public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory {
+
+    private static final Log LOG =
+        LogFactory.getLog(OutgoingQueryReplyFactoryImpl.class);
 
     private final QueryReplyFactory queryReplyFactory;
     private final UploadManager uploadManager;
@@ -133,10 +139,20 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         // first try using multicast addresses & ports, but if they're
         // invalid, fallback to non multicast.
         if(isMulticast) {
-            ip = networkManager.getNonForcedAddress();
-            port = networkManager.getNonForcedPort();
-            if(!NetworkUtils.isValidPort(port) || !NetworkUtils.isValidAddress(ip))
+            InetSocketAddress multi = networkManager.getMulticastReplyAddress();
+            if(multi == null) {
+                LOG.warn("No multicast reply address");
+                ip = networkManager.getNonForcedAddress();
+                port = networkManager.getNonForcedPort();
+            } else {
+                ip = multi.getAddress().getAddress();
+                port = multi.getPort();
+            }
+            if(!NetworkUtils.isValidPort(port) ||
+                    !NetworkUtils.isValidAddress(ip)) {
+                LOG.debug("Non-forced address is invalid");
                 isMulticast = false;
+            }
         }
         
         if(!isMulticast) {
@@ -144,9 +160,11 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
             if(isFWTransfer) {
                 port = networkManager.getStableUDPPort();
                 ip = networkManager.getExternalAddress();
-                if(!NetworkUtils.isValidAddress(ip) 
-                        || !NetworkUtils.isValidPort(port))
+                if(!NetworkUtils.isValidAddress(ip) ||
+                        !NetworkUtils.isValidPort(port)) {
+                    LOG.debug("FW transfer address is invalid");
                     isFWTransfer = false;
+                }
             }
             
             // if we still don't have a valid address here, exit early.
@@ -154,10 +172,15 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
                 ip = networkManager.getAddress();
                 port = networkManager.getPort();
                 if(!NetworkUtils.isValidAddress(ip) ||
-                        !NetworkUtils.isValidPort(port))
+                        !NetworkUtils.isValidPort(port)) {
+                    LOG.debug("All addresses are invalid");
                     return Collections.emptyList();
+                }
             }
         }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Replying from " + NetworkUtils.ip2string(ip) + ":" + port);
         
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session

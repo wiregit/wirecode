@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.limewire.io.Connectable;
@@ -135,4 +136,10 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
      * Validates that tls will work, and disables it for the session if it will not. 
      */
     public void validateTLS();
+
+    /**
+     * Returns the address and port that should be used in replies to multicast
+     * queries, or null if multicast is not in use.
+     */
+    public InetSocketAddress getMulticastReplyAddress();
 }

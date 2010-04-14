@@ -778,7 +778,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @see com.limegroup.gnutella.MessageRouter#handleMulticastMessage(com.limegroup.gnutella.messages.Message, java.net.InetSocketAddress)
      */
 	public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
-    
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Handling multicast message " + msg + " from " + addr);
+        }
         // Use this assert for testing only -- it is a dangerous assert
         // to have in the field, as not all messages currently set the
         // network int appropriately.
@@ -1168,8 +1170,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
             // if (I'm firewalled AND the source is firewalled) AND 
             // NOT(he can do a FW transfer and so can i) then don't reply...
             if ((request.isFirewalledSource() &&
-                 !networkManager.acceptedIncomingConnection()) &&
-                !(request.canDoFirewalledTransfer() &&
+                    !networkManager.acceptedIncomingConnection()) &&
+                    !(request.canDoFirewalledTransfer() &&
                   networkManager.canDoFWT())
                 )
                 return;

@@ -388,4 +388,10 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final LongSetting SIMPP_SEND_TIMEOUT = FACTORY.createRemoteLongSetting(
             "SIMPP_SEND_TIMEOUT", 60 * 1000, "ConnectionSettings.simppSendTimeout", 0, Long.MAX_VALUE);
+
+    /**
+     * If true, LimeWire will only communicate with peers on the same LAN.
+     */
+    public static final BooleanSetting LAN_MODE =
+        FACTORY.createBooleanSetting("LAN_MODE", false);
 }

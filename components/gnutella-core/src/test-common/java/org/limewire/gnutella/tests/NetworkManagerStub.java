@@ -1,6 +1,7 @@
 package org.limewire.gnutella.tests;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
@@ -279,4 +280,8 @@ public class NetworkManagerStub implements NetworkManager {
         
     }
 
+    @Override
+    public InetSocketAddress getMulticastReplyAddress() {
+        return null;
+    }
 }

@@ -37,6 +37,7 @@ public class AdvancedOptionPanel extends OptionPanel {
     private static final String PERFORMANCE = I18n.tr("Performance");
     private static final String FILTERING = I18n.tr("Filtering");
     private static final String EXTERNAL_ACCESS = I18n.tr("External Access");
+    private static final String LAN_MODE = I18n.tr("LAN Mode");
 
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
@@ -51,7 +52,8 @@ public class AdvancedOptionPanel extends OptionPanel {
             Provider<PerformanceOptionPanel> performanceOptionPanel,
             Provider<FilteringOptionPanel> filteringOptionPanel,
             Provider<SystemOptionPanel> systemOptionPanel,
-            Provider<ExternalAccessOptionPanel> externalAccessOptionPanel) {
+            Provider<ExternalAccessOptionPanel> externalAccessOptionPanel,
+            Provider<LanModeOptionPanel> lanModeOptionPanel) {
 
         providers.put(SYSTEM, systemOptionPanel);
         providers.put(LISTENING_PORTS, firewallOptionPanel);
@@ -60,6 +62,7 @@ public class AdvancedOptionPanel extends OptionPanel {
         providers.put(PERFORMANCE, performanceOptionPanel);
         providers.put(FILTERING, filteringOptionPanel);
         providers.put(EXTERNAL_ACCESS, externalAccessOptionPanel);
+        providers.put(LAN_MODE, lanModeOptionPanel);
 
         setLayout(new MigLayout("insets 15, fill, gapy 10", "[][grow]", "[][]"));
 
@@ -116,6 +119,7 @@ public class AdvancedOptionPanel extends OptionPanel {
         model.addElement(PERFORMANCE);
         model.addElement(FILTERING);
         model.addElement(EXTERNAL_ACCESS);
+        model.addElement(LAN_MODE);
 
         list.setModel(model);
     }
