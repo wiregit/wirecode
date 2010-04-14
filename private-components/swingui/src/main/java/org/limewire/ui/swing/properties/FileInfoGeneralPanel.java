@@ -57,9 +57,12 @@ import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 
 /**
  * Displays meta data information about the given PropertiableFile. If the file
@@ -166,15 +169,52 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 
         createLocation();
         
-        URN urn = propertiableFile.getUrn();
-        if (urn != null) {
-            component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
-            component.add(createLabelField(propertiableFile.getUrn().toString()), "growx, span, wrap");
-        }
+        createUrnSection();
         
         createTorrentSettings();
     }
 
+    private void createUrnSection() {
+        URN urn = propertiableFile.getUrn();
+
+        switch(propertiableFile.getCategory()) {
+            case TORRENT :
+                if (urn != null) {
+                    Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
+                    String sha1HexString = null; 
+                    if (torrent != null) {
+                        sha1HexString = torrent.getSha1();
+                    }
+                    if (sha1HexString != null) {
+                        
+                        // Manually convert the base 16 string hash to a more recognisable format
+                        //  without going into core
+                        String payloadHashString = "urn:sha1:" + Base32.encode(StringUtils.fromHexString(sha1HexString));
+                        
+                        JLabel torrentHashLabel = createPlainLabel(I18n.tr("torrent file hash:"));
+                        JLabel payloadHashLabel = createPlainLabel(I18n.tr("payload hash:"));
+                        
+                        FontUtils.bold(torrentHashLabel);
+                        FontUtils.bold(payloadHashLabel);
+                        
+                        component.add(createHeaderLabel(I18n.tr("Hashes")), "wrap");
+                        component.add(torrentHashLabel, "split 2, gapright 5");
+                        component.add(createLabelField(propertiableFile.getUrn().toString()), "gapleft 0, growx, span, wrap");
+                        component.add(payloadHashLabel, "split 2, gapright 5"); 
+                        component.add(createLabelField(payloadHashString), "gapleft 0, growx, span, wrap");
+                        break;
+                    }
+                }
+                // else, no payload hash, fall through... 
+            default :   
+                if (urn != null) {
+                    component.add(createHeaderLabel(I18n.tr("Hash")), "wrap");
+                    component.add(createLabelField(propertiableFile.getUrn().toString()), "growx, span, wrap");
+                }
+                break;
+        }
+    }
+    
     /**
      * If a torrent download that is in error. The internal error message will be displayed, 
      * to help debug the situation.
