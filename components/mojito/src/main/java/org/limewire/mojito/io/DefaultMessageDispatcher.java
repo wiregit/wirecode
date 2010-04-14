@@ -194,10 +194,11 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     
     @Override
     protected void handleTimeout(ResponseHandler2 callback, 
+            KUID contactId, SocketAddress dst, 
             RequestMessage request, long time, TimeUnit unit) throws IOException {
         
-        super.handleTimeout(callback, request, time, unit);
-        defaultHandler.handleTimeout(request, time, unit);
+        super.handleTimeout(callback, contactId, dst, request, time, unit);
+        defaultHandler.handleTimeout(contactId, dst, request, time, unit);
     }
 
     /**
