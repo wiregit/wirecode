@@ -130,12 +130,16 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
 
     @Override
     public Category getCategory() {
-        File file = downloader.getFile();
-        if(file != null) {
-            return categoryManager.getCategoryForFile(file);
+        if(downloadItemType == DownloadItemType.BITTORRENT) {
+            return Category.OTHER;
         } else {
-            // TODO: See if it's OK to always use save file.
-            return categoryManager.getCategoryForFile(downloader.getSaveFile());
+            File file = downloader.getFile();
+            if(file != null) {
+                return categoryManager.getCategoryForFile(file);
+            } else {
+                // TODO: See if it's OK to always use save file.
+                return categoryManager.getCategoryForFile(downloader.getSaveFile());
+            }
         }
     }
 
