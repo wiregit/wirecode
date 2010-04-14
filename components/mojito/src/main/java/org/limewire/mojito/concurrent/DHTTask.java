@@ -23,18 +23,13 @@ package org.limewire.mojito.concurrent;
 /**
  * A DHTTask is an asynchronous non-blocking task.
  */
-public interface DHTTask<T> {
+public interface DHTTask<T> extends AsyncProcess<T> {
     
     /**
      * The maximum amount of time this DHTTask may be
      * active before it's being interrupted. 
      */
     public long getWaitOnLockTimeout();
-    
-    /**
-     * Starts the DHTTask.
-     */
-    public void start(DHTFuture<T> future);
     
     /**
      * Cancels the DHTTask.
