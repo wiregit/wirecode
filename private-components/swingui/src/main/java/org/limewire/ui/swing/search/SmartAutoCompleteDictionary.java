@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -78,25 +79,25 @@ class SmartAutoCompleteDictionary {
         List<SmartQuery> entries = new ArrayList<SmartQuery>();
         
         // Split input text using dash.
-        String[] fields = s.split("-", 3);
+        String[] fields = s.split("-");
         
         // Add smart query entries.
-        if (fields.length == 1) {
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim()));
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim()));
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.ALBUM, fields[0].trim()));
+        if (fields.length == 1 ||
+                (fields.length > 1 && StringUtils.isEmpty(fields[1]))) {
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, fields[0].trim()));
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.TITLE, fields[0].trim()));
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.ALBUM, fields[0].trim()));
             
-        } else if (fields.length == 2) {
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
-                    FilePropertyKey.TITLE, fields[1].trim()));
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim(),
-                    FilePropertyKey.AUTHOR, fields[1].trim()));
+        } else if (fields.length == 2 ||
+                (fields.length > 2 && StringUtils.isEmpty(fields[2]))) {
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, fields[0].trim()).
+                    addData(FilePropertyKey.TITLE, fields[1].trim()));
             
         } else if (fields.length > 2) {
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
-                    FilePropertyKey.ALBUM, fields[1].trim(), FilePropertyKey.TITLE, fields[2].trim()));
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, fields[0].trim(),
-                    FilePropertyKey.TITLE, fields[1].trim(), FilePropertyKey.ALBUM, fields[2].trim()));
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, fields[0].trim()).
+                    addData(FilePropertyKey.TITLE, fields[1].trim()).addData(FilePropertyKey.ALBUM, fields[2].trim()));
+            entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, fields[0].trim()).
+                    addData(FilePropertyKey.ALBUM, fields[1].trim()).addData(FilePropertyKey.TITLE, fields[2].trim()));
         }
         
         return entries;
@@ -110,15 +111,25 @@ class SmartAutoCompleteDictionary {
         List<SmartQuery> entries = new ArrayList<SmartQuery>();
         
         // Split input text using dash.
-        String[] fields = s.split("-", 2);
+        String[] fields = s.split("-");
         
         // Add smart query entries.
-        if (fields.length > 0) {
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim()));
-        }
-        if (fields.length > 1 && !fields[1].trim().isEmpty()) {
-            entries.add(SmartQuery.newInstance(searchCategory, FilePropertyKey.TITLE, fields[0].trim(),
-                    FilePropertyKey.YEAR, fields[1].trim()));
+        if (fields.length == 1) {
+            // Add entries only if the field is an integer.
+            if (fields[0].trim().matches("\\d+")) {
+                entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.YEAR, fields[0].trim()));
+                entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.TITLE, fields[0].trim()));
+            }
+            
+        } else if (fields.length > 1) {
+            // Add entry only if one of the fields is an integer.
+            if (fields[1].trim().matches("\\d+")) {
+                entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.TITLE, fields[0].trim()).
+                        addData(FilePropertyKey.YEAR, fields[1].trim()));
+            } else if (fields[0].trim().matches("\\d+")) {
+                entries.add(new SmartQuery(searchCategory).addData(FilePropertyKey.YEAR, fields[0].trim()).
+                        addData(FilePropertyKey.TITLE, fields[1].trim()));
+            }
         }
         
         return entries;

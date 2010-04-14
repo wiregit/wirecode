@@ -40,7 +40,7 @@ public class SmartQueryTest extends BaseTestCase {
     /** Tests method to create new instance with single property value. */
     public void testNewInstanceOnePropertyValue() {
         // Create instance.
-        smartQuery = SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, "band");
+        smartQuery = new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, "band");
         
         // Verify query data.
         Map<FilePropertyKey, String> queryData = smartQuery.getQueryData();
@@ -51,8 +51,8 @@ public class SmartQueryTest extends BaseTestCase {
     /** Tests method to create new instance with two property values. */
     public void testNewInstanceTwoPropertyValues() {
         // Create instance.
-        smartQuery = SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, "band",
-                FilePropertyKey.ALBUM, "hits");
+        smartQuery = new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, "band").
+                addData(FilePropertyKey.ALBUM, "hits");
         
         // Verify query data.
         Map<FilePropertyKey, String> queryData = smartQuery.getQueryData();
@@ -64,8 +64,8 @@ public class SmartQueryTest extends BaseTestCase {
     /** Tests method to create new instance with three property values. */
     public void testNewInstanceThreePropertyValues() {
         // Create instance.
-        smartQuery = SmartQuery.newInstance(searchCategory, FilePropertyKey.AUTHOR, "band",
-                FilePropertyKey.ALBUM, "hits", FilePropertyKey.TITLE, "life");
+        smartQuery = new SmartQuery(searchCategory).addData(FilePropertyKey.AUTHOR, "band").
+                addData(FilePropertyKey.ALBUM, "hits").addData(FilePropertyKey.TITLE, "life");
         
         // Verify query data.
         Map<FilePropertyKey, String> queryData = smartQuery.getQueryData();
@@ -101,7 +101,7 @@ public class SmartQueryTest extends BaseTestCase {
         
         // Verify one key.
         smartQuery.addData(FilePropertyKey.AUTHOR, artist);
-        String expected = artistKey + " called \"" + artist + "\"";
+        String expected = artistKey + " is \"" + artist + "\"";
         assertEquals(expected, smartQuery.toString());
         
         // Verify two keys.

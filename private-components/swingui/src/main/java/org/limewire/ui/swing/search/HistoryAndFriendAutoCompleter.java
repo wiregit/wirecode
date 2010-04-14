@@ -179,6 +179,17 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         Collection<String> histories = historyDictionary.getPrefixedBy(lookupText);
         final ArrayList<Entry> items = new ArrayList<Entry>(histories.size());
         
+        // Add search history items.
+        boolean needFirstHistory = true;
+        for (String string : histories) {
+            if (needFirstHistory) {
+                items.add(new Entry(string, Entry.Reason.FIRST_HISTORY));
+                needFirstHistory = false;
+            } else {
+                items.add(new Entry(string, Entry.Reason.HISTORY));
+            }
+        }
+        
         // Add smart suggestion items.
         if (showSuggestions) {
             Collection<SmartQuery> suggestions = smartDictionary.getPrefixedBy(lookupText);
@@ -193,17 +204,6 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
                 } else {
                     items.add(new Entry(queryText, query.toString(), Entry.Reason.SUGGESTION));
                 }
-            }
-        }
-        
-        // Add search history items.
-        boolean needFirstSuggestion = true;
-        for (String string : histories) {
-            if (needFirstSuggestion) {
-                items.add(new Entry(string, Entry.Reason.FIRST_HISTORY));
-                needFirstSuggestion = false;
-            } else {
-                items.add(new Entry(string, Entry.Reason.HISTORY));
             }
         }
         

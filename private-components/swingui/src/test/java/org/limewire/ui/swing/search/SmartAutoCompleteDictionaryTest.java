@@ -78,10 +78,9 @@ public class SmartAutoCompleteDictionaryTest extends BaseTestCase {
         Collection<SmartQuery> smartQueries = smartDictionary.getPrefixedBy(input);
         
         // Verify queries.
-        assertEquals(5, smartQueries.size());
+        assertEquals(1, smartQueries.size());
         for (SmartQuery query : smartQueries) {
-            int size = query.getQueryData().size();
-            assertTrue(size > 0 && size < 3);
+            assertEquals(2, query.getQueryData().size());
         }
     }
 
@@ -92,10 +91,9 @@ public class SmartAutoCompleteDictionaryTest extends BaseTestCase {
         Collection<SmartQuery> smartQueries = smartDictionary.getPrefixedBy(input);
         
         // Verify queries.
-        assertEquals(7, smartQueries.size());
+        assertEquals(2, smartQueries.size());
         for (SmartQuery query : smartQueries) {
-            int size = query.getQueryData().size();
-            assertTrue(size > 0 && size < 4);
+            assertEquals(3, query.getQueryData().size());
         }
     }
 
