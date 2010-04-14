@@ -7,10 +7,9 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.SecuritySettings;
 import org.limewire.io.GUID;
-import org.limewire.security.id.SecureIdManager.Identity;
 import org.limewire.util.BaseTestCase;
 
-public class SecureIdManagerTest extends BaseTestCase {
+public class SecureIdManagerTest extends BaseTestCase{
     public SecureIdManagerTest(String name){
         super(name);
     }
@@ -20,38 +19,41 @@ public class SecureIdManagerTest extends BaseTestCase {
     }
 
     public void testIdGeneration() throws Exception{
-        // generate id, test if it is secure id, verify sturgeon id mark
-        GUID sturgeonID = new GUID("00000000000000000000000000000000");
-        SecureIdManager aliceIdManager = new SecureIdManager(sturgeonID, null);
+        // generate id, test if it is secure id        
+        SecureIdManager aliceIdManager = new SecureIdManager(null);
+        aliceIdManager.start();
         
         MessageDigest md = MessageDigest.getInstance(SecureIdManager.HASH_ALGO);
         md.update(aliceIdManager.getMyIdentity().getSignatureKey().getEncoded());
         byte[] hash = md.digest();
-        assertTrue(GUID.isSecureGuid(hash, aliceIdManager.getMyId()));        
+        assertTrue(GUID.isSecureGuid(hash, aliceIdManager.getMyId(), SecureIdManager.TAGGING));        
     }
         
     public void testKeyAgreement() throws Exception{
         // the two parties of key agreement: alice and bob
-        SecureIdManager aliceIdManager = new SecureIdManager(new GUID(), "aliceRemoteKeys.txt");        
+        SecureIdManager aliceIdManager = new SecureIdManager("aliceRemoteKeys.txt");
+        aliceIdManager.start();
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManager bobIdManager = new SecureIdManager(new GUID(), "bobRemoteKeys.txt");        
-
+        SecureIdManager bobIdManager = new SecureIdManager("bobRemoteKeys.txt");        
+        bobIdManager.start();
         // alice and bob exchange identities
         Identity request = aliceIdManager.getMyIdentity();
         bobIdManager.processIdentity(request);
         Identity reply = bobIdManager.getMyIdentity();
         aliceIdManager.processIdentity(reply);
         assertTrue(Arrays.equals(
-                aliceIdManager.getRemotePublicKeyEntry(bobIdManager.getMyId()).sharedKey.getEncoded(), 
-                bobIdManager.getRemotePublicKeyEntry(aliceIdManager.getMyId()).sharedKey.getEncoded()
+                aliceIdManager.getRemotePublicKeyEntry(bobIdManager.getMyId()).encryptionKey.getEncoded(), 
+                bobIdManager.getRemotePublicKeyEntry(aliceIdManager.getMyId()).encryptionKey.getEncoded()
                 ));
         }
     
     public void testSignatureAndHmac() throws Exception {
         // key agreement first
-        SecureIdManager aliceIdManager = new SecureIdManager(new GUID(), "aliceRemoteKeys.txt");        
+        SecureIdManager aliceIdManager = new SecureIdManager("aliceRemoteKeys.txt");        
+        aliceIdManager.start();
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManager bobIdManager = new SecureIdManager(new GUID(), "bobRemoteKeys.txt");        
+        SecureIdManager bobIdManager = new SecureIdManager("bobRemoteKeys.txt");
+        bobIdManager.start();
         Identity request = aliceIdManager.getMyIdentity();
         bobIdManager.processIdentity(request);
         Identity reply = bobIdManager.getMyIdentity();
@@ -62,7 +64,7 @@ public class SecureIdManagerTest extends BaseTestCase {
         byte[] data = "data".getBytes();
         GUID bobId = bobIdManager.getMyId();
         byte[] sigBytes = aliceIdManager.sign(data);
-        byte[] macBytes = aliceIdManager.hamc(bobId, data);
+        byte[] macBytes = aliceIdManager.createHmac(bobId, data);
         // bob knows that the signature and mac are from alice
         GUID aliceId = aliceIdManager.getMyId();
         // bob verifies signature and mac

@@ -35,4 +35,7 @@ public final class SecuritySettings extends LimeProps {
 
     public static final StringSetting DH_PRIVATE_KEY= 
         FACTORY.createStringSetting("DH_PRIVATE_KEY", "");
+    
+    public static final StringSetting MULTI_INSTALLATION_MARK=
+        FACTORY.createStringSetting("MULTI_INSTALLATION_MARK", "");
 }

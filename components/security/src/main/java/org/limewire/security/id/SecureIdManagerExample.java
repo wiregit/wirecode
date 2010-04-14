@@ -3,36 +3,25 @@ package org.limewire.security.id;
 import java.util.Arrays;
 import org.limewire.core.settings.SecuritySettings;
 import org.limewire.io.GUID;
-import org.limewire.security.id.SecureIdManager.Identity;
+import org.limewire.security.SecurityUtils;
 import org.limewire.util.Base32;
 
 public class SecureIdManagerExample {
 
     public static void main(String[] args) throws Exception {        
         // alice
-        SecureIdManager aliceIdManager = new SecureIdManager(new GUID(), "aliceRemoteKeys.txt");
+        SecureIdManager aliceIdManager = new SecureIdManager("aliceRemoteKeys.txt");
+        aliceIdManager.start();
         System.out.println("alice id "+aliceIdManager.getMyId());
         // bob
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManager bobIdManager = new SecureIdManager(new GUID(), "bobRemoteKeys.txt");        
+        SecureIdManager bobIdManager = new SecureIdManager("bobRemoteKeys.txt");          
+        bobIdManager.start();
         System.out.println("bob id "+bobIdManager.getMyId());
-
+        
         // alice generates a request which is basically an identity
         Identity request = aliceIdManager.getMyIdentity();
         
-        // System.out.println(Base32.encode(request.getDHKey().getEncoded()));
-        System.out.println("public key request {id, signature public key, dh public key, signature} size:\n raw data: "+
-                request.getGuid().bytes().length +" "+
-                request.getSignatureKey().getEncoded().length +" "+
-                request.getDHPublicComponent().toByteArray().length +" "+
-                request.getSignature().length);
-
-        System.out.println(" base32 encoded: "+
-                Base32.encode(request.getGuid().bytes()).length() +" "+
-                Base32.encode(request.getSignatureKey().getEncoded()).length() +" "+
-                Base32.encode(request.getDHPublicComponent().toByteArray()).length() +" "+
-                Base32.encode(request.getSignature()).length());
-
         // bob process the request
         boolean goodRequest= bobIdManager.processIdentity(request);
         Identity reply = null;
@@ -51,7 +40,7 @@ public class SecureIdManagerExample {
         // alice generates a message with a nonce        
         String requestData = "who has a blowfish book?";
         System.out.println("alice asks "+requestData);
-        byte[] challengeStoredLocally = aliceIdManager.nonce();
+        byte[] challengeStoredLocally = SecurityUtils.createNonce();
         String message = Base32.encode(aliceIdManager.getMyId().bytes()) +"|"+ requestData +"|"+ Base32.encode(challengeStoredLocally);
         //System.out.println(Base32.encode(challengeStoredLocally));
         
@@ -65,7 +54,7 @@ public class SecureIdManagerExample {
         String toSign = Base32.encode(bobIdManager.getMyId().bytes()) +"|"+ replyData +"|"+ alicesChallenge;
         // bob does both signature and mac for fun
         String sigStr = Base32.encode(bobIdManager.sign(toSign.getBytes()));
-        String macStr = Base32.encode(bobIdManager.hamc(requesterGUID, toSign.getBytes()));
+        String macStr = Base32.encode(bobIdManager.createHmac(requesterGUID, toSign.getBytes()));
         String signedMessageReply = toSign +"|"+ sigStr; 
         String macedMessageReply = toSign +"|"+ macStr;
         
@@ -115,5 +104,17 @@ public class SecureIdManagerExample {
         }
         // 4) use the reply
         System.out.println("alice got a maced reply: "+replyStr);
+        
+        // alice and bob use encrypted communication
+        // 1) alice encrypts something
+        byte[] plaintext = "plaintext: Encryption is the process of converting normal data or plaintext to something incomprehensible or cipher-text by applying mathematical transformations.".getBytes();
+        GUID bobID = bobIdManager.getMyId();
+        GUID aliceID = aliceIdManager.getMyId();
+        byte[] ciphertext = aliceIdManager.encrypt(bobID, plaintext);
+        // System.out.println(ciphertext.length);
+        // System.out.println(new String(ciphertext));
+        // 2) bob decrypts 
+        byte[] bobPlaintext = bobIdManager.decrypt(aliceID, ciphertext);
+        System.out.println("\nbob decrypts: "+new String(bobPlaintext));
     }
 }
