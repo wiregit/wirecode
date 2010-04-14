@@ -16,6 +16,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -35,6 +36,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 public class TrackerScraper {
 
+    private final int TIMEOUT = 1500;
+    
     /**
      *  Copied from escape_string.cpp in libtorrent
      */
@@ -48,7 +51,8 @@ public class TrackerScraper {
         + ";?:@=&/"
         // unreserved (special characters) ' excluded,
         // since some buggy trackers fail with those
-        + "$-_.!~*(),"
+        // (michaelt:  ??? removed '$' since it seems to break things ??)
+        + "-_.!~*(),"
         // unreserved (alphanumerics)
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         + "0123456789";
@@ -69,40 +73,40 @@ public class TrackerScraper {
     /**
      * Submit the scrape request.  Notification will be returned through the callback
      *
-     * @return false if the scrape could not be submitted
+     * @return the shutdownable for the connection, or null if no 
+     *          connection was supported.
      */
-    public boolean submitScrape(URI trackerAnnounceUri, URN urn,
+    public Shutdownable submitScrape(URI trackerAnnounceUri, URN urn,
             final ScrapeCallback callback) {
 
-        System.out.println("submitting: " + trackerAnnounceUri);
+        System.out.println("attempting: " + trackerAnnounceUri);
         
         if (!canHTTPScrape(trackerAnnounceUri)) {
             System.out.println("scraping not available");
             
             // Tracker does not support scraping so don't attempt
-            return false;
+            return null;
         }
         
-
         URI uri;
         try {
             uri = createScrapingRequest(trackerAnnounceUri, urn);
         } catch (URISyntaxException e) {
-            // URI could not be generated for the scrape request so dont try
-            return false;
+            // URI could not be generated for the scrape request so don't try
+            return null;
         }
 
-        System.out.println(uri.toString());
-       
         HttpGet get = new HttpGet(uri);
 
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         HttpParams params = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(params, 10000);
-        HttpConnectionParams.setSoTimeout(params, 10000);
+        HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
+        HttpConnectionParams.setSoTimeout(params, TIMEOUT);
         params = new DefaultedHttpParams(params, defaultParamsProvider.get());
-        httpExecutorProvider.get().execute(get, params, new HttpClientListener() {
+        
+        System.out.println("submitting: " + uri);
+        return httpExecutorProvider.get().execute(get, params, new HttpClientListener() {
             @Override
             public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
                 callback.failure("request failed");
@@ -110,7 +114,6 @@ public class TrackerScraper {
             }
             @Override
             public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
-
                 HttpEntity entity = response.getEntity();
 
                 Object decoded = null;
@@ -185,8 +188,6 @@ public class TrackerScraper {
                 return true;
             }
         });
-
-        return true;
     }
 
 

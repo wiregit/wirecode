@@ -11,30 +11,47 @@ import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentScrapeData;
-import org.limewire.lifecycle.ServiceScheduler;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.TrackerScraper;
 import com.limegroup.bittorrent.TrackerScraper.ScrapeCallback;
 import com.limegroup.gnutella.URN;
 
 /**
  * Returning the data from torrent scraping by asynchronously 
  *  queueing then staggering the requests
+ *  
+ * <p> NOTE: Will go to sleep in periods of inactivity.  Will
+ *            clear cache entries randomly after the entry 
+ *            threshold is achieved.  Will ban trackers
+ *            that consistently fail after scrapes are attempted. 
+ *            
+ * TODO: convert to singleton, use sha1 to hash, cache management,
+ *        tracker ban, figure out random openbt fails.
  */
-
-// TODO: clean up mess!! unregister service or provide a secondary queue 
-//        processor that is not created for every search tab
 public class TorrentScrapeScheduler {
     
     private static final long PERIOD = 1200;
+    /**
+     * Number of cycles to wait with an empty
+     *  request queue before stopping this scheduler.
+     *  
+     *  TODO: not needed anymore with wakeups
+     */
+    private static final int EMPTY_PERIOD_MAX = 2;    
+
+    private static final int PROCESSING_PERIOD_MAX = 3;
+    private int processingPeriodsCount = 0;
     
     private final TrackerScraper scraper;
+    
+    private final AtomicBoolean awake = new AtomicBoolean(false);
     
     private ScheduledFuture<?> future = null;
     
@@ -49,24 +66,37 @@ public class TorrentScrapeScheduler {
     private final AtomicReference<Torrent> currentlyScrapingTorrent
         = new AtomicReference<Torrent>(null);
  
+    private Shutdownable currentScrapeAttemptShutdown = null;
+    
+    /**
+     * Used to decide when to give up waiting for requests 
+     *  and shut down this scheduler instance.
+     */
+    private int queueEmptyPeriodsCount = 0;
+    
+    private final Runnable command = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println("process");
+            process();
+        }
+    };
+    private final ScheduledExecutorService backgroundExecutor;
+    
     @Inject
-    public TorrentScrapeScheduler(TrackerScraper scraper) {
+    public TorrentScrapeScheduler(TrackerScraper scraper,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        
         this.scraper = scraper;
+        this.backgroundExecutor = backgroundExecutor;
+        
+        awake.set(true);
+        future = scheduleProcessor();
     }
     
-    @Inject 
-    void registerService(ServiceScheduler scheduler, 
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-          final Runnable command = new Runnable() {
-              @Override
-              public void run() {
-                  System.out.println("process");
-                  process();
-              }
-          };
-     
-          future = backgroundExecutor.scheduleWithFixedDelay(command,
-                  PERIOD*2, PERIOD, TimeUnit.MILLISECONDS);
+    private ScheduledFuture<?> scheduleProcessor() {
+        return backgroundExecutor.scheduleWithFixedDelay(command,
+                PERIOD*2, PERIOD, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -99,6 +129,17 @@ public class TorrentScrapeScheduler {
             
             System.out.println(torrent.getName() + " queued");
             torrentsToScrape.add(torrent);
+            wakeup();
+        }
+    }
+    
+    /**
+     * Wakeup the processing thread if needed.
+     */
+    private void wakeup() {
+        if (awake.compareAndSet(false, true)) {
+            System.out.println("wakeup");
+            future = scheduleProcessor();
         }
     }
     
@@ -117,26 +158,52 @@ public class TorrentScrapeScheduler {
      * Mark a torrent that failed so we dont attempt to scrape it again.
      */
     private void markCurrentTorrentFailure() {
+        System.out.println("  " + currentlyScrapingTorrent.get().getName() + " MARK FAIL");
         synchronized (failedTorrents) {
             failedTorrents.add(currentlyScrapingTorrent.getAndSet(null));
         }
     }
     
+    /**
+     * Used to ban consitently failing trackers
+     */
+    private void markCurrentTrackerFailure() {
+    }
+   
     private void process() {
         
         synchronized (torrentsToScrape) {
-            if (!currentlyScrapingTorrent.compareAndSet(null, torrentsToScrape.poll())) {
+            if (!currentlyScrapingTorrent.compareAndSet(null, torrentsToScrape.peek())) {
+                if (processingPeriodsCount++ >= PROCESSING_PERIOD_MAX) {
+                    System.out.println("CANCEL SCRAPE REQUEST");
+                    currentScrapeAttemptShutdown.shutdown();
+                    // Don't need to mark fail here... will get it on shutdown
+                }
                 return;
+            } else {
+                torrentsToScrape.poll();
+                processingPeriodsCount = 0;
             }
         }
         
         final Torrent torrent = currentlyScrapingTorrent.get();
         if (torrent == null) {
+            if (queueEmptyPeriodsCount++ > EMPTY_PERIOD_MAX) {
+                System.out.println("GOING TO SLEEP");
+                if (awake.compareAndSet(true, false)) {
+                    future.cancel(false);
+                    future = null;
+                }
+                
+            }
             return;
+        } else {
+            queueEmptyPeriodsCount = 0;
         }
         
         List<URI> trackers = torrent.getTrackerURIS();
         if (trackers == null || trackers.size() < 1) {
+            // Has no trackers
             markCurrentTorrentFailure();
             return;
         }
@@ -159,24 +226,25 @@ public class TorrentScrapeScheduler {
         try {
             System.out.println(torrent.getName() + " submit");
 
-            boolean submitted = scraper.submitScrape(tracker,
+            currentScrapeAttemptShutdown = scraper.submitScrape(tracker,
                     URN.createSha1UrnFromHex(torrent.getSha1()), 
                     new ScrapeCallback() {
                         @Override
                         public void success(TorrentScrapeData data) {
                             synchronized (resultsMap) {
-                                System.out.println(torrent.getName() + " found");
+                                System.out.println("  " + torrent.getName() + " FOUND");
                                 resultsMap.put(currentlyScrapingTorrent.getAndSet(null),
                                             data);
                             }
                         }
                         @Override
                         public void failure(String reason) {
-                            System.out.println(torrent.getName() + " failed");
+                            System.out.println("   " + torrent.getName() + " FAILED");
+                            markCurrentTrackerFailure();
                             markCurrentTorrentFailure();
                         }
                     });
-            if (!submitted) {
+            if (currentScrapeAttemptShutdown == null) {
                 markCurrentTorrentFailure();
                 return;
             }
