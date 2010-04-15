@@ -3,6 +3,7 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.util.ContactsScrubber;
+import org.limewire.mojito.util.ContactsScrubber2;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.security.SecurityToken;
 
@@ -308,7 +309,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
                 return true;
             }
             
-            ContactsScrubber scrubber = ContactsScrubber.scrub(
+            ContactsScrubber2 scrubber = ContactsScrubber2.scrub(
                     context, src, contacts, 
                     LookupSettings.CONTACTS_SCRUBBER_REQUIRED_RATIO.getValue());
             if (!scrubber.isValidResponse()) {
@@ -329,7 +330,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
                 }
             }
             
-            collisions.addAll(scrubber.getCollisions());
+            collisions.addAll(Arrays.asList(scrubber.getCollisions()));
             
             return true;
         }
