@@ -96,10 +96,15 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             ret.put("type", searchInfo.getSearchType());
             ret.put("files", sortedResultList.size());
             
-            double random = new Random().nextDouble();
-            int randomIndex = (int) (sortedResultList.size() * random);
+            if (sortedResultList.size() > 0) {
+                double random = new Random().nextDouble();
+                int randomIndex = (int) (sortedResultList.size() * random);
             
-            ret.put("random result bytes", sortedResultList.get(randomIndex).getSize());
+                ret.put("random result bytes", sortedResultList.get(randomIndex).getSize());
+            } else {
+                // No files to get the size of
+                ret.put("random result bytes", -1);
+            }
             
             ret.put("downloads", downloadsStarted);
             
