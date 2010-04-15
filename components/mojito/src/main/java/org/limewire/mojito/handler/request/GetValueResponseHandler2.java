@@ -72,7 +72,7 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
             long time, TimeUnit unit) {
         
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Eeceived response: " + message);
+            LOG.debug("Received response: " + message);
         }
         
         // Imagine the following case: We do a lookup for a value 
