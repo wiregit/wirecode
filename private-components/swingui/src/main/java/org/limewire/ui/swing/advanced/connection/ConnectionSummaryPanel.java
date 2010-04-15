@@ -37,6 +37,7 @@ import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatus;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.listener.EventBean;
 import org.limewire.ui.swing.advanced.connection.PopupManager.PopupProvider;
 import org.limewire.ui.swing.components.Disposable;
@@ -59,6 +60,7 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
     private static final String DISCONNECTED_PANEL_KEY = "DISCONNECTED_KEY";
     private static final String CONNECTED_PANEL_KEY = "CONNECTED_KEY";
     
+    private final String LAN_MODE = I18n.tr("LimeWire is running in LAN mode");
     private final String IS_ULTRAPEER = I18n.tr("You are an Ultrapeer node");
     private final String IS_LEAF = I18n.tr("You are a Leaf node");
     private final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall");
@@ -209,7 +211,10 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
      * Updates the firewall status fields.
      */
     private void updateStatus() {
-        if (gnutellaConnectionManager.isConnected()) {
+        if (ConnectionSettings.LAN_MODE.getValue()) {
+            nodeLabel.setText(LAN_MODE);
+            firewallLabelPanel.setStatusText("", null);
+        } else if (gnutellaConnectionManager.isConnected()) {
             switcher.show(this, CONNECTED_PANEL_KEY);
             
             // Set node description.
@@ -236,8 +241,7 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
                 // Not firewalled so clear transfer status and reason.
                 firewallLabelPanel.setStatusText(IS_NOT_FIREWALLED, null);
             }
-        } 
-        else {
+        } else {
             switcher.show(this, DISCONNECTED_PANEL_KEY);
             switch (gnutellaConnectionManager.getConnectionStrength()) {
                 case NO_INTERNET :
