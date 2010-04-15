@@ -41,7 +41,7 @@ class LanModeOptionPanel extends OptionPanel {
 
         lanModeLabel = new MultiLineLabel();
         lanModeLabel.setMaxLineSpan(AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH);
-        lanModeLabel.setText(I18n.tr("In LAN mode, LimeWire will only connect to computers on your Local Area Network. If you enable LAN mode, you will not be able to access files from users outside your LAN, and they will not be able to access your files."));
+        lanModeLabel.setText(I18n.tr("In LAN mode, LimeWire will only connect to computers on your Local Area Network. You will not be able to access files from users outside your LAN, and they will not be able to access your files."));
 
         lanModeCheckBox = new JCheckBox(I18n.tr("Run in LAN mode"));
         lanModeCheckBox.setOpaque(false);
