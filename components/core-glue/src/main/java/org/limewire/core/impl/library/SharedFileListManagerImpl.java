@@ -155,10 +155,9 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         private final Inspectable hasCustomListWithFile = new Inspectable() {
             @Override
             public Object inspect() {
-                if (getModel().size() > 2) {
+                if (getModel().size() >= 2) {
                     for ( SharedFileList list : getModel() ) {
-                        //we are assuming that the second list is the private shared list
-                        if (!list.isPublic() && list.getId() != 1 && list.size() != 0) {
+                        if (!list.isPublic() && list.size() != 0) {
                             return true;
                         }
                     }
