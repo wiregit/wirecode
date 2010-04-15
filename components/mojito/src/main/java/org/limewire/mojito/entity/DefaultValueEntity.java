@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.handler.response2.LookupResponseHandler.State;
+import org.limewire.mojito.handler.response.LookupResponseHandler2.State;
 
 public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
 

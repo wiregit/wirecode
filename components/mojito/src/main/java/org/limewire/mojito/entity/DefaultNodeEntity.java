@@ -4,7 +4,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.handler.response2.LookupResponseHandler.State;
+import org.limewire.mojito.handler.response.LookupResponseHandler2.State;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
