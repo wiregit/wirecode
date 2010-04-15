@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
-import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 
 import ca.odell.glazedlists.EventList;
 
@@ -23,30 +22,16 @@ public interface PlayerMediator {
     public void removeMediatorListener(PlayerMediatorListener listener);
 
     /**
-     * Returns the current status of the audio player.
+     * Returns the current status of the media player.
      */
     public PlayerState getStatus();
-    
-    /**
-     * @return true if the mediator supports playlists
-     */
-    public boolean isPlaylistSupported();
 
     /**
-     * Returns true if the specified library item is the active playlist.
+     * Sets the active playlist to the current EventList. If the EventList
+     * is modified or filtered, this will be reflected in the playlist. If  
+     * no playlist exists, this can be set to null.
      */
-    public boolean isActivePlaylist(LibraryNavItem navItem);
-
-    /**
-     * Sets the active playlist using the specified library item.
-     */
-    public void setActivePlaylist(LibraryNavItem navItem);
-
-    /**
-     * Sets the internal playlist using the specified list of file items.  If
-     * the specified list is empty or null, then the playlist is cleared.
-     */
-    public void setPlaylist(EventList<LocalFileItem> fileList);
+    public void setActivePlaylist(EventList<LocalFileItem> fileList);
 
     /**
      * Returns true if shuffle mode is enabled.
@@ -62,50 +47,43 @@ public interface PlayerMediator {
      * Sets the volume (gain) value on a linear scale from 0.0 to 1.0.
      */
     public void setVolume(double value);
-    
 
     /**
-     * @return true if volume can be set
+     * @return true if a volume Control exists on this player, false otherwise.
      */
-    boolean isVolumeSettable();
+    boolean hasVolumeControl();
 
     /**
-     * @return true if the name of the file playing should scroll above the control buttons
-     */
-    boolean hasScrollingTitle();
-
-    /**
-     * Pauses the current song in the audio player. 
+     * Pauses the media player. 
      */
     public void pause();
 
     /**
-     * Resumes playing the current song in the audio player.  If the player is
-     * stopped, then attempt to play the first selected item in the library. 
+     * Resumes the media player.
      */
     public void resume();
 
     /**
-     * Starts playing the specified file in the audio player.  The playlist
-     * is automatically cleared so the player will stop when the song finishes.
-     */
-    public void play(File file);
-
-    /**
-     * Starts playing the specified file item in the audio player.
+     * Starts playing the specified file item in the media player.
      */
     public void play(LocalFileItem localFileItem);
+    
+    /**
+     * Starts playing the specified file within LW if it can, otherwise it
+     * launches natively on failure.
+     */
+    public void playOrLaunchNatively(File file);
 
     /**
-     * Skips the current song to a new position in the song. If the song's
-     * length is unknown (streaming audio), then ignore the skip.
+     * Seek to given point within the current file. If the media's
+     * length is unknown (ie. streaming audio), the seek is ignored.
      * 
      * @param percent of the song frames to skip from begining of file
      */
-    public void skip(double percent);
+    public void seek(double percent);
 
     /**
-     * Stops playing the current song in the audio player.
+     * Stops playing the current file.
      */
     public void stop();
 
@@ -138,6 +116,9 @@ public interface PlayerMediator {
      * Returns true if the currently playing song is seekable.
      */
     public boolean isSeekable();
-
-
+    
+    /**
+     * Returns true if this is an audio or video file.
+     */
+    public boolean isPlayable(File file);
 }

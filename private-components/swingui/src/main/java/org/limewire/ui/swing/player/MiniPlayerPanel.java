@@ -59,12 +59,12 @@ public class MiniPlayerPanel extends JPanel {
 
     private MarqueeButton statusButton;
     
-    private final Provider<AudioPlayerMediator> playerMediator;
+    private final Provider<PlayerMediator> playerMediator;
     private final LibraryMediator libraryMediator;
     private boolean isInitialized = false;
 
     @Inject
-    public MiniPlayerPanel(Provider<AudioPlayerMediator> playerMediator, LibraryMediator libraryMediator) {
+    public MiniPlayerPanel(Provider<PlayerMediator> playerMediator, LibraryMediator libraryMediator) {
         super(new MigLayout("insets 0", "4[][]", "0[]0"));
 
         this.playerMediator = playerMediator;
@@ -167,7 +167,7 @@ public class MiniPlayerPanel extends JPanel {
         }
 
         @Override
-        public void songChanged(String name) {
+        public void mediaChanged(String name) {
             initialize();
             //Show MiniPlayer when song is opened
             statusButton.setText(name);

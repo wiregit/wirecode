@@ -18,7 +18,6 @@ import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.file.CategoryManager;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadButtonRendererEditor;
@@ -26,17 +25,19 @@ import org.limewire.ui.swing.downloads.table.renderer.DownloadCancelRendererEdit
 import org.limewire.ui.swing.downloads.table.renderer.DownloadMessageRendererEditorFactory;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadProgressRenderer;
 import org.limewire.ui.swing.downloads.table.renderer.DownloadTitleRenderer;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.transfer.TransferTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.DefaultEventSelectionModel;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * Table showing DownloadItems. Provides popup menus and double click handling.
@@ -68,7 +69,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
     private EventList<DownloadItem> selectedItems;
     
     private final DownloadActionHandler actionHandler;
-    private final CategoryManager categoryManager;
+    private final Provider<PlayerMediator> playerMediator;
     private final DownloadMessageRendererEditorFactory messageRendererEditorFactory;
     private final DownloadProgressRenderer downloadProgressRenderer;
     private boolean isPro = false;
@@ -77,11 +78,11 @@ public class DownloadTable extends TransferTable<DownloadItem> {
 	public DownloadTable(DownloadTitleRenderer downloadTitleRenderer, DownloadProgressRenderer downloadProgressRenderer, 
 	        DownloadMessageRendererEditorFactory messageRendererEditorFactory, DownloadCancelRendererEditor cancelEditor,
 	        DownloadButtonRendererEditor buttonEditor, DownloadActionHandler actionHandler, DownloadPopupHandlerFactory downloadPopupHandlerFactory,
-	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler, CategoryManager categoryManager) {
+	        @Assisted EventList<DownloadItem> downloadItems, DownloadableTransferHandler downloadableTransferHandler, Provider<PlayerMediator> playerMediator) {
         super(new DownloadTableModel(downloadItems));
         
         this.actionHandler = actionHandler;
-        this.categoryManager = categoryManager;
+        this.playerMediator = playerMediator;
         this.messageRendererEditorFactory = messageRendererEditorFactory;
         this.downloadProgressRenderer = downloadProgressRenderer;
         
@@ -206,7 +207,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
     private void launch(int row){
         DownloadItem item = getDownloadItem(row);
         if(item != null && item.isLaunchable()) {
-            DownloadItemUtils.launch(item, categoryManager);
+            DownloadItemUtils.launch(item, playerMediator);
         }
     }
     

@@ -67,7 +67,7 @@ class VideoPanel implements Disposable {
 
     @Resource private Icon close;
 
-    private final VideoPlayerMediator videoMediator;
+    private final PlayerMediatorImpl playerMediator;
     
     private final Container videoRenderer;
     
@@ -90,11 +90,11 @@ class VideoPanel implements Disposable {
 
     @Inject
     public VideoPanel(@Assisted Container videoRenderer, PlayerControlPanelFactory controlPanelFactory,
-            HeaderBarDecorator headerBarDecorator, VideoPlayerMediator videoMediator, 
+            HeaderBarDecorator headerBarDecorator, PlayerMediatorImpl playerMediator, 
             ButtonPainterFactory buttonPainterFactory) {
 
         this.videoRenderer = videoRenderer;        
-        this.videoMediator = videoMediator;
+        this.playerMediator = playerMediator;
         
         GuiUtils.assignResources(this);
 
@@ -149,10 +149,10 @@ class VideoPanel implements Disposable {
      * has been loaded and VideoPanel and any renderer components have been
      * added to the GUI and shown.
      */
-    public void playerLoaded(){
+    public void playerLoaded() {
         headerBar.requestFocusInWindow();
         
-        if (videoMediator.isFullScreen()) {
+        if (playerMediator.isFullScreen()) {
             setFitToScreen(true);
             fullScreenButton.setIcon(fullScreenSelected);
             if (!OSUtils.isMacOSX())
@@ -209,7 +209,7 @@ class VideoPanel implements Disposable {
     
     private JMenuItem createFullScreenMenuItem(){
         JMenuItem item = new JCheckBoxMenuItem(I18n.tr("Full Screen"));
-        item.setSelected(videoMediator.isFullScreen());
+        item.setSelected(playerMediator.isFullScreen());
         item.addActionListener(new FullScreenListener());
         return item;
     }
@@ -219,7 +219,7 @@ class VideoPanel implements Disposable {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                videoMediator.resume();
+                playerMediator.resume();
             }
         });
         return item;
@@ -250,7 +250,7 @@ class VideoPanel implements Disposable {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                videoMediator.pause();
+                playerMediator.pause();
             }
         });
         return item;
@@ -261,7 +261,7 @@ class VideoPanel implements Disposable {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                videoMediator.closeVideo();
+                playerMediator.stop();
             }
         });
         return item;
@@ -270,21 +270,21 @@ class VideoPanel implements Disposable {
     private class CloseAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            videoMediator.closeVideo();
+            playerMediator.stop();
         }
     }
     
     private class FullScreenListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            videoMediator.setFullScreen(!videoMediator.isFullScreen());
+            playerMediator.setFullScreen(!playerMediator.isFullScreen());
         }
     }
     
     private class ToggleFullScreen extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            videoMediator.setFullScreen(!videoMediator.isFullScreen());
+            playerMediator.setFullScreen(!playerMediator.isFullScreen());
         }
     }
     
@@ -300,10 +300,10 @@ class VideoPanel implements Disposable {
     private class EscAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (videoMediator.isFullScreen()) {
-                videoMediator.setFullScreen(false);
+            if (playerMediator.isFullScreen()) {
+                playerMediator.setFullScreen(false);
             } else {
-                videoMediator.closeVideo();
+                playerMediator.stop();
             }
         }
     }
@@ -311,10 +311,10 @@ class VideoPanel implements Disposable {
     private class PlayOrPauseAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (videoMediator.getStatus() == PlayerState.PLAYING) {
-                videoMediator.pause();
+            if (playerMediator.getStatus() == PlayerState.PLAYING) {
+                playerMediator.pause();
             } else {
-                videoMediator.resume();
+                playerMediator.resume();
             }
         }
     }
@@ -331,7 +331,7 @@ class VideoPanel implements Disposable {
              * So, let's try to separate this sort of motion from real user input by checking whether
              * the mouse has actually moved with regard to its location on the screen.
              */
-            if (videoMediator.isFullScreen() && (e.getLocationOnScreen().x != mouseX || e.getLocationOnScreen().y != mouseY)) {
+            if (playerMediator.isFullScreen() && (e.getLocationOnScreen().x != mouseX || e.getLocationOnScreen().y != mouseY)) {
                 headerBarCollapsiblePane.setCollapsed(false);
                 if (!OSUtils.isMacOSX())
                     collapsePlayerControlsTimer.restart();
@@ -354,13 +354,13 @@ class VideoPanel implements Disposable {
             if (e.isPopupTrigger()) {
                 JPopupMenu menu = new JPopupMenu();
                 SwingHacks.fixPopupMenuForWindows(menu);
-                if (videoMediator.getStatus() == PlayerState.PLAYING) {
+                if (playerMediator.getStatus() == PlayerState.PLAYING) {
                     menu.add(createPauseMenuItem());
                 } else {
                     menu.add(createPlayMenuItem());
                 }
                 menu.addSeparator();
-                if(!videoMediator.isFullScreen()) {
+                if(!playerMediator.isFullScreen()) {
                     menu.add(createFitToScreenMenuItem());
                 }
                 menu.add(createFullScreenMenuItem());
@@ -370,5 +370,4 @@ class VideoPanel implements Disposable {
             }
         }
     }
-
 }

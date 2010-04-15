@@ -14,71 +14,75 @@ import javax.media.Player;
 import javax.media.protocol.DataSource;
 import javax.swing.SwingUtilities;
 
+import org.limewire.inject.LazySingleton;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
-class VideoPlayerFactory {
+@LazySingleton
+class MediaPlayerFactoryImpl implements MediaPlayerFactory {
     // Flag indicating whether the native library that provides the bridge between Java and Cocoa could be loaded.
-    private static boolean initializationOfJavaToCocoaBridgeFailed = false;
+    private boolean initializationOfJavaToCocoaBridgeFailed = false;
     
-    public Player createVideoPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
+    public Player createMediaPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
             throw new IllegalStateException("Video is only supported on Windows and Mac");
         }
 
-        Player handler;
+        Player handler = null;
         
-        if(OSUtils.isWindows7()){
-            return createWindows7Player(file, parentComponent);            
-        } else if (OSUtils.isWindows()) {           
-            handler = new net.sf.fmj.ds.media.content.unknown.Handler();
-        } else { // OSX
-            try {
-                if (!initializationOfJavaToCocoaBridgeFailed)
-                    handler = new net.sf.fmj.qt.media.content.unknown.JavaToCocoaHandler();
-                else
-                    handler = new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
-            } catch (ExceptionInInitializerError error) {
-                // if the native cocoa wrapper library can't be loaded, then let's use the QuickTime for Java library instead
-                ErrorService.error(error, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("rococoa.jnilib"));
-                initializationOfJavaToCocoaBridgeFailed = true;
-                handler = new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
-            }
+        try {
+            handler = createDefaultPlayer(file);
+            setupPlayer(handler, file);
+        } catch(IncompatibleSourceException e) {
+            handler = createBackupPlayer(file, parentComponent);
+            setupPlayer(handler, file);
+        } catch(ExceptionInInitializerError e) {
+            if(OSUtils.isMacOSX())
+                ErrorService.error(e, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("rococoa.jnilib"));
+            handler = createBackupPlayer(file, parentComponent);
+            setupPlayer(handler, file);
         }
 
-        setupPlayer(handler, file);
-
-        final Player finalHandler = handler;
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                //remove all in case the mfCanvas was added.
-                parentComponent.removeAll();
-                parentComponent.add(finalHandler.getVisualComponent());
-            }
-        });
-       return handler;
+        return handler;
     }
     
-    private Player createWindows7Player(File file, final Container parentComponent) throws IncompatibleSourceException {
-
-        //Since the DS player supports 3rd party codecs and has a chance of supporting more files, we will try it before MF
-         final Player dsPlayer = new net.sf.fmj.ds.media.content.unknown.Handler();    
-         try {
-             //we need to setup the player here so we can fall back to ds if it fails
-             setupPlayer(dsPlayer, file);
-             SwingUtilities.invokeLater(new Runnable() {
-                 @Override
-                 public void run() {
-                     parentComponent.add(dsPlayer.getVisualComponent());                
-                 }
-             });
-             return dsPlayer;
-         } catch (IncompatibleSourceException e) {
-             //ds can't play it.  try mf.
-         }
-         
+    /**
+     * Attempts to return the appropriate player for each platform.
+     */
+    private Player createDefaultPlayer(File file) throws IncompatibleSourceException, ExceptionInInitializerError {
+        if(OSUtils.isWindows())
+            return new net.sf.fmj.ds.media.content.unknown.Handler();
+        else {
+            if (!initializationOfJavaToCocoaBridgeFailed)
+                return new net.sf.fmj.qt.media.content.unknown.JavaToCocoaHandler();
+            else
+                return new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
+        }
+    }
+     
+    /**
+     * Attempts to try and fallback to another player if the first failed. If
+     * no other player exists, will throw a new IncompatibleSourceException.
+     */
+    private Player createBackupPlayer(File file, Container parentComponent) throws IncompatibleSourceException {
+        if(OSUtils.isWindows7())
+            return createWindows7MFPlayer(file, parentComponent);
+        else if(OSUtils.isMacOSX() && !initializationOfJavaToCocoaBridgeFailed) {
+            initializationOfJavaToCocoaBridgeFailed = true;
+            return new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
+        }
+        throw new IncompatibleSourceException("Unable to create native player.");
+    }
+    
+    /**
+     * Creates a MF Player on Windows 7. Unlike other players, a Container must created and 
+     * realized before the player is created since it requires a handle to the Container. 
+     * As a result we wait and add the Canvas prior to attempting to create the Player but 
+     * only for MFPlayer.
+     */
+    private Player createWindows7MFPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
          //DS failed.  Now we try MF.
          final AtomicReference<Canvas> mfCanvas = new AtomicReference<Canvas>(); 
          try {
@@ -99,41 +103,44 @@ class VideoPlayerFactory {
              throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
          }
          
-         final Player mfPlayer = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());
-         
-         //let this throw the exception if it fails.  
-         setupPlayer(mfPlayer, file);
+         final Player handler = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());
          
          SwingUtilities.invokeLater(new Runnable() {
              public void run() {
                  parentComponent.setPreferredSize(mfCanvas.get().getPreferredSize());
              }
          });
-        return mfPlayer;
+        return handler;
      
     }
     
+    /**
+     * Attempts to set the source on the player and realize it. After a player is realized 
+     * the player is ready to use. If the realization fails an IncompatibleSourceException
+     * is thrown.
+     */
     private void setupPlayer(Player player, File file) throws IncompatibleSourceException {
         try {
-            
             player.setSource(createDataSource(file));
-
         } catch (IOException e) {
             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
         } catch (UnsatisfiedLinkError e) {
-            // TODO: this is not the best way to handle unsatisfied links but
-            // our native launch fallback will work
             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
         }
         player.realize();
     }
     
+    /**
+     * Creates a DataSource from the file for use with the Player.
+     */
     private DataSource createDataSource(File file) throws MalformedURLException{
         //FMJ's handling of files is incredibly fragile.  This works with both quicktime and directshow.
         DataSource source = new net.sf.fmj.media.protocol.file.DataSource();
         if (OSUtils.isMacOSX()) {
             // On OS-X escaping characters such as spaces, parenthesis, etc are causing the 
             // files not to be loaded by FMJ. So let's not escape any characters. 
+            // NOTE: only three backslashes since absolute path returns one. Need 4 to escape
+            // the string!!
             source.setLocator(new MediaLocator("file:///" + file.getAbsolutePath()));
         } else {
             // This produces a URL with the form file:/path rather than file:///path
@@ -143,5 +150,4 @@ class VideoPlayerFactory {
         }
         return source;
     }
-
 }

@@ -14,7 +14,7 @@ import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibrarySelected;
-import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
@@ -28,15 +28,18 @@ class RemoveFromLibraryAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final LibraryManager libraryManager;
     private final SharedFileListManager sharedFileListManager;
+    private final Provider<PlayerMediator> playerMediator;
     
     @Inject
     public RemoveFromLibraryAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
-            LibraryManager libraryManager, SharedFileListManager sharedFileListManager) {
+            LibraryManager libraryManager, SharedFileListManager sharedFileListManager,
+            Provider<PlayerMediator> playerMediator) {
         super(I18n.tr("All Lists and Library"));
         
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.libraryManager = libraryManager;
         this.sharedFileListManager = sharedFileListManager;
+        this.playerMediator = playerMediator;
     }
 
     @Override
@@ -53,7 +56,7 @@ class RemoveFromLibraryAction extends AbstractAction {
                 options, cancelText);
         
         if (confirmation > -1 && options[confirmation] == removeText) {
-            removeFromLibrary(libraryManager, selected);
+            removeFromLibrary(libraryManager, playerMediator.get(), selected);
         }
     }
     
@@ -96,13 +99,14 @@ class RemoveFromLibraryAction extends AbstractAction {
         return hasSharedFile;
     }
     
-    static void removeFromLibrary(final LibraryManager libraryManager, final List<LocalFileItem> selected) {
-        File currentSong = PlayerUtils.getCurrentSongFile();
+    public static void removeFromLibrary(final LibraryManager libraryManager, final PlayerMediator playerMediator,
+            final List<LocalFileItem> selected) {
+        File currentSong = playerMediator.getCurrentMediaFile();
         
         final List<File> toRemove = new ArrayList<File>(selected.size());
         for(LocalFileItem item : selected) {
             if(item.getFile().equals(currentSong)){
-                PlayerUtils.stop();
+                playerMediator.stop();
             }
             if(!item.isIncomplete()) {
                 toRemove.add(item.getFile());

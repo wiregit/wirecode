@@ -67,10 +67,9 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.player.Audio;
+import org.limewire.ui.swing.player.PlayerControlPanelFactory;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerMediatorListener;
-import org.limewire.ui.swing.player.PlayerControlPanelFactory;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -212,7 +211,7 @@ public class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register(LibraryManager libraryManager, final @Audio PlayerMediator playerMediator) {        
+    void register(LibraryManager libraryManager, final PlayerMediator playerMediator) {        
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
@@ -231,13 +230,6 @@ public class LibraryPanel extends JPanel {
             public void categorySelected(Category category) {
             	// only update the table if the category has changed
                 if(category != getSelectedCategory()) {
-                    // If selected navItem is playlist and old category playable 
-                    // and new category not playable, then save playlist.
-                    if (playerMediator.isActivePlaylist(selectedNavItem) &&
-                            isPlayable(selectedCategory) &&
-                            !isPlayable(libraryFilterPanel.getSelectedCategory())) {
-                        playerMediator.setPlaylist(libraryTable.getPlayableList());
-                    }
                     selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 }
             }
@@ -252,14 +244,6 @@ public class LibraryPanel extends JPanel {
                     selectedNavItem.setSelectedCategory(libraryFilterPanel.getSelectedCategory());
                     
                     LibraryNavItem navItem = libraryNavigatorPanel.getSelectedNavItem();
-                    
-                    // If previous navItem was playlist and new navItem not playlist 
-                    // and category playable, then save playlist.
-                    if (playerMediator.isActivePlaylist(selectedNavItem) &&
-                            !playerMediator.isActivePlaylist(navItem) &&
-                            isPlayable(selectedCategory)) {
-                        playerMediator.setPlaylist(libraryTable.getPlayableList());
-                    }
                     selectedNavItem = navItem;
                     // update the filter Panel to display the saved category/filter text of the new NavItem
                     libraryFilterPanel.setSelectedCategory(navItem.getSelectedCategory(), navItem.getFilteredText());
@@ -278,7 +262,7 @@ public class LibraryPanel extends JPanel {
             }
 
             @Override
-            public void songChanged(String name) {
+            public void mediaChanged(String name) {
                 if(libraryTable.isVisible() && isPlayable(libraryFilterPanel.getSelectedCategory())) {
                     SwingUtilities.invokeLater(new Runnable(){
                         public void run() {
@@ -504,7 +488,7 @@ public class LibraryPanel extends JPanel {
     }
     
     private void setEventListOnTable(EventList<LocalFileItem> eventList) {
-        libraryTable.setEventList(recreateFilterList(eventList), libraryFilterPanel.getSelectedTableFormat(), isPlayable(selectedCategory));
+        libraryTable.setEventList(recreateFilterList(eventList), libraryFilterPanel.getSelectedTableFormat());
     }
     
     private void setEventListOnImages(EventList<LocalFileItem> eventList) {

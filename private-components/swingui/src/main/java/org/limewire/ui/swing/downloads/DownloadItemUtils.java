@@ -10,14 +10,15 @@ import javax.swing.SwingWorker;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.file.CategoryManager;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.inspection.DataCategory;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Provider;
 
 public class DownloadItemUtils {
     
@@ -33,7 +34,7 @@ public class DownloadItemUtils {
      * Launches the download, loading the launchable portion in the background
      * if necessary.
      */
-    public static void launch(final DownloadItem downloadItem, final CategoryManager categoryManager) {
+    public static void launch(final DownloadItem downloadItem, final Provider<PlayerMediator> playerMediator) {
         assert EventQueue.isDispatchThread();
         assert downloadItem.isLaunchable();
         
@@ -62,7 +63,7 @@ public class DownloadItemUtils {
                 try {
                     file = get();
                     if(file != null) {
-                        PlayerUtils.playOrLaunch(file, categoryManager);
+                        playerMediator.get().playOrLaunchNatively(file);
                     }
                 } catch (InterruptedException ignored) {
                 } catch (ExecutionException e) {

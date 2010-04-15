@@ -15,7 +15,7 @@ public interface PlayerMediatorListener {
     /**
      * Handles song change to the specified song name.
      */
-    void songChanged(String name);
+    void mediaChanged(String name);
     
     /**
      * Hanldes state change in the player to the specified state.

@@ -18,11 +18,11 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.listener.MousePopupListener;
-import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
@@ -56,7 +56,6 @@ public class LibraryTable extends MouseableTable {
     private DefaultEventSelectionModel<LocalFileItem> cachedEventSelectionModel;
     private EventListJXTableSorting cachedTableSorting;
     private SortedList<LocalFileItem> cachedSortedList;
-    private FilterList<LocalFileItem> cachedPlayableList;
     
     private AbstractLibraryFormat<LocalFileItem> fileItemFormat;
     private ColumnStateHandler columnStateHandler;
@@ -72,6 +71,7 @@ public class LibraryTable extends MouseableTable {
     private final Provider<LaunchFileAction> launchAction;
     private final IconLabelRenderer iconLabelRenderer;
     private final RemoveEditor removeEditor;
+    private final CategoryManager categoryManager;
     
     @Inject
     public LibraryTable(Provider<DefaultLimeTableCellRenderer> defaultCellRenderer,
@@ -85,7 +85,8 @@ public class LibraryTable extends MouseableTable {
             Provider<LaunchFileAction> launchAction,
             IconLabelRendererFactory iconLabelRendererFactory,
             RemoveEditor removeEditor,
-            DeletionKeyListener deletionKeyListener) {
+            DeletionKeyListener deletionKeyListener,
+            CategoryManager categoryManager) {
         this.defaultCellRenderer = defaultCellRenderer;
         this.nameCategoryRenderer = nameCategoryRenderer;
         this.timeRenderer = timeRenderer;
@@ -96,6 +97,7 @@ public class LibraryTable extends MouseableTable {
         this.launchAction = launchAction;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
+        this.categoryManager = categoryManager;
 
         initTable();
         
@@ -160,7 +162,7 @@ public class LibraryTable extends MouseableTable {
             return null;
     }
     
-    public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat, boolean playable) {
+    public void setEventList(EventList<LocalFileItem> eventList, AbstractLibraryFormat<LocalFileItem> tableFormat) {
         uninstallListeners();
         
         fileItemFormat = tableFormat;
@@ -168,8 +170,7 @@ public class LibraryTable extends MouseableTable {
         SortedList<LocalFileItem> newSortedList = GlazedListsFactory.sortedList(eventList, null);
         LibraryTableModel newLibraryTableModel = new LibraryTableModel(newSortedList, tableFormat);
         DefaultEventSelectionModel<LocalFileItem> newEventSelectionModel = new DefaultEventSelectionModel<LocalFileItem>(newSortedList);
-        FilterList<LocalFileItem> newPlayableList = playable ? createPlayableList(newSortedList) : null;
-        
+  
         if(cachedTableSorting != null) {
             cachedTableSorting.uninstall();
         }
@@ -180,9 +181,6 @@ public class LibraryTable extends MouseableTable {
         setModel(newLibraryTableModel);
         newEventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         
-        if (cachedPlayableList != null) {
-            cachedPlayableList.dispose();
-        }
         if(cachedLibraryTableModel != null) {
             cachedEventSelectionModel.dispose();
             cachedLibraryTableModel.dispose();
@@ -195,7 +193,6 @@ public class LibraryTable extends MouseableTable {
         cachedLibraryTableModel = newLibraryTableModel;
         cachedEventSelectionModel = newEventSelectionModel;
         cachedTableSorting = newTableSorting;
-        cachedPlayableList = newPlayableList;
         
         installListeners();
     }
@@ -208,7 +205,8 @@ public class LibraryTable extends MouseableTable {
         return GlazedListsFactory.filterList(sourceList, new Matcher<LocalFileItem>() {
             @Override
             public boolean matches(LocalFileItem item) {
-                return PlayerUtils.isFileAllowedInPlaylist(item.getFile());
+                Category category = categoryManager.getCategoryForFile(item.getFile());
+                return category == Category.AUDIO;
             }
         });
     }
@@ -217,7 +215,7 @@ public class LibraryTable extends MouseableTable {
      * Returns the list of playable file items.
      */
     public EventList<LocalFileItem> getPlayableList() {
-        return cachedPlayableList;
+        return createPlayableList(((LibraryTableModel)getModel()).getAllItems());
     }
     
     public boolean isRowDisabled(int row) {

@@ -21,6 +21,8 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavMediator;
 import org.limewire.ui.swing.nav.Navigator;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -181,7 +183,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         return getComponent().getSelectedCategory();
     }
 
-    public List<LocalFileItem> getPlayableList() {
+    public EventList<LocalFileItem> getPlayableList() {
         return getComponent().getPlayableList();
     }
 

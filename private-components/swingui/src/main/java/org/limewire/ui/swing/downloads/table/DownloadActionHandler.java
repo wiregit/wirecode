@@ -10,13 +10,13 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.library.LibraryMediator;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.properties.FileInfoDialogFactory;
 import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
@@ -63,7 +63,7 @@ public class DownloadActionHandler {
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
-    private final CategoryManager categoryManager;
+    private final Provider<PlayerMediator> playerMediator;
     
     @Inject
     public DownloadActionHandler(DownloadListManager downloadListManager, 
@@ -71,7 +71,7 @@ public class DownloadActionHandler {
             Provider<AVInfoPanel> avInfoPanelFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder,
-            CategoryManager categoryManager){
+            Provider<PlayerMediator> playerMediator){
         this.downloadListManager = downloadListManager;
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
@@ -80,7 +80,7 @@ public class DownloadActionHandler {
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
-        this.categoryManager = categoryManager;
+        this.playerMediator = playerMediator;
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -97,7 +97,7 @@ public class DownloadActionHandler {
            // NativeLaunchUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND || actionCommmand == PLAY_COMMAND){
             if (item.isLaunchable()) {
-                DownloadItemUtils.launch(item, categoryManager);
+                DownloadItemUtils.launch(item, playerMediator);
             }
         } else if (actionCommmand == LOCATE_COMMAND){
             if(item.getDownloadingFile() != null) {
@@ -107,11 +107,6 @@ public class DownloadActionHandler {
             createFileInfoDialog(item);
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadListManager.remove(item);
-        } else if (actionCommmand == SHARE_COMMAND){
-//            if(shareWidget == null)
-//                shareWidget = shareFactory.get().createFileShareWidget();
-//            shareWidget.setShareable(item.getDownloadingFile());
-//            shareWidget.show(null);
         } else if( actionCommmand == LIBRARY_COMMAND) {
             libraryMediator.locateInLibrary(item);
         } else if (actionCommmand == CHANGE_LOCATION_COMMAND){

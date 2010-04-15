@@ -26,7 +26,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
@@ -112,10 +111,8 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     private static final String SHUFFLE = "SHUFFLE";
 
     private final Provider<PlayerMediator> playerProvider;
-    
     private final LibraryMediator libraryMediator;
-    
-    private final CategoryManager categoryManager;
+    private final boolean isAudio;
     
     private SettingListener settingListener;
     
@@ -125,14 +122,11 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      */
     public PlayerControlPanel(Provider<PlayerMediator> playerProvider,
                               LibraryMediator libraryMediator,
-                              CategoryManager categoryManager,
-                              SliderBarDecorator sliderBarDecorator) {
-        
+                              SliderBarDecorator sliderBarDecorator,
+                              boolean isAudio) {        
         this.playerProvider = playerProvider;
-        
         this.libraryMediator = libraryMediator;
-        
-        this.categoryManager = categoryManager;
+        this.isAudio = isAudio;
         
         GuiUtils.assignResources(this);
         
@@ -183,7 +177,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         volumeSlider.setValue((int)(SwingUiSettings.PLAYER_VOLUME.getValue() * volumeSlider.getMaximum()));        
         volumeControlPopup = volumeSlider.createPopup();
         
-        if (isPlaylistSupported()) {
+        if (isAudio) {
             shuffleButton = new IconButton(shuffleIcon, shuffleIconRollover, shuffleIconPressed, shuffleIconActive);
             shuffleButton.addActionListener(playerListener);
             shuffleButton.setActionCommand(SHUFFLE);
@@ -218,17 +212,17 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
-        if (isPlaylistSupported()) {
+        if (isAudio) {
             innerPanel.add(backButton, "gapright 1");
         }
         innerPanel.add(pauseButton, "hidemode 3");
         innerPanel.add(playButton, "hidemode 3");
-        if (isPlaylistSupported()) {
+        if (isAudio) {
             innerPanel.add(forwardButton, "gapright 3");
         }
         innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
-        if (isPlaylistSupported()) {
+        if (isAudio) {
             innerPanel.add(shuffleButton, "gapleft 2");
         }
         
@@ -285,7 +279,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
 	 * Clears all of the progress/song fields.
 	 */
     private void resetPlayer() {
-        if (getPlayerMediator().hasScrollingTitle()) {
+        if (isAudio) {
             titleLabel.stop();
         }
         progressSlider.setValue(0);
@@ -297,7 +291,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
     public void dispose(){
         getPlayerMediator().removeMediatorListener(this);
         SwingUiSettings.PLAYER_ENABLED.removeSettingListener(settingListener);
-        if (getPlayerMediator().hasScrollingTitle()) {
+        if (isAudio) {
             titleLabel.stop();
         }
     }
@@ -394,7 +388,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * Handles song change to the specified song name.
      */
     @Override
-    public void songChanged(String name) {
+    public void mediaChanged(String name) {
 
         initializeVolumeSettings();
         
@@ -404,7 +398,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         // Set song text.
         titleLabel.setText(name);
         titleLabel.setToolTipText(name);
-        if (getPlayerMediator().hasScrollingTitle()) {
+        if (isAudio) {
             titleLabel.start();
         }
         
@@ -418,7 +412,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         updateVolumeFromSetting();
         
         //enable volume control
-        volumeButton.setEnabled(getPlayerMediator().isVolumeSettable());
+        volumeButton.setEnabled(getPlayerMediator().hasVolumeControl());
     }
 
     /**
@@ -438,7 +432,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
         if ((playerState == PlayerState.PLAYING) || (playerState == PlayerState.SEEKING_PLAY)) {
             playButton.setVisible(false);
             pauseButton.setVisible(true);
-            if (getPlayerMediator().hasScrollingTitle()) {
+            if (isAudio) {
                 titleLabel.start();
             }
         } else if (playerState == PlayerState.PAUSED || playerState == PlayerState.SEEKING_PAUSED ||
@@ -446,14 +440,10 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                 playerState == PlayerState.UNKNOWN || playerState == PlayerState.NO_SOUND_DEVICE) {
             playButton.setVisible(true);
             pauseButton.setVisible(false);
-            if (getPlayerMediator().hasScrollingTitle()) {
+            if (isAudio) {
                 titleLabel.stop();
             }
         }        
-    }
-    
-    private boolean isPlaylistSupported(){
-        return getPlayerMediator().isPlaylistSupported();
     }
     
     private void setVolume(float volume){
@@ -465,7 +455,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * Updates the volume in the player.
      */
     private void updateVolumeFromSetting() {
-        if (getPlayerMediator().isVolumeSettable()) {
+        if (getPlayerMediator().hasVolumeControl()) {
             getPlayerMediator().setVolume(SwingUiSettings.PLAYER_VOLUME.getValue());
         }
     }
@@ -493,7 +483,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                 } else {
                     List<LocalFileItem> selectedItems = libraryMediator.getSelectedItems();
                     if (selectedItems.size() > 0) {
-                        PlayerUtils.playOrLaunch(selectedItems.get(0).getFile(), categoryManager);
+                        playerProvider.get().playOrLaunchNatively(selectedItems.get(0).getFile());
                     }
                 }
                 
@@ -533,7 +523,6 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
        
         @Override
         public void stateChanged(ChangeEvent e) {
-
             if (progressSlider.getMaximum() != 0 && getPlayerMediator().isSeekable() && progressSlider.getValueIsAdjusting()) {
                 if (!waiting) {
                     waiting = true;
@@ -542,7 +531,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
             } else if (waiting) {
                 waiting = false;
                 double percent = (double)progressSlider.getValue() / (double)progressSlider.getMaximum();
-                getPlayerMediator().skip(percent);
+                getPlayerMediator().seek(percent);
                 progressSlider.setValue((int)(percent * progressSlider.getMaximum()));
             } 
         }
@@ -552,7 +541,6 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
      * Listener to update volume when volume slider is adjusted.
      */
     private class VolumeController implements ChangeListener {
-
         @Override
         public void stateChanged(ChangeEvent e) {
             PlayerInspectionUtils.playerUsed();

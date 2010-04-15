@@ -17,7 +17,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.LibrarySelected;
-import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
@@ -34,15 +34,17 @@ class DeleteAction extends AbstractAction {
     private final Provider<List<LocalFileItem>> selectedLocalFileItems;
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
+    private final Provider<PlayerMediator> playerMediator;
 
     @Inject
     public DeleteAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems, 
-            DownloadListManager downloadListManager,
+            DownloadListManager downloadListManager, Provider<PlayerMediator> playerMediator,
             LibraryManager libraryManager) {
        
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
+        this.playerMediator = playerMediator;
 
         putValue(Action.NAME, I18n.tr("Delete from Disk"));
     }
@@ -81,18 +83,23 @@ class DeleteAction extends AbstractAction {
                 options, noText);
         
         if (confirmation > -1 && options[confirmation] == yesText) {
-            deleteSelectedItems(libraryManager, downloadListManager, selectedItems);
+            deleteSelectedItems(libraryManager, playerMediator.get(), downloadListManager, selectedItems);
         }
     }
     
-    static void deleteSelectedItems(final LibraryManager libraryManager, final DownloadListManager downloadListManager,
-            final List<LocalFileItem> selectedItems) {
+    public static void deleteSelectedItems(final LibraryManager libraryManager, final PlayerMediator playerMediator, 
+            final DownloadListManager downloadListManager, final List<LocalFileItem> selectedItems) {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {                  
-                File currentSong = PlayerUtils.getCurrentSongFile();
+                File currentSong = playerMediator.getCurrentMediaFile();
                 for(LocalFileItem item : selectedItems) {
                     if(item.getFile().equals(currentSong)){
-                        stopAudio();
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                playerMediator.stop();
+                            }
+                        });
                     }
                     if(!item.isIncomplete()) {
                         FileUtils.unlockFile(item.getFile());
@@ -110,15 +117,5 @@ class DeleteAction extends AbstractAction {
             DownloadItem item = downloadListManager.getDownloadItem(urn);
             downloadListManager.remove(item);
         }
-    }
-    
-    private static void stopAudio() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                PlayerUtils.stop();
-            }
-        });
-    }
-  
+    }  
 }

@@ -16,21 +16,24 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 class RecentDownloadsMenu extends DelayedMnemonicMenu {
     private static final String emptyText = I18n.tr("(empty)");
     
     private final CategoryManager categoryManager;
+    private final Provider<PlayerMediator> playerMediator;
 
     @Inject
-    public RecentDownloadsMenu(CategoryManager categoryManager) {
+    public RecentDownloadsMenu(CategoryManager categoryManager, Provider<PlayerMediator> playerMediator) {
         super(I18n.tr("&Recent Downloads"));
         this.categoryManager = categoryManager;
+        this.playerMediator = playerMediator;
     }
 
     @Override
@@ -66,7 +69,7 @@ class RecentDownloadsMenu extends DelayedMnemonicMenu {
                 switch (category) {
                 case AUDIO:
                 case VIDEO:
-                    PlayerUtils.playOrLaunch(file, categoryManager);
+                    playerMediator.get().playOrLaunchNatively(file);
                     break;
                 case DOCUMENT:
                 case IMAGE:

@@ -50,15 +50,15 @@ class VideoDisplayDirector {
 
     private final Navigator navigator;
     
-    private final Provider<VideoPlayerMediator> videoPlayerMediator;
+    private final Provider<PlayerMediatorImpl> playerMediator;
 
     private VideoPanelResizer resizerListener;
 
     @Inject
-    public VideoDisplayDirector(@GlobalLayeredPane JLayeredPane limeWireLayeredPane, Provider<VideoPlayerMediator> videoPlayerMediator,
+    public VideoDisplayDirector(@GlobalLayeredPane JLayeredPane limeWireLayeredPane, Provider<PlayerMediatorImpl> videoPlayerMediator,
             VideoPanelFactory videoPanelFactory, Navigator navigator){
         this.limeWireLayeredPane = limeWireLayeredPane;
-        this.videoPlayerMediator = videoPlayerMediator;
+        this.playerMediator = videoPlayerMediator;
         this.videoPanelFactory = videoPanelFactory;
         this.navigator = navigator;
         
@@ -140,7 +140,6 @@ class VideoDisplayDirector {
         //addNotify is necessary here so that a null pointer doesn't happen in sun's awt code 
         //when a canvas is added to videoRenderer
         fullScreenFrame.addNotify();
-      
     }
     
     /**
@@ -183,10 +182,11 @@ class VideoDisplayDirector {
     public void close() {
         if (isFullScreen()) {
             closeFullScreen();
-        } else {
+            videoPanel.dispose();
+        } else if(videoPanel != null) {
             closeInClient();
+            videoPanel.dispose();
         }
-        videoPanel.dispose();
         videoPanel = null;
         //Force a repaint on close - gets rid of artifacts (especially noticable on Mac)
         GuiUtils.getMainFrame().repaint();
@@ -239,27 +239,12 @@ class VideoDisplayDirector {
         @Override
         public void itemSelected(NavCategory category, NavItem navItem,
                 NavSelectable selectable, NavMediator navMediator) {
-            videoPlayerMediator.get().closeVideo();                    
+            playerMediator.get().stop();                    
         }
 
-        @Override
-        public void categoryAdded(NavCategory category) {
-            // do nothing
-        }
-
-        @Override
-        public void categoryRemoved(NavCategory category, boolean wasSelected) {
-            // do nothing
-        }
-
-        @Override
-        public void itemAdded(NavCategory category, NavItem navItem) {
-            // do nothing
-        }
-
-        @Override
-        public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {
-            // do nothing
-        }
+        @Override public void categoryAdded(NavCategory category) {}
+        @Override public void categoryRemoved(NavCategory category, boolean wasSelected) {}
+        @Override public void itemAdded(NavCategory category, NavItem navItem) {}
+        @Override public void itemRemoved(NavCategory category, NavItem navItem, boolean wasSelected) {}
     }
 }

@@ -19,13 +19,13 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
-import org.limewire.core.api.file.CategoryManager;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.AVInfoPanel;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
+import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -50,7 +50,7 @@ public class MainDownloadPanel extends JPanel {
     private final DownloadMediator downloadMediator;
     private final Provider<DownloadTableFactory> downloadTableFactory;
     private final DownloadListManager downloadListManager;
-    private final CategoryManager categoryManager;
+    private final Provider<PlayerMediator> playerMediator;
     private final Provider<AVInfoPanel> avInfoPanelFactory;
     
     private TrayNotifier notifier;
@@ -66,12 +66,12 @@ public class MainDownloadPanel extends JPanel {
             DownloadMediator downloadMediator,
             TrayNotifier notifier, 
             DownloadListManager downloadListManager,
-            CategoryManager categoryManager,
+            Provider<PlayerMediator> playerMediator,
             Provider<AVInfoPanel> avInfoPanelFactory) {
         this.downloadMediator = downloadMediator;
         this.downloadTableFactory = downloadTableFactory;
         this.downloadListManager = downloadListManager;
-        this.categoryManager = categoryManager;
+        this.playerMediator = playerMediator;
         this.avInfoPanelFactory = avInfoPanelFactory;
         this.notifier = notifier;
 
@@ -159,7 +159,7 @@ public class MainDownloadPanel extends JPanel {
                             map.get("restoreView").actionPerformed(e);
 
                             if (downloadItem.isLaunchable()) {
-                                DownloadItemUtils.launch(downloadItem, categoryManager);
+                                DownloadItemUtils.launch(downloadItem, playerMediator);
                             }
                         }
                     }));

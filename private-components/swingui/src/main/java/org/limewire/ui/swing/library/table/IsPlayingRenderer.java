@@ -11,7 +11,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
-import org.limewire.ui.swing.player.Audio;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -27,7 +26,7 @@ class IsPlayingRenderer extends DefaultTableCellRenderer {
     private final Border emptyBorder;
     
     @Inject
-    public IsPlayingRenderer(@Audio Provider<PlayerMediator> playerMediator) {
+    public IsPlayingRenderer(Provider<PlayerMediator> playerMediator) {
         GuiUtils.assignResources(this);
         
         this.playerMediator = playerMediator;
