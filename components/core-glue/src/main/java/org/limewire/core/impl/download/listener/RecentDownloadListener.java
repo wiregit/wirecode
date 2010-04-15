@@ -18,7 +18,6 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
-import com.limegroup.gnutella.downloader.DownloaderType;
 
 /**
  * Listens for the completion of downloads, adding completed downloads to the
@@ -55,8 +54,7 @@ public class RecentDownloadListener implements EventListener<DownloadStateEvent>
         // TODO don't do anything for torrent downloads?
         DownloadState downloadStatus = event.getType();
         
-        updateStats(downloadStatus,
-                event.getSource().getDownloadType());
+        updateStats(event);
         
         if (DownloadState.COMPLETE == downloadStatus) {
             File saveFile = downloader.getSaveFile();
@@ -79,8 +77,8 @@ public class RecentDownloadListener implements EventListener<DownloadStateEvent>
         }
     }
     
-    private static void updateStats(DownloadState downloadStatus, DownloaderType downloaderType) {
-        downloadStateHistogram.count(downloaderType + ":" + downloadStatus.name());
+    private static void updateStats(DownloadStateEvent event) {
+        downloadStateHistogram.count(event.getSource().getDownloadType() + ":" + event.getType());
     }
     
     /**

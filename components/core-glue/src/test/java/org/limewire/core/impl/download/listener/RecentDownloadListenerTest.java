@@ -30,11 +30,11 @@ public class RecentDownloadListenerTest extends BaseTestCase {
         Mockery context = new Mockery();
         final Downloader downloader = context.mock(CoreDownloader.class);
         context.checking(new Expectations() {
-            {
-                one(downloader).getState();
+            {   one(downloader).getState();
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(null));
+                allowing(downloader);
             }
         });
 
@@ -80,6 +80,7 @@ public class RecentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader).getSaveFile();
                 will(returnValue(saveFile));
+                allowing(downloader);
             }
         });
 
@@ -112,6 +113,9 @@ public class RecentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader2).getSaveFile();
                 will(returnValue(saveFile2));
+                
+                allowing(downloader1);
+                allowing(downloader2);
             }
         });
 
@@ -151,6 +155,9 @@ public class RecentDownloadListenerTest extends BaseTestCase {
                 will(returnValue(DownloadState.COMPLETE));
                 one(downloader2).getSaveFile();
                 will(returnValue(saveFile2));
+                
+                allowing(downloader1);
+                allowing(downloader2);
             }
         });
 
