@@ -1,16 +1,16 @@
 package org.limewire.mojito.handler;
 
+import java.io.IOException;
 import java.net.SocketAddress;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.collection.CollectionUtils;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
@@ -29,9 +29,10 @@ import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 
-public class DefaultMessageHandler2 {
+public class DefaultMessageHandler2 implements ResponseHandler2 {
 
-    private static final Log LOG = LogFactory.getLog(DefaultMessageHandler2.class);
+    private static final Log LOG 
+        = LogFactory.getLog(DefaultMessageHandler2.class);
     
     private static enum Operation {
         // Do nothing
@@ -44,35 +45,61 @@ public class DefaultMessageHandler2 {
         DELETE;
     }
     
+    //private final Context context;
+    
+    private final RouteTable routeTable;
+    
+    private final Database database;
+    
+    private final Provider provider;
+    
     private DatabaseStatisticContainer databaseStats;
     
-    protected final Context context;
-    
-    public DefaultMessageHandler2(Context context) {
-        this.context = context;
+    public DefaultMessageHandler2(RouteTable routeTable, Database database) {
+        this.routeTable = routeTable;
+        this.database = database;
         
         databaseStats = context.getDatabaseStats();
     }
     
-    public void handleResponse(ResponseMessage message, long time, TimeUnit unit) {
-        addLiveContactInfo(message.getContact(), message);
+    @Override
+    public void handleResponse(RequestMessage request, ResponseMessage response, 
+            long time, TimeUnit unit) throws IOException {
+        addLiveContactInfo(response.getContact(), response);
     }
-
+    
+    @Override
+    public void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time, TimeUnit unit) {
+        routeTable.handleFailure(nodeId, dst);
+    }
+    
     public void handleLateResponse(ResponseMessage message) {
         Contact node = message.getContact();
         
         if (!node.isFirewalled()) {
-            context.getRouteTable().add(node); // update
+            routeTable.add(node); // update
         }
     }
-
-    public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) {
-        context.getRouteTable().handleFailure(nodeId, dst);
+    
+    @Override
+    public void handleException(RequestMessage request, Throwable exception) {
     }
 
     public void handleRequest(RequestMessage message) {
         addLiveContactInfo(message.getContact(), message);
+    }
+    
+    private boolean isLocalNode(Contact contact) {
+        return routeTable.getLocalNode().equals(contact);
+    }
+    
+    private boolean isLocalNodeID(KUID contactId) {
+        return getLocalNodeID().equals(contactId);
+    }
+    
+    private KUID getLocalNodeID() {
+        return routeTable.getLocalNode().getNodeID();
     }
     
     /**
@@ -80,8 +107,6 @@ public class DefaultMessageHandler2 {
      * <code>RouteTable</code>
      */
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) {
-        
-        RouteTable routeTable = context.getRouteTable();
         
         // If the Node is going to shutdown then don't bother
         // further than this.
@@ -100,8 +125,10 @@ public class DefaultMessageHandler2 {
                     // mark it as shutdown
                     // mark the existing contact as shutdown if its alive or
                     // it will not be removed.
-                    if (existing.isAlive())
+                    if (existing.isAlive()) {
                         existing.shutdown(true);
+                    }
+                    
                     routeTable.add(node);
                     node.shutdown(true);
                 }
@@ -125,7 +152,7 @@ public class DefaultMessageHandler2 {
         }
         
         KUID nodeId = node.getNodeID();
-        if (context.isLocalNodeID(nodeId)) {
+        if (isLocalNodeID(nodeId)) {
             
             // This is expected if there's a Node ID collision
             assert (message instanceof PingResponse) 
@@ -149,7 +176,7 @@ public class DefaultMessageHandler2 {
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
-                if (context.isBootstrapped()) {
+                if (provider.isBootstrapped()) {
                     int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
@@ -157,7 +184,7 @@ public class DefaultMessageHandler2 {
                     Collection<Contact> nodes = routeTable.select(nodeId, 2*k, SelectMode.ALL);
                     
                     // Are we one of the K nearest Nodes to the contact?
-                    if (containsNodeID(nodes, context.getLocalNodeID())) {
+                    if (containsNodeID(nodes, getLocalNodeID())) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
                         }
@@ -182,14 +209,13 @@ public class DefaultMessageHandler2 {
         
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
-        Database database = context.getDatabase();
         synchronized(database) {
             for(KUID primaryKey : database.keySet()) {
                 
                 Operation op = getOperation(node, existing, primaryKey);
                 
                 if (LOG.isDebugEnabled())
-                    LOG.debug("node: " + node + "existing: " + existing + "operation: " + op);
+                    LOG.debug("node: " + node + ", existing: " + existing + ", operation: " + op);
                 
                 if (op.equals(Operation.FORWARD)) {
                     Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
@@ -222,14 +248,14 @@ public class DefaultMessageHandler2 {
                 }
             }
             
-            context.store(node, securityToken, valuesToForward);
+            provider.store(node, securityToken, valuesToForward);
         }
     }
     
     /**
      * Returns whether or not the local Node is in the given List
      */
-    private boolean containsNodeID(Collection<Contact> nodes, KUID id) {
+    private static boolean containsNodeID(Collection<Contact> nodes, KUID id) {
         for (Contact node : nodes) {
             if (id.equals(node.getNodeID())) {
                 return true;
@@ -250,14 +276,14 @@ public class DefaultMessageHandler2 {
         // and the closest is stale?
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        RouteTable routeTable = context.getRouteTable();
-        List<Contact> nodes = org.limewire.collection.CollectionUtils.toList(
+        
+        List<Contact> nodes = CollectionUtils.toList(
                 routeTable.select(valueId, k, SelectMode.ALL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         
         if (LOG.isDebugEnabled()) {
-            LOG.debug(MessageFormat.format("node: {0}, existing: {1}, close nodes: {2}", node, existing, nodes));
+            LOG.debugf("node: {0}, existing: {1}, close nodes: {2}", node, existing, nodes);
         }
         
 //        StringBuilder sb = new StringBuilder();
@@ -284,10 +310,10 @@ public class DefaultMessageHandler2 {
         // That means we're the second closest and since
         // the other Node has changed its instanceId we must
         // re-send the values
-        if (context.isLocalNode(closest)
+        if (isLocalNode(closest)
                 || (node.equals(closest)
                         && nodes.size() > 1
-                        && context.isLocalNode(nodes.get(1)))) {
+                        && isLocalNode(nodes.get(1)))) {
             
             KUID nodeId = node.getNodeID();
             KUID furthestId = furthest.getNodeID();
@@ -326,7 +352,7 @@ public class DefaultMessageHandler2 {
         // #4 The new Node is nearer to the given valueId then
             //    the furthest away Node (we).
         } else if (nodes.size() >= k 
-                && context.isLocalNode(furthest) 
+                && isLocalNode(furthest) 
                 && (existing == null || existing.isDead())) {
             
             KUID nodeId = node.getNodeID();
@@ -345,5 +371,16 @@ public class DefaultMessageHandler2 {
         }
         
         return Operation.NOTHING;
+    }
+    
+    /**
+     * 
+     */
+    public static interface Provider {
+        
+        public boolean isBootstrapped();
+        
+        public void store(Contact dst, SecurityToken securityToken, 
+                Collection<? extends DHTValueEntity> values);
     }
 }

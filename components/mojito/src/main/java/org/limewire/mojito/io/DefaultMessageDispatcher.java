@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Database;
 import org.limewire.mojito.handler.DefaultMessageHandler2;
 import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.handler.request.NodeRequestHandler2;
@@ -25,6 +26,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
@@ -35,6 +37,10 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
         = LogFactory.getLog(DefaultMessageDispatcher.class);
 
     private final Context context;
+    
+    private final RouteTable routeTable;
+    
+    private final Database database;
     
     private final DefaultMessageHandler2 defaultHandler;
     
@@ -47,12 +53,15 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     private final StoreRequestHandler2 store;
     
     public DefaultMessageDispatcher(Context context, 
-            Transport transport, MessageCodec codec) {
+            Transport transport, MessageCodec codec,
+            RouteTable routeTable, Database database) {
         super(transport, codec);
         
         this.context = context;
+        this.routeTable = routeTable;
+        this.database = database;
         
-        defaultHandler = new DefaultMessageHandler2(context);
+        defaultHandler = new DefaultMessageHandler2(routeTable, database);
         ping = new PingRequestHandler2(this, context);
         node = new NodeRequestHandler2(this, context);
         value = new ValueRequestHandler2(this, context, node);
@@ -184,7 +193,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
         node.setRoundTripTime(time);
         
         super.handleResponse(callback, request, response, time, unit);
-        defaultHandler.handleResponse(response, time, unit);
+        defaultHandler.handleResponse(request, response, time, unit);
     }
     
     @Override
