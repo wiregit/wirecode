@@ -150,11 +150,11 @@ class LibraryImpl implements Library, FileCollection {
             }
         };
         
-        @InspectionPoint(value = "number of files added to public shared list this session", category = DataCategory.USAGE)
-        private final Inspectable numFilesAdded = new Inspectable() {
+        @InspectionPoint(value = "number of files added or removed from public shared list this session", category = DataCategory.USAGE)
+        private final Inspectable changeInPublicSharedFiles = new Inspectable() {
             @Override
             public Object inspect() {
-                return fileData.getNumFilesAdded();
+                return fileData.getChangeInNumPublicFiles();
             }
         };
     }

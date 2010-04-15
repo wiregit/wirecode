@@ -695,7 +695,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     /**
      * Helper method for inspections since this class can not contain inspections due to crazy guice stuff.
      */
-    int getNumFilesAdded() {
+    int getChangeInNumPublicFiles() {
         if (originalNumPublicSharedFiles > -1) {
             return peekPublicSharedListCount() - originalNumPublicSharedFiles;
         } else {
