@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -38,11 +39,11 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
     private final EntityKey lookupKey;
     
     /** Collection of EntityKeys */
-    private final Collection<EntityKey> entityKeys
+    private final List<EntityKey> entityKeys
         = new ArrayList<EntityKey>();
 
     /** Collection of DHTValueEntities */
-    private final Collection<DHTValueEntity> entities 
+    private final List<DHTValueEntity> entities 
         = new ArrayList<DHTValueEntity>();
     
     public ValueResponseHandler2(Context context, EntityKey lookupKey, 

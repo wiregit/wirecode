@@ -32,11 +32,7 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     
     private long startTime = -1L;
     
-    private long stopTime = -1L;
-    
     private long timeStamp = 0L;
-    
-    private boolean done = false;
     
     public AbstractResponseHandler2(Context context, 
             long timeout, TimeUnit unit) {
@@ -66,16 +62,6 @@ public abstract class AbstractResponseHandler2<V extends Entity>
         
         synchronized (future) {
             synchronized (this) {
-                // Already started?
-                if (startTime != -1L) {
-                    throw new IllegalStateException();
-                }
-                
-                // Already stopped?
-                if (stopTime != -1L) {
-                    throw new IllegalStateException();
-                }
-                
                 this.future = future;
                 this.startTime = System.currentTimeMillis();
                 
@@ -94,19 +80,7 @@ public abstract class AbstractResponseHandler2<V extends Entity>
         
         synchronized (future) {
             synchronized (this) {
-                // Make sure it has been started but not stopped yet
-                if (startTime != -1L && stopTime == -1L) {
-                    
-                    // Make sure it's the same future
-                    if (this.future != future) {
-                        throw new IllegalStateException();
-                    }
-                 
-                    done = true;
-                    this.stopTime = System.currentTimeMillis();
-                    
-                    stop();
-                }
+                stop();
             }
         }
     }
@@ -127,7 +101,8 @@ public abstract class AbstractResponseHandler2<V extends Entity>
      * 
      */
     protected long getTime(TimeUnit unit) {
-        return unit.convert(stopTime - startTime, TimeUnit.MILLISECONDS);
+        long duration = System.currentTimeMillis() - startTime;
+        return unit.convert(duration, TimeUnit.MILLISECONDS);
     }
     
     /**

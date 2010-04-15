@@ -51,8 +51,6 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     private final Map<Contact, List<StoreStatusCode>> codes 
         = new HashMap<Contact, List<StoreStatusCode>>();
     
-    private long startTime = -1L;
-    
     public StoreResponseHandler2(Context context, 
             Entry<Contact, SecurityToken>[] contacts, 
             DHTValueEntity[] entities, 
@@ -77,7 +75,6 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     
     @Override
     protected void start() throws IOException {
-        startTime = System.currentTimeMillis();
         process(0);
     }
     
@@ -115,7 +112,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     }
     
     private synchronized void complete() {
-        long time = System.currentTimeMillis() - startTime;
+        long time = getTime(TimeUnit.MILLISECONDS);
         setValue(new DefaultStoreEntity(time, TimeUnit.MILLISECONDS));
     }
     
