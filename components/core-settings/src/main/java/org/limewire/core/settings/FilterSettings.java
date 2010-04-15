@@ -259,4 +259,9 @@ public class FilterSettings extends LimeProps {
     public static final BooleanSetting SAME_ALTS_ARE_SPAM =
         FACTORY.createRemoteBooleanSetting("SAME_ALTS_ARE_SPAM", true,
         "FilterSettings.sameAltsAreSpam");    
+
+    /** Whether to enable the ClientGuidFilter. */
+    public static final BooleanSetting CLIENT_GUID_FILTER =
+        FACTORY.createRemoteBooleanSetting("CLIENT_GUID_FILTER", true,
+        "FilterSettings.clientGuidFilter");
 }
