@@ -19,6 +19,7 @@ import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
+// TODO: !!!!
 import com.limegroup.bittorrent.TorrentScrapeScheduler;
 
 /**
@@ -42,8 +43,8 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
         super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_TORRENT_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_TORRENT_TITLE", I18n.tr("Name"), 255, true, true),     
-                new ColumnStateInfo(FILES_INDEX, "CLASS_SEARCH_TORRENT_FILES", I18n.tr("Files"), 255, true, true),
-                new ColumnStateInfo(TRACKERS_INDEX, "CLASS_SEARCH_TORRENT_TRACKERS", I18n.tr("Trackers"), 255, true, true),
+                new ColumnStateInfo(FILES_INDEX, "CLASS_SEARCH_TORRENT_FILES", I18n.tr("Files"), 180, true, true),
+                new ColumnStateInfo(TRACKERS_INDEX, "CLASS_SEARCH_TORRENT_TRACKERS", I18n.tr("Trackers"), 255, false, true),
                 new ColumnStateInfo(SIZE_INDEX, "CLASS_SEARCH_TORRENT_SIZE", I18n.tr("Size"), 20, true, true),
                 new ColumnStateInfo(SEEDERS_INDEX, "CLASS_SEARCH_TORRENT_SEEDERS", I18n.tr("Seeders"), 20, true, true),
                 new ColumnStateInfo(LEECHERS_INDEX, "CLASS_SEARCH_TORRENT_LEECHERS", I18n.tr("Leechers"), 20, true, true),
@@ -89,9 +90,9 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             
             switch (column) {
             case FILES_INDEX:
-                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n");
+                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n", 14, 40);
             case TRACKERS_INDEX:
-                return StringUtils.explode(torrent.getTrackers(), "\n");
+                return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40);
             case SEEDERS_INDEX:
                 data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
                 if (data != null) {

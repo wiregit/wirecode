@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.limewire.ui.swing.util.I18n;
+
 /**
  * Provides static methods to split, check for substrings, change case and
  * compare strings, along with additional string utility methods.
@@ -460,15 +462,34 @@ public class StringUtils {
      * @return "" if iterable doesn't have elements
      */
     public static <T> String explode(Iterable<T> iterable, String delimiter) {
+        return explode(iterable, delimiter, Integer.MAX_VALUE, Integer.MAX_VALUE);      
+    }
+    
+    public static <T> String explode(Iterable<T> iterable, String delimiter, int maxRows, int maxCols) {
         Iterator<T> iterator = iterable.iterator();
         if (!iterator.hasNext()) {
             return "";
         }
+        
+        int rowCount = 0;
+        
         StringBuilder builder = new StringBuilder();
-        builder.append(iterator.next());
         while (iterator.hasNext()) {
-            builder.append(delimiter);
-            builder.append(iterator.next());
+            if (rowCount != 0) {
+                builder.append(delimiter);
+            }
+            
+            if (++rowCount > maxRows) {
+                builder.append(I18n.tr("...and more..."));
+                break;
+            } else {
+                String nextLine = iterator.next().toString();
+                int length = Math.min(nextLine.length(), maxCols);
+                builder.append(nextLine.substring(0, length));
+                if (length == maxCols) {
+                    builder.append("...");
+                }
+            }
         }
         return builder.toString();
     }
