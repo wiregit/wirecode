@@ -14,6 +14,7 @@ import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.util.Objects;
 
 public abstract class AbstractResponseHandler2<V extends Entity> 
         implements ResponseHandler2, AsyncProcess<V> {
@@ -28,6 +29,10 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     protected final TimeUnit unit;
     
     protected volatile DHTFuture<V> future = null;
+    
+    private long startTime = -1L;
+    
+    private long stopTime = -1L;
     
     private long timeStamp = 0L;
     
@@ -57,17 +62,22 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     
     @Override
     public final void start(DHTFuture<V> future) {
+        Objects.nonNull(future, "future");
+        
         synchronized (future) {
             synchronized (this) {
-                if (done) {
+                // Already started?
+                if (startTime != -1L) {
                     throw new IllegalStateException();
                 }
                 
-                if (this.future != null) {
+                // Already stopped?
+                if (stopTime != -1L) {
                     throw new IllegalStateException();
                 }
                 
                 this.future = future;
+                this.startTime = System.currentTimeMillis();
                 
                 try {
                     start();
@@ -78,15 +88,22 @@ public abstract class AbstractResponseHandler2<V extends Entity>
         }
     }
     
+    //@Override
     public final void stop(DHTFuture<V> future) {
+        Objects.nonNull(future, "future");
+        
         synchronized (future) {
             synchronized (this) {
-                if (!done) {
+                // Make sure it has been started but not stopped yet
+                if (startTime != -1L && stopTime == -1L) {
+                    
+                    // Make sure it's the same future
                     if (this.future != future) {
                         throw new IllegalStateException();
                     }
                  
                     done = true;
+                    this.stopTime = System.currentTimeMillis();
                     
                     stop();
                 }
@@ -104,6 +121,13 @@ public abstract class AbstractResponseHandler2<V extends Entity>
      */
     protected synchronized void stop() {
         
+    }
+    
+    /**
+     * 
+     */
+    protected long getTime(TimeUnit unit) {
+        return unit.convert(stopTime - startTime, TimeUnit.MILLISECONDS);
     }
     
     /**
