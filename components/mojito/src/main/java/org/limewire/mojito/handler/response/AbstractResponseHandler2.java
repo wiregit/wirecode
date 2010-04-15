@@ -29,6 +29,10 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     
     protected volatile DHTFuture<V> future = null;
     
+    private long timeStamp = 0L;
+    
+    private boolean done = false;
+    
     public AbstractResponseHandler2(Context context, 
             long timeout, TimeUnit unit) {
         
@@ -52,17 +56,41 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     }
     
     @Override
-    public synchronized void start(DHTFuture<V> future) {
-        if (this.future != null) {
-            throw new IllegalStateException();
+    public final void start(DHTFuture<V> future) {
+        synchronized (future) {
+            synchronized (this) {
+                if (done) {
+                    throw new IllegalStateException();
+                }
+                
+                if (this.future != null) {
+                    throw new IllegalStateException();
+                }
+                
+                this.future = future;
+                
+                try {
+                    start();
+                } catch (IOException err) {
+                    setException(err);
+                }
+            }
         }
-        
-        this.future = future;
-        
-        try {
-            start();
-        } catch (IOException err) {
-            setException(err);
+    }
+    
+    public final void stop(DHTFuture<V> future) {
+        synchronized (future) {
+            synchronized (this) {
+                if (!done) {
+                    if (this.future != future) {
+                        throw new IllegalStateException();
+                    }
+                 
+                    done = true;
+                    
+                    stop();
+                }
+            }
         }
     }
     
@@ -70,6 +98,13 @@ public abstract class AbstractResponseHandler2<V extends Entity>
      * 
      */
     protected abstract void start() throws IOException;
+    
+    /**
+     * 
+     */
+    protected synchronized void stop() {
+        
+    }
     
     /**
      * 
@@ -84,6 +119,21 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     protected boolean setException(Throwable exception) {
         return future.setException(exception);
     }
+    
+    /**
+     * 
+     */
+    protected synchronized long getLastResponseTime(TimeUnit unit) {
+        long duration = System.currentTimeMillis() - timeStamp;
+        return unit.convert(duration, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * 
+     */
+    protected long getLastResponseTimeInMillis() {
+        return getLastResponseTime(TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public final void handleResponse(RequestMessage request, 
@@ -96,6 +146,7 @@ public abstract class AbstractResponseHandler2<V extends Entity>
             }
             
             synchronized (this) {
+                timeStamp = System.currentTimeMillis();
                 processResponse(request, response, time, unit);
             }
         }

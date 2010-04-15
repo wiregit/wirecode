@@ -67,6 +67,13 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     }
     
     /**
+     * 
+     */
+    protected synchronized void stop() {
+        task.stop(this);
+    }
+    
+    /**
      * Starts the watchdog task
      */
     private synchronized boolean watchdog() {
@@ -116,6 +123,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             if (watchdog != null) {
                 watchdog.cancel(true);
             }
+            
+            stop();
         }
         
         done0();
