@@ -4,11 +4,12 @@ import org.limewire.io.GUID;
 
 public interface SecureIdStore {
 
-    LocalIdentity getLocalIdentity();
+    public LocalIdentity getLocalIdentity();
     
-    void setLocalIdenity(LocalIdentity identity);
+    public void setLocalIdentity(LocalIdentity identity);
     
-    Identity getIdentity(GUID id);
+    public RemoteIdKeys getRemoteIdKeys(GUID id);
     
-    void storeIdentity(Identity identity);
+    public void storeRemoteIdKeys(RemoteIdKeys remoteKeys);
+    
 }

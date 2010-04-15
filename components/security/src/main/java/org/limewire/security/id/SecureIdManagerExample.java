@@ -10,20 +10,20 @@ public class SecureIdManagerExample {
 
     public static void main(String[] args) throws Exception {        
         // alice
-        SecureIdManager aliceIdManager = new SecureIdManagerImpl("aliceRemoteKeys.txt");
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl("aliceRemoteKeys.txt");
         aliceIdManager.start();
-        System.out.println("alice id "+aliceIdManager.getLocalId());
+        System.out.println("alice id "+aliceIdManager.getLocalGuid());
         // bob
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManager bobIdManager = new SecureIdManagerImpl("bobRemoteKeys.txt");          
+        SecureIdManagerImpl bobIdManager = new SecureIdManagerImpl("bobRemoteKeys.txt");          
         bobIdManager.start();
-        System.out.println("bob id "+bobIdManager.getLocalId());
+        System.out.println("bob id "+bobIdManager.getLocalGuid());
         
         // alice generates a request which is basically an identity
         Identity request = aliceIdManager.getLocalIdentity();
         
         // bob process the request
-        boolean goodRequest= bobIdManager.processIdentity(request);
+        boolean goodRequest= bobIdManager.addIdentity(request);
         Identity reply = null;
         if(goodRequest){
             System.out.println("alice's request looks good, gonna reply.");
@@ -33,7 +33,7 @@ public class SecureIdManagerExample {
             System.exit(-1);
         }
         // alice process the reply
-        aliceIdManager.processIdentity(reply);
+        aliceIdManager.addIdentity(reply);
         System.out.println("Now, alice and bob know each other and share a key.\n");
         
         // example of authenticated message reply
@@ -41,7 +41,7 @@ public class SecureIdManagerExample {
         String requestData = "who has a blowfish book?";
         System.out.println("alice asks "+requestData);
         byte[] challengeStoredLocally = SecurityUtils.createNonce();
-        String message = Base32.encode(aliceIdManager.getLocalId().bytes()) +"|"+ requestData +"|"+ Base32.encode(challengeStoredLocally);
+        String message = Base32.encode(aliceIdManager.getLocalGuid().bytes()) +"|"+ requestData +"|"+ Base32.encode(challengeStoredLocally);
         //System.out.println(Base32.encode(challengeStoredLocally));
         
         // somehow bob receives the message and processes it
@@ -51,7 +51,7 @@ public class SecureIdManagerExample {
         String alicesChallenge = message.substring(separater2+1);
         
         String replyData = "bob has a blowfish spec!";        
-        String toSign = Base32.encode(bobIdManager.getLocalId().bytes()) +"|"+ replyData +"|"+ alicesChallenge;
+        String toSign = Base32.encode(bobIdManager.getLocalGuid().bytes()) +"|"+ replyData +"|"+ alicesChallenge;
         // bob does both signature and mac for fun
         String sigStr = Base32.encode(bobIdManager.sign(toSign.getBytes()));
         String macStr = Base32.encode(bobIdManager.createHmac(requesterGUID, toSign.getBytes()));
@@ -108,8 +108,8 @@ public class SecureIdManagerExample {
         // alice and bob use encrypted communication
         // 1) alice encrypts something
         byte[] plaintext = "plaintext: Encryption is the process of converting normal data or plaintext to something incomprehensible or cipher-text by applying mathematical transformations.".getBytes();
-        GUID bobID = bobIdManager.getLocalId();
-        GUID aliceID = aliceIdManager.getLocalId();
+        GUID bobID = bobIdManager.getLocalGuid();
+        GUID aliceID = aliceIdManager.getLocalGuid();
         byte[] ciphertext = aliceIdManager.encrypt(bobID, plaintext);
         // System.out.println(ciphertext.length);
         // System.out.println(new String(ciphertext));

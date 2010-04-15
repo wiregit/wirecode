@@ -1,16 +1,7 @@
 package org.limewire.security.id;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidParameterSpecException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import org.limewire.io.GUID;
+import org.limewire.io.InvalidDataException;
 
 public interface SecureIdManager {
 
@@ -32,67 +23,54 @@ public interface SecureIdManager {
 
     public static final boolean TAGGING = false;
 
-    /**
-     * initializing DH community parameter, keys, and remote key storage.
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidParameterSpecException
-     * @throws IOException
-     */
-    public void start() throws NoSuchAlgorithmException, InvalidParameterSpecException,
-            IOException;
-
-    public void stop();
-
-    /**
+     /**
      * @return if the local node knows the remoteID and shares a key with the remote node
      */
-    public boolean exist(GUID remoteID);
+    public boolean isKnown(GUID remoteID);
 
     /**
      * @return hmac value
-     * @throws NoSuchAlgorithmException 
+     * @throws Exception when remoteID not known 
      */
-    public byte[] createHmac(GUID remoteID, byte[] data) throws NoSuchAlgorithmException;
+    public byte[] createHmac(GUID remoteID, byte[] data);
 
     /**
      * @return true if the data can be authenticated, i.e., the remoteID generated the hmac using the data.  
-     * @throws NoSuchAlgorithmException 
+     * @throws Exception when remoteID not known 
      */
-    public boolean verifyHmac(GUID remoteId, byte[] data, byte[] hmacValue)
-            throws NoSuchAlgorithmException;
+    public boolean verifyHmac(GUID remoteId, byte[] data, byte[] hmacValue);
 
     /**
      * @return ciphertext 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception when remoteID not known 
+     * @throws InvalidData 
      */
     public byte[] encrypt(GUID remoteId, byte[] plaintext)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException;
+            throws InvalidDataException;
 
     /**
      * @return plaintext 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException 
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
+     * @throws Exception when remoteID not known 
+     * @throws InvalidData 
      */
     public byte[] decrypt(GUID remoteId, byte[] ciphertext)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException;
+            throws InvalidDataException;
 
     /**
-     * @return true if the data can be authenticated, i.e., the remoteID generated the signature using the data.  
-     * @throws NoSuchAlgorithmException 
+     * @return the signature 
      */
-    public boolean verifySignature(GUID remoteId, byte[] data, byte[] signature)
-            throws NoSuchAlgorithmException;
+    public byte[] sign(byte[] data);
+
+    /**
+     * @return true if the data can be authenticated, i.e., the remoteID generated the signature using the data.
+     * @throws Exception when remoteID not known 
+     * @throws InvalidData 
+     */
+    public boolean verifySignature(GUID remoteId, byte[] data, byte[] signature) throws InvalidDataException;
 
     public Identity getLocalIdentity();
+
+    public GUID getLocalGuid();
 
     /**
      * process a remote node's identity:
@@ -101,23 +79,6 @@ public interface SecureIdManager {
      * 3) store the identity if it is not in my list
      * @param identity
      * @return true if the remote node's identity is valid based on step 1) and 2). 
-     * @throws NoSuchAlgorithmException 
      */
-    public boolean processIdentity(Identity identity) throws NoSuchAlgorithmException;
-
-    /**
-     * @return true if the signature is valid  
-     * @throws NoSuchAlgorithmException 
-     */
-    public boolean verifySignature(byte[] data, byte[] signature, PublicKey publicKey)
-            throws NoSuchAlgorithmException;
-
-    /**
-     * @return the signature 
-     * @throws NoSuchAlgorithmException 
-     */
-    public byte[] sign(byte[] data) throws NoSuchAlgorithmException;
-
-    public GUID getLocalId();
-
+    public boolean addIdentity(Identity identity);
 }

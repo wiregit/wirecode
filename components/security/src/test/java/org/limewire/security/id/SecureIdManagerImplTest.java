@@ -20,13 +20,13 @@ public class SecureIdManagerImplTest extends BaseTestCase {
 
     public void testIdGeneration() throws Exception{
         // generate id, test if it is secure id        
-        SecureIdManager aliceIdManager = new SecureIdManagerImpl(null);
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(null);
         aliceIdManager.start();
         
         MessageDigest md = MessageDigest.getInstance(SecureIdManager.HASH_ALGO);
         md.update(aliceIdManager.getLocalIdentity().getSignatureKey().getEncoded());
         byte[] hash = md.digest();
-        assertTrue(GUID.isSecureGuid(hash, aliceIdManager.getLocalId(), SecureIdManager.TAGGING));        
+        assertTrue(GUID.isSecureGuid(hash, aliceIdManager.getLocalGuid(), SecureIdManager.TAGGING));        
     }
         
     public void testKeyAgreement() throws Exception{
@@ -38,35 +38,35 @@ public class SecureIdManagerImplTest extends BaseTestCase {
         bobIdManager.start();
         // alice and bob exchange identities
         Identity request = aliceIdManager.getLocalIdentity();
-        bobIdManager.processIdentity(request);
+        bobIdManager.addIdentity(request);
         Identity reply = bobIdManager.getLocalIdentity();
-        aliceIdManager.processIdentity(reply);
+        aliceIdManager.addIdentity(reply);
         assertTrue(Arrays.equals(
-                aliceIdManager.getRemotePublicKeyEntry(bobIdManager.getLocalId()).encryptionKey.getEncoded(), 
-                bobIdManager.getRemotePublicKeyEntry(aliceIdManager.getLocalId()).encryptionKey.getEncoded()
+                aliceIdManager.getRemoteIdKeys(bobIdManager.getLocalGuid()).getEncryptionKey().getEncoded(), 
+                bobIdManager.getRemoteIdKeys(aliceIdManager.getLocalGuid()).getEncryptionKey().getEncoded()
                 ));
         }
     
     public void testSignatureAndHmac() throws Exception {
         // key agreement first
-        SecureIdManager aliceIdManager = new SecureIdManagerImpl("aliceRemoteKeys.txt");        
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl("aliceRemoteKeys.txt");        
         aliceIdManager.start();
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManager bobIdManager = new SecureIdManagerImpl("bobRemoteKeys.txt");
+        SecureIdManagerImpl bobIdManager = new SecureIdManagerImpl("bobRemoteKeys.txt");
         bobIdManager.start();
         Identity request = aliceIdManager.getLocalIdentity();
-        bobIdManager.processIdentity(request);
+        bobIdManager.addIdentity(request);
         Identity reply = bobIdManager.getLocalIdentity();
-        aliceIdManager.processIdentity(reply);
+        aliceIdManager.addIdentity(reply);
         // key agreement done, alice and bob should share a key
                  
         // alice generates signature and mac for bob
         byte[] data = "data".getBytes();
-        GUID bobId = bobIdManager.getLocalId();
+        GUID bobId = bobIdManager.getLocalGuid();
         byte[] sigBytes = aliceIdManager.sign(data);
         byte[] macBytes = aliceIdManager.createHmac(bobId, data);
         // bob knows that the signature and mac are from alice
-        GUID aliceId = aliceIdManager.getLocalId();
+        GUID aliceId = aliceIdManager.getLocalGuid();
         // bob verifies signature and mac
         assertTrue(bobIdManager.verifySignature(aliceId, data, sigBytes));
         assertTrue(bobIdManager.verifyHmac(aliceId, data, macBytes));

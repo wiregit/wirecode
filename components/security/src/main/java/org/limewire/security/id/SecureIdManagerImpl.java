@@ -59,7 +59,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
     private GUID myGuid;
     private DHParameterSpec dhParamSpec;
     private byte[] multiInstallationMark;
-    private HashMap<GUID, RemotePublicKeyEntry> remoteKeys;
+    private HashMap<GUID, RemoteIdKeys> remoteKeys;
     private PrintStream remoteKeysFilePrintStream;
     private Identity localIdentity;
     private boolean writeRemoteKeysToFile = false;
@@ -67,7 +67,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
     
     public SecureIdManagerImpl(String remoteKeysFilename) {
         // init parameters
-        remoteKeys = new HashMap<GUID, RemotePublicKeyEntry>();
+        remoteKeys = new HashMap<GUID, RemoteIdKeys>();
         this.remoteKeysFilename = remoteKeysFilename;
     }
     
@@ -101,91 +101,116 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#exist(org.limewire.io.GUID)
      */
-    public synchronized boolean exist(GUID remoteID){
+    public synchronized boolean isKnown(GUID remoteID){
         return remoteKeys.containsKey(remoteID);
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#createHmac(org.limewire.io.GUID, byte[])
      */
-    public byte[] createHmac(GUID remoteID, byte[] data) throws NoSuchAlgorithmException{
-        if(! exist(remoteID)){
-            return null;
+    public byte[] createHmac(GUID remoteID, byte[] data){
+        if(! isKnown(remoteID)){
+            throw new IllegalArgumentException("unknown ID "+remoteID);
         }
-        Mac mac = Mac.getInstance(MAC_ALGO);
+        
         try {
-            mac.init(getRemotePublicKeyEntry(remoteID).macKey);
+            Mac mac = Mac.getInstance(MAC_ALGO);
+            mac.init(getRemoteIdKeys(remoteID).getMacKey());
+            return mac.doFinal(data);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }        
-        return mac.doFinal(data);
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#verifyHmac(org.limewire.io.GUID, byte[], byte[])
      */
-    public boolean verifyHmac(GUID remoteId, byte[] data, byte[] hmacValue) throws NoSuchAlgorithmException {
-        if(! exist(remoteId)){
-            return false;
+    public boolean verifyHmac(GUID remoteId, byte[] data, byte[] hmacValue) {
+        if(! isKnown(remoteId)){
+            throw new IllegalArgumentException("unknown ID "+remoteId);
         }
-        Mac mac = Mac.getInstance(MAC_ALGO);
         try {
-            mac.init(getRemotePublicKeyEntry(remoteId).macKey);
+            Mac mac = Mac.getInstance(MAC_ALGO);
+            mac.init(getRemoteIdKeys(remoteId).getMacKey());
+            return Arrays.equals(mac.doFinal(data), hmacValue);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }        
-        return Arrays.equals(mac.doFinal(data), hmacValue);
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#encrypt(org.limewire.io.GUID, byte[])
      */
-    public byte[] encrypt(GUID remoteId, byte[] plaintext) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
-        if(! exist(remoteId)){
-            return null;
+    public byte[] encrypt(GUID remoteId, byte[] plaintext){
+        if(! isKnown(remoteId)){
+            throw new IllegalArgumentException("unknown ID "+remoteId);
         }
-        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
-        cipher.init(Cipher.ENCRYPT_MODE, remoteKeys.get(remoteId).encryptionKey);
-        byte[] encrypted = cipher.doFinal(plaintext);
-        //byte[] iv = cipher.getIV();
-        //System.out.println("iv: "+new String(iv));
-        return encrypted;
+        try {
+            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
+            cipher.init(Cipher.ENCRYPT_MODE, remoteKeys.get(remoteId).getEncryptionKey());
+            byte[] encrypted = cipher.doFinal(plaintext);
+            return encrypted;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#decrypt(org.limewire.io.GUID, byte[])
      */
-    public byte[] decrypt(GUID remoteId, byte[] ciphertext) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
-        if(! exist(remoteId)){
-            return null;
+    public byte[] decrypt(GUID remoteId, byte[] ciphertext){
+        if(! isKnown(remoteId)){
+            throw new IllegalArgumentException("unknown ID "+remoteId);
         }
-        Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
-        cipher.init(Cipher.DECRYPT_MODE, remoteKeys.get(remoteId).encryptionKey);
-        byte[] plaintext = cipher.doFinal(ciphertext);
-        return plaintext;
+        try {
+            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
+            cipher.init(Cipher.DECRYPT_MODE, remoteKeys.get(remoteId).getEncryptionKey());
+            byte[] plaintext = cipher.doFinal(ciphertext);
+            return plaintext;
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#verifySignature(org.limewire.io.GUID, byte[], byte[])
      */
-    public boolean verifySignature(GUID remoteId, byte [] data, byte [] signature) throws NoSuchAlgorithmException{
-        if(! exist(remoteId)){
-            return false;
+    public boolean verifySignature(GUID remoteId, byte [] data, byte [] signature){
+        if(! isKnown(remoteId)){
+            throw new IllegalArgumentException("unknown ID "+remoteId);
         }
-        Signature verifier = Signature.getInstance(SIG_ALGO);
         try {
-            verifier.initVerify(getRemotePublicKeyEntry(remoteId).signaturePublicKey);
+            Signature verifier = Signature.getInstance(SIG_ALGO);
+            verifier.initVerify(getRemoteIdKeys(remoteId).getSignaturePublicKey());
+            verifier.update(data);
+            return verifier.verify(signature);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
-        }
-        boolean goodSig = false;
-        try {
-            verifier.update(data);
-            goodSig = verifier.verify(signature);
         } catch (SignatureException e) {
-            goodSig = false;
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return goodSig;
     }
     
     /* (non-Javadoc)
@@ -198,19 +223,19 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#processIdentity(org.limewire.security.id.Identity)
      */
-    public boolean processIdentity(Identity identity) throws NoSuchAlgorithmException{
-        RemotePublicKeyEntry rpe = verifyIdentityAndDoKeyAgreement(identity);
+    public boolean addIdentity(Identity identity){
+        RemoteIdKeys rpe = verifyIdentityAndDoKeyAgreement(identity);
         if(rpe == null){// bad identify
             return false;
         }else{
-            if( ! exist(identity.getGuid()) ){
+            if( ! isKnown(identity.getGuid()) ){
                 store(identity.getGuid(), rpe);
             }
             return true;
         }
     }
 
-    private RemotePublicKeyEntry createRemotePublicKeyEntry(PublicKey pk, byte[] sharedSecret) throws NoSuchAlgorithmException{
+    private RemoteIdKeys createRemoteIdKeys(GUID remoteId, PublicKey pk, byte[] sharedSecret) throws NoSuchAlgorithmException{
         // generate all the symmetric keys
         MessageDigest md = MessageDigest.getInstance(HASH_ALGO);        
         md.update(StringUtils.toUTF8Bytes("AUTH"));
@@ -224,15 +249,15 @@ public class SecureIdManagerImpl implements SecureIdManager {
         
         SecretKey macKey = new SecretKeySpec(macSecret, MAC_ALGO);
         SecretKey encryptionKey = new SecretKeySpec(encryptionSecret, ENCRYPTION_KEY_ALGO);
-        RemotePublicKeyEntry rpe = new RemotePublicKeyEntry(pk, macKey, encryptionKey);        
+        RemoteIdKeys rpe = new RemoteIdKeys(remoteId, pk, macKey, encryptionKey);        
         return rpe;
     }
     
     /**
      * store a remote node's public key, Diffie-Hellman public exponent, and shared key 
      */
-    private void store(GUID id, RemotePublicKeyEntry rpe){
-        putRemotePublicKeyEntry(id, rpe);
+    private void store(GUID id, RemoteIdKeys rpe){
+        putRemoteIdKeys(id, rpe);
         if(writeRemoteKeysToFile){            
             writeEntry(id, rpe);
         }
@@ -241,7 +266,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#verifySignature(byte[], byte[], java.security.PublicKey)
      */
-    public boolean verifySignature(byte [] data, byte [] signature, PublicKey publicKey) throws NoSuchAlgorithmException {
+    private boolean verifySignature(byte [] data, byte [] signature, PublicKey publicKey) throws NoSuchAlgorithmException {
         Signature verifier = Signature.getInstance(SIG_ALGO);
         try {
             verifier.initVerify(publicKey);
@@ -262,27 +287,27 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#sign(byte[])
      */
-    public byte[] sign(byte[] data) throws NoSuchAlgorithmException{
-        Signature signer = Signature.getInstance(SIG_ALGO);
+    public byte[] sign(byte[] data){
         try {
+            Signature signer = Signature.getInstance(SIG_ALGO);
             signer.initSign(mySignaturePrivateKey);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
-        byte[] signature = null;
-        try {
+            byte[] signature = null;
             signer.update(data);
             signature = signer.sign();
-        } catch (SignatureException e) {
             return signature;
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return signature;
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#getMyId()
      */
-    public GUID getLocalId(){
+    public GUID getLocalGuid(){
         return myGuid;
     }
     
@@ -385,11 +410,11 @@ public class SecureIdManagerImpl implements SecureIdManager {
         return secureID;
     }    
 
-    private void writeEntry(GUID id, RemotePublicKeyEntry entry) {        
+    private void writeEntry(GUID id, RemoteIdKeys entry) {        
         String toWrite = Base32.encode(id.bytes()) +"|"+
-            Base32.encode(entry.signaturePublicKey.getEncoded()) +"|"+
-            Base32.encode(entry.macKey.getEncoded()) +"|"+
-            Base32.encode(entry.encryptionKey.getEncoded());        
+            Base32.encode(entry.getSignaturePublicKey().getEncoded()) +"|"+
+            Base32.encode(entry.getMacKey().getEncoded()) +"|"+
+            Base32.encode(entry.getEncryptionKey().getEncoded());        
         remoteKeysFilePrintStream.println(toWrite);
     }
     
@@ -412,8 +437,8 @@ public class SecureIdManagerImpl implements SecureIdManager {
         SecretKey mackey = new SecretKeySpec(macKeyBytes, MAC_ALGO);
         SecretKey enckey = new SecretKeySpec(encryptionKeyBytes, ENCRYPTION_KEY_ALGO);
         
-        RemotePublicKeyEntry entry = new RemotePublicKeyEntry(remoteSignatureKey, mackey, enckey);        
-        putRemotePublicKeyEntry(remoteID, entry);
+        RemoteIdKeys entry = new RemoteIdKeys(remoteID, remoteSignatureKey, mackey, enckey);        
+        putRemoteIdKeys(remoteID, entry);
     }
     
     private Identity createIdentity() throws NoSuchAlgorithmException{       
@@ -431,7 +456,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
         return new IdentityImpl(myGuid, mySignaturePublicKey, myDHPublicKey.getY(), signature);
     }
             
-    private RemotePublicKeyEntry verifyIdentityAndDoKeyAgreement(Identity identity) throws NoSuchAlgorithmException{
+    private RemoteIdKeys verifyIdentityAndDoKeyAgreement(Identity identity) {
         PublicKey remoteSignatureKey = identity.getSignatureKey();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -444,13 +469,23 @@ public class SecureIdManagerImpl implements SecureIdManager {
         byte[] payload = out.toByteArray();
         
         // verify signature
-        boolean goodSig = verifySignature(payload, identity.getSignature(), remoteSignatureKey);
+        boolean goodSig;
+        try {
+            goodSig = verifySignature(payload, identity.getSignature(), remoteSignatureKey);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
         if (! goodSig )
             return null;
 
         // verify remoteID
         GUID remoteID = identity.getGuid();//new GUID(remoteGuidBytes);
-        MessageDigest md = MessageDigest.getInstance(HASH_ALGO);
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance(HASH_ALGO);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
         md.update(remoteSignatureKey.getEncoded());
         byte[] hash = md.digest();
         
@@ -459,8 +494,18 @@ public class SecureIdManagerImpl implements SecureIdManager {
         
         // diffie-hellman agreement
         DHPublicKeySpec dhPubSpec = new DHPublicKeySpec(identity.getDHPublicComponent(), dhParamSpec.getP(), dhParamSpec.getG());
-        KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
-        KeyFactory factory = KeyFactory.getInstance("DH");
+        KeyAgreement keyAgree;
+        try {
+            keyAgree = KeyAgreement.getInstance("DH");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        KeyFactory factory;
+        try {
+            factory = KeyFactory.getInstance("DH");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
         PublicKey remoteDhKey;
         try {
             remoteDhKey = factory.generatePublic(dhPubSpec);
@@ -475,27 +520,20 @@ public class SecureIdManagerImpl implements SecureIdManager {
         }
         
         byte[] sharedSecret = keyAgree.generateSecret();
-        RemotePublicKeyEntry rpe = createRemotePublicKeyEntry(remoteSignatureKey, sharedSecret);
+        RemoteIdKeys rpe;
+        try {
+            rpe = createRemoteIdKeys(remoteID, remoteSignatureKey, sharedSecret);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
         return rpe;
     }
     
-    protected synchronized void putRemotePublicKeyEntry(GUID id, RemotePublicKeyEntry rpe){
+    protected synchronized void putRemoteIdKeys(GUID id, RemoteIdKeys rpe){
         remoteKeys.put(id, rpe);
     }
     
-    protected synchronized RemotePublicKeyEntry getRemotePublicKeyEntry(GUID id){
+    protected synchronized RemoteIdKeys getRemoteIdKeys(GUID id){
         return remoteKeys.get(id);
-    }
-    
-    class RemotePublicKeyEntry{
-        PublicKey signaturePublicKey;        
-        SecretKey macKey;
-        SecretKey encryptionKey;
-        
-        public RemotePublicKeyEntry(PublicKey pk, SecretKey hmacKey, SecretKey encKey) {
-            signaturePublicKey = pk;
-            macKey = hmacKey;
-            encryptionKey = encKey;
-        }       
     }
 }
