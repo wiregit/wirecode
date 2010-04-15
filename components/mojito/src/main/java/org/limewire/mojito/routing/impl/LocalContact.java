@@ -25,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -294,8 +295,8 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return 0L.
      */
-    public long getAdaptativeTimeout() {
-        return 0L;
+    public long getAdaptativeTimeout(long defaultValue, TimeUnit unit) {
+        return defaultValue;
     }
     
     /**

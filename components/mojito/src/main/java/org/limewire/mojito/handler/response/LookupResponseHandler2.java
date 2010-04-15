@@ -106,7 +106,10 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
             if (getLastResponseTime(TimeUnit.MILLISECONDS) >= boostTimeout) {
                 try {
                     Contact contact = lookupManager.next();
-                    lookup(contact, lookupId, contact.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
+                    
+                    long adaptiveTimeout = contact.getAdaptativeTimeout(timeout, unit);
+                    lookup(contact, lookupId, adaptiveTimeout, unit);
+                    
                     lookupCounter.push(true);
                 } finally {
                     postProcess();
@@ -127,7 +130,9 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
                }
                
                Contact contact = lookupManager.next();
-               lookup(contact, lookupId, contact.getAdaptativeTimeoutInMillis(), TimeUnit.MILLISECONDS);
+               
+               long adaptiveTimeout = contact.getAdaptativeTimeout(timeout, unit);
+               lookup(contact, lookupId, adaptiveTimeout, unit);
                
                lookupCounter.push();
             }
