@@ -36,6 +36,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("searchHistory")).toInstance(new StringTrieSet(true));
+        bind(SmartAutoCompleteFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        SmartAutoCompleteFactory.class, SmartAutoCompleteDictionary.class));
+        
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
         bind(SearchHandler.class).annotatedWith(Names.named("text")).to(TextSearchHandlerImpl.class);
         bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
