@@ -85,7 +85,6 @@ public class TrackerScraper {
             System.out.println("scraping not available");
             
             // Tracker does not support scraping so don't attempt
-            System.out.println("??");
             return null;
         }
         
@@ -93,8 +92,6 @@ public class TrackerScraper {
         try {
             uri = createScrapingRequest(trackerAnnounceUri, urn);
         } catch (URISyntaxException e) {
-            System.out.println("!!");
-            e.printStackTrace();
             // URI could not be generated for the scrape request so don't try
             return null;
         }
