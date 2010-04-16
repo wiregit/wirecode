@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.Context;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -23,9 +22,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
     
-    private final Context context;
-    
-    private final DHTTask<V> task;
+    private final AsyncProcess<V> task;
     
     private final long timeout;
     
@@ -38,17 +35,12 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Creates an {@link DHTFutureTask}
      */
-    public DHTFutureTask(Context context, DHTTask<V> task) {
+    public DHTFutureTask(AsyncProcess<V> task, long timeout, TimeUnit unit) {
         
-        this.context = context;
         this.task = task;
         
-        this.timeout = task.getWaitOnLockTimeout();
-        this.unit = TimeUnit.MILLISECONDS;
-    }
-    
-    public Context getContext() {
-        return context;
+        this.timeout = timeout;
+        this.unit = unit;
     }
     
     @Override

@@ -46,9 +46,12 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
     private final List<DHTValueEntity> entities 
         = new ArrayList<DHTValueEntity>();
     
-    public ValueResponseHandler2(Context context, EntityKey lookupKey, 
+    public ValueResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher, 
+            EntityKey lookupKey, 
             long timeout, TimeUnit unit) {
-        super(context, lookupKey.getPrimaryKey(), timeout, unit);
+        super(context, messageDispatcher, 
+                lookupKey.getPrimaryKey(), timeout, unit);
         this.lookupKey = lookupKey;
     }
 
@@ -65,7 +68,6 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         FindValueRequest request = messageHelper.createFindValueRequest(
                 addr, key, noKeys, lookupKey.getDHTValueType());
         
-        MessageDispatcher2 messageDispatcher = context.getMessageDispatcher2();
         messageDispatcher.send(this, contactId, addr, request, timeout, unit);
     }
     

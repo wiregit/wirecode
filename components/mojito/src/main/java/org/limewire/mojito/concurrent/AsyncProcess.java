@@ -13,5 +13,5 @@ public interface AsyncProcess<V> {
     /**
      * Stops the {@link AsyncProcess}
      */
-    //public void stop(DHTFuture<V> future);
+    public void stop(DHTFuture<V> future);
 }

@@ -21,9 +21,11 @@ import org.limewire.security.SecurityToken;
 
 public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
 
-    public NodeResponseHandler2(Context context, KUID lookupId, 
+    public NodeResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher, 
+            KUID lookupId, 
             long timeout, TimeUnit unit) {
-        super(context, lookupId, timeout, unit);
+        super(context, messageDispatcher, lookupId, timeout, unit);
     }
 
     @Override
@@ -47,9 +49,6 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
         
         MessageHelper messageHelper = context.getMessageHelper();
         FindNodeRequest request = messageHelper.createFindNodeRequest(addr, lookupId);
-        
-        MessageDispatcher2 messageDispatcher 
-            = context.getMessageDispatcher2();
         
         messageDispatcher.send(this, contactId, 
                 addr, request, timeout, unit);

@@ -12,6 +12,7 @@ import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.handler.ResponseHandler2;
+import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.util.Objects;
@@ -24,6 +25,8 @@ public abstract class AbstractResponseHandler2<V extends Entity>
 
     protected final Context context;
     
+    protected final MessageDispatcher2 messageDispatcher;
+    
     protected final long timeout;
     
     protected final TimeUnit unit;
@@ -35,9 +38,11 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     private long timeStamp = 0L;
     
     public AbstractResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher, 
             long timeout, TimeUnit unit) {
         
         this.context = context;
+        this.messageDispatcher = messageDispatcher;
         this.timeout = timeout;
         this.unit = unit;
     }

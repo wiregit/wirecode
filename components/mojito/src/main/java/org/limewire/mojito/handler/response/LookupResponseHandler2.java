@@ -25,6 +25,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.entity.LookupEntity;
+import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
@@ -62,9 +63,11 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
     
     private volatile ScheduledFuture<?> boostFuture = null;
     
-    public LookupResponseHandler2(Context context, KUID lookupId, 
+    public LookupResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher,
+            KUID lookupId, 
             long timeout, TimeUnit unit) {
-        super(context, timeout, unit);
+        super(context, messageDispatcher, timeout, unit);
         
         this.lookupId = lookupId;
         

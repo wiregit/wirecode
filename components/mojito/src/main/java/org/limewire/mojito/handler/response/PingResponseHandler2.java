@@ -31,39 +31,60 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    public PingResponseHandler2(Context context, SocketAddress dst, 
+    public PingResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher, 
+            SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        this(context, new SocketAddressPinger(dst), timeout, unit);
+        this(context, messageDispatcher, 
+                new SocketAddressPinger(dst), timeout, unit);
     }
     
     /**
      * 
      */
-    public PingResponseHandler2(Context context, Contact dst, 
+    public PingResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher, 
+            KUID contactId,
+            SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        this(context, new ContactPinger(dst), timeout, unit);
+        this(context, messageDispatcher, 
+                new SocketAddressPinger(contactId, dst), timeout, unit);
     }
     
     /**
      * 
      */
-    public PingResponseHandler2(Context context, Contact src, Contact dst, 
-            long timeout, TimeUnit unit) {
-        this(context, new ContactPinger(src, dst), timeout, unit);
+    public PingResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher,
+            Contact dst, long timeout, TimeUnit unit) {
+        this(context, messageDispatcher, 
+                new ContactPinger(dst), timeout, unit);
     }
     
     /**
      * 
      */
-    private PingResponseHandler2(Context context, Pinger pinger, 
-            long timeout, TimeUnit unit) {
-        super(context, timeout, unit);
+    public PingResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher,
+            Contact src, Contact dst, long timeout, TimeUnit unit) {
+        this(context, messageDispatcher, 
+                new ContactPinger(src, dst), timeout, unit);
+    }
+    
+    /**
+     * 
+     */
+    private PingResponseHandler2(Context context, 
+            MessageDispatcher2 messageDispatcher,
+            Pinger pinger, long timeout, TimeUnit unit) {
+        super(context, messageDispatcher, timeout, unit);
+        
         this.pinger = pinger;
     }
     
     @Override
     protected void start() throws IOException {
-        pinger.ping(context, this, timeout, unit);
+        pinger.ping(context, messageDispatcher, this, timeout, unit);
     }
     
     /**
@@ -113,11 +134,6 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
             return;
         }
         
-        if (!isCollisionPing()) {
-            context.setExternalAddress(externalAddress);
-            context.addEstimatedRemoteSize(estimatedSize);
-        }
-        
         setValue(new DefaultPingEntity(node, externalAddress, 
                 estimatedSize, time, unit));
     }
@@ -130,7 +146,9 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         /**
          * 
          */
-        public void ping(Context context, ResponseHandler2 callback, 
+        public void ping(Context context, 
+                MessageDispatcher2 messageDispatcher, 
+                ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException;
     }
     
@@ -139,22 +157,29 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
      */
     private static class SocketAddressPinger implements Pinger {
         
+        private final KUID contactId;
+        
         private final SocketAddress dst;
         
         public SocketAddressPinger(SocketAddress dst) {
+            this(null, dst);
+        }
+        
+        public SocketAddressPinger(KUID contactId, SocketAddress dst) {
+            this.contactId = contactId;
             this.dst = dst;
         }
 
         @Override
-        public void ping(Context context, ResponseHandler2 callback, 
+        public void ping(Context context, 
+                MessageDispatcher2 messageDispatcher, 
+                ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException {
+            
             MessageHelper messageHelper = context.getMessageHelper();
             RequestMessage request = messageHelper.createPingRequest(dst);
             
-            MessageDispatcher2 messageDispatcher 
-                = context.getMessageDispatcher2();
-            
-            messageDispatcher.send(callback, null, dst, request, timeout, unit);
+            messageDispatcher.send(callback, contactId, dst, request, timeout, unit);
         }
     }
     
@@ -190,7 +215,9 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
         
         @Override
-        public void ping(Context context, ResponseHandler2 callback, 
+        public void ping(Context context, 
+                MessageDispatcher2 messageDispatcher, 
+                ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException {
             
             KUID contactId = dst.getNodeID();
@@ -204,9 +231,6 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
                 MessageFactory messageFactory = context.getMessageFactory();
                 request = messageFactory.createPingRequest(src, addr);
             }
-            
-            MessageDispatcher2 messageDispatcher 
-                = context.getMessageDispatcher2();
             
             messageDispatcher.send(callback, contactId, 
                     addr, request, timeout, unit);
