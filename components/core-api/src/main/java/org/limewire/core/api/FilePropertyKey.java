@@ -26,7 +26,8 @@ public enum FilePropertyKey {
     WIDTH(true),
     LOCATION(false),
     YEAR(true),
-    TORRENT(false);
+    TORRENT(false),
+    USERAGENT(false);
     
     private final static Collection<FilePropertyKey> indexableKeys = EnumSet.noneOf(FilePropertyKey.class); 
     private final static Collection<FilePropertyKey> editableKeys = EnumSet.noneOf(FilePropertyKey.class);

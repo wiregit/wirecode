@@ -44,6 +44,7 @@ import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.StringUtils;
 
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
@@ -91,6 +92,12 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         infoTable.setEditable(false);
         
         component.add(new JScrollPane(infoTable), "gaptop 10, span, grow, wrap");
+        
+        String userAgent = file.getPropertyString(FilePropertyKey.USERAGENT);
+        if(!StringUtils.isEmpty(userAgent) && type == FileInfoType.UPLOADING_FILE) {
+            component.add(createBoldLabel(I18n.tr("Version")), "split 2, gaptop 10");
+            component.add(createPlainLabel(userAgent), "wrap");
+        }
         
         if (download != null) {
             component.add(createBoldLabel(I18n.tr("Total Completed:")), "split 2, gaptop 10");

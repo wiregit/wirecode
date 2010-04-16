@@ -291,6 +291,8 @@ class CoreUploadItem implements UploadItem {
             } else {
                 return null;
             }
+        case USERAGENT:
+            return uploader.getUserAgent();
         default:
             if(fd == null) {
                 return null;
