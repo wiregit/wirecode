@@ -132,8 +132,7 @@ class MockSearchResultList implements SearchResultList {
                     MockGroupedSearchResult gsr = (MockGroupedSearchResult) groupedUrnResultList.get(idx);
                     gsr.addNewSource(result, searchDetails.getSearchQuery());
                     groupedUrnResultList.set(idx, gsr);
-                    // Notify listeners that result changed.
-                    gsr.notifyNewSource();
+                    newResults.add(gsr);
 
                 } else {
                     // URN not found so add new result at insertion point.
@@ -150,13 +149,13 @@ class MockSearchResultList implements SearchResultList {
             lock.unlock();
         }
         
-        // Forward new results to list listeners.
+        // Forward added results to list listeners.
         if (newResults.size() > 0) {
-            notifyResultsCreated(newResults);
+            notifyResultsAdded(newResults);
         }
     }
     
-    private void notifyResultsCreated(Collection<GroupedSearchResult> results) {
+    private void notifyResultsAdded(Collection<GroupedSearchResult> results) {
         listListeners.broadcast(results);
     }
     
