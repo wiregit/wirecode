@@ -90,7 +90,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
 
-        if (request.getHeaders(HTTPHeaderName.FW_NODE_INFO.name()).length > 0) {
+        if (request.containsHeader(HTTPHeaderName.FW_NODE_INFO.toString())) {
             requestorCanDoFWT = true;
         }
         HTTPUploader uploader = null;
