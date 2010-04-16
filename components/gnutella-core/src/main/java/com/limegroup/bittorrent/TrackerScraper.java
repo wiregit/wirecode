@@ -45,8 +45,8 @@ public class TrackerScraper {
     // section 2.3
     private static String UNRESERVED_CHARS =
         // when determining if a url needs encoding
-        // % should be ok
-        "%+"
+        // % should be ok  (michaelt - '%' removed because it broke uri)
+        "+"
         // reserved (michaelt: ???? guess the trackers expect these ???)
         + ";?:@=&/"
         // unreserved (special characters) ' excluded,
@@ -85,6 +85,7 @@ public class TrackerScraper {
             System.out.println("scraping not available");
             
             // Tracker does not support scraping so don't attempt
+            System.out.println("??");
             return null;
         }
         
@@ -92,11 +93,13 @@ public class TrackerScraper {
         try {
             uri = createScrapingRequest(trackerAnnounceUri, urn);
         } catch (URISyntaxException e) {
+            System.out.println("!!");
+            e.printStackTrace();
             // URI could not be generated for the scrape request so don't try
             return null;
         }
 
-        HttpGet get = new HttpGet(uri);
+        final HttpGet get = new HttpGet(uri);
 
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
@@ -109,6 +112,7 @@ public class TrackerScraper {
         return httpExecutorProvider.get().execute(get, params, new HttpClientListener() {
             @Override
             public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
+                get.abort();
                 callback.failure("request failed");
                 return false;
             }
@@ -120,14 +124,18 @@ public class TrackerScraper {
                 try {
                     decoded = Token.parse(Channels.newChannel(entity.getContent()), "UTF-8");
                 } catch (IllegalStateException e) {
+                    
+                    get.abort();
                     callback.failure(e.getMessage());
                     return false;
                 } catch (IOException e) {
+                    get.abort();
                     callback.failure(e.getMessage());
                     return false;
                 }
                 
                 if(decoded == null || !(decoded instanceof Map<?,?>)) {
+                    get.abort();
                     callback.failure("no scrape data in results downloaded");
                     return false;
                 }
@@ -137,6 +145,7 @@ public class TrackerScraper {
                 Object filesElement = baseMap.get("files");
                 
                 if (filesElement == null || !(filesElement instanceof Map<?,?>)) {
+                    get.abort();
                     callback.failure("scrape results had bad structure");
                     return false;
                 }
@@ -144,6 +153,7 @@ public class TrackerScraper {
                 Map<?,?> torrentsMap = (Map) filesElement;
                 
                 if (torrentsMap.size() != 1) {
+                    get.abort();
                     callback.failure("wrong number of elements in scrape results");
                     return false;
                 }
@@ -151,6 +161,7 @@ public class TrackerScraper {
                 Object torrentScrapeEntry = torrentsMap.entrySet().iterator().next().getValue();
                
                 if (!(torrentScrapeEntry instanceof Map<?,?>)) {
+                    get.abort();
                     callback.failure("could not find torrent scrape entry in results");
                     return false;
                 }
@@ -162,20 +173,24 @@ public class TrackerScraper {
                 Object downloaded = torrentScrapeEntryMap.get("downloaded");
 
                 if (complete == null || !(complete instanceof Long)) {
+                    get.abort();
                     callback.failure("could not find well formed complete field");
                     return false;
                 }
                 
                 if (incomplete == null || !(incomplete instanceof Long)) {
+                    get.abort();
                     callback.failure("could not find well formed incomplete field");
                     return false;
                 }
                 
                 if (downloaded == null || !(downloaded instanceof Long)) {
+                    get.abort();
                     callback.failure("could not find well formed downloaded field");
                     return false;
                 }
 
+                get.abort();
                 callback.success(new ScrapeData((Long)complete, 
                         (Long)incomplete, 
                         (Long)downloaded));
