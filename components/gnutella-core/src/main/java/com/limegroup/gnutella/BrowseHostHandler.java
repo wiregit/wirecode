@@ -30,6 +30,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
@@ -244,7 +245,9 @@ public class BrowseHostHandler {
         if (SearchSettings.DESIRES_NMS1_URNS.getValue()) {
             get.addHeader(HTTPHeaderName.NMS1.create("1"));
         }
-                
+        if (ConnectionSettings.LAN_MODE.getValue()) {
+            get.addHeader(HTTPHeaderName.LAN_MODE.create("1"));
+        }
         if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
             get.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpointFactory.createForSelf()));
         }

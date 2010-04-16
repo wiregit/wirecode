@@ -64,6 +64,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
      * the request header correctly. Will be set to false in the future.
      */
     private boolean requestorCanDoFWT = true;
+    private boolean isLanModeBrowse = false;
 
     private final HttpRequestFileViewProvider browseRequestFileListProvider;
     private final BrowseTracker tracker;
@@ -90,8 +91,11 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
 
-        if (request.getHeaders(HTTPHeaderName.FW_NODE_INFO.name()).length > 0) {
+        if (request.containsHeader(HTTPHeaderName.FW_NODE_INFO.toString())) {
             requestorCanDoFWT = true;
+        }
+        if (request.containsHeader(HTTPHeaderName.LAN_MODE.toString())) {
+            isLanModeBrowse = true;
         }
         HTTPUploader uploader = null;
         try {
@@ -121,7 +125,8 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                 
                 response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
             } else {
-                response.setEntity(new BrowseResponseEntity(uploader, files, shouldIncludeNMS1Urns(request)));
+                response.setEntity(new BrowseResponseEntity(uploader, files,
+                        shouldIncludeNMS1Urns(request), isLanModeBrowse));
                 response.setStatusCode(HttpStatus.SC_OK);
             }
         } catch (com.limegroup.gnutella.uploader.HttpException he) {
@@ -181,25 +186,22 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     public class BrowseResponseEntity extends AbstractProducingNHttpEntity {
 
         private static final int RESPONSES_PER_REPLY = 10;
-        
         private static final int MAX_PENDING_REPLIES = 5;
 
         private final HTTPUploader uploader;
-
         private Iterator<FileDesc> iterator;
-        
         private MessageWriter sender;
-        
         private volatile int pendingMessageCount = 0;
-
         private GUID sessionGUID = new GUID();
-        
-        private final boolean includeNMS1Urn;
+        private final boolean includeNMS1Urn, isLanModeBrowse;
 
-        public BrowseResponseEntity(HTTPUploader uploader, Iterable<FileDesc> files, boolean includeNMS1Urn) {
+        public BrowseResponseEntity(HTTPUploader uploader,
+                Iterable<FileDesc> files, boolean includeNMS1Urn,
+                boolean isLanModeBrowse) {
             this.uploader = uploader;
             iterator = files.iterator();
             this.includeNMS1Urn = includeNMS1Urn;
+            this.isLanModeBrowse = isLanModeBrowse;
             
             // XXX LW can't handle chunked responses: CORE-199
             //setChunked(true);
@@ -253,8 +255,10 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                 responses.add(response);
             }
             
-            Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(responses.toArray(new Response[0]),
-                    10, null, sessionGUID.bytes(), (byte)1, false, requestorCanDoFWT);
+            Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(
+                    responses.toArray(new Response[0]), 10, null,
+                    sessionGUID.bytes(), (byte)1, false, isLanModeBrowse,
+                    requestorCanDoFWT);
             
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);

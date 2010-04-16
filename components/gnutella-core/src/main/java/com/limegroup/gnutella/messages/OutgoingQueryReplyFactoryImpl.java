@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Tuple;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UploadSettings;
@@ -59,16 +60,17 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         boolean isMulticast = queryRequest.isMulticast() && (queryRequest.getTTL() + queryRequest.getHops()) == 1;
         byte ttl = isMulticast ? 1 : (byte)(queryRequest.getHops() + 1); 
         return createReplies(responses, responsesPerReply, securityToken, queryRequest.getGUID(),
-                ttl, isMulticast, queryRequest.canDoFirewalledTransfer());
+                ttl, isMulticast, false, queryRequest.canDoFirewalledTransfer());
     }
 
     public List<QueryReply> createReplies(Response[] responses, int responsesPerReply,
             SecurityToken securityToken, byte[] guid, byte ttl, boolean isMulticast,
-            boolean requestorCanDoFWT) {
+            boolean isLanModeBrowse, boolean requestorCanDoFWT) {
         List<Response[]> splitResponses = splitResponses(responses, responsesPerReply);
         List<QueryReply> replies = new ArrayList<QueryReply>();
         for (Response[] bundle : splitResponses) {
-            replies.addAll(createReplies(bundle, securityToken, guid, ttl, isMulticast, requestorCanDoFWT));
+            replies.addAll(createReplies(bundle, securityToken, guid, ttl,
+                    isMulticast, isLanModeBrowse, requestorCanDoFWT));
         }
         return replies;
     }
@@ -90,8 +92,9 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
      * @param securityToken might be null, otherwise must be sent in GGEP
      * of QHD with header "SO"
      */
-    public List<QueryReply> createReplies(Response[] responses,
-            SecurityToken securityToken, byte[] guid, byte ttl, boolean isMulticast,
+    private List<QueryReply> createReplies(Response[] responses,
+            SecurityToken securityToken, byte[] guid, byte ttl,
+            boolean isMulticast, boolean isLanModeBrowse,
             boolean requestorCanDoFWT) {
         
         if (responses.length == 0) {
@@ -134,53 +137,11 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         
         // pick the right address & port depending on multicast & fwtrans
         // if we cannot find a valid address & port, exit early.
-        int port = -1;
-        byte[] ip = null;
-        // first try using multicast addresses & ports, but if they're
-        // invalid, fallback to non multicast.
-        if(isMulticast) {
-            InetSocketAddress multi = networkManager.getMulticastReplyAddress();
-            if(multi == null) {
-                LOG.warn("No multicast reply address");
-                ip = networkManager.getNonForcedAddress();
-                port = networkManager.getNonForcedPort();
-            } else {
-                ip = multi.getAddress().getAddress();
-                port = multi.getPort();
-            }
-            if(!NetworkUtils.isValidPort(port) ||
-                    !NetworkUtils.isValidAddress(ip)) {
-                LOG.debug("Non-forced address is invalid");
-                isMulticast = false;
-            }
-        }
-        
-        if(!isMulticast) {
-            // see if we have a valid FWTrans address.  if not, fall back.
-            if(isFWTransfer) {
-                port = networkManager.getStableUDPPort();
-                ip = networkManager.getExternalAddress();
-                if(!NetworkUtils.isValidAddress(ip) ||
-                        !NetworkUtils.isValidPort(port)) {
-                    LOG.debug("FW transfer address is invalid");
-                    isFWTransfer = false;
-                }
-            }
-            
-            // if we still don't have a valid address here, exit early.
-            if(!isFWTransfer) {
-                ip = networkManager.getAddress();
-                port = networkManager.getPort();
-                if(!NetworkUtils.isValidAddress(ip) ||
-                        !NetworkUtils.isValidPort(port)) {
-                    LOG.debug("All addresses are invalid");
-                    return Collections.emptyList();
-                }
-            }
-        }
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("Replying from " + NetworkUtils.ip2string(ip) + ":" + port);
+        Tuple<byte[], Integer> ipp = getReplyAddress(isMulticast, isLanModeBrowse, isFWTransfer);
+        if(ipp == null)
+            return Collections.emptyList();
+        byte[] ip = ipp.getFirst();
+        int port = ipp.getSecond();
         
         // get the *latest* push proxies if we have not accepted an incoming
         // connection in this session
@@ -241,6 +202,51 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
         }
 
         return queryReplies;
+    }
+    
+    /** Returns the address that should be encoded in outgoing query replies. */
+    private Tuple<byte[], Integer> getReplyAddress(boolean isMulticast,
+            boolean isLanModeBrowse, boolean isFWTransfer) {
+        byte[] ip = null;
+        int port = -1;
+        if(isMulticast || isLanModeBrowse) {
+            InetSocketAddress multi = networkManager.getMulticastReplyAddress();
+            if(multi != null) {
+                ip = multi.getAddress().getAddress();
+                port = multi.getPort();
+                if(NetworkUtils.isValidPort(port) &&
+                        NetworkUtils.isValidAddress(ip)) {
+                    LOG.debug("Replying from multicast address");
+                    return new Tuple<byte[], Integer>(ip, port);
+                }
+            }
+            LOG.warn("No multicast reply address");
+            ip = networkManager.getNonForcedAddress();
+            port = networkManager.getNonForcedPort();
+            if(NetworkUtils.isValidPort(port) &&
+                    NetworkUtils.isValidAddress(ip)) {
+                LOG.debug("Replying from non-forced address");
+                return new Tuple<byte[], Integer>(ip, port);
+            }
+        }
+        if(isFWTransfer) {
+            ip = networkManager.getExternalAddress();
+            port = networkManager.getStableUDPPort();
+            if(NetworkUtils.isValidAddress(ip) &&
+                    NetworkUtils.isValidPort(port)) {
+                LOG.debug("Replying from FWT address");
+                return new Tuple<byte[], Integer>(ip, port);
+            }
+        }
+        ip = networkManager.getAddress();
+        port = networkManager.getPort();
+        if(NetworkUtils.isValidAddress(ip) &&
+                NetworkUtils.isValidPort(port)) {
+            LOG.debug("Replying from ordinary address");
+            return new Tuple<byte[], Integer>(ip, port);
+        }
+        LOG.warn("No valid reply address");
+        return null;
     }
     
     /** @return Simply splits the input array into two (almost) equally sized

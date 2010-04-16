@@ -146,7 +146,11 @@ public enum HTTPHeaderName {
     FW_NODE_INFO("X-FW-Node-Info"),
     
     /** Header to signal interest in and support of non-metadata urns. **/
-    NMS1("X-NMS1");
+    NMS1("X-NMS1"),
+
+    /** Header indicating that the sender is in LAN mode. */
+    LAN_MODE("X-LAN-Mode");
+
     /**
      * Constant for the HTTP header name as a string.
      */
