@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.collection.CollectionUtils;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
@@ -25,7 +27,6 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 
@@ -33,6 +34,12 @@ public class DefaultMessageHandler2 implements ResponseHandler2 {
 
     private static final Log LOG 
         = LogFactory.getLog(DefaultMessageHandler2.class);
+    
+    @InspectablePrimitive(value = "Store-Forward Count")
+    private static final AtomicInteger STORE_FORWARD_VALUE = new AtomicInteger();
+    
+    @InspectablePrimitive(value = "Store-Drop Count")
+    private static final AtomicInteger STORE_DROP_VALUE = new AtomicInteger();
     
     private static enum Operation {
         // Do nothing
@@ -53,13 +60,9 @@ public class DefaultMessageHandler2 implements ResponseHandler2 {
     
     private final Provider provider;
     
-    private DatabaseStatisticContainer databaseStats;
-    
     public DefaultMessageHandler2(RouteTable routeTable, Database database) {
         this.routeTable = routeTable;
         this.database = database;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     @Override
@@ -220,7 +223,7 @@ public class DefaultMessageHandler2 implements ResponseHandler2 {
                 if (op.equals(Operation.FORWARD)) {
                     Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     valuesToForward.addAll(bag.values());
-                    databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                    STORE_FORWARD_VALUE.incrementAndGet();
                     
                 } else if (op.equals(Operation.DELETE)
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
@@ -229,7 +232,7 @@ public class DefaultMessageHandler2 implements ResponseHandler2 {
                         //System.out.println("REMOVING: " + entity + "\n");
                         database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     }
-                    databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
+                    STORE_DROP_VALUE.incrementAndGet();
                 }
             }
         }

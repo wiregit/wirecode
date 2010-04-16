@@ -25,11 +25,12 @@ import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.LookupRequest;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
@@ -43,9 +44,10 @@ import org.limewire.mojito.util.ContactUtils;
  */
 public class NodeRequestHandler2 extends AbstractRequestHandler2 {
 
-    private static final Log LOG = LogFactory.getLog(NodeRequestHandler2.class);
+    private static final Log LOG 
+        = LogFactory.getLog(NodeRequestHandler2.class);
     
-    public NodeRequestHandler2(MessageDispatcher2 messageDispatcher, Context context) {
+    public NodeRequestHandler2(MessageDispatcher2 messageDispatcher, Context2 context) {
         super(messageDispatcher, context);
     }
 
@@ -62,6 +64,7 @@ public class NodeRequestHandler2 extends AbstractRequestHandler2 {
      */
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
+        
         // Cast to LookupRequest because FindValueRequestHandler
         // is delegating requests to this class!
         LookupRequest request = (LookupRequest)message;
@@ -71,7 +74,7 @@ public class NodeRequestHandler2 extends AbstractRequestHandler2 {
         
         Collection<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
-            if(context.isFirewalled()) {
+            if (context.isFirewalled()) {
                 nodes = ContactUtils.sort(
                             context.getRouteTable().getContacts(), 
                             KademliaSettings.REPLICATION_PARAMETER.getValue());
@@ -96,10 +99,8 @@ public class NodeRequestHandler2 extends AbstractRequestHandler2 {
             }
         }
         
-        context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
-        
-        FindNodeResponse response = context.getMessageHelper()
-                    .createFindNodeResponse(request, nodes);
+        MessageHelper2 messageHelper = context.getMessageHelper();
+        FindNodeResponse response = messageHelper.createFindNodeResponse(request, nodes);
         
         messageDispatcher.send(node, response);
     }

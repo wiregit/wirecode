@@ -24,10 +24,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -35,6 +37,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
@@ -45,7 +48,14 @@ import org.limewire.mojito.util.DatabaseUtils;
  */
 public class ValueRequestHandler2 extends AbstractRequestHandler2 {
     
-    private static final Log LOG = LogFactory.getLog(ValueRequestHandler2.class);
+    private static final Log LOG 
+        = LogFactory.getLog(ValueRequestHandler2.class);
+    
+    @InspectablePrimitive(value = "Value Not Found")
+    private static final AtomicInteger NOT_FOUND_COUNT = new AtomicInteger();
+    
+    @InspectablePrimitive(value = "Value Found")
+    private static final AtomicInteger FOUND_COUNT = new AtomicInteger();
     
     /**
      * Delegate to the FIND_NODE request handler
@@ -53,7 +63,7 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
     private final NodeRequestHandler2 node;
     
     public ValueRequestHandler2(MessageDispatcher2 messageDispatcher, 
-            Context context, NodeRequestHandler2 node) {
+            Context2 context, NodeRequestHandler2 node) {
         super(messageDispatcher, context);
         
         this.node = node;
@@ -61,6 +71,7 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
     
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
+        
         FindValueRequest request = (FindValueRequest)message;
         
         KUID lookupId = request.getLookupID();
@@ -113,6 +124,8 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
         if (valuesToReturn.isEmpty() 
                 && availableKeys.isEmpty()) {
             
+            NOT_FOUND_COUNT.incrementAndGet();
+            
             if (LOG.isInfoEnabled()) {
                 LOG.info("No values for " + lookupId 
                     + ", returning Contacts instead to " + request.getContact());
@@ -123,17 +136,17 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
             
         } else {
             
+            FOUND_COUNT.incrementAndGet();
+            
             if (LOG.isInfoEnabled()) {
                 LOG.info("Return " + CollectionUtils.toString(valuesToReturn) + " and " 
                         + CollectionUtils.toString(availableKeys) + " for " 
                         + lookupId + " to " + request.getContact());
             }
             
-            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
-
-            FindValueResponse response = context.getMessageHelper()
-                .createFindValueResponse(request, requestLoad, 
-                        valuesToReturn, availableKeys);
+            MessageHelper2 messageHelper = context.getMessageHelper();
+            FindValueResponse response = messageHelper.createFindValueResponse(
+                    request, requestLoad, valuesToReturn, availableKeys);
             messageDispatcher.send(request.getContact(), response);
         }
     }

@@ -23,19 +23,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher2;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
@@ -48,21 +50,29 @@ import org.limewire.security.SecurityToken.TokenData;
  */
 public class StoreRequestHandler2 extends AbstractRequestHandler2 {
     
-    private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
+    private static final Log LOG 
+        = LogFactory.getLog(StoreRequestHandler.class);
     
-    private NetworkStatisticContainer networkStats;
+    @InspectablePrimitive(value = "No Security Token")
+    private static final AtomicInteger NO_SECURITY_TOKEN = new AtomicInteger();
     
-    public StoreRequestHandler2(MessageDispatcher2 messageDispatcher, Context context) {
+    @InspectablePrimitive(value = "Bad Security Token")
+    private static final AtomicInteger BAD_SECURITY_TOKEN = new AtomicInteger();
+    
+    @InspectablePrimitive(value = "Store Success Count")
+    private static final AtomicInteger STORE_SUCCESS = new AtomicInteger();
+    
+    @InspectablePrimitive(value = "Store Failure Count")
+    private static final AtomicInteger STORE_FAILURE = new AtomicInteger();
+    
+    public StoreRequestHandler2(MessageDispatcher2 messageDispatcher, Context2 context) {
         super(messageDispatcher, context);
-        this.networkStats = context.getNetworkStats();
     }
     
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
-        networkStats.STORE_REQUESTS.incrementStat();
-        
         SecurityToken securityToken = request.getSecurityToken();
         
         if (securityToken == null) {
@@ -70,7 +80,7 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
                 LOG.error(request.getContact() 
                         + " does not provide a SecurityToken");
             }
-            networkStats.STORE_REQUESTS_NO_QK.incrementStat();
+            NO_SECURITY_TOKEN.incrementAndGet();
             return;
         }
         
@@ -81,7 +91,7 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);
             }
-            networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
+            BAD_SECURITY_TOKEN.incrementAndGet();
             return;
         }
         
@@ -95,16 +105,16 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
         for (DHTValueEntity entity : values) {
             
             if (database.store(entity)) {
-                networkStats.STORE_REQUESTS_OK.incrementStat();
+                STORE_SUCCESS.incrementAndGet();
                 status.add(new StoreStatusCode(entity, StoreResponse.OK));
             } else {
-                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+                STORE_FAILURE.incrementAndGet();
                 status.add(new StoreStatusCode(entity, StoreResponse.ERROR));
             }
         }
         
-        StoreResponse response 
-            = context.getMessageHelper().createStoreResponse(request, status);
+        MessageHelper2 messageHelper = context.getMessageHelper();
+        StoreResponse response = messageHelper.createStoreResponse(request, status);
         messageDispatcher.send(request.getContact(), response);
     }
 }

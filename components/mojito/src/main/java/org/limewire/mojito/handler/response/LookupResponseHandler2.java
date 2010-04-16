@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.entity.LookupEntity;
@@ -63,7 +63,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
     
     private volatile ScheduledFuture<?> boostFuture = null;
     
-    public LookupResponseHandler2(Context context, 
+    public LookupResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher,
             KUID lookupId, 
             long timeout, TimeUnit unit) {
@@ -253,7 +253,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         private static boolean RANDOMIZE = false;
         
-        private final Context context;
+        private final Context2 context;
         
         private final KUID key;
         
@@ -272,7 +272,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         private int timeouts = 0;
         
-        public LookupManager(Context context, KUID key) {
+        public LookupManager(Context2 context, KUID key) {
             this.context = context;
             this.key = key;
             

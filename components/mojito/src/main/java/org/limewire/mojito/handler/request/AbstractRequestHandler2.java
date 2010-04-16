@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.handler.RequestHandler;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.RequestMessage;
@@ -15,10 +15,10 @@ abstract class AbstractRequestHandler2 implements RequestHandler {
     
     protected final MessageDispatcher2 messageDispatcher;
     
-    protected final Context context;
+    protected final Context2 context;
     
     public AbstractRequestHandler2(
-            MessageDispatcher2 messageDispatcher, Context context) {
+            MessageDispatcher2 messageDispatcher, Context2 context) {
         
         this.messageDispatcher = messageDispatcher;
         this.context = context;

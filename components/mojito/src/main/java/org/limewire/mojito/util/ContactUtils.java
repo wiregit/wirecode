@@ -35,7 +35,7 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -257,7 +257,7 @@ public final class ContactUtils {
      * Returns true if the given Contact has the same Node ID as the
      * local Node but a different IP Address.
      */
-    public static boolean isCollision(Context context, Contact node) {
+    public static boolean isCollision(Context2 context, Contact node) {
         if (context.isLocalNodeID(node.getNodeID())
                 && !context.isLocalContactAddress(node.getContactAddress())) {
             return true;
@@ -269,7 +269,7 @@ public final class ContactUtils {
      * Returns true if the given Contact has the same Node ID or the
      * same IP Address as the local Node.
      */
-    public static boolean isLocalContact(Context context, Contact node) {
+    public static boolean isLocalContact(Context2 context, Contact node) {
         
         if (context.isLocalNodeID(node.getNodeID())) {
             return true;

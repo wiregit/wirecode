@@ -14,16 +14,19 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.entity.StoreEntity;
-import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.handler.response.NodeResponseHandler2;
 import org.limewire.mojito.handler.response.PingResponseHandler2;
-import org.limewire.mojito.handler.response.ValueResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
+import org.limewire.mojito.messages.MessageFactory;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.mojito.util.DHTSizeEstimator;
+import org.limewire.mojito.util.HostFilter;
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SecurityToken;
 
 public class Context2 implements Closeable {
     
@@ -73,17 +76,49 @@ public class Context2 implements Closeable {
     /**
      * 
      */
+    private final MessageHelper2 messageHelper;
+    
+    /**
+     * 
+     */
+    private final SecurityTokenHelper2 tokenHelper;
+    
+    /**
+     * 
+     */
+    private volatile HostFilter hostFilter = null;
+    
+    /**
+     * 
+     */
     public Context2(MessageDispatcher2 messageDispatcher, 
+            MessageFactory messageFactory,
             RouteTable routeTable, Database database) {
         
         this.messageDispatcher = messageDispatcher;
         this.routeTable = routeTable;
         this.database = database;
+        
+        this.messageHelper = new MessageHelper2(this, messageFactory);
+        
+        MACCalculatorRepositoryManager calculator 
+            = new MACCalculatorRepositoryManager();
+        
+        SecurityToken.TokenProvider tokenProvider 
+            = new SecurityToken.AddressSecurityTokenProvider(calculator);
+        
+        this.tokenHelper = new SecurityTokenHelper2(tokenProvider);
     }
     
     @Override
     public void close() {
         futureManager.close();
+        estimator.clear();
+    }
+    
+    //@Override
+    public BigInteger size() {
+        return estimator.getEstimatedSize(routeTable);
     }
     
     /**
@@ -105,6 +140,101 @@ public class Context2 implements Closeable {
      */
     public Database getDatabase() {
         return database;
+    }
+    
+    /**
+     * 
+     */
+    public MessageFactory getMessageFactory() {
+        return messageHelper.getMessageFactory();
+    }
+    
+    /**
+     * 
+     */
+    public MessageHelper2 getMessageHelper() {
+        return messageHelper;
+    }
+    
+    /**
+     * 
+     */
+    public SecurityTokenHelper2 getSecurityTokenHelper() {
+        return tokenHelper;
+    }
+    
+    /**
+     * 
+     */
+    public LocalContact getLocalNode() {
+        return (LocalContact)routeTable.getLocalNode();
+    }
+    
+    /**
+     * 
+     */
+    public SocketAddress getContactAddress() {
+        return getLocalNode().getContactAddress();
+    }
+    
+    /**
+     * 
+     */
+    public int getExternalPort() {
+        return getLocalNode().getExternalPort();
+    }
+    
+    /**
+     * 
+     */
+    public KUID getLocalNodeID() {
+        return getLocalNode().getNodeID();
+    }
+    
+    /**
+     * 
+     */
+    public boolean isLocalNodeID(KUID contactId) {
+        return getLocalNodeID().equals(contactId);
+    }
+    
+    /**
+     * 
+     */
+    public boolean isLocalNode(Contact contact) {
+        return getLocalNode().equals(contact);
+    }
+    
+    /**
+     * 
+     */
+    public boolean isLocalContactAddress(SocketAddress address) {
+        return getContactAddress().equals(address);
+    }
+    
+    /**
+     * 
+     */
+    public boolean isBootstrapping() {
+        return false;
+    }
+    
+    /**
+     * 
+     */
+    public boolean isFirewalled() {
+        return getLocalNode().isFirewalled();
+    }
+    
+    /**
+     * 
+     */
+    public HostFilter getHostFilter() {
+        return hostFilter;
+    }
+    
+    public void setHostFilter(HostFilter hostFilter) {
+        this.hostFilter = hostFilter;
     }
     
     //@Override
@@ -139,12 +269,12 @@ public class Context2 implements Closeable {
     }
     
     //@Override
-    public DHTFuture<ValueEntity> get(KUID lookupId, long timeout, TimeUnit unit) {
+    /*public DHTFuture<ValueEntity> get(KUID lookupId, long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new ValueResponseHandler2(
                 this, messageDispatcher, lookupId, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
-    }
+    }*/
     
     //@Override
     /*public DHTFuture<StoreEntity> put(KUID lookupId, long timeout, TimeUnit unit) {

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.handler.DefaultMessageHandler2;
@@ -36,7 +36,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     private static final Log LOG 
         = LogFactory.getLog(DefaultMessageDispatcher.class);
 
-    private final Context context;
+    private final Context2 context;
     
     private final RouteTable routeTable;
     
@@ -52,7 +52,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     
     private final StoreRequestHandler2 store;
     
-    public DefaultMessageDispatcher(Context context, 
+    public DefaultMessageDispatcher(Context2 context, 
             Transport transport, MessageCodec codec,
             RouteTable routeTable, Database database) {
         super(transport, codec);
@@ -68,10 +68,15 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
         store = new StoreRequestHandler2(this, context);
     }
 
+    /**
+     * 
+     */
     private boolean allow(DHTMessage message) {
         HostFilter hostFilter = context.getHostFilter();
         if (hostFilter != null) {
-            return hostFilter.allow(message.getContact().getContactAddress());
+            Contact src = message.getContact();
+            SocketAddress addr = src.getContactAddress();
+            return hostFilter.allow(addr);
         }
         return true;
     }
@@ -190,7 +195,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
             return;
         }
         
-        node.setRoundTripTime(time);
+        node.setRoundTripTime(unit.toMillis(time));
         
         super.handleResponse(callback, request, response, time, unit);
         defaultHandler.handleResponse(request, response, time, unit);

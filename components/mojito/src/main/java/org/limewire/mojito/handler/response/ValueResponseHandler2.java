@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -20,7 +20,7 @@ import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageHelper;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.SecurityTokenProvider;
@@ -38,15 +38,15 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
     /** The key we're looking for */
     private final EntityKey lookupKey;
     
-    /** Collection of EntityKeys */
+    /** Collection of {@link EntityKey}s */
     private final List<EntityKey> entityKeys
         = new ArrayList<EntityKey>();
 
-    /** Collection of DHTValueEntities */
+    /** Collection of {@link DHTValueEntity}ies */
     private final List<DHTValueEntity> entities 
         = new ArrayList<DHTValueEntity>();
     
-    public ValueResponseHandler2(Context context, 
+    public ValueResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher, 
             EntityKey lookupKey, 
             long timeout, TimeUnit unit) {
@@ -64,7 +64,7 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         
         Collection<KUID> noKeys = Collections.emptySet();
         
-        MessageHelper messageHelper = context.getMessageHelper();
+        MessageHelper2 messageHelper = context.getMessageHelper();
         FindValueRequest request = messageHelper.createFindValueRequest(
                 addr, key, noKeys, lookupKey.getDHTValueType());
         

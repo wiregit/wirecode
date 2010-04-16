@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -21,7 +21,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.entity.DefaultStoreEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.io.MessageDispatcher2;
-import org.limewire.mojito.messages.MessageHelper;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.StoreRequest;
@@ -51,7 +51,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     private final Map<Contact, List<StoreStatusCode>> codes 
         = new HashMap<Contact, List<StoreStatusCode>>();
     
-    public StoreResponseHandler2(Context context, 
+    public StoreResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher,
             Entry<Contact, SecurityToken>[] contacts, 
             DHTValueEntity[] entities, 
@@ -262,7 +262,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             
             long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
             
-            MessageHelper messageHelper = context.getMessageHelper();
+            MessageHelper2 messageHelper = context.getMessageHelper();
             StoreRequest request = messageHelper.createStoreRequest(
                     addr, securityToken, Collections.singleton(entity));
             

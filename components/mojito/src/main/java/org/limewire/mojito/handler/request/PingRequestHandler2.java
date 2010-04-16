@@ -23,13 +23,13 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageDispatcher2;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.util.MessageUtils;
 
 
@@ -38,20 +38,15 @@ import org.limewire.mojito.util.MessageUtils;
  */
 public class PingRequestHandler2 extends AbstractRequestHandler2 {
     
-    private static final Log LOG = LogFactory.getLog(PingRequestHandler2.class);
+    private static final Log LOG 
+        = LogFactory.getLog(PingRequestHandler2.class);
     
-    private final NetworkStatisticContainer networkStats;
-    
-    public PingRequestHandler2(MessageDispatcher2 messageDispatcher, Context context) {
+    public PingRequestHandler2(MessageDispatcher2 messageDispatcher, Context2 context) {
         super(messageDispatcher, context);
-        
-        networkStats = context.getNetworkStats();
     }
     
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
-        
-        networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
         Contact node = request.getContact();
@@ -71,10 +66,10 @@ public class PingRequestHandler2 extends AbstractRequestHandler2 {
             return;
         }
         
-        PingResponse response = context.getMessageHelper()
-                .createPingResponse(request, node.getContactAddress());
+        MessageHelper2 messageHelper = context.getMessageHelper();
+        PingResponse response = messageHelper.createPingResponse(
+                request, node.getContactAddress());
 
         messageDispatcher.send(node, response);
-        networkStats.PONGS_SENT.incrementStat();
     }
 }

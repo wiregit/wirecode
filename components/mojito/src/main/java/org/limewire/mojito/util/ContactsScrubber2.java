@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.NetworkSettings;
@@ -51,7 +51,7 @@ public class ContactsScrubber2 {
     /**
      * Creates and returns a ContactsScrubber for the given arguments.
      */
-    public static ContactsScrubber2 scrub(Context context, Contact src, 
+    public static ContactsScrubber2 scrub(Context2 context, Contact src, 
             Contact[] contacts, float requiredRatio) {
         
         if (contacts.length == 0) {
@@ -61,7 +61,7 @@ public class ContactsScrubber2 {
         return new ContactsScrubber2(context, src, contacts, requiredRatio);
     }
     
-    private ContactsScrubber2(Context context, Contact src, 
+    private ContactsScrubber2(Context2 context, Contact src, 
             Contact[] contacts, float requiredRatio) {
         
         assert (0 < contacts.length);

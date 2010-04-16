@@ -5,14 +5,14 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultPingEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageFactory;
-import org.limewire.mojito.messages.MessageHelper;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
@@ -31,7 +31,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    public PingResponseHandler2(Context context, 
+    public PingResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher, 
             SocketAddress dst, 
             long timeout, TimeUnit unit) {
@@ -42,7 +42,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    public PingResponseHandler2(Context context, 
+    public PingResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher, 
             KUID contactId,
             SocketAddress dst, 
@@ -54,7 +54,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    public PingResponseHandler2(Context context, 
+    public PingResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher,
             Contact dst, long timeout, TimeUnit unit) {
         this(context, messageDispatcher, 
@@ -64,7 +64,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    public PingResponseHandler2(Context context, 
+    public PingResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher,
             Contact src, Contact dst, long timeout, TimeUnit unit) {
         this(context, messageDispatcher, 
@@ -74,7 +74,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
-    private PingResponseHandler2(Context context, 
+    private PingResponseHandler2(Context2 context, 
             MessageDispatcher2 messageDispatcher,
             Pinger pinger, long timeout, TimeUnit unit) {
         super(context, messageDispatcher, timeout, unit);
@@ -146,7 +146,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         /**
          * 
          */
-        public void ping(Context context, 
+        public void ping(Context2 context, 
                 MessageDispatcher2 messageDispatcher, 
                 ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException;
@@ -171,12 +171,12 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
 
         @Override
-        public void ping(Context context, 
+        public void ping(Context2 context, 
                 MessageDispatcher2 messageDispatcher, 
                 ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException {
             
-            MessageHelper messageHelper = context.getMessageHelper();
+            MessageHelper2 messageHelper = context.getMessageHelper();
             RequestMessage request = messageHelper.createPingRequest(dst);
             
             messageDispatcher.send(callback, contactId, dst, request, timeout, unit);
@@ -215,7 +215,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
         
         @Override
-        public void ping(Context context, 
+        public void ping(Context2 context, 
                 MessageDispatcher2 messageDispatcher, 
                 ResponseHandler2 callback, 
                 long timeout, TimeUnit unit) throws IOException {
@@ -223,12 +223,14 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
             KUID contactId = dst.getNodeID();
             SocketAddress addr = dst.getContactAddress();
             
+            MessageHelper2 messageHelper = context.getMessageHelper();
+            
             RequestMessage request = null;
             if (src == null) {
-                MessageHelper messageHelper = context.getMessageHelper();
                 request = messageHelper.createPingRequest(addr);
             } else {
-                MessageFactory messageFactory = context.getMessageFactory();
+                MessageFactory messageFactory 
+                    = messageHelper.getMessageFactory();
                 request = messageFactory.createPingRequest(src, addr);
             }
             

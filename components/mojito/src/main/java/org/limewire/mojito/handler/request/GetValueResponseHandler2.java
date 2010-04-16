@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -20,7 +20,7 @@ import org.limewire.mojito.handler.response.AbstractResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageHelper;
+import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
@@ -33,9 +33,10 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
     
     private final EntityKey lookupKey;
     
-    public GetValueResponseHandler2(Context context, 
+    public GetValueResponseHandler2(
+            MessageDispatcher2 messageDispatcher, Context2 context, 
             EntityKey lookupKey, long timeout, TimeUnit unit) {
-        super(context, timeout, unit);
+        super(context, messageDispatcher, timeout, unit);
         
         this.lookupKey = lookupKey;
     }
@@ -50,7 +51,7 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         KUID contactId = node.getNodeID();
         SocketAddress addr = node.getContactAddress();
         
-        MessageHelper messageHelper = context.getMessageHelper();
+        MessageHelper2 messageHelper = context.getMessageHelper();
         FindValueRequest request = messageHelper.createFindValueRequest(
                 addr, primaryKey, Collections.singleton(secondaryKey), valueType);
         
@@ -60,16 +61,13 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         
         long adaptiveTimeout = node.getAdaptativeTimeout(timeout, unit);
         
-        MessageDispatcher2 messageDispatcher 
-            = context.getMessageDispatcher2();
-        
         messageDispatcher.send(this, contactId, addr, 
                 request, adaptiveTimeout, unit);
     }
 
     @Override
-    protected void processResponse(RequestMessage request, ResponseMessage message, 
-            long time, TimeUnit unit) {
+    protected void processResponse(RequestMessage request, 
+            ResponseMessage message, long time, TimeUnit unit) {
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("Received response: " + message);
