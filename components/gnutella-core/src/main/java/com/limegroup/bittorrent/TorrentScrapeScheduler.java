@@ -33,20 +33,25 @@ import com.limegroup.gnutella.URN;
  *            threshold is achieved.  Will ban trackers
  *            that consistently fail after scrapes are attempted. 
  *            
- * TODO: convert to singleton, use sha1 to hash, cache management,
- *        tracker ban, figure out random openbt fails.
+ * TODO: cache management,
+ *        tracker ban
  */
 @LazySingleton
 public class TorrentScrapeScheduler {
     
     private static final long PERIOD = 1200;
+
+    private static final int MAX_RESULTS_TO_KEEP_CACHED = 100;
+    private static final int MAX_FAILURES_TO_KEEP_CACHED = 100;
+
     /**
      * Number of cycles to wait with an empty
      *  request queue before stopping this scheduler.
      *  
-     *  TODO: not needed anymore with wakeups
+     *  <p> This will result in a cache cleansing cycle
+     *       if required
      */
-    private static final int EMPTY_PERIOD_MAX = 2;    
+    private static final int EMPTY_PERIOD_MAX = 4;    
 
     private static final int PROCESSING_PERIOD_MAX = 3;
     private int processingPeriodsCount = 0;
@@ -69,6 +74,7 @@ public class TorrentScrapeScheduler {
         = new AtomicReference<Torrent>(null);
  
     private Shutdownable currentScrapeAttemptShutdown = null;
+    
     
     /**
      * Used to decide when to give up waiting for requests 
@@ -149,6 +155,39 @@ public class TorrentScrapeScheduler {
     }
     
     /**
+     * Put the processing thread to sleep, clear cache 
+     *  entries if the threshold has been reached. 
+     */
+    private void sleep() {
+        System.out.println("GOING TO SLEEP");
+        if (awake.compareAndSet(true, false)) {
+            future.cancel(false);
+            future = null;
+        }
+        
+        synchronized (failedTorrents) {
+            int failedTorrentsToRemove = failedTorrents.size() - MAX_FAILURES_TO_KEEP_CACHED;
+            if (failedTorrentsToRemove > 0) {
+                for ( int i=0 ; i<failedTorrentsToRemove ; i++ ) {
+                    failedTorrents.remove(0);
+                }
+            }
+        }
+        
+        synchronized (resultsMap) {
+            int resultsToRemove = resultsMap.size() - MAX_RESULTS_TO_KEEP_CACHED;
+            if (resultsToRemove > 0) {
+                List<String> keys = new ArrayList<String>(resultsMap.keySet());
+                for ( int i=0 ; i<resultsToRemove ; i++ ) {
+                    int randomKeyIndex = (int) (keys.size()*Math.random());
+                    String keyToRemove = keys.remove(randomKeyIndex);
+                    resultsMap.remove(keyToRemove);
+                }
+            }
+        }        
+    }
+    
+    /**
      * Get any scrape results if available.
      * 
      * @return null if no scrape data available.
@@ -194,12 +233,7 @@ public class TorrentScrapeScheduler {
         final Torrent torrent = currentlyScrapingTorrent.get();
         if (torrent == null) {
             if (queueEmptyPeriodsCount++ > EMPTY_PERIOD_MAX) {
-                System.out.println("GOING TO SLEEP");
-                if (awake.compareAndSet(true, false)) {
-                    future.cancel(false);
-                    future = null;
-                }
-                
+                sleep();
             }
             return;
         } else {
