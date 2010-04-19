@@ -144,7 +144,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
             NetworkManager networkManager,
-            Provider<IPFilter> ipFilter, Provider<UDPService> udpService,
+            @Named("hostileFilter") Provider<IPFilter> ipFilter, Provider<UDPService> udpService,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<PushEndpointCache> pushEndpointCache,
             RemoteFileDescFactory remoteFileDescFactory,

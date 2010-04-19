@@ -8,6 +8,7 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.io.ConnectableImpl;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.maxmind.geoip.Location;
 
 /**
  * Live implementation of a ConnectionItem.  This is the rough equivalent of 
@@ -39,11 +40,15 @@ public class CoreConnectionItem implements ConnectionItem {
     /** Whether or not this dataline is in the 'connecting' state. */
     private boolean connecting = true;
 
+    private final Location location;
+
     /**
      * Constructs a CoreConnectionItem for the specified connection.
+     * @param location 
      */
-    public CoreConnectionItem(RoutedConnection routedConnection) {
+    public CoreConnectionItem(RoutedConnection routedConnection, Location location) {
         this.routedConnection = routedConnection;
+        this.location = location;
 
         // Initialize attributes.
         host = routedConnection.getAddress();
@@ -74,7 +79,7 @@ public class CoreConnectionItem implements ConnectionItem {
     public FriendPresence getFriendPresence() {
         String id = routedConnection.getAddress() + ":" + routedConnection.getPort();
         // copy construct connectable to give it full equals semantics
-        return new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(routedConnection), id);
+        return new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(routedConnection), id, location);
     }
 
     @Override

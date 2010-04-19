@@ -1,7 +1,7 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
 import org.limewire.setting.FloatSetting;
@@ -9,6 +9,7 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.PowerOfTwoSetting;
 import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetSetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -388,4 +389,10 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final LongSetting SIMPP_SEND_TIMEOUT = FACTORY.createRemoteLongSetting(
             "SIMPP_SEND_TIMEOUT", 60 * 1000, "ConnectionSettings.simppSendTimeout", 0, Long.MAX_VALUE);
+    
+    public static final StringSetSetting FILTERED_COUNTRIES = 
+        FACTORY.createStringSetSetting("FILTERED_COUNTRIES", "");
+    
+    public static final StringSetSetting ALLOWED_COUNTRIES = 
+        FACTORY.createStringSetSetting("ALLOWED_COUNTRIES", "");
 }

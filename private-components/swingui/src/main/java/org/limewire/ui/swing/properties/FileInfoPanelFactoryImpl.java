@@ -21,6 +21,7 @@ import org.limewire.ui.swing.util.IconManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.filters.GeoIpLookupService;
 
 @Singleton
 public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
@@ -37,6 +38,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     private final Provider<BarPainterFactory> barPainterFactory;
     private final Provider<TableDecorator> tableDecorator;
     private final @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings;
+    private final GeoIpLookupService geoIpLookupService;
     
     @Inject
     public FileInfoPanelFactoryImpl(Provider<IconManager> iconManager, Provider<MagnetLinkFactory> magnetLinkFactory, 
@@ -45,7 +47,8 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
             Provider<SharedFileListManager> sharedFileListManager, Provider<MetaDataManager> metaDataManager,
             Provider<LibraryMediator> libraryMediator, Provider<LibraryManager> libraryManager,
             Provider<BarPainterFactory> barPainterFactory, Provider<TableDecorator> tableDecorator,
-            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings) {
+            @TorrentSettingsAnnotation TorrentManagerSettings torrentSettings,
+            GeoIpLookupService geoIpLookupService) {
         this.iconManager = iconManager;
         this.magnetLinkFactory = magnetLinkFactory;
         this.categoryIconManager = categoryIconManager;
@@ -58,6 +61,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
         this.barPainterFactory = barPainterFactory;
         this.tableDecorator = tableDecorator;
         this.torrentSettings = torrentSettings;
+        this.geoIpLookupService = geoIpLookupService;
     }
     
     @Override
@@ -92,7 +96,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     
     @Override
     public FileInfoPanel createTransferPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoTransfersPanel(type, propertiableFile, tableDecorator.get());
+        return new FileInfoTransfersPanel(type, propertiableFile, tableDecorator.get(), geoIpLookupService);
     }
 
     @Override

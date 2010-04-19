@@ -41,6 +41,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.filters.GeoIpLookupService;
 import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 import com.limegroup.gnutella.malware.VirusDefinitionDownloaderKeys;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -62,13 +63,16 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
     private final CategoryManager categoryManager;
+    private final GeoIpLookupService geoIpLookupService;
     
     @Inject
-    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
+    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager,
+            GeoIpLookupService geoIpLookupService) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
         this.friendManager = friendManager;
         this.categoryManager = categoryManager;
+        this.geoIpLookupService = geoIpLookupService;
         if(downloader instanceof BTDownloader)
             downloadItemType = DownloadItemType.BITTORRENT;
         else if(downloader instanceof VirusDefinitionDownloader)
@@ -206,7 +210,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
             friendPresence = friendManager.getMostRelevantFriendPresence(((FriendAddress)rfd.getAddress()).getId());
         } 
         if(friendPresence == null) {
-            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID());
+            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getLocation(rfd.getAddress()));
         }
         return friendPresence;
     }

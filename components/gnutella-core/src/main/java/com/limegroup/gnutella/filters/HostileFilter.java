@@ -18,9 +18,13 @@ public class HostileFilter extends  AbstractIPFilter {
     
     private final NetworkInstanceUtils networkInstanceUtils;
     
+    private final GeoLocationFilter geoLocationFilter;
+    
     @Inject
-    public HostileFilter(NetworkInstanceUtils networkInstanceUtils) {
+    public HostileFilter(NetworkInstanceUtils networkInstanceUtils,
+            GeoLocationFilter geoLocationFilter) {
         this.networkInstanceUtils = networkInstanceUtils;
+        this.geoLocationFilter = geoLocationFilter;
     }
     
     /**
@@ -63,6 +67,6 @@ public class HostileFilter extends  AbstractIPFilter {
     
     @Override
     protected boolean allowImpl(IP ip) {
-        return !hostileHosts.contains(ip);
+        return !hostileHosts.contains(ip); // && geoLocationFilter.allow(ip);
     }
 }

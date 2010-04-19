@@ -46,6 +46,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.gnutella.filters.GeoIpLookupService;
+import com.maxmind.geoip.Location;
+
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
     @Resource private Icon lockIcon;
@@ -65,9 +68,11 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
     private final JLabel seedersLabel;
     
     private Torrent torrent = null;
+    private final GeoIpLookupService geoIpLookupService;
     
-    public FileInfoTransfersPanel(FileInfoType type, PropertiableFile file, TableDecorator tableDecorator) {
+    public FileInfoTransfersPanel(FileInfoType type, PropertiableFile file, TableDecorator tableDecorator, GeoIpLookupService geoIpLookupService) {
         
+        this.geoIpLookupService = geoIpLookupService;
         Torrent localTorrent = (Torrent)file.getProperty(FilePropertyKey.TORRENT);
         if(localTorrent != null) {
             assert(localTorrent.isEditable());
@@ -331,12 +336,15 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         }
     }
     
-    private static class IPRenderer extends DefaultLimeTableCellRenderer {
+    private class IPRenderer extends DefaultLimeTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if (value != null){
-                value = ((IpPort)value).getAddress();
+                String address = ((IpPort)value).getAddress();
+                Location location = geoIpLookupService.getLocation(address);
+                String country = " (" + (location != null ? location.countryCode: "N/A") + ")";
+                value = address + country;
             }
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }

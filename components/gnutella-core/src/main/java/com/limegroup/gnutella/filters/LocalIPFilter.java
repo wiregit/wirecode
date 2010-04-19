@@ -46,12 +46,16 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private volatile long netblockings;  // # of times net blacklisted an ip 
     private volatile long implicitings;  // # of times an ip was implicitly allowed
     
+    private final GeoLocationFilter geoLocationFilter;
+    
     /** Constructs an IPFilter that automatically loads the content. */
     @Inject
     public LocalIPFilter(@Named("hostileFilter") IPFilter hostileNetworkFilter, 
-            @Named("backgroundExecutor") ScheduledExecutorService ipLoader) {
+            @Named("backgroundExecutor") ScheduledExecutorService ipLoader,
+            GeoLocationFilter geoLocationFilter) {
         this.hostileNetworkFilter = hostileNetworkFilter;
         this.ipLoader = ipLoader;
+        this.geoLocationFilter = geoLocationFilter;
         
         File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
         shouldLoadHostiles = hostiles.exists();
@@ -154,6 +158,10 @@ public final class LocalIPFilter extends AbstractIPFilter {
             return false;
         }
 
+        if (!geoLocationFilter.allow(ip)) {
+            return false;
+        }
+        
         if (FilterSettings.USE_NETWORK_FILTER.getValue() && !hostileNetworkFilter.allow(ip)) {
             netblockings++;
             return false;

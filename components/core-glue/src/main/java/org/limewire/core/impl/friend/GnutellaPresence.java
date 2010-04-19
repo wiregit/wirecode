@@ -13,6 +13,8 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 
+import com.maxmind.geoip.Location;
+
 /**
  * An implementation of FriendPresence for a Gnutella address.  For example,
  * a GnutellaPresence can be created for a Connection, which is supplied to
@@ -26,8 +28,8 @@ public abstract class GnutellaPresence implements FriendPresence {
     private final GnutellaFriend friend;
     
     /** Constructs a presence with the given Address. */
-    GnutellaPresence(Address address) {
-        this.friend = new GnutellaFriend(address, this);
+    GnutellaPresence(Address address, Location location) {
+        this.friend = new GnutellaFriend(address, this, location);
     }
     
     @Override
@@ -114,8 +116,8 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final String id;
         
         /** Constructs a presence with the given Address & id string. */
-        public GnutellaPresenceWithString(Address address, String id) {
-            super(address);
+        public GnutellaPresenceWithString(Address address, String id, Location location) {
+            super(address, location);
             this.id = id;
         }
         
@@ -130,8 +132,8 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final byte[] id;
         
         /** Constructs a presence with the given Address & byte[] as an id. */
-        public GnutellaPresenceWithGuid(Address address, byte[] id) {
-            super(address);
+        public GnutellaPresenceWithGuid(Address address, byte[] id, Location location) {
+            super(address, location);
             this.id = id;
         }
         
@@ -146,8 +148,8 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final Connectable connectable;
         
         /** Constructs a presence with the given Connectable as the id & address. */
-        public GnutellaPresenceWithConnectable(Connectable address) {
-            super(address);
+        public GnutellaPresenceWithConnectable(Connectable address, Location location) {
+            super(address, location);
             this.connectable = address;
         }
         

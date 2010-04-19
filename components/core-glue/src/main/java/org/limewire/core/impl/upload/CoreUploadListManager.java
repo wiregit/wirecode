@@ -34,6 +34,7 @@ import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
+import com.limegroup.gnutella.filters.GeoIpLookupService;
 
 @EagerSingleton
 public class CoreUploadListManager implements UploadListener, UploadListManager {
@@ -49,12 +50,15 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     private ThreadSafeList<UploadItem> threadSafeUploadItems;
     
     private static final int PERIOD = 1000;
+    private final GeoIpLookupService geoIpLookupService;
 
     @Inject
-    public CoreUploadListManager(UploadServices uploadServices, FriendManager friendManager, CoreUploadItem.Factory cuiFactory) {
+    public CoreUploadListManager(UploadServices uploadServices, FriendManager friendManager, CoreUploadItem.Factory cuiFactory,
+            GeoIpLookupService geoIpLookupService) {
         this.cuiFactory = cuiFactory;
         this.uploadServices = uploadServices;
         this.friendManager = friendManager;
+        this.geoIpLookupService = geoIpLookupService;
         
         threadSafeUploadItems = GlazedListsFactory.threadSafeList(new BasicEventList<UploadItem>());
         
@@ -236,7 +240,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         }
         if (currentPresence == null) {
             // copy construct connectable to give it full equals semantics
-            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost());
+            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost(), geoIpLookupService.getLocation(uploader));
         }
         return currentPresence;
     }

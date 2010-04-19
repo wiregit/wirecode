@@ -14,8 +14,6 @@ import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
@@ -25,6 +23,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.filters.GeoIpLookupService;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -78,8 +77,9 @@ public class RemoteFileDescAdapter implements SearchResult {
     RemoteFileDescAdapter(@Assisted RemoteFileDesc rfd,
             @Assisted Set<? extends IpPort> locs,
             CategoryManager categoryManager,
-            TorrentFactory torrentFactory) {
-        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID()), categoryManager, torrentFactory);
+            TorrentFactory torrentFactory,
+            GeoIpLookupService geoIpLookupService) {
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getLocation(rfd.getAddress())), categoryManager, torrentFactory);
     }
     
     /**
@@ -307,60 +307,5 @@ public class RemoteFileDescAdapter implements SearchResult {
             return "RFD Host for: " + friendPresence;
         }
     }
-    
-    /**
-     * An adapter class for an AltLoc based on {@link IpPort} and translated to a {@link RemoteHost}.
-     */
-    static class AltLocRemoteHost implements RemoteHost {
-        private final FriendPresence presence;        
 
-        AltLocRemoteHost(IpPort ipPort) {
-            if(ipPort instanceof Connectable) {
-                this.presence = new GnutellaPresence.GnutellaPresenceWithConnectable((Connectable)ipPort);
-            } else {
-                this.presence = new GnutellaPresence.GnutellaPresenceWithConnectable(new ConnectableImpl(ipPort, false));
-            }
-        }
-
-        /**
-         * Indicates that a browse host is possible, however, in this case, it actually
-         *  may not be 100% of the time.  Returning true allows a browse host attempts
-         *  to be started.
-         */
-        @Override
-        public boolean isBrowseHostEnabled() {
-            return true;
-        }
-
-        /**
-         * Chat is unsupported for Gnutella/anonymous sources so it will
-         *  never be supported in an altloc.
-         */
-        @Override
-        public boolean isChatEnabled() {
-            return false;
-        }
-
-        /**
-         * Share is unsupported for Gnutella/anonymous sources so it will
-         *  never be supported in an AltLoc.
-         */
-        @Override
-        public boolean isSharingEnabled() {
-            return false;
-        }
-
-        /**
-         * @return the anonymous {@link FriendPresence} associated with this altloc.
-         */
-        @Override
-        public FriendPresence getFriendPresence() {
-            return presence;
-        }
-        
-        @Override
-        public String toString() {
-            return "AltLoc Host For: " + presence;
-        }
-    }
 }

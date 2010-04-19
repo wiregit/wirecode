@@ -47,6 +47,7 @@ class FileMenu extends MnemonicMenu implements DelayedMenuItemCreator {
     
     @Override
     public void createMenuItems() {
+        add(new ConfigureIpFiltersAction());
         add(activationActionProvider.get());
         add(openFileActionProvider.get());
         add(openLinkActionProvider.get());

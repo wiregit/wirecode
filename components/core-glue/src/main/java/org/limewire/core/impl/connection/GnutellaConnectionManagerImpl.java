@@ -32,6 +32,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.filters.GeoIpLookupService;
 
 /**
  * An implementation of GnutellaConnectionManager for the live core. 
@@ -58,6 +59,8 @@ public class GnutellaConnectionManagerImpl
     
     volatile ConnectionLifecycleEventType lastStrengthRelatedEvent;
     volatile long lastIdleTime;
+
+    private final GeoIpLookupService geoIpLookupService;
     
     /**
      * Constructs the live implementation of GnutellaConnectionManager using 
@@ -67,8 +70,10 @@ public class GnutellaConnectionManagerImpl
     public GnutellaConnectionManagerImpl(
             ConnectionManager connectionManager,
             ConnectionServices connectionServices,
-            ActivationManager activationManager) {
+            ActivationManager activationManager,
+            GeoIpLookupService geoIpLookupService) {
         
+        this.geoIpLookupService = geoIpLookupService;
         this.connectionManager = Objects.nonNull(connectionManager, "connectionManager");
         this.connectionServices = connectionServices;
         this.activationManager = activationManager;
@@ -329,7 +334,7 @@ public class GnutellaConnectionManagerImpl
     private void addConnection(RoutedConnection connection) {
         ConnectionItem connectionItem = connectionMap.get(connection);
         if (connectionItem == null) {
-            connectionItem = new CoreConnectionItem(connection);
+            connectionItem = new CoreConnectionItem(connection, geoIpLookupService.getLocation(connection.getAddress()));
             connectionMap.put(connection, connectionItem);
             connectionItemList.add(connectionItem);
         }

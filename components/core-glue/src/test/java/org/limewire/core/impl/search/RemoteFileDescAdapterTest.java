@@ -2,7 +2,6 @@ package org.limewire.core.impl.search;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,14 +13,11 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.TorrentFactory;
-import org.limewire.core.impl.search.RemoteFileDescAdapter.AltLocRemoteHost;
 import org.limewire.core.impl.search.RemoteFileDescAdapter.RfdRemoteHost;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.util.BaseTestCase;
 
@@ -464,26 +460,4 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    /**
-     * Tests the class {@link AltLocRemoteHost} and ensures it can be constructed, 
-     *  accessed, and that the returns are sane.
-     */
-    public void testAltLocRemoteHost() throws UnknownHostException {
-        
-        IpPort ipPort = new ConnectableImpl("akzp.com", 55, false);
-        
-        RemoteHost remoteHost = new AltLocRemoteHost(ipPort);
-        
-        // The outcome of these functions is never determinate for an AltLoc
-        //  so it is a matter of app behaviour preference what they return
-        //  therefore ignore the result but make sure they do not cause
-        //  exceptions.
-        remoteHost.isBrowseHostEnabled();
-        remoteHost.isChatEnabled();
-        remoteHost.isSharingEnabled();
-       
-        assertNotNull(remoteHost.getFriendPresence());
-        assertEquals(55, 
-           ((Connectable)remoteHost.getFriendPresence().getFeature(AddressFeature.ID).getFeature()).getPort());
-    }
 }
