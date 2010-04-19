@@ -46,13 +46,14 @@ public class TrackerScraper {
     private static String UNRESERVED_CHARS =
         // when determining if a url needs encoding
         // % should be ok  (michaelt - '%' removed because it broke uri)
-        "+"
-        // reserved (michaelt: ???? guess the trackers expect these ???)
-        + ";?:@=&/"
+      //  "+"
+        // reserved (michaelt: ???? guess the trackers expect these ???  removed!)
+      //  + ";?:@=&/"
         // unreserved (special characters) ' excluded,
         // since some buggy trackers fail with those
         // (michaelt:  ??? removed '$' since it seems to break things ??)
-        + "-_.!~*(),"
+        //+
+        "-_.!~*(),"
         // unreserved (alphanumerics)
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         + "0123456789";
