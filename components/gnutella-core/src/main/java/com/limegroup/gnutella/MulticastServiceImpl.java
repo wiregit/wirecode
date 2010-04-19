@@ -166,7 +166,7 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
                 Enumeration<InetAddress> addrs = iface.getInetAddresses();
                 while(addrs.hasMoreElements()) {
                     InetAddress addr = addrs.nextElement();
-                    if(addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
+                    if(addr.isSiteLocalAddress()) {
                         LOG.debug("Binding to LAN interface " + addr.getHostAddress());
                         return addr;
                     }
