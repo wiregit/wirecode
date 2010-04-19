@@ -90,8 +90,8 @@ class ViewMenu extends DelayedMnemonicMenu {
         group.add(showDownloads);
         group.add(showUploads);
         
-        add(buildShowHideChatWindowAction(chatFrameProvider));
         add(buildShowHomeScreenAction());
+        add(buildShowHideChatWindowAction(chatFrameProvider));
         addSeparator();
         add(hideTransferTray);
         add(showDownloads);
