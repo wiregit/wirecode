@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentScrapeData;
+import org.limewire.inject.LazySingleton;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
@@ -35,6 +36,7 @@ import com.limegroup.gnutella.URN;
  * TODO: convert to singleton, use sha1 to hash, cache management,
  *        tracker ban, figure out random openbt fails.
  */
+@LazySingleton
 public class TorrentScrapeScheduler {
     
     private static final long PERIOD = 1200;
@@ -55,10 +57,10 @@ public class TorrentScrapeScheduler {
     
     private ScheduledFuture<?> future = null;
     
-    private final Map<Torrent,TorrentScrapeData> resultsMap 
-        = new HashMap<Torrent, TorrentScrapeData>();
+    private final Map<String,TorrentScrapeData> resultsMap 
+        = new HashMap<String, TorrentScrapeData>();
         
-    private final List<Torrent> failedTorrents = new ArrayList<Torrent>();
+    private final List<String> failedTorrents = new ArrayList<String>();
     
     private final Queue<Torrent> torrentsToScrape
         = new LinkedList<Torrent>();
@@ -105,26 +107,29 @@ public class TorrentScrapeScheduler {
      */
     public void queueScrapeIfNew(Torrent torrent) {
         
-        if (currentlyScrapingTorrent.get() == torrent) {
+        Torrent current = currentlyScrapingTorrent.get();
+        if (current != null && torrent.getSha1().equals(current.getSha1())) {
             return;
         }
         
         synchronized (resultsMap) {
-            if (resultsMap.containsKey(torrent)) {
+            if (resultsMap.containsKey(torrent.getSha1())) {
                 return;
             }
         }
 
         synchronized (failedTorrents) {
-            if (failedTorrents.contains(torrent)) {
+            if (failedTorrents.contains(torrent.getSha1())) {
                 return;
             }
         }
 
         
         synchronized (torrentsToScrape) {
-            if (torrentsToScrape.contains(torrent)) {
-                return;
+            for ( Torrent torrentToScrape : torrentsToScrape ) {
+                if (torrentToScrape.getSha1().equals(torrent.getSha1())) {
+                    return;
+                }
             }
             
             System.out.println(torrent.getName() + " queued");
@@ -150,7 +155,7 @@ public class TorrentScrapeScheduler {
      */
     public TorrentScrapeData getScrapeDataIfAvailable(Torrent torrent) {
         synchronized (resultsMap) {
-            return resultsMap.get(torrent);
+            return resultsMap.get(torrent.getSha1());
         }
     }
     
@@ -160,7 +165,7 @@ public class TorrentScrapeScheduler {
     private void markCurrentTorrentFailure() {
         System.out.println("  " + currentlyScrapingTorrent.get().getName() + " MARK FAIL");
         synchronized (failedTorrents) {
-            failedTorrents.add(currentlyScrapingTorrent.getAndSet(null));
+            failedTorrents.add(currentlyScrapingTorrent.getAndSet(null).getSha1());
         }
     }
     
@@ -233,7 +238,7 @@ public class TorrentScrapeScheduler {
                         public void success(TorrentScrapeData data) {
                             synchronized (resultsMap) {
                                 System.out.println("  " + torrent.getName() + " FOUND");
-                                resultsMap.put(currentlyScrapingTorrent.getAndSet(null),
+                                resultsMap.put(currentlyScrapingTorrent.getAndSet(null).getSha1(),
                                             data);
                             }
                         }
