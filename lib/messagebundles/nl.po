@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-16 13:48-0400\n"
-"PO-Revision-Date: 2010-03-28 22:47+0000\n"
-"Last-Translator: kim serlet <Unknown>\n"
+"POT-Creation-Date: 2010-04-16 19:57-0400\n"
+"PO-Revision-Date: 2010-04-17 17:59+0000\n"
+"Last-Translator: BertP <bproesmans@hotmail.com>\n"
 "Language-Team: NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-04-17 00:25+0000\n"
+"X-Launchpad-Export-Date: 2010-04-19 15:25+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Dutch\n"
 
@@ -90,7 +90,7 @@ msgstr "Er is een probleem met de schijf"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:39
 msgid "The file is corrupted"
-msgstr "bestand is beschadigd"
+msgstr "Het bestand is beschadigd"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
 msgid "The file is invalid"
@@ -123,6 +123,8 @@ msgstr ""
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
 msgid "The file could not be scanned for viruses. Preview anyway?"
 msgstr ""
+"Het bestand kon niet gescand worden op virussen. Wil je het toch "
+"voorvertonen?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -130,7 +132,7 @@ msgstr "XMPP Service"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr ""
+msgstr "REST Service"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -145,7 +147,7 @@ msgstr "Beschikbaar"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:111
 msgid "Away"
-msgstr "Weg"
+msgstr "Afwezig"
 
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:112
@@ -819,6 +821,10 @@ msgid ""
 "connections on the local machine. Please add LimeWire as an exception to "
 "your security software and restart LimeWire."
 msgstr ""
+"Limewire kon niet starten. Dit gebeurd meestal door een "
+"beveiligingsprogramma dat Limewire's toegang tot het internet of connecties "
+"binnen deze computer blokeerd. Voeg Limewire AUB toe aan de "
+"uitzonderingslijst van uw beveiligingssoftware en herstart Limewire."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:682
 msgid ""
@@ -1485,12 +1491,16 @@ msgid ""
 "This torrent contains files with the following extensions, which LimeWire is "
 "configured not to download: {0}."
 msgstr ""
+"Deze torrent bevat bestanden met de volgende extensies waarvan Limewire niet "
+"is geconfigureerd om te downloaden: {0}."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:122
 msgid ""
 "Downloading this torrent could damage your computer. Are you sure you want "
 "to continue?"
 msgstr ""
+"Deze torrent downloaden kan je computer beschadigen. Weet je zeker dat je "
+"wilt doorgaan?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:124
 #, java-format
@@ -3279,7 +3289,7 @@ msgstr "&FAQ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:51
 msgid "&Forum"
-msgstr ""
+msgstr "&Forum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
 msgid "&Give Feedback"
@@ -3487,7 +3497,7 @@ msgstr "Filteren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:39
 msgid "External Access"
-msgstr ""
+msgstr "Toegang van buitenaf"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:82
 msgid ""
@@ -3582,10 +3592,12 @@ msgid ""
 "LimeWire can allow other processes to make use of its services, like search "
 "and download, via a REST interface."
 msgstr ""
+"Limewire kan andere processen toestaan om gebruik te maken van zijn "
+"services, zoals zoeken en downloaden, via een REST interface."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExternalAccessOptionPanel.java:47
 msgid "Enable local access to REST service"
-msgstr ""
+msgstr "Activeer lokale toegang tot de REST service"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:76
 msgid "Add Extension"
@@ -3880,19 +3892,19 @@ msgstr "Wachtwoord:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:315
 msgid "Username cannot be blank."
-msgstr ""
+msgstr "Gebruikersnaam mag niet leeg zijn."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:323
 msgid "Password cannot be blank."
-msgstr ""
+msgstr "Wachtwoord mag niet leeg zijn."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:335
 msgid "Service cannot be blank."
-msgstr ""
+msgstr "Service mag niet leeg zijn."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:336
 msgid "Service"
-msgstr ""
+msgstr "Service"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:82
 msgid "Let LimeWire choose my network interface (Recommended)"
@@ -4023,7 +4035,7 @@ msgstr "Zoek standaard naar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:153
 msgid "Suggest smart searches"
-msgstr ""
+msgstr "Suggesteer zoekopdrachten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:156
 msgid "Remember my recent searches"
@@ -4114,7 +4126,7 @@ msgstr "Bestandsassociaties"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:123
 msgid "\"magnet\" links"
-msgstr ""
+msgstr "\"magnet\" links"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:140
 msgid "Warn me when other programs want to automatically open these types"
@@ -4512,7 +4524,7 @@ msgstr "Adres blokkeren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:378
 msgid "Torrent Settings"
-msgstr ""
+msgstr "Torrent instellingen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
@@ -4639,7 +4651,7 @@ msgstr "Tracker-URL ongeldig"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:98
 msgid "Version"
-msgstr ""
+msgstr "Versie"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:103
 msgid "Total Completed:"
@@ -4679,23 +4691,23 @@ msgstr "Torrentdownload"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:196
 msgid "Use default torrent options"
-msgstr ""
+msgstr "Gebruik de standaard torrent opties"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:197
 msgid "Upload this torrent forever"
-msgstr ""
+msgstr "Upload deze torrent voor altijd"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:198
 msgid "Upload this torrent until either of the following:"
-msgstr ""
+msgstr "Upload deze torrent tot een van de volgende:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:223
 msgid "Limit this torrent's download bandwidth"
-msgstr ""
+msgstr "Limiteer de download bandbreedte van deze torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:233
 msgid "Limit this torrent's upload bandwidth"
-msgstr ""
+msgstr "Limiteer de upload bandbreedte van deze torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:56
 msgid "Choose files to download"
@@ -4833,11 +4845,11 @@ msgstr "Alle vrienden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:347
 msgid "History"
-msgstr ""
+msgstr "Geschiedenis"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:349
 msgid "Smart Search"
-msgstr ""
+msgstr "Intelligent zoeken"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/KeywordAssistedSearchBuilder.java:24
 msgid ":"
@@ -5051,13 +5063,13 @@ msgstr "Andere resultaten voor {0} - toont {1} van {2}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:61
 #, java-format
 msgid "{0} is \"{1}\""
-msgstr ""
+msgstr "{0} is \"{1}\""
 
 #. {0}: property key, {1}: property value, {2}: property key, {3}: property value
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:69
 #, java-format
 msgid "{0} \"{1}\" - {2} \"{3}\""
-msgstr ""
+msgstr "{0} \"{1}\" - {2} \"{3}\""
 
 #. {0}: property key, {1}: property value
 #. {2}: property key, {3}: property value
@@ -5065,7 +5077,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:82
 #, java-format
 msgid "{0} \"{1}\" - {2} \"{3}\" - {4} \"{5}\""
-msgstr ""
+msgstr "{0} \"{1}\" - {2} \"{3}\" - {4} \"{5}\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:69
 msgid "Sort by:"
@@ -5591,11 +5603,11 @@ msgstr "Datum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:42
 msgid "Torrent"
-msgstr ""
+msgstr "Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:43
 msgid "User Agent"
-msgstr ""
+msgstr "Gebruikersagent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:78
 #, java-format
@@ -5677,11 +5689,11 @@ msgstr "Uitstekende kwaliteit"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:68
 msgid "The magnet link is invalid."
-msgstr ""
+msgstr "De magnet link is ongeldig."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:69
 msgid "Invalid Magnet Link"
-msgstr ""
+msgstr "Ongeldige magnet link."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:87
 msgid "Unable to open URL"
@@ -6034,7 +6046,7 @@ msgstr "Bestandsassociaties en opstarten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
 msgid "Associate magnet links and torrent files with LimeWire"
-msgstr ""
+msgstr "Koppel magnet links en torrent bestanden aan Limewire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:66
 msgid "Launch LimeWire at system startup"

@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire 5.4.6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-16 13:48-0400\n"
-"PO-Revision-Date: 2010-03-24 12:25+0000\n"
-"Last-Translator: Alexander Gorbounov <Unknown>\n"
+"POT-Creation-Date: 2010-04-16 19:57-0400\n"
+"PO-Revision-Date: 2010-04-18 12:17+0000\n"
+"Last-Translator: tenor <Unknown>\n"
 "Language-Team: Launchpad Translators\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2010-04-17 00:24+0000\n"
+"X-Launchpad-Export-Date: 2010-04-19 15:24+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 "X-Poedit-Language: Russian\n"
@@ -124,7 +124,7 @@ msgstr ""
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
 msgid "The file could not be scanned for viruses. Preview anyway?"
-msgstr ""
+msgstr "Файл не может быть проверен на вирусы. Все равно посмотреть?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -968,11 +968,13 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:135
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "License Key:"
-msgstr ""
+msgstr "Лицензионный Ключ:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:431
 msgid "Your License Key has been used on too many installations."
 msgstr ""
+"Ваш Лицензионный ключ был использован для слишком большого количества "
+"установок."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:433
 msgid "Connection error. Please try again later."
@@ -980,15 +982,15 @@ msgstr "Ошибка соединения. Пожалуйста попробуй
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:435
 msgid "Invalid License Key."
-msgstr ""
+msgstr "Неправильный Лицензионный ключ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:456
 msgid "Go PRO"
-msgstr ""
+msgstr "Перейти на PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:457
 msgid "Upgrade to PRO"
-msgstr ""
+msgstr "Обновить до PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:458
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
@@ -1016,7 +1018,7 @@ msgstr "Обновить"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:493
 msgid "Update the saved key"
-msgstr ""
+msgstr "Обновить сохраненный ключ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:109
@@ -1034,7 +1036,7 @@ msgstr "Редактировать учётную запись"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:533
 msgid "Edit information about the account associated with this License Key"
-msgstr ""
+msgstr "Редактировать информацию об аккаунте связанную с Лицензионным Ключом"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:574
 #, java-format
@@ -1055,11 +1057,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:609
 msgid "Edit Key"
-msgstr ""
+msgstr "Изменение ключа"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:610
 msgid "Edit the saved License Key"
-msgstr ""
+msgstr "Редактировать сохраненный Лицензионный Ключ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:621
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/CancelAllDownloadsAction.java:36
@@ -1086,7 +1088,7 @@ msgstr "Отмена"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:622
 msgid "Cancel editing"
-msgstr ""
+msgstr "Отменить редактирование"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:147
 msgid "Feature"
@@ -1094,20 +1096,20 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:147
 msgid "Registered"
-msgstr ""
+msgstr "Зарегистрирован"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:147
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
 msgid "Expires"
-msgstr ""
+msgstr "Истекает"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:179
 msgid "Lost your license?"
-msgstr ""
+msgstr "Потеряли вашу лицензию?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationTable.java:254
 msgid "Expired"
-msgstr ""
+msgstr "Недействительный"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/LostLicenseItem.java:35
 msgid "Don't see your features?"
@@ -1471,11 +1473,13 @@ msgid ""
 "Downloading this torrent could damage your computer. Are you sure you want "
 "to continue?"
 msgstr ""
+"Загрузка этого торрента может навредить вашему компьютеру. Вы точно хотите "
+"продолжить?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:124
 #, java-format
 msgid "Warning: {0}"
-msgstr ""
+msgstr "Предупреждение: {0}"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -1498,7 +1502,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:34
 msgid "Close Tab"
-msgstr ""
+msgstr "Закрыть вкладку"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/FancyTabProperties.java:35
 msgid "Close All Tabs"
@@ -3240,7 +3244,7 @@ msgstr "&FAQ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:51
 msgid "&Forum"
-msgstr ""
+msgstr "&Форум"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
 msgid "&Give Feedback"
@@ -3323,72 +3327,72 @@ msgstr "&Список Общего"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:43
 msgid "&Store"
-msgstr ""
+msgstr "&Сохранить"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:54
 msgid "&Home"
-msgstr ""
+msgstr "&Домой"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:63
 msgid "&Log In"
-msgstr ""
+msgstr "&Войти"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:64
 msgid "&Sign Up"
-msgstr ""
+msgstr "&Зарегистрироваться"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:66
 msgid "&Genres"
-msgstr ""
+msgstr "&Жанры"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:67
 msgid "&Alternative"
-msgstr ""
+msgstr "&Альтернатива"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:68
 msgid "&Country"
-msgstr ""
+msgstr "&Кантри"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:69
 msgid "&Electronica"
-msgstr ""
+msgstr "&Электроника"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:70
 msgid "&Folk"
-msgstr ""
+msgstr "&Фолк"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:71
 msgid "&Jazz"
-msgstr ""
+msgstr "&Джаз"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:72
 msgid "&Pop"
-msgstr ""
+msgstr "&Поп"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:73
 msgid "&Rap"
-msgstr ""
+msgstr "&Рэп"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:74
 msgid "&Rhythm and Blues"
-msgstr ""
+msgstr "&Ритм и Блюз"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:75
 msgid "&Rock"
-msgstr ""
+msgstr "&Рок"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:76
 msgid "&World"
-msgstr ""
+msgstr "&Мир"
 
 #. add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:80
 msgid "LimeWire Store Hel&p"
-msgstr ""
+msgstr "Помощь по хранилищу LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:84
 msgid "His&tory"
-msgstr ""
+msgstr "Ис&тория"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:50
 msgid "&Tools"
@@ -3448,7 +3452,7 @@ msgstr "Фильтрация"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:39
 msgid "External Access"
-msgstr ""
+msgstr "Удаленный Доступ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:82
 msgid ""
@@ -3825,19 +3829,19 @@ msgstr "Пароль:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:315
 msgid "Username cannot be blank."
-msgstr ""
+msgstr "Имя пользователя не может быть пустым."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:323
 msgid "Password cannot be blank."
-msgstr ""
+msgstr "Пароль не может быть пустым."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:335
 msgid "Service cannot be blank."
-msgstr ""
+msgstr "Служба не может быть пустой."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:336
 msgid "Service"
-msgstr ""
+msgstr "Служба"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:82
 msgid "Let LimeWire choose my network interface (Recommended)"
@@ -4053,7 +4057,7 @@ msgstr "Файловые Ассоциации"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:123
 msgid "\"magnet\" links"
-msgstr ""
+msgstr "\"magnet\" ссылки"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:140
 msgid "Warn me when other programs want to automatically open these types"
@@ -4153,7 +4157,7 @@ msgstr "Если файл существует, загрузить переим�
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:200
 msgid "Scan files I download for viruses"
-msgstr ""
+msgstr "Проверить загруженные файлы на вирусы"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:223
 msgid "Download Folders"
@@ -4363,11 +4367,11 @@ msgstr "Почему"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:324
 msgid "Sorry, your license key has been blocked"
-msgstr ""
+msgstr "Извините, ваш лицензионный ключ заблокирован"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:327
 msgid "Your license key has been used on too many installations. "
-msgstr ""
+msgstr "Ваш лицензионный ключ был использован слишком много установок. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:328
 #, java-format
@@ -4376,7 +4380,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:336
 msgid "Edit License Key"
-msgstr ""
+msgstr "Редактировать Лицензионный Ключ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:352
 msgid "Time to Renew Your LimeWire"
@@ -4446,11 +4450,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
-msgstr ""
+msgstr "Скопировать Magnet ссылку"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:395
 msgid "Rename File"
-msgstr ""
+msgstr "Переименовать Файл"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:116
 msgid "Preparing View..."
@@ -4569,7 +4573,7 @@ msgstr "Неверный URL Трекера"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:98
 msgid "Version"
-msgstr ""
+msgstr "Версия"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:103
 msgid "Total Completed:"
@@ -4609,7 +4613,7 @@ msgstr "Загрузить Торент"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:196
 msgid "Use default torrent options"
-msgstr ""
+msgstr "Использовать стандартные настройки торрента"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:197
 msgid "Upload this torrent forever"
@@ -4757,11 +4761,11 @@ msgstr "Все Друзья"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:347
 msgid "History"
-msgstr ""
+msgstr "История"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:349
 msgid "Smart Search"
-msgstr ""
+msgstr "Интеллектуальный поиск"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/KeywordAssistedSearchBuilder.java:24
 msgid ":"
@@ -5518,7 +5522,7 @@ msgstr "Дата"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:42
 msgid "Torrent"
-msgstr ""
+msgstr "Торрент"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:43
 msgid "User Agent"
@@ -5604,11 +5608,11 @@ msgstr "Превосходное Качество"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:68
 msgid "The magnet link is invalid."
-msgstr ""
+msgstr "Magnet ссылка неправильная."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:69
 msgid "Invalid Magnet Link"
-msgstr ""
+msgstr "Неправильная Magnet ссылка"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:87
 msgid "Unable to open URL"
@@ -5870,7 +5874,7 @@ msgstr "Я согласен"
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
 msgid "Activate your LimeWire PRO."
-msgstr ""
+msgstr "Активировать ваш LimeWire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:69
 msgid "Want to go PRO?"
@@ -5883,10 +5887,12 @@ msgid ""
 "Enter your activation key below. This was sent to the email address you used "
 "when purchasing. You can always do this later on from the File menu."
 msgstr ""
+"Введите ваш лицензионный ключ ниже. Он был послан вам на email адрес при "
+"покупке. Вы можете всегда сделать это позже из меню Файл"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
 msgid "I don't know my license key"
-msgstr ""
+msgstr "У меня нет лицензионного ключа"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -5895,15 +5901,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:193
 msgid "Invalid license key."
-msgstr ""
+msgstr "Неправильный лицензионный ключ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:197
 msgid "Your license key has been used on too many installations."
-msgstr ""
+msgstr "Ваш лицензионный ключ был использован слишком много установок."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:202
 msgid "Communication error. Please try again later."
-msgstr ""
+msgstr "Ошибка соединения. Пожалуйста попробуйте позже."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationTable.java:47
 msgid "Feature Type"
@@ -5919,15 +5925,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:50
 msgid "Your license has been activated, but..."
-msgstr ""
+msgstr "Ваша лицензия была активирована, но..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:53
 msgid "Yay! Your license has been successfully activated."
-msgstr ""
+msgstr "Ура! Ваша лицензия была успешно активирована."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:56
 msgid "Thank you! You have successfully activated your license."
-msgstr ""
+msgstr "Спасибо! Вы успешно активировали лицензию."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:85
 #, java-format
@@ -5941,7 +5947,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:96
 #, java-format
 msgid "Click on {0} for more information."
-msgstr ""
+msgstr "Нажмите на {0} для получения дополнительной информации."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:109
 #, java-format
@@ -5956,7 +5962,7 @@ msgstr "Файловые ассоциации и запуск"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
 msgid "Associate magnet links and torrent files with LimeWire"
-msgstr ""
+msgstr "Ассоциировать magnet ссылки и торрент файлы с LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:66
 msgid "Launch LimeWire at system startup"
@@ -6026,19 +6032,19 @@ msgstr "{0} общие файлы из вашей предыдущей верс�
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:104
 msgid "LimeWire PRO"
-msgstr ""
+msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:113
 msgid "You can activate LimeWire PRO later from File > License"
-msgstr ""
+msgstr "Вы можете активировать LimeWire PRO позже из Файл > Лицензия"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "No thanks"
-msgstr ""
+msgstr "Нет, спасибо"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"
-msgstr ""
+msgstr "Вы можете редактировать вашу лицензию из Файл > Лицензия"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75

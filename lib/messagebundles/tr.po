@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-16 13:48-0400\n"
-"PO-Revision-Date: 2010-04-12 01:03+0000\n"
-"Last-Translator: thondras <Unknown>\n"
+"POT-Creation-Date: 2010-04-16 19:57-0400\n"
+"PO-Revision-Date: 2010-04-18 13:01+0000\n"
+"Last-Translator: JohnBenjaminOsman <Unknown>\n"
 "Language-Team: TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-04-17 00:25+0000\n"
+"X-Launchpad-Export-Date: 2010-04-19 15:24+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -121,7 +121,7 @@ msgstr ""
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
 msgid "The file could not be scanned for viruses. Preview anyway?"
-msgstr ""
+msgstr "Dosya virüsler için taranamadı. Yine de önizlensin mi?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -129,7 +129,7 @@ msgstr "XMPP Hizmeti"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr ""
+msgstr "REST Servisi"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -354,7 +354,7 @@ msgstr "Güncelleme Denetlemeleri"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:17
 msgid "Title"
-msgstr "Eser Adı"
+msgstr "Başlık"
 
 #. *
 #. * Variables for displaying substitutable values, visual form
@@ -1484,11 +1484,13 @@ msgid ""
 "Downloading this torrent could damage your computer. Are you sure you want "
 "to continue?"
 msgstr ""
+"Bu torrenti indirmek bilgisayarınıza zarar verebilir. Devam etmek "
+"istediğinize emin misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:124
 #, java-format
 msgid "Warning: {0}"
-msgstr ""
+msgstr "Uyarı: {0}"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -3240,11 +3242,11 @@ msgstr "&SSS"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:51
 msgid "&Forum"
-msgstr ""
+msgstr "&Forum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
 msgid "&Give Feedback"
-msgstr "Geribildirim verin"
+msgstr "&Geribildirim Verin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:59
 msgid "Get Personalized &Tech Support"
@@ -3448,7 +3450,7 @@ msgstr "Filtreleme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:39
 msgid "External Access"
-msgstr ""
+msgstr "Dışsal Erişim"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:82
 msgid ""
@@ -3831,19 +3833,19 @@ msgstr "Şifre:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:315
 msgid "Username cannot be blank."
-msgstr ""
+msgstr "Kullanıcı adı boş olamaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:323
 msgid "Password cannot be blank."
-msgstr ""
+msgstr "Parola boş olamaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:335
 msgid "Service cannot be blank."
-msgstr ""
+msgstr "Servis boş olamaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:336
 msgid "Service"
-msgstr ""
+msgstr "Servis"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:82
 msgid "Let LimeWire choose my network interface (Recommended)"
@@ -3973,7 +3975,7 @@ msgstr "Varsayılan olarak, şunu ara"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:153
 msgid "Suggest smart searches"
-msgstr ""
+msgstr "Akıllı aramalar öner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:156
 msgid "Remember my recent searches"
@@ -4067,7 +4069,7 @@ msgstr "Dosya İlişkileri"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:123
 msgid "\"magnet\" links"
-msgstr ""
+msgstr "\"magnet\" bağlantıları"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:140
 msgid "Warn me when other programs want to automatically open these types"
@@ -4140,7 +4142,7 @@ msgstr "Yükleme bant genişliğinizi sınırlandırın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferLimitsOptionPanel.java:214
 msgid "Maximum uploads at once:"
-msgstr "Bir defada en fazla yükleme:"
+msgstr "Bir kerede en fazla yükleme:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:82
 msgid "Configure Torrent Settings"
@@ -4148,11 +4150,11 @@ msgstr "Torrent Ayarlarını Yapılandır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:82
 msgid "Configure Torrent Settings..."
-msgstr "Akış ayarlarını yapılandır"
+msgstr "Akış Ayarlarını Yapılandır..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:82
 msgid "Configure torrent settings."
-msgstr "Akış ayarlarını yapılandırın"
+msgstr "Akış ayarlarını yapılandır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:184
 msgid "Save all downloads to one folder:"
@@ -4207,7 +4209,7 @@ msgstr "Tepsi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:401
 msgid "Close tray when there are no transfers"
-msgstr "Aktarım olmadığında tepsiyi kapat"
+msgstr "Hiçbir aktarım olmadığında tepsiyi kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:404
 msgid "Show total bandwidth"
@@ -4239,7 +4241,7 @@ msgstr "Ayarlar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:468
 msgid "Configure transfer limit settings."
-msgstr "Aktarım sınır ayarlarını yapılandır."
+msgstr "Aktarım sınırı ayarlarını yapılandır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:62
 msgid "Allow me to search for and share Programs with anyone"
@@ -4459,7 +4461,7 @@ msgstr "Adresi Engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:378
 msgid "Torrent Settings"
-msgstr ""
+msgstr "Torrent Ayarları"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
@@ -4511,7 +4513,7 @@ msgstr "Başarısız İndirme:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:172
 msgid "Uploaded:"
-msgstr "Yüklendi:"
+msgstr "Yüklenen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:192
 msgid "Download Cancelled!"
@@ -4586,7 +4588,7 @@ msgstr "İzleyici URL hatalı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:98
 msgid "Version"
-msgstr ""
+msgstr "Sürüm"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:103
 msgid "Total Completed:"
@@ -4626,11 +4628,11 @@ msgstr "Torrent İndirme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:196
 msgid "Use default torrent options"
-msgstr ""
+msgstr "Öntanımlı torrent seçeneklerini kullan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:197
 msgid "Upload this torrent forever"
-msgstr ""
+msgstr "Bu torrenti sonsuza kadar yükle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:198
 msgid "Upload this torrent until either of the following:"
@@ -4780,11 +4782,11 @@ msgstr "Tüm Arkadaşlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:347
 msgid "History"
-msgstr ""
+msgstr "Geçmiş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:349
 msgid "Smart Search"
-msgstr ""
+msgstr "Akıllı Arama"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/KeywordAssistedSearchBuilder.java:24
 msgid ":"
@@ -5335,7 +5337,7 @@ msgstr "LimeWire'ı göster"
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:115
 msgid "Exit After Transfers"
-msgstr "Aktarımlar Tamamlanınca Çık"
+msgstr "Aktarımlardan Sonra Çık"
 
 #. exit
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:126
@@ -5385,7 +5387,7 @@ msgstr "Tüm torrentlerin yüklenmesi iptal edilsin mi?"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:149
 msgid "Note: Downloading torrents will be cancelled as well."
-msgstr "Not: İndirilmekte olan torrentler de iptal edilecek."
+msgstr "Not: İndirilen torrentler de iptal edilecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:142
 msgid "All Uploads"
@@ -5408,7 +5410,7 @@ msgid ""
 "If you stop this upload, the torrent download will stop.  Are you sure you "
 "want to do this?"
 msgstr ""
-"Bu yüklemeyi durdurursanız, torrent indirmeleri de durdurulacak. Bunu yapmak "
+"Bu yüklemeyi durdurursanız torrent indirme duracak. Bunu yapmak "
 "istediğinizden emin misiniz?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadMediator.java:406
@@ -5536,11 +5538,11 @@ msgstr "Tarih"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:42
 msgid "Torrent"
-msgstr ""
+msgstr "Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:43
 msgid "User Agent"
-msgstr ""
+msgstr "Kullanıcı Aracısı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:78
 #, java-format
@@ -5622,11 +5624,11 @@ msgstr "Mükemmel Kalite"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:68
 msgid "The magnet link is invalid."
-msgstr ""
+msgstr "Bu magnet bağlantısı geçersiz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandlerImpl.java:69
 msgid "Invalid Magnet Link"
-msgstr ""
+msgstr "Geçersiz Magnet Bağlantısı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:87
 msgid "Unable to open URL"
@@ -6055,7 +6057,8 @@ msgid ""
 "{0} shared files from your previous version will continue to be shared with "
 "the world."
 msgstr ""
-"Önceki versiyonunuzda paylaşılan {0} dosya paylaşılmaya devam edecek."
+"Önceki sürümünüzdeki paylaşılan {0} dosya herkesle paylaşılmaya devam "
+"edilecek."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:104
 msgid "LimeWire PRO"
