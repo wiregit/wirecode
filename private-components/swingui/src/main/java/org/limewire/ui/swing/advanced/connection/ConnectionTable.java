@@ -9,13 +9,10 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
@@ -23,10 +20,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.ui.swing.advanced.connection.ConnectionTableFormat.ConnectionColumn;
+import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.I18n;
 
@@ -103,7 +100,7 @@ public class ConnectionTable extends MouseableTable {
         super.createDefaultRenderers();
         
         // Install custom renderer for Object values.
-        setDefaultRenderer(Object.class, new ObjectCellRenderer());
+        setDefaultRenderer(Object.class, new DefaultLimeTableCellRenderer());
     }
 
     /**
@@ -444,30 +441,6 @@ public class ConnectionTable extends MouseableTable {
             // Resize table columns to fit.
             packAll();
         }
-    }
-
-    /**
-     * Cell renderer for Object values. 
-     */
-    private static class ObjectCellRenderer extends DefaultTableRenderer {
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            
-            // Retrieve renderer component.
-            Component renderer = super.getTableCellRendererComponent(table, value, 
-                    isSelected, hasFocus, row, column);
-            
-            // Set renderer attributes.  The border is set so that the focused
-            // cell border is never seen.
-            if (renderer instanceof JLabel) {
-                ((JLabel) renderer).setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-            }
-            
-            return renderer;
-        }
-
     }
 
     /**
