@@ -2,6 +2,8 @@ package org.limewire.setting.jmx;
 
 import java.io.File;
 
+import javax.management.MXBean;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
 import org.limewire.setting.FileSetting;
@@ -14,6 +16,7 @@ import org.limewire.setting.StringSetting;
 /**
  * A JMX Bean interface for {@link Setting}s.
  */
+@MXBean
 public interface SettingBean {
 
     /**
@@ -62,6 +65,11 @@ public interface SettingBean {
     public String getKey();
     
     /**
+     * Returns the remote key of the {@link Setting}
+     */
+    public String getRemoteKey();
+    
+    /**
      * Reloads the {@link Setting}'s value from the properties
      */
     public void reload();
@@ -73,8 +81,15 @@ public interface SettingBean {
         
         private final Setting setting;
         
+        private final String remoteKey;
+        
         public Impl(Setting setting) {
+            this(setting, null);
+        }
+        
+        public Impl(Setting setting, String remoteKey) {
             this.setting = setting;
+            this.remoteKey = remoteKey;
         }
         
         @Override
@@ -136,6 +151,11 @@ public interface SettingBean {
             return setting.getKey();
         }
         
+        @Override
+        public String getRemoteKey() {
+            return remoteKey;
+        }
+
         @Override
         public void reload() {
             setting.reload();
