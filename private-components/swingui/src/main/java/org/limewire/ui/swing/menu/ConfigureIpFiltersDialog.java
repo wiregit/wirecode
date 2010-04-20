@@ -65,7 +65,7 @@ public class ConfigureIpFiltersDialog extends LimeJDialog {
         container.add(blacklist, "span, wrap");
         container.add(new JLabel(I18n.tr("Only connect to peers from:")));
         container.add(whitelist, "span, wrap");
-        container.add(new MultiLineLabel(I18n.tr("Valid country codes are:\n\n{0}\n", StringUtils.explode(countryCode, ", ")), 400), "span, wrap");
+        container.add(new MultiLineLabel(I18n.tr("Valid country codes are:\n\n{0}\n\nThis product includes GeoLite data created by MaxMind, available from http://www.maxmind.com/.\n", StringUtils.explode(countryCode, ", ")), 400), "span, wrap");
         container.add(new JButton(new OKAction()), "cell 3 3, alignx right");
         container.add(new JButton(new CancelAction()), "cell 3 3, alignx right");
         getContentPane().add(container);
