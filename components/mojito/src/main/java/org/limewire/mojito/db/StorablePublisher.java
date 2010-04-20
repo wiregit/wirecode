@@ -5,18 +5,19 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.Context;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 
 /**
  * Publishes {@link Storable} values in the DHT.
@@ -25,18 +26,17 @@ public class StorablePublisher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(StorablePublisher.class);
     
-    private final Context context;
+    @InspectablePrimitive(value = "The number of times values have been re-published")
+    private static final AtomicInteger REPUBLISHED_COUNT = new AtomicInteger();
     
-    private final DatabaseStatisticContainer databaseStats;
+    private final Context2 context;
     
     private ScheduledFuture future;
     
     private final PublishTask publishTask = new PublishTask();
     
-    public StorablePublisher(Context context) {
+    public StorablePublisher(Context2 context) {
         this.context = context;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     /**
@@ -171,7 +171,7 @@ public class StorablePublisher implements Runnable {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
-            databaseStats.REPUBLISHED_VALUES.incrementStat();
+            REPUBLISHED_COUNT.incrementAndGet();
             
             future = context.store(DHTValueEntity.createFromStorable(context, storable));
             future.addFutureListener(new StoreResultHandler(storable));

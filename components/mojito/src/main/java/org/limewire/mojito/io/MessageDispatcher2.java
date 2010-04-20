@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.ResponseHandler2;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -52,8 +51,8 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    private final List<MessageDispatcherListener> listeners 
-        = new CopyOnWriteArrayList<MessageDispatcherListener>();
+    private final List<MessageDispatcherListener2> listeners 
+        = new CopyOnWriteArrayList<MessageDispatcherListener2>();
     
     /**
      * 
@@ -91,14 +90,14 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    public void addMessageDispatcherListener(MessageDispatcherListener l) {
+    public void addMessageDispatcherListener(MessageDispatcherListener2 l) {
         listeners.add(l);
     }
     
     /**
      * 
      */
-    public void removeMessageDispatcherListener(MessageDispatcherListener l) {
+    public void removeMessageDispatcherListener(MessageDispatcherListener2 l) {
         listeners.remove(l);
     }
     
