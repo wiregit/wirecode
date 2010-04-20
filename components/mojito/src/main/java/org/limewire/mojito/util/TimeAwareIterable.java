@@ -19,12 +19,9 @@
 
 package org.limewire.mojito.util;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
-
-import org.limewire.collection.CollectionUtils;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TimeAwareIterable has a maximum time for which it's valid
@@ -54,36 +51,53 @@ public class TimeAwareIterable<E> implements Iterable<E> {
     
     private final long maxTime;
 
-    private final List<? extends E> elements;
+    private final TimeUnit unit;
+    
+    private final E[] elements;
     
     /**
      * Creates a TimeAwareIterable with a default sample size of 10.
      * 
-     * @param maxTime the maximum time this Iterable is valid
      * @param elements the elements to process
+     * @param maxTime the maximum time this {@link Iterable} is valid
+     * @param unit the {@link TimeUnit} of maxTime
      */
-    public TimeAwareIterable(long maxTime, Collection<? extends E> elements) {
-        this(10, maxTime, elements);
+    public TimeAwareIterable(E[] elements, 
+            long maxTime, TimeUnit unit) {
+        this(10, elements, maxTime, unit);
     }
     
     /**
      * Creates a TimeAwareIterable.
      * 
      * @param sampleSize the sample size to compute the average time between calls
-     * @param maxTime the maximum time this Iterable is valid
      * @param elements the elements to process
+     * @param maxTime the maximum time this {@link Iterable} is valid
+     * @param unit the {@link TimeUnit} of maxTime
      */
-    public TimeAwareIterable(int sampleSize, long maxTime, 
-            Collection<? extends E> elements) {
+    public TimeAwareIterable(int sampleSize, 
+            E[] elements, long maxTime, TimeUnit unit) {
         this.sampleSize = sampleSize;
+        this.elements = elements;
         this.maxTime = maxTime;
-        this.elements = CollectionUtils.toList(elements);
+        this.unit = unit;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Iterable#iterator()
+    /**
+     * Returns the maxTime in the given {@link TimeUnit}
      */
+    public long getMaxTime(TimeUnit unit) {
+        return unit.convert(maxTime, this.unit);
+    }
+    
+    /**
+     * Returns the maxTime in milliseconds
+     */
+    public long getMaxTimeInMillis() {
+        return getMaxTime(TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
     public Iterator<E> iterator() {
         return new TimeAwareIterator();
     }
@@ -94,6 +108,8 @@ public class TimeAwareIterable<E> implements Iterable<E> {
     private class TimeAwareIterator implements Iterator<E> {
         
         private final long[] samples = new long[sampleSize];
+        
+        private final long maxTime = getMaxTimeInMillis();
         
         private int sampleCount = 0;
         
@@ -107,8 +123,9 @@ public class TimeAwareIterable<E> implements Iterable<E> {
         
         private int nextIndex = 0;
         
+        @Override
         public boolean hasNext() {
-            if (currentIndex == -1 && nextIndex < elements.size()) {
+            if (currentIndex == -1 && nextIndex < elements.length) {
                 long currentTime = System.currentTimeMillis();
                 long average = 0L;
                 
@@ -123,10 +140,11 @@ public class TimeAwareIterable<E> implements Iterable<E> {
                 
                 // If there's not enough time left then exit
                 long timeRemaining = maxTime - (currentTime - startTime);
+                
                 if (timeRemaining >= average) {
                     currentIndex = nextIndex;
                     nextIndex++;
-                    int elementsRemaining = elements.size() - nextIndex;
+                    int elementsRemaining = elements.length - nextIndex;
                     assert (elementsRemaining >= 0);
                     nextIndex += (int)(average*elementsRemaining/timeRemaining);
                 }
@@ -135,6 +153,7 @@ public class TimeAwareIterable<E> implements Iterable<E> {
             return currentIndex != -1;
         }
         
+        @Override
         public E next() {
             if (startTime == -1L || currentIndex == -1) {
                 throw new NoSuchElementException();
@@ -142,16 +161,17 @@ public class TimeAwareIterable<E> implements Iterable<E> {
             
             int index = currentIndex;
             currentIndex = -1;
-            return elements.get(index);
+            return elements[index];
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
         
-        private long addSample(long time) {
-            if (time >= 0L) {
-                samples[sampleIndex] = time;
+        private long addSample(long timeInMillis) {
+            if (timeInMillis >= 0L) {
+                samples[sampleIndex] = timeInMillis;
                 sampleIndex = (sampleIndex + 1) % samples.length;
                 
                 if (sampleCount < samples.length) {

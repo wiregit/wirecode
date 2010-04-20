@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.concurrent.FutureEvent;
@@ -171,7 +172,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         
         KUID[] bucketIds = getBucketsToRefresh();
         bucketsToRefresh = new TimeAwareIterable<KUID>(
-                maxTime, bucketIds).iterator();
+                bucketIds, maxTime, TimeUnit.MILLISECONDS).iterator();
         
         synchronized (future) {
             if (future.isDone()) {
