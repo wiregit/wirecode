@@ -11,15 +11,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.routing.RouteTable;
 
+/**
+ * 
+ */
 public class DatabaseCleaner2 implements Closeable {
 
-    private static final Log LOG = LogFactory.getLog(DatabaseCleaner2.class);
+    private static final Log LOG 
+        = LogFactory.getLog(DatabaseCleaner2.class);
     
     @InspectablePrimitive(value = "Expired Value Count")
-    private static final AtomicInteger EXPIRED_VALUE_COUNT = new AtomicInteger();
+    private static final AtomicInteger EXPIRED_COUNT = new AtomicInteger();
     
     private static final ScheduledExecutorService EXECUTOR 
         = Executors.newSingleThreadScheduledExecutor(
@@ -33,6 +38,16 @@ public class DatabaseCleaner2 implements Closeable {
     
     private final ScheduledFuture<?> future;
     
+    /**
+     * 
+     */
+    public DatabaseCleaner2(MojitoDHT2 dht, long frequency, TimeUnit unit) {
+        this(dht.getRouteTable(), dht.getDatabase(), frequency, unit);
+    }
+    
+    /**
+     * 
+     */
     public DatabaseCleaner2(RouteTable routeTable, 
             Database database, long frequency, TimeUnit unit) {
         
@@ -72,7 +87,7 @@ public class DatabaseCleaner2 implements Closeable {
                     database.remove(entity.getPrimaryKey(), 
                             entity.getSecondaryKey());
                     
-                    EXPIRED_VALUE_COUNT.incrementAndGet();
+                    EXPIRED_COUNT.incrementAndGet();
                 }
             }
         }
