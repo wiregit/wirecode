@@ -33,6 +33,7 @@ import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.EventUtils;
 import org.limewire.mojito.util.FixedSizeHashSet;
 
 /**
@@ -57,33 +58,27 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    private final TransportListener listener = new TransportListener() {
-        @Override
-        public void received(SocketAddress src, 
-                DHTMessage message) throws IOException {
-            MessageDispatcher2.this.handleMessage(message);
-        }
-    };
-    
     private final RequestManager requestManager = new RequestManager();
     
+    /**
+     * 
+     */
     private final ResponseHistory history = new ResponseHistory(512);
     
+    /**
+     * 
+     */
     private final Transport transport;
     
-    private final MessageCodec codec;
-    
-    public MessageDispatcher2(Transport transport, MessageCodec codec) {
-        
+    /**
+     * 
+     */
+    public MessageDispatcher2(Transport transport) {
         this.transport = transport;
-        this.codec = codec;
-        
-        transport.addTransportListener(listener);
     }
     
     @Override
     public void close() {
-        transport.removeTransportListener(listener);
         requestManager.close();
     }
     
@@ -107,6 +102,8 @@ public abstract class MessageDispatcher2 implements Closeable {
     public void send(Contact dst, ResponseMessage response) throws IOException {
         SocketAddress address = dst.getContactAddress();
         transport.send(address, response);
+        
+        fireMessageSent(response);
     }
     
     /**
@@ -119,6 +116,8 @@ public abstract class MessageDispatcher2 implements Closeable {
         requestManager.add(callback, contactId, dst, 
                 request, timeout, unit);
         transport.send(dst, request);
+        
+        fireMessageSent(request);
     }
     
     /**
@@ -130,6 +129,8 @@ public abstract class MessageDispatcher2 implements Closeable {
         } else {
             handleResponse((ResponseMessage)message);
         }
+        
+        fireMessageReceived(message);
     }
     
     /**
@@ -195,6 +196,36 @@ public abstract class MessageDispatcher2 implements Closeable {
         }
     }
     
+    protected void fireMessageSent(final DHTMessage message) {
+        if (!listeners.isEmpty()) {
+            Runnable event = new Runnable() {
+                @Override
+                public void run() {
+                    for (MessageDispatcherListener2 l : listeners) {
+                        l.messageSent(message);
+                    }
+                }
+            };
+            
+            EventUtils.fireEvent(event);
+        }
+    }
+    
+    protected void fireMessageReceived(final DHTMessage message) {
+        if (!listeners.isEmpty()) {
+            Runnable event = new Runnable() {
+                @Override
+                public void run() {
+                    for (MessageDispatcherListener2 l : listeners) {
+                        l.messageReceived(message);
+                    }
+                }
+            };
+            
+            EventUtils.fireEvent(event);
+        }
+    }
+    
     /**
      * 
      */
@@ -218,59 +249,8 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     public static interface Transport {
         
-        public void send(SocketAddress dst, DHTMessage message) throws IOException;
-        
-        public void addTransportListener(TransportListener l);
-        
-        public void removeTransportListener(TransportListener l);
-        
-        public TransportListener[] getTransportListeners();
-    }
-    
-    /**
-     * 
-     */
-    public static interface TransportListener {
-        
-        /**
-         * 
-         */
-        public void received(SocketAddress src, DHTMessage message) throws IOException;
-    }
-    
-    /**
-     * 
-     */
-    public static abstract class AbstractTransport implements Transport {
-
-        protected final List<TransportListener> listeners 
-            = new CopyOnWriteArrayList<TransportListener>();
-        
-        @Override
-        public void addTransportListener(TransportListener l) {
-            listeners.add(l);
-        }
-
-        @Override
-        public void removeTransportListener(TransportListener l) {
-            listeners.remove(l);
-        }
-        
-        @Override
-        public TransportListener[] getTransportListeners() {
-            return listeners.toArray(new TransportListener[0]);
-        }
-        
-        /**
-         * 
-         */
-        protected void fireMessageReceived(SocketAddress src, 
-                DHTMessage message) throws IOException {
-            
-            for (TransportListener l : listeners) {
-                l.received(src, message);
-            }
-        }
+        public void send(SocketAddress dst, 
+                DHTMessage message) throws IOException;
     }
     
     /**

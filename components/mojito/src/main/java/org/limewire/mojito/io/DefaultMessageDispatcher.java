@@ -53,9 +53,9 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     private final StoreRequestHandler2 store;
     
     public DefaultMessageDispatcher(Context2 context, 
-            Transport transport, MessageCodec codec,
-            RouteTable routeTable, Database database) {
-        super(transport, codec);
+            Transport transport, RouteTable routeTable, 
+            Database database) {
+        super(transport);
         
         this.context = context;
         this.routeTable = routeTable;

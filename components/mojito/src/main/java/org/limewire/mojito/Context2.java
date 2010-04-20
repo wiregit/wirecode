@@ -13,7 +13,6 @@ import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
-import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -56,6 +55,9 @@ public class Context2 implements Closeable {
      * 
      */
     private final FutureManager futureManager = new FutureManager();
+    
+    private final MACCalculatorRepositoryManager calculator 
+        = new MACCalculatorRepositoryManager();
     
     /**
      * 
@@ -104,9 +106,6 @@ public class Context2 implements Closeable {
         this.database = database;
         
         this.messageHelper = new MessageHelper2(this, messageFactory);
-        
-        MACCalculatorRepositoryManager calculator 
-            = new MACCalculatorRepositoryManager();
         
         SecurityToken.TokenProvider tokenProvider 
             = new SecurityToken.AddressSecurityTokenProvider(calculator);
@@ -165,6 +164,13 @@ public class Context2 implements Closeable {
      */
     public SecurityTokenHelper2 getSecurityTokenHelper() {
         return tokenHelper;
+    }
+    
+    /**
+     * 
+     */
+    public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager() {
+        return calculator;
     }
     
     /**
