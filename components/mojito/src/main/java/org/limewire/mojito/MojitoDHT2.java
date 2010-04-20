@@ -24,6 +24,11 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
+    public String getName();
+    
+    /**
+     * 
+     */
     public BigInteger size();
     
     /**

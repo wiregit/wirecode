@@ -32,6 +32,8 @@ import org.limewire.security.SecurityToken;
 
 public class Context2 implements MojitoDHT2 {
     
+    private static final String NAME = "Mojito";
+    
     /**
      * 
      */
@@ -112,6 +114,11 @@ public class Context2 implements MojitoDHT2 {
         this.tokenHelper = new SecurityTokenHelper2(tokenProvider);
     }
     
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
     @Override
     public void close() {
         futureManager.close();
