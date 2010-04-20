@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-19 11:21-0400\n"
+"POT-Creation-Date: 2010-04-20 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1229,26 +1229,26 @@ msgstr ""
 msgid "Ultrapeers"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:54
 msgid "Revert To Default"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:55
 msgid "Sort Automatically"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:59
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:56
 msgid "Extended Tooltips"
 msgstr ""
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
 #. we check both the mousePressed and mouseReleased events.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:73
 msgid "Right-click to select columns to display"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:301
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:298
 msgid "More Options"
 msgstr ""
 
