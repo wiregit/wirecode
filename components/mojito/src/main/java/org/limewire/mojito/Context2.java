@@ -1,6 +1,5 @@
 package org.limewire.mojito;
 
-import java.io.Closeable;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +30,7 @@ import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
-public class Context2 implements Closeable {
+public class Context2 implements MojitoDHT2 {
     
     /**
      * 
@@ -119,35 +118,27 @@ public class Context2 implements Closeable {
         estimator.clear();
     }
     
-    //@Override
+    @Override
     public BigInteger size() {
         return estimator.getEstimatedSize(routeTable);
     }
     
-    /**
-     * 
-     */
+    @Override
     public MessageDispatcher2 getMessageDispatcher() {
         return messageDispatcher;
     }
     
-    /**
-     * 
-     */
+    @Override
     public RouteTable getRouteTable() {
         return routeTable;
     }
     
-    /**
-     * 
-     */
+    @Override
     public Database getDatabase() {
         return database;
     }
     
-    /**
-     * 
-     */
+    @Override
     public MessageFactory getMessageFactory() {
         return messageHelper.getMessageFactory();
     }
@@ -173,9 +164,7 @@ public class Context2 implements Closeable {
         return calculator;
     }
     
-    /**
-     * 
-     */
+    @Override
     public LocalContact getLocalNode() {
         return (LocalContact)routeTable.getLocalNode();
     }
@@ -229,23 +218,17 @@ public class Context2 implements Closeable {
         return false;
     }
     
-    /**
-     * 
-     */
+    @Override
     public boolean isFirewalled() {
         return getLocalNode().isFirewalled();
     }
     
-    /**
-     * 
-     */
+    @Override
     public HostFilter getHostFilter() {
         return hostFilter;
     }
     
-    /**
-     * 
-     */
+    @Override
     public void setHostFilter(HostFilter hostFilter) {
         this.hostFilter = hostFilter;
     }
@@ -256,7 +239,7 @@ public class Context2 implements Closeable {
         return null;
     }*/
     
-    //@Override
+    @Override
     public DHTFuture<PingEntity> ping(SocketAddress dst, 
             long timeout, TimeUnit unit) {
         AsyncProcess<PingEntity> process = new PingResponseHandler2(
@@ -268,7 +251,7 @@ public class Context2 implements Closeable {
         return future;
     }
     
-    //@Override
+    @Override
     public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
         AsyncProcess<PingEntity> process = new PingResponseHandler2(
                 this, dst, timeout, unit);
@@ -279,7 +262,7 @@ public class Context2 implements Closeable {
         return future;
     }
     
-    //@Override
+    @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
@@ -296,7 +279,7 @@ public class Context2 implements Closeable {
         return futureManager.submit(process, timeout, unit);
     }
     
-    //@Override
+    @Override
     public DHTFuture<ValueEntity> get(KUID lookupId, 
             long timeout, TimeUnit unit) {
         
@@ -306,7 +289,7 @@ public class Context2 implements Closeable {
         return get(key, timeout, unit);
     }
     
-    //@Override
+    @Override
     public DHTFuture<ValueEntity> get(EntityKey key, 
             long timeout, TimeUnit unit) {
         
