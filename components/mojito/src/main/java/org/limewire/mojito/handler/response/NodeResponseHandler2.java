@@ -9,7 +9,6 @@ import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultNodeEntity;
 import org.limewire.mojito.entity.NodeEntity;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.MessageHelper2;
@@ -22,18 +21,15 @@ import org.limewire.security.SecurityToken;
 public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
 
     public NodeResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher, 
             KUID lookupId, 
             long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, lookupId, timeout, unit);
+        super(context, lookupId, timeout, unit);
     }
     
     public NodeResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher,
             KUID lookupId, Contact[] contacts, 
             long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, 
-                lookupId, contacts, timeout, unit);
+        super(context, lookupId, contacts, timeout, unit);
     }
     
     @Override
@@ -58,8 +54,7 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
         MessageHelper2 messageHelper = context.getMessageHelper();
         FindNodeRequest request = messageHelper.createFindNodeRequest(addr, lookupId);
         
-        messageDispatcher.send(this, contactId, 
-                addr, request, timeout, unit);
+        send(contactId, addr, request, timeout, unit);
     }
 
     @Override

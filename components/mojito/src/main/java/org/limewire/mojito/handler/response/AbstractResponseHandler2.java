@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.AsyncProcess;
@@ -15,17 +13,13 @@ import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.util.Objects;
 
 public abstract class AbstractResponseHandler2<V extends Entity> 
         implements ResponseHandler2, AsyncProcess<V> {
     
-    private static final Log LOG 
-        = LogFactory.getLog(AbstractResponseHandler2.class);
-
     protected final Context2 context;
-    
-    protected final MessageDispatcher2 messageDispatcher;
     
     protected final long timeout;
     
@@ -38,13 +32,18 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     private long timeStamp = 0L;
     
     public AbstractResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher, 
             long timeout, TimeUnit unit) {
         
         this.context = context;
-        this.messageDispatcher = messageDispatcher;
         this.timeout = timeout;
         this.unit = unit;
+    }
+    
+    /**
+     * 
+     */
+    public Context2 getContext() {
+        return context;
     }
     
     /**
@@ -206,6 +205,27 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     protected synchronized void processException(
             RequestMessage request, Throwable exception) {
         setException(exception);
+    }
+    
+    /**
+     * 
+     */
+    protected void send(Contact dst, ResponseMessage response) throws IOException {
+        MessageDispatcher2 messageDispatcher 
+            = context.getMessageDispatcher();
+        messageDispatcher.send(dst, response);
+    }
+    
+    /**
+     * 
+     */
+    protected void send(KUID contactId, SocketAddress addr, 
+            RequestMessage response, long timeout, TimeUnit unit) throws IOException {
+        
+        MessageDispatcher2 messageDispatcher 
+            = context.getMessageDispatcher();
+        messageDispatcher.send(this, contactId, addr, 
+                response, timeout, unit);
     }
     
     public static class RequestTimeoutException extends IOException {

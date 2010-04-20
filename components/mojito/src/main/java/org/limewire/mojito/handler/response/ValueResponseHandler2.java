@@ -16,7 +16,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
@@ -47,11 +46,9 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         = new ArrayList<DHTValueEntity>();
     
     public ValueResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher, 
             EntityKey lookupKey, 
             long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, 
-                lookupKey.getPrimaryKey(), timeout, unit);
+        super(context, lookupKey.getPrimaryKey(), timeout, unit);
         this.lookupKey = lookupKey;
     }
 
@@ -68,7 +65,7 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         FindValueRequest request = messageHelper.createFindValueRequest(
                 addr, key, noKeys, lookupKey.getDHTValueType());
         
-        messageDispatcher.send(this, contactId, addr, request, timeout, unit);
+        send(contactId, addr, request, timeout, unit);
     }
     
     @Override

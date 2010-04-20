@@ -20,7 +20,6 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.entity.DefaultStoreEntity;
 import org.limewire.mojito.entity.StoreEntity;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
@@ -52,11 +51,10 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
         = new HashMap<Contact, List<StoreStatusCode>>();
     
     public StoreResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher,
             Entry<Contact, SecurityToken>[] contacts, 
             DHTValueEntity[] entities, 
             long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, timeout, unit);
+        super(context, timeout, unit);
         
         for (Entry<Contact, SecurityToken> entry : contacts) {
             Contact node = entry.getKey();
@@ -266,8 +264,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             StoreRequest request = messageHelper.createStoreRequest(
                     addr, securityToken, Collections.singleton(entity));
             
-            messageDispatcher.send(StoreResponseHandler2.this, 
-                    contactId, addr, request, adaptiveTimeout, unit);
+            send(contactId, addr, request, adaptiveTimeout, unit);
         
             return false;
         }

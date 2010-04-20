@@ -260,7 +260,7 @@ public class Context2 implements Closeable {
     public DHTFuture<PingEntity> ping(SocketAddress dst, 
             long timeout, TimeUnit unit) {
         AsyncProcess<PingEntity> process = new PingResponseHandler2(
-                this, messageDispatcher, dst, timeout, unit);
+                this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
             = futureManager.submit(process, timeout, unit);
@@ -271,7 +271,7 @@ public class Context2 implements Closeable {
     //@Override
     public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
         AsyncProcess<PingEntity> process = new PingResponseHandler2(
-                this, messageDispatcher, dst, timeout, unit);
+                this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
             = futureManager.submit(process, timeout, unit);
@@ -283,7 +283,7 @@ public class Context2 implements Closeable {
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
-                this, messageDispatcher, lookupId, timeout, unit);
+                this, lookupId, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
     }
@@ -291,7 +291,7 @@ public class Context2 implements Closeable {
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             Contact[] contacts, long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
-                this, messageDispatcher, lookupId, contacts, timeout, unit);
+                this, lookupId, contacts, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
     }
@@ -311,7 +311,7 @@ public class Context2 implements Closeable {
             long timeout, TimeUnit unit) {
         
         AsyncProcess<ValueEntity> process = new ValueResponseHandler2(
-                this, messageDispatcher, key, timeout, unit);
+                this, key, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
     }

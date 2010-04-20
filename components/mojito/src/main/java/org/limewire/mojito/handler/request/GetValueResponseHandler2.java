@@ -17,7 +17,6 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.handler.response.AbstractResponseHandler2;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.MessageHelper2;
@@ -33,10 +32,9 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
     
     private final EntityKey lookupKey;
     
-    public GetValueResponseHandler2(
-            MessageDispatcher2 messageDispatcher, Context2 context, 
+    public GetValueResponseHandler2(Context2 context, 
             EntityKey lookupKey, long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, timeout, unit);
+        super(context, timeout, unit);
         
         this.lookupKey = lookupKey;
     }
@@ -61,8 +59,7 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         
         long adaptiveTimeout = node.getAdaptativeTimeout(timeout, unit);
         
-        messageDispatcher.send(this, contactId, addr, 
-                request, adaptiveTimeout, unit);
+        send(contactId, addr, request, adaptiveTimeout, unit);
     }
 
     @Override

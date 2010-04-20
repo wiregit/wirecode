@@ -9,8 +9,6 @@ import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultPingEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.handler.ResponseHandler2;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.PingResponse;
@@ -32,59 +30,51 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
      * 
      */
     public PingResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher, 
             SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        this(context, messageDispatcher, 
-                new SocketAddressPinger(dst), timeout, unit);
+        this(context, new SocketAddressPinger(dst), timeout, unit);
     }
     
     /**
      * 
      */
     public PingResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher, 
             KUID contactId,
             SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        this(context, messageDispatcher, 
-                new SocketAddressPinger(contactId, dst), timeout, unit);
+        this(context, new SocketAddressPinger(contactId, dst), 
+                timeout, unit);
     }
     
     /**
      * 
      */
     public PingResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher,
             Contact dst, long timeout, TimeUnit unit) {
-        this(context, messageDispatcher, 
-                new ContactPinger(dst), timeout, unit);
+        this(context, new ContactPinger(dst), timeout, unit);
     }
     
     /**
      * 
      */
     public PingResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher,
             Contact src, Contact dst, long timeout, TimeUnit unit) {
-        this(context, messageDispatcher, 
-                new ContactPinger(src, dst), timeout, unit);
+        this(context, new ContactPinger(src, dst), timeout, unit);
     }
     
     /**
      * 
      */
     private PingResponseHandler2(Context2 context, 
-            MessageDispatcher2 messageDispatcher,
             Pinger pinger, long timeout, TimeUnit unit) {
-        super(context, messageDispatcher, timeout, unit);
+        super(context, timeout, unit);
         
         this.pinger = pinger;
     }
     
     @Override
     protected void start() throws IOException {
-        pinger.ping(context, messageDispatcher, this, timeout, unit);
+        pinger.ping(this, timeout, unit);
     }
     
     /**
@@ -146,9 +136,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         /**
          * 
          */
-        public void ping(Context2 context, 
-                MessageDispatcher2 messageDispatcher, 
-                ResponseHandler2 callback, 
+        public void ping(PingResponseHandler2 handler,
                 long timeout, TimeUnit unit) throws IOException;
     }
     
@@ -171,15 +159,14 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
 
         @Override
-        public void ping(Context2 context, 
-                MessageDispatcher2 messageDispatcher, 
-                ResponseHandler2 callback, 
+        public void ping(PingResponseHandler2 handler,
                 long timeout, TimeUnit unit) throws IOException {
             
+            Context2 context = handler.getContext();
             MessageHelper2 messageHelper = context.getMessageHelper();
             RequestMessage request = messageHelper.createPingRequest(dst);
             
-            messageDispatcher.send(callback, contactId, dst, request, timeout, unit);
+            handler.send(contactId, dst, request, timeout, unit);
         }
     }
     
@@ -215,14 +202,13 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
         
         @Override
-        public void ping(Context2 context, 
-                MessageDispatcher2 messageDispatcher, 
-                ResponseHandler2 callback, 
+        public void ping(PingResponseHandler2 handler,
                 long timeout, TimeUnit unit) throws IOException {
             
             KUID contactId = dst.getNodeID();
             SocketAddress addr = dst.getContactAddress();
             
+            Context2 context = handler.getContext();
             MessageHelper2 messageHelper = context.getMessageHelper();
             
             RequestMessage request = null;
@@ -234,8 +220,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
                 request = messageFactory.createPingRequest(src, addr);
             }
             
-            messageDispatcher.send(callback, contactId, 
-                    addr, request, timeout, unit);
+            handler.send(contactId, addr, request, timeout, unit);
         }
     }
 }
