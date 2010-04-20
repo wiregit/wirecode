@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.Database;
 import org.limewire.mojito.handler.DefaultMessageHandler2;
 import org.limewire.mojito.handler.ResponseHandler2;
+import org.limewire.mojito.handler.StoreForward;
 import org.limewire.mojito.handler.request.NodeRequestHandler2;
 import org.limewire.mojito.handler.request.PingRequestHandler2;
 import org.limewire.mojito.handler.request.StoreRequestHandler2;
@@ -38,10 +38,6 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
 
     private final Context2 context;
     
-    private final RouteTable routeTable;
-    
-    private final Database database;
-    
     private final DefaultMessageHandler2 defaultHandler;
     
     private final PingRequestHandler2 ping;
@@ -54,14 +50,12 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     
     public DefaultMessageDispatcher(Context2 context, 
             Transport transport, RouteTable routeTable, 
-            Database database) {
+            StoreForward storeForward) {
         super(transport);
         
         this.context = context;
-        this.routeTable = routeTable;
-        this.database = database;
         
-        defaultHandler = new DefaultMessageHandler2(routeTable, database);
+        defaultHandler = new DefaultMessageHandler2(routeTable, storeForward);
         ping = new PingRequestHandler2(this, context);
         node = new NodeRequestHandler2(this, context);
         value = new ValueRequestHandler2(this, context, node);

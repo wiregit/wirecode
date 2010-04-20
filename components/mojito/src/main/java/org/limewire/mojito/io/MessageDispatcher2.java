@@ -14,10 +14,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.messages.DHTMessage;
@@ -48,6 +50,12 @@ public abstract class MessageDispatcher2 implements Closeable {
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory(
                 "MessageDispatcherThread"));
+    
+    @InspectablePrimitive(value = "")
+    private static final AtomicInteger MESSAGES_SENT = new AtomicInteger();
+    
+    @InspectablePrimitive(value = "")
+    private static final AtomicInteger MESSAGES_RECEIVED = new AtomicInteger();
     
     /**
      * 
@@ -197,6 +205,9 @@ public abstract class MessageDispatcher2 implements Closeable {
     }
     
     protected void fireMessageSent(final DHTMessage message) {
+        
+        MESSAGES_SENT.incrementAndGet();
+        
         if (!listeners.isEmpty()) {
             Runnable event = new Runnable() {
                 @Override
@@ -212,6 +223,9 @@ public abstract class MessageDispatcher2 implements Closeable {
     }
     
     protected void fireMessageReceived(final DHTMessage message) {
+        
+        MESSAGES_RECEIVED.incrementAndGet();
+        
         if (!listeners.isEmpty()) {
             Runnable event = new Runnable() {
                 @Override
