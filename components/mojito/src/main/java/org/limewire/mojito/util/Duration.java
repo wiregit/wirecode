@@ -14,15 +14,24 @@ public class Duration implements Comparable<Duration>, Serializable, Cloneable {
     
     private final TimeUnit unit;
     
+    /**
+     * Creates a time duration.
+     */
     public Duration(long duration, TimeUnit unit) {
         this.duration = duration;
         this.unit = unit;
     }
     
+    /**
+     * Returns the time duration in the given {@link TimeUnit}
+     */
     public long getDuration(TimeUnit unit) {
         return unit.convert(duration, this.unit);
     }
     
+    /**
+     * Returns the time duration im milliseconds
+     */
     public long getDurationInMillis() {
         return getDuration(TimeUnit.MILLISECONDS);
     }
