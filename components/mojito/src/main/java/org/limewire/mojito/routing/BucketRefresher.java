@@ -29,11 +29,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.manager.BootstrapManager;
+import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
@@ -49,13 +49,13 @@ public class BucketRefresher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(BucketRefresher.class);
     
-    private final Context context;
+    private final Context2 context;
     
     private final RefreshTask refreshTask = new RefreshTask();
     
     private ScheduledFuture future;
     
-    public BucketRefresher(Context context) {
+    public BucketRefresher(Context2 context) {
         this.context = context;
     }
     
@@ -178,11 +178,11 @@ public class BucketRefresher implements Runnable {
      * starts a new lookup for the next ID until all KUIDs have been
      * looked up.
      */
-    private class RefreshTask extends DHTFutureAdapter<FindNodeResult> {
+    private class RefreshTask extends DHTFutureAdapter<NodeEntity> {
         
         private Iterator<KUID> bucketIds = null;
         
-        private DHTFuture<FindNodeResult> future = null;
+        private DHTFuture<NodeEntity> future = null;
         
         /**
          * Returns whether or not the refresh task has 
@@ -241,7 +241,7 @@ public class BucketRefresher implements Runnable {
         }
         
         @Override
-        protected void operationComplete(FutureEvent<FindNodeResult> event) {
+        protected void operationComplete(FutureEvent<NodeEntity> event) {
             switch (event.getType()) {
                 case SUCCESS:
                     handleFutureSuccess(event.getResult());
@@ -255,7 +255,7 @@ public class BucketRefresher implements Runnable {
             }
         }
 
-        private void handleFutureSuccess(FindNodeResult result) {
+        private void handleFutureSuccess(NodeEntity result) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(result);
             }
