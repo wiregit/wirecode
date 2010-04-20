@@ -15,7 +15,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureTask;
 
 /**
- * The {@link FutureManager} manges {@link DHTFuture}s.
+ * The {@link FutureManager} executes and manages {@link DHTFuture}s.
  */
 class FutureManager implements Closeable {
 

@@ -60,8 +60,9 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     private final TransportListener listener = new TransportListener() {
         @Override
-        public void received(SocketAddress src, byte[] data) throws IOException {
-            MessageDispatcher2.this.handleMessage(src, data);
+        public void received(SocketAddress src, 
+                DHTMessage message) throws IOException {
+            MessageDispatcher2.this.handleMessage(message);
         }
     };
     
@@ -106,8 +107,7 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     public void send(Contact dst, ResponseMessage response) throws IOException {
         SocketAddress address = dst.getContactAddress();
-        byte[] data = codec.encode(address, response);
-        transport.send(address, data);
+        transport.send(address, response);
     }
     
     /**
@@ -117,19 +117,9 @@ public abstract class MessageDispatcher2 implements Closeable {
             SocketAddress dst, RequestMessage request, 
             long timeout, TimeUnit unit) throws IOException {
         
-        byte[] data = codec.encode(dst, request);
-        
         requestManager.add(callback, contactId, dst, 
                 request, timeout, unit);
-        transport.send(dst, data);
-    }
-    
-    /**
-     * 
-     */
-    public void handleMessage(SocketAddress src, byte[] data) throws IOException {
-        DHTMessage message = codec.decode(src, data);
-        handleMessage(message);
+        transport.send(dst, request);
     }
     
     /**
@@ -229,10 +219,7 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     public static interface Transport {
         
-        public void send(SocketAddress dst, byte[] data) throws IOException;
-        
-        public void send(SocketAddress dst, byte[] data, 
-                int offset, int length) throws IOException;
+        public void send(SocketAddress dst, DHTMessage message) throws IOException;
         
         public void addTransportListener(TransportListener l);
         
@@ -249,7 +236,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         /**
          * 
          */
-        public void received(SocketAddress src, byte[] data) throws IOException;
+        public void received(SocketAddress src, DHTMessage message) throws IOException;
     }
     
     /**
@@ -259,11 +246,6 @@ public abstract class MessageDispatcher2 implements Closeable {
 
         protected final List<TransportListener> listeners 
             = new CopyOnWriteArrayList<TransportListener>();
-        
-        @Override
-        public void send(SocketAddress dst, byte[] data) throws IOException {
-            send(dst, data, 0, data.length);
-        }
         
         @Override
         public void addTransportListener(TransportListener l) {
@@ -283,8 +265,9 @@ public abstract class MessageDispatcher2 implements Closeable {
         /**
          * 
          */
-        protected void received(SocketAddress src, byte[] message) 
-                throws IOException {
+        protected void fireMessageReceived(SocketAddress src, 
+                DHTMessage message) throws IOException {
+            
             for (TransportListener l : listeners) {
                 l.received(src, message);
             }

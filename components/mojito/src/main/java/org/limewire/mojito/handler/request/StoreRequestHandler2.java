@@ -51,7 +51,7 @@ import org.limewire.security.SecurityToken.TokenData;
 public class StoreRequestHandler2 extends AbstractRequestHandler2 {
     
     private static final Log LOG 
-        = LogFactory.getLog(StoreRequestHandler.class);
+        = LogFactory.getLog(StoreRequestHandler2.class);
     
     @InspectablePrimitive(value = "No Security Token")
     private static final AtomicInteger NO_SECURITY_TOKEN = new AtomicInteger();

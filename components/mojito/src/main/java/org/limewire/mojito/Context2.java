@@ -10,12 +10,16 @@ import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
+import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.handler.response.NodeResponseHandler2;
 import org.limewire.mojito.handler.response.PingResponseHandler2;
+import org.limewire.mojito.handler.response.ValueResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper2;
@@ -233,9 +237,18 @@ public class Context2 implements Closeable {
         return hostFilter;
     }
     
+    /**
+     * 
+     */
     public void setHostFilter(HostFilter hostFilter) {
         this.hostFilter = hostFilter;
     }
+    
+    //@Override
+    /*public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit) {
+        return null;
+    }*/
     
     //@Override
     public DHTFuture<PingEntity> ping(SocketAddress dst, 
@@ -261,20 +274,41 @@ public class Context2 implements Closeable {
     }
     
     //@Override
-    public DHTFuture<NodeEntity> lookup(KUID lookupId, long timeout, TimeUnit unit) {
+    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
+            long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
                 this, messageDispatcher, lookupId, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
     }
     
-    //@Override
-    /*public DHTFuture<ValueEntity> get(KUID lookupId, long timeout, TimeUnit unit) {
-        AsyncProcess<NodeEntity> process = new ValueResponseHandler2(
-                this, messageDispatcher, lookupId, timeout, unit);
+    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
+            Contact[] contacts, long timeout, TimeUnit unit) {
+        AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
+                this, messageDispatcher, lookupId, contacts, timeout, unit);
         
         return futureManager.submit(process, timeout, unit);
-    }*/
+    }
+    
+    //@Override
+    public DHTFuture<ValueEntity> get(KUID lookupId, 
+            long timeout, TimeUnit unit) {
+        
+        EntityKey key = EntityKey.createEntityKey(
+                lookupId, DHTValueType.ANY);
+        
+        return get(key, timeout, unit);
+    }
+    
+    //@Override
+    public DHTFuture<ValueEntity> get(EntityKey key, 
+            long timeout, TimeUnit unit) {
+        
+        AsyncProcess<ValueEntity> process = new ValueResponseHandler2(
+                this, messageDispatcher, key, timeout, unit);
+        
+        return futureManager.submit(process, timeout, unit);
+    }
     
     //@Override
     /*public DHTFuture<StoreEntity> put(KUID lookupId, long timeout, TimeUnit unit) {

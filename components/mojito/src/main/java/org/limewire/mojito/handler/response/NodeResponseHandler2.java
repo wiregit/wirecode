@@ -27,7 +27,15 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
             long timeout, TimeUnit unit) {
         super(context, messageDispatcher, lookupId, timeout, unit);
     }
-
+    
+    public NodeResponseHandler2(Context2 context, 
+            MessageDispatcher2 messageDispatcher,
+            KUID lookupId, Contact[] contacts, 
+            long timeout, TimeUnit unit) {
+        super(context, messageDispatcher, 
+                lookupId, contacts, timeout, unit);
+    }
+    
     @Override
     protected void complete(State state) {
         Entry<Contact, SecurityToken>[] contacts 

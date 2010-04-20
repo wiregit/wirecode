@@ -35,7 +35,7 @@ import org.limewire.security.SecurityToken;
 public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity> {
 
     private static final Log LOG 
-        = LogFactory.getLog(StoreResponseHandler.class);
+        = LogFactory.getLog(StoreResponseHandler2.class);
     
     private static final int PARALLELISM = 4;
     

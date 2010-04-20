@@ -45,6 +45,8 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
     
     private static final long BOOST_FREQUENCY = 1000L;
     
+    private static final int K = 20;
+    
     private static final int ALPHA = 4;
     
     private volatile long boostFrequency = BOOST_FREQUENCY;
@@ -71,7 +73,26 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         this.lookupId = lookupId;
         
-        lookupManager = new LookupManager(context, lookupId);
+        RouteTable routeTable = context.getRouteTable();
+        Collection<Contact> contacts 
+            = routeTable.select(lookupId, K, SelectMode.ALL);
+        
+        lookupManager = new LookupManager(context, 
+                lookupId, contacts.toArray(new Contact[0]));
+        lookupCounter = new MaxStack(alpha);
+    }
+    
+    public LookupResponseHandler2(Context2 context, 
+            MessageDispatcher2 messageDispatcher,
+            KUID lookupId, 
+            Contact[] contacts,
+            long timeout, TimeUnit unit) {
+        super(context, messageDispatcher, timeout, unit);
+        
+        this.lookupId = lookupId;
+        
+        lookupManager = new LookupManager(context, 
+                lookupId, contacts);
         lookupCounter = new MaxStack(alpha);
     }
 
@@ -247,15 +268,13 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
     
     private static class LookupManager {
         
-        private static final int K = 20;
-        
         private static boolean EXHAUSTIVE = false;
         
         private static boolean RANDOMIZE = false;
         
         private final Context2 context;
         
-        private final KUID key;
+        private final KUID lookupId;
         
         private final List<Contact> collisions = new ArrayList<Contact>();
         
@@ -272,12 +291,14 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         private int timeouts = 0;
         
-        public LookupManager(Context2 context, KUID key) {
+        public LookupManager(Context2 context, 
+                KUID lookupId, Contact[] contacts) {
+            
             this.context = context;
-            this.key = key;
+            this.lookupId = lookupId;
             
             Comparator<Contact> comparator 
-                = new XorComparator(key);
+                = new XorComparator(lookupId);
             
             responses = new TreeMap<Contact, SecurityToken>(comparator);
             closest = new TreeSet<Contact>(comparator);
@@ -288,10 +309,8 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
             KUID contactId = localhost.getNodeID();
             
             history.put(contactId, 0);
-            Collection<Contact> contacts 
-                = routeTable.select(key, K, SelectMode.ALL);
             
-            if (!contacts.isEmpty()) {
+            if (0 < contacts.length) {
                 addToResponses(localhost, null);
                 
                 for (Contact contact : contacts) {
@@ -388,7 +407,7 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
                 Contact contact = closest.last();
                 KUID contactId = contact.getNodeID();
                 KUID otherId = other.getNodeID();
-                return otherId.isNearerTo(key, contactId);
+                return otherId.isNearerTo(lookupId, contactId);
             }
             return true;
         }
