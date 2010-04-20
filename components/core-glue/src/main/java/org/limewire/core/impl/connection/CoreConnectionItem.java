@@ -8,7 +8,7 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.io.ConnectableImpl;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 
 /**
  * Live implementation of a ConnectionItem.  This is the rough equivalent of 
@@ -40,15 +40,15 @@ public class CoreConnectionItem implements ConnectionItem {
     /** Whether or not this dataline is in the 'connecting' state. */
     private boolean connecting = true;
 
-    private final Location location;
+    private final Country location;
 
     /**
      * Constructs a CoreConnectionItem for the specified connection.
-     * @param location 
+     * @param country 
      */
-    public CoreConnectionItem(RoutedConnection routedConnection, Location location) {
+    public CoreConnectionItem(RoutedConnection routedConnection, Country country) {
         this.routedConnection = routedConnection;
-        this.location = location;
+        this.location = country;
 
         // Initialize attributes.
         host = routedConnection.getAddress();

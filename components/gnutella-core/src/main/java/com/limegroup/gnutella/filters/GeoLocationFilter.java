@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 
 public class GeoLocationFilter extends AbstractIPFilter implements ResponseFilter {
     
@@ -57,16 +57,16 @@ public class GeoLocationFilter extends AbstractIPFilter implements ResponseFilte
 
     @Override
     protected boolean allowImpl(IP ip) {
-        Location location = geoIpLookupService.getLocation(ip);
-        if (location == null) {
+        Country country = geoIpLookupService.getCountry(ip);
+        if (country == null) {
             LOG.debugf("location null for {0}", ip);
             return false;
         }
-        if (filteredCountries.contains(location.countryCode)) {
-            LOG.debugf("filtered {0}", StringUtils.toString(location));
+        if (filteredCountries.contains(country.getCode())) {
+            LOG.debugf("{1} filtered {0}", StringUtils.toString(country), ip);
             return false;
-        } else if (!allowedCountries.isEmpty() && !allowedCountries.contains(location.countryCode)) {
-            LOG.debugf("not allowed {0}", StringUtils.toString(location));
+        } else if (!allowedCountries.isEmpty() && !allowedCountries.contains(country.getCode())) {
+            LOG.debugf("not allowed {0}", StringUtils.toString(country));
             return false;
         }
         return true;

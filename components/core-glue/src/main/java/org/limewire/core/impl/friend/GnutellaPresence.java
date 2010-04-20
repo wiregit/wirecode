@@ -13,7 +13,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 
 /**
  * An implementation of FriendPresence for a Gnutella address.  For example,
@@ -28,7 +28,7 @@ public abstract class GnutellaPresence implements FriendPresence {
     private final GnutellaFriend friend;
     
     /** Constructs a presence with the given Address. */
-    GnutellaPresence(Address address, Location location) {
+    GnutellaPresence(Address address, Country location) {
         this.friend = new GnutellaFriend(address, this, location);
     }
     
@@ -116,7 +116,7 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final String id;
         
         /** Constructs a presence with the given Address & id string. */
-        public GnutellaPresenceWithString(Address address, String id, Location location) {
+        public GnutellaPresenceWithString(Address address, String id, Country location) {
             super(address, location);
             this.id = id;
         }
@@ -132,7 +132,7 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final byte[] id;
         
         /** Constructs a presence with the given Address & byte[] as an id. */
-        public GnutellaPresenceWithGuid(Address address, byte[] id, Location location) {
+        public GnutellaPresenceWithGuid(Address address, byte[] id, Country location) {
             super(address, location);
             this.id = id;
         }
@@ -148,7 +148,7 @@ public abstract class GnutellaPresence implements FriendPresence {
         private final Connectable connectable;
         
         /** Constructs a presence with the given Connectable as the id & address. */
-        public GnutellaPresenceWithConnectable(Connectable address, Location location) {
+        public GnutellaPresenceWithConnectable(Connectable address, Country location) {
             super(address, location);
             this.connectable = address;
         }

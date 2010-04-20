@@ -79,7 +79,7 @@ public class RemoteFileDescAdapter implements SearchResult {
             CategoryManager categoryManager,
             TorrentFactory torrentFactory,
             GeoIpLookupService geoIpLookupService) {
-        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getLocation(rfd.getAddress())), categoryManager, torrentFactory);
+        this(rfd, locs, new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getCountry(rfd.getAddress())), categoryManager, torrentFactory);
     }
     
     /**

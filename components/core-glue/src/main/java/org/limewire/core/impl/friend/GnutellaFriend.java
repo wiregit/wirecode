@@ -20,7 +20,7 @@ import org.limewire.util.ByteUtils;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.PushEndpoint;
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 
 class GnutellaFriend implements Friend {
 
@@ -89,9 +89,9 @@ class GnutellaFriend implements Friend {
             "Grunion", "Grouper", "Guppy", "Gulper", "Crab", "Lobster", "Halibut", "Hagfish",
             "Horsefish", "Seahorse", "Jellyfish", "Killifish", "Trout", "Pike", "Ray", "Razorfish",
             "Ragfish", "Hamster", "Gerbil", "Mouse", "Gnome", "Shark", "Snail", "Skilfish" };
-    private final Location location;    
+    private final Country location;    
 
-    public GnutellaFriend(Address address, FriendPresence presence, Location location) {
+    public GnutellaFriend(Address address, FriendPresence presence, Country location) {
         this.location = location;
         this.address = Objects.nonNull(address, "address");
         this.presence = presence;
@@ -102,7 +102,7 @@ class GnutellaFriend implements Friend {
     }
     
     private String describe(Address address) {
-        String country = " (" + (location != null ? location.countryCode: "N/A") + ")"; 
+        String country = " (" + (location != null ? location.getCode(): "N/A") + ")"; 
         if(address instanceof Connectable || address instanceof PushEndpoint) {
             IpPort ipp = (IpPort)address;
             InetAddress inetAddr = ipp.getInetAddress();

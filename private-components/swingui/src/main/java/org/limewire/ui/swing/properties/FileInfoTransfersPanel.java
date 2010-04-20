@@ -47,7 +47,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.filters.GeoIpLookupService;
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 
 public class FileInfoTransfersPanel implements FileInfoPanel {
 
@@ -343,8 +343,8 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if (value != null){
                 String address = ((IpPort)value).getAddress();
-                Location location = geoIpLookupService.getLocation(address);
-                String country = " (" + (location != null ? location.countryCode: "N/A") + ")";
+                Country location = geoIpLookupService.getCountry(address);
+                String country = " (" + (location != null ? location.getCode(): "N/A") + ")";
                 value = address + country;
             }
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

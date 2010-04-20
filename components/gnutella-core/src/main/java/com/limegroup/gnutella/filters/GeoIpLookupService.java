@@ -3,7 +3,6 @@ package com.limegroup.gnutella.filters;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.PushEndpoint;
-import com.maxmind.geoip.Location;
+import com.maxmind.geoip.Country;
 import com.maxmind.geoip.LookupService;
 
 @Singleton
@@ -30,55 +29,55 @@ public class GeoIpLookupService {
     private final AtomicBoolean loaded = new AtomicBoolean(false);
     private final ScheduledExecutorService scheduledExecutorService;
     private volatile LookupService lookupService;
-    private final File geoIpDatabaseFile = new File(CommonUtils.getUserSettingsDir(), "GeoLiteCit.dat");
+    private final File geoIpDatabaseFile = new File(CommonUtils.getUserSettingsDir(), "GeoIP.dat");
     
     @Inject
     public GeoIpLookupService(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService) {
         this.scheduledExecutorService = scheduledExecutorService;
     }
     
-    public Location getLocation(IP ip) {
+    public Country getCountry(IP ip) {
         start();
         LookupService copy = lookupService;
         if (copy != null) {
-            return copy.getLocation(ip.addr);
+            Country country = copy.getCountry(ip.addr & 0xFFFFFFFFL);
+            return country;
         }
         return null;
     }
     
-    public Location getLocation(InetAddress address) {
+    
+    
+    public Country getCountry(InetAddress address) {
         start();
         LookupService copy = lookupService;
         if (copy != null) {
-            return copy.getLocation(address);
+            Country country = copy.getCountry(address);
+            return country;
         }
         return null;
     }
 
-    public Location getLocation(String address) {
+    public Country getCountry(String address) {
         start();
         LookupService copy = lookupService;
         if (copy != null) {
-            try {
-                return getLocation(InetAddress.getByName(address));
-            } catch (UnknownHostException bad) {
-            }
-            return copy.getLocation(address);
+            return copy.getCountry(address);
         }
         return null;
     }
     
-    public Location getLocation(Address address) {
+    public Country getCountry(Address address) {
         start();
         LookupService copy = lookupService;
         if (copy != null) {
             if (address instanceof Connectable) {
-                return copy.getLocation(((Connectable)address).getInetAddress());
+                return copy.getCountry(((Connectable)address).getInetAddress());
             }
             if (address instanceof PushEndpoint) {
                 IpPort ipPort = ((PushEndpoint)address).getValidExternalAddress();
                 if (ipPort != null) {
-                    return copy.getLocation(ipPort.getInetAddress());
+                    return copy.getCountry(ipPort.getInetAddress());
                 }
             }
         }
@@ -101,7 +100,7 @@ public class GeoIpLookupService {
         try {
             if (!geoIpDatabaseFile.exists()) {
                 LOG.debug("copy db file");
-                CommonUtils.copyResourceFile("org/limewire/GeoLiteCity.dat", geoIpDatabaseFile, false);
+                CommonUtils.copyResourceFile("org/limewire/GeoIP.dat", geoIpDatabaseFile, false);
             }
             lookupService = new LookupService(geoIpDatabaseFile, LookupService.GEOIP_MEMORY_CACHE);
         } catch (IOException e) {

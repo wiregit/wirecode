@@ -240,7 +240,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
         }
         if (currentPresence == null) {
             // copy construct connectable to give it full equals semantics
-            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost(), geoIpLookupService.getLocation(uploader));
+            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost(), geoIpLookupService.getCountry(uploader));
         }
         return currentPresence;
     }

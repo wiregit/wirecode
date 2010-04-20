@@ -210,7 +210,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
             friendPresence = friendManager.getMostRelevantFriendPresence(((FriendAddress)rfd.getAddress()).getId());
         } 
         if(friendPresence == null) {
-            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getLocation(rfd.getAddress()));
+            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID(), geoIpLookupService.getCountry(rfd.getAddress()));
         }
         return friendPresence;
     }

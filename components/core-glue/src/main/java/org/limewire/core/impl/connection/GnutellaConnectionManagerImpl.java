@@ -334,7 +334,7 @@ public class GnutellaConnectionManagerImpl
     private void addConnection(RoutedConnection connection) {
         ConnectionItem connectionItem = connectionMap.get(connection);
         if (connectionItem == null) {
-            connectionItem = new CoreConnectionItem(connection, geoIpLookupService.getLocation(connection.getAddress()));
+            connectionItem = new CoreConnectionItem(connection, geoIpLookupService.getCountry(connection.getAddress()));
             connectionMap.put(connection, connectionItem);
             connectionItemList.add(connectionItem);
         }
