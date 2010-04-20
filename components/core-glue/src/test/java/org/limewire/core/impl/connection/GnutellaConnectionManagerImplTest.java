@@ -60,7 +60,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
      */
     public void testRegisterConnectionListener() {
         final GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, null, null);
+                connectionManager, null, null, null);
         
         context.checking(new Expectations() {{
             exactly(1).of(connectionManager).addEventListener(gnutellaConnectionManager);
@@ -78,7 +78,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     public void testRegisterService() {
         
         final GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, null, null);
+                connectionManager, null, null, null);
 
         final ServiceRegistry registry = context.mock(ServiceRegistry.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
@@ -185,7 +185,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionServices connectionServices = context.mock(ConnectionServices.class);
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices, null);
+                connectionManager, connectionServices, null, null);
 
         context.checking(new Expectations() {{
                 one(connectionServices).isConnected();
@@ -210,7 +210,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionServices connectionServices = context.mock(ConnectionServices.class);
                 
         GnutellaConnectionManagerImpl gnutellaConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices, null);
+                connectionManager, connectionServices, null, null);
         context.checking(new Expectations() {{
                 one(connectionManager).isSupernode();
                 will(returnValue(true));
@@ -240,7 +240,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ConnectionItem connectionItemToBrowse = context.mock(ConnectionItem.class);
         
         GnutellaConnectionManagerImpl gConnectionManager = new GnutellaConnectionManagerImpl(
-                connectionManager, connectionServices, null);
+                connectionManager, connectionServices, null, null);
         
         context.checking(new Expectations() {{
             allowing(connectionItemToRemove);
@@ -280,7 +280,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
     public void testHandleConnectionLifecycleEvent() {
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager
-            = new GnutellaConnectionManagerImpl(connectionManager, null, null);
+            = new GnutellaConnectionManagerImpl(connectionManager, null, null, null);
         
         EventList<ConnectionItem> list = gnutellaConnectionManager.getConnectionList();
         
@@ -443,7 +443,7 @@ public class GnutellaConnectionManagerImplTest extends BaseTestCase {
         final ActivationManager activationManager = context.mock(ActivationManager.class);
         
         GnutellaConnectionManagerImpl gnutellaConnectionManager
-            = new GnutellaConnectionManagerImpl(connectionManager, null, activationManager);
+            = new GnutellaConnectionManagerImpl(connectionManager, null, activationManager, null);
         
         gnutellaConnectionManager.lastIdleTime = lastIdleTime;
         gnutellaConnectionManager.lastStrengthRelatedEvent = lastStrengthRelatedEvent;

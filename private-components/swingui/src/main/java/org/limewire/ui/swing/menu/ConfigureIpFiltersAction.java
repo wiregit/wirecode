@@ -8,7 +8,7 @@ import org.limewire.ui.swing.util.I18n;
 public class ConfigureIpFiltersAction extends AbstractAction {
     
     public ConfigureIpFiltersAction() {
-        super(I18n.tr("Configure blocked ips..."));
+        super(I18n.tr("Configure peers to connect to..."));
     }
 
     @Override

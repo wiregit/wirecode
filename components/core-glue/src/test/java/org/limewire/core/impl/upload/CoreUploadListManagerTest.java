@@ -53,7 +53,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null, null);
         
         final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
         
@@ -88,7 +88,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         final long testSize = 777;
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager), null);
                 
         context.checking(new Expectations() {
         {   
@@ -142,7 +142,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final FriendManager friendManager = context.mock(FriendManager.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager), null);
                 
         context.checking(new Expectations() {
             {   
@@ -202,7 +202,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         // Do we really need this dependence in CoreUploadListManager? 
         final UploadServices uploadServices = context.mock(UploadServices.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, friendManager, null, null);
         
         context.checking(new Expectations() {
             {   
@@ -256,7 +256,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager), null);
                 
         context.checking(new Expectations() {
         {   
@@ -309,7 +309,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final UploadItem uploadUploading3 = context.mock(UploadItem.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null, null);
                 
         context.checking(new Expectations() {
             {   
@@ -387,7 +387,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager), null);
                 
         context.checking(new Expectations() {
             {   
@@ -450,7 +450,7 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final CoreUploadItem item3 = context.mock(CoreUploadItem.class);
         final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null, null);
         
         context.checking(new Expectations() {
             {

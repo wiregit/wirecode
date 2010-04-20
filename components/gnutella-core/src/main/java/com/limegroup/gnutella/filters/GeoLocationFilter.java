@@ -49,7 +49,6 @@ public class GeoLocationFilter extends AbstractIPFilter implements ResponseFilte
     private void loadFilteredCountries() {
         ImmutableSet<String> localFiltered = ImmutableSet.copyOf(ConnectionSettings.FILTERED_COUNTRIES.get());
         ImmutableSet<String> localAllowed = ImmutableSet.copyOf(ConnectionSettings.ALLOWED_COUNTRIES.get());
-        assert localFiltered.isEmpty() || localAllowed.isEmpty();
         LOG.debugf("filtered {0}", localFiltered);
         LOG.debugf("allowed {0}", localAllowed);
         filteredCountries = localFiltered;

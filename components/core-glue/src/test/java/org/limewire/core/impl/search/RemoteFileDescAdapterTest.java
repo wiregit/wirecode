@@ -72,7 +72,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }});
 
         RemoteFileDescAdapter remoteFileDescAdapter1 =
-            new RemoteFileDescAdapter(remoteFileDesc1, ipPorts, categoryManager, torrentFactory);
+            new RemoteFileDescAdapter(remoteFileDesc1, ipPorts, categoryManager, torrentFactory, null);
 
         assertEquals(Category.DOCUMENT, remoteFileDescAdapter1.getCategory());
         assertEquals("txt", remoteFileDescAdapter1.getFileExtension());
@@ -199,7 +199,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }});
 
         if(anonymous) {
-            return new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+            return new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         } else {
             return new RemoteFileDescAdapter(rfd, locs, friendPresence, categoryManager, torrentFactory);
         }
@@ -243,7 +243,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         
         assertEquals("JPG", rfdAdapter.getFileExtension());
         assertEquals("Giant Guitar.JPG", rfdAdapter.getFileName());
@@ -295,13 +295,13 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager, torrentFactory, null);
         assertFalse(rfdAdapterWithNull1.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterWithNull2 = new RemoteFileDescAdapter(rfdWithNull2, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterWithNull2 = new RemoteFileDescAdapter(rfdWithNull2, locs, categoryManager, torrentFactory, null);
         assertFalse(rfdAdapterWithNull2.isLicensed());
         
-        RemoteFileDescAdapter rfdAdapterGood = new RemoteFileDescAdapter(rfdGood, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapterGood = new RemoteFileDescAdapter(rfdGood, locs, categoryManager, torrentFactory, null);
         assertTrue(rfdAdapterGood.isLicensed());
         
         context.assertIsSatisfied();
@@ -336,7 +336,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         
         assertSame(rfd, rfdAdapter.getRfd());
         assertEquals(Long.MAX_VALUE-3, rfdAdapter.getSize());
@@ -372,7 +372,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         
         assertEquals(urn, rfdAdapter.getUrn());
         
@@ -399,7 +399,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         
         assertNotNull(rfdAdapter.getMagnetURL());
         assertGreaterThan(0, rfdAdapter.getMagnetURL().length());
@@ -424,7 +424,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(Category.OTHER));
         }});
         
-        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
+        RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory, null);
         
         assertNotNull(rfdAdapter1.toString());
     }

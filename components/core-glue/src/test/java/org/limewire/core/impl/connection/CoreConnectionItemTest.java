@@ -41,7 +41,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             allowing(connection);
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
         
         assertFalse(item.isAddressResolved());
         item.setAddressResolved(true);
@@ -71,7 +71,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
      
         FriendPresence presence = item.getFriendPresence();
         assertNotNull(presence);
@@ -104,7 +104,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             allowing(connection);
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
         assertSame(props, item.getHeaderProperties());
         
         context.assertIsSatisfied();
@@ -132,7 +132,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             will(returnValue("reseted"));
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
         assertEquals("initial", item.getHostName());
         item.setHostName("override");
         assertEquals("override", item.getHostName());
@@ -168,7 +168,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             allowing(connection);
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
         
         assertSame(connection, item.getRoutedConnection());
         
@@ -280,7 +280,7 @@ public class CoreConnectionItemTest extends BaseTestCase {
             allowing(connection);
         }});
         
-        CoreConnectionItem item = new CoreConnectionItem(connection);
+        CoreConnectionItem item = new CoreConnectionItem(connection, null);
         
         assertEquals(6523f, item.getMeasuredDownstreamBandwidth());
         assertEquals(6524f, item.getMeasuredUpstreamBandwidth());

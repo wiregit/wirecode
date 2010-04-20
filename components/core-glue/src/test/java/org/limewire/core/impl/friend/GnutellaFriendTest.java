@@ -30,7 +30,7 @@ public class GnutellaFriendTest extends BaseTestCase {
         });
 
         GnutellaFriend gnutellaFriend =
-            new GnutellaFriend(address, friendPresence1);
+            new GnutellaFriend(address, friendPresence1, null);
         
         assertTrue(gnutellaFriend.isAnonymous());
         assertEquals("description", gnutellaFriend.getFirstName());

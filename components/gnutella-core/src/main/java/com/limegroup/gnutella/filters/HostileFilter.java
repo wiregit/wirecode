@@ -18,13 +18,10 @@ public class HostileFilter extends  AbstractIPFilter {
     
     private final NetworkInstanceUtils networkInstanceUtils;
     
-    private final GeoLocationFilter geoLocationFilter;
-    
     @Inject
     public HostileFilter(NetworkInstanceUtils networkInstanceUtils,
             GeoLocationFilter geoLocationFilter) {
         this.networkInstanceUtils = networkInstanceUtils;
-        this.geoLocationFilter = geoLocationFilter;
     }
     
     /**

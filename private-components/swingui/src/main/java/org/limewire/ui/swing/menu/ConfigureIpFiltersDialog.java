@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -49,6 +50,10 @@ public class ConfigureIpFiltersDialog extends LimeJDialog {
         "UM","US","UY","UZ","VA","VC","VE","VG","VI","VN","VU","WF","WS","YE",
         "YT","RS","ZA","ZM","ME","ZW","A1","A2","O1","AX","GG","IM","JE","BL",
         "MF"};
+    
+    static {
+        Arrays.sort(countryCode);
+    }
     
     private final static Set<String> countryCodes = ImmutableSet.of(countryCode);
     

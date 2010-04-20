@@ -98,7 +98,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager, categoryManager);
+        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager, categoryManager, null);
 
     }
 

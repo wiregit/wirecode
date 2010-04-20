@@ -314,7 +314,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, 
-             Provider<IPFilter> ipFilter,
+            @Named("hostileFilter") Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory, 
             NetworkInstanceUtils networkInstanceUtils,

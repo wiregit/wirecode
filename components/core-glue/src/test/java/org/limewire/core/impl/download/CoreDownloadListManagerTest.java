@@ -807,7 +807,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         
         @Override
         public CoreDownloadItem create(Downloader downloader, QueueTimeCalculator calculator) {
-            return new CoreDownloadItem(downloader, calculator, friendManager, categoryManager);
+            return new CoreDownloadItem(downloader, calculator, friendManager, categoryManager, null);
         }
     }
 }

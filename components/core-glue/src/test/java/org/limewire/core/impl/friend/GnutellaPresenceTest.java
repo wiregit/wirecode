@@ -31,7 +31,7 @@ public class GnutellaPresenceTest extends BaseTestCase {
                 allowing(address1);
             }
         });
-        GnutellaPresence gnutellaPresence = new GnutellaPresence.GnutellaPresenceWithString(address1, id1);
+        GnutellaPresence gnutellaPresence = new GnutellaPresence.GnutellaPresenceWithString(address1, id1, null);
 
         Friend friend1 = gnutellaPresence.getFriend();
         assertEquals(id1, friend1.getId());
