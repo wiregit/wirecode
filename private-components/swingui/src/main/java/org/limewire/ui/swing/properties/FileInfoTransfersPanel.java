@@ -173,6 +173,7 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
 
         infoTable.getColumnExt(FileInfoTableModel.IP).setComparator(IpPort.IP_COMPARATOR);
         TableColumn ipColumn = infoTable.getColumn(FileInfoTableModel.IP);
+        ipColumn.setMinWidth(100);
         ipColumn.setCellRenderer(new IPRenderer());
         
         TableColumn uploadColumn = infoTable.getColumn(FileInfoTableModel.UPLOAD_SPEED);

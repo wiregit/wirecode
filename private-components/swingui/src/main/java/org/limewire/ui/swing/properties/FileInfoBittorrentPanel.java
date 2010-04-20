@@ -236,9 +236,13 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
 
             getColumn(BitTorrentTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
+            getColumn(BitTorrentTableFormat.SIZE_INDEX).setMaxWidth(72);
 
             getColumn(BitTorrentTableFormat.PERCENT_INDEX).setCellRenderer(new PercentRenderer());
+            getColumn(BitTorrentTableFormat.PERCENT_INDEX).setMaxWidth(20);
             getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
+            getColumn(BitTorrentTableFormat.NAME_INDEX).setMinWidth(140);
+            
 
             final PriorityRendererEditor editor = new PriorityRendererEditor();
             editor.getButton().addActionListener(new ActionListener() {
