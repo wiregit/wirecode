@@ -28,6 +28,7 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.jmx.ExecutorBean;
 import org.limewire.listener.AsynchronousCachingEventMulticasterImpl;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.listener.AsynchronousMulticasterImpl;
@@ -54,6 +55,7 @@ import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
+import org.limewire.util.JmxUtils;
 
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -390,7 +392,13 @@ public class LimeWireCoreModule extends AbstractModule {
     
     private static final String FAST = "fastExecutor";
     @Provides @LazySingleton @Named(FAST) ScheduledExecutorService fastSES() {
-        return new LimeScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+        LimeScheduledThreadPoolExecutor executor 
+            = new LimeScheduledThreadPoolExecutor(1, 
+                    ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+        
+        JmxUtils.add(LimeWireCoreModule.class, FAST, new ExecutorBean.Impl(executor));
+        
+        return executor;
     }
     @Provides @LazySingleton @Named(FAST) ExecutorService fastES(@Named(FAST) ScheduledExecutorService ses) {
         return ses;
