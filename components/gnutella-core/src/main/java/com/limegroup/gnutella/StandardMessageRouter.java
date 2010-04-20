@@ -384,7 +384,13 @@ public class StandardMessageRouter extends MessageRouterImpl {
             
             Tuple<Response[], List<QueryReply>> split = splitLargeResponses(query, responses);
             responses = split.getFirst();
-            List<QueryReply> largeQueryReplies = split.getSecond(); 
+            List<QueryReply> largeQueryReplies = split.getSecond();
+            
+            if (responses.length == 0) {
+                assert !largeQueryReplies.isEmpty();
+                sendQueryReplies(largeQueryReplies);
+                return true;
+            }
                                     
             // send the replies out-of-band - we need to
             // 1) buffer the responses

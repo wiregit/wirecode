@@ -195,6 +195,17 @@ public class StandardMessageRouterTest extends LimeTestCase {
         context.assertIsSatisfied();
     }
     
+    public void testSendResponsesOneResponseSplitIntoLargeResponse() throws Exception {
+        QueryRequest queryRequest = queryRequestFactory.createOutOfBandQuery("hello", new byte[] { 111, 111, 111, 111}, 1000);
+        
+        messageRouter.sendResponses(new Response[] { largeResponses[0] }, queryRequest, replyHandler);
+        
+        assertEquals(1, messageRouter.sentReplies.size());
+        assertEquals("large1.torrent", messageRouter.sentReplies.get(0).getResultsArray()[0].getName());
+        
+        context.assertIsSatisfied();
+    }
+    
     /**
      * Subclass for unit under test to get a hold of query replies sent in-band.
      */
