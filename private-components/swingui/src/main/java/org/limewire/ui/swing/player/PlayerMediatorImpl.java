@@ -508,17 +508,23 @@ class PlayerMediatorImpl implements PlayerMediator {
         fireProgressUpdated(100f);
 
         // Sanity check before switching to the next song,
-        //  the last 5 songs that switched must have taken over
-        //  a second to play or else there is a problem.
-        playingSwitches = (playingSwitches+1) % 5;
-        if (playingSwitches == 0) {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime-playingWindowStartTime > 1000) {
+        //  the last 10 songs that switched must have taken over
+        //  5 seconds to play.
+        playingSwitches = (playingSwitches+1);
+        if (playingSwitches % 10 == 0) {
+            if(playingSwitches == 0) {
+                playingWindowStartTime = System.currentTimeMillis();
                 nextSong();
-                playingWindowStartTime = currentTime;
             } else {
-                playingSwitches = -1;
-                playingWindowStartTime = -1;    
+                long currentTime = System.currentTimeMillis();
+                if(currentTime - playingWindowStartTime < 5000) {
+                    playingSwitches = -1;
+                    playingWindowStartTime = -1;   
+                } else {
+                    playingSwitches = -1;
+                    playingWindowStartTime = currentTime;
+                    nextSong();
+                }
             }
         } else {
             nextSong();
