@@ -9,6 +9,7 @@ import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
@@ -57,8 +58,22 @@ public class Context2 implements MojitoDHT2 {
      */
     private final FutureManager futureManager = new FutureManager();
     
+    /**
+     * 
+     */
     private final MACCalculatorRepositoryManager calculator 
         = new MACCalculatorRepositoryManager();
+    
+    /**
+     * 
+     */
+    private final DHTValueFactoryManager factoryManager 
+        = new DHTValueFactoryManager();
+    
+    /**
+     * 
+     */
+    private final String name;
     
     /**
      * 
@@ -98,10 +113,12 @@ public class Context2 implements MojitoDHT2 {
     /**
      * 
      */
-    public Context2(MessageDispatcher2 messageDispatcher, 
+    public Context2(String name,
+            MessageDispatcher2 messageDispatcher, 
             MessageFactory messageFactory,
             RouteTable routeTable, Database database) {
         
+        this.name = name;
         this.messageDispatcher = messageDispatcher;
         this.routeTable = routeTable;
         this.database = database;
@@ -116,7 +133,7 @@ public class Context2 implements MojitoDHT2 {
     
     @Override
     public String getName() {
-        return NAME;
+        return name;
     }
 
     @Override
@@ -169,6 +186,13 @@ public class Context2 implements MojitoDHT2 {
      */
     public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager() {
         return calculator;
+    }
+    
+    /**
+     * 
+     */
+    public DHTValueFactoryManager getDHTValueFactoryManager() {
+        return factoryManager;
     }
     
     @Override
