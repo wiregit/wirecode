@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -403,7 +404,8 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                 
                 pingFuture = null;
                 
-                if (ExceptionUtils.isCausedBy(e, DHTException.class)) {
+                if (ExceptionUtils.isCausedBy(e, DHTException.class)
+                        || ExceptionUtils.isCausedBy(e, TimeoutException.class)) {
                     // Try to bootstrap from a SIMPP Host if
                     // bootstrapping failed
                     // and try the hosts Set otherwise
@@ -413,7 +415,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
                     } else {
                         retry();
                     }
-                } else if(!ExceptionUtils.isCausedBy(e, IllegalArgumentException.class)){
+                } else if (!ExceptionUtils.isCausedBy(e, IllegalArgumentException.class)) {
                     LOG.error("ExecutionException", e);
                     ErrorService.error(e);
                     stop();
