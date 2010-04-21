@@ -1,12 +1,13 @@
 package org.limewire.concurrent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -42,18 +43,16 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
  * @see AsyncFutureTask
  */
 public class AsyncValueFuture<V> implements AsyncFuture<V> {
-
-    private final AtomicReference<EventListenerList<FutureEvent<V>>> listenersRef 
-        = new AtomicReference<EventListenerList<FutureEvent<V>>>(
-            new EventListenerList<FutureEvent<V>>());
     
-    // The listenerContext is required to make sure that listeners are 
-    // notified in the correct threads.  We eagerly clear the listenerRef 
-    // to release old listeners, but need to keep the context around to 
-    // make sure future listeners reuse the context.
-    private final EventListenerListContext listenerContext 
-        = listenersRef.get().getContext();
+    /**
+     * 
+     */
+    private final List<EventListener<FutureEvent<V>>> listeners 
+        = new ArrayList<EventListener<FutureEvent<V>>>();
     
+    /**
+     * 
+     */
     private final OnewayExchanger<V, ExecutionException> exchanger 
         = new OnewayExchanger<V, ExecutionException>(this, true);
     
@@ -140,15 +139,7 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
      * Notifies all {@link EventListener}s and calls {@link #done()}.
      */
     private void complete() {
-        // Fire the event
-        EventListenerList<FutureEvent<V>> listeners 
-            = listenersRef.getAndSet(null);
-        assert listeners != null;
-
-        if (listeners.size() > 0) {
-            listeners.broadcast(FutureEvent.createEvent(this));
-        }
-        
+        fireOperationComplete();
         done();
     }
     
@@ -167,21 +158,59 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
     @Override
     public void addFutureListener(EventListener<FutureEvent<V>> listener) {
-        boolean added = false;
-        EventListenerList<FutureEvent<V>> listeners = listenersRef.get();
-        // Add the listener & set it back -- we add a proxy listener
-        // because there's a chance that we add it to the list
-        // before another thread sets it to null, leaving us
-        // to potentially call methods on the listener twice.
-        // (Once from the done() thread, and once from this thread.)
-        if (!isDone() && listeners != null) {
-            listeners.addListener(new ProxyListener<V>(listener, listenerContext));
-            added = listenersRef.compareAndSet(listeners, listeners);
+        
+        boolean done = false;
+        synchronized (this) {
+            done = isDone();
+            if (!done) {
+                listeners.add(listener);
+            }
         }
-
-        if (!added) {
-            EventListenerList.dispatch(listener, 
-                    FutureEvent.createEvent(this), listenerContext);
+        
+        if (done) {
+            FutureEvent<V> event 
+                = FutureEvent.createEvent(this);
+            fireOperationComplete(event, listener);
+        }
+    }
+    
+    /**
+     * Notifies all {@link EventListener}s that were added before
+     */
+    @SuppressWarnings("unchecked")
+    private void fireOperationComplete() {
+        FutureEvent<V> event = null;
+        EventListener<FutureEvent<V>>[] others = null;
+        
+        synchronized (this) {
+            if (!listeners.isEmpty()) {
+                event = FutureEvent.createEvent(this);
+                others = listeners.toArray(new EventListener[0]); 
+            }
+        }
+        
+        if (others != null) {
+            fireOperationComplete(event, null, others);
+        }
+    }
+    
+    /**
+     * Fires the given {@link FutureEvent} and notifies the given
+     * {@link EventListener}s.
+     */
+    protected void fireOperationComplete(
+            FutureEvent<V> event,
+            EventListener<FutureEvent<V>> first,
+            EventListener<FutureEvent<V>>... others) {
+        
+        if (first != null) {
+            first.handleEvent(event);
+        }
+        
+        if (others != null) {
+            for (EventListener<FutureEvent<V>> l : others) {
+                l.handleEvent(event);
+            }
         }
     }
     
