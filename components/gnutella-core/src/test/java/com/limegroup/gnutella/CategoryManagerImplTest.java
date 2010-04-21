@@ -102,16 +102,16 @@ public class CategoryManagerImplTest extends LimeTestCase {
     public void testBuiltInProgramExtensions() {
         checkExtensions(Category.PROGRAM, "app", "bin", "mdb", "sh", "csh", "awk", "pl", "rpm",
                 "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz", "taz", "shar", "hqx", "sit",
-                "dmg", "7z", "jar", "zip", "nrg", "cue", "iso", "jnlp", "rar", "sh", "mdb", "exe",
+                "dmg", "7z", "jar", "zip", "nrg", "iso", "jnlp", "rar", "sh", "mdb", "exe",
                 "zip", "jar", "cab", "msi", "msp", "arj", "rar", "ace", "lzh", "lha", "bin", "nrg",
-                "cue", "iso", "jnlp", "bat", "lnk", "vbs");
+                "iso", "jnlp", "bat", "lnk", "vbs");
     }
     
     public void testBuiltInOsxLinuxPrograms() {
         Set<String> expecting = ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).add(
                 "app", "bin", "mdb", "sh", "csh", "awk", "pl", "rpm", "deb", "gz", "gzip", "z",
                 "bz2", "zoo", "tar", "tgz", "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip",
-                "nrg", "cue", "iso", "jnlp", "rar", "sh").build();
+                "nrg", "iso", "jnlp", "rar", "sh").build();
         for(String e : expecting) {
             assertTrue("failed for: " + e, cmi.getOsxAndLinuxProgramsFilter().apply(e));
         }
@@ -120,7 +120,7 @@ public class CategoryManagerImplTest extends LimeTestCase {
     public void testBuiltInWindowsPrograms() {
         Set<String> expecting = ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).add(
                 "mdb", "exe", "zip", "jar", "cab", "msi", "msp", "arj", "rar", "ace", "lzh", "lha",
-                "bin", "nrg", "cue", "iso", "jnlp", "bat", "lnk", "vbs").build();
+                "bin", "nrg", "iso", "jnlp", "bat", "lnk", "vbs").build();
         for(String e : expecting) {
             assertTrue("failed for: " + e, cmi.getWindowsProgramsFilter().apply(e));
         }
