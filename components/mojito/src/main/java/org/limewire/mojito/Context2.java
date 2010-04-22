@@ -302,6 +302,7 @@ public class Context2 implements MojitoDHT2 {
         return futureManager.submit(process, timeout, unit);
     }
     
+    @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             Contact[] contacts, long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(

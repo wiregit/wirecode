@@ -79,7 +79,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
                 synchronized (DHTFutureTask.this) {
                     if (!isDone() && !isDelay()) {
                         wasTimeout = true;
-                        setException(new TimeoutException());
+                        handleTimeout();
                     }
                 }
             }
@@ -89,17 +89,30 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         return true;
     }
     
+    /**
+     * Returns true if the watchdog was delayed.
+     */
     private boolean isDelay() {
         long delay = getDelay(unit);
         return watchdog(delay, unit);
     }
     
+    /**
+     * Returns the watchdog delay.
+     */
     protected long getDelay(TimeUnit unit) {
         if (task instanceof Delay) {
             return ((Delay)task).getDelay(unit);
         }
         
         return -1L;
+    }
+    
+    /**
+     * 
+     */
+    protected synchronized void handleTimeout() {
+        setException(new TimeoutException());
     }
     
     @Override
