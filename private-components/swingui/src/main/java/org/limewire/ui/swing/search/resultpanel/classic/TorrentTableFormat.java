@@ -82,8 +82,10 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         Torrent torrent = (Torrent) vsr.getProperty(FilePropertyKey.TORRENT);
         if (torrent != null) {
-            scrapeAdaptor.queueScrapeIfNew(torrent);
-            
+            if (torrent.getTrackerURIS().size() > 0) {
+                scrapeAdaptor.queueScrapeIfNew(torrent);
+            }
+
             TorrentScrapeData data = null;
             
             switch (column) {
@@ -92,25 +94,31 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TRACKERS_INDEX:
                 return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40);
             case SEEDERS_INDEX:
-                data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
-                if (data != null) {
-                    return data.getComplete();
-                } else {
-                    return "";
+                if (torrent.getTrackerURIS().size() > 0) {
+                    data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
+                    if (data != null) {
+                        return data.getComplete();
+                    } else {
+                        return "";
+                    }
                 }
             case LEECHERS_INDEX:
-                data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
-                if (data != null) {
-                    return data.getIncomplete();
-                } else {
-                    return "";
+                if (torrent.getTrackerURIS().size() > 0) {
+                    data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
+                    if (data != null) {
+                        return data.getIncomplete();
+                    } else {
+                        return "";
+                    }
                 }
             case DOWNLOADED_INDEX:
-                data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
-                if (data != null) {
-                    return data.getDownloaded();
-                } else {
-                    return "";
+                if (torrent.getTrackerURIS().size() > 0) {
+                    data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
+                    if (data != null) {
+                        return data.getDownloaded();
+                    } else {
+                        return "";
+                    }
                 }
             }
         }
