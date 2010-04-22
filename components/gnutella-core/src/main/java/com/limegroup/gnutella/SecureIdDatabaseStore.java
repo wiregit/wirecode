@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.SecuritySettings;
 import org.limewire.inject.EagerSingleton;
@@ -19,9 +21,11 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.id.SecureIdStore;
 import org.limewire.util.Base32;
+import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 @EagerSingleton
 public class SecureIdDatabaseStore implements SecureIdStore, Service {
@@ -33,6 +37,18 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     @Inject
     void register(ServiceRegistry serviceRegistry) {
         serviceRegistry.register(this).in(ServiceStage.VERY_LATE);
+    }
+    
+    @Inject
+    void register(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService,
+            final Clock clock) {
+        scheduledExecutorService.schedule(new Runnable() {
+            @Override
+            public void run() {
+                long aYearAgo = clock.now() - TimeUnit.DAYS.toMillis(365);
+                store.deleteOlderThan(aYearAgo);
+            }
+        }, 5, TimeUnit.MINUTES);
     }
     
     @Override
@@ -93,6 +109,8 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
         private final PreparedStatement getStatement;
         
         private final PreparedStatement putStatement;
+
+        private PreparedStatement deleteStatement;
         
         // TODO implement drop
         public DbStore(boolean dropDb) throws SQLException {
@@ -106,12 +124,13 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
             connection = DriverManager.getConnection(connectionUrl, "sa", "");
             Statement statement = connection.createStatement();
             try {
-                statement.execute("create cached table ids (guid binary(16) primary key, data varbinary(200))");
+                statement.execute("create cached table ids (guid binary(16) primary key, timestamp bigint, data varbinary(200))");
             } catch (SQLException se) {
                 LOG.debug("table already exists", se);
             }
             getStatement = connection.prepareStatement("select data from ids where guid = ?");
             putStatement = connection.prepareStatement("insert into ids values (?, ?)");
+            deleteStatement = connection.prepareStatement("delete from ids where timestamp < ?");
         }
         
         public synchronized byte[] get(GUID key) {
@@ -130,7 +149,8 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
         public synchronized void put(GUID key, byte[] value) {
             try {
                 putStatement.setBytes(1, key.bytes());
-                putStatement.setBytes(2, value);
+                putStatement.setLong(2, System.currentTimeMillis());
+                putStatement.setBytes(3, value);
                 putStatement.execute();
             } catch (SQLException e) {
                 LOG.debug("error putting value", e);
@@ -143,6 +163,15 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
                 statement.execute("SHUTDOWN");
             } catch (SQLException e) {
                 LOG.debug("error shutting down", e);
+            }
+        }
+        
+        public synchronized void deleteOlderThan(long timestamp) {
+            try {
+                deleteStatement.setLong(1, timestamp);
+                deleteStatement.execute();
+            } catch (SQLException e) {
+                LOG.debug("error deleting old entries", e);
             }
         }
 
