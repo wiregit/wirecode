@@ -46,8 +46,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     @Override
     protected synchronized void doRun() {
         if (!isDone()) {
+            watchdog(timeout, unit);
             start();
-            watchdog();
         }
     }
     
@@ -68,8 +68,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Starts the watchdog task
      */
-    private synchronized boolean watchdog() {
-        if (timeout == -1L || isDone()) {
+    private synchronized boolean watchdog(long timeout, TimeUnit unit) {
+        if (timeout < 0L || isDone()) {
             return false;
         }
         
@@ -77,7 +77,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             @Override
             public void run() {
                 synchronized (DHTFutureTask.this) {
-                    if (!isDone()) {
+                    if (!isDone() && !isDelay()) {
                         wasTimeout = true;
                         setException(new TimeoutException());
                     }
@@ -87,6 +87,19 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         
         watchdog = WATCHDOG.schedule(task, timeout, unit);
         return true;
+    }
+    
+    private boolean isDelay() {
+        long delay = getDelay(unit);
+        return watchdog(delay, unit);
+    }
+    
+    protected long getDelay(TimeUnit unit) {
+        if (task instanceof Delay) {
+            return ((Delay)task).getDelay(unit);
+        }
+        
+        return -1L;
     }
     
     @Override
@@ -130,5 +143,16 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
      */
     protected void done0() {
         // Override
+    }
+    
+    /**
+     * A mix-in interface for {@link AsyncProcess}es.
+     */
+    public static interface Delay {
+        
+        /**
+         * The delay for which the watchdog should be postponed.
+         */
+        public long getDelay(TimeUnit unit);
     }
 }
