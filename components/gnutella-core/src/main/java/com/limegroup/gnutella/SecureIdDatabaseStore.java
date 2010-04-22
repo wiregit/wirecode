@@ -86,17 +86,6 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
         store.put(key, value);
     }
     
-    public static void main(String[] args) {
-        SecureIdDatabaseStore store = new SecureIdDatabaseStore();
-        store.start();
-        GUID guid = new GUID("03E80D00041CDEBAD2FD6EC91A566200");
-        System.out.println(guid);
-        store.put(guid, guid.bytes());
-        store.put(guid, guid.bytes());
-        System.out.println(new GUID(store.get(guid)));
-        store.stop();
-    }
-    
     class DbStore {
         
         private final Connection connection;
