@@ -171,7 +171,6 @@ public class CoreSearch implements Search {
             }
         });        
         
-        
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override

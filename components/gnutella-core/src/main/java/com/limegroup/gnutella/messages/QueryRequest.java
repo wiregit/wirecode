@@ -274,6 +274,8 @@ public interface QueryRequest extends Message {
      */
     public boolean desiresLinuxOSXPrograms();
     
+    /** @return true if the query desires Torrents.
+     */
     public boolean desiresTorrents();
 
     /**

@@ -155,9 +155,9 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
             File saveFile, boolean overwrite) throws DownloadException {
-                        
         // Train the spam filter even if the results weren't rated as spam
         spamManager.handleUserMarkedGood(searchResults);
+        
         
         RemoteFileDesc[] files;
         List<RemoteFileDesc> alts = new ArrayList<RemoteFileDesc>();
