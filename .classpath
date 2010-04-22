@@ -169,6 +169,5 @@
 	<classpathentry kind="lib" path="lib/jars/AnimatedTransitions-0.11.jar" sourcepath="lib/sources/AnimatedTransitions-0.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-20091008-23.jar" sourcepath="lib/sources/fmj-source.zip"/>
-	<classpathentry kind="lib" path="lib/jars/htmlcleaner2_1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

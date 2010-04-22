@@ -2,18 +2,20 @@ package org.limewire.bittorrent;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -30,10 +32,9 @@ import com.limegroup.gnutella.URN;
  *  queueing then staggering the requests
  *  
  * <p> NOTE: Will go to sleep in periods of inactivity.  Will
- *            clear result cache entries randomly if the entry 
- *            threshold is achieved when going to sleep.  Will clear
- *            oldest failed torrents entries first if that threshold
- *            is reached.   Will ban trackers that consistently fail
+ *            clear cache entries randomly if the entry 
+ *            threshold is achieved when going to sleep. 
+ *            Will ban trackers that consistently fail
  *            after scrapes are attempted. 
  *            
  * TODO: 
@@ -44,40 +45,78 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     
     private static final Log LOG = LogFactory.getLog(TorrentScrapeSchedulerImpl.class);
     
+    /**
+     * Time between processing cycles, ie. submitting new
+     *  scrapes, deciding to cancel scrapes, etc..
+     */
     private static final long PERIOD = 1200;
 
+    /**
+     * Threshold before clearing cached results.
+     */
     private static final int MAX_RESULTS_TO_KEEP_CACHED = 100;
+    
+    /**
+     * Threshold before clearing cached fails
+     */
     private static final int MAX_FAILURES_TO_KEEP_CACHED = 100;
 
     /**
      * Number of cycles to wait with an empty
-     *  request queue before stopping this scheduler.
+     *  request queue and no job before stopping this scheduler.
      *  
      *  <p> This will result in a cache cleansing cycle
      *       if required
      */
     private static final int EMPTY_PERIOD_MAX = 4;    
 
+    /**
+     * Number of cycles before cancelling a request if it hasn't
+     *  completed
+     */
     private static final int PROCESSING_PERIOD_MAX = 3;
+    
+    
     private int processingPeriodsCount = 0;
     
     private final TrackerScraper scraper;
     
+    /**
+     * Whether the processing thread is active.
+     */
     private final AtomicBoolean awake = new AtomicBoolean(false);
     
-    private ScheduledFuture<?> future = null;
+    /**
+     * The future for the processing thread.  Used to go to sleep.
+     */
+    private ScheduledFuture<?> processingThreadFuture = null;
     
+    /**
+     * This list of fetched results.  Dually serves to cache.
+     */
     private final Map<String,TorrentScrapeData> resultsMap 
         = new HashMap<String, TorrentScrapeData>();
         
-    private final List<String> failedTorrents = new ArrayList<String>();
+    /**
+     * List of failed torrents to not try again.
+     */
+    private final Set<String> failedTorrents = new HashSet<String>();
     
+    /**
+     * Processing queue.
+     */
     private final Queue<Torrent> torrentsToScrape
         = new LinkedList<Torrent>();
     
+    /**
+     * The current thread being processed.
+     */
     private final AtomicReference<Torrent> currentlyScrapingTorrent
         = new AtomicReference<Torrent>(null);
  
+    /**
+     * A shutoff for the current job if it has been running too long.
+     */
     private Shutdownable currentScrapeAttemptShutdown = null;
     
     
@@ -94,6 +133,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             process();
         }
     };
+    
     private final ScheduledExecutorService backgroundExecutor;
     
     @Inject
@@ -104,7 +144,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         this.backgroundExecutor = backgroundExecutor;
         
         awake.set(true);
-        future = scheduleProcessor();
+        processingThreadFuture = scheduleProcessor();
     }
     
     private ScheduledFuture<?> scheduleProcessor() {
@@ -155,7 +195,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     private void wakeup() {
         if (awake.compareAndSet(false, true)) {
             LOG.debugf("wakeup");
-            future = scheduleProcessor();
+            processingThreadFuture = scheduleProcessor();
         }
     }
     
@@ -166,17 +206,15 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     private void sleep() {
         LOG.debugf("GOING TO SLEEP");
         if (awake.compareAndSet(true, false)) {
-            future.cancel(false);
-            future = null;
+            processingThreadFuture.cancel(false);
+            processingThreadFuture = null;
         }
         
         synchronized (failedTorrents) {
             int failedTorrentsToRemove = failedTorrents.size() - MAX_FAILURES_TO_KEEP_CACHED;
             if (failedTorrentsToRemove > 0) {
                 LOG.debugf("purging {0} failed torrents", failedTorrentsToRemove);
-                for ( int i=0 ; i<failedTorrentsToRemove ; i++ ) {
-                    failedTorrents.remove(0);
-                }
+                CollectionUtils.randomPurge(failedTorrents, failedTorrentsToRemove);
             }
         }
         
@@ -184,12 +222,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             int resultsToRemove = resultsMap.size() - MAX_RESULTS_TO_KEEP_CACHED;
             if (resultsToRemove > 0) {
                 LOG.debugf("purging {0} results", resultsToRemove);
-                List<String> keys = new ArrayList<String>(resultsMap.keySet());
-                for ( int i=0 ; i<resultsToRemove ; i++ ) {
-                    int randomKeyIndex = (int) (keys.size()*Math.random());
-                    String keyToRemove = keys.remove(randomKeyIndex);
-                    resultsMap.remove(keyToRemove);
-                }
+                CollectionUtils.randomPurge(resultsMap, resultsToRemove);
             }
         }        
     }
@@ -212,11 +245,16 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     }
     
     /**
-     * Used to ban consitently failing trackers
+     * Used to ban consistently failing trackers.
+     * 
+     * TODO!
      */
     private void markCurrentTrackerFailure() {
     }
    
+    /**
+     * The processing thread.  Handles submitting jobs.
+     */
     private void process() {
         
         synchronized (torrentsToScrape) {
@@ -289,8 +327,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
                                 LOG.debugf("   {0} FAILED", torrent.getName());
                             }
                             markCurrentTrackerFailure();
-                            markCurrentTorrentFailure();
-                        }
+                         }
                     });
             if (currentScrapeAttemptShutdown == null) {
                 markCurrentTorrentFailure();

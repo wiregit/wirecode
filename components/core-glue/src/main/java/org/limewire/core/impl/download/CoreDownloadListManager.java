@@ -15,10 +15,8 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.bittorrent.Torrent;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
@@ -35,7 +33,6 @@ import org.limewire.core.impl.download.listener.TorrentDownloadListenerFactory;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.impl.search.TorrentSearchResult;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
@@ -158,12 +155,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
             File saveFile, boolean overwrite) throws DownloadException {
-        
-        if (searchResults.get(0) instanceof TorrentSearchResult) {
-            TorrentSearchResult result = (TorrentSearchResult)searchResults.get(0);
-            return addTorrentDownload(result.getTorrentFile(), null, false);
-        }
-                
+                        
         // Train the spam filter even if the results weren't rated as spam
         spamManager.handleUserMarkedGood(searchResults);
         
