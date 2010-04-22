@@ -242,7 +242,7 @@ public class StandardMessageRouterTest extends LimeTestCase {
                     pingRequestFactory, messageHandlerBinder, oobHandlerFactory,
                     MACCalculatorRepositoryManager, limeACKHandler, outgoingQueryReplyFactory,
                     sharedFilesKeywordIndex, qrpUpdater, urnFilter, spamServices, activationManager,
-                    querySettings);
+                    querySettings, null);
         }
         
         @Override

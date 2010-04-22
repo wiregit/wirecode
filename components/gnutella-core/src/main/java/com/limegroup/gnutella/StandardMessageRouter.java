@@ -32,6 +32,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileViewManager;
@@ -96,6 +97,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
     private final SharedFilesKeywordIndex sharedFilesKeywordIndex;
 
     private OutgoingQueryReplyFactory outgoingQueryReplyFactory;
+
+    private final Provider<IPFilter> ipFilter;
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -136,7 +139,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
             SharedFilesKeywordIndex sharedFilesKeywordIndex,
             QRPUpdater qrpUpdater, URNFilter urnFilter,
             SpamServices spamServices, ActivationManager activationManager,
-            QuerySettings querySettings) {
+            QuerySettings querySettings,
+            Provider<IPFilter> ipFilter) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -156,6 +160,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
         this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
+        this.ipFilter = ipFilter;
     }
     
     /**
@@ -344,7 +349,13 @@ public class StandardMessageRouter extends MessageRouterImpl {
             ignoredBusy.countMessage(queryRequest);
             return false;
         }
-                                                
+                                           
+        if (queryRequest.desiresOutOfBandReplies()) {
+            String replyAddress = queryRequest.getReplyAddress();
+            if (!ipFilter.get().allow(replyAddress)) {
+                return false;
+            }
+        }
                                                 
         // Ensure that we have a valid IP & Port before we send the response.
         // Otherwise the QueryReply will fail on creation.

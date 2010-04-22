@@ -120,7 +120,7 @@ public class MessageRouterStub extends StandardMessageRouter {
                 messageHandlerBinder, oobHandlerFactory, macManager,
                 limeACKHandler, outgoingQueryReplyFactory,
                 sharedFilesKeywordIndex, qrpUpdater, urnFilter,
-                spamServices, activationManager, querySettings);
+                spamServices, activationManager, querySettings, null);
     }
     
     @Override

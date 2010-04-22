@@ -308,7 +308,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             Provider<UDPService> udpService,
             Provider<DHTManager> dhtManager,
             Provider<QueryUnicaster> queryUnicaster,
-            Provider<IPFilter> ipFilter,
+            @Named("hostileFilter") Provider<IPFilter> ipFilter,
             UniqueHostPinger uniqueHostPinger,
             NetworkInstanceUtils networkInstanceUtils,
             Bootstrapper bootstrapper) {

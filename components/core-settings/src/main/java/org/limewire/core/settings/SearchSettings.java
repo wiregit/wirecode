@@ -350,7 +350,7 @@ public final class SearchSettings extends LimeProps {
      * Whether to replace IP addresses with friendly-looking strings.
      */
     public static final BooleanSetting FRIENDLY_ADDRESS_DESCRIPTIONS = FACTORY
-            .createBooleanSetting("FRIENDLY_ADDRESS_DESCRIPTIONS", true);
+            .createBooleanSetting("FRIENDLY_ADDRESS_DESCRIPTIONS", false);
 
     /**
      * Do not issue query keys more than this often.
