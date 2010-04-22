@@ -218,6 +218,9 @@ public class HomePanel extends JXPanel {
                 firstRequest = false;
             } else {
                 url += "&firstRequest=true";
+                if(application.isNewInstall()) {
+                    url += "&newInstall=true";
+                }
                 if(initialLoadTime == -1) {
                     initialLoadTime = System.currentTimeMillis();
                 }
