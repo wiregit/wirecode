@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -70,6 +71,11 @@ public interface MojitoDHT2 extends Closeable {
      * 
      */
     public void setHostFilter(HostFilter hostFilter);
+    
+    /**
+     * 
+     */
+    public StorableModelManager getStorableModelManager();
     
     /**
      * 

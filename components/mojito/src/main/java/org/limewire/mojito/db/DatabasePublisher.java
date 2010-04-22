@@ -1,6 +1,8 @@
 package org.limewire.mojito.db;
 
 import java.io.Closeable;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -12,12 +14,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.concurrent.ManagedRunnable;
-import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EventUtils;
+import org.limewire.security.SecurityToken;
 
 /**
  * 
@@ -36,6 +41,8 @@ public class DatabasePublisher implements Closeable {
     
     private final MojitoDHT2 dht;
     
+    private final DatabasePublisherConfig config;
+    
     private final ScheduledFuture<?> future;
     
     /**
@@ -50,9 +57,11 @@ public class DatabasePublisher implements Closeable {
     private StoreTask storeTask = null;
     
     public DatabasePublisher(MojitoDHT2 dht, 
+            DatabasePublisherConfig config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
+        this.config = config;
         
         Runnable task = new ManagedRunnable() {
             @Override
@@ -91,10 +100,22 @@ public class DatabasePublisher implements Closeable {
     
     private static class StoreTask implements Closeable {
         
-        private final EventListener<FutureEvent<PingEntity>> listener 
-                = new EventListener<FutureEvent<PingEntity>>() {
+        private final EventListener<FutureEvent<NodeEntity>> listener 
+                = new EventListener<FutureEvent<NodeEntity>>() {
             @Override
-            public void handleEvent(FutureEvent<PingEntity> event) {
+            public void handleEvent(FutureEvent<NodeEntity> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    doStore(event.getResult());
+                } else {
+                    doNext();
+                }
+            }
+        };
+        
+        private final EventListener<FutureEvent<NodeEntity>> listener2 
+                = new EventListener<FutureEvent<NodeEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<NodeEntity> event) {
                 doNext();
             }
         };
@@ -107,6 +128,8 @@ public class DatabasePublisher implements Closeable {
         
         protected final TimeUnit unit;
         
+        private final Iterator<Storable> storables;
+        
         protected volatile boolean open = true;
         
         public StoreTask(MojitoDHT2 dht, Runnable callback, 
@@ -116,6 +139,11 @@ public class DatabasePublisher implements Closeable {
             this.callback = callback;
             this.timeout = timeout;
             this.unit = unit;
+            
+            StorableModelManager modelManager 
+                = dht.getStorableModelManager();
+            
+            storables = modelManager.getStorables().iterator();
         }
         
         @Override
@@ -123,14 +151,27 @@ public class DatabasePublisher implements Closeable {
             open = false;
         }
         
+        private void doStore(NodeEntity entity) {
+            if (!open) {
+                EventUtils.fireEvent(callback);
+                return;
+            }
+            
+            Entry<Contact, SecurityToken>[] contacts 
+                = entity.getContacts();
+            
+            
+        }
+
         private void doNext() {
-            if (!open || contacts == null 
-                    || index >= contacts.length) {
+            if (!open || !storables.hasNext()) {
                 EventUtils.fireEvent(callback);
                 return;
             }
             
             // DO STORE
         }
+        
+        
     }
 }

@@ -3,21 +3,26 @@ package org.limewire.mojito;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.handler.response.NodeResponseHandler2;
 import org.limewire.mojito.handler.response.PingResponseHandler2;
+import org.limewire.mojito.handler.response.StoreResponseHandler2;
 import org.limewire.mojito.handler.response.ValueResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageFactory;
@@ -32,8 +37,6 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
 public class Context2 implements MojitoDHT2 {
-    
-    private static final String NAME = "Mojito";
     
     /**
      * 
@@ -93,7 +96,8 @@ public class Context2 implements MojitoDHT2 {
     /**
      * 
      */
-    private final StorableModelManager modelManager = null;
+    private final StorableModelManager modelManager 
+        = new StorableModelManager();
     
     /**
      * 
@@ -193,6 +197,11 @@ public class Context2 implements MojitoDHT2 {
      */
     public DHTValueFactoryManager getDHTValueFactoryManager() {
         return factoryManager;
+    }
+    
+    @Override
+    public StorableModelManager getStorableModelManager() {
+        return modelManager;
     }
     
     @Override
@@ -331,13 +340,45 @@ public class Context2 implements MojitoDHT2 {
         return futureManager.submit(process, timeout, unit);
     }
     
+    private final Object putLock = new Object();
+    
     //@Override
-    /*public DHTFuture<StoreEntity> put(KUID lookupId, long timeout, TimeUnit unit) {
-        AsyncProcess<StoreEntity> process = new StoreResponseHandler2(
-                this, messageDispatcher, lookupId, timeout, unit);
+    public DHTFuture<StoreEntity> put(DHTValueEntity value, 
+            long timeout, TimeUnit unit) {
         
-        return futureManager.submit(process, timeout, unit);
-    }*/
+        synchronized (putLock) {
+            
+            final AtomicReference<DHTFuture<StoreEntity>> futureRef 
+                = new AtomicReference<DHTFuture<StoreEntity>>();
+            
+            final StoreResponseHandler2 process 
+                = new StoreResponseHandler2(
+                    this, new DHTValueEntity[] { value }, timeout, unit);
+            
+            KUID lookupId = value.getPrimaryKey();
+            DHTFuture<NodeEntity> future 
+                = lookup(lookupId, timeout2, unit2);
+            
+            future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<NodeEntity> event) {
+                    switch (event.getType()) {
+                        case SUCCESS:
+                            NodeEntity entity = event.getResult();
+                            process.store(entity.getContacts());
+                            break;
+                        case EXCEPTION:
+                            
+                    }
+                }
+            });
+            
+            DHTFuture<StoreEntity> store 
+                = futureManager.submit(process, timeout, unit);
+            futureRef.set(store);
+            return store;
+        }
+    }
     
     /**
      * 

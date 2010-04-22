@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,10 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     
     private static final int PARALLELISM = 4;
     
+    private final Entry<Contact, SecurityToken>[] contacts;
+    
+    private final DHTValueEntity[] values;
+    
     private final MaxStack processCounter 
         = new MaxStack(PARALLELISM);
     
@@ -50,11 +55,26 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     private final Map<Contact, List<StoreStatusCode>> codes 
         = new HashMap<Contact, List<StoreStatusCode>>();
     
+    private final AtomicBoolean once = new AtomicBoolean(false);
+    
     public StoreResponseHandler2(Context2 context, 
-            Entry<Contact, SecurityToken>[] contacts, 
             DHTValueEntity[] entities, 
             long timeout, TimeUnit unit) {
+        this(context, null, entities, timeout, unit);
+    }
+    
+    public StoreResponseHandler2(Context2 context, 
+            Entry<Contact, SecurityToken>[] contacts, 
+            DHTValueEntity[] values, 
+            long timeout, TimeUnit unit) {
         super(context, timeout, unit);
+        
+        this.contacts = contacts;
+        this.values = values;
+    }
+    
+    private void init(Entry<Contact, SecurityToken>[] contacts, 
+            DHTValueEntity[] entities) {
         
         for (Entry<Contact, SecurityToken> entry : contacts) {
             Contact node = entry.getKey();
@@ -74,6 +94,18 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
     
     @Override
     protected void start() throws IOException {
+        if (contacts != null) {
+            store(contacts);
+        }
+    }
+    
+    public void store(Entry<Contact, SecurityToken>[] contacts) throws IOException {
+        
+        if (once.getAndSet(true)) {
+            throw new IllegalStateException();
+        }
+        
+        init(contacts, values);
         process(0);
     }
     
