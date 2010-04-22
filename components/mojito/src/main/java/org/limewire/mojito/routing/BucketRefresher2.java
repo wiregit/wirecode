@@ -35,6 +35,8 @@ public class BucketRefresher2 implements Closeable {
     
     private final MojitoDHT2 dht;
     
+    private final BucketRefresherConfig config;
+    
     private final ScheduledFuture<?> future;
     
     /**
@@ -57,9 +59,11 @@ public class BucketRefresher2 implements Closeable {
      * 
      */
     public BucketRefresher2(MojitoDHT2 dht, 
+            BucketRefresherConfig config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
+        this.config = config;
         
         Runnable task = new ManagedRunnable() {
             @Override
@@ -105,7 +109,9 @@ public class BucketRefresher2 implements Closeable {
             }
         };
         
-        pingTask = new PingTask(dht, callback, timeout, unit);
+        long timeout = config.getPingTimeoutInMillis();
+        pingTask = new PingTask(dht, callback, 
+                timeout, TimeUnit.MILLISECONDS);
     }
     
     private synchronized void lookup() {
@@ -116,7 +122,9 @@ public class BucketRefresher2 implements Closeable {
             }
         };
         
-        lookupTask = new LookupTask(dht, callback, timeout, unit);
+        long timeout = config.getLookupTimeoutInMillis();
+        lookupTask = new LookupTask(dht, callback, 
+                timeout, TimeUnit.MILLISECONDS);
     }
     
     private static abstract class AbstractTask implements Closeable {
