@@ -9,10 +9,12 @@ public interface Identity {
 
     public abstract GUID getGuid();
 
-    public abstract PublicKey getSignatureKey();
+    public abstract PublicKey getPublicSignatureKey();
 
-    public abstract BigInteger getDHPublicComponent();
+    public abstract BigInteger getPublicDiffieHellmanComponent();
 
     public abstract byte[] getSignature();
 
+    public byte[] toByteArray();
+    
 }

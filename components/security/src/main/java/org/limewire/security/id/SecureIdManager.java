@@ -9,6 +9,8 @@ public interface SecureIdManager {
 
     public static final String SIG_ALGO = "SHA1withRSA";
 
+    public static final String AGREEMENT_ALGO = "DH";
+    
     public static final String HASH_ALGO = "MD5";
 
     public static final String MAC_ALGO = "HmacMD5";
@@ -23,7 +25,7 @@ public interface SecureIdManager {
 
     public static final boolean TAGGING = false;
 
-     /**
+    /**
      * @return if the local node knows the remoteID and shares a key with the remote node
      */
     public boolean isKnown(GUID remoteID);
@@ -68,7 +70,13 @@ public interface SecureIdManager {
      */
     public boolean verifySignature(GUID remoteId, byte[] data, byte[] signature) throws InvalidDataException;
 
-    public Identity getLocalIdentity();
+    /**
+     * return the identity of the local node, including ID, signature public key, 
+     * diffie-hellman public component, and the signature on the first three fields.
+     * the identity can be sent to other nodes on the network to setup shared keys.
+     * @return the identity of the local node
+     */
+    public Identity getPublicLocalIdentity();
 
     public GUID getLocalGuid();
 

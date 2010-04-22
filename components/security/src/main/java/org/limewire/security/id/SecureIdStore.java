@@ -2,14 +2,14 @@ package org.limewire.security.id;
 
 import org.limewire.io.GUID;
 
+
 public interface SecureIdStore {
 
-    public LocalIdentity getLocalIdentity();
+    void setLocalData(byte[] value);
     
-    public void setLocalIdentity(LocalIdentity identity);
+    byte[] getLocalData();
     
-    public RemoteIdKeys getRemoteIdKeys(GUID id);
+    public void put(GUID key, byte[] value);
     
-    public void storeRemoteIdKeys(RemoteIdKeys remoteKeys);
-    
+    byte[] get(GUID key);
 }

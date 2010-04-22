@@ -10,24 +10,24 @@ public class SecureIdManagerExample {
 
     public static void main(String[] args) throws Exception {        
         // alice
-        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl("aliceRemoteKeys.txt");
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());
         aliceIdManager.start();
         System.out.println("alice id "+aliceIdManager.getLocalGuid());
         // bob
         SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
-        SecureIdManagerImpl bobIdManager = new SecureIdManagerImpl("bobRemoteKeys.txt");          
+        SecureIdManagerImpl bobIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());          
         bobIdManager.start();
         System.out.println("bob id "+bobIdManager.getLocalGuid());
         
         // alice generates a request which is basically an identity
-        Identity request = aliceIdManager.getLocalIdentity();
+        Identity request = aliceIdManager.getPublicLocalIdentity();
         
         // bob process the request
         boolean goodRequest= bobIdManager.addIdentity(request);
         Identity reply = null;
         if(goodRequest){
             System.out.println("alice's request looks good, gonna reply.");
-            reply = bobIdManager.getLocalIdentity();
+            reply = bobIdManager.getPublicLocalIdentity();
         }else{
             System.out.println("alice's request looks bad, gonna quit.");
             System.exit(-1);
