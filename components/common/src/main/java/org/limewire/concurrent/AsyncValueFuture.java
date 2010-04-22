@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.listener.EventListener;
+import org.limewire.util.Objects;
 
 /**
  * The base implementation of {@link AsyncFuture}.
@@ -158,6 +159,7 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
     @Override
     public void addFutureListener(EventListener<FutureEvent<V>> listener) {
+        Objects.nonNull(listener, "listener");
         
         boolean done = false;
         synchronized (this) {
