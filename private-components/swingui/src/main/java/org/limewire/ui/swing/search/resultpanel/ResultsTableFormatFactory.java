@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import org.limewire.bittorrent.TorrentScrapeScheduler;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.classic.AllTableFormat;
@@ -14,7 +15,6 @@ import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.bittorrent.TorrentScrapeScheduler;
 
 /**
  * Implements a factory for creating a TableFormat to display search results.
@@ -22,16 +22,16 @@ import com.limegroup.bittorrent.TorrentScrapeScheduler;
 public class ResultsTableFormatFactory {
 
     private final Provider<IconManager> iconManager;
-    private final Provider<TorrentScrapeScheduler> torrentScrapeAdaptorProvider;
+    private final Provider<TorrentScrapeScheduler> scraperScheduler;
     
     /**
      * Constructs a ResultsTableFormatFactory with the specified icon manager.
      */
     @Inject
     public ResultsTableFormatFactory(Provider<IconManager> iconManager,
-            Provider<TorrentScrapeScheduler> torrentScrapeAdaptorProvider) {
+            Provider<TorrentScrapeScheduler> scraperScheduler) {
         this.iconManager = iconManager;
-        this.torrentScrapeAdaptorProvider = torrentScrapeAdaptorProvider;
+        this.scraperScheduler = scraperScheduler;
     }
 
     /**
@@ -54,7 +54,7 @@ public class ResultsTableFormatFactory {
         case OTHER:
             return new OtherTableFormat();
         case TORRENT:
-            return new TorrentTableFormat(torrentScrapeAdaptorProvider.get()); 
+            return new TorrentTableFormat(scraperScheduler.get()); 
         default:
             throw new IllegalArgumentException("Invalid search category " + searchCategory);
         }

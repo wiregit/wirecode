@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package org.limewire.bittorrent;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,13 +14,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.inject.LazySingleton;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.limegroup.bittorrent.TrackerScraper;
 import com.limegroup.bittorrent.TrackerScraper.ScrapeCallback;
 import com.limegroup.gnutella.URN;
 
@@ -29,15 +30,19 @@ import com.limegroup.gnutella.URN;
  *  queueing then staggering the requests
  *  
  * <p> NOTE: Will go to sleep in periods of inactivity.  Will
- *            clear cache entries randomly after the entry 
- *            threshold is achieved.  Will ban trackers
- *            that consistently fail after scrapes are attempted. 
+ *            clear result cache entries randomly if the entry 
+ *            threshold is achieved when going to sleep.  Will clear
+ *            oldest failed torrents entries first if that threshold
+ *            is reached.   Will ban trackers that consistently fail
+ *            after scrapes are attempted. 
  *            
- * TODO: cache management,
+ * TODO: 
  *        tracker ban
  */
 @LazySingleton
-public class TorrentScrapeScheduler {
+public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
+    
+    private static final Log LOG = LogFactory.getLog(TorrentScrapeSchedulerImpl.class);
     
     private static final long PERIOD = 1200;
 
@@ -85,14 +90,14 @@ public class TorrentScrapeScheduler {
     private final Runnable command = new Runnable() {
         @Override
         public void run() {
-            System.out.println("process");
+            LOG.debugf("process");
             process();
         }
     };
     private final ScheduledExecutorService backgroundExecutor;
     
     @Inject
-    public TorrentScrapeScheduler(TrackerScraper scraper,
+    public TorrentScrapeSchedulerImpl(TrackerScraper scraper,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         
         this.scraper = scraper;
@@ -106,11 +111,8 @@ public class TorrentScrapeScheduler {
         return backgroundExecutor.scheduleWithFixedDelay(command,
                 PERIOD*2, PERIOD, TimeUnit.MILLISECONDS);
     }
-    
-    /**
-     * Initiate a scrape request asyncronously results will be available
-     *  by {link #getScrapeDataIfAvailable()}
-     */
+
+    @Override
     public void queueScrapeIfNew(Torrent torrent) {
         
         Torrent current = currentlyScrapingTorrent.get();
@@ -137,8 +139,11 @@ public class TorrentScrapeScheduler {
                     return;
                 }
             }
+     
+            if (LOG.isDebugEnabled()) {
+                LOG.debugf("{0} queued", torrent.getName());
+            }
             
-            System.out.println(torrent.getName() + " queued");
             torrentsToScrape.add(torrent);
             wakeup();
         }
@@ -149,7 +154,7 @@ public class TorrentScrapeScheduler {
      */
     private void wakeup() {
         if (awake.compareAndSet(false, true)) {
-            System.out.println("wakeup");
+            LOG.debugf("wakeup");
             future = scheduleProcessor();
         }
     }
@@ -159,7 +164,7 @@ public class TorrentScrapeScheduler {
      *  entries if the threshold has been reached. 
      */
     private void sleep() {
-        System.out.println("GOING TO SLEEP");
+        LOG.debugf("GOING TO SLEEP");
         if (awake.compareAndSet(true, false)) {
             future.cancel(false);
             future = null;
@@ -168,6 +173,7 @@ public class TorrentScrapeScheduler {
         synchronized (failedTorrents) {
             int failedTorrentsToRemove = failedTorrents.size() - MAX_FAILURES_TO_KEEP_CACHED;
             if (failedTorrentsToRemove > 0) {
+                LOG.debugf("purging {0} failed torrents", failedTorrentsToRemove);
                 for ( int i=0 ; i<failedTorrentsToRemove ; i++ ) {
                     failedTorrents.remove(0);
                 }
@@ -177,6 +183,7 @@ public class TorrentScrapeScheduler {
         synchronized (resultsMap) {
             int resultsToRemove = resultsMap.size() - MAX_RESULTS_TO_KEEP_CACHED;
             if (resultsToRemove > 0) {
+                LOG.debugf("purging {0} results", resultsToRemove);
                 List<String> keys = new ArrayList<String>(resultsMap.keySet());
                 for ( int i=0 ; i<resultsToRemove ; i++ ) {
                     int randomKeyIndex = (int) (keys.size()*Math.random());
@@ -187,11 +194,7 @@ public class TorrentScrapeScheduler {
         }        
     }
     
-    /**
-     * Get any scrape results if available.
-     * 
-     * @return null if no scrape data available.
-     */
+    @Override
     public TorrentScrapeData getScrapeDataIfAvailable(Torrent torrent) {
         synchronized (resultsMap) {
             return resultsMap.get(torrent.getSha1());
@@ -202,7 +205,7 @@ public class TorrentScrapeScheduler {
      * Mark a torrent that failed so we dont attempt to scrape it again.
      */
     private void markCurrentTorrentFailure() {
-        System.out.println("  " + currentlyScrapingTorrent.get().getName() + " MARK FAIL");
+        LOG.debugf("  {0} MARK FAIL", currentlyScrapingTorrent.get().getName());
         synchronized (failedTorrents) {
             failedTorrents.add(currentlyScrapingTorrent.getAndSet(null).getSha1());
         }
@@ -219,7 +222,7 @@ public class TorrentScrapeScheduler {
         synchronized (torrentsToScrape) {
             if (!currentlyScrapingTorrent.compareAndSet(null, torrentsToScrape.peek())) {
                 if (processingPeriodsCount++ >= PROCESSING_PERIOD_MAX) {
-                    System.out.println("CANCEL SCRAPE REQUEST");
+                    LOG.debugf("CANCEL SCRAPE REQUEST");
                     currentScrapeAttemptShutdown.shutdown();
                     // Don't need to mark fail here... will get it on shutdown
                 }
@@ -263,7 +266,9 @@ public class TorrentScrapeScheduler {
         }
         
         try {
-            System.out.println(torrent.getName() + " submit");
+            if (LOG.isDebugEnabled()) {
+                LOG.debugf(" {0} submit", torrent.getName());
+            }
 
             currentScrapeAttemptShutdown = scraper.submitScrape(tracker,
                     URN.createSha1UrnFromHex(torrent.getSha1()), 
@@ -271,14 +276,18 @@ public class TorrentScrapeScheduler {
                         @Override
                         public void success(TorrentScrapeData data) {
                             synchronized (resultsMap) {
-                                System.out.println("  " + torrent.getName() + " FOUND");
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debugf("  {0} FOUND", torrent.getName());
+                                }
                                 resultsMap.put(currentlyScrapingTorrent.getAndSet(null).getSha1(),
                                             data);
                             }
                         }
                         @Override
                         public void failure(String reason) {
-                            System.out.println("   " + torrent.getName() + " FAILED");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debugf("   {0} FAILED", torrent.getName());
+                            }
                             markCurrentTrackerFailure();
                             markCurrentTorrentFailure();
                         }

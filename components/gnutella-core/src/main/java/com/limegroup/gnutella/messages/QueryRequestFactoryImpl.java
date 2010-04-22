@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.core.api.search.SearchCategory;
@@ -561,8 +562,8 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     }
     
     private String getQuery(String query, SearchCategory category) {
-        if (category == SearchCategory.TORRENT && !SearchSettings.USE_TORRENT_CATEGORY.getValue()) {
-            System.out.println("query: " + query + " torrent");
+        if (category == SearchCategory.TORRENT && SearchSettings.APPEND_TORRENT_TO_TORRENT_QUERIES.getValue()
+                && query.toLowerCase(Locale.US).indexOf("torrent")  < 0) {
             return query + " torrent";
         }
         return query;
@@ -580,7 +581,8 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             metaFlag |= QueryRequest.IMAGE_MASK;
         else if (type == SearchCategory.DOCUMENT)
             metaFlag |= QueryRequest.DOC_MASK;
-        else if (type == SearchCategory.TORRENT && SearchSettings.USE_TORRENT_CATEGORY.getValue())
+        else if (type == SearchCategory.TORRENT)
+            // Always append the mask since no recognised mask falls over to ALL anyways
             metaFlag |= QueryRequest.TORRENT_MASK;
         else if (type == SearchCategory.PROGRAM) {
             if (OSUtils.isLinux() || OSUtils.isMacOSX())

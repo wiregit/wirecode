@@ -6,6 +6,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.impl.LimeWireActivationModule;
+import org.limewire.bittorrent.TorrentScrapeScheduler;
+import org.limewire.bittorrent.TorrentScrapeSchedulerImpl;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
@@ -334,6 +336,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RareFileStrategy.class).to(RareFileStrategyImpl.class);
         bind(MulticastService.class).to(MulticastServiceImpl.class);
         bind(CategoryManager.class).to(CategoryManagerImpl.class);
+        bind(TorrentScrapeScheduler.class).to(TorrentScrapeSchedulerImpl.class);
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        
         AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent> asyncTransferMulticaster 

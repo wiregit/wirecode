@@ -10,6 +10,7 @@ import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentScrapeData;
+import org.limewire.bittorrent.TorrentScrapeScheduler;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
@@ -18,9 +19,6 @@ import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
-
-// TODO: !!!!
-import com.limegroup.bittorrent.TorrentScrapeScheduler;
 
 /**
  * This class specifies the content of a table that contains

@@ -414,6 +414,18 @@ public final class SearchSettings extends LimeProps {
     public static final BooleanSetting DESIRES_NMS1_URNS = 
         FACTORY.createBooleanSetting("DESIRES_NMS1_URNS", false);
     
-    public static final BooleanSetting USE_TORRENT_CATEGORY =
-        FACTORY.createRemoteBooleanSetting("USE_TORRENT_CATEGORY", false, "SearchSettings.useTorrentCategory");
+    /**
+     * Aims to reduce the number of non torrent responses generated from old clients when doing a torrent category search
+     *  by appending a torrent search term to the query to match on the extension.
+     */
+    public static final BooleanSetting APPEND_TORRENT_TO_TORRENT_QUERIES =
+        FACTORY.createRemoteBooleanSetting("APPEND_TORRENT_TO_TORRENT_QUERIES", true, "SearchSettings.appendTorrentToTorrentQueries");
+    
+    /**
+     * Whether torrent scraping should be used or not.  If false scrape requests will be ignored.
+     * 
+     * TODO: hide search columns...
+     */
+    public static final BooleanSetting USE_TORRENT_SCRAPER =
+        FACTORY.createRemoteBooleanSetting("USE_TORRENT_SCRAPER", true, "SearchSettings.useTorrentScraper");
 }

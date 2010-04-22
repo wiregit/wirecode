@@ -16,6 +16,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.bencoding.Token;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
@@ -36,25 +39,16 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 public class TrackerScraper {
 
+    private static final Log LOG = LogFactory.getLog(TrackerScraper.class);
+    
     private final int TIMEOUT = 1500;
     
     /**
-     *  Copied from escape_string.cpp in libtorrent
+     *  Subset of the characters from escape_string.cpp in libtorrent that
+     *   work in java.
      */
-    // http://www.ietf.org/rfc/rfc2396.txt
-    // section 2.3
     private static String UNRESERVED_CHARS =
-        // when determining if a url needs encoding
-        // % should be ok  (michaelt - '%' removed because it broke uri)
-      //  "+"
-        // reserved (michaelt: ???? guess the trackers expect these ???  removed!)
-      //  + ";?:@=&/"
-        // unreserved (special characters) ' excluded,
-        // since some buggy trackers fail with those
-        // (michaelt:  ??? removed '$' since it seems to break things ??)
-        //+
         "-_.!~*(),"
-        // unreserved (alphanumerics)
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         + "0123456789";
     
@@ -80,10 +74,15 @@ public class TrackerScraper {
     public Shutdownable submitScrape(URI trackerAnnounceUri, URN urn,
             final ScrapeCallback callback) {
 
-        System.out.println("attempting: " + trackerAnnounceUri);
+        if (!SearchSettings.USE_TORRENT_SCRAPER.get()) {
+            LOG.debugf("scraping has been disabled");
+            return null;
+        }
+        
+        LOG.debugf("attempting: {0}", trackerAnnounceUri);
         
         if (!canHTTPScrape(trackerAnnounceUri)) {
-            System.out.println("scraping not available");
+            LOG.debugf("scraping not available for the uri");
             
             // Tracker does not support scraping so don't attempt
             return null;
@@ -106,7 +105,8 @@ public class TrackerScraper {
         HttpConnectionParams.setSoTimeout(params, TIMEOUT);
         params = new DefaultedHttpParams(params, defaultParamsProvider.get());
         
-        System.out.println("submitting: " + uri);
+        LOG.debugf("submitting: {0}", uri);
+
         return httpExecutorProvider.get().execute(get, params, new HttpClientListener() {
             @Override
             public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
