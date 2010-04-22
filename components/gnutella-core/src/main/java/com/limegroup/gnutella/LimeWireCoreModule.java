@@ -365,6 +365,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();
         bind(PushEndpointSerializer.class).asEagerSingleton();
+        bind(SecureIdDatabaseStore.class);
     }
     
     @Provides @Singleton SecureMessageVerifier smv() {        
