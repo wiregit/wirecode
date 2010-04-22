@@ -235,7 +235,7 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
                 // when you first can, try to recieve a packet....
                 // *----------------------------
                 synchronized (_receiveLock) {
-                    while (_socket == null) {
+                    while (_socket == null || _socket.isClosed()) {
                         try {
                             _receiveLock.wait();
                         }
