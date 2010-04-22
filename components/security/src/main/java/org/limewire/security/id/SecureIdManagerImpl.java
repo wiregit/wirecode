@@ -65,7 +65,8 @@ public class SecureIdManagerImpl implements SecureIdManager {
         try{
             localIdentity = new PrivateIdentityImpl(secureIdStore.getLocalData());
         } catch (Exception e){
-            localIdentity = createPrivateIdentity();
+            localIdentity = createPrivateIdentity();            
+            secureIdStore.setLocalData(localIdentity.toByteArray());
         }
     }
     
@@ -154,7 +155,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#decrypt(org.limewire.io.GUID, byte[])
      */
-    public byte[] decrypt(GUID remoteId, byte[] ciphertext){
+    public byte[] decrypt(GUID remoteId, byte[] ciphertext) throws InvalidDataException{
         if(! isKnown(remoteId)){
             throw new IllegalArgumentException("unknown ID "+remoteId);
         }
@@ -172,7 +173,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
         } catch (IllegalBlockSizeException e) {
             throw new RuntimeException(e);
         } catch (BadPaddingException e) {
-            throw new RuntimeException(e);
+            throw new InvalidDataException("bad ciphertext");
         } catch (InvalidDataException e) {
             throw new RuntimeException(e);
         }

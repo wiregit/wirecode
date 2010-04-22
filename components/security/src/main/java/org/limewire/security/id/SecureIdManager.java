@@ -52,7 +52,7 @@ public interface SecureIdManager {
 
     /**
      * @return plaintext 
-     * @throws Exception when remoteID not known 
+     * @throws Exception when remoteID not known or when the ciphertext padding is wrong
      * @throws InvalidData 
      */
     public byte[] decrypt(GUID remoteId, byte[] ciphertext)

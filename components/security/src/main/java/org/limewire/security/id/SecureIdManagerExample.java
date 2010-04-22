@@ -1,7 +1,6 @@
 package org.limewire.security.id;
 
 import java.util.Arrays;
-import org.limewire.core.settings.SecuritySettings;
 import org.limewire.io.GUID;
 import org.limewire.security.SecurityUtils;
 import org.limewire.util.Base32;
@@ -14,7 +13,6 @@ public class SecureIdManagerExample {
         aliceIdManager.start();
         System.out.println("alice id "+aliceIdManager.getLocalGuid());
         // bob
-        SecuritySettings.SIGNATURE_PUBLIC_KEY.set("set it to this line to rise an exception, otherwise alice and bob will have same keys");
         SecureIdManagerImpl bobIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());          
         bobIdManager.start();
         System.out.println("bob id "+bobIdManager.getLocalGuid());

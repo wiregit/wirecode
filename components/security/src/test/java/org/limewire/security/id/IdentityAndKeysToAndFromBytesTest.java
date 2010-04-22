@@ -13,7 +13,7 @@ public class IdentityAndKeysToAndFromBytesTest extends BaseTestCase {
     }
 
     public void testIdentityImpl() throws Exception{
-        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(null);
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());
         aliceIdManager.start();
         
         // testing toByteArray() and identity constructed from a byte array
@@ -28,7 +28,7 @@ public class IdentityAndKeysToAndFromBytesTest extends BaseTestCase {
     }
 
     public void testPrivateIdentityImpl() throws Exception{
-        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(null);
+        SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());
         aliceIdManager.start();
         
         // testing toByteArray() and privateIdentity constructed from a byte array
