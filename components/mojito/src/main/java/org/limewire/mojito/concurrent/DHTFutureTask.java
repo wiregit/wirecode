@@ -8,7 +8,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.Context;
+import org.limewire.mojito.util.EventUtils;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -54,8 +57,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     @Override
     protected synchronized void doRun() {
         if (!isDone()) {
-            start();
             watchdog();
+            start();
         }
     }
     
@@ -129,5 +132,25 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
      */
     protected void done0() {
         // Override
+    }
+
+    @Override
+    protected boolean isEventThread() {
+        return EventUtils.isEventThread();
+    }
+    
+    @Override
+    protected void fireOperationComplete(
+            final EventListener<FutureEvent<V>>[] listeners,
+            final FutureEvent<V> event) {
+        
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                DHTFutureTask.super.fireOperationComplete(listeners, event);
+            }
+        };
+        
+        EventUtils.fireEvent(task);
     }
 }

@@ -1,16 +1,15 @@
 package org.limewire.concurrent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
-import org.limewire.listener.EventListenerList.EventListenerListContext;
+import org.limewire.util.Objects;
 
 /**
  * The base implementation of {@link AsyncFuture}.
@@ -42,18 +41,17 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
  * @see AsyncFutureTask
  */
 public class AsyncValueFuture<V> implements AsyncFuture<V> {
-
-    private final AtomicReference<EventListenerList<FutureEvent<V>>> listenersRef 
-        = new AtomicReference<EventListenerList<FutureEvent<V>>>(
-            new EventListenerList<FutureEvent<V>>());
     
-    // The listenerContext is required to make sure that listeners are 
-    // notified in the correct threads.  We eagerly clear the listenerRef 
-    // to release old listeners, but need to keep the context around to 
-    // make sure future listeners reuse the context.
-    private final EventListenerListContext listenerContext 
-        = listenersRef.get().getContext();
+    /**
+     * {@link List} of {@link EventListener}s that were added
+     * before the {@link AsyncValueFuture} completed.
+     */
+    private final List<EventListener<FutureEvent<V>>> listeners 
+        = new ArrayList<EventListener<FutureEvent<V>>>();
     
+    /**
+     * 
+     */
     private final OnewayExchanger<V, ExecutionException> exchanger 
         = new OnewayExchanger<V, ExecutionException>(this, true);
     
@@ -112,12 +110,14 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
     @Override
     public V get() throws InterruptedException, ExecutionException {
+        checkIfEventThread();
         return exchanger.get();
     }
 
     @Override
-    public V get(long timeout, TimeUnit unit) 
-            throws InterruptedException, ExecutionException, TimeoutException {
+    public V get(long timeout, TimeUnit unit) throws InterruptedException, 
+            ExecutionException, TimeoutException {
+        checkIfEventThread();
         return exchanger.get(timeout, unit);
     }
 
@@ -140,15 +140,7 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
      * Notifies all {@link EventListener}s and calls {@link #done()}.
      */
     private void complete() {
-        // Fire the event
-        EventListenerList<FutureEvent<V>> listeners 
-            = listenersRef.getAndSet(null);
-        assert listeners != null;
-
-        if (listeners.size() > 0) {
-            listeners.broadcast(FutureEvent.createEvent(this));
-        }
-        
+        fireOperationComplete();
         done();
     }
     
@@ -167,21 +159,81 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
     @Override
     public void addFutureListener(EventListener<FutureEvent<V>> listener) {
-        boolean added = false;
-        EventListenerList<FutureEvent<V>> listeners = listenersRef.get();
-        // Add the listener & set it back -- we add a proxy listener
-        // because there's a chance that we add it to the list
-        // before another thread sets it to null, leaving us
-        // to potentially call methods on the listener twice.
-        // (Once from the done() thread, and once from this thread.)
-        if (!isDone() && listeners != null) {
-            listeners.addListener(new ProxyListener<V>(listener, listenerContext));
-            added = listenersRef.compareAndSet(listeners, listeners);
+        Objects.nonNull(listener, "listener");
+        
+        boolean done = false;
+        synchronized (this) {
+            done = isDone();
+            if (!done) {
+                listeners.add(listener);
+            }
         }
-
-        if (!added) {
-            EventListenerList.dispatch(listener, 
-                    FutureEvent.createEvent(this), listenerContext);
+        
+        if (done) {
+            fireOperationComplete(listener);
+        }
+    }
+    
+    /**
+     * Checks if the caller {@link Thread} is the event {@link Thread}.
+     * The default implementation is always returning false, custom
+     * implementations may override this method.
+     */
+    protected boolean isEventThread() {
+        return false;
+    }
+    
+    /**
+     * Checks if it's called from the event {@link Thread} and
+     * throws an {@link IllegalStateException} if {@link #isDone()}
+     * is returning false. This is a safe-guard to ensure that
+     * the event {@link Thread} cannot call any of the get()
+     * methods if the {@link AsyncFuture} isn't done yet.
+     */
+    private void checkIfEventThread() {
+        if (!isDone() && isEventThread()) {
+            throw new IllegalStateException();
+        }
+    }
+    
+    /**
+     * Notifies all {@link EventListener}s that were added before
+     */
+    @SuppressWarnings("unchecked")
+    private void fireOperationComplete() {
+        FutureEvent<V> event = null;
+        EventListener<FutureEvent<V>>[] l = null;
+        
+        synchronized (this) {
+            if (!listeners.isEmpty()) {
+                event = FutureEvent.createEvent(this);
+                l = listeners.toArray(new EventListener[0]); 
+            }
+        }
+        
+        if (l != null) {
+            fireOperationComplete(l, event);
+        }
+    }
+    
+    /**
+     * Notifies the given {@link EventListener}.
+     */
+    @SuppressWarnings("unchecked")
+    private void fireOperationComplete(EventListener<FutureEvent<V>> listener) {
+        FutureEvent<V> event = FutureEvent.createEvent(this);
+        fireOperationComplete(new EventListener[] { listener }, event);
+    }
+    
+    /**
+     * Notifies the given {@link EventListener}s.
+     */
+    protected void fireOperationComplete(
+            EventListener<FutureEvent<V>>[] listeners,
+            FutureEvent<V> event) {
+        
+        for (EventListener<FutureEvent<V>> l : listeners) {
+            l.handleEvent(event);
         }
     }
     
@@ -195,27 +247,5 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
         }
         
         return new ExecutionException(t);
-    }
-    
-    private static class ProxyListener<V> implements EventListener<FutureEvent<V>> {
-        
-        private final AtomicBoolean called = new AtomicBoolean(false);
-        private final EventListenerListContext listenerContext;
-
-        private final EventListener<FutureEvent<V>> delegate;
-
-        public ProxyListener(EventListener<FutureEvent<V>> delegate, 
-                EventListenerListContext listenerContext) {
-            this.delegate = delegate;
-            this.listenerContext = listenerContext;
-        }
-
-        @Override
-        public void handleEvent(FutureEvent<V> event) {
-            if (!called.getAndSet(true)) {
-                // Dispatch via EventListenerList to support annotations.
-                EventListenerList.dispatch(delegate, event, listenerContext);
-            }
-        }
     }
 }
