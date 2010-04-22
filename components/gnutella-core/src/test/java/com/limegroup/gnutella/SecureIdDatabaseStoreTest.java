@@ -99,6 +99,12 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         assertEquals(value, result);
         secureIdDatabaseStore.stop();
     }
+
+    public void testStoppedStoreDoesNotThrowRuntimeException() {
+        secureIdDatabaseStore.start();
+        secureIdDatabaseStore.stop();
+        assertNull(secureIdDatabaseStore.get(new GUID()));
+    }
     
     private byte[] createRandomBytes(int length) {
         byte[] bytes = new byte[length];
