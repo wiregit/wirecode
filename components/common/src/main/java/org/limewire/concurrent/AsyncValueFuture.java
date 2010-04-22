@@ -7,11 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
-import org.limewire.listener.EventListenerList.EventListenerListContext;
 
 /**
  * The base implementation of {@link AsyncFuture}.
@@ -45,7 +42,8 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
 public class AsyncValueFuture<V> implements AsyncFuture<V> {
     
     /**
-     * 
+     * {@link List} of {@link EventListener}s that were added
+     * before the {@link AsyncValueFuture} completed.
      */
     private final List<EventListener<FutureEvent<V>>> listeners 
         = new ArrayList<EventListener<FutureEvent<V>>>();
@@ -111,12 +109,14 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
 
     @Override
     public V get() throws InterruptedException, ExecutionException {
+        checkIfEventThread();
         return exchanger.get();
     }
 
     @Override
-    public V get(long timeout, TimeUnit unit) 
-            throws InterruptedException, ExecutionException, TimeoutException {
+    public V get(long timeout, TimeUnit unit) throws InterruptedException, 
+            ExecutionException, TimeoutException {
+        checkIfEventThread();
         return exchanger.get(timeout, unit);
     }
 
@@ -168,9 +168,29 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
         }
         
         if (done) {
-            FutureEvent<V> event 
-                = FutureEvent.createEvent(this);
-            fireOperationComplete(event, listener);
+            fireOperationComplete(listener);
+        }
+    }
+    
+    /**
+     * Checks if the caller {@link Thread} is the event {@link Thread}.
+     * The default implementation is always returning false, custom
+     * implementations may override this method.
+     */
+    protected boolean isEventThread() {
+        return false;
+    }
+    
+    /**
+     * Checks if it's called from the event {@link Thread} and
+     * throws an {@link IllegalStateException} if {@link #isDone()}
+     * is returning false. This is a safe-guard to ensure that
+     * the event {@link Thread} cannot call any of the get()
+     * methods if the {@link AsyncFuture} isn't done yet.
+     */
+    private void checkIfEventThread() {
+        if (!isDone() && isEventThread()) {
+            throw new IllegalStateException();
         }
     }
     
@@ -180,37 +200,38 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
     @SuppressWarnings("unchecked")
     private void fireOperationComplete() {
         FutureEvent<V> event = null;
-        EventListener<FutureEvent<V>>[] others = null;
+        EventListener<FutureEvent<V>>[] l = null;
         
         synchronized (this) {
             if (!listeners.isEmpty()) {
                 event = FutureEvent.createEvent(this);
-                others = listeners.toArray(new EventListener[0]); 
+                l = listeners.toArray(new EventListener[0]); 
             }
         }
         
-        if (others != null) {
-            fireOperationComplete(event, null, others);
+        if (l != null) {
+            fireOperationComplete(l, event);
         }
     }
     
     /**
-     * Fires the given {@link FutureEvent} and notifies the given
-     * {@link EventListener}s.
+     * Notifies the given {@link EventListener}.
+     */
+    @SuppressWarnings("unchecked")
+    private void fireOperationComplete(EventListener<FutureEvent<V>> listener) {
+        FutureEvent<V> event = FutureEvent.createEvent(this);
+        fireOperationComplete(new EventListener[] { listener }, event);
+    }
+    
+    /**
+     * Notifies the given {@link EventListener}s.
      */
     protected void fireOperationComplete(
-            FutureEvent<V> event,
-            EventListener<FutureEvent<V>> first,
-            EventListener<FutureEvent<V>>... others) {
+            EventListener<FutureEvent<V>>[] listeners,
+            FutureEvent<V> event) {
         
-        if (first != null) {
-            first.handleEvent(event);
-        }
-        
-        if (others != null) {
-            for (EventListener<FutureEvent<V>> l : others) {
-                l.handleEvent(event);
-            }
+        for (EventListener<FutureEvent<V>> l : listeners) {
+            l.handleEvent(event);
         }
     }
     
@@ -224,27 +245,5 @@ public class AsyncValueFuture<V> implements AsyncFuture<V> {
         }
         
         return new ExecutionException(t);
-    }
-    
-    private static class ProxyListener<V> implements EventListener<FutureEvent<V>> {
-        
-        private final AtomicBoolean called = new AtomicBoolean(false);
-        private final EventListenerListContext listenerContext;
-
-        private final EventListener<FutureEvent<V>> delegate;
-
-        public ProxyListener(EventListener<FutureEvent<V>> delegate, 
-                EventListenerListContext listenerContext) {
-            this.delegate = delegate;
-            this.listenerContext = listenerContext;
-        }
-
-        @Override
-        public void handleEvent(FutureEvent<V> event) {
-            if (!called.getAndSet(true)) {
-                // Dispatch via EventListenerList to support annotations.
-                EventListenerList.dispatch(delegate, event, listenerContext);
-            }
-        }
     }
 }
