@@ -1,5 +1,6 @@
 package org.limewire.mojito;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -385,32 +386,33 @@ public class Context2 implements MojitoDHT2 {
                 @Override
                 public void handleEvent(FutureEvent<NodeEntity> event) {
                     synchronized (lock) {
-                        // The reference can be null if the FutureManager was
-                        // unable to execute the STORE process. This can happen
-                        // if the Context is being shutdown.
-                        if (futureRef.get() != null) {
-                            switch (event.getType()) {
-                                case SUCCESS:
-                                    handleNodeEntity(event.getResult());
-                                    break;
-                                case EXCEPTION:
-                                    handleException(event.getException());
-                                    break;
-                                default:
-                                    handleCancellation();
-                                    break;
+                        try {
+                            // The reference can be null if the FutureManager was
+                            // unable to execute the STORE process. This can happen
+                            // if the Context is being shutdown.
+                            if (futureRef.get() != null) {
+                                switch (event.getType()) {
+                                    case SUCCESS:
+                                        handleNodeEntity(event.getResult());
+                                        break;
+                                    case EXCEPTION:
+                                        handleException(event.getException());
+                                        break;
+                                    default:
+                                        handleCancellation();
+                                        break;
+                                }
                             }
+                        } catch (Throwable t) {
+                            handleException(t);
+                            ExceptionUtils.reportIfUnchecked(t);
                         }
                     }
                 }
                 
-                private void handleNodeEntity(NodeEntity entity) {
-                    try {
-                        process.store(entity.getContacts());
-                    } catch (Throwable t) {
-                        handleException(t);
-                        ExceptionUtils.reportIfUnchecked(t);
-                    }
+                private void handleNodeEntity(NodeEntity entity) 
+                        throws IOException {
+                    process.store(entity.getContacts());
                 }
                 
                 private void handleException(Throwable t) {
