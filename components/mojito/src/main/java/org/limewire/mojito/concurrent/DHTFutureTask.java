@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.mojito.concurrent.AsyncProcess.Delay;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -156,16 +157,5 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
      */
     protected void done0() {
         // Override
-    }
-    
-    /**
-     * A mix-in interface for {@link AsyncProcess}es.
-     */
-    public static interface Delay {
-        
-        /**
-         * The delay for which the watchdog should be postponed.
-         */
-        public long getDelay(TimeUnit unit);
     }
 }
