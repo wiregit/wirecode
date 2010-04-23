@@ -23,8 +23,6 @@ public interface SecureIdManager {
 
     public static final int SIGNATURE_KEY_SIZE = 768;
 
-    public static final boolean TAGGING = false;
-
     /**
      * @return if the local node knows the remoteID and shares a key with the remote node
      */
@@ -44,11 +42,9 @@ public interface SecureIdManager {
 
     /**
      * @return ciphertext 
-     * @throws Exception when remoteID not known 
-     * @throws InvalidData 
+     * @throws Exception when remoteID not known
      */
-    public byte[] encrypt(GUID remoteId, byte[] plaintext)
-            throws InvalidDataException;
+    public byte[] encrypt(GUID remoteId, byte[] plaintext);
 
     /**
      * @return plaintext 

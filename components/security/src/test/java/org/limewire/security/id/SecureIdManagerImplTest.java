@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import junit.framework.Test;
 
 import org.limewire.io.GUID;
+import org.limewire.security.SecurityUtils;
 import org.limewire.util.BaseTestCase;
 
 public class SecureIdManagerImplTest extends BaseTestCase {
@@ -162,8 +163,11 @@ public class SecureIdManagerImplTest extends BaseTestCase {
         byte[] badMacBytes = macBytesToBob;
         badSigBytes[10] += 1;
         badMacBytes[10] += 1;
-        assertFalse(bobIdManager.verifySignature(aliceId, data, badSigBytes));
+        assertFalse(bobIdManager.verifySignature(aliceId, data, badSigBytes));        
         assertFalse(bobIdManager.verifyHmac(aliceId, data, badMacBytes));
+        // bad signature or mac with wrong length should fail, but should not throw exception
+        assertFalse(bobIdManager.verifySignature(aliceId, data, SecurityUtils.createNonce()));
+        assertFalse(bobIdManager.verifyHmac(aliceId, data, SecurityUtils.createNonce()));
     }   
     
     public void testRemoteKeyLength() throws Exception {
@@ -194,7 +198,7 @@ public class SecureIdManagerImplTest extends BaseTestCase {
         assertEquals(aliceIdManager.getPrivateLocalIdentity().toByteArray(), aliceCloneIdManager.getPrivateLocalIdentity().toByteArray());
     }
 
-    public void testEncryption() throws Exception{
+    public void testEncryptionAndDecryption() throws Exception{
         // alice and bob and cara
         SecureIdManagerImpl aliceIdManager = new SecureIdManagerImpl(new SecureIdStoreImpl());
         aliceIdManager.start();
