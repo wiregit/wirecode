@@ -99,7 +99,6 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
      */
     private void onException(Throwable t) {
         future.setException(t);
-        ExceptionUtils.reportIfUnchecked(t);
     }
     
     /**
@@ -107,6 +106,14 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
      */
     private void onCancellation() {
         future.cancel(true);
+    }
+    
+    /**
+     * 
+     */
+    private void uncaughtException(Throwable t) {
+        future.setException(t);
+        ExceptionUtils.reportIfUnchecked(t);
     }
     
     // --- PING ---
@@ -147,8 +154,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                         break;
                 }
             } catch (Throwable t) {
-                future.setException(t);
-                ExceptionUtils.reportIfUnchecked(t);
+                uncaughtException(t);
             }
         }
     }
@@ -194,8 +200,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                         break;
                 }
             } catch (Throwable t) {
-                future.setException(t);
-                ExceptionUtils.reportIfUnchecked(t);
+                uncaughtException(t);
             }
         }
     }
@@ -239,7 +244,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                             try {
                                 doRefresh(1);
                             } catch (Throwable t) {
-                                onException(t);
+                                uncaughtException(t);
                             }
                         }
                     });
