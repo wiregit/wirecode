@@ -1,6 +1,5 @@
 package org.limewire.mojito.manager;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +22,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.TimeAwareIterable;
+import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
@@ -94,6 +94,23 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         }
     }
     
+    /**
+     * 
+     */
+    private void onException(Throwable t) {
+        future.setException(t);
+        ExceptionUtils.reportIfUnchecked(t);
+    }
+    
+    /**
+     * 
+     */
+    private void onCancellation() {
+        future.cancel(true);
+    }
+    
+    // --- PING ---
+    
     private void ping() {
         synchronized (future) {
             if (future.isDone()) {
@@ -105,83 +122,85 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
                 @Override
                 public void handleEvent(FutureEvent<PingEntity> event) {
-                    handlePingEvent(event);
+                    handlePong(event);
                 }
             });
         }
     }
     
-    private void handlePingEvent(FutureEvent<PingEntity> event) {
+    private void handlePong(FutureEvent<PingEntity> event) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
             }
             
-            switch (event.getType()) {
-                case SUCCESS:
-                    handlePingSuccess(event.getResult());
-                    break;
-                default:
-                    handlePingError();
-                    break;
+            try {
+                switch (event.getType()) {
+                    case SUCCESS:
+                        onPong(event.getResult());
+                        break;
+                    case EXCEPTION:
+                        onException(event.getException());
+                        break;
+                    default:
+                        onCancellation();
+                        break;
+                }
+            } catch (Throwable t) {
+                future.setException(t);
+                ExceptionUtils.reportIfUnchecked(t);
             }
         }
     }
     
-    private void handlePingSuccess(PingEntity entity) {
+    private void onPong(PingEntity entity) {
         Contact localhost = dht.getLocalNode();
         KUID lookupId = localhost.getNodeID();
         
+        Contact contact 
+            = entity.getContact();
+        
+        long timeout = config.getLookupTimeoutInMillis();
+        phaseOne = dht.lookup(lookupId, 
+                new Contact[] { contact }, 
+                timeout, TimeUnit.MILLISECONDS);
+        
+        phaseOne.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<NodeEntity> event) {
+                handleLookup(event);
+            }
+        });
+    }
+    
+    // --- LOOKUP ---
+    
+    private void handleLookup(FutureEvent<NodeEntity> event) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
             }
             
-            Contact contact 
-                = entity.getContact();
-            
-            long timeout = config.getLookupTimeoutInMillis();
-            phaseOne = dht.lookup(lookupId, 
-                    new Contact[] { contact }, 
-                    timeout, TimeUnit.MILLISECONDS);
-            
-            phaseOne.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
-                @Override
-                public void handleEvent(FutureEvent<NodeEntity> event) {
-                    handlePhaseOneEvent(event);
+            try {
+                switch (event.getType()) {
+                    case SUCCESS:
+                        onLookup(event.getResult());
+                        break;
+                    case EXCEPTION:
+                        onException(event.getException());
+                        break;
+                    default:
+                        onCancellation();
+                        break;
                 }
-            });
-        }
-    }
-    
-    private void handlePingError() {
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            future.setException(new IOException());
-        }
-    }
-    
-    private void handlePhaseOneEvent(FutureEvent<NodeEntity> event) {
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            switch (event.getType()) {
-                case SUCCESS:
-                    handlePhaseOneSuccess(event.getResult());
-                    break;
-                default:
-                    handlePhaseOneError();
-                    break;
+            } catch (Throwable t) {
+                future.setException(t);
+                ExceptionUtils.reportIfUnchecked(t);
             }
         }
     }
     
-    private void handlePhaseOneSuccess(NodeEntity entity) {
+    private void onLookup(NodeEntity entity) {
         
         KUID[] bucketIds = getBucketsToRefresh();
         
@@ -189,16 +208,12 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         bucketsToRefresh = new TimeAwareIterable<KUID>(
                 bucketIds, timeout, TimeUnit.MILLISECONDS).iterator();
         
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            processNextBucket(0);
-        }
+        doRefresh(0);
     }
     
-    private void processNextBucket(int count) {
+    // --- REFRESH ---
+    
+    private void doRefresh(int count) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -221,7 +236,11 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                     future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
                         @Override
                         public void handleEvent(FutureEvent<NodeEntity> event) {
-                            processNextBucket(1);
+                            try {
+                                doRefresh(1);
+                            } catch (Throwable t) {
+                                onException(t);
+                            }
                         }
                     });
                     
@@ -254,16 +273,6 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             long time = System.currentTimeMillis() - startTime;
             future.setValue(new DefaultBootstrapEntity(
                     dht, time, TimeUnit.MILLISECONDS));
-        }
-    }
-    
-    private void handlePhaseOneError() {
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            future.setException(new IOException());
         }
     }
     
