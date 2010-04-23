@@ -1,0 +1,80 @@
+GAWAEFCBKKMSEPCX4KDKFW5OZFEWWVBYMMJU2GYCCQPDO72SQGJ7P7QFOXJGZSESSWI6OXGRZQ||<update id="8" timestamp="1267044123561">
+  <keyversion>25</keyversion><newversion>29</newversion><signature>GAWAEFCPV4TLWDZ3QWXZTRK4HNLR7B65GUBH4LQCCQD46QHC2WDKBA23UVZ4U5HLDAFA7FWZYA</signature><certificate>GAWAEFAX27DFHJKWREOETPSCYDZY2NEP6G5CE3QCCRRNNR2UOLXB7SKOC5BJ2Z4QMZIP7PXSFA|25|GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAGSCICEXEUOB632QRDLIJW4HBGOK3RGOW3GE5P75AOM47GHXEN63KHRJGBTL7Y4QPVVIHTRHLQE3F4SNONNJXHR3WBNPZW7U4YLWZK4MA4S7UTIKZD5VJIDAPX6DGMLKQXVNB5GOCPTBFBSLCNH5EVA7TD4SP3NLKU3IQNMBZJGFHA5RWG4GDEIWNOPRMJA2C4CFYO5FCHXSOW</certificate>
+  <msg from="0.0.1" to="0.0.2" for="0.0.3" url="http://www.limewire.com/download/update?fc=4" style="2" os="mac,windows,linux,unix,other" osv="10.5,*,*,*,*,*,*,*,*,*">
+    <lang id='en' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 is here!<ul><li>Follow downloads with BitTorrent visualization</li><li>Built-in video player</li><li>Improved network connectivity</li></ul>Update Now</html>]]>
+    </lang>
+    <lang id='ar' title='LimeWire 5.4'>
+      <![CDATA[<html>&#1607;&#1608; &#1607;&#1606;&#1575;!LimeWire 5.4<ul><li>&#1605;&#1578;&#1575;&#1576;&#1593;&#1577; &#1608;&#1575;&#1587;&#1578;&#1593;&#1585;&#1575;&#1590; &#1575;&#1604;&#1578;&#1606;&#1586;&#1610;&#1604;&#1575;&#1578; &#1576;&#1576;&#1585;&#1608;&#1578;&#1608;&#1603;&#1608;&#1604;BitTorrent </li><li> &#1605;&#1588;&#1594;&#1604; &#1601;&#1610;&#1583;&#1610;&#1608; &#1605;&#1583;&#1605;&#1580;</li><li> &#1575;&#1578;&#1589;&#1575;&#1604; &#1605;&#1581;&#1587;&#1617;&#1614;&#1606; &#1576;&#1575;&#1604;&#1588;&#1576;&#1603;&#1577;</li></ul> &#1581;&#1583;&#1617;&#1616;&#1579; &#1575;&#1604;&#1570;&#1606;</html>]]>
+    </lang>
+    <lang id='zh_CN' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4&#23601;&#22312;&#36825;&#37324;!<ul><li>&#36890;&#36807; BitTorrent &#21487;&#35270;&#21270;&#36319;&#36827;&#19979;&#36733;&#36827;&#24230;</li><li>&#20869;&#32622;&#35270;&#39057;&#25773;&#25918;&#22120;</li><li>&#22686;&#24378;&#30340;&#32593;&#32476;&#36830;&#25509;&#24615;&#33021;</li></ul>&#31435;&#21363;&#26356;&#26032;</html>]]>
+    </lang>
+    <lang id='da' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 er her!<ul><li>F&oslash;lger downloads med BitTorrent visualisering</li><li>Indbygget videoafspiller</li><li>Forbedret netv&aelig;rksforbindelse</li></ul>Opdater Nu</html>]]>
+    </lang>
+    <lang id='nl' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 is hier!<ul><li>Volg het downloaden met de Bit Torrent visualisatie</li><li>Ingebouwde videospeler</li><li>Verbeterde netwerkverbindingen</li></ul>Nu updaten</html>]]>
+    </lang>
+    <lang id='nl_NL' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 is hier!<ul><li>Volg het downloaden met de Bit Torrent visualisatie</li><li>Ingebouwde videospeler</li><li>Verbeterde netwerkverbindingen</li></ul>Nu updaten</html>]]>
+    </lang>    
+    <lang id='nl_BE' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 is hier!<ul><li>Volg het downloaden met de Bit Torrent visualisatie</li><li>Ingebouwde videospeler</li><li>Verbeterde netwerkverbindingen</li></ul>Nu updaten</html>]]>
+    </lang>
+    <lang id='fr' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 est l&agrave;!<ul><li>Suivez les t&eacute;l&eacute;chargements avec une visualisation BitTorrent</li><li>Lecteur vid&eacute;o int&eacute;gr&eacute;</li><li>Connectivit&eacute; de r&eacute;seau am&eacute;lior&eacute;e</li></ul>Mettez-vous &agrave; jour d&egrave;s maintenant</html>]]>
+    </lang>
+    <lang id='fr_FR' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 est l&agrave;!<ul><li>Suivez les t&eacute;l&eacute;chargements avec une visualisation BitTorrent</li><li>Lecteur vid&eacute;o int&eacute;gr&eacute;</li><li>Connectivit&eacute; de r&eacute;seau am&eacute;lior&eacute;e</li></ul>Mettez-vous &agrave; jour d&egrave;s maintenant</html>]]>
+    </lang>
+    <lang id='de' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 ist da!<ul><li>Downloads verfolgen mit BitTorrent-Visualisierung</li><li>Eingebauter Video-Player</li><li>Verbesserte Netzwerkkonnektivit&auml;t</li></ul>Jetzt aktualisieren</html>]]>
+    </lang>
+    <lang id='de_DE' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 ist da!<ul><li>Downloads verfolgen mit BitTorrent-Visualisierung</li><li>Eingebauter Video-Player</li><li>Verbesserte Netzwerkkonnektivit&auml;t</li></ul>Jetzt aktualisieren</html>]]>
+    </lang> 
+    <lang id='it' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 &egrave; qui!<ul><li>Segui i download con la visualizzazione BitTorrent</li><li>Riproduttore video incorporato</li><li>Connessione di rete migliorata</li></ul>Aggiornati ora</html>]]>
+    </lang>
+    <lang id='it_IT' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 &egrave; qui!<ul><li>Segui i download con la visualizzazione BitTorrent</li><li>Riproduttore video incorporato</li><li>Connessione di rete migliorata</li></ul>Aggiornati ora</html>]]>
+    </lang>
+    <lang id='ja' title='LimeWire 5.4'>
+      <![CDATA[<html>Limewire&#12399;5.4&#12371;&#12371;&#12395;&#12354;&#12427;<ul><li>BitTorrent&#12499;&#12472;&#12517;&#12450;&#12521;&#12452;&#12476;&#12540;&#12471;&#12519;&#12531;&#12391;&#12480;&#12454;&#12531;&#12525;&#12540;&#12489;&#12434;&#36861;&#36321;</li><li>&#12499;&#12487;&#12458;&#12503;&#12524;&#12540;&#12516;&#12540;&#20869;&#34101;</li><li>&#25913;&#33391;&#12373;&#12428;&#12383;&#12493;&#12483;&#12488;&#12527;&#12540;&#12463;&#25509;&#32154;&#24615;</li></ul>&#20170;&#12377;&#12368;&#12450;&#12483;&#12503;&#12487;&#12540;&#12488;</html>]]>
+    </lang>
+    <lang id='ja_JP' title='LimeWire 5.4'>
+      <![CDATA[<html>Limewire&#12399;5.4&#12371;&#12371;&#12395;&#12354;&#12427;<ul><li>BitTorrent&#12499;&#12472;&#12517;&#12450;&#12521;&#12452;&#12476;&#12540;&#12471;&#12519;&#12531;&#12391;&#12480;&#12454;&#12531;&#12525;&#12540;&#12489;&#12434;&#36861;&#36321;</li><li>&#12499;&#12487;&#12458;&#12503;&#12524;&#12540;&#12516;&#12540;&#20869;&#34101;</li><li>&#25913;&#33391;&#12373;&#12428;&#12383;&#12493;&#12483;&#12488;&#12527;&#12540;&#12463;&#25509;&#32154;&#24615;</li></ul>&#20170;&#12377;&#12368;&#12450;&#12483;&#12503;&#12487;&#12540;&#12488;</html>]]>
+    </lang>
+    <lang id='no' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 er her!<ul><li>F&oslash;lg nedlastinger med BitTorrent visualisering</li><li>Innebygd videospiller</li><li>Forbedret nettverkstilkobling</li></ul>Oppdater n&aring;</html>]]>
+    </lang>
+    <lang id='no_NO' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 er her!<ul><li>F&oslash;lg nedlastinger med BitTorrent visualisering</li><li>Innebygd videospiller</li><li>Forbedret nettverkstilkobling</li></ul>Oppdater n&aring;</html>]]>
+    </lang>    
+    <lang id='pt_BR' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5,4 &eacute; aqui!<ul><li>Siga os downloads com a visualiza&ccedil;&atilde;o BitTorrent</li><li>Player de v&iacute;deo embutido</li><li>Conectividade de rede aprimorada</li></ul>Atualize j&aacute;</html>]]>
+    </lang>
+    <lang id='es' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 ya est&aacute; aqu&iacute;!<ul><li>Seguimiento de descargas con visualizaci&oacute;n BitTorrent</li><li>Reproductor de v&iacute;deo integrado</li><li>Conectividad de red mejorada</li></ul>Actualizar ahora</html>]]>
+    </lang>
+    <lang id='es_ES' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 ya est&aacute; aqu&iacute;!<ul><li>Seguimiento de descargas con visualizaci&oacute;n BitTorrent</li><li>Reproductor de v&iacute;deo integrado</li><li>Conectividad de red mejorada</li></ul>Actualizar ahora</html>]]>
+    </lang>
+    <lang id='es_MX' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 ya est&aacute; aqu&iacute;!<ul><li>Seguimiento de descargas con visualizaci&oacute;n BitTorrent</li><li>Reproductor de v&iacute;deo integrado</li><li>Conectividad de red mejorada</li></ul>Actualizar ahora</html>]]>
+    </lang>
+    <lang id='sv' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 &auml;r h&auml;r!<ul><li>F&ouml;lj nedladdningarna med BitTorrent visualisering</li><li>Inbyggd videospelare</li><li>F&ouml;rb&auml;ttrad n&auml;tverksanslutning</li></ul>Uppdatera nu</html>]]>
+    </lang>
+    <lang id='tr' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5,4 burada!<ul><li>&#304;ndirmeleri, BitTorrent g&ouml;rselle&#351;tirmeyle izleyin</li><li>Yerle&#351;ik video oynat&#305;c&#305;</li><li>Geli&#351;tirilmi&#351; a&#287; ba&#287;lanabilirli&#287;i</li></ul>&#350;imdi G&uuml;ncelleyin</html>]]>
+    </lang>
+    <lang id='tr_TR' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5,4 burada!<ul><li>&#304;ndirmeleri, BitTorrent g&ouml;rselle&#351;tirmeyle izleyin</li><li>Yerle&#351;ik video oynat&#305;c&#305;</li><li>Geli&#351;tirilmi&#351; a&#287; ba&#287;lanabilirli&#287;i</li></ul>&#350;imdi G&uuml;ncelleyin</html>]]>
+    </lang>
+    <lang id='ko' title='LimeWire 5.4'>
+      <![CDATA[<html>LimeWire 5.4 &#50668;&#44592;&#51080;&#45796;!<ul><li>BitTorrent &#49884;&#44033;&#54868;&#47484; &#53685;&#54644; &#45796;&#50868;&#47196;&#46300; &#49688;&#54665;</li><li>&#45236;&#51109; &#48708;&#46356;&#50724; &#54540;&#47112;&#51060;&#50612;</li><li>&#45348;&#53944;&#50892;&#53356; &#50672;&#44208; &#54693;&#49345;</li></ul>&#51648;&#44552; &#50629;&#45936;&#51060;&#53944;&#54616;&#49901;&#49884;&#50724;.</html>]]>
+    </lang>
+  </msg>
+</update>
