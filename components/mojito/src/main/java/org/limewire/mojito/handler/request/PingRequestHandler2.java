@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context2;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.messages.PingResponse;
@@ -41,8 +40,8 @@ public class PingRequestHandler2 extends AbstractRequestHandler2 {
     private static final Log LOG 
         = LogFactory.getLog(PingRequestHandler2.class);
     
-    public PingRequestHandler2(MessageDispatcher2 messageDispatcher, Context2 context) {
-        super(messageDispatcher, context);
+    public PingRequestHandler2(Context2 context) {
+        super(context);
     }
     
     @Override
@@ -70,6 +69,6 @@ public class PingRequestHandler2 extends AbstractRequestHandler2 {
         PingResponse response = messageHelper.createPingResponse(
                 request, node.getContactAddress());
 
-        messageDispatcher.send(node, response);
+        send(node, response);
     }
 }

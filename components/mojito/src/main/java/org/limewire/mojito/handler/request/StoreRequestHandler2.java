@@ -31,7 +31,6 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageHelper2;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
@@ -65,8 +64,8 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
     @InspectablePrimitive(value = "Store Failure Count")
     private static final AtomicInteger STORE_FAILURE = new AtomicInteger();
     
-    public StoreRequestHandler2(MessageDispatcher2 messageDispatcher, Context2 context) {
-        super(messageDispatcher, context);
+    public StoreRequestHandler2(Context2 context) {
+        super(context);
     }
     
     @Override
@@ -115,6 +114,7 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
         
         MessageHelper2 messageHelper = context.getMessageHelper();
         StoreResponse response = messageHelper.createStoreResponse(request, status);
-        messageDispatcher.send(request.getContact(), response);
+        
+        send(request.getContact(), response);
     }
 }

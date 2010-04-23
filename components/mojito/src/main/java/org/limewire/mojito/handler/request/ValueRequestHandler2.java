@@ -34,7 +34,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.MessageHelper2;
@@ -62,9 +61,8 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
      */
     private final NodeRequestHandler2 node;
     
-    public ValueRequestHandler2(MessageDispatcher2 messageDispatcher, 
-            Context2 context, NodeRequestHandler2 node) {
-        super(messageDispatcher, context);
+    public ValueRequestHandler2(Context2 context, NodeRequestHandler2 node) {
+        super(context);
         
         this.node = node;
     }
@@ -147,7 +145,7 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
             MessageHelper2 messageHelper = context.getMessageHelper();
             FindValueResponse response = messageHelper.createFindValueResponse(
                     request, requestLoad, valuesToReturn, availableKeys);
-            messageDispatcher.send(request.getContact(), response);
+            send(request.getContact(), response);
         }
     }
 }
