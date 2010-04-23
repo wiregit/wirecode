@@ -36,17 +36,17 @@ import org.limewire.mojito.messages.DHTMessage.OpCode;
  * <code>ArcsVisualizer</code> is a small framework for visually representing 
  * the DHT messages distinguished by color and dash patterns.
  */
-public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
+public class ArcsVisualizer extends JPanel implements MessageDispatcherListener2 {
 
     private static final int SLEEP = 100;
     
     private static final float FONT_SIZE = 24f;
     
-    private final Context context;
+    private final Context2 context;
 
     private Timer timer;
     
-    public static ArcsVisualizer show(final Context context) {
+    public static ArcsVisualizer show(final Context2 context) {
         final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -86,7 +86,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private final List<Painter> painters = new ArrayList<Painter>();
     
-    public ArcsVisualizer(Context context, KUID nodeId) {
+    public ArcsVisualizer(Context2 context, KUID nodeId) {
         this.context = context;
         addPainter(new SnowMan(nodeId));
         addPainter(new PlasmaLamp(nodeId));

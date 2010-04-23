@@ -22,7 +22,7 @@ package org.limewire.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.LookupResponse;
 import org.limewire.mojito.messages.MessageID;
@@ -36,12 +36,12 @@ import org.limewire.mojito.routing.Version;
 abstract class AbstractLookupResponse extends AbstractResponseMessage 
 	implements LookupResponse {
 
-    public AbstractLookupResponse(Context context, 
+    public AbstractLookupResponse(Context2 context, 
             OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
         super(context, opcode, contact, messageId, msgVersion);
     }
     
-    public AbstractLookupResponse(Context context, 
+    public AbstractLookupResponse(Context2 context, 
             OpCode opcode, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, opcode, src, messageId, msgVersion, in);

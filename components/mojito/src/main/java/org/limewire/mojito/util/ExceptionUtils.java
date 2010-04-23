@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.util;
 
+
 /**
  * Miscellaneous utilities for Exceptions.
  */

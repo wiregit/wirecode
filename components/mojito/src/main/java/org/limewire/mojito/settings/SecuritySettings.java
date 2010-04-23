@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.settings;
 
-import org.limewire.mojito.security.SecurityTokenHelper;
+import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.setting.BooleanSetting;
@@ -36,7 +36,7 @@ public class SecuritySettings extends MojitoProps {
      * in the {@link SecurityToken} and {@link TokenData} if a Node
      * says it's firewalled. Some NAT boxes keep changing the Port
      * number with each outgoing UDP packet and break therefore the
-     * whole thing. See {@link SecurityTokenHelper} for more info!
+     * whole thing. See {@link SecurityTokenHelper2} for more info!
      */
     public static final BooleanSetting SUBSTITUTE_TOKEN_PORT
         = FACTORY.createRemoteBooleanSetting("SUBSTITUTE_TOKEN_PORT", 

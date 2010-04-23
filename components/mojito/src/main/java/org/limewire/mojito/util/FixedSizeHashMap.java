@@ -22,14 +22,13 @@ package org.limewire.mojito.util;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Grows up to a fixed predefined size and 
  * starts removing the eldest entry for each insertion. See 
  * also access-order and insertion-order mode of LinkedHashMap!
  */
-public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Serializable {
+public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements FixedSize, Serializable {
     
     private static final long serialVersionUID = 8502617259787609782L;
     
@@ -79,7 +78,18 @@ public class FixedSizeHashMap<K, V> extends LinkedHashMap<K, V> implements Seria
      * Remove the eldest entry if the Map is full
      */
     @Override
-    protected boolean removeEldestEntry(Entry<K, V> eldest) {
-        return size() > maxSize;
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        if (size() > getMaxSize()) {
+            removing(eldest);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 
+     */
+    protected void removing(Map.Entry<K, V> eldest) {
+        // OVERRIDE
     }
 }

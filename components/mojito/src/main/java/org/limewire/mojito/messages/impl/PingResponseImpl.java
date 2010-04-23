@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -42,7 +42,7 @@ public class PingResponseImpl extends AbstractResponseMessage
     
     private final BigInteger estimatedSize;
 
-    public PingResponseImpl(Context context, 
+    public PingResponseImpl(Context2 context, 
 	    Contact contact, MessageID messageId, 
 	    SocketAddress externalAddress, BigInteger estimatedSize) {
         super(context, OpCode.PING_RESPONSE, contact, messageId, Version.ZERO);
@@ -51,7 +51,7 @@ public class PingResponseImpl extends AbstractResponseMessage
         this.estimatedSize = estimatedSize;
     }
 
-    public PingResponseImpl(Context context, SocketAddress src, 
+    public PingResponseImpl(Context2 context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.PING_RESPONSE, src, messageId, msgVersion, in);
         

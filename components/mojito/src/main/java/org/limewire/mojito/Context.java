@@ -42,8 +42,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
@@ -56,6 +56,7 @@ import org.limewire.mojito.db.StorablePublisher;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.io.MessageDispatcherFactoryImpl;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
@@ -102,6 +103,7 @@ import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
+import org.limewire.util.NotImplementedException;
 
 
 /**
@@ -396,6 +398,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         // Not synchronized 'cause only called when Mojito is running and 
         // while Mojito is running you cannot change the MessageDispatcher
         return messageDispatcher;
+    }
+    
+    /**
+     * 
+     */
+    public MessageDispatcher2 getMessageDispatcher2() {
+        throw new NotImplementedException();
     }
     
     /*

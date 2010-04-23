@@ -59,6 +59,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
         return vendorId;
     }
     
+    @Override
     public int compareTo(Vendor o) {
         return vendorId - o.vendorId;
     }

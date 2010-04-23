@@ -71,6 +71,7 @@ public class Version implements Serializable, Comparable<Version> {
         return version;
     }
     
+    @Override
     public int compareTo(Version o) {
         return version - o.version;
     }

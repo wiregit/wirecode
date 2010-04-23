@@ -21,13 +21,14 @@ package org.limewire.mojito.db;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.Context;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 
 /**
  * Removes expired values from the local database.
@@ -36,16 +37,15 @@ public class DatabaseCleaner implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(DatabaseCleaner.class);
     
-    private final Context context;
+    @InspectablePrimitive(value = "Expired Value Count")
+    private static final AtomicInteger EXPIRED_VALUE_COUNT = new AtomicInteger();
     
-    private final DatabaseStatisticContainer databaseStats;
+    private final Context2 context;
     
     private ScheduledFuture future;
     
-    public DatabaseCleaner(Context context) {
+    public DatabaseCleaner(Context2 context) {
         this.context = context;
-        
-        databaseStats = context.getDatabaseStats();
     }
     
     /**
@@ -86,7 +86,7 @@ public class DatabaseCleaner implements Runnable {
                     }
                     
                     database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
-                    databaseStats.EXPIRED_VALUES.incrementStat();
+                    EXPIRED_VALUE_COUNT.incrementAndGet();
                 }
             }
         }

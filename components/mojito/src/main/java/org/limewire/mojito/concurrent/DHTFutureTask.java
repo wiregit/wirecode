@@ -10,7 +10,7 @@ import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.concurrent.AsyncProcess.Delay;
 import org.limewire.mojito.util.EventUtils;
 
 /**
@@ -26,9 +26,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
     
-    private final Context context;
-    
-    private final DHTTask<V> task;
+    private final AsyncProcess<V> task;
     
     private final long timeout;
     
@@ -41,23 +39,18 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Creates an {@link DHTFutureTask}
      */
-    public DHTFutureTask(Context context, DHTTask<V> task) {
+    public DHTFutureTask(AsyncProcess<V> task, long timeout, TimeUnit unit) {
         
-        this.context = context;
         this.task = task;
         
-        this.timeout = task.getWaitOnLockTimeout();
-        this.unit = TimeUnit.MILLISECONDS;
-    }
-    
-    public Context getContext() {
-        return context;
+        this.timeout = timeout;
+        this.unit = unit;
     }
     
     @Override
     protected synchronized void doRun() {
         if (!isDone()) {
-            watchdog();
+            watchdog(timeout, unit);
             start();
         }
     }
@@ -70,10 +63,17 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     }
     
     /**
+     * 
+     */
+    protected synchronized void stop() {
+        task.stop(this);
+    }
+    
+    /**
      * Starts the watchdog task
      */
-    private synchronized boolean watchdog() {
-        if (timeout == -1L || isDone()) {
+    private synchronized boolean watchdog(long timeout, TimeUnit unit) {
+        if (timeout < 0L || isDone()) {
             return false;
         }
         
@@ -81,9 +81,9 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             @Override
             public void run() {
                 synchronized (DHTFutureTask.this) {
-                    if (!isDone()) {
+                    if (!isDone() && !isDelay()) {
                         wasTimeout = true;
-                        setException(new TimeoutException());
+                        handleTimeout();
                     }
                 }
             }
@@ -91,6 +91,32 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         
         watchdog = WATCHDOG.schedule(task, timeout, unit);
         return true;
+    }
+    
+    /**
+     * Returns true if the watchdog was delayed.
+     */
+    private boolean isDelay() {
+        long delay = getDelay(unit);
+        return watchdog(delay, unit);
+    }
+    
+    /**
+     * Returns the watchdog delay.
+     */
+    protected long getDelay(TimeUnit unit) {
+        if (task instanceof Delay) {
+            return ((Delay)task).getDelay(unit);
+        }
+        
+        return -1L;
+    }
+    
+    /**
+     * 
+     */
+    protected synchronized void handleTimeout() {
+        setException(new TimeoutException());
     }
     
     @Override
@@ -119,6 +145,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             if (watchdog != null) {
                 watchdog.cancel(true);
             }
+            
+            stop();
         }
         
         done0();

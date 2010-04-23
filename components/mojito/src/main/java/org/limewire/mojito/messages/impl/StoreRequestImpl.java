@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
@@ -43,7 +43,7 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
     
     private final Collection<? extends DHTValueEntity> values;
     
-    public StoreRequestImpl(Context context, 
+    public StoreRequestImpl(Context2 context, 
             Contact contact, MessageID messageId,
             SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId, Version.ZERO);
@@ -52,7 +52,7 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
         this.values = values;
     }
     
-    public StoreRequestImpl(Context context, SocketAddress src, 
+    public StoreRequestImpl(Context2 context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_REQUEST, src, messageId, msgVersion, in);
         

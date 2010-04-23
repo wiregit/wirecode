@@ -21,6 +21,7 @@ package org.limewire.mojito.routing;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
 
@@ -159,7 +160,7 @@ public interface Contact extends Serializable {
     /**
      * Returns an adaptive timeout based on the RTT and number of failures.
      */
-    public long getAdaptativeTimeout();
+    public long getAdaptativeTimeout(long defaultValue, TimeUnit unit);
     
     /**
      * Returns the time of the last successful or unsuccessful contact

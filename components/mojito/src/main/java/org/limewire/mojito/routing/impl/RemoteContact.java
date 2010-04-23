@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -242,18 +243,19 @@ public class RemoteContact implements Contact {
         }
     }
     
-    public long getAdaptativeTimeout() {
+    public long getAdaptativeTimeout(long defaultValue, TimeUnit unit) {
         //for now, based on failures and previous round trip time
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-        if (rtt <= 0L || !isAlive()) {
-            return timeout;
-        } else {
+        
+        if (0 < rtt && isAlive()) {
             // Should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.DEFAULT_TIMEOUT
             long rttFactor = NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue();
             long adaptiveTimeout = ((rttFactor * rtt) + failures * rtt);
-            return Math.max(Math.min(timeout, adaptiveTimeout), 
+            timeout = Math.max(Math.min(timeout, adaptiveTimeout), 
                     NetworkSettings.MIN_TIMEOUT_RTT.getValue());
         }
+        
+        return unit.convert(timeout, TimeUnit.MILLISECONDS);
     }
     
     public void alive() {

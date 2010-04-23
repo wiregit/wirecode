@@ -27,7 +27,7 @@ import java.net.SocketAddress;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -44,14 +44,14 @@ public class StatsResponseImpl extends AbstractResponseMessage
 
     private final byte[] statistics;
 
-    public StatsResponseImpl(Context context, 
+    public StatsResponseImpl(Context2 context, 
             Contact contact, MessageID messageId, byte[] statistics) {
         super(context, OpCode.STATS_RESPONSE, contact, messageId, Version.ZERO);
 
         this.statistics = statistics;
     }
 
-    public StatsResponseImpl(Context context, SocketAddress src, 
+    public StatsResponseImpl(Context2 context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.STATS_RESPONSE, src, messageId, msgVersion, in);
         
