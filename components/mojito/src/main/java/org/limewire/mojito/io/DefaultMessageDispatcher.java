@@ -49,17 +49,28 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     private final StoreRequestHandler2 store;
     
     public DefaultMessageDispatcher(Context2 context, 
-            Transport transport, RouteTable routeTable, 
-            StoreForward storeForward) {
+            Transport transport, StoreForward storeForward) {
         super(transport);
         
         this.context = context;
         
-        defaultHandler = new DefaultMessageHandler2(routeTable, storeForward);
-        ping = new PingRequestHandler2(this, context);
-        node = new NodeRequestHandler2(this, context);
-        value = new ValueRequestHandler2(this, context, node);
-        store = new StoreRequestHandler2(this, context);
+        RouteTable routeTable 
+            = context.getRouteTable();
+        
+        defaultHandler = new DefaultMessageHandler2(
+                routeTable, storeForward);
+        
+        ping = new PingRequestHandler2(context);
+        node = new NodeRequestHandler2(context);
+        value = new ValueRequestHandler2(context, node);
+        store = new StoreRequestHandler2(context);
+    }
+    
+    /**
+     * 
+     */
+    public Context2 getContext() {
+        return context;
     }
 
     /**

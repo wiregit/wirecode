@@ -22,13 +22,18 @@ import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.handler.DefaultStoreForward;
+import org.limewire.mojito.handler.StoreForward;
 import org.limewire.mojito.handler.response.NodeResponseHandler2;
 import org.limewire.mojito.handler.response.PingResponseHandler2;
 import org.limewire.mojito.handler.response.StoreResponseHandler2;
 import org.limewire.mojito.handler.response.ValueResponseHandler2;
+import org.limewire.mojito.io.DefaultMessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcher2;
+import org.limewire.mojito.io.MessageDispatcher2.Transport;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper2;
+import org.limewire.mojito.messages.impl.DefaultMessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.LocalContact;
@@ -124,14 +129,16 @@ public class Context2 implements MojitoDHT2 {
      * 
      */
     public Context2(String name,
-            MessageDispatcher2 messageDispatcher, 
-            MessageFactory messageFactory,
-            RouteTable routeTable, Database database) {
+            Transport transport,
+            RouteTable routeTable, 
+            Database database) {
         
         this.name = name;
-        this.messageDispatcher = messageDispatcher;
         this.routeTable = routeTable;
         this.database = database;
+        
+        MessageFactory messageFactory 
+            = new DefaultMessageFactory(this);
         
         this.messageHelper = new MessageHelper2(this, messageFactory);
         
@@ -139,6 +146,12 @@ public class Context2 implements MojitoDHT2 {
             = new SecurityToken.AddressSecurityTokenProvider(calculator);
         
         this.tokenHelper = new SecurityTokenHelper2(tokenProvider);
+        
+        StoreForward storeForward 
+            = new DefaultStoreForward(routeTable, database);
+        
+        this.messageDispatcher = new DefaultMessageDispatcher(
+                this, transport, storeForward);
     }
     
     @Override
