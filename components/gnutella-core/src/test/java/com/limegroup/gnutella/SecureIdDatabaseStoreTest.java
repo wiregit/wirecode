@@ -1,11 +1,19 @@
 package com.limegroup.gnutella;
 
 import java.util.Random;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
+import org.jmock.Mockery;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.GUID;
+import org.limewire.util.AssignParameterAction;
+import org.limewire.util.Clock;
+import org.limewire.util.ClockImpl;
+import org.limewire.util.SequencedExpectations;
 
 public class SecureIdDatabaseStoreTest extends LimeTestCase {
 
@@ -17,7 +25,7 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        secureIdDatabaseStore = new SecureIdDatabaseStore();
+        secureIdDatabaseStore = new SecureIdDatabaseStore(new ClockImpl());
     }
     
     public void testGet() {
@@ -34,6 +42,8 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         secureIdDatabaseStore.put(guid, value);
         byte[] result = secureIdDatabaseStore.get(guid);
         assertEquals(value, result);
+        result = secureIdDatabaseStore.get(guid);
+        assertEquals(value, result);
         secureIdDatabaseStore.stop();
     }
     
@@ -46,7 +56,7 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         assertEquals(value, result);
         secureIdDatabaseStore.stop();
         
-        secureIdDatabaseStore = new SecureIdDatabaseStore();
+        secureIdDatabaseStore = new SecureIdDatabaseStore(new ClockImpl());
         secureIdDatabaseStore.start();
         result = secureIdDatabaseStore.get(guid);
         assertEquals(value, result);
@@ -97,6 +107,81 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         result = secureIdDatabaseStore.get(guid);
         // should still be the old value
         assertEquals(value, result);
+        secureIdDatabaseStore.stop();
+    }
+    
+    public void testOldEntriesGetExpired() {
+        Mockery context = new Mockery();
+        final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
+        final Clock clock = context.mock(Clock.class);
+        final long currentTime = System.currentTimeMillis();
+        final AtomicReference<Runnable> runnable = new AtomicReference<Runnable>();
+        context.checking(new SequencedExpectations(context) {{
+            one(clock).now();
+            will(returnValue(System.currentTimeMillis()));
+            one(clock).now();
+            will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
+            one(executorService).schedule(with(any(Runnable.class)), with(equal(1L)), with(equal(TimeUnit.MINUTES)));
+            will(new AssignParameterAction<Runnable>(runnable));
+        }});
+        
+        secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
+        secureIdDatabaseStore.start();
+        GUID guid = new GUID();
+        byte[] value = createRandomBytes(100);
+        secureIdDatabaseStore.put(guid, value);
+        byte[] result = secureIdDatabaseStore.get(guid);
+        assertEquals(value, result);
+        
+        secureIdDatabaseStore.register(executorService);
+        runnable.get().run();
+        
+        assertNull(secureIdDatabaseStore.get(guid));
+        secureIdDatabaseStore.stop();
+    }
+    
+    public void testRecentlyReadEntriesAreNotExpired() {
+        Mockery context = new Mockery();
+        final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
+        final Clock clock = context.mock(Clock.class);
+        final long currentTime = System.currentTimeMillis();
+        final AtomicReference<Runnable> runnable = new AtomicReference<Runnable>();
+        context.checking(new SequencedExpectations(context) {{
+            // initial store
+            one(clock).now();
+            will(returnValue(System.currentTimeMillis()));
+            // update on read access
+            one(clock).now();
+            will(returnValue(currentTime + TimeUnit.DAYS.toMillis(365)));
+            // expiration check
+            one(clock).now();
+            will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
+            // update on read access
+            one(clock).now();
+            will(returnValue(currentTime + TimeUnit.DAYS.toMicros(400)));
+            
+            one(executorService).schedule(with(any(Runnable.class)), with(equal(1L)), with(equal(TimeUnit.MINUTES)));
+            will(new AssignParameterAction<Runnable>(runnable));
+        }});
+        
+        secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
+        secureIdDatabaseStore.start();
+        GUID guid = new GUID();
+        byte[] value = createRandomBytes(100);
+        secureIdDatabaseStore.put(guid, value);
+        secureIdDatabaseStore.stop();
+        
+        secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
+        secureIdDatabaseStore.start();
+        
+        // this get will update the timestamp
+        byte[] result = secureIdDatabaseStore.get(guid);
+        assertEquals(value, result);
+        
+        secureIdDatabaseStore.register(executorService);
+        runnable.get().run();
+        
+        assertEquals(value, secureIdDatabaseStore.get(guid));
         secureIdDatabaseStore.stop();
     }
 

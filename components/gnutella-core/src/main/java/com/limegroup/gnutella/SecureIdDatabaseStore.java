@@ -7,9 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.core.settings.SecuritySettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.GUID;
@@ -34,21 +36,32 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     
     private volatile DbStore store;
     
+    private final Map<GUID, byte[]> cache = new FixedsizeForgetfulHashMap<GUID, byte[]>(100);
+
+    private final Clock clock;
+    
+    @Inject
+    public SecureIdDatabaseStore(Clock clock) {
+        this.clock = clock;
+    }
+    
     @Inject
     void register(ServiceRegistry serviceRegistry) {
         serviceRegistry.register(this).in(ServiceStage.VERY_LATE);
     }
     
     @Inject
-    void register(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService,
-            final Clock clock) {
+    void register(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService) {
         scheduledExecutorService.schedule(new Runnable() {
             @Override
             public void run() {
                 long aYearAgo = clock.now() - TimeUnit.DAYS.toMillis(365);
-                store.deleteOlderThan(aYearAgo);
+                synchronized (store) {
+                    store.deleteOlderThan(aYearAgo);
+                    cache.clear();
+                }
             }
-        }, 5, TimeUnit.MINUTES);
+        }, 1, TimeUnit.MINUTES);
     }
     
     @Override
@@ -94,12 +107,30 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
 
     @Override
     public byte[] get(GUID key) {
-        return store.get(key);
+        synchronized (store) {
+            byte[] value = cache.get(key);
+            if (value != null) {
+                return value;
+            }
+            value = store.get(key);
+            if (value != null) {
+                // only store non-null values in memory cache to avoid valid
+                // items from being expelled, we might want to change this based
+                // on usage
+                cache.put(key, value);
+            }
+            return value;
+        }
     }
 
     @Override
     public void put(GUID key, byte[] value) {
-        store.put(key, value);
+        synchronized (store) {
+            boolean stored = store.put(key, value);
+            if (stored) {
+                cache.put(key, value);
+            }
+        }
     }
     
     class DbStore {
@@ -110,7 +141,9 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
         
         private final PreparedStatement putStatement;
 
-        private PreparedStatement deleteStatement;
+        private final PreparedStatement deleteStatement;
+
+        private final PreparedStatement updateStatement;
         
         // TODO implement drop
         public DbStore(boolean dropDb) throws SQLException {
@@ -129,7 +162,8 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
                 LOG.debug("table already exists", se);
             }
             getStatement = connection.prepareStatement("select data from ids where guid = ?");
-            putStatement = connection.prepareStatement("insert into ids values (?, ?)");
+            updateStatement = connection.prepareStatement("update ids set timestamp = ? where guid = ?");
+            putStatement = connection.prepareStatement("insert into ids values (?, ?, ?)");
             deleteStatement = connection.prepareStatement("delete from ids where timestamp < ?");
         }
         
@@ -138,7 +172,13 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
                 getStatement.setBytes(1, key.bytes());
                 ResultSet resultSet = getStatement.executeQuery();
                 while (resultSet.next()) {
-                    return resultSet.getBytes(1);
+                    byte[] value = resultSet.getBytes(1);
+                    if (value != null) {
+                        updateStatement.setLong(1, clock.now());
+                        updateStatement.setBytes(2, key.bytes());
+                        updateStatement.execute();
+                    }
+                    return value;
                 }
             } catch (SQLException e) {
                 LOG.debug("error getting value", e);
@@ -146,15 +186,17 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
             return null;
         }
 
-        public synchronized void put(GUID key, byte[] value) {
+        public synchronized boolean put(GUID key, byte[] value) {
             try {
                 putStatement.setBytes(1, key.bytes());
-                putStatement.setLong(2, System.currentTimeMillis());
+                putStatement.setLong(2, clock.now());
                 putStatement.setBytes(3, value);
                 putStatement.execute();
+                return true;
             } catch (SQLException e) {
                 LOG.debug("error putting value", e);
             }
+            return false;
         }
         
         public synchronized void stop() {
