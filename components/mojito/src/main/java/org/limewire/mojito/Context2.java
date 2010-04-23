@@ -38,6 +38,9 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ExceptionUtils;
 
+/**
+ * 
+ */
 public class Context2 implements MojitoDHT2 {
     
     /**
@@ -365,7 +368,8 @@ public class Context2 implements MojitoDHT2 {
         
         synchronized (lock) {
             
-            // The DHTFuture for the STORE operation. 
+            // The DHTFuture for the STORE operation. We initialize it 
+            // at the very end of this block of code.
             final AtomicReference<DHTFuture<StoreEntity>> futureRef 
                 = new AtomicReference<DHTFuture<StoreEntity>>();
             
@@ -446,7 +450,7 @@ public class Context2 implements MojitoDHT2 {
         boolean changed = localhost.setExternalAddress(externalAddress);
         
         if (changed) {
-            modelManager.handleContactChange(null);
+            modelManager.handleContactChange(this);
         }
         
         estimator.addEstimatedRemoteSize(estimatedSize);
