@@ -1,6 +1,7 @@
 package org.limewire.mojito.routing.impl;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
@@ -152,30 +153,36 @@ public class RemoteContactTest extends MojitoTestCase {
                 0, Contact.DEFAULT_FLAG);
         
         assertEquals(-1L, node1.getRoundTripTime());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), node1.getAdaptativeTimeout());
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+                node1.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         node1.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
-        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
+        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), 
+                node1.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         node1.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() + 500L);
-        assertGreaterThan(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
+        assertGreaterThan(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), 
+                node1.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         Contact node2 = ContactFactory.createUnknownContact(
                 Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
         assertEquals(-1L, node2.getRoundTripTime());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), node2.getAdaptativeTimeout());
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+                node2.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
         assertFalse(node2.isAlive());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), node2.getAdaptativeTimeout());
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+                node2.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         ((RemoteContact)node2).alive();
         assertTrue(node2.isAlive());
         
         node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
-        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node2.getAdaptativeTimeout());
+        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), 
+                node2.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
     }
     
     public void testPublicPrivateAddress() {
