@@ -6,10 +6,13 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.messages.MessageFactory;
@@ -110,5 +113,17 @@ public interface MojitoDHT2 extends Closeable {
      * 
      */
     public DHTFuture<ValueEntity> get(EntityKey key, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEntity> put(Storable storable, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEntity> put(DHTValueEntity value, 
             long timeout, TimeUnit unit);
 }

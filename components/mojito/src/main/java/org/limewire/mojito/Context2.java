@@ -15,6 +15,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -35,6 +36,7 @@ import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.ExceptionUtils;
 
 public class Context2 implements MojitoDHT2 {
     
@@ -340,14 +342,30 @@ public class Context2 implements MojitoDHT2 {
         return futureManager.submit(process, timeout, unit);
     }
     
-    private final Object putLock = new Object();
+    @Override
+    public DHTFuture<StoreEntity> put(Storable storable, 
+            long timeout, TimeUnit unit) {
+        
+        DHTValueEntity value = DHTValueEntity.createFromStorable(
+                this, storable);
+        
+        return put(value, timeout, unit);
+    }
     
-    //@Override
+    @Override
     public DHTFuture<StoreEntity> put(DHTValueEntity value, 
             long timeout, TimeUnit unit) {
         
-        synchronized (putLock) {
+        // The store operation is a composition of two DHT operations.
+        // In the first step we're doing a FIND_NODE lookup to find
+        // the K-closest nodes to a given key. In the second step we're
+        // performing a STORE operation on the K-closest nodes we found.
+        
+        final Object lock = new Object();
+        
+        synchronized (lock) {
             
+            // The DHTFuture for the STORE operation. 
             final AtomicReference<DHTFuture<StoreEntity>> futureRef 
                 = new AtomicReference<DHTFuture<StoreEntity>>();
             
@@ -356,26 +374,61 @@ public class Context2 implements MojitoDHT2 {
                     this, new DHTValueEntity[] { value }, timeout, unit);
             
             KUID lookupId = value.getPrimaryKey();
-            DHTFuture<NodeEntity> future 
-                = lookup(lookupId, timeout2, unit2);
+            final DHTFuture<NodeEntity> lookup 
+                = lookup(lookupId, timeout, unit);
             
-            future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+            lookup.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
                 @Override
                 public void handleEvent(FutureEvent<NodeEntity> event) {
-                    switch (event.getType()) {
-                        case SUCCESS:
-                            NodeEntity entity = event.getResult();
-                            process.store(entity.getContacts());
-                            break;
-                        case EXCEPTION:
-                            
+                    synchronized (lock) {
+                        // The reference can be null if the FutureManager was
+                        // unable to execute the STORE process. This can happen
+                        // if the Context is being shutdown.
+                        if (futureRef.get() != null) {
+                            switch (event.getType()) {
+                                case SUCCESS:
+                                    handleNodeEntity(event.getResult());
+                                    break;
+                                case EXCEPTION:
+                                    handleException(event.getException());
+                                    break;
+                                default:
+                                    handleCancellation();
+                                    break;
+                            }
+                        }
                     }
+                }
+                
+                private void handleNodeEntity(NodeEntity entity) {
+                    try {
+                        process.store(entity.getContacts());
+                    } catch (Throwable t) {
+                        handleException(t);
+                        ExceptionUtils.reportIfUnchecked(t);
+                    }
+                }
+                
+                private void handleException(Throwable t) {
+                    futureRef.get().setException(t);
+                }
+                
+                private void handleCancellation() {
+                    futureRef.get().cancel(true);
                 }
             });
             
             DHTFuture<StoreEntity> store 
                 = futureManager.submit(process, timeout, unit);
             futureRef.set(store);
+            
+            store.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<StoreEntity> event) {
+                    lookup.cancel(true);
+                }
+            });
+            
             return store;
         }
     }

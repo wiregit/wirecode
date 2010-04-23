@@ -135,10 +135,7 @@ public class AsyncFutureTask<V> extends AsyncValueFuture<V>
     protected void uncaughtException(Throwable t) {
         setException(t);
         
-        if (t instanceof RuntimeException
-                || t instanceof Error) {
-            ExceptionUtils.reportOrReturn(t);
-        }
+        ExceptionUtils.reportIfUnchecked(t);
     }
     
     @Override

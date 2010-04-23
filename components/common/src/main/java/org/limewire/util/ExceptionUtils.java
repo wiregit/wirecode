@@ -72,4 +72,17 @@ public class ExceptionUtils {
             rethrow(t);
         }
     }
+    
+    /**
+     * Reports an unchecked {@link Exception} such as 
+     * {@link RuntimeException}s and {@link Error}s.
+     */
+    public static boolean reportIfUnchecked(Throwable t) {
+        if (t instanceof RuntimeException
+                || t instanceof Error) {
+            reportOrReturn(t);
+            return true;
+        }
+        return false;
+    }
 }
