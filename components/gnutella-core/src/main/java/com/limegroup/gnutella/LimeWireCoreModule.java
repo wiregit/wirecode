@@ -393,7 +393,11 @@ public class LimeWireCoreModule extends AbstractModule {
     
     private static final String FAST = "fastExecutor";
     @Provides @LazySingleton @Named(FAST) ScheduledExecutorService fastSES() {
-        return new LimeScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+        LimeScheduledThreadPoolExecutor executor 
+            = new LimeScheduledThreadPoolExecutor(1, 
+                    ExecutorsHelper.daemonThreadFactory("FastExecutor")); 
+        
+        return executor;
     }
     @Provides @LazySingleton @Named(FAST) ExecutorService fastES(@Named(FAST) ScheduledExecutorService ses) {
         return ses;

@@ -19,8 +19,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.limewire.ui.swing.util.I18n;
-
 /**
  * Provides static methods to split, check for substrings, change case and
  * compare strings, along with additional string utility methods.
@@ -462,10 +460,22 @@ public class StringUtils {
      * @return "" if iterable doesn't have elements
      */
     public static <T> String explode(Iterable<T> iterable, String delimiter) {
-        return explode(iterable, delimiter, Integer.MAX_VALUE, Integer.MAX_VALUE);      
+        return explode(iterable, delimiter, Integer.MAX_VALUE, Integer.MAX_VALUE, "");      
     }
     
-    public static <T> String explode(Iterable<T> iterable, String delimiter, int maxRows, int maxCols) {
+    /**
+     * Concatenates/joins the elements of <code>iteratble</code> together,
+     * separated by <code>delimiter</code>
+     * 
+     * @param <T>
+     * @param iterable the list of items to join
+     * @param delimiter the sequence to put between elements
+     * @param maxRows the maximum number of elements to explode
+     * @param maxCols the maximum number of characters in each element
+     * @param moreRowsMsg the message to display if elements have been skipped
+     * @return
+     */
+    public static <T> String explode(Iterable<T> iterable, String delimiter, int maxRows, int maxCols, String moreRowsMsg) {
         Iterator<T> iterator = iterable.iterator();
         if (!iterator.hasNext()) {
             return "";
@@ -480,10 +490,10 @@ public class StringUtils {
             }
             
             if (++rowCount > maxRows) {
-                builder.append(I18n.tr("...and more..."));
+                builder.append(moreRowsMsg);
                 break;
             } else {
-                String nextLine = iterator.next().toString();
+                String nextLine = String.valueOf(iterator.next());
                 int length = Math.min(nextLine.length(), maxCols);
                 builder.append(nextLine.substring(0, length));
                 if (length == maxCols) {

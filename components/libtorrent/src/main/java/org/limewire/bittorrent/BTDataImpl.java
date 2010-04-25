@@ -84,9 +84,6 @@ public class BTDataImpl implements BTData {
         Object tmp;
 
         trackerUris = parseTrackerUris(torrentFileMap);
-        if (trackerUris.isEmpty()) {
-            throw new BTDataValueException("announces missing or invalid!");
-        }
 
         webSeeds = parseWebSeeds(torrentFileMap);
         tmp = torrentFileMap.get("info");

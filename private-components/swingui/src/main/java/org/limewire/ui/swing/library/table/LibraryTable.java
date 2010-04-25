@@ -29,6 +29,7 @@ import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.IconLabelRendererFactory;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.MultilineTooltipRenderer;
 import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColumnSelector;
@@ -329,6 +330,18 @@ public class LibraryTable extends MouseableTable {
                 setCellRenderer(OtherTableFormat.ACTION_INDEX, removeRenderer.get());
                 setCellEditor(OtherTableFormat.ACTION_INDEX, removeEditor);
                 setUnsortable(OtherTableFormat.ACTION_INDEX);
+                break;
+            case TORRENT:
+                
+                MultilineTooltipRenderer renderer = new MultilineTooltipRenderer();
+                setCellRenderer(TorrentTableFormat.TRACKERS_INDEX, renderer);
+                setCellRenderer(TorrentTableFormat.FILES_INDEX, renderer);
+                
+                setCellRenderer(TorrentTableFormat.NAME_INDEX, iconLabelRenderer);
+                setCellRenderer(TorrentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
+                setCellRenderer(TorrentTableFormat.ACTION_INDEX, removeRenderer.get());
+                setCellEditor(TorrentTableFormat.ACTION_INDEX, removeEditor);
+                setUnsortable(TorrentTableFormat.ACTION_INDEX);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown category:" + category);

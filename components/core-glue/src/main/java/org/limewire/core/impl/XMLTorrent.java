@@ -81,7 +81,8 @@ public class XMLTorrent implements Torrent {
         return sum;
     }
     
-    public long getTotalSize() {
+    @Override
+    public long getTotalPayloadSize() {
         return size;
     }
 

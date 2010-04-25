@@ -14,9 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.impl.XMLTorrent;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.io.InvalidDataException;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
 
@@ -26,7 +24,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton
 class CategoryManagerImpl implements CategoryManager {
@@ -131,12 +128,12 @@ class CategoryManagerImpl implements CategoryManager {
                 .put(InternalCategory.PROGRAM_OSX_LINUX, ImmutableSortedSet.orderedBy(
                         String.CASE_INSENSITIVE_ORDER).add("app", "bin", "mdb", "sh", "csh", "awk",
                         "pl", "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz", "taz",
-                        "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg", "cue", "iso",
+                        "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg", "iso",
                         "jnlp", "rar", "sh").build());
 
         builtInExtensionMap.put(InternalCategory.PROGRAM_WINDOWS, ImmutableSortedSet.orderedBy(
                 String.CASE_INSENSITIVE_ORDER).add("mdb", "exe", "zip", "jar", "cab", "msi", "msp",
-                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue", "iso", "jnlp", "bat",
+                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "iso", "jnlp", "bat",
                 "lnk", "vbs").build());
         
         builtInExtensionMap.put(InternalCategory.TORRENT, ImmutableSortedSet.orderedBy(
@@ -302,16 +299,9 @@ class CategoryManagerImpl implements CategoryManager {
     }
 
     @Override
-    public boolean containsCategory(Category category, LimeXMLDocument document) {
-        if (document == null) {
-            return false;
-        }
-        
-        List<TorrentFileEntry> paths = null;
-        try {
-            paths = XMLTorrent.parsePathEntries(document);
-        } catch (InvalidDataException e) {
-            // No files found in xml
+    public boolean containsCategory(Category category, List<TorrentFileEntry> paths) {
+  
+        if (paths == null) {
             return false;
         }
         

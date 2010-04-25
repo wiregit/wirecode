@@ -449,9 +449,10 @@ public class BaseResultPanel extends JXPanel {
             setCellRenderer(OtherTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             break;
         case TORRENT:
+            MultilineTooltipRenderer renderer = new MultilineTooltipRenderer();
             setCellRenderer(TorrentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
-            setCellRenderer(TorrentTableFormat.FILES_INDEX, new MultilineTooltipRenderer());
-            setCellRenderer(TorrentTableFormat.TRACKERS_INDEX, new MultilineTooltipRenderer());
+            setCellRenderer(TorrentTableFormat.FILES_INDEX, renderer);
+            setCellRenderer(TorrentTableFormat.TRACKERS_INDEX, renderer);
         default:
             break;
         }

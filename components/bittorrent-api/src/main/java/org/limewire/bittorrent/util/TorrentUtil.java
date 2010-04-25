@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.Torrent;
@@ -16,6 +18,9 @@ import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.io.IOUtils;
 
 public class TorrentUtil {
+    
+    private static final Log LOG = LogFactory.getLog(TorrentUtil.class);
+    
     /**
      * Returns a list of files in the given torrent.
      */
@@ -43,7 +48,7 @@ public class TorrentUtil {
                 return torrentData;
             }
         } catch (IOException ie) {
-            // TODO log
+            LOG.error("IOE opening torrent file", ie);
         } finally {
             IOUtils.close(fis);
             IOUtils.close(fileChannel);

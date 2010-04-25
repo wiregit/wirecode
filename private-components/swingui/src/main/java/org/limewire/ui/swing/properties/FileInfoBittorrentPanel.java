@@ -86,12 +86,6 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     
     private EventListJXTableSorting tableSorting;
 
-    private int DOWNLOAD_INDEX = -1;
-    private int NAME_INDEX = -1;
-    private int SIZE_INDEX = -1;
-    private int PERCENT_INDEX = -1;
-    private int PRIORITY_INDEX = -1;
-    
     /**
      * Items in the eventList are expected to be in the order that they are
      * returned from the Torrent instance. This is so we can pull items out by
@@ -138,29 +132,8 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
         // sort the table
         SortedList<TorrentFileEntryWrapper> sortedList = GlazedListsFactory.sortedList(eventList, null);
         
-        int columnCount = 0;
-        DOWNLOAD_INDEX = torrent.isEditable() ? columnCount++ : -1;
-        NAME_INDEX = columnCount++;
-        SIZE_INDEX = columnCount++;
-        PERCENT_INDEX = torrent.isEditable() ? columnCount++ : -1;
-        PRIORITY_INDEX = torrent.isEditable() ? columnCount++ : -1;
-
-        String[] headings = new String[columnCount];
-
-        if (DOWNLOAD_INDEX != -1)
-            headings[DOWNLOAD_INDEX] = I18n.tr("DL"); 
-        if (NAME_INDEX != -1)
-            headings[NAME_INDEX] = I18n.tr("Name");
-        if (SIZE_INDEX != -1)
-            headings[SIZE_INDEX] = I18n.tr("Size");
-        if (PERCENT_INDEX != -1)
-            headings[PERCENT_INDEX] = I18n.tr("%");
-        if (PRIORITY_INDEX != -1)
-            headings[PRIORITY_INDEX] = I18n.tr("Priority");
-        
-        BitTorrentTableFormat tableFormat = new BitTorrentTableFormat(headings);
-        
-        table = new BitTorrentTable(sortedList, tableFormat);
+        BitTorrentTableFormat tableFormat = new BitTorrentTableFormat();
+        table = new BitTorrentTable(new DefaultEventTableModel<TorrentFileEntryWrapper>(sortedList, tableFormat));
         
         tableSorting = EventListJXTableSorting.install(table, sortedList, tableFormat);
 
@@ -240,9 +213,8 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
     private class BitTorrentTable extends MouseableTable {
         boolean torrentPartSelected = true;
-        public BitTorrentTable(SortedList<TorrentFileEntryWrapper> sortedList, BitTorrentTableFormat format) {
-            super(new DefaultEventTableModel<TorrentFileEntryWrapper>(sortedList, format));
-            
+        public BitTorrentTable(final DefaultEventTableModel<TorrentFileEntryWrapper> model) {
+            super(model);
             setShowHorizontalLines(false);
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setColumnSelectionAllowed(false);
@@ -260,52 +232,50 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
                     BitTorrentTable.this.repaint();
                 }
             });
-
-            if (NAME_INDEX != -1) {
-                getColumn(NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
-            }
+            getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(new CheckBoxRendererEditor());
+            getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
             
-            if (SIZE_INDEX != -1) {
-                getColumn(SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
-            }
+            getColumn(BitTorrentTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
+            getColumn(BitTorrentTableFormat.SIZE_INDEX).setMaxWidth(72);
+
+            getColumn(BitTorrentTableFormat.PERCENT_INDEX).setCellRenderer(new PercentRenderer());
+            getColumn(BitTorrentTableFormat.PERCENT_INDEX).setMaxWidth(20);
+            getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
+            getColumn(BitTorrentTableFormat.NAME_INDEX).setMinWidth(140);
             
-            if (DOWNLOAD_INDEX != -1) {
-                getColumn(DOWNLOAD_INDEX).setCellRenderer(new CheckBoxRendererEditor());
-                getColumn(DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
-                getColumnExt(DOWNLOAD_INDEX).setMaxWidth(30);
-                getColumnExt(DOWNLOAD_INDEX).setMinWidth(30);
-            }
-            
-            if (PERCENT_INDEX != -1) {
-                getColumn(PERCENT_INDEX).setCellRenderer(new PercentRenderer());
-                getColumnExt(PERCENT_INDEX).setMaxWidth(50);
-                getColumnExt(PERCENT_INDEX).setMinWidth(50);
-
-            }
-
-
-            if (PRIORITY_INDEX != -1) { 
-                final PriorityRendererEditor editor = new PriorityRendererEditor();
-                editor.getButton().addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        int oldPriority = editor.getCellEditorValue().getPriority();
-                        if (oldPriority != DONT_DOWNLOAD) {
-                            editor.getCellEditorValue().setPriority(
-                                    oldPriority + 1 > HIGHEST_PRIORITY ? LOWEST_PRIORITY
-                                            : (oldPriority + 1));
-                            editor.cancelCellEditing();
-                            BitTorrentTable.this.repaint();
-                        }
+            final PriorityRendererEditor editor = new PriorityRendererEditor();
+            editor.getButton().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int oldPriority = editor.getCellEditorValue().getPriority();
+                    if (oldPriority != DONT_DOWNLOAD) {
+                        editor.getCellEditorValue().setPriority(
+                                oldPriority + 1 > HIGHEST_PRIORITY ? LOWEST_PRIORITY
+                                        : (oldPriority + 1));
+                        editor.cancelCellEditing();
+                        BitTorrentTable.this.repaint();
                     }
-                });
-                
-                getColumn(PRIORITY_INDEX).setCellRenderer(
-                        new PriorityRendererEditor());
-                getColumn(PRIORITY_INDEX).setCellEditor(editor);
-                getColumnExt(PRIORITY_INDEX).setMaxWidth(60);
-                getColumnExt(PRIORITY_INDEX).setMinWidth(60);
-            }
+                }
+
+            });
+            getColumn(BitTorrentTableFormat.PRIORITY_INDEX).setCellRenderer(
+                    new PriorityRendererEditor());
+            getColumn(BitTorrentTableFormat.PRIORITY_INDEX).setCellEditor(editor);
+
+            getColumnExt(BitTorrentTableFormat.DOWNLOAD_INDEX).setMaxWidth(30);
+            getColumnExt(BitTorrentTableFormat.DOWNLOAD_INDEX).setMinWidth(30);
+
+            getColumnExt(BitTorrentTableFormat.PERCENT_INDEX).setMaxWidth(50);
+            getColumnExt(BitTorrentTableFormat.PERCENT_INDEX).setMinWidth(50);
+
+            getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMaxWidth(60);
+            getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMinWidth(60);
+            
+            boolean editable = torrent.isEditable();
+            getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setVisible(editable);
+            getColumnExt(BitTorrentTableFormat.PERCENT_INDEX).setVisible(editable);
+            getColumnExt(BitTorrentTableFormat.DOWNLOAD_INDEX).setVisible(editable);
+            
         }
         
         private void validateSelection() {
@@ -328,39 +298,48 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
     }
 
     private class BitTorrentTableFormat extends AbstractTableFormat<TorrentFileEntryWrapper> implements EventListTableSortFormat, AdvancedTableFormat<TorrentFileEntryWrapper> {
-       
-        public BitTorrentTableFormat(String[] headings) {
-            super(headings);
+
+        private static final int DOWNLOAD_INDEX = 0;
+        private static final int NAME_INDEX = 1;
+        private static final int SIZE_INDEX = 2;
+        private static final int PERCENT_INDEX = 3;
+        private static final int PRIORITY_INDEX = 4;
+
+        public BitTorrentTableFormat() {
+            super(I18n.tr("DL"), I18n.tr("Name"), I18n.tr("Size"), I18n.tr("%"), I18n.tr("Priority"));
         }
 
         @Override
         public Object getColumnValue(TorrentFileEntryWrapper baseObject, int column) {
-            if (column == DOWNLOAD_INDEX)
+            switch (column) {
+            case DOWNLOAD_INDEX:
                 return baseObject;
-            if (column == NAME_INDEX)
+            case NAME_INDEX:
                 return baseObject.getPath();
-            if (column == SIZE_INDEX)
+            case SIZE_INDEX:
                 return baseObject.getSize();
-            if (column == PERCENT_INDEX)
+            case PERCENT_INDEX:
                 return baseObject;
-            if (column == PRIORITY_INDEX)
+            case PRIORITY_INDEX:
                 return baseObject;
+            }
             throw new IllegalStateException("Unknown column:" + column);
         }
         
         @Override
         public Comparator getColumnComparator(int column) {
-            if (column == DOWNLOAD_INDEX)
+            switch(column) {
+            case DOWNLOAD_INDEX:
                 return new SelectedComparator();
-            if (column == NAME_INDEX)
+            case NAME_INDEX:
                 return new NameComparator();
-            if (column == SIZE_INDEX)
+            case SIZE_INDEX:
                 return Objects.getComparator(true);
-            if (column == PERCENT_INDEX)
+            case PERCENT_INDEX:
                 return new PercentComparator();
-            if (column == PRIORITY_INDEX)
+            case PRIORITY_INDEX:
                 return new PriorityComparator();
-
+            }
             throw new IllegalStateException("Unknown column:" + column);
         }
 
@@ -381,16 +360,18 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
         @Override
         public Class getColumnClass(int column) {
-            if (column == DOWNLOAD_INDEX)
+            switch(column) {
+            case DOWNLOAD_INDEX:
                 return TorrentFileEntryWrapper.class;
-            if (column == NAME_INDEX)
+            case NAME_INDEX:
                 return String.class;
-            if (column == SIZE_INDEX)
+            case SIZE_INDEX:
                 return Long.class;
-            if (column == PERCENT_INDEX)
+            case PERCENT_INDEX:
                 return TorrentFileEntryWrapper.class;
-            if (column == PRIORITY_INDEX)
+            case PRIORITY_INDEX:
                 return TorrentFileEntryWrapper.class;
+            }
             throw new IllegalStateException("Unknown column:" + column);
         }
     }

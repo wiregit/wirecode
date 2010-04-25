@@ -3,14 +3,15 @@ package org.limewire.core.impl.file;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.util.FileUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class MockCategoryManager implements CategoryManager {
 
@@ -184,8 +185,7 @@ class MockCategoryManager implements CategoryManager {
     }
 
     @Override
-    public boolean containsCategory(Category category, LimeXMLDocument document) {
-        // TODO Auto-generated method stub
+    public boolean containsCategory(Category category, List<TorrentFileEntry> list) {
         return false;
     }
 }

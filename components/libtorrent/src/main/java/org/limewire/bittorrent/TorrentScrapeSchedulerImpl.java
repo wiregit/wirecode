@@ -23,8 +23,8 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.TrackerScraper;
-import com.limegroup.bittorrent.TrackerScraper.ScrapeCallback;
+import com.limegroup.bittorrent.TorrentTrackerScraper;
+import com.limegroup.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import com.limegroup.gnutella.URN;
 
 /**
@@ -79,7 +79,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     
     private int processingPeriodsCount = 0;
     
-    private final TrackerScraper scraper;
+    private final TorrentTrackerScraper scraper;
     
     /**
      * Whether the processing thread is active.
@@ -137,7 +137,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     private final ScheduledExecutorService backgroundExecutor;
     
     @Inject
-    public TorrentScrapeSchedulerImpl(TrackerScraper scraper,
+    public TorrentScrapeSchedulerImpl(TorrentTrackerScraper scraper,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         
         this.scraper = scraper;
@@ -327,6 +327,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
                                 LOG.debugf("   {0} FAILED", torrent.getName());
                             }
                             markCurrentTrackerFailure();
+                            markCurrentTorrentFailure();
                          }
                     });
             if (currentScrapeAttemptShutdown == null) {
