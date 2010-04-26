@@ -40,7 +40,23 @@ public class MessageInputStream extends DataInputStream {
         this.calculator = calculator;
     }
     
-    public Message readMessage(MessageID messageId, SocketAddress src) throws IOException {
+    public Message readMessage(SocketAddress src) throws IOException {
+        MessageID messageId = readMessageId();
+        
+        int func = readUnsignedByte();
+        if (func != Message.F_DHT_MESSAGE) {
+            throw new IOException("func=" + func);
+        }
+        
+        // The version of the Message
+        Version version = readVersion();
+        if (!version.equals(Version.ZERO)) {
+            throw new IOException("version=" + version);
+        }
+        
+        // The size of the payload.
+        skip(4);
+        
         OpCode opcode = readOpCode();
         /*Vendor vendor = readVendor();
         Version version = readVersion();
@@ -49,8 +65,8 @@ public class MessageInputStream extends DataInputStream {
         int instanceId = readUnsignedByte();
         int flags = readUnsignedByte();*/
         
-        Contact contact = readContact(
-                opcode.isRequest() ? Type.UNSOLICITED : Type.SOLICITED, src);
+        Contact contact = readContact(opcode.isRequest() 
+                ? Type.UNSOLICITED : Type.SOLICITED, src);
         
         int extendedHeader = readUnsignedShort();
         skip(extendedHeader);
@@ -183,7 +199,8 @@ public class MessageInputStream extends DataInputStream {
         KUID primaryKey = readKUID();
         DHTValue value = readValue();
         
-        return DHTValueEntity.createFromRemote(creator, sender, primaryKey, value);
+        return DHTValueEntity.createFromRemote(
+                creator, sender, primaryKey, value);
     }
     
     public DHTValue readValue() throws IOException {
@@ -306,5 +323,9 @@ public class MessageInputStream extends DataInputStream {
         readFully(data);
         
         return new BigInteger(1 /* unsigned */, data);
+    }
+    
+    public MessageID readMessageId() throws IOException {
+        return DefaultMessageID.createWithInputStream(this, calculator);
     }
 }

@@ -29,6 +29,12 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeMessage(Message message) throws IOException {
+        
+        writeMessageId(message.getMessageId());
+        writeByte(Message.F_DHT_MESSAGE);
+        writeVersion(Version.ZERO);
+        writeInt(0); /* SIZE! */
+        
         OpCode opcode = OpCode.valueOf(message);
         Contact src = message.getContact();
         
