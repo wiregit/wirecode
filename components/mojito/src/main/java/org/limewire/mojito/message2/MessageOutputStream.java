@@ -69,6 +69,8 @@ public class MessageOutputStream extends DataOutputStream {
             case STORE_RESPONSE:
                 writeStoreResponse((StoreResponse)message);
                 break;
+            default:
+                throw new IllegalArgumentException("message=" + message);
         }
     }
     
