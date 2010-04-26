@@ -3,8 +3,6 @@ package org.limewire.mojito.handler.request;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -17,11 +15,11 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.handler.response.AbstractResponseHandler2;
-import org.limewire.mojito.messages.FindValueRequest;
-import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito.message2.ValueRequest;
+import org.limewire.mojito.message2.ValueResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.DatabaseUtils;
 
@@ -50,8 +48,8 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         SocketAddress addr = node.getContactAddress();
         
         MessageHelper2 messageHelper = context.getMessageHelper();
-        FindValueRequest request = messageHelper.createFindValueRequest(
-                addr, primaryKey, Collections.singleton(secondaryKey), valueType);
+        ValueRequest request = messageHelper.createFindValueRequest(
+                addr, primaryKey, new KUID[] { secondaryKey }, valueType);
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("start looking for: " + request);
@@ -75,20 +73,20 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         // the 60th minute. As values expire on the 60th minute 
         // it may no longer exists and the remote Node returns us
         // a Set of the k-closest Nodes instead.
-        if (!(message instanceof FindValueResponse)) {
+        if (!(message instanceof ValueResponse)) {
             setException(new FileNotFoundException());
             return;
         }
         
-        FindValueResponse response = (FindValueResponse)message;
+        ValueResponse response = (ValueResponse)message;
         
         // Make sure the DHTValueEntities have the expected
         // value type.
-        Collection<? extends DHTValueEntity> entities 
+        DHTValueEntity[] entities 
             = DatabaseUtils.filter(lookupKey.getDHTValueType(), 
-                    response.getDHTValueEntities());
+                    response.getValueEntities());
         
-        Collection<EntityKey> entityKeys = Collections.emptySet();
+        EntityKey[] entityKeys = new EntityKey[0];
         
         ValueEntity entity = new DefaultValueEntity(
                 lookupKey, entities, entityKeys, time, unit);

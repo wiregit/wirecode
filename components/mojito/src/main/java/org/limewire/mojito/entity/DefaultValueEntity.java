@@ -1,6 +1,5 @@
 package org.limewire.mojito.entity;
 
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.EntityKey;
@@ -12,21 +11,21 @@ public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
 
     private final EntityKey lookupKey;
     
-    private final Collection<? extends DHTValueEntity> entities;
+    private final DHTValueEntity[] entities;
     
-    private final Collection<? extends EntityKey> entityKeys;
+    private final EntityKey[] entityKeys;
     
     public DefaultValueEntity(EntityKey lookupKey, 
-            Collection<? extends DHTValueEntity> entities, 
-            Collection<? extends EntityKey> entityKeys, 
+            DHTValueEntity[] entities, 
+            EntityKey[] entityKeys, 
             State state) {
         this(lookupKey, entities, entityKeys, 
                 state.getTimeInMillis(), TimeUnit.MILLISECONDS);
     }
     
     public DefaultValueEntity(EntityKey lookupKey, 
-            Collection<? extends DHTValueEntity> entities, 
-            Collection<? extends EntityKey> entityKeys, 
+            DHTValueEntity[] entities, 
+            EntityKey[] entityKeys, 
             long time, TimeUnit unit) {
         
         super(time, unit);
@@ -42,7 +41,7 @@ public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
     }
 
     @Override
-    public Collection<? extends DHTValueEntity> getEntities() {
+    public DHTValueEntity[] getEntities() {
         return entities;
     }
 
@@ -52,7 +51,7 @@ public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
     }
 
     @Override
-    public Collection<? extends EntityKey> getEntityKeys() {
+    public EntityKey[] getEntityKeys() {
         return entityKeys;
     }
 }

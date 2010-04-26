@@ -5,8 +5,8 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 
 /**
  * 

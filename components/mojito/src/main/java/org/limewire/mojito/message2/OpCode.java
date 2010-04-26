@@ -1,6 +1,6 @@
 package org.limewire.mojito.message2;
 
-import org.limewire.mojito.messages.MessageFormatException;
+import java.io.IOException;
 
 enum OpCode {
     
@@ -57,12 +57,12 @@ enum OpCode {
         }
     }
     
-    public static OpCode valueOf(int opcode) throws MessageFormatException {
+    public static OpCode valueOf(int opcode) throws IOException {
         OpCode o = VALUES[opcode % VALUES.length];
         if (o != null && o.opcode == opcode) {
             return o;
         }
-        throw new MessageFormatException("Unknown opcode: " + opcode);
+        throw new IOException("OpCode=" + opcode);
     }
     
     public static OpCode valueOf(Message message) {

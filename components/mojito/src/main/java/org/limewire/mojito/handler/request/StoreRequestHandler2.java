@@ -21,7 +21,6 @@ package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,11 +30,11 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.StoreRequest;
-import org.limewire.mojito.messages.StoreResponse;
-import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.StoreRequest;
+import org.limewire.mojito.message2.StoreResponse;
+import org.limewire.mojito.message2.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
@@ -94,10 +93,10 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
             return;
         }
         
-        Collection<? extends DHTValueEntity> values = request.getDHTValueEntities();
+        DHTValueEntity[] values = request.getValueEntities();
         
         List<StoreStatusCode> status 
-            = new ArrayList<StoreStatusCode>(values.size());
+            = new ArrayList<StoreStatusCode>(values.length);
         
         Database database = context.getDatabase();
         
@@ -105,15 +104,16 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
             
             if (database.store(entity)) {
                 STORE_SUCCESS.incrementAndGet();
-                status.add(new StoreStatusCode(entity, StoreResponse.OK));
+                status.add(new StoreStatusCode(entity, StoreStatusCode.OK));
             } else {
                 STORE_FAILURE.incrementAndGet();
-                status.add(new StoreStatusCode(entity, StoreResponse.ERROR));
+                status.add(new StoreStatusCode(entity, StoreStatusCode.ERROR));
             }
         }
         
         MessageHelper2 messageHelper = context.getMessageHelper();
-        StoreResponse response = messageHelper.createStoreResponse(request, status);
+        StoreResponse response = messageHelper.createStoreResponse(
+                request, status.toArray(new StoreStatusCode[0]));
         
         send(request.getContact(), response);
     }

@@ -13,8 +13,8 @@ import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.messages.DHTMessage;
-import org.limewire.mojito.messages.SecurityTokenProvider;
+import org.limewire.mojito.message2.Message;
+import org.limewire.mojito.message2.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
@@ -65,7 +65,7 @@ public class DefaultStoreForward implements StoreForward {
     }
     
     @Override
-    public void process(Contact node, DHTMessage message) {
+    public void process(Contact node, Message message) {
         KUID nodeId = node.getNodeID();
         
         if (StoreSettings.STORE_FORWARD_ENABLED.getValue()) {
@@ -104,7 +104,7 @@ public class DefaultStoreForward implements StoreForward {
      * For details see Kademlia spec!
      */
     private void forwardOrRemoveValues(Contact node, 
-            Contact existing, DHTMessage message) {
+            Contact existing, Message message) {
         
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         

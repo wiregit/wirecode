@@ -15,7 +15,7 @@ import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.MessageDispatcher2;
-import org.limewire.mojito.messages.MessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.HostFilter;

@@ -3,8 +3,7 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -14,15 +13,15 @@ import org.limewire.mojito.Context2;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
-import org.limewire.mojito.messages.FindNodeResponse;
-import org.limewire.mojito.messages.FindValueRequest;
-import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.SecurityTokenProvider;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.NodeResponse;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito.message2.ValueRequest;
+import org.limewire.mojito.message2.ValueResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
@@ -59,10 +58,10 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         KUID contactId = dst.getNodeID();
         SocketAddress addr = dst.getContactAddress();
         
-        Collection<KUID> noKeys = Collections.emptySet();
+        KUID[] noKeys = new KUID[0];
         
         MessageHelper2 messageHelper = context.getMessageHelper();
-        FindValueRequest request = messageHelper.createFindValueRequest(
+        ValueRequest request = messageHelper.createFindValueRequest(
                 addr, key, noKeys, lookupKey.getDHTValueType());
         
         send(contactId, addr, request, timeout, unit);
@@ -74,7 +73,8 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
             setException(new NoSuchValueException(state));
         } else {
             setValue(new DefaultValueEntity(lookupKey, 
-                    this.entities, this.entityKeys, state));
+                    this.entities.toArray(new DHTValueEntity[0]), 
+                    this.entityKeys.toArray(new EntityKey[0]), state));
         }
     }
     
@@ -82,39 +82,35 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
     protected void processResponse0(RequestMessage request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         
-        if (response instanceof FindNodeResponse) {
-            processNodeResponse((FindNodeResponse)response, time, unit);
+        if (response instanceof NodeResponse) {
+            processNodeResponse((NodeResponse)response, time, unit);
         } else {
-            processValueResponse((FindValueResponse)response, time, unit);
+            processValueResponse((ValueResponse)response, time, unit);
         }
     }
     
-    private void processNodeResponse(FindNodeResponse response, 
+    private void processNodeResponse(NodeResponse response, 
             long time, TimeUnit unit) throws IOException {
         
         Contact src = response.getContact();
-        SecurityToken securityToken = null;
+        SecurityToken securityToken = response.getSecurityToken();
         
-        if (response instanceof SecurityTokenProvider) {
-            securityToken = ((SecurityTokenProvider)response).getSecurityToken();
-        }
-        
-        Contact[] contacts = response.getNodes().toArray(new Contact[0]);
+        Contact[] contacts = response.getContacts();
         processContacts(src, securityToken, contacts, time, unit);
     }
     
-    private void processValueResponse(FindValueResponse response, 
+    private void processValueResponse(ValueResponse response, 
             long time, TimeUnit unit) throws IOException {
         
         Contact src = response.getContact();
         
-        Collection<KUID> availableSecondaryKeys = response.getSecondaryKeys();
-        Collection<? extends DHTValueEntity> entities = response.getDHTValueEntities();
+        KUID[] availableSecondaryKeys = response.getSecondaryKeys();
+        DHTValueEntity[] entities = response.getValueEntities();
         
         // No keys and no values? In other words the remote Node sent us
         // a FindValueResponse even though it doesn't have a value for
         // the given KUID!? Continue with the lookup if so...!
-        if (availableSecondaryKeys.isEmpty() && entities.isEmpty()) {
+        if (availableSecondaryKeys.length == 0 && entities.length == 0) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(src + " returned neither keys nor values for " + lookupId);
             }
@@ -123,13 +119,13 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
             return;
         }
         
-        Collection<? extends DHTValueEntity> filtered 
-            = DatabaseUtils.filter(lookupKey.getDHTValueType(), entities);
+        DHTValueType valueType = lookupKey.getDHTValueType();
+        DHTValueEntity[] filtered = DatabaseUtils.filter(valueType, entities);
     
         // The filtered Set is empty and the unfiltered isn't?
         // The remote Node send us unrequested Value(s)!
         // Continue with the lookup if so...!
-        if (filtered.isEmpty() && !entities.isEmpty()) {
+        if (filtered.length == 0 && entities.length != 0) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(src + " returned unrequested types of values for " + lookupId);
             }
@@ -138,7 +134,7 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
             return;
         }
         
-        this.entities.addAll(filtered);
+        this.entities.addAll(Arrays.asList(filtered));
         
         for (KUID secondaryKey : availableSecondaryKeys) {
             EntityKey entityKey = EntityKey.createEntityKey(
@@ -150,7 +146,8 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         if (!EXHAUSTIVE) {
             State state = getState();
             setValue(new DefaultValueEntity(lookupKey, 
-                    this.entities, this.entityKeys, state));
+                    this.entities.toArray(new DHTValueEntity[0]), 
+                    this.entityKeys.toArray(new EntityKey[0]), state));
         }
     }
     

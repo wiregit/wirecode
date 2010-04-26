@@ -24,10 +24,10 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context2;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.PingRequest;
-import org.limewire.mojito.messages.PingResponse;
-import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.PingRequest;
+import org.limewire.mojito.message2.PingResponse;
+import org.limewire.mojito.message2.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.MessageUtils;
 

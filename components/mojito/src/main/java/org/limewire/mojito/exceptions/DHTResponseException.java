@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.exceptions;
 
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 
 /**
  * An abstract base class for Exceptions that are triggered

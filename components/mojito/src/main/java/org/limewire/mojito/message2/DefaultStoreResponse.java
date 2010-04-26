@@ -1,6 +1,5 @@
 package org.limewire.mojito.message2;
 
-import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 
 public class DefaultStoreResponse extends AbstractResponse 

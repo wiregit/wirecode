@@ -9,11 +9,11 @@ import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultPingEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.messages.MessageFactory;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.PingResponse;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.MessageFactory;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.PingResponse;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 
 /**

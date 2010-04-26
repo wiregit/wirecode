@@ -21,8 +21,8 @@ package org.limewire.mojito.util;
 
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.messages.DHTMessage;
-import org.limewire.mojito.messages.PingRequest;
+import org.limewire.mojito.message2.Message;
+import org.limewire.mojito.message2.PingRequest;
 
 
 /**
@@ -40,7 +40,7 @@ public class MessageUtils {
      * @param nodeId the local Node ID
      * @param message the Message
      */
-    public static boolean isCollisionPingRequest(KUID nodeId, DHTMessage message) {
+    public static boolean isCollisionPingRequest(KUID nodeId, Message message) {
         if (!(message instanceof PingRequest)) {
             return false;
         }

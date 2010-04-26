@@ -27,10 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.messages.FindNodeResponse;
-import org.limewire.mojito.messages.LookupRequest;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.message2.LookupRequest;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.NodeResponse;
+import org.limewire.mojito.message2.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -68,7 +68,7 @@ public class NodeRequestHandler2 extends AbstractRequestHandler2 {
         // is delegating requests to this class!
         LookupRequest request = (LookupRequest)message;
 
-        KUID lookupId = request.getLookupID();
+        KUID lookupId = request.getLookupId();
         Contact node = request.getContact();
         
         Collection<Contact> nodes = Collections.emptyList();
@@ -99,7 +99,8 @@ public class NodeRequestHandler2 extends AbstractRequestHandler2 {
         }
         
         MessageHelper2 messageHelper = context.getMessageHelper();
-        FindNodeResponse response = messageHelper.createFindNodeResponse(request, nodes);
+        NodeResponse response = messageHelper.createFindNodeResponse(
+                request, nodes.toArray(new Contact[0]));
         
         send(node, response);
     }

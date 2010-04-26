@@ -3,8 +3,6 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +19,12 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.entity.DefaultStoreEntity;
 import org.limewire.mojito.entity.StoreEntity;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.StoreRequest;
-import org.limewire.mojito.messages.StoreResponse;
-import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito.message2.StoreRequest;
+import org.limewire.mojito.message2.StoreResponse;
+import org.limewire.mojito.message2.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.MaxStack;
@@ -171,12 +169,12 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             StoreResponse response, long time, TimeUnit unit) throws IOException {
         
         Contact src = response.getContact();
-        Collection<StoreStatusCode> codes = response.getStoreStatusCodes();
+        StoreStatusCode[] codes = response.getStoreStatusCodes();
         
         // We store one value per request! If the remote Node
         // sends us a different number of StoreStatusCodes back
         // then there is something wrong!
-        if (codes.size() != 1) {
+        if (codes.length != 1) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(response.getContact() 
                         + " sent a wrong number of StoreStatusCodes: " + codes);
@@ -184,7 +182,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             return;
         }
         
-        StoreStatusCode code = codes.iterator().next();
+        StoreStatusCode code = codes[0];
         StoreProcess process = active.remove(new ProcessKey(src, code));
         if (process == null) {
             return;
@@ -213,8 +211,9 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             RequestMessage message, long time, TimeUnit unit) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
+        DHTValueEntity[] entities = request.getValueEntities();
         
-        DHTValueEntity entity = request.getDHTValueEntities().iterator().next();
+        DHTValueEntity entity = entities[0];
         
         if (LOG.isInfoEnabled()) {
             LOG.info("Couldn't store " + entity + " at " 
@@ -226,7 +225,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             return;
         }
         
-        addStoreStatusCode(process.dst, entity, StoreResponse.ERROR);
+        addStoreStatusCode(process.dst, entity, StoreStatusCode.ERROR);
     }
     
     private void addStoreStatusCode(Contact dst, 
@@ -271,7 +270,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             Database database = context.getDatabase();
             boolean stored = database.store(entity);
             
-            addStoreStatusCode(dst, entity, stored ? StoreResponse.OK : StoreResponse.ERROR);
+            addStoreStatusCode(dst, entity, stored ? StoreStatusCode.OK : StoreStatusCode.ERROR);
             
             return true;
         }
@@ -294,7 +293,7 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             
             MessageHelper2 messageHelper = context.getMessageHelper();
             StoreRequest request = messageHelper.createStoreRequest(
-                    addr, securityToken, Collections.singleton(entity));
+                    addr, securityToken, new DHTValueEntity[] { entity });
             
             send(contactId, addr, request, adaptiveTimeout, unit);
         

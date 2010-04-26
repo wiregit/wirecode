@@ -9,12 +9,11 @@ import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultNodeEntity;
 import org.limewire.mojito.entity.NodeEntity;
-import org.limewire.mojito.messages.FindNodeRequest;
-import org.limewire.mojito.messages.FindNodeResponse;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.SecurityTokenProvider;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.NodeRequest;
+import org.limewire.mojito.message2.NodeResponse;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
@@ -52,7 +51,7 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
         SocketAddress addr = dst.getContactAddress();
         
         MessageHelper2 messageHelper = context.getMessageHelper();
-        FindNodeRequest request = messageHelper.createFindNodeRequest(addr, lookupId);
+        NodeRequest request = messageHelper.createFindNodeRequest(addr, lookupId);
         
         send(contactId, addr, request, timeout, unit);
     }
@@ -61,16 +60,12 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
     protected void processResponse0(RequestMessage request,
             ResponseMessage message, long time, TimeUnit unit) throws IOException {
         
-        FindNodeResponse response = (FindNodeResponse)message;
+        NodeResponse response = (NodeResponse)message;
         
         Contact src = message.getContact();
-        SecurityToken securityToken = null;
+        SecurityToken securityToken = response.getSecurityToken();
         
-        if (response instanceof SecurityTokenProvider) {
-            securityToken = ((SecurityTokenProvider)message).getSecurityToken();
-        }
-        
-        Contact[] contacts = response.getNodes().toArray(new Contact[0]);
+        Contact[] contacts = response.getContacts();
         processContacts(src, securityToken, contacts, time, unit);
     }
     

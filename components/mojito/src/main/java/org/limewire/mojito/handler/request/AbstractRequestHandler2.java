@@ -7,8 +7,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.handler.RequestHandler;
 import org.limewire.mojito.io.MessageDispatcher2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 
 abstract class AbstractRequestHandler2 implements RequestHandler {

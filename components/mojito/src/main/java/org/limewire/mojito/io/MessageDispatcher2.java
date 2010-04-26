@@ -22,18 +22,18 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.ResponseHandler2;
-import org.limewire.mojito.messages.DHTMessage;
-import org.limewire.mojito.messages.FindNodeRequest;
-import org.limewire.mojito.messages.FindNodeResponse;
-import org.limewire.mojito.messages.FindValueRequest;
-import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageID;
-import org.limewire.mojito.messages.PingRequest;
-import org.limewire.mojito.messages.PingResponse;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.StoreRequest;
-import org.limewire.mojito.messages.StoreResponse;
+import org.limewire.mojito.message2.Message;
+import org.limewire.mojito.message2.MessageID;
+import org.limewire.mojito.message2.NodeRequest;
+import org.limewire.mojito.message2.NodeResponse;
+import org.limewire.mojito.message2.PingRequest;
+import org.limewire.mojito.message2.PingResponse;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito.message2.StoreRequest;
+import org.limewire.mojito.message2.StoreResponse;
+import org.limewire.mojito.message2.ValueRequest;
+import org.limewire.mojito.message2.ValueResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.mojito.util.FixedSizeHashSet;
@@ -138,7 +138,7 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    public void handleMessage(DHTMessage message) throws IOException {
+    public void handleMessage(Message message) throws IOException {
         if (message instanceof RequestMessage) {
             handleRequest((RequestMessage)message);
         } else {
@@ -211,7 +211,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         }
     }
     
-    protected void fireMessageSent(final DHTMessage message) {
+    protected void fireMessageSent(final Message message) {
         
         MESSAGES_SENT.incrementAndGet();
         
@@ -229,7 +229,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         }
     }
     
-    protected void fireMessageReceived(final DHTMessage message) {
+    protected void fireMessageReceived(final Message message) {
         
         MESSAGES_RECEIVED.incrementAndGet();
         
@@ -256,7 +256,7 @@ public abstract class MessageDispatcher2 implements Closeable {
          * 
          */
         public void send(MessageDispatcher2 messageDispatcher, 
-                SocketAddress dst, DHTMessage message) throws IOException;
+                SocketAddress dst, Message message) throws IOException;
     }
     
     /**
@@ -294,7 +294,7 @@ public abstract class MessageDispatcher2 implements Closeable {
                 SocketAddress dst, RequestMessage request, 
                 long timeout, TimeUnit unit) {
             
-            final MessageID messageId = request.getMessageID();
+            final MessageID messageId = request.getMessageId();
             
             synchronized (callbacks) {
                 if (!open) {
@@ -334,7 +334,7 @@ public abstract class MessageDispatcher2 implements Closeable {
          * 
          */
         public RequestEntity remove(ResponseMessage message) {
-            return callbacks.remove(message.getMessageID());
+            return callbacks.remove(message.getMessageId());
         }
     }
     
@@ -383,11 +383,11 @@ public abstract class MessageDispatcher2 implements Closeable {
         public boolean check(ResponseMessage response) {
             if (request instanceof PingRequest) {
                 return response instanceof PingResponse;
-            } else if (request instanceof FindNodeRequest) {
-                return response instanceof FindNodeResponse;
-            } else if (request instanceof FindValueRequest) {
-                return response instanceof FindValueResponse 
-                    || response instanceof FindNodeResponse;
+            } else if (request instanceof NodeRequest) {
+                return response instanceof NodeResponse;
+            } else if (request instanceof ValueRequest) {
+                return response instanceof ValueResponse 
+                    || response instanceof NodeResponse;
             } else if (request instanceof StoreRequest) {
                 return response instanceof StoreResponse;
             }
@@ -442,7 +442,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         }
         
         public boolean check(ResponseMessage response) {
-            MessageID messageId = response.getMessageID();
+            MessageID messageId = response.getMessageId();
             if (!history.add(messageId)) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Multiple respones: " + response);

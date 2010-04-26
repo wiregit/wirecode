@@ -11,8 +11,8 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.util.Objects;
 

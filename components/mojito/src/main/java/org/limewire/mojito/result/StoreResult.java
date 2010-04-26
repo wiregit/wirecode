@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
+import org.limewire.mojito.message2.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.CollectionUtils;
 

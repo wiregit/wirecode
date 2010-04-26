@@ -20,10 +20,10 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -34,10 +34,10 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.messages.FindValueRequest;
-import org.limewire.mojito.messages.FindValueResponse;
-import org.limewire.mojito.messages.MessageHelper2;
-import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.message2.MessageHelper2;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ValueRequest;
+import org.limewire.mojito.message2.ValueResponse;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
@@ -70,10 +70,10 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
         
-        FindValueRequest request = (FindValueRequest)message;
+        ValueRequest request = (ValueRequest)message;
         
-        KUID lookupId = request.getLookupID();
-        DHTValueType valueType = request.getDHTValueType();
+        KUID lookupId = request.getLookupId();
+        DHTValueType valueType = request.getValueType();
         
         Map<KUID, DHTValueEntity> bag = null;
         float requestLoad = 0f;
@@ -85,23 +85,25 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
         }
         
         // The keys and values we'll return
-        Collection<KUID> availableKeys = Collections.emptySet();
-        Collection<DHTValueEntity> valuesToReturn = Collections.emptySet();
+        Set<KUID> availableKeys = new HashSet<KUID>();
+        Set<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
         
         // The keys the remote Node is requesting
-        Collection<KUID> requestedSecondaryKeys = request.getSecondaryKeys();
+        KUID[] requestedSecondaryKeys = request.getSecondaryKeys();
         
         if (bag != null && !bag.isEmpty()) {
             availableKeys = new HashSet<KUID>();
             valuesToReturn = new HashSet<DHTValueEntity>();
             
-            Collection<? extends DHTValueEntity> filtered 
-                = DatabaseUtils.filter(valueType, bag.values());
+            DHTValueEntity[] entities 
+                = bag.values().toArray(new DHTValueEntity[0]);
+            DHTValueEntity[] filtered 
+                = DatabaseUtils.filter(valueType, entities);
             
-            if (requestedSecondaryKeys.isEmpty()) {
+            if (requestedSecondaryKeys.length == 0) {
                 if (valuesToReturn.isEmpty()
-                        && filtered.size() == 1) {
-                    valuesToReturn.addAll(filtered);
+                        && filtered.length == 1) {
+                    valuesToReturn.addAll(Arrays.asList(filtered));
                 } else {
                     for (DHTValueEntity entity : filtered) {
                         availableKeys.add(entity.getSecondaryKey());
@@ -112,7 +114,7 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
                 for (DHTValueEntity entity : filtered) {
                     KUID secondaryKey = entity.getSecondaryKey();
-                    if (requestedSecondaryKeys.contains(secondaryKey)) {
+                    if (contains(requestedSecondaryKeys, secondaryKey)) {
                         valuesToReturn.add(entity);
                     }
                 }
@@ -143,9 +145,21 @@ public class ValueRequestHandler2 extends AbstractRequestHandler2 {
             }
             
             MessageHelper2 messageHelper = context.getMessageHelper();
-            FindValueResponse response = messageHelper.createFindValueResponse(
-                    request, requestLoad, valuesToReturn, availableKeys);
+            ValueResponse response = messageHelper.createFindValueResponse(
+                    request, requestLoad, 
+                    valuesToReturn.toArray(new DHTValueEntity[0]), 
+                    availableKeys.toArray(new KUID[0]));
             send(request.getContact(), response);
         }
+    }
+    
+    private static boolean contains(Object[] c, Object element) {
+        for (Object o : c) {
+            if (o == element || (o != null && o.equals(element))) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

@@ -16,15 +16,15 @@ import org.limewire.mojito.handler.request.NodeRequestHandler2;
 import org.limewire.mojito.handler.request.PingRequestHandler2;
 import org.limewire.mojito.handler.request.StoreRequestHandler2;
 import org.limewire.mojito.handler.request.ValueRequestHandler2;
-import org.limewire.mojito.messages.DHTMessage;
-import org.limewire.mojito.messages.FindNodeRequest;
-import org.limewire.mojito.messages.FindValueRequest;
-import org.limewire.mojito.messages.MessageID;
-import org.limewire.mojito.messages.PingRequest;
-import org.limewire.mojito.messages.PingResponse;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.StoreRequest;
+import org.limewire.mojito.message2.Message;
+import org.limewire.mojito.message2.MessageID;
+import org.limewire.mojito.message2.NodeRequest;
+import org.limewire.mojito.message2.PingRequest;
+import org.limewire.mojito.message2.PingResponse;
+import org.limewire.mojito.message2.RequestMessage;
+import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito.message2.StoreRequest;
+import org.limewire.mojito.message2.ValueRequest;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.NetworkSettings;
@@ -76,7 +76,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     /**
      * 
      */
-    private boolean allow(DHTMessage message) {
+    private boolean allow(Message message) {
         HostFilter hostFilter = context.getHostFilter();
         if (hostFilter != null) {
             Contact src = message.getContact();
@@ -87,7 +87,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
     }
     
     @Override
-    public void handleMessage(DHTMessage message) throws IOException {
+    public void handleMessage(Message message) throws IOException {
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
@@ -157,9 +157,9 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
         
         if (request instanceof PingRequest) {
             ping.handleRequest(request);
-        } else if (request instanceof FindNodeRequest) {
+        } else if (request instanceof NodeRequest) {
             node.handleRequest(request);
-        } else if (request instanceof FindValueRequest) {
+        } else if (request instanceof ValueRequest) {
             value.handleRequest(request);
         } else if (request instanceof StoreRequest) {
             store.handleRequest(request);
@@ -174,7 +174,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
         
         Contact node = response.getContact();
         SocketAddress src = node.getContactAddress();
-        MessageID messageId = response.getMessageID();
+        MessageID messageId = response.getMessageId();
         
         // The remote Node thinks it's firewalled but it responded 
         // for some odd reason which it shouldn't regardless if it
@@ -192,12 +192,13 @@ public class DefaultMessageDispatcher extends MessageDispatcher2 {
 
         // Check the SecurityToken in the MessageID to figure out
         // whether or not we have ever sent a Request to that Host!
-        if (messageId.isTaggingSupported()
-                && !messageId.isFor(src)) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(response.getContact() + " sent us an unsolicited response: " + response);
+        if (messageId instanceof MessageID.Tagging) {
+            if (!((MessageID.Tagging)messageId).isFor(src)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(response.getContact() + " sent us an unsolicited response: " + response);
+                }
+                return;
             }
-            return;
         }
         
         node.setRoundTripTime(unit.toMillis(time));
