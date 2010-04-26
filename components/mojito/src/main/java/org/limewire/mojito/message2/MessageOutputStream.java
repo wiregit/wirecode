@@ -1,5 +1,6 @@
 package org.limewire.mojito.message2;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,11 +31,28 @@ public class MessageOutputStream extends DataOutputStream {
     
     public void writeMessage(Message message) throws IOException {
         
+        ByteArrayOutputStream baos 
+            = new ByteArrayOutputStream(8 * 128);
+        MessageOutputStream out = new MessageOutputStream(baos);
+        out.writeMessage0(message);
+        out.close();
+        
+        byte[] payload = baos.toByteArray();
+        
         writeMessageId(message.getMessageId());
         writeByte(Message.F_DHT_MESSAGE);
         writeVersion(Version.ZERO);
-        writeInt(0); /* SIZE! */
         
+        // Length of payload in Little-Endian!
+        write((payload.length       ) & 0xFF);
+        write((payload.length >>>  8) & 0xFF);
+        write((payload.length >>> 16) & 0xFF);
+        write((payload.length >>> 24) & 0xFF);
+        
+        write(payload);
+    }
+    
+    private void writeMessage0(Message message) throws IOException {
         OpCode opcode = OpCode.valueOf(message);
         Contact src = message.getContact();
         
@@ -119,20 +137,20 @@ public class MessageOutputStream extends DataOutputStream {
         writeStoreStatusCodes(message.getStoreStatusCodes());
     }
     
-    public void writeValueEntities(DHTValueEntity[] values) throws IOException {
+    private void writeValueEntities(DHTValueEntity[] values) throws IOException {
         writeByte(values.length);
         for (DHTValueEntity value : values) {
             writeValueEntity(value);
         }
     }
     
-    public void writeValueEntity(DHTValueEntity value) throws IOException {
+    private void writeValueEntity(DHTValueEntity value) throws IOException {
         writeContact(value.getCreator());
         writeKUID(value.getPrimaryKey());
         writeValue(value.getValue());
     }
     
-    public void writeValue(DHTValue value) throws IOException {
+    private void writeValue(DHTValue value) throws IOException {
         writeValueType(value.getValueType());
         writeVersion(value.getVersion());
         
@@ -141,7 +159,7 @@ public class MessageOutputStream extends DataOutputStream {
         write(data);
     }
     
-    public void writeSocketAddress(SocketAddress address) throws IOException {
+    private void writeSocketAddress(SocketAddress address) throws IOException {
         if (address instanceof InetSocketAddress
                 && !((InetSocketAddress)address).isUnresolved()) {
             InetSocketAddress isa = (InetSocketAddress)address;
@@ -152,7 +170,7 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    public void writeInetAddress(InetAddress address) throws IOException {
+    private void writeInetAddress(InetAddress address) throws IOException {
         if (address != null) {
             byte[] addr = address.getAddress();
             writeByte(addr.length);
@@ -162,19 +180,19 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    public void writePort(int port) throws IOException {
+    private void writePort(int port) throws IOException {
         writeShort(port);
     }
     
-    public void writeVendor(Vendor vendor) throws IOException {
+    private void writeVendor(Vendor vendor) throws IOException {
         writeInt(vendor.intValue());
     }
     
-    public void writeVersion(Version version) throws IOException {
+    private void writeVersion(Version version) throws IOException {
         writeShort(version.shortValue());
     }
     
-    public void writeStatusCode(StatusCode value) throws IOException {
+    private void writeStatusCode(StatusCode value) throws IOException {
         writeShort(value.shortValue());
         
         byte[] description = getBytes(value.getDescription());
@@ -182,22 +200,22 @@ public class MessageOutputStream extends DataOutputStream {
         write(description);
     }
     
-    public void writeMessageId(MessageID messageId) throws IOException {
+    private void writeMessageId(MessageID messageId) throws IOException {
         messageId.write(this);
     }
     
-    public void writeKUIDs(KUID[] kuids) throws IOException {
+    private void writeKUIDs(KUID[] kuids) throws IOException {
         writeByte(kuids.length);
         for (KUID kuid : kuids) {
             writeKUID(kuid);
         }
     }
     
-    public void writeKUID(KUID kuid) throws IOException {
+    private void writeKUID(KUID kuid) throws IOException {
         kuid.write(this);
     }
     
-    public void writeStoreStatusCodes(StoreStatusCode[] codes) throws IOException {
+    private void writeStoreStatusCodes(StoreStatusCode[] codes) throws IOException {
         writeByte(codes.length);
         
         for (StoreStatusCode code : codes) {
@@ -208,7 +226,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     
-    public void writeSecurityToken(SecurityToken securityToken) throws IOException {
+    private void writeSecurityToken(SecurityToken securityToken) throws IOException {
         if (securityToken != null) {
             assert (securityToken instanceof AddressSecurityToken);
             byte[] qk = securityToken.getBytes();
@@ -219,11 +237,11 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    public void writeOpCode(OpCode opcode) throws IOException {
+    private void writeOpCode(OpCode opcode) throws IOException {
         writeByte(opcode.byteValue());
     }
     
-    public void writeBigInteger(BigInteger value) throws IOException {
+    private void writeBigInteger(BigInteger value) throws IOException {
         byte[] data = value.toByteArray();
         if (data.length > KUID.LENGTH) {
             throw new IllegalArgumentException();
@@ -233,21 +251,21 @@ public class MessageOutputStream extends DataOutputStream {
         write(data);
     }
     
-    public void writeContacts(Contact[] contacts) throws IOException {
+    private void writeContacts(Contact[] contacts) throws IOException {
         writeByte(contacts.length);
         for (Contact contact : contacts) {
             writeContact(contact);
         }
     }
     
-    public void writeContact(Contact contact) throws IOException {
+    private void writeContact(Contact contact) throws IOException {
         writeVendor(contact.getVendor());
         writeVersion(contact.getVersion());
         writeKUID(contact.getNodeID());
         writeSocketAddress(contact.getContactAddress());
     }
     
-    public void writeValueType(DHTValueType valueType) throws IOException {
+    private void writeValueType(DHTValueType valueType) throws IOException {
         writeInt(valueType.intValue());
     }
     

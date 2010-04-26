@@ -54,17 +54,17 @@ public class MessageInputStream extends DataInputStream {
             throw new IOException("version=" + version);
         }
         
-        // The size of the payload.
+        // Skip the payload length! Keep in minds it's
+        // in Little-Endian!
         skip(4);
         
-        OpCode opcode = readOpCode();
-        /*Vendor vendor = readVendor();
-        Version version = readVersion();
-        KUID contactId = readKUID();
-        SocketAddress contactAddress = readSocketAddress();
-        int instanceId = readUnsignedByte();
-        int flags = readUnsignedByte();*/
+        return readMessage0(src, messageId, version);
+    }
+    
+    private Message readMessage0(SocketAddress src, 
+            MessageID messageId, Version version) throws IOException {
         
+        OpCode opcode = readOpCode();
         Contact contact = readContact(opcode.isRequest() 
                 ? Type.UNSOLICITED : Type.SOLICITED, src);
         
@@ -161,7 +161,7 @@ public class MessageInputStream extends DataInputStream {
         return new DefaultStoreResponse(messageId, contact, codes);
     }
     
-    public StoreStatusCode[] readStoreStatusCodes() throws IOException {
+    private StoreStatusCode[] readStoreStatusCodes() throws IOException {
         int length = readUnsignedByte();
         StoreStatusCode[] codes = new StoreStatusCode[length];
         
@@ -176,7 +176,7 @@ public class MessageInputStream extends DataInputStream {
         return codes;
     }
     
-    public StatusCode readStatusCode() throws IOException {
+    private StatusCode readStatusCode() throws IOException {
         int code = readUnsignedShort();
         
         byte[] decription = new byte[readUnsignedShort()];
@@ -185,7 +185,7 @@ public class MessageInputStream extends DataInputStream {
         return StatusCode.valueOf(code, StringUtils.toUTF8String(decription));
     }
     
-    public DHTValueEntity[] readValueEntities(Contact sender) throws IOException {
+    private DHTValueEntity[] readValueEntities(Contact sender) throws IOException {
         int length = readUnsignedByte();
         DHTValueEntity[] entities = new DHTValueEntity[length];
         for (int i = 0; i < entities.length; i++) {
@@ -194,7 +194,7 @@ public class MessageInputStream extends DataInputStream {
         return entities;
     }
     
-    public DHTValueEntity readValueEntity(Contact sender) throws IOException {
+    private DHTValueEntity readValueEntity(Contact sender) throws IOException {
         Contact creator = readContact();
         KUID primaryKey = readKUID();
         DHTValue value = readValue();
@@ -203,7 +203,7 @@ public class MessageInputStream extends DataInputStream {
                 creator, sender, primaryKey, value);
     }
     
-    public DHTValue readValue() throws IOException {
+    private DHTValue readValue() throws IOException {
         DHTValueType type = readValueType();
         Version version = readVersion();
         
@@ -214,23 +214,23 @@ public class MessageInputStream extends DataInputStream {
         return new DHTValueImpl(type, version, data);
     }
     
-    public OpCode readOpCode() throws IOException {
+    private OpCode readOpCode() throws IOException {
         return OpCode.valueOf(read());
     }
     
-    public Vendor readVendor() throws IOException {
+    private Vendor readVendor() throws IOException {
         return Vendor.valueOf(readInt());
     }
     
-    public Version readVersion() throws IOException {
+    private Version readVersion() throws IOException {
         return Version.valueOf(readUnsignedShort());
     }
     
-    public KUID readKUID() throws IOException {
+    private KUID readKUID() throws IOException {
         return KUID.createWithInputStream(this);
     }
     
-    public KUID[] readKUIDs() throws IOException {
+    private KUID[] readKUIDs() throws IOException {
         int length = readUnsignedByte();
         KUID[] kuids = new KUID[length];
         for (int i = 0; i < kuids.length; i++) {
@@ -239,11 +239,11 @@ public class MessageInputStream extends DataInputStream {
         return kuids;
     }
     
-    public DHTValueType readValueType() throws IOException {
+    private DHTValueType readValueType() throws IOException {
         return DHTValueType.valueOf(readInt());
     }
     
-    public SecurityToken readSecurityToken() throws IOException {
+    private SecurityToken readSecurityToken() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
             return null;
@@ -254,7 +254,7 @@ public class MessageInputStream extends DataInputStream {
         return new AddressSecurityToken(securityToken, calculator);
     }
     
-    public SocketAddress readSocketAddress() throws IOException {
+    private SocketAddress readSocketAddress() throws IOException {
         InetAddress address = readInetAddress();
         if (address == null || !NetworkUtils.isValidAddress(address)) {
             return null;
@@ -264,7 +264,7 @@ public class MessageInputStream extends DataInputStream {
         return new InetSocketAddress(address, port);
     }
     
-    public InetAddress readInetAddress() throws IOException {
+    private InetAddress readInetAddress() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
             return null;
@@ -276,11 +276,11 @@ public class MessageInputStream extends DataInputStream {
         return InetAddress.getByAddress(address);
     }
     
-    public int readPort() throws IOException {
+    private int readPort() throws IOException {
         return readUnsignedShort();
     }
     
-    public Contact readContact(Type type, SocketAddress src) throws IOException {
+    private Contact readContact(Type type, SocketAddress src) throws IOException {
         Vendor vendor = readVendor();
         Version version = readVersion();
         KUID contactId = readKUID();
@@ -292,7 +292,7 @@ public class MessageInputStream extends DataInputStream {
                 contactId, address, instanceId, flags);
     }
     
-    public Contact[] readContacts() throws IOException {
+    private Contact[] readContacts() throws IOException {
         int size = readUnsignedByte();
         
         Contact[] contacts = new Contact[size];
@@ -303,7 +303,7 @@ public class MessageInputStream extends DataInputStream {
         return contacts;
     }
     
-    public Contact readContact() throws IOException {
+    private Contact readContact() throws IOException {
         Vendor vendor = readVendor();
         Version version = readVersion();
         KUID contactId = readKUID();
@@ -313,7 +313,7 @@ public class MessageInputStream extends DataInputStream {
                 vendor, version, contactId, address);
     }
     
-    public BigInteger readBigInteger() throws IOException {
+    private BigInteger readBigInteger() throws IOException {
         int length = readUnsignedByte();
         if (length > KUID.LENGTH) {
             throw new IOException("length=" + length);
@@ -325,7 +325,7 @@ public class MessageInputStream extends DataInputStream {
         return new BigInteger(1 /* unsigned */, data);
     }
     
-    public MessageID readMessageId() throws IOException {
+    private MessageID readMessageId() throws IOException {
         return DefaultMessageID.createWithInputStream(this, calculator);
     }
 }
