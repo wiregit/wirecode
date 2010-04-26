@@ -3,7 +3,9 @@ package org.limewire.security.id;
 import java.util.HashMap;
 
 import org.limewire.io.GUID;
-
+/**
+ * a simple impl used in tests.  
+ */
 public class SecureIdStoreImpl implements SecureIdStore {
     private HashMap<GUID, byte[]> remoteKeys;
     private byte[] privateIdentityBytes;

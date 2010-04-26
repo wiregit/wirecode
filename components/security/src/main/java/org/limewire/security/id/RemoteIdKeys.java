@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.security.id;
 
 import java.security.KeyFactory;
@@ -18,6 +15,10 @@ import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 
+/**
+ * RemoteIdKeys contains keys that the local node uses to securely communicate
+ * with a remote node identified with the id field.  
+ */
 class RemoteIdKeys {
     private final PublicKey signaturePublicKey;
 

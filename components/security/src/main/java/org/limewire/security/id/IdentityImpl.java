@@ -14,6 +14,11 @@ import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.StringUtils;
 
+/**
+ * In this implementation, toByteArray() is implemented with ggep. 
+ * If the returned bytes are sent to other nodes, the receivers must
+ * use ggep to recover the 4 fields of the identity.
+ */
 public class IdentityImpl implements Identity {
 
     protected final GUID id;
@@ -29,8 +34,7 @@ public class IdentityImpl implements Identity {
     }
         
     public IdentityImpl(byte[] data) throws InvalidDataException {
-        try{
-            // reading from stored data
+        try{            
             GGEP ggep = new GGEP(data);
             id = new GUID(ggep.getBytes("ID"));            
             KeyFactory factory = KeyFactory.getInstance(SecureIdManager.SIG_KEY_ALGO);

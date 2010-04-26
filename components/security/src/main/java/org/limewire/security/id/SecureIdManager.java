@@ -1,13 +1,17 @@
 package org.limewire.security.id;
 
+import java.security.PublicKey;
+
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 
 public interface SecureIdManager {
 
+    public static final String SIG_ALGO = "SHA1withRSA";
+    
     public static final String SIG_KEY_ALGO = "RSA";
 
-    public static final String SIG_ALGO = "SHA1withRSA";
+    public static final int SIGNATURE_KEY_SIZE = 768;
 
     public static final String AGREEMENT_ALGO = "DH";
     
@@ -17,11 +21,12 @@ public interface SecureIdManager {
 
     public static final String ENCRYPTION_KEY_ALGO = "AES";
 
-    // to make it more secure, we could use "AES/CBC/PKCS5Padding", 
-    // but we will need to deal with transferring IV. 
+    /** 
+     * We use simple ECB mode. We could use other mode, e.g., "AES/CBC/PKCS5Padding", 
+     * to make it more secure, but we will need to deal with transferring IV.
+     */ 
     public static final String ENCRYPTION_ALGO = "AES";
 
-    public static final int SIGNATURE_KEY_SIZE = 768;
 
     /**
      * @return if the local node knows the remoteID and shares a key with the remote node
@@ -60,11 +65,18 @@ public interface SecureIdManager {
     public byte[] sign(byte[] data);
 
     /**
-     * @return true if the data can be authenticated, i.e., the remoteID generated the signature using the data.
+     * @return true if the data can be authenticated, 
+     *  i.e., the remoteID generated the signature using the data.
      * @throws Exception when remoteID not known 
      * @throws InvalidData 
      */
     public boolean verifySignature(GUID remoteId, byte[] data, byte[] signature) throws InvalidDataException;
+
+    /**
+     * @return true if the data can be authenticated, 
+     *  i.e., the signature of the data can be verified with the public key.     
+     */
+    public boolean verifySignature(PublicKey publicKey, byte[] data, byte[] signature);
 
     /**
      * return the identity of the local node, including ID, signature public key, 
