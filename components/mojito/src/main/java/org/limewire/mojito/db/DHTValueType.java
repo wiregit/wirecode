@@ -82,7 +82,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return name;
     }
     
-    public int toInt() {
+    public int intValue() {
         return type;
     }
     

@@ -5,7 +5,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 public class DefaultStoreRequest extends AbstractRequest 
-        implements StoreRequest, SecurityTokenProvider {
+        implements StoreRequest {
 
     private final SecurityToken securityToken;
     
@@ -20,7 +20,7 @@ public class DefaultStoreRequest extends AbstractRequest
     }
 
     @Override
-    public DHTValueEntity[] getValues() {
+    public DHTValueEntity[] getValueEntities() {
         return values;
     }
 

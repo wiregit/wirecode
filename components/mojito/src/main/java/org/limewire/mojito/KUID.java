@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.Map.Entry;
 
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
+import org.limewire.mojito.io.Writeable;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.SecurityUtils;
 
@@ -45,7 +46,7 @@ import org.limewire.security.SecurityUtils;
  * <p>
  * This class is immutable!
  */
-public class KUID implements Comparable<KUID>, Serializable {
+public class KUID implements Comparable<KUID>, Serializable, Writeable {
     
     private static final long serialVersionUID = 633717248208386374L;
     
@@ -105,8 +106,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Writes the ID to the OutputStream.
      */
-    public void write(OutputStream out) throws IOException {
+    @Override
+    public int write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
+        return id.length;
     }
     
     /**

@@ -19,15 +19,15 @@
 
 package org.limewire.mojito.message2;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.SocketAddress;
+
+import org.limewire.mojito.io.Writeable;
 
 /**
  * A MessageID is an unique identifier for Messages. 
  */
-public interface MessageID extends Serializable {
+public interface MessageID extends Serializable, Writeable {
 
     /**
      * Returns true if tagging is supported.
@@ -41,11 +41,6 @@ public interface MessageID extends Serializable {
      */
     public boolean isFor(SocketAddress dst);
     
-    /**
-     * Writes this MessageID to the OutputStream.
-     */
-    public void write(OutputStream os) throws IOException;
-
     /**
      * Returns the length of the MessageID in bytes.
      */

@@ -85,6 +85,13 @@ public abstract class MessageDispatcher2 implements Closeable {
         this.transport = transport;
     }
     
+    /**
+     * Returns the {@link Transport}
+     */
+    public Transport getTransport() {
+        return transport;
+    }
+    
     @Override
     public void close() {
         requestManager.close();
@@ -109,7 +116,7 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     public void send(Contact dst, ResponseMessage response) throws IOException {
         SocketAddress address = dst.getContactAddress();
-        transport.send(address, response);
+        transport.send(this, address, response);
         
         fireMessageSent(response);
     }
@@ -123,7 +130,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         
         requestManager.add(callback, contactId, dst, 
                 request, timeout, unit);
-        transport.send(dst, request);
+        transport.send(this, dst, request);
         
         fireMessageSent(request);
     }
@@ -243,28 +250,13 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    public static interface MessageCodec {
-        
-        /**
-         * 
-         */
-        public byte[] encode(SocketAddress dst, 
-                DHTMessage message) throws IOException;
-        
-        /**
-         * 
-         */
-        public DHTMessage decode(SocketAddress src, 
-                byte[] data) throws IOException;
-    }
-    
-    /**
-     * 
-     */
     public static interface Transport {
         
-        public void send(SocketAddress dst, 
-                DHTMessage message) throws IOException;
+        /**
+         * 
+         */
+        public void send(MessageDispatcher2 messageDispatcher, 
+                SocketAddress dst, DHTMessage message) throws IOException;
     }
     
     /**
