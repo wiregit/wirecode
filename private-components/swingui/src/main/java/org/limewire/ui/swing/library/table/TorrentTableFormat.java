@@ -65,13 +65,13 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
         case FILES_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
             if (torrent != null)
-                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n", 14, 40, AND_MORE_MSG);
+                return StringUtils.explode(torrent.getTorrentFileEntries(), "\r\n", 14, 40, AND_MORE_MSG);
             else 
                 return "";
         case TRACKERS_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
             if (torrent != null)
-                return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40, AND_MORE_MSG);
+                return StringUtils.explode(torrent.getTrackers(), "\r\n", 14, 40, AND_MORE_MSG);
             else 
                 return "";
         }
