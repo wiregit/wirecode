@@ -20,8 +20,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.Contact.State;
-import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -274,8 +272,8 @@ public class MessageInputStream extends DataInputStream {
         int instanceId = readUnsignedByte();
         int flags = readUnsignedByte();
         
-        return new RemoteContact(src, vendor, version, contactId, 
-                address, instanceId, flags, State.ALIVE);
+        return ContactFactory.createLiveContact(src, vendor, version, 
+                contactId, address, instanceId, flags);
     }
     
     public Contact[] readContacts() throws IOException {
