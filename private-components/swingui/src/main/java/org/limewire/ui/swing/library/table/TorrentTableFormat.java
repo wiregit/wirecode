@@ -9,6 +9,7 @@ import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
@@ -42,10 +43,9 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_TORRENT_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
                 new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARYTORRENT_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_TORRENT_PATH", I18n.tr("Location"), 200, false, true),
-                new ColumnStateInfo(FILES_INDEX, "LIBRARY_TORRENT_FILES", I18n.tr("Files"), 400, 480, true, true),
-                new ColumnStateInfo(TRACKERS_INDEX, "LIBRARY_TORRENT_TRACKERS", I18n.tr("Trackers"), 400, 480, true, true),
-                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_TORRENT_ACTION", I18n.tr(" "), 22, 22, true, false)
-                
+                new ColumnStateInfo(FILES_INDEX, "LIBRARY_TORRENT_FILES", I18n.tr("Files"), 400, 480, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
+                new ColumnStateInfo(TRACKERS_INDEX, "LIBRARY_TORRENT_TRACKERS", I18n.tr("Trackers"), 400, 480, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
+                new ColumnStateInfo(ACTION_INDEX, "LIBRARY_TORRENT_ACTION", I18n.tr(" "), 22, 22, SearchSettings.USE_TORRENT_SCRAPER.getValue(), false)
         });
     }
 

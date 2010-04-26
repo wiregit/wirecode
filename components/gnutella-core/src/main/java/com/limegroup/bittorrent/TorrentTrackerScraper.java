@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.Channels;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
@@ -250,7 +251,7 @@ public class TorrentTrackerScraper {
     private static boolean canHTTPScrape(URI trackerAnnounceUri) {
         String announceString = trackerAnnounceUri.toString();
         
-        return announceString.startsWith("http") && announceString.indexOf(ANNOUNCE_PATH) > 0;
+        return announceString.toLowerCase(Locale.US).startsWith("http") && announceString.indexOf(ANNOUNCE_PATH) > 0;
     }
     
     private static URI createScrapingRequest(URI trackerAnnounceUri, URN urn) throws URISyntaxException {

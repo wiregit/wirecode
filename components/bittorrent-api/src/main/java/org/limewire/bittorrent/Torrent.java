@@ -84,7 +84,7 @@ public interface Torrent {
     public boolean isStarted();
 
     /**
-     * Returns the tracker uris to this torrent. Can be null.
+     * Returns the tracker uris to this torrent.  Never Null.
      */
     public List<URI> getTrackerURIS();
 

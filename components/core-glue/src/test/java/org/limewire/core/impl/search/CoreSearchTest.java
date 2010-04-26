@@ -49,7 +49,7 @@ public class CoreSearchTest extends BaseTestCase {
     public CoreSearchTest(String name) {
         super(name);
     }
-/*
+
     @SuppressWarnings({"unchecked"})
     public void testQueryReplySearchListenerResultsAdded() {
         Mockery context = new Mockery() {{
@@ -534,5 +534,5 @@ public class CoreSearchTest extends BaseTestCase {
                 coreSearch.getQueryGuid());
     }
     
-    */
+    
 }

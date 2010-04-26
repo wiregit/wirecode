@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.gnutella.tests.LimeTestCase;
@@ -107,16 +108,16 @@ public class CategoryManagerImplTest extends LimeTestCase {
     public void testBuiltInProgramExtensions() {
         checkExtensions(Category.PROGRAM, "app", "bin", "mdb", "sh", "csh", "awk", "pl", "rpm",
                 "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz", "taz", "shar", "hqx", "sit",
-                "dmg", "7z", "jar", "zip", "nrg", "cue", "iso", "jnlp", "rar", "sh", "mdb", "exe",
+                "dmg", "7z", "jar", "zip", "nrg", "iso", "jnlp", "rar", "sh", "mdb", "exe",
                 "zip", "jar", "cab", "msi", "msp", "arj", "rar", "ace", "lzh", "lha", "bin", "nrg",
-                "cue", "iso", "jnlp", "bat", "lnk", "vbs");
+                "iso", "jnlp", "bat", "lnk", "vbs");
     }
     
     public void testBuiltInOsxLinuxPrograms() {
         Set<String> expecting = ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).add(
                 "app", "bin", "mdb", "sh", "csh", "awk", "pl", "rpm", "deb", "gz", "gzip", "z",
                 "bz2", "zoo", "tar", "tgz", "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip",
-                "nrg", "cue", "iso", "jnlp", "rar", "sh").build();
+                "nrg", "iso", "jnlp", "rar", "sh").build();
         for(String e : expecting) {
             assertTrue("failed for: " + e, cmi.getOsxAndLinuxProgramsFilter().apply(e));
         }
@@ -125,7 +126,7 @@ public class CategoryManagerImplTest extends LimeTestCase {
     public void testBuiltInWindowsPrograms() {
         Set<String> expecting = ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).add(
                 "mdb", "exe", "zip", "jar", "cab", "msi", "msp", "arj", "rar", "ace", "lzh", "lha",
-                "bin", "nrg", "cue", "iso", "jnlp", "bat", "lnk", "vbs").build();
+                "bin", "nrg", "iso", "jnlp", "bat", "lnk", "vbs").build();
         for(String e : expecting) {
             assertTrue("failed for: " + e, cmi.getWindowsProgramsFilter().apply(e));
         }
@@ -182,6 +183,130 @@ public class CategoryManagerImplTest extends LimeTestCase {
                 LibrarySettings.ADDITIONAL_DOCUMENT_EXTS,
                 LibrarySettings.ADDITIONAL_IMAGE_EXTS,
                 LibrarySettings.ADDITIONAL_VIDEO_EXTS);
+    }
+    
+    public void testContainsCategoryWithMultiEntry() {
+       List<TorrentFileEntry> list = new ArrayList<TorrentFileEntry>();
+        
+       // No entries
+       for ( Category category : Category.values() ) {
+           assertFalse(cmi.containsCategory(category, null));
+           assertFalse(cmi.containsCategory(category, list));
+       }
+       
+       // One entry of each
+       list.add(new MockTorrentFileEntry("test.exe"));
+       assertTrue(cmi.containsCategory(Category.PROGRAM, list));
+       
+       
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.Doc"));
+       assertTrue(cmi.containsCategory(Category.DOCUMENT, list));
+       assertFalse(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.OTHER, list));
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.ogg"));
+       assertTrue(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.DOCUMENT, list));
+       assertFalse(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.OTHER, list));
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.png"));
+       assertTrue(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.DOCUMENT, list));
+       assertFalse(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.OTHER, list));
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.torrent"));
+       assertTrue(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.DOCUMENT, list));
+       assertFalse(cmi.containsCategory(Category.OTHER, list));
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.mpg"));
+       assertTrue(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.DOCUMENT, list));
+       assertFalse(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.OTHER, list));
+       
+       list.clear();
+       list.add(new MockTorrentFileEntry("test.asdafsd"));
+       assertTrue(cmi.containsCategory(Category.OTHER, list));
+       assertFalse(cmi.containsCategory(Category.AUDIO, list));
+       assertFalse(cmi.containsCategory(Category.VIDEO, list));
+       assertFalse(cmi.containsCategory(Category.IMAGE, list));
+       assertFalse(cmi.containsCategory(Category.TORRENT, list));
+       assertFalse(cmi.containsCategory(Category.DOCUMENT, list));
+       
+       list.clear();
+       
+       // Test with all entries
+       list.add(new MockTorrentFileEntry("test.asdasdafsd"));
+       list.add(new MockTorrentFileEntry("test.avi"));
+       list.add(new MockTorrentFileEntry("test.torrent"));
+       list.add(new MockTorrentFileEntry("test.jpeg"));
+       list.add(new MockTorrentFileEntry("test.mp3"));
+       list.add(new MockTorrentFileEntry("test.ogg"));
+       list.add(new MockTorrentFileEntry("test.xls"));
+       list.add(new MockTorrentFileEntry("test.bat"));
+       assertTrue(cmi.containsCategory(Category.OTHER, list));
+       assertTrue(cmi.containsCategory(Category.AUDIO, list));
+       assertTrue(cmi.containsCategory(Category.VIDEO, list));
+       assertTrue(cmi.containsCategory(Category.IMAGE, list));
+       assertTrue(cmi.containsCategory(Category.TORRENT, list));
+       assertTrue(cmi.containsCategory(Category.DOCUMENT, list));
+       
+    }
+    
+    private static class MockTorrentFileEntry implements TorrentFileEntry {
+
+        private final String path;
+
+        public MockTorrentFileEntry(String path) {
+            this.path = path;
+        }
+        
+        @Override
+        public int getIndex() {
+            return 0;
+        }
+        @Override
+        public String getPath() {
+            return path;
+        }
+        @Override
+        public int getPriority() {
+            return 0;
+        }
+        @Override
+        public float getProgress() {
+            return 0;
+        }
+        @Override
+        public long getSize() {
+            return 0;
+        }
+        @Override
+        public long getTotalDone() {
+            return 0;
+        }
+        
     }
     
     public void testProgramsCanShareRemoteExtensions() {
@@ -299,5 +424,4 @@ public class CategoryManagerImplTest extends LimeTestCase {
         }
         assertEquals(expecting, cmi.getExtensionsForCategory(category));
     }
-    
 }

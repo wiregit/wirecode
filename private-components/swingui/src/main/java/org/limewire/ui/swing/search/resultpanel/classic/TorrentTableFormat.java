@@ -12,6 +12,7 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.TorrentScrapeScheduler;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 import org.limewire.ui.swing.settings.TablesHandler;
@@ -47,9 +48,9 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(FILES_INDEX, "CLASS_SEARCH_TORRENT_FILES", I18n.tr("Files"), 180, true, true),
                 new ColumnStateInfo(TRACKERS_INDEX, "CLASS_SEARCH_TORRENT_TRACKERS", I18n.tr("Trackers"), 255, false, true),
                 new ColumnStateInfo(SIZE_INDEX, "CLASS_SEARCH_TORRENT_SIZE", I18n.tr("Size"), 20, true, true),
-                new ColumnStateInfo(SEEDERS_INDEX, "CLASS_SEARCH_TORRENT_SEEDERS", I18n.tr("Seeders"), 20, true, true),
-                new ColumnStateInfo(LEECHERS_INDEX, "CLASS_SEARCH_TORRENT_LEECHERS", I18n.tr("Leechers"), 20, true, true),
-                new ColumnStateInfo(DOWNLOADED_INDEX, "CLASS_SEARCH_TORRENT_DOWNLOADED", I18n.tr("Downloaded"), 20, true, true),
+                new ColumnStateInfo(SEEDERS_INDEX, "CLASS_SEARCH_TORRENT_SEEDERS", I18n.tr("Seeders"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
+                new ColumnStateInfo(LEECHERS_INDEX, "CLASS_SEARCH_TORRENT_LEECHERS", I18n.tr("Leechers"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
+                new ColumnStateInfo(DOWNLOADED_INDEX, "CLASS_SEARCH_TORRENT_DOWNLOADED", I18n.tr("Downloaded"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
                 new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_AUDIO_IS_SPAM", "", 10, false, false)
         });
         
@@ -125,7 +126,8 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 }
             }
         }
-        return "";
+        
+        throw new IllegalArgumentException("Unknown column:" + column);
     }
     
     @Override

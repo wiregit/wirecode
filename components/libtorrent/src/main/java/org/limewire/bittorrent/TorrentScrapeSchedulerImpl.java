@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -142,9 +143,6 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         
         this.scraper = scraper;
         this.backgroundExecutor = backgroundExecutor;
-        
-        awake.set(true);
-        processingThreadFuture = scheduleProcessor();
     }
     
     private ScheduledFuture<?> scheduleProcessor() {
@@ -282,7 +280,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         }
         
         List<URI> trackers = torrent.getTrackerURIS();
-        if (trackers == null || trackers.size() < 1) {
+        if (trackers.size() < 1) {
             // Has no trackers
             markCurrentTorrentFailure();
             return;
@@ -291,7 +289,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         // Find first HTTP tracker since right now we only support them
         URI tracker = null;
         for ( URI potentialTracker : trackers ) {
-            if (potentialTracker.toString().startsWith("http")) {
+            if (potentialTracker.toString().toLowerCase(Locale.US).startsWith("http")) {
                 tracker = potentialTracker;
                 break;
             }
