@@ -16,7 +16,7 @@ public abstract class SwingInspectable implements Inspectable {
                 result.set(inspectOnEDT());
             }
         });
-        return result;
+        return result.get();
     }
     
     protected abstract Object inspectOnEDT();
