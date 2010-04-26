@@ -25,36 +25,34 @@ import java.net.SocketAddress;
 import org.limewire.mojito.io.Writeable;
 
 /**
- * A MessageID is an unique identifier for Messages. 
+ * A {@link MessageID} is an unique identifier for {@link Message}s. 
  */
 public interface MessageID extends Serializable, Writeable {
-
-    /**
-     * Returns true if tagging is supported.
-     */
-    public boolean isTaggingSupported();
     
     /**
-     * Returns whether or not we're the originator of the MessageID.
-     * 
-     * @throws UnsupportedOperationException if tagging is not supported
-     */
-    public boolean isFor(SocketAddress dst);
-    
-    /**
-     * Returns the length of the MessageID in bytes.
+     * Returns the length of the {@link MessageID} in bytes.
      */
     public int getLength();
     
     /**
-     * Returns the raw bytes of the MessageID. The
-     * returned byte[] array is a copy and modifications
-     * are not reflected to the MessageID.
+     * Returns the raw bytes of the {@link MessageID}.
      */
     public byte[] getBytes();
 
     /**
-     * Returns the raw bytes of the current MessageID from the specified interval.
+     * Returns the raw bytes of the current {@link MessageID}.
      */
     public byte[] getBytes(int srcPos, byte[] dest, int destPos, int length);
+    
+    /**
+     * A mix-in interface for implementations of {@link MessageID}s to 
+     * indicate that it's supporting tagging.
+     */
+    public static interface Tagging {
+        
+        /**
+         * Returns whether or not we're the originator of the {@link MessageID}.
+         */
+        public boolean isFor(SocketAddress dst);
+    }
 }
