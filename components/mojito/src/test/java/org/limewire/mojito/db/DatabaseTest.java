@@ -37,6 +37,8 @@ import org.limewire.mojito.NopTransport;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
@@ -411,7 +413,9 @@ public class DatabaseTest extends MojitoTestCase {
      * "better solution" this test will fail!
      */
     public void testMultiRemove() {
-        MojitoDHT2 dht = MojitoFactory2.createDHT(NopTransport.NOP);
+        MessageFactory messageFactory = new DefaultMessageFactory();
+        MojitoDHT2 dht = MojitoFactory2.createDHT(
+                NopTransport.NOP, messageFactory);
         
         DatabaseImpl database = (DatabaseImpl)dht.getDatabase();
         
