@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-19 11:21-0400\n"
+"POT-Creation-Date: 2010-04-26 11:30-0400\n"
 "PO-Revision-Date: 2010-02-03 22:00+0000\n"
 "Last-Translator: Jason Chun <Unknown>\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-04-20 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-04-27 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Korean\n"
 
@@ -561,7 +561,7 @@ msgstr "응용 프로그램"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:36
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:227
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:300
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:304
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:296
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:361
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:40
@@ -1275,26 +1275,26 @@ msgstr "표준"
 msgid "Ultrapeers"
 msgstr "울트라피어 수"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:54
 msgid "Revert To Default"
 msgstr "기본값으로 되돌리기"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:55
 msgid "Sort Automatically"
 msgstr "자동 정렬"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:59
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:56
 msgid "Extended Tooltips"
 msgstr "확장 도구 설명"
 
 #. Set up table header to display context menu to configure visible
 #. columns.  As recommended in the API Javadoc for isPopupTrigger(),
 #. we check both the mousePressed and mouseReleased events.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:76
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:73
 msgid "Right-click to select columns to display"
 msgstr "마우스 오른쪽 단추를 클릭하여 표시할 열을 선택하십시오."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:301
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:298
 msgid "More Options"
 msgstr "기타 옵션"
 
@@ -1877,7 +1877,7 @@ msgid "Finishing..."
 msgstr "완료 중..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:147
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:550
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:554
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPanel.java:107
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:124
@@ -2052,7 +2052,7 @@ msgstr "범주"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:40
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:46
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:300
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:304
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:54
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:48
@@ -2934,21 +2934,21 @@ msgstr ""
 "LimeWire는 다음과 같은 LimeWire 개발자들이 수많은 시간을 투자하여 만든 결과물입니다."
 
 #. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:171
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr "LimeWire의 비즈니스 개발자는 배후에서 비즈니스 전략과 일상적인 업무를 처리합니다."
 
 #. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:187
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr "또한 과거에 LimeWire 팀에서 일한 다음 개발자들은 자리를 옮겨 다른 프로젝트를 작업하고 있습니다."
 
 #. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:269
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:268
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -2959,7 +2959,7 @@ msgstr ""
 "주셨습니다. 다음은 LimeWire의 모든 버전에 배포된 기록 코드이거나 코드의 중대한 버그로 식별된 것입니다."
 
 #. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:342
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:341
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2968,14 +2968,14 @@ msgstr ""
 "또한 LimeWire는 응용 프로그램 자체 및 LimeWire 웹 사이트의 국제 프로젝트에 기여한 수많은 공헌자에게 감사드립니다."
 
 #. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:346
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:345
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr "다음과 같은 Gnutella 커뮤니티의 몇몇 동료 분들께 특별한 감사의 말씀을 드립니다."
 
 #. conclusion
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:368
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:367
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2984,7 +2984,7 @@ msgstr ""
 "마지막으로 LimeWire는 프로젝트에 아이디어를 제공해 주신 개발자, 사용자 및 기타 모든 분들에게 심심한 감사의 말씀을 드립니다. "
 "LimeWire 사용자 없이 P2P 네트워크가 있을 수 없습니다."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:373
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:372
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc. Gmail is a trademark of Google&nbsp;Inc., Jabber and LiveJournal are "
@@ -3733,7 +3733,7 @@ msgstr "사용자가 특정 네트워크 인터페이스 선택"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:227
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:296
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:261
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:262
 msgid "Address"
 msgstr "주소"
 
@@ -4168,7 +4168,7 @@ msgstr "자세히..."
 msgid "Keep any changes made"
 msgstr "변경 내용 유지"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/AudioPlayerMediator.java:380
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/player/AudioPlayerMediator.java:381
 msgid "Unknown"
 msgstr "알 수 없음"
 
@@ -4278,15 +4278,15 @@ msgstr "크기:"
 msgid "# files:"
 msgstr "파일 개수:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:300
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:304
 msgid "DL"
 msgstr "DL"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:300
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:304
 msgid "%"
 msgstr "%"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:300
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:304
 msgid "Priority"
 msgstr "우선 순위"
 
@@ -4459,21 +4459,21 @@ msgstr "총 리처:"
 msgid "Total Seeders:"
 msgstr "총 시더:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:225
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:226
 #, java-format
 msgid "{0}%"
 msgstr "{0}%"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:262
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:263
 msgid "Client"
 msgstr "클라이언트"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:262
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:263
 msgid "Upload"
 msgstr "업로드"
 
 #. Add Download menu item.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:262
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:263
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:190
 msgid "Download"
