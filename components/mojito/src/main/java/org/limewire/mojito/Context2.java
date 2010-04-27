@@ -2,6 +2,8 @@ package org.limewire.mojito;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -271,6 +273,18 @@ public class Context2 implements MojitoDHT2 {
             long timeout, TimeUnit unit) {
         return null;
     }*/
+    
+    @Override
+    public DHTFuture<PingEntity> ping(InetAddress address, int port, 
+            long timeout, TimeUnit unit) {
+        return ping(new InetSocketAddress(address, port), timeout, unit);
+    }
+
+    @Override
+    public DHTFuture<PingEntity> ping(String address, int port, 
+            long timeout, TimeUnit unit) {
+        return ping(new InetSocketAddress(address, port), timeout, unit);
+    }
     
     @Override
     public DHTFuture<PingEntity> ping(SocketAddress dst, 

@@ -2,6 +2,7 @@ package org.limewire.mojito;
 
 import java.io.Closeable;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -89,6 +90,18 @@ public interface MojitoDHT2 extends Closeable {
      * 
      */
     public void unbind();
+    
+    /**
+     * 
+     */
+    public DHTFuture<PingEntity> ping(String address, int port, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
+    public DHTFuture<PingEntity> ping(InetAddress address, int port, 
+            long timeout, TimeUnit unit);
     
     /**
      * 

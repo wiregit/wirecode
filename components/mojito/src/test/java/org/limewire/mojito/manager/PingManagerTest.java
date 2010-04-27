@@ -1,7 +1,6 @@
 package org.limewire.mojito.manager;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -63,7 +62,7 @@ public class PingManagerTest extends MojitoTestCase {
             
             try {
                 DHTFuture<PingEntity> future = dht2.ping(
-                        new InetSocketAddress("www.google.com", 80), 
+                        "www.google.com", 80, 
                         1L, TimeUnit.SECONDS);
                 future.get();
                 fail("Ping should have failed");
@@ -73,7 +72,7 @@ public class PingManagerTest extends MojitoTestCase {
             
             try {
                 DHTFuture<PingEntity> future = dht2.ping(
-                        new InetSocketAddress("localhost", 2000), 
+                        "localhost", 2000, 
                         1L, TimeUnit.SECONDS);
                 PingEntity entity = future.get();
                 assertEquals(dht1.getLocalNode().getNodeID(), 
