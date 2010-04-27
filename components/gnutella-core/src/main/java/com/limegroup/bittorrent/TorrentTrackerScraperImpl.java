@@ -16,6 +16,7 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.bittorrent.TorrentScrapeData;
+import org.limewire.bittorrent.TorrentTrackerScraper;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.logging.Log;
@@ -25,7 +26,6 @@ import org.limewire.nio.observer.Shutdownable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
@@ -39,9 +39,9 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * <p> Only supports HTTP scrape right now but UDP scrape is possible
  *      TODO: decouple udp_tracker_connection::send_udp_scrape()
  */
-public class TorrentTrackerScraper {
+public class TorrentTrackerScraperImpl implements TorrentTrackerScraper {
 
-    private static final Log LOG = LogFactory.getLog(TorrentTrackerScraper.class);
+    private static final Log LOG = LogFactory.getLog(TorrentTrackerScraperImpl.class);
     
     /**
      * Timeout before cancelling HTTP requests.
@@ -64,7 +64,7 @@ public class TorrentTrackerScraper {
     private final Provider<HttpParams> defaultParamsProvider;
 
     @Inject
-    public TorrentTrackerScraper(HttpExecutor httpExecutor,
+    public TorrentTrackerScraperImpl(HttpExecutor httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParamsProvider) {
         this.httpExecutor = httpExecutor;
         this.defaultParamsProvider = defaultParamsProvider;
@@ -76,7 +76,8 @@ public class TorrentTrackerScraper {
      * @return the shutdownable for the connection, or null if no 
      *          connection was supported.
      */
-    public Shutdownable submitScrape(URI trackerAnnounceUri, URN urn,
+    @Override
+    public RequestShutdown submitScrape(URI trackerAnnounceUri, String urn,
             final ScrapeCallback callback) {
 
         if (!SearchSettings.USE_TORRENT_SCRAPER.get()) {
@@ -114,7 +115,7 @@ public class TorrentTrackerScraper {
         
         LOG.debugf("submitting: {0}", uri);
 
-        return httpExecutor.execute(get, params, new HttpClientListener() {
+        final Shutdownable shutdown = httpExecutor.execute(get, params, new HttpClientListener() {
             @Override
             public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
                 get.abort();
@@ -178,6 +179,13 @@ public class TorrentTrackerScraper {
                 return true;
             }
         });
+        
+        return new RequestShutdown() {
+            @Override
+            public void shutdown() {
+                shutdown.shutdown();
+            }
+        };
     }
     
     /**
@@ -242,19 +250,13 @@ public class TorrentTrackerScraper {
         }
     }
 
-    public static interface ScrapeCallback {
-        void success(TorrentScrapeData data);
-        void failure(String reason);
-    }
-
-
     private static boolean canHTTPScrape(URI trackerAnnounceUri) {
         String announceString = trackerAnnounceUri.toString();
         
         return announceString.toLowerCase(Locale.US).startsWith("http") && announceString.indexOf(ANNOUNCE_PATH) > 0;
     }
     
-    private static URI createScrapingRequest(URI trackerAnnounceUri, URN urn) throws URISyntaxException {
+    private static URI createScrapingRequest(URI trackerAnnounceUri, String urn) throws URISyntaxException {
         String scrapeUriString = trackerAnnounceUri.toString().replaceFirst(ANNOUNCE_PATH, SCRAPE_PATH);
         StringBuffer buffer = new StringBuffer(scrapeUriString);
 
@@ -270,7 +272,7 @@ public class TorrentTrackerScraper {
         return new URI(buffer.toString());
     }
     
-    private static String httpEncodeURN(URN urn) {
+    private static String httpEncodeURN(String urn) {
         StringBuffer sb = new StringBuffer();
         for ( byte b : urn.getBytes() ) {
             if (UNRESERVED_CHARS.indexOf((char)b) > -1) {

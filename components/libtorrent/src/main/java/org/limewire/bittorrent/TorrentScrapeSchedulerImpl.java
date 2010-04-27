@@ -1,6 +1,5 @@
 package org.limewire.bittorrent;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,17 +15,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.bittorrent.TorrentTrackerScraper.RequestShutdown;
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.bittorrent.TorrentTrackerScraper;
-import com.limegroup.bittorrent.TorrentTrackerScraper.ScrapeCallback;
-import com.limegroup.gnutella.URN;
 
 /**
  * Returning the data from torrent scraping by asynchronously 
@@ -118,7 +115,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     /**
      * A shutoff for the current job if it has been running too long.
      */
-    private Shutdownable currentScrapeAttemptShutdown = null;
+    private RequestShutdown currentScrapeAttemptShutdown = null;
     
     
     /**
@@ -301,38 +298,33 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             return;
         }
         
-        try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debugf(" {0} submit", torrent.getName());
-            }
+        if (LOG.isDebugEnabled()) {
+            LOG.debugf(" {0} submit", torrent.getName());
+        }
 
-            currentScrapeAttemptShutdown = scraper.submitScrape(tracker,
-                    URN.createSha1UrnFromHex(torrent.getSha1()), 
-                    new ScrapeCallback() {
-                        @Override
-                        public void success(TorrentScrapeData data) {
-                            synchronized (resultsMap) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debugf("  {0} FOUND", torrent.getName());
-                                }
-                                resultsMap.put(currentlyScrapingTorrent.getAndSet(null).getSha1(),
-                                            data);
-                            }
-                        }
-                        @Override
-                        public void failure(String reason) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debugf("   {0} FAILED", torrent.getName());
-                            }
-                            markCurrentTrackerFailure();
-                            markCurrentTorrentFailure();
-                         }
-                    });
-            if (currentScrapeAttemptShutdown == null) {
-                markCurrentTorrentFailure();
-                return;
+        currentScrapeAttemptShutdown = scraper.submitScrape(tracker,
+                torrent.getSha1(), 
+                new ScrapeCallback() {
+            @Override
+            public void success(TorrentScrapeData data) {
+                synchronized (resultsMap) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debugf("  {0} FOUND", torrent.getName());
+                    }
+                    resultsMap.put(currentlyScrapingTorrent.getAndSet(null).getSha1(),
+                            data);
+                }
             }
-        } catch (IOException e) {
+            @Override
+            public void failure(String reason) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debugf("   {0} FAILED", torrent.getName());
+                }
+                markCurrentTrackerFailure();
+                markCurrentTorrentFailure();
+            }
+        });
+        if (currentScrapeAttemptShutdown == null) {
             markCurrentTorrentFailure();
             return;
         }
