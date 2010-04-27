@@ -491,7 +491,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public boolean containsCategory(Category category, List<TorrentFileEntry> list) {
+            public boolean containsCategory(Category category, List<String> list) {
                 return false;
             }
             
