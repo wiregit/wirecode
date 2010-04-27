@@ -127,7 +127,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             }
         }
         
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return "";
     }
     
     @Override
