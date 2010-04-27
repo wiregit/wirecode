@@ -18,9 +18,11 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.GUID;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.TestUtils;
 
@@ -160,6 +162,38 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         assertNotNull(xmlDocument);
         assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
         assertEquals("http://localhost/announce", xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS));
+    }
+    
+    public void testReturnsTorrentForTorrentKeyWordSearch() throws Exception {
+        SearchSettings.APPEND_TORRENT_TO_TORRENT_QUERIES.set(true);
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        QueryRequest queryRequest = queryRequestFactory.createQuery(new GUID().bytes(), "messages", "", SearchCategory.TORRENT);
+        assertTrue(queryRequest.getQuery().contains("torrent"));
+        responses = keywordIndex.query(queryRequest);
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        
+        responses = keywordIndex.query(queryRequestFactory.createQuery(new GUID().bytes(), "messages", "", SearchCategory.AUDIO));
+        assertEquals(0, responses.length);
+    }
+    
+    public void testReturnsTorrentForTorrentTypeSearch() throws Exception {
+        SearchSettings.APPEND_TORRENT_TO_TORRENT_QUERIES.set(false);
+        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", MetaDataFactoryImplTest.class);
+        assertAdds(fileList, torrentFile);
+        QueryRequest queryRequest = queryRequestFactory.createQuery(new GUID().bytes(), "messages", "", SearchCategory.TORRENT);
+        assertFalse(queryRequest.getQuery().contains("torrent"));
+        responses = keywordIndex.query(queryRequest);
+        assertEquals(1, responses.length);
+        LimeXMLDocument xmlDocument = responses[0].getDocument();
+        assertNotNull(xmlDocument);
+        assertEquals("OWVPM7JN7ZDRX6EHFMZAPJPHI3JXIUUZ", xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        
+        responses = keywordIndex.query(queryRequestFactory.createQuery(new GUID().bytes(), "messages", "", SearchCategory.AUDIO));
+        assertEquals(0, responses.length);
     }
     
     public void testAddAnotherSharedFile() throws Exception {
