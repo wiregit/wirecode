@@ -1,6 +1,8 @@
 package org.limewire.bittorrent;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.bittorrent.TorrentTrackerScraper.RequestShutdown;
 import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
-import org.limewire.collection.CollectionUtils;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -209,7 +210,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             int failedTorrentsToRemove = failedTorrents.size() - MAX_FAILURES_TO_KEEP_CACHED;
             if (failedTorrentsToRemove > 0) {
                 LOG.debugf("purging {0} failed torrents", failedTorrentsToRemove);
-                CollectionUtils.randomPurge(failedTorrents, failedTorrentsToRemove);
+                randomPurge(failedTorrents, failedTorrentsToRemove);
             }
         }
         
@@ -217,7 +218,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             int resultsToRemove = resultsMap.size() - MAX_RESULTS_TO_KEEP_CACHED;
             if (resultsToRemove > 0) {
                 LOG.debugf("purging {0} results", resultsToRemove);
-                CollectionUtils.randomPurge(resultsMap, resultsToRemove);
+                randomPurge(resultsMap, resultsToRemove);
             }
         }        
     }
@@ -327,6 +328,49 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         if (currentScrapeAttemptShutdown == null) {
             markCurrentTorrentFailure();
             return;
+        }
+    }
+    
+    
+    // REMOVE THESE WHEN CACHE CLEAR ALG IS DECIDED... see mrogers comment on LRU order in maps
+    
+    /**
+     * Randomly removes elements from a generic collection
+     */
+    public static void randomPurge(Collection<?> c, int elementsToRemove) {
+        randomPurge(null, c, elementsToRemove);
+    }
+    
+    /**
+     * Randomly removes elements from a map
+     */
+    public static void randomPurge(Map<?,?> m, int elementsToRemove) {
+        randomPurge(m, null, elementsToRemove);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static void randomPurge(Map<?,?> m, Collection<?> c, int elementsToRemove) {
+        List keys; 
+        
+        if (m == null) {
+            if (c instanceof List) {
+                keys = (List) c;
+            }
+            else {
+                keys = new ArrayList(c);
+            }
+        } else {
+            keys = new ArrayList(m.keySet());
+        }
+        
+        for ( int i=0 ; i<elementsToRemove ; i++ ) {
+            int randomKeyIndex = (int) (keys.size()*Math.random());
+            Object keyToRemove = keys.remove(randomKeyIndex);
+            if (m == null) {
+                c.remove(keyToRemove);
+            } else {
+                m.remove(keyToRemove);
+            }
         }
     }
 }

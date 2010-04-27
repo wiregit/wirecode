@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.util.FileUtils;
@@ -185,7 +184,7 @@ class MockCategoryManager implements CategoryManager {
     }
 
     @Override
-    public boolean containsCategory(Category category, List<TorrentFileEntry> list) {
+    public boolean containsCategory(Category category, List<String> list) {
         return false;
     }
 }

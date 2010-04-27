@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class CollectionUtils {
@@ -79,46 +78,5 @@ public class CollectionUtils {
             list.addAll(collection);
         }
         return list;
-    }
-
-
-    /**
-     * Randomly removes elements from a generic collection
-     */
-    public static void randomPurge(Collection<?> c, int elementsToRemove) {
-        randomPurge(null, c, elementsToRemove);
-    }
-    
-    /**
-     * Randomly removes elements from a map
-     */
-    public static void randomPurge(Map<?,?> m, int elementsToRemove) {
-        randomPurge(m, null, elementsToRemove);
-    }
-    
-    @SuppressWarnings("unchecked")
-    private static void randomPurge(Map<?,?> m, Collection<?> c, int elementsToRemove) {
-        List keys; 
-        
-        if (m == null) {
-            if (c instanceof List) {
-                keys = (List) c;
-            }
-            else {
-                keys = new ArrayList(c);
-            }
-        } else {
-            keys = new ArrayList(m.keySet());
-        }
-        
-        for ( int i=0 ; i<elementsToRemove ; i++ ) {
-            int randomKeyIndex = (int) (keys.size()*Math.random());
-            Object keyToRemove = keys.remove(randomKeyIndex);
-            if (m == null) {
-                c.remove(keyToRemove);
-            } else {
-                m.remove(keyToRemove);
-            }
-        }
     }
 }

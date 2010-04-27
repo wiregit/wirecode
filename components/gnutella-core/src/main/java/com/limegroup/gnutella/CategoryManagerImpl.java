@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -299,14 +298,14 @@ class CategoryManagerImpl implements CategoryManager {
     }
 
     @Override
-    public boolean containsCategory(Category category, List<TorrentFileEntry> paths) {
+    public boolean containsCategory(Category category, List<String> paths) {
   
         if (paths == null) {
             return false;
         }
         
-        for ( TorrentFileEntry path : paths ) {
-            if (getCategoryForFilename(path.getPath()) == category) {
+        for ( String path : paths ) {
+            if (getCategoryForFilename(path) == category) {
                 return true;
             }
         }
