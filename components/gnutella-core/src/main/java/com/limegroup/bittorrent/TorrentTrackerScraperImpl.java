@@ -22,7 +22,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
-import org.xbill.DNS.utils.base16;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -276,7 +276,7 @@ public class TorrentTrackerScraperImpl implements TorrentTrackerScraper {
     private static String httpEncodeURN(String urn) {
         StringBuffer sb = new StringBuffer();
         
-        for ( byte b : base16.fromString(urn) ) {
+        for ( byte b : StringUtils.fromHexString(urn) ) {
             if (UNRESERVED_CHARS.indexOf((char)b) > -1) {
                 sb.append((char)b);
             } else {
