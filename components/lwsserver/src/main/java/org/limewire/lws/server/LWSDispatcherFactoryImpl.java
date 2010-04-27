@@ -1,5 +1,7 @@
 package org.limewire.lws.server;
 
+import org.limewire.core.api.network.NetworkManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -11,13 +13,15 @@ import com.google.inject.Singleton;
 @Singleton
 public class LWSDispatcherFactoryImpl implements LWSDispatcherFactory {
       
-    @Inject
-    public LWSDispatcherFactoryImpl() {
+    private final NetworkManager networkManager;
 
+    @Inject
+    public LWSDispatcherFactoryImpl(NetworkManager networkManager) {
+        this.networkManager = networkManager;
     }
 
     public LWSDispatcher createDispatcher(LWSSenderOfMessagesToServer sender, LWSReceivesCommandsFromDispatcher recipient) {
-        LWSDispatcherImpl s = new LWSDispatcherImpl(sender);
+        LWSDispatcherImpl s = new LWSDispatcherImpl(sender, networkManager);
         s.setCommandReceiver(recipient);
         return s;
     }

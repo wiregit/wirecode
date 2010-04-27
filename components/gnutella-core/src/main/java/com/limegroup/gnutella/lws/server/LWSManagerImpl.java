@@ -19,7 +19,6 @@ import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
-import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
@@ -54,11 +53,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     private boolean isConnected;
     
     @Inject
-    public LWSManagerImpl(HttpExecutor exe) {
-        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
-    }    
-    
-    //todo @Inject
     public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
         this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get(), 
              LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);

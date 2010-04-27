@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.network.NetworkManager;
+
 
 /**
  * Dispatches commands after going through an authentication phase explained
@@ -41,9 +43,11 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
     private String publicKey;
     private String privateKey;
     private String sharedKey;
+    private final NetworkManager networkManager;
     
-    public LWSDispatcherImpl(LWSSenderOfMessagesToServer sender) {
+    public LWSDispatcherImpl(LWSSenderOfMessagesToServer sender, NetworkManager networkManager) {
         this.sender = sender;
+        this.networkManager = networkManager;
     }
     
     public void deauthenticate() {

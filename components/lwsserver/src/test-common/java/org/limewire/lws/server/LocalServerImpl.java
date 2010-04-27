@@ -2,6 +2,7 @@ package org.limewire.lws.server;
 
 import java.util.Map;
 
+import org.limewire.core.impl.network.MockNetworkManagerImpl;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSDispatcherImpl;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
@@ -25,7 +26,7 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
                 del.sendMessageToServer(msg, args, cb, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
             }
 
-        });
+        }, new MockNetworkManagerImpl());
         setDispatcher(ssd);
         
         ssd.setCommandReceiver(new AbstractReceivesCommandsFromDispatcher() {

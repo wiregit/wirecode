@@ -6,6 +6,7 @@ import java.util.HashMap;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
+import org.limewire.core.impl.network.MockNetworkManagerImpl;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -40,7 +41,7 @@ public class LWSManagerImplTest extends LimeTestCase {
         LWSSettings.LWS_DOWNLOAD_PREFIX.set("");
         assertEquals("", LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get());
         
-        LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());
+        LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl(new MockNetworkManagerImpl()));
 
         try {
             lwsManagerImpl.sendMessageToServer("blah", new HashMap<String, String>(), new StringCallback() {
@@ -61,7 +62,7 @@ public class LWSManagerImplTest extends LimeTestCase {
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("");
         assertEquals("", LWSSettings.LWS_DOWNLOAD_PREFIX.get());
         
-        LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());
+        LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl(new MockNetworkManagerImpl()));
 
         try {
             lwsManagerImpl.sendMessageToServer("blah", new HashMap<String, String>(), new StringCallback() {

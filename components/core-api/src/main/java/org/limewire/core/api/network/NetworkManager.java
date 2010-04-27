@@ -19,4 +19,6 @@ public interface NetworkManager {
     public boolean addressChanged();
     
     public void validateTLS();
+    
+    public byte[] getExternalAddress();
 }
