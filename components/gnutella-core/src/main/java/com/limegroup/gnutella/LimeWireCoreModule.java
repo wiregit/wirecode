@@ -8,6 +8,7 @@ import org.limewire.activation.api.ActivationSettingsController;
 import org.limewire.activation.impl.LimeWireActivationModule;
 import org.limewire.bittorrent.TorrentScrapeScheduler;
 import org.limewire.bittorrent.TorrentScrapeSchedulerImpl;
+import org.limewire.bittorrent.TorrentTrackerScraper;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.LimeScheduledThreadPoolExecutor;
@@ -67,6 +68,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.LimeWireBittorrentModule;
+import com.limegroup.bittorrent.TorrentTrackerScraperImpl;
 import com.limegroup.bittorrent.TorrentUploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
@@ -339,6 +341,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(MulticastService.class).to(MulticastServiceImpl.class);
         bind(CategoryManager.class).to(CategoryManagerImpl.class);
         bind(TorrentScrapeScheduler.class).to(TorrentScrapeSchedulerImpl.class);
+        bind(TorrentTrackerScraper.class).to(TorrentTrackerScraperImpl.class);
         
         Executor fwtEventExecutor = ExecutorsHelper.newProcessingQueue("FirewallEventThread");        
         AsynchronousCachingEventMulticasterImpl<FirewallTransferStatusEvent> asyncTransferMulticaster 
