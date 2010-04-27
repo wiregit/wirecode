@@ -1,7 +1,5 @@
 package org.limewire.mojito.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,11 +13,8 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.io.MessageDispatcher2.AbstractTransport;
 import org.limewire.mojito.message2.Message;
-import org.limewire.mojito.message2.MessageInputStream;
-import org.limewire.mojito.message2.MessageOutputStream;
-import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.mojito.message2.MessageFactory;
 
 public class DatagramTransport extends AbstractTransport implements Closeable {
 
@@ -32,28 +27,27 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
         = ExecutorsHelper.newSingleThreadExecutor(
             ExecutorsHelper.defaultThreadFactory("DatagramTransportThread"));
     
-    private final DatagramSocket socket;
+    private final MessageFactory messageFactory;
     
-    private final MACCalculatorRepositoryManager calculator;
+    private final DatagramSocket socket;
     
     private volatile boolean open = true;
     
     private Future<?> future = null;
     
-    public DatagramTransport(int port, 
-            MACCalculatorRepositoryManager calculator) throws IOException {
-        this(new InetSocketAddress(port), calculator);
+    public DatagramTransport(int port, MessageFactory messageFactory) throws IOException {
+        this(new InetSocketAddress(port), messageFactory);
     }
     
     public DatagramTransport(InetAddress addr, int port, 
-            MACCalculatorRepositoryManager calculator) throws IOException {
-        this(new InetSocketAddress(addr, port), calculator);
+            MessageFactory messageFactory) throws IOException {
+        this(new InetSocketAddress(addr, port), messageFactory);
     }
 
     public DatagramTransport(SocketAddress bindaddr, 
-            MACCalculatorRepositoryManager calculator) throws IOException {
+            MessageFactory messageFactory) throws IOException {
+        this.messageFactory = messageFactory;
         socket = new DatagramSocket(bindaddr);
-        this.calculator = calculator;
     }
     
     /**
@@ -66,8 +60,8 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     /**
      * 
      */
-    public MACCalculatorRepositoryManager getCalculator() {
-        return calculator;
+    public MessageFactory getMessageFactory() {
+        return messageFactory;
     }
     
     /**
@@ -117,7 +111,7 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
                 @Override
                 public void run() {
                     try {
-                        byte[] data = serialize(message);
+                        byte[] data = messageFactory.serialize(message);
                         
                         DatagramPacket packet = new DatagramPacket(
                                 data, 0, data.length, dst);
@@ -185,7 +179,8 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
                     int length = packet.getLength();
                     
                     try {
-                        Message msg = deserialize(src, data, offset, length);
+                        Message msg = messageFactory.deserialize(
+                                src, data, offset, length);
                         handleMessage(msg);
                     } catch (IOException err) {
                         LOG.error("IOException", err);
@@ -194,33 +189,6 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
             };
             
             executor.execute(task);
-        }
-    }
-    
-    /**
-     * 
-     */
-    private static byte[] serialize(Message message) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(8 * 128);
-        MessageOutputStream out = new MessageOutputStream(baos);
-        out.writeMessage(message);
-        out.close();
-        
-        return baos.toByteArray();
-    }
-    
-    /**
-     * 
-     */
-    private Message deserialize(SocketAddress src, byte[] message, 
-            int offset, int length) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(message, offset, length);
-        MessageInputStream in = new MessageInputStream(bais, calculator);
-        
-        try {
-            return in.readMessage(src);
-        } finally {
-            in.close();
         }
     }
 }

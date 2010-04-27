@@ -265,59 +265,6 @@ public abstract class MessageDispatcher2 implements Closeable {
     /**
      * 
      */
-    public static interface Transport {
-        
-        /**
-         * 
-         */
-        public void bind(MessageDispatcher2 messageDispatcher);
-        
-        /**
-         * 
-         */
-        public void send(SocketAddress dst, Message message) throws IOException;
-    }
-    
-    /**
-     * 
-     */
-    public static abstract class AbstractTransport implements Transport {
-
-        /**
-         * 
-         */
-        private volatile MessageDispatcher2 messageDispatcher;
-        
-        @Override
-        public void bind(MessageDispatcher2 messageDispatcher) {
-            this.messageDispatcher = messageDispatcher;
-        }
-        
-        /**
-         * 
-         */
-        public boolean isBound() {
-            return messageDispatcher != null;
-        }
-        
-        /**
-         * 
-         */
-        public boolean handleMessage(Message message) throws IOException {
-            MessageDispatcher2 messageDispatcher = this.messageDispatcher;
-            
-            if (messageDispatcher != null) {
-                messageDispatcher.handleMessage(message);
-                return true;
-            }
-            
-            return false;
-        }
-    }
-    
-    /**
-     * 
-     */
     private class RequestManager implements Closeable {
         
         private final Map<MessageID, RequestEntity> callbacks

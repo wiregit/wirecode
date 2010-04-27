@@ -19,141 +19,138 @@
  
 package org.limewire.mojito.message2;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.security.SecurityTokenHelper2;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
+import org.limewire.security.SecurityToken.TokenData;
 
 /**
  * The default implementation of the MessageFactory.
  */
 public class DefaultMessageFactory implements MessageFactory {
 
-    protected final Context2 context;
+    protected final MACCalculatorRepositoryManager calculator;
     
-    public DefaultMessageFactory(Context2 context) {
-        this.context = context;
+    protected final SecurityTokenHelper2 tokenHelper;
+    
+    public DefaultMessageFactory() {
+        this(new MACCalculatorRepositoryManager());
     }
     
-    /*public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
-            throws MessageFormatException, IOException {
+    public DefaultMessageFactory(MACCalculatorRepositoryManager calculator) {
+        this.calculator = calculator;
         
-        MessageInputStream in = null;
+        SecurityToken.TokenProvider tokenProvider 
+            = new SecurityToken.AddressSecurityTokenProvider(calculator);
+        
+        this.tokenHelper = new SecurityTokenHelper2(tokenProvider);
+    }
+    
+    @Override
+    public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager() {
+        return calculator;
+    }
+    
+    @Override
+    public SecurityTokenHelper2 getSecurityTokenHelper() {
+        return tokenHelper;
+    }
+    
+    @Override
+    public Message deserialize(SocketAddress src, byte[] message, 
+            int offset, int length) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(message, offset, length);
+        MessageInputStream in = new MessageInputStream(bais, calculator);
         
         try {
-            in = new MessageInputStream(new ByteBufferInputStream(data), context.getMACCalculatorRepositoryManager());
-            
-            // --- GNUTELLA HEADER ---
-            MessageID messageId = in.readMessageID();
-            int func = in.readUnsignedByte();
-            if (func != DHTMessage.F_DHT_MESSAGE) {
-                throw new MessageFormatException("Unknown function ID: " + func);
-            }
-            
-            Version msgVersion = in.readVersion();
-            //byte[] length = in.readBytes(4); // Little-Endian!
-            in.skip(4);
-            
-            // --- CONTINUTE WITH MOJITO HEADER ---
-            OpCode opcode = in.readOpCode();
-            
-            switch(opcode) {
-                case PING_REQUEST:
-                    return new PingRequestImpl(context, src, messageId, msgVersion, in);
-                case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, messageId, msgVersion, in);
-                case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, messageId, msgVersion, in);
-                case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, messageId, msgVersion, in);
-                case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, messageId, msgVersion, in);
-                case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, messageId, msgVersion, in);
-                case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, messageId, msgVersion, in);
-                case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, messageId, msgVersion, in);
-                case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, messageId, msgVersion, in);
-                case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, messageId, msgVersion, in);
-                default:
-                    throw new IOException("Unhandled OpCode " + opcode);
-            }
-        } catch (IllegalArgumentException err) {
-            String msg = (src != null) ? src.toString() : null;
-            throw new MessageFormatException(msg, err);
-        } catch (IOException err) {
-            String msg = (src != null) ? src.toString() : null;
-            throw new MessageFormatException(msg, err);
+            return in.readMessage(src);
         } finally {
-            if (in != null) { 
-                try { in.close(); } catch (IOException ignore) {}
-            }
+            in.close();
         }
-    }*/
-    
-    public SecurityToken createSecurityToken(Contact dst) {
-        return context.getSecurityTokenHelper().createSecurityToken(dst);
     }
     
+    @Override
+    public byte[] serialize(Message message) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(8 * 128);
+        MessageOutputStream out = new MessageOutputStream(baos);
+        out.writeMessage(message);
+        out.close();
+        
+        return baos.toByteArray();
+    }
+    
+    @Override
+    public SecurityToken createSecurityToken(Contact dst) {
+        return tokenHelper.createSecurityToken(dst);
+    }
+    
+    @Override
+    public TokenData createTokenData(Contact src) {
+        return tokenHelper.createTokenData(src);
+    }
+    
+    @Override
     public MessageID createMessageID(SocketAddress dst) {
         if (!NetworkUtils.isValidSocketAddress(dst)) {
             throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
         }
         
-        return DefaultMessageID.createWithSocketAddress(dst, context.getMACCalculatorRepositoryManager());
+        return DefaultMessageID.createWithSocketAddress(dst, calculator);
     }
-    
-    /*public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
-            throws IOException {
-        ByteBufferOutputStream out = new ByteBufferOutputStream(640, true);
-        message.write(out);
-        out.close();
-        return ((ByteBuffer)out.getBuffer().flip()).order(ByteOrder.BIG_ENDIAN);
-    }*/
 
-    public NodeRequest createFindNodeRequest(Contact contact, SocketAddress dst, KUID lookupId) {
+    @Override
+    public NodeRequest createNodeRequest(Contact contact, SocketAddress dst, KUID lookupId) {
         return new DefaultNodeRequest(createMessageID(dst), contact, lookupId);
     }
 
-    public NodeResponse createFindNodeResponse(Contact contact, Contact dst, 
+    @Override
+    public NodeResponse createNodeResponse(Contact contact, Contact dst, 
             MessageID messageId, Contact[] nodes) {
         return new DefaultNodeResponse(messageId, contact, createSecurityToken(dst), nodes);
     }
 
-    public ValueRequest createFindValueRequest(Contact contact, SocketAddress dst, 
+    @Override
+    public ValueRequest createValueRequest(Contact contact, SocketAddress dst, 
             KUID lookupId, KUID[] keys, DHTValueType valueType) {
         return new DefaultValueRequest(createMessageID(dst), contact, lookupId, keys, valueType);
     }
 
-    public ValueResponse createFindValueResponse(Contact contact, Contact dst, 
+    @Override
+    public ValueResponse createValueResponse(Contact contact, Contact dst, 
             MessageID messageId, float requestLoad, 
             DHTValueEntity[] entities, KUID[] secondaryKeys) {
         return new DefaultValueResponse(messageId, contact, requestLoad, secondaryKeys, entities);
     }
 
+    @Override
     public PingRequest createPingRequest(Contact contact, SocketAddress dst) {
         return new DefaultPingRequest(createMessageID(dst), contact);
     }
 
+    @Override
     public PingResponse createPingResponse(Contact contact, Contact dst, 
             MessageID messageId, SocketAddress externalAddress, BigInteger estimatedSize) {
         return new DefaultPingResponse(messageId, contact, externalAddress, estimatedSize);
     }
 
+    @Override
     public StoreRequest createStoreRequest(Contact contact, SocketAddress dst, 
             SecurityToken securityToken, DHTValueEntity[] values) {
         return new DefaultStoreRequest(createMessageID(dst), contact, securityToken, values);
     }
 
+    @Override
     public StoreResponse createStoreResponse(Contact contact, Contact dst, 
             MessageID messageId, StoreStatusCode[] status) {
         return new DefaultStoreResponse(messageId, contact, status);

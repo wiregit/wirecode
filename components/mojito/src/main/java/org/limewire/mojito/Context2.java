@@ -30,18 +30,14 @@ import org.limewire.mojito.handler.response.StoreResponseHandler2;
 import org.limewire.mojito.handler.response.ValueResponseHandler2;
 import org.limewire.mojito.io.DefaultMessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcher2;
-import org.limewire.mojito.io.MessageDispatcher2.Transport;
-import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.message2.MessageHelper2;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SecurityToken;
 import org.limewire.util.ExceptionUtils;
 
 /**
@@ -71,12 +67,6 @@ public class Context2 implements MojitoDHT2 {
      * 
      */
     private final FutureManager futureManager = new FutureManager();
-    
-    /**
-     * 
-     */
-    private final MACCalculatorRepositoryManager calculator 
-        = new MACCalculatorRepositoryManager();
     
     /**
      * 
@@ -118,11 +108,6 @@ public class Context2 implements MojitoDHT2 {
     /**
      * 
      */
-    private final SecurityTokenHelper2 tokenHelper;
-    
-    /**
-     * 
-     */
     private volatile HostFilter hostFilter = null;
     
     /**
@@ -130,6 +115,7 @@ public class Context2 implements MojitoDHT2 {
      */
     public Context2(String name,
             Transport transport,
+            MessageFactory messageFactory,
             RouteTable routeTable, 
             Database database) {
         
@@ -137,15 +123,7 @@ public class Context2 implements MojitoDHT2 {
         this.routeTable = routeTable;
         this.database = database;
         
-        MessageFactory messageFactory 
-            = new DefaultMessageFactory(this);
-        
         this.messageHelper = new MessageHelper2(this, messageFactory);
-        
-        SecurityToken.TokenProvider tokenProvider 
-            = new SecurityToken.AddressSecurityTokenProvider(calculator);
-        
-        this.tokenHelper = new SecurityTokenHelper2(tokenProvider);
         
         StoreForward storeForward 
             = new DefaultStoreForward(routeTable, database);
@@ -195,20 +173,6 @@ public class Context2 implements MojitoDHT2 {
      */
     public MessageHelper2 getMessageHelper() {
         return messageHelper;
-    }
-    
-    /**
-     * 
-     */
-    public SecurityTokenHelper2 getSecurityTokenHelper() {
-        return tokenHelper;
-    }
-    
-    /**
-     * 
-     */
-    public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager() {
-        return calculator;
     }
     
     /**

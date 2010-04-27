@@ -74,24 +74,24 @@ public class MessageHelper2 {
     }
 
     public NodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
-        return factory.createFindNodeRequest(getLocalNode(), dst, lookupId);
+        return factory.createNodeRequest(getLocalNode(), dst, lookupId);
     }
 
     public NodeResponse createFindNodeResponse(RequestMessage request, 
             Contact[] nodes) {
-        return factory.createFindNodeResponse(getLocalNode(), request.getContact(), 
+        return factory.createNodeResponse(getLocalNode(), request.getContact(), 
                 request.getMessageId(), nodes);
     }
 
     public ValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
             KUID[] keys, DHTValueType valueType) {
-        return factory.createFindValueRequest(getLocalNode(), dst, lookupId, keys, valueType);
+        return factory.createValueRequest(getLocalNode(), dst, lookupId, keys, valueType);
     }
 
     public ValueResponse createFindValueResponse(RequestMessage request, 
             float requestLoad, DHTValueEntity[] values, KUID[] keys) {
         
-        return factory.createFindValueResponse(getLocalNode(), request.getContact(), 
+        return factory.createValueResponse(getLocalNode(), request.getContact(), 
                 request.getMessageId(), requestLoad, values, keys);
     }
 

@@ -19,6 +19,7 @@
  
 package org.limewire.mojito.message2;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
@@ -26,13 +27,47 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.security.SecurityTokenHelper2;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
+import org.limewire.security.SecurityToken.TokenData;
 
 /**
  * Defines the interface for a factory to construct DHT messages.
  */
 public interface MessageFactory {
 
+    /**
+     * 
+     */
+    public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager();
+    
+    /**
+     * 
+     */
+    public SecurityTokenHelper2 getSecurityTokenHelper();
+    
+    /**
+     * 
+     */
+    public SecurityToken createSecurityToken(Contact dst);
+    
+    /**
+     * 
+     */
+    public TokenData createTokenData(Contact src);
+    
+    /**
+     */
+    public byte[] serialize(Message message) throws IOException;
+    
+    /**
+     * 
+     */
+    public Message deserialize(SocketAddress src, 
+            byte[] message, int offset, int length) throws IOException;
+    
+    
     /**
      * Creates and returns a MessageID. MessageID implementations
      * that support tagging may use the given SocketAddress to tag
@@ -70,7 +105,7 @@ public interface MessageFactory {
      * @param dst the destination address to where the request will be send
      * @param lookupID node id to use for the lookup
      */
-    public NodeRequest createFindNodeRequest(Contact src, SocketAddress dst, KUID lookupId);
+    public NodeRequest createNodeRequest(Contact src, SocketAddress dst, KUID lookupId);
 
     /**
      * Creates and returns a <code>FindNodeResponse</code> Message.
@@ -81,7 +116,7 @@ public interface MessageFactory {
      * @param nodes nodes in the issuing Node's bucket that are closest
      * to the requested target id
      */
-    public NodeResponse createFindNodeResponse(Contact src, Contact dst, 
+    public NodeResponse createNodeResponse(Contact src, Contact dst, 
             MessageID messageId, Contact[] nodes);
 
     /**
@@ -93,7 +128,7 @@ public interface MessageFactory {
      * @param secondaryKeys a Collection of secondary Keys we're looking for (can be empty)
      * @param valueType the type of value we're looking for
      */
-    public ValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
+    public ValueRequest createValueRequest(Contact src, SocketAddress dst, 
             KUID primaryKey, KUID[] secondaryKeys, DHTValueType valueType);
 
     /**
@@ -109,7 +144,7 @@ public interface MessageFactory {
      * @param secondaryKeys secondary keys of the values
      * 
      */
-    public ValueResponse createFindValueResponse(Contact src, Contact dst, 
+    public ValueResponse createValueResponse(Contact src, Contact dst, 
             MessageID messageId, float requestLoad, DHTValueEntity[] entities, KUID[] secondaryKeys);
 
     /**

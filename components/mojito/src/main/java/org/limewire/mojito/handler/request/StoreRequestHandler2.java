@@ -30,12 +30,14 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.Context2;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.message2.MessageHelper2;
 import org.limewire.mojito.message2.RequestMessage;
 import org.limewire.mojito.message2.StoreRequest;
 import org.limewire.mojito.message2.StoreResponse;
 import org.limewire.mojito.message2.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
@@ -82,8 +84,11 @@ public class StoreRequestHandler2 extends AbstractRequestHandler2 {
             return;
         }
         
+        MessageFactory messageFactory = context.getMessageFactory();
+        SecurityTokenHelper2 tokenHelper = messageFactory.getSecurityTokenHelper();
+        
         Contact src = request.getContact();
-        TokenData expectedToken = context.getSecurityTokenHelper().createTokenData(src);
+        TokenData expectedToken = tokenHelper.createTokenData(src);
         if (!securityToken.isFor(expectedToken)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
