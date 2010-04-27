@@ -54,14 +54,14 @@ public class MessageInputStream extends DataInputStream {
             throw new IOException("version=" + version);
         }
         
-        // Skip the payload length! Keep in minds it's
+        // Skip the payload length! Keep in mind it's
         // in Little-Endian!
         skip(4);
         
-        return readMessage0(src, messageId, version);
+        return readPayload(src, messageId, version);
     }
     
-    private Message readMessage0(SocketAddress src, 
+    private Message readPayload(SocketAddress src, 
             MessageID messageId, Version version) throws IOException {
         
         OpCode opcode = readOpCode();

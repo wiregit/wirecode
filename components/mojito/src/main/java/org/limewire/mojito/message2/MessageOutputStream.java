@@ -34,7 +34,7 @@ public class MessageOutputStream extends DataOutputStream {
         ByteArrayOutputStream baos 
             = new ByteArrayOutputStream(8 * 128);
         MessageOutputStream out = new MessageOutputStream(baos);
-        out.writeMessage0(message);
+        out.writePayload(message);
         out.close();
         
         byte[] payload = baos.toByteArray();
@@ -52,7 +52,7 @@ public class MessageOutputStream extends DataOutputStream {
         write(payload);
     }
     
-    private void writeMessage0(Message message) throws IOException {
+    private void writePayload(Message message) throws IOException {
         OpCode opcode = OpCode.valueOf(message);
         Contact src = message.getContact();
         

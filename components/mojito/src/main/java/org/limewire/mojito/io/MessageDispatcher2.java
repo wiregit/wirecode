@@ -86,6 +86,20 @@ public abstract class MessageDispatcher2 implements Closeable {
     }
     
     /**
+     * 
+     */
+    public void bind() {
+        transport.bind(this);
+    }
+    
+    /**
+     * 
+     */
+    public void unbind() {
+        transport.bind(null);
+    }
+    
+    /**
      * Returns the {@link Transport}
      */
     public Transport getTransport() {
@@ -94,6 +108,7 @@ public abstract class MessageDispatcher2 implements Closeable {
     
     @Override
     public void close() {
+        unbind();
         requestManager.close();
     }
     
@@ -116,7 +131,7 @@ public abstract class MessageDispatcher2 implements Closeable {
      */
     public void send(Contact dst, ResponseMessage response) throws IOException {
         SocketAddress address = dst.getContactAddress();
-        transport.send(this, address, response);
+        transport.send(address, response);
         
         fireMessageSent(response);
     }
@@ -130,7 +145,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         
         requestManager.add(callback, contactId, dst, 
                 request, timeout, unit);
-        transport.send(this, dst, request);
+        transport.send(dst, request);
         
         fireMessageSent(request);
     }
@@ -255,8 +270,49 @@ public abstract class MessageDispatcher2 implements Closeable {
         /**
          * 
          */
-        public void send(MessageDispatcher2 messageDispatcher, 
-                SocketAddress dst, Message message) throws IOException;
+        public void bind(MessageDispatcher2 messageDispatcher);
+        
+        /**
+         * 
+         */
+        public void send(SocketAddress dst, Message message) throws IOException;
+    }
+    
+    /**
+     * 
+     */
+    public static abstract class AbstractTransport implements Transport {
+
+        /**
+         * 
+         */
+        private volatile MessageDispatcher2 messageDispatcher;
+        
+        @Override
+        public void bind(MessageDispatcher2 messageDispatcher) {
+            this.messageDispatcher = messageDispatcher;
+        }
+        
+        /**
+         * 
+         */
+        public boolean isBound() {
+            return messageDispatcher != null;
+        }
+        
+        /**
+         * 
+         */
+        public boolean handleMessage(Message message) throws IOException {
+            MessageDispatcher2 messageDispatcher = this.messageDispatcher;
+            
+            if (messageDispatcher != null) {
+                messageDispatcher.handleMessage(message);
+                return true;
+            }
+            
+            return false;
+        }
     }
     
     /**
