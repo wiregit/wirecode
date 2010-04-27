@@ -7,10 +7,10 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +43,7 @@ import org.limewire.ui.swing.library.table.DocumentTableFormat;
 import org.limewire.ui.swing.library.table.ImageTableFormat;
 import org.limewire.ui.swing.library.table.OtherTableFormat;
 import org.limewire.ui.swing.library.table.ProgramTableFormat;
+import org.limewire.ui.swing.library.table.TorrentTableFormat;
 import org.limewire.ui.swing.library.table.VideoTableFormat;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -82,6 +83,7 @@ public class LibraryFilterPanel {
             Provider<DocumentTableFormat<LocalFileItem>> documentFormat,
             Provider<ProgramTableFormat<LocalFileItem>> programFormat,
             Provider<OtherTableFormat<LocalFileItem>> otherFormat,
+            Provider<TorrentTableFormat<LocalFileItem>> torrentFormat,
             TextFieldDecorator textFieldDecorator) {
         GuiUtils.assignResources(this);
         
@@ -93,6 +95,7 @@ public class LibraryFilterPanel {
         addCategory(tr("Images"), Category.IMAGE, imageFormat);
         addCategory(tr("Documents"), Category.DOCUMENT, documentFormat);
         addCategory(tr("Programs"), Category.PROGRAM, programFormat);
+        addCategory(tr("Torrents"), Category.TORRENT, torrentFormat);
         addCategory(tr("Other"), Category.OTHER, otherFormat);
         
         component = new JPanel(new MigLayout("insets 0 5 0 5, gap 0, fill", "", "[28!]"));

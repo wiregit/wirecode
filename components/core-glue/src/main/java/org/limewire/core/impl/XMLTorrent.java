@@ -81,7 +81,8 @@ public class XMLTorrent implements Torrent {
         return sum;
     }
     
-    public long getTotalSize() {
+    @Override
+    public long getTotalPayloadSize() {
         return size;
     }
 
@@ -359,7 +360,7 @@ public class XMLTorrent implements Torrent {
         throw new UnsupportedOperationException();
     }
     
-    private static List<TorrentFileEntry> parsePathEntries(LimeXMLDocument xmlDocument) throws InvalidDataException {
+    public static List<TorrentFileEntry> parsePathEntries(LimeXMLDocument xmlDocument) throws InvalidDataException {
         String encodedPath = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_PATHS);
         String encodedSizes = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_SIZES);
         if (encodedPath == null || encodedSizes == null) {

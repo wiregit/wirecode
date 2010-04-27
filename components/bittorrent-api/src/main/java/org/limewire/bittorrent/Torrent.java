@@ -84,7 +84,7 @@ public interface Torrent {
     public boolean isStarted();
 
     /**
-     * Returns the tracker uris to this torrent. Can be null.
+     * Returns the tracker uris to this torrent.  Never Null.
      */
     public List<URI> getTrackerURIS();
 
@@ -316,6 +316,11 @@ public interface Torrent {
     /**
      * Sets the maximum upload bandwidth this Torrent can use.
      */
-    public void setMaxUploadBandwidth(int value); 
+    public void setMaxUploadBandwidth(int value);
+
+    /**
+     * @return The total size of all the entries in the torrent
+     */
+    public long getTotalPayloadSize(); 
 
 }

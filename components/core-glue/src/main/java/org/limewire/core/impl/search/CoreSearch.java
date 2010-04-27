@@ -255,6 +255,18 @@ public class CoreSearch implements Search {
         }
     }
     
+    private void handleSearchResult(SearchResult searchResult) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSearchResult(this, searchResult);
+        }   
+    }
+    
+    private void handleSearchResults(Collection<SearchResult> searchResults) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSearchResults(this, searchResults);
+        }
+    }
+    
     private class QrListener implements QueryReplyListener {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
@@ -262,17 +274,13 @@ public class CoreSearch implements Search {
             
             RemoteFileDescAdapter rfdAdapter = remoteFileDescAdapterFactory.create(rfd, locs);
             
-            for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(CoreSearch.this, rfdAdapter);
-            }
+            handleSearchResult(rfdAdapter);
         }
     }
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
         public void handleFriendResults(Collection<SearchResult> results) {
-            for (SearchListener listener : searchListeners) {
-                listener.handleSearchResults(CoreSearch.this, results);
-            }            
+            handleSearchResults(results);
         }
     }
 }

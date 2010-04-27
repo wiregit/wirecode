@@ -58,4 +58,8 @@ public class LibrarySettings extends LimeProps {
     public static final StringArraySetting ADDITIONAL_PROGRAM_OSX_LINUX_EXTS =
         FACTORY.createRemoteStringArraySetting("ADDITIONAL_PROGRAM_OSX_LINUX_EXTS", new String[0], "LibrarySetting.additionalProgramOsxLinuxExts");
     
+    /** More extensions that should be considered torrents, empty now. */
+    public static final StringArraySetting ADDITIONAL_TORRENT_EXTS =
+        FACTORY.createRemoteStringArraySetting("ADDITIONAL_TORRENT_EXTS", new String[0], "LibrarySetting.additionalTorrentExts");
+    
 }

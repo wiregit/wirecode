@@ -197,7 +197,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             throw new IllegalArgumentException("Bad feature = " +
                                                featureSelector);
         _featureSelector = featureSelector;
-        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 248))
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 508))
             throw new IllegalArgumentException("Bad Meta Flag = " +
                                                metaFlagMask);
         if (metaFlagMask > 0)
@@ -740,50 +740,49 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     /** @return true if the query desires 'Audio' results back.
      */
     public boolean desiresAudio() {
-        if (_metaMask != null) 
-            return ((_metaMask & AUDIO_MASK) > 0);
-        return true;
+        return hasMetaMask(AUDIO_MASK);
     }
     
     /** @return true if the query desires 'Video' results back.
      */
     public boolean desiresVideo() {
-        if (_metaMask != null) 
-            return ((_metaMask & VIDEO_MASK) > 0);
-        return true;
+        return hasMetaMask(VIDEO_MASK);
     }
     
     /** @return true if the query desires 'Document' results back.
      */
     public boolean desiresDocuments() {
-        if (_metaMask != null) 
-            return ((_metaMask & DOC_MASK) > 0);
-        return true;
+        return hasMetaMask(DOC_MASK);
     }
     
     /** @return true if the query desires 'Image' results back.
      */
     public boolean desiresImages() {
-        if (_metaMask != null) 
-            return ((_metaMask & IMAGE_MASK) > 0);
-        return true;
+        return hasMetaMask(IMAGE_MASK);
     }
     
     /** @return true if the query desires 'Programs/Packages' for Windows
      *  results back.
      */
     public boolean desiresWindowsPrograms() {
-        if (_metaMask != null) 
-            return ((_metaMask & WIN_PROG_MASK) > 0);
-        return true;
+        return hasMetaMask(WIN_PROG_MASK);  
     }
     
     /** @return true if the query desires 'Programs/Packages' for Linux/OSX
      *  results back.
      */
     public boolean desiresLinuxOSXPrograms() {
+        return hasMetaMask(LIN_PROG_MASK);
+    }
+    
+    @Override
+    public boolean desiresTorrents() {
+        return hasMetaMask(TORRENT_MASK);
+    }
+    
+    private boolean hasMetaMask(int mask) {
         if (_metaMask != null) 
-            return ((_metaMask & LIN_PROG_MASK) > 0);
+            return ((_metaMask & mask) > 0);
         return true;
     }
     

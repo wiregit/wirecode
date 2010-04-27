@@ -594,4 +594,14 @@ class TorrentImpl implements Torrent {
             lock.unlock();
         }
     }
+
+    @Override
+    public long getTotalPayloadSize() {
+        long sum = 0;
+        for (TorrentFileEntry file : getTorrentFileEntries()) {
+            sum += file.getSize();
+        }
+        
+        return sum;
+    }
 }

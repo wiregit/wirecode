@@ -17,6 +17,7 @@ public enum Category {
     DOCUMENT(I18nMarker.marktr("Document"), I18nMarker.marktr("Documents"), "document"),
     PROGRAM(I18nMarker.marktr("Program"), I18nMarker.marktr("Programs"), "application"),
     OTHER(I18nMarker.marktr("Other"), I18nMarker.marktr("Other"), "other"),
+    TORRENT(I18nMarker.marktr("Torrent"), I18nMarker.marktr("Torrents"), "torrent"),
     ;
     
     private final String plural;

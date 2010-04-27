@@ -3,6 +3,7 @@ package org.limewire.core.impl.search;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -63,11 +64,12 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String extension;
     private final List<IpPort> locs;
     private final Category category;
-    private final TorrentFactory torrentFactory;
     private final int quality;
 
     /** The cached relevance value from {@link #getRelevance()}, -1 is unset */
     private float relevance = -1;
+
+    private final Torrent torrent;
 
     /**
      * Constructs {@link RemoteFileDescAdapter} with an anonymous Gnutella presence based on the rfd's
@@ -98,8 +100,8 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.friendPresence = friendPresence;
         this.extension = FileUtils.getFileExtension(rfd.getFileName());
         this.category = categoryManager.getCategoryForExtension(extension);
-        this.torrentFactory = torrentFactory;
         this.quality = FilePropertyKeyPopulator.calculateQuality(category, extension, rfd.getSize(), rfd.getXMLDocument());
+        this.torrent = torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
     }
     
     /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
@@ -109,8 +111,8 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.friendPresence = presence;
         this.extension = copy.extension;
         this.category = copy.category;
-        this.torrentFactory = torrentFactory;
         this.quality = copy.quality;
+        this.torrent = torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
         
         // and other items too, if they were constructed..
         this.relevance = copy.relevance;
@@ -184,11 +186,20 @@ public class RemoteFileDescAdapter implements SearchResult {
         case DATE_CREATED: return rfd.getCreationTime() == -1 ? null : rfd.getCreationTime();
         case FILE_SIZE: return rfd.getSize();      
         case QUALITY: return quality == -1 ? null : Long.valueOf(quality);
-        case TORRENT: return torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
+        // TODO: what was going on here?? why do we need to recreate?
+        case TORRENT: return torrent;
         default: return FilePropertyKeyPopulator.get(category, property, rfd.getXMLDocument());
         }
     }
-
+    
+    @Override
+    public long getSize() {
+        if (torrent != null) {
+            return torrent.getTotalPayloadSize();
+        }
+        return rfd.getSize();
+    }
+    
     /**
      * @return the category the rfd filetype falls into.
      */
@@ -211,14 +222,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         return friendPresence;
     }
     
-    /**
-     * @return the file size of the rfd.
-     */
-    @Override
-    public long getSize() {
-        return rfd.getSize();
-    }
-
     /**
      * @return whether the rfd has been marked as spam or not.
      */

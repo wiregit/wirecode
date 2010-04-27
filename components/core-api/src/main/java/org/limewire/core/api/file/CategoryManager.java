@@ -2,7 +2,9 @@ package org.limewire.core.api.file;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 
 import com.google.common.base.Predicate;
@@ -36,6 +38,11 @@ public interface CategoryManager {
     
     /** Returns the category that best matches the given file. */
     Category getCategoryForFile(File file);
+    
+    /**
+     * @return if any given torrent entry is of the category of type.
+     */
+    boolean containsCategory(Category category, List<TorrentFileEntry> list);
     
     /** Gets all extensions for a given category. */
     Collection<String> getExtensionsForCategory(Category category);

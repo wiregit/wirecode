@@ -14,7 +14,8 @@ public enum SearchCategory {
     IMAGE(Category.IMAGE, 3),
     DOCUMENT(Category.DOCUMENT, 4), 
     PROGRAM(Category.PROGRAM, 5), 
-    OTHER(Category.OTHER, 6);
+    OTHER(Category.OTHER, 6),
+    TORRENT(Category.TORRENT, 7);
     
     private static final EnumMap<Category, SearchCategory> perCategory = new EnumMap<Category, SearchCategory>(Category.class);
 

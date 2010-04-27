@@ -218,7 +218,7 @@ class CoreUploadItem implements UploadItem {
     @Override
     public Category getCategory() {
         if(uploadItemType == UploadItemType.BITTORRENT)
-            return Category.OTHER;
+            return Category.TORRENT;
         else
             return categoryManager.getCategoryForFilename(getFileName());
     }

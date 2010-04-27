@@ -533,4 +533,6 @@ public class CoreSearchTest extends BaseTestCase {
         assertEquals(new GUID(new byte[] {4,3,2,1,'q','x','x','x','x','x','x','x','x','x','x','x'}),
                 coreSearch.getQueryGuid());
     }
+    
+    
 }

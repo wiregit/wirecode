@@ -14,6 +14,7 @@ import junit.framework.Test;
 
 import org.apache.http.params.BasicHttpParams;
 import org.limewire.bittorrent.Torrent;
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
@@ -46,8 +47,8 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
-import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.malware.VirusScanException;
+import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.FileServer;
@@ -488,7 +489,13 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public Category getCategoryForFilename(String filename) {
                 return null;
             }
-        }, new VirusScanner() {
+
+            @Override
+            public boolean containsCategory(Category category, List<TorrentFileEntry> list) {
+                return false;
+            }
+            
+            }, new VirusScanner() {
             
             @Override
             public boolean isSupported() {

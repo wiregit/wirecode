@@ -234,7 +234,7 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
             });
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellRenderer(new CheckBoxRendererEditor());
             getColumn(BitTorrentTableFormat.DOWNLOAD_INDEX).setCellEditor(checkBoxEditor);
-
+            
             getColumn(BitTorrentTableFormat.SIZE_INDEX).setCellRenderer(new FileSizeRenderer());
             getColumn(BitTorrentTableFormat.SIZE_INDEX).setMaxWidth(72);
 
@@ -243,7 +243,6 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
             getColumn(BitTorrentTableFormat.NAME_INDEX).setCellRenderer(new DefaultLimeTableCellRenderer());
             getColumn(BitTorrentTableFormat.NAME_INDEX).setMinWidth(140);
             
-
             final PriorityRendererEditor editor = new PriorityRendererEditor();
             editor.getButton().addActionListener(new ActionListener() {
                 @Override
@@ -271,6 +270,12 @@ public class FileInfoBittorrentPanel implements FileInfoPanel, EventListener<Tor
 
             getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMaxWidth(60);
             getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setMinWidth(60);
+            
+            boolean editable = torrent.isEditable();
+            getColumnExt(BitTorrentTableFormat.PRIORITY_INDEX).setVisible(editable);
+            getColumnExt(BitTorrentTableFormat.PERCENT_INDEX).setVisible(editable);
+            getColumnExt(BitTorrentTableFormat.DOWNLOAD_INDEX).setVisible(editable);
+            
         }
         
         private void validateSelection() {

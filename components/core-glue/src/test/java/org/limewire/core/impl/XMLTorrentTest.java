@@ -57,7 +57,7 @@ public class XMLTorrentTest extends LimeTestCase {
         assertEquals(1, entries.size());
         assertEquals("name", entries.get(0).getPath());
         assertEquals(2545, entries.get(0).getSize());
-        assertEquals(2545, torrent.getTotalSize());
+        assertEquals(2545, torrent.getTotalPayloadSize());
     }
     
     public void testTorrentXmlWithLackingFileSizesFails() throws Exception {
@@ -87,7 +87,7 @@ public class XMLTorrentTest extends LimeTestCase {
         assertEquals(1000, entries.get(0).getSize());
         assertEquals("file2", entries.get(1).getPath());
         assertEquals(2000, entries.get(1).getSize());
-        assertEquals(3000, torrent.getTotalSize());
+        assertEquals(3000, torrent.getTotalPayloadSize());
     }
     
     public void testTorrentXmlWithInvalidTrackersFails() throws Exception {

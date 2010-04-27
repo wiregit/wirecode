@@ -13,6 +13,8 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.GUID;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -27,6 +29,9 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 @Singleton
 public class ResponseVerifierImpl implements ResponseVerifier {
+    
+    private static final Log LOG = LogFactory.getLog(ResponseVerifierImpl.class);
+    
     private static class RequestData {
         /** The original query. */
         final String query;
@@ -94,8 +99,10 @@ public class ResponseVerifierImpl implements ResponseVerifier {
 
     public synchronized boolean matchesQuery(byte [] guid, Response response) {
         RequestData data = mapper.get(new GUID(guid));
-        if (data == null || data.queryWords == null) 
+        if (data == null || data.queryWords == null) {
+            LOG.debugf("no match: {0}", response);
             return false;
+        }
         
         if (data.whatIsNew) 
             return true;
@@ -163,6 +170,7 @@ public class ResponseVerifierImpl implements ResponseVerifier {
         String reply = response.getName();
         Category category = request.type.getCategory();
         if(category != null) {
+            LOG.debugf("Matching for type: {0} - {1}", category, response);
             return categoryManager.getCategoryForFilename(reply) == category;
         } else {
             return true;

@@ -464,6 +464,13 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                         // {0}: search title, {1}: actual count, {2}: total count 
                         I18n.tr("Other results for {0} - Showing {1} of {2}", title, actual, total));
                 break;
+            case TORRENT:
+                searchTitleLabel.setText((actual == total) ?
+                        // {0}: search title, {1}: total count
+                        I18n.tr("Torrent results for {0} ({1})", title, total) :
+                        // {0}: search title, {1}: actual count, {2}: total count 
+                        I18n.tr("Torrent results for {0} - Showing {1} of {2}", title, actual, total));
+                break;
             default:
                 throw new IllegalStateException("Invalid search category " + displayCategory);
             }

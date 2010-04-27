@@ -80,6 +80,11 @@ public interface QueryRequest extends Message {
      *  | .... to specify linux/osx programs/packages responses.
      */
     public static final int LIN_PROG_MASK = 0x0080;
+    
+    /**
+     * Mask for torrent queries.
+     */
+    public static final int TORRENT_MASK = 0x00100;
 
     public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNewXOXO";
 
@@ -268,6 +273,10 @@ public interface QueryRequest extends Message {
      *  results back.
      */
     public boolean desiresLinuxOSXPrograms();
+    
+    /** @return true if the query desires Torrents.
+     */
+    public boolean desiresTorrents();
 
     /**
      * Returns the mask of allowed programs.

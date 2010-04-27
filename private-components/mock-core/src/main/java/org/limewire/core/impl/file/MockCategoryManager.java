@@ -3,7 +3,9 @@ package org.limewire.core.impl.file;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.util.FileUtils;
@@ -180,5 +182,10 @@ class MockCategoryManager implements CategoryManager {
         public boolean apply(String input) {
             return delegate.contains(input);
         }
+    }
+
+    @Override
+    public boolean containsCategory(Category category, List<TorrentFileEntry> list) {
+        return false;
     }
 }
