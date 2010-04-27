@@ -55,10 +55,10 @@ public class PingManagerTest extends MojitoTestCase {
             transport2 = new DatagramTransport(3000, factory2);
             
             dht1 = MojitoFactory2.createDHT(transport1, factory1);
-            dht1.bind();
+            dht1.start();
             
             dht2 = MojitoFactory2.createDHT(transport2, factory2);
-            dht2.bind();
+            dht2.start();
             
             try {
                 DHTFuture<PingEntity> future = dht2.ping(

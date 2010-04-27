@@ -84,12 +84,12 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
-    public void bind();
+    public void start();
     
     /**
      * 
      */
-    public void unbind();
+    public void stop();
     
     /**
      * 

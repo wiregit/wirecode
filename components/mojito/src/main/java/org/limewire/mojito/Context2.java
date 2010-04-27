@@ -146,12 +146,12 @@ public class Context2 implements MojitoDHT2 {
     }
     
     @Override
-    public void bind() {
+    public void start() {
         messageDispatcher.bind();
     }
 
     @Override
-    public void unbind() {
+    public void stop() {
         messageDispatcher.unbind();
     }
 
