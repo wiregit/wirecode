@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.io.Transport;
-import org.limewire.mojito.messages.DHTMessage;
+import org.limewire.mojito.message2.Message;
 
 public class NopTransport implements Transport {
 
@@ -14,7 +14,10 @@ public class NopTransport implements Transport {
     private NopTransport() {}
     
     @Override
-    public void send(MessageDispatcher2 messageDispatcher, 
-            SocketAddress dst, DHTMessage message) throws IOException {
+    public void bind(MessageDispatcher2 messageDispatcher) {
+    }
+
+    @Override
+    public void send(SocketAddress dst, Message message) throws IOException {
     }
 }
