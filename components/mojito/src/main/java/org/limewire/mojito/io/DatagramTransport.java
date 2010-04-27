@@ -35,7 +35,8 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     
     private Future<?> future = null;
     
-    public DatagramTransport(int port, MessageFactory messageFactory) throws IOException {
+    public DatagramTransport(int port, 
+            MessageFactory messageFactory) throws IOException {
         this(new InetSocketAddress(port), messageFactory);
     }
     

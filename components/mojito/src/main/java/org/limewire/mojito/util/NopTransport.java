@@ -1,4 +1,4 @@
-package org.limewire.mojito;
+package org.limewire.mojito.util;
 
 import java.io.IOException;
 import java.net.SocketAddress;

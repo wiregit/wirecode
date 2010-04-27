@@ -133,7 +133,7 @@ public abstract class MessageDispatcher2 implements Closeable {
         SocketAddress address = dst.getContactAddress();
         transport.send(address, response);
         
-        fireMessageSent(response);
+        fireMessageSent(dst.getNodeID(), address, response);
     }
     
     /**
@@ -147,7 +147,7 @@ public abstract class MessageDispatcher2 implements Closeable {
                 request, timeout, unit);
         transport.send(dst, request);
         
-        fireMessageSent(request);
+        fireMessageSent(contactId, dst, request);
     }
     
     /**
@@ -226,7 +226,8 @@ public abstract class MessageDispatcher2 implements Closeable {
         }
     }
     
-    protected void fireMessageSent(final Message message) {
+    protected void fireMessageSent(final KUID contactId, 
+            final SocketAddress dst, final Message message) {
         
         MESSAGES_SENT.incrementAndGet();
         
@@ -235,7 +236,7 @@ public abstract class MessageDispatcher2 implements Closeable {
                 @Override
                 public void run() {
                     for (MessageDispatcherListener2 l : listeners) {
-                        l.messageSent(message);
+                        l.messageSent(contactId, dst, message);
                     }
                 }
             };

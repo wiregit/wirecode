@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.NopTransport;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message2.DefaultMessageFactory;
 import org.limewire.mojito.message2.MessageFactory;

@@ -33,7 +33,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.NopTransport;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
@@ -45,6 +44,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito.util.NopTransport;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 

@@ -50,6 +50,7 @@ class SnowMan extends Painter {
     
     @Override
     public void paint(Component c, Graphics2D g2) {
+        
         int width = c.getWidth();
         int height = c.getHeight();
         
@@ -78,9 +79,6 @@ class SnowMan extends Painter {
     @Override
     public void handle(boolean outgoing, KUID nodeId, 
             SocketAddress dst, Message message) {
-        if (nodeId == null) {
-            return;
-        }
         
         if (nodeId != null) {
             synchronized (nodes) {
@@ -98,6 +96,8 @@ class SnowMan extends Painter {
     
     private static class Node {
         
+        private final long timeStamp = System.currentTimeMillis();
+        
         private final Ellipse2D.Double dot;
         
         private final boolean outgoing;
@@ -105,8 +105,6 @@ class SnowMan extends Painter {
         private final KUID nodeId;
         
         private final Message message;
-        
-        private final long timeStamp = System.currentTimeMillis();
         
         private final Arc2D.Double arc = new Arc2D.Double();
         
