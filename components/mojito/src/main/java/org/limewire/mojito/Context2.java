@@ -144,6 +144,16 @@ public class Context2 implements MojitoDHT2 {
     }
     
     @Override
+    public void bind() {
+        messageDispatcher.bind();
+    }
+
+    @Override
+    public void unbind() {
+        messageDispatcher.unbind();
+    }
+
+    @Override
     public BigInteger size() {
         return estimator.getEstimatedSize(routeTable);
     }

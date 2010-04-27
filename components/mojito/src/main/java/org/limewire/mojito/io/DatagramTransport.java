@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
@@ -22,6 +23,9 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
         = LogFactory.getLog(DatagramTransport.class);
     
     private static final int PACKET_SIZE = 4 * 1024;
+    
+    private static final ExecutorService EXECUTOR 
+        = Executors.newCachedThreadPool();
     
     private final ExecutorService executor 
         = ExecutorsHelper.newSingleThreadExecutor(
@@ -49,6 +53,8 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
             MessageFactory messageFactory) throws IOException {
         this.messageFactory = messageFactory;
         socket = new DatagramSocket(bindaddr);
+        
+        bind(EXECUTOR);
     }
     
     /**

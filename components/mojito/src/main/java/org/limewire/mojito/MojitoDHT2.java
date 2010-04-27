@@ -83,6 +83,16 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
+    public void bind();
+    
+    /**
+     * 
+     */
+    public void unbind();
+    
+    /**
+     * 
+     */
     public DHTFuture<PingEntity> ping(SocketAddress dst, 
             long timeout, TimeUnit unit);
     

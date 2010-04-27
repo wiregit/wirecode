@@ -78,7 +78,7 @@ public class DefaultStoreForward implements StoreForward {
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
-                if (provider.isBootstrapped()) {
+                if (provider != null && provider.isBootstrapped()) {
                     int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
