@@ -158,7 +158,7 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
             will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
             // update on read access
             one(clock).now();
-            will(returnValue(currentTime + TimeUnit.DAYS.toMicros(400)));
+            will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
             
             one(executorService).schedule(with(any(Runnable.class)), with(equal(1L)), with(equal(TimeUnit.MINUTES)));
             will(new AssignParameterAction<Runnable>(runnable));
@@ -182,6 +182,26 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         runnable.get().run();
         
         assertEquals(value, secureIdDatabaseStore.get(guid));
+        secureIdDatabaseStore.stop();
+    }
+    
+    public void testSetLocalDataResetsDatabase() {
+        secureIdDatabaseStore.start();
+        GUID guid = new GUID();
+        byte[] value = createRandomBytes(100);
+        secureIdDatabaseStore.put(guid, value);
+        byte[] result = secureIdDatabaseStore.get(guid);
+        assertEquals(value, result);
+        result = secureIdDatabaseStore.get(guid);
+        assertEquals(value, result);
+        secureIdDatabaseStore.stop();
+        
+        secureIdDatabaseStore = new SecureIdDatabaseStore(new ClockImpl());
+        secureIdDatabaseStore.setLocalData(new byte[] { 0, 0, 0, 0 });
+        secureIdDatabaseStore.start();
+        
+        assertNull(secureIdDatabaseStore.get(guid));
+        assertEquals(new byte[] { 0, 0, 0, 0, }, secureIdDatabaseStore.getLocalData());
         secureIdDatabaseStore.stop();
     }
 

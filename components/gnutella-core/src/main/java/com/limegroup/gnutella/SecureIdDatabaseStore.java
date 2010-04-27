@@ -40,6 +40,8 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
 
     private final Clock clock;
     
+    private volatile boolean resetDatabase;
+    
     @Inject
     public SecureIdDatabaseStore(Clock clock) {
         this.clock = clock;
@@ -72,15 +74,18 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
         }
         return Base32.decode(value);
     }
+    
     @Override
     public void setLocalData(byte[] value) {
         SecuritySettings.SECURE_IDENTITY.set(Base32.encode(value));
+        resetDatabase = true;
     }
     
     @Override
     public String getServiceName() {
         return "id db store";
     }
+
     @Override
     public void initialize() {
     }
@@ -89,14 +94,9 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     @Asynchronous
     public void start() {
         try {
-            store = new DbStore(false);
+            store = new DbStore(resetDatabase);
         } catch (SQLException e) {
-            LOG.debug("error initializing store", e);
-            try {
-                store = new DbStore(true);
-            } catch (SQLException e1) {
-                LOG.debug("error reinitializing store", e);
-            }
+            throw new RuntimeException(e);
         }
     }
     
@@ -145,7 +145,6 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
 
         private final PreparedStatement updateStatement;
         
-        // TODO implement drop
         public DbStore(boolean dropDb) throws SQLException {
             try {
                 Class.forName("org.hsqldb.jdbcDriver");
@@ -157,6 +156,9 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
             connection = DriverManager.getConnection(connectionUrl, "sa", "");
             Statement statement = connection.createStatement();
             try {
+                if (dropDb) {
+                    statement.execute("drop table ids if exists");
+                }
                 statement.execute("create cached table ids (guid binary(16) primary key, timestamp bigint, data varbinary(200))");
             } catch (SQLException se) {
                 LOG.debug("table already exists", se);

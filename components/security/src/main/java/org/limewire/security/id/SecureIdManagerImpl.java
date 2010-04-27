@@ -39,7 +39,9 @@ import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SecureIdManagerImpl implements SecureIdManager {    
     /** 768-bit system-wide Diffie-Hellman parameters
      *  limewire base32 encoded    
