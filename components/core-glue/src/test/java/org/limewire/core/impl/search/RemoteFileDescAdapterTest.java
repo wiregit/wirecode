@@ -73,6 +73,9 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             will(returnValue(urn1));
             allowing(remoteFileDesc1).isSpam();
             will(returnValue(false));
+            
+            allowing(torrentFactory).createTorrentFromXML(null);
+            will(returnValue(null));
         }});
 
         RemoteFileDescAdapter remoteFileDescAdapter1 =
@@ -158,6 +161,9 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         }
 
         context.checking(new Expectations() {{
+            
+            allowing(torrentFactory);
+            
             // Fill the locs list with alternating IpPort and Connectable instances 
             for(int i = 0; i < altlocs; i++) {
                 IpPort loc;
@@ -245,6 +251,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(categoryManager).getCategoryForExtension("JPG");
             will(returnValue(Category.IMAGE));
             allowing(rfd);
+            
+            allowing(torrentFactory);
         }});
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
@@ -297,6 +305,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfdGood);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
+            
+            allowing(torrentFactory);
         }});
         
         RemoteFileDescAdapter rfdAdapterWithNull1 = new RemoteFileDescAdapter(rfdWithNull1, locs, categoryManager, torrentFactory);
@@ -338,6 +348,9 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
+            
+            allowing(torrentFactory).createTorrentFromXML(with(any(LimeXMLDocument.class)));
+            will(returnValue(null));
         }});
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
@@ -374,6 +387,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
+            
+            allowing(torrentFactory);
         }});
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
@@ -401,6 +416,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
+            
+            allowing(torrentFactory);
         }});
         
         RemoteFileDescAdapter rfdAdapter = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
@@ -426,6 +443,8 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             allowing(rfd);
             allowing(categoryManager).getCategoryForExtension("");
             will(returnValue(Category.OTHER));
+            
+            allowing(torrentFactory);
         }});
         
         RemoteFileDescAdapter rfdAdapter1 = new RemoteFileDescAdapter(rfd, locs, categoryManager, torrentFactory);
