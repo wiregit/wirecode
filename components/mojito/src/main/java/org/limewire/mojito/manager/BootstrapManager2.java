@@ -1,7 +1,6 @@
 package org.limewire.mojito.manager;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,7 +29,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
     private final Context2 context;
     
-    private final SocketAddress address;
+    private final Contact contact;
     
     private final BootstrapConfig config;
     
@@ -52,10 +51,10 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     private Iterator<KUID> bucketsToRefresh = null;
     
     public BootstrapManager2(Context2 context, 
-            SocketAddress address, BootstrapConfig config) {
+            Contact contact, BootstrapConfig config) {
         
         this.context = context;
-        this.address = address;
+        this.contact = contact;
         this.config = config;
         
         refreshStack = new MaxStack(config.getAlpha());
@@ -77,7 +76,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     }
     
     private void start() {
-        ping();
+        lookup();
     }
     
     private void stop() {
@@ -135,57 +134,9 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         ExceptionUtils.reportIfUnchecked(t);
     }
     
-    // --- PING ---
-    
-    private void ping() {
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            long timeout = config.getPingTimeoutInMillis();
-            pingFuture = context.ping(address, 
-                    timeout, TimeUnit.MILLISECONDS);
-            
-            pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
-                @Override
-                public void handleEvent(FutureEvent<PingEntity> event) {
-                    handlePong(event);
-                }
-            });
-        }
-    }
-    
-    private void handlePong(FutureEvent<PingEntity> event) {
-        synchronized (future) {
-            if (future.isDone()) {
-                return;
-            }
-            
-            try {
-                switch (event.getType()) {
-                    case SUCCESS:
-                        onPong(event.getResult());
-                        break;
-                    case EXCEPTION:
-                        onException(event.getException());
-                        break;
-                    default:
-                        onCancellation();
-                        break;
-                }
-            } catch (Throwable t) {
-                uncaughtException(t);
-            }
-        }
-    }
-    
-    private void onPong(PingEntity entity) {
+    private void lookup() {
         Contact localhost = context.getLocalNode();
         KUID lookupId = localhost.getNodeID();
-        
-        Contact contact 
-            = entity.getContact();
         
         long timeout = config.getLookupTimeoutInMillis();
         lookupFuture = context.lookup(lookupId, 

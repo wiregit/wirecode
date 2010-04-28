@@ -96,7 +96,7 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
-    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
             long timeout, TimeUnit unit);
     
     /**

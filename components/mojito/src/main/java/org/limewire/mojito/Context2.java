@@ -273,7 +273,7 @@ public class Context2 implements MojitoDHT2 {
     }
     
     @Override
-    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
             long timeout, TimeUnit unit) {
         
         BootstrapConfig config = new BootstrapConfig();
