@@ -317,7 +317,6 @@ public class Context2 implements MojitoDHT2 {
         return future;
     }
     
-    @Override
     public DHTFuture<PingEntity> collisionPing(Contact[] dst, 
             long timeout, TimeUnit unit) {
         

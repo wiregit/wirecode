@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
@@ -28,7 +28,7 @@ import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
-    private final MojitoDHT2 dht;
+    private final Context2 context;
     
     private final SocketAddress address;
     
@@ -51,10 +51,10 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
-    public BootstrapManager2(MojitoDHT2 dht, 
+    public BootstrapManager2(Context2 context, 
             SocketAddress address, BootstrapConfig config) {
         
-        this.dht = dht;
+        this.context = context;
         this.address = address;
         this.config = config;
         
@@ -144,7 +144,9 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             }
             
             long timeout = config.getPingTimeoutInMillis();
-            pingFuture = dht.ping(address, timeout, TimeUnit.MILLISECONDS);
+            pingFuture = context.ping(address, 
+                    timeout, TimeUnit.MILLISECONDS);
+            
             pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
                 @Override
                 public void handleEvent(FutureEvent<PingEntity> event) {
@@ -179,14 +181,14 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     }
     
     private void onPong(PingEntity entity) {
-        Contact localhost = dht.getLocalNode();
+        Contact localhost = context.getLocalNode();
         KUID lookupId = localhost.getNodeID();
         
         Contact contact 
             = entity.getContact();
         
         long timeout = config.getLookupTimeoutInMillis();
-        lookupFuture = dht.lookup(lookupId, 
+        lookupFuture = context.lookup(lookupId, 
                 new Contact[] { contact }, 
                 timeout, TimeUnit.MILLISECONDS);
         
@@ -233,7 +235,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         }
         
         long timeout = config.getPingTimeoutInMillis();
-        collisitonFuture = dht.collisionPing(
+        collisitonFuture = context.collisionPing(
                 collisions, timeout, TimeUnit.MILLISECONDS);
         
         collisitonFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
@@ -283,7 +285,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     }
     
     private KUID[] getBucketsToRefresh() {
-        RouteTable routeTable = dht.getRouteTable();
+        RouteTable routeTable = context.getRouteTable();
         List<KUID> bucketIds = CollectionUtils.toList(
                 routeTable.getRefreshIDs(true));
         Collections.reverse(bucketIds);
@@ -309,7 +311,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                     KUID bucketId = bucketsToRefresh.next();
                     
                     long timeout = config.getLookupTimeoutInMillis();
-                    DHTFuture<NodeEntity> future = dht.lookup(
+                    DHTFuture<NodeEntity> future = context.lookup(
                             bucketId, timeout, TimeUnit.MILLISECONDS);
                     
                     future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
@@ -351,7 +353,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             
             long time = System.currentTimeMillis() - startTime;
             onCompletation(new DefaultBootstrapEntity(
-                    dht, time, TimeUnit.MILLISECONDS));
+                    context, time, TimeUnit.MILLISECONDS));
         }
     }
 }

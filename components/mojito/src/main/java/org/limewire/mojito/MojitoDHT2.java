@@ -126,12 +126,6 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
-    public DHTFuture<PingEntity> collisionPing(Contact[] dst, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit);
     
