@@ -43,6 +43,13 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
 
     @Override
     public void createMenuItems() {       
+                
+        if(!activationManager.isProActive()) {
+            add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
+        } else {
+            add(new UrlAction(I18n.tr("&Tech Support"), "http://www.limewire.com/support/", application));
+//            add(new UrlAction(I18n.tr("&Tech Support"), "http://www.limewire.com/?page=support", application));
+        }
         
         add(new UrlAction(I18n.tr("&Using LimeWire"), "http://www.limewire.com/client_redirect/?page=support", application));
         
@@ -52,11 +59,6 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
 
         if(application.isBetaVersion()) {
             add(new UrlAction(I18n.tr("&Give Feedback"), "http://www.limewire.com/client_redirect/?page=betaTesting", application));
-        }
-        
-        if(!activationManager.isProActive()) {
-            addSeparator();
-            add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
         }
         
         if (!OSUtils.isMacOSX()) {
