@@ -64,7 +64,8 @@ public class ValueResponseHandler2 extends LookupResponseHandler2<ValueEntity> {
         ValueRequest request = messageHelper.createFindValueRequest(
                 addr, key, noKeys, lookupKey.getDHTValueType());
         
-        send(contactId, addr, request, timeout, unit);
+        long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
+        send(contactId, addr, request, adaptiveTimeout, unit);
     }
     
     @Override

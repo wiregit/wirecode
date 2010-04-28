@@ -56,7 +56,6 @@ public class GetValueResponseHandler2 extends AbstractResponseHandler2<ValueEnti
         }
         
         long adaptiveTimeout = node.getAdaptativeTimeout(timeout, unit);
-        
         send(contactId, addr, request, adaptiveTimeout, unit);
     }
 

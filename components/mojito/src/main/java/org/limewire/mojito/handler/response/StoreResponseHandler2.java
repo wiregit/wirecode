@@ -289,12 +289,12 @@ public class StoreResponseHandler2 extends AbstractResponseHandler2<StoreEntity>
             KUID contactId = dst.getNodeID();
             SocketAddress addr = dst.getContactAddress();
             
-            long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
             
             MessageHelper2 messageHelper = context.getMessageHelper();
             StoreRequest request = messageHelper.createStoreRequest(
                     addr, securityToken, new DHTValueEntity[] { entity });
             
+            long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
             send(contactId, addr, request, adaptiveTimeout, unit);
         
             return false;

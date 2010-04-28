@@ -220,7 +220,8 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
                 request = messageFactory.createPingRequest(src, addr);
             }
             
-            handler.send(contactId, addr, request, timeout, unit);
+            long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
+            handler.send(contactId, addr, request, adaptiveTimeout, unit);
         }
     }
 }

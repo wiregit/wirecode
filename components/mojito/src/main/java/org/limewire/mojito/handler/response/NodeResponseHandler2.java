@@ -53,7 +53,8 @@ public class NodeResponseHandler2 extends LookupResponseHandler2<NodeEntity> {
         MessageHelper2 messageHelper = context.getMessageHelper();
         NodeRequest request = messageHelper.createFindNodeRequest(addr, lookupId);
         
-        send(contactId, addr, request, timeout, unit);
+        long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
+        send(contactId, addr, request, adaptiveTimeout, unit);
     }
 
     @Override

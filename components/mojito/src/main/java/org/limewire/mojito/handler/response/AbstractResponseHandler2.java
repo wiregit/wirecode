@@ -13,7 +13,6 @@ import org.limewire.mojito.handler.ResponseHandler2;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.message2.RequestMessage;
 import org.limewire.mojito.message2.ResponseMessage;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.util.Objects;
 
 public abstract class AbstractResponseHandler2<V extends Entity> 
@@ -205,15 +204,6 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     protected synchronized void processException(
             RequestMessage request, Throwable exception) {
         setException(exception);
-    }
-    
-    /**
-     * 
-     */
-    protected void send(Contact dst, ResponseMessage response) throws IOException {
-        MessageDispatcher2 messageDispatcher 
-            = context.getMessageDispatcher();
-        messageDispatcher.send(dst, response);
     }
     
     /**
