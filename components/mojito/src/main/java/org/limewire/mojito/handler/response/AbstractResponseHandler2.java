@@ -219,13 +219,14 @@ public abstract class AbstractResponseHandler2<V extends Entity>
     /**
      * 
      */
-    protected void send(KUID contactId, SocketAddress addr, 
-            RequestMessage response, long timeout, TimeUnit unit) throws IOException {
+    protected void send(KUID contactId, SocketAddress dst, 
+            RequestMessage request, long timeout, TimeUnit unit) 
+                throws IOException {
         
         MessageDispatcher2 messageDispatcher 
             = context.getMessageDispatcher();
-        messageDispatcher.send(this, contactId, addr, 
-                response, timeout, unit);
+        messageDispatcher.send(this, contactId, dst, 
+                request, timeout, unit);
     }
     
     public static class RequestTimeoutException extends IOException {
