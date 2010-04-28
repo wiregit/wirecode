@@ -105,14 +105,14 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
     
     /** A copy constructor for a RemoteFileDescAdapter, except it changes the presence. */
-    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence, TorrentFactory torrentFactory) {
+    public RemoteFileDescAdapter(RemoteFileDescAdapter copy, FriendPresence presence) {
         this.rfd = copy.rfd;
         this.locs = copy.locs;
         this.friendPresence = presence;
         this.extension = copy.extension;
         this.category = copy.category;
         this.quality = copy.quality;
-        this.torrent = torrentFactory.createTorrentFromXML(rfd.getXMLDocument());
+        this.torrent = copy.torrent;
         
         // and other items too, if they were constructed..
         this.relevance = copy.relevance;
