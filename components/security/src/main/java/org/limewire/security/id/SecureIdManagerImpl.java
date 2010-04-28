@@ -30,6 +30,7 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.limewire.io.GUID;
@@ -55,14 +56,16 @@ public class SecureIdManagerImpl implements SecureIdManager {
     @Inject
     public SecureIdManagerImpl(SecureIdStore secureIdStore) {
         this.secureIdStore = secureIdStore;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.limewire.security.id.SecureIdManagerI#start()
-     */
-    public void start() throws Exception{
         // init DH community parameter
-        initDHParamSpec();
+        try {
+            initDHParamSpec();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidParameterSpecException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         // init my privateIdentity, first from locally stored data. 
         // if fail, then generate a new identity.
         try{
@@ -70,7 +73,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
         } catch (Exception e){
             localIdentity = createPrivateIdentity();            
             secureIdStore.setLocalData(localIdentity.toByteArray());
-        }
+        }        
     }
     
     /* (non-Javadoc)
@@ -79,29 +82,30 @@ public class SecureIdManagerImpl implements SecureIdManager {
     public boolean isKnown(GUID remoteID){
         return secureIdStore.get(remoteID) != null;
     }
-    
-    
-    public SecureIdStore getSecureIdStore(){
-        return secureIdStore;
+
+    private RemoteIdKeys getRemoteIdKeys(GUID remoteId){
+        byte[] remoteIdKeysBytes = secureIdStore.get(remoteId);
+        if(remoteIdKeysBytes == null){
+            throw new IllegalArgumentException("unknown ID "+remoteId);
+        }
+        try {
+            return new RemoteIdKeys(remoteIdKeysBytes);
+        } catch (InvalidDataException e) {
+            throw new RuntimeException(e);
+        }
     }
-    
+
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#createHmac(org.limewire.io.GUID, byte[])
      */
     public byte[] createHmac(GUID remoteId, byte[] data){
-        if(! isKnown(remoteId)){
-            throw new IllegalArgumentException("unknown ID "+remoteId);
-        }
-        
         try {
             Mac mac = Mac.getInstance(MAC_ALGO);
-            mac.init((new RemoteIdKeys(secureIdStore.get(remoteId))).getMacKey());
+            mac.init(getRemoteIdKeys(remoteId).getOutgoingMacHmacKey());
             return mac.doFinal(data);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidDataException e) {
             throw new RuntimeException(e);
         }        
     }
@@ -110,18 +114,13 @@ public class SecureIdManagerImpl implements SecureIdManager {
      * @see org.limewire.security.id.SecureIdManagerI#verifyHmac(org.limewire.io.GUID, byte[], byte[])
      */
     public boolean verifyHmac(GUID remoteId, byte[] data, byte[] hmacValue) {
-        if(! isKnown(remoteId)){
-            throw new IllegalArgumentException("unknown ID "+remoteId);
-        }
         try {
             Mac mac = Mac.getInstance(MAC_ALGO);
-            mac.init((new RemoteIdKeys(secureIdStore.get(remoteId))).getMacKey());
+            mac.init(getRemoteIdKeys(remoteId).getIncomingVerificationHmacKey());
             return Arrays.equals(mac.doFinal(data), hmacValue);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidDataException e) {
             throw new RuntimeException(e);
         }        
     }
@@ -129,14 +128,10 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#encrypt(org.limewire.io.GUID, byte[])
      */
-    public byte[] encrypt(GUID remoteId, byte[] plaintext){
-        if(! isKnown(remoteId)){
-            throw new IllegalArgumentException("unknown ID "+remoteId);
-        }
-        try {
-            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
-            
-            cipher.init(Cipher.ENCRYPT_MODE, (new RemoteIdKeys(secureIdStore.get(remoteId))).getEncryptionKey());
+    public byte[] encrypt(GUID remoteId, byte[] plaintext, byte[] iv) throws InvalidAlgorithmParameterException {
+        try {            
+            Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);            
+            cipher.init(Cipher.ENCRYPT_MODE, getRemoteIdKeys(remoteId).getOutgoingEncryptionKey(), new IvParameterSpec(iv));
             byte[] encrypted = cipher.doFinal(plaintext);
             return encrypted;
         } catch (NoSuchAlgorithmException e) {
@@ -149,21 +144,18 @@ public class SecureIdManagerImpl implements SecureIdManager {
             throw new RuntimeException(e);
         } catch (BadPaddingException e) {
             throw new RuntimeException(e);
-        } catch (InvalidDataException e) {
-            throw new RuntimeException(e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidAlgorithmParameterException("Invalid IV");
         }
     }
 
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#decrypt(org.limewire.io.GUID, byte[])
      */
-    public byte[] decrypt(GUID remoteId, byte[] ciphertext) throws InvalidDataException{
-        if(! isKnown(remoteId)){
-            throw new IllegalArgumentException("unknown ID "+remoteId);
-        }
+    public byte[] decrypt(GUID remoteId, byte[] ciphertext, byte[] iv) throws InvalidDataException, InvalidAlgorithmParameterException{
         try {
             Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGO);
-            cipher.init(Cipher.DECRYPT_MODE, (new RemoteIdKeys(secureIdStore.get(remoteId))).getEncryptionKey());
+            cipher.init(Cipher.DECRYPT_MODE, getRemoteIdKeys(remoteId).getIncomingDecryptionKey(), new IvParameterSpec(iv));
             byte[] plaintext = cipher.doFinal(ciphertext);
             return plaintext;
         } catch (InvalidKeyException e) {
@@ -176,32 +168,16 @@ public class SecureIdManagerImpl implements SecureIdManager {
             throw new RuntimeException(e);
         } catch (BadPaddingException e) {
             throw new InvalidDataException("bad ciphertext");
-        } catch (InvalidDataException e) {
-            throw new RuntimeException(e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidAlgorithmParameterException("Invalid IV");
         }
     }
     
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#verifySignature(org.limewire.io.GUID, byte[], byte[])
      */
-    public boolean verifySignature(GUID remoteId, byte [] data, byte [] signature){
-        if(! isKnown(remoteId)){
-            throw new IllegalArgumentException("unknown ID "+remoteId);
-        }
-        try {
-            Signature verifier = Signature.getInstance(SIG_ALGO);
-            verifier.initVerify((new RemoteIdKeys(secureIdStore.get(remoteId))).getSignaturePublicKey());
-            verifier.update(data);
-            return verifier.verify(signature);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidDataException e) {
-            throw new RuntimeException(e);
-        }
+    public boolean verifySignature(GUID remoteId, byte [] data, byte [] signature){        
+        return verifySignature(getRemoteIdKeys(remoteId).getSignaturePublicKey(), data, signature);
     }
 
     /* (non-Javadoc)
@@ -225,14 +201,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
     /* (non-Javadoc)
      * @see org.limewire.security.id.SecureIdManagerI#getMyIdentity()
      */
-    public Identity getPublicLocalIdentity(){
-        return new IdentityImpl(localIdentity.getGuid(), localIdentity.getPublicSignatureKey(), localIdentity.getPublicDiffieHellmanComponent(), localIdentity.getSignature());
-    }
-
-    /** 
-     * returns private local identity which includes private keys 
-     */
-    PrivateIdentity getPrivateLocalIdentity(){
+    public Identity getLocalIdentity(){
         return localIdentity;
     }
 
@@ -253,20 +222,41 @@ public class SecureIdManagerImpl implements SecureIdManager {
 
     private RemoteIdKeys createRemoteIdKeys(GUID remoteId, PublicKey pk, byte[] sharedSecret){
         // generate all the symmetric keys
-        try{
-            MessageDigest md = MessageDigest.getInstance(HASH_ALGO);        
+        try{            
+            // mac key for maccing outgoing messages
+            MessageDigest md = MessageDigest.getInstance(HASH_ALGO);
             md.update(StringUtils.toUTF8Bytes("AUTH"));
-            md.update(sharedSecret);        
-            byte[] macSecret = md.digest();
+            md.update(localIdentity.getGuid().bytes());
+            md.update(sharedSecret);
+            byte[] tempSecretBytes = md.digest();
+            SecretKey outHmacKey = new SecretKeySpec(tempSecretBytes, MAC_ALGO);
             
+            // mac key for verifying incoming mac of messages
+            md.reset();
+            md.update(StringUtils.toUTF8Bytes("AUTH"));
+            md.update(remoteId.bytes());
+            md.update(sharedSecret);
+            tempSecretBytes = md.digest();
+            SecretKey inHmacKey = new SecretKeySpec(tempSecretBytes, MAC_ALGO);
+            
+            // encryption key for encrypting outgoing messages 
             md.reset();
             md.update(StringUtils.toUTF8Bytes("ENC"));
+            md.update(localIdentity.getGuid().bytes());
             md.update(sharedSecret);
-            byte[] encryptionSecret = md.digest();
+            tempSecretBytes = md.digest();           
+            SecretKey encryptionKey = new SecretKeySpec(tempSecretBytes, ENCRYPTION_KEY_ALGO);
             
-            SecretKey macKey = new SecretKeySpec(macSecret, MAC_ALGO);
-            SecretKey encryptionKey = new SecretKeySpec(encryptionSecret, ENCRYPTION_KEY_ALGO);
-            RemoteIdKeys rpe = new RemoteIdKeys(remoteId, pk, macKey, encryptionKey);        
+            // encryption key for decrypting incoming messages 
+            md.reset();
+            md.update(StringUtils.toUTF8Bytes("ENC"));
+            md.update(remoteId.bytes());
+            md.update(sharedSecret);
+            tempSecretBytes = md.digest();           
+            SecretKey decryptionKey = new SecretKeySpec(tempSecretBytes, ENCRYPTION_KEY_ALGO);
+            
+            // create remoteIdKeys
+            RemoteIdKeys rpe = new RemoteIdKeys(remoteId, pk, outHmacKey, inHmacKey, encryptionKey, decryptionKey);        
             return rpe;
         }catch(NoSuchAlgorithmException e){
             throw new RuntimeException(e);
@@ -277,20 +267,7 @@ public class SecureIdManagerImpl implements SecureIdManager {
      * @see org.limewire.security.id.SecureIdManagerI#sign(byte[])
      */
     public byte[] sign(byte[] data){
-        try {
-            Signature signer = Signature.getInstance(SIG_ALGO);
-            signer.initSign(localIdentity.getPrivateSignatureKey());
-            byte[] signature = null;
-            signer.update(data);
-            signature = signer.sign();
-            return signature;
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        return sign(data, localIdentity.getPrivateSignatureKey());
     }
     
     private byte[] sign(byte[] data, PrivateKey sigKey){

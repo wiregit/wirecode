@@ -11,7 +11,7 @@ import org.limewire.util.FileUtils;
 /** Provides a non-blocking cryptographically strong random number generator. */
 public class SecurityUtils {
     
-    private static SecureRandom rand = new SecureRandom();;
+    private static SecureRandom rand = createSecureRandomNoBlock();
     
     /**
      * On some OSes, creating a new <code>SeucureRandom</code> instance

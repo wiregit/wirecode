@@ -4,13 +4,13 @@ import java.util.HashMap;
 
 import org.limewire.io.GUID;
 /**
- * a simple impl used in tests.  
+ * a simple SecureIdStore impl used in tests.  
  */
-public class SecureIdStoreImpl implements SecureIdStore {
+public class SimpleSecureIdStoreImpl implements SecureIdStore {
     private HashMap<GUID, byte[]> remoteKeys;
     private byte[] privateIdentityBytes;
     
-    public SecureIdStoreImpl(){
+    public SimpleSecureIdStoreImpl(){
         remoteKeys = new HashMap<GUID, byte[]>();
     }
     

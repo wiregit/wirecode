@@ -53,6 +53,7 @@ import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
+import org.limewire.security.id.SecureIdStore;
 import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Provides;
@@ -364,8 +365,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FirewalledAddressSerializer.class).asEagerSingleton();
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();
-        bind(PushEndpointSerializer.class).asEagerSingleton();
-        bind(SecureIdDatabaseStore.class);
+        bind(PushEndpointSerializer.class).asEagerSingleton();        
+        bind(SecureIdStore.class).to(SecureIdDatabaseStore.class);
     }
     
     @Provides @Singleton SecureMessageVerifier smv() {        

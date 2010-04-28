@@ -22,9 +22,13 @@ import org.limewire.io.InvalidDataException;
 class RemoteIdKeys {
     private final PublicKey signaturePublicKey;
 
-    private final SecretKey hmacKey;
+    private final SecretKey outgoingMacHmacKey;
 
-    private final SecretKey encryptionKey;
+    private final SecretKey incomingVerificationHmacKey;
+
+    private final SecretKey outgoingEncryptionKey;
+
+    private final SecretKey incomingDecryptionKey;
 
     private final GUID id;
     
@@ -34,8 +38,10 @@ class RemoteIdKeys {
             id = new GUID(ggep.getBytes("ID"));
             KeyFactory factory = KeyFactory.getInstance(SecureIdManager.SIG_KEY_ALGO);
             signaturePublicKey = factory.generatePublic(new X509EncodedKeySpec(ggep.getBytes("SPK")));
-            hmacKey = new SecretKeySpec(ggep.getBytes("HMAC"), SecureIdManager.MAC_ALGO);
-            encryptionKey = new SecretKeySpec(ggep.getBytes("ENC"), SecureIdManager.ENCRYPTION_KEY_ALGO);
+            outgoingMacHmacKey = new SecretKeySpec(ggep.getBytes("OUTHMAC"), SecureIdManager.MAC_ALGO);
+            incomingVerificationHmacKey = new SecretKeySpec(ggep.getBytes("INHMAC"), SecureIdManager.MAC_ALGO);
+            outgoingEncryptionKey = new SecretKeySpec(ggep.getBytes("OUTENC"), SecureIdManager.ENCRYPTION_KEY_ALGO);
+            incomingDecryptionKey = new SecretKeySpec(ggep.getBytes("INDEC"), SecureIdManager.ENCRYPTION_KEY_ALGO);
         } catch (BadGGEPBlockException e) {
             throw new InvalidDataException(e);
         } catch (BadGGEPPropertyException e) {
@@ -47,11 +53,13 @@ class RemoteIdKeys {
         }
     }
     
-    public RemoteIdKeys(GUID id, PublicKey pk, SecretKey hmacKey, SecretKey encryptionKey) {
+    public RemoteIdKeys(GUID id, PublicKey pk, SecretKey macHmacKey, SecretKey verificationHmacKey, SecretKey outgoingEncryptionKey, SecretKey incomingDecryptionKey) {
         this.id = id;
         signaturePublicKey = pk;
-        this.hmacKey = hmacKey;
-        this.encryptionKey = encryptionKey;
+        this.outgoingMacHmacKey = macHmacKey;
+        this.incomingVerificationHmacKey = verificationHmacKey;
+        this.outgoingEncryptionKey = outgoingEncryptionKey;
+        this.incomingDecryptionKey = incomingDecryptionKey;
     }
 
     public GUID getId() {
@@ -62,20 +70,28 @@ class RemoteIdKeys {
         return signaturePublicKey;
     }
 
-    public SecretKey getMacKey() {
-        return hmacKey;
+    public SecretKey getOutgoingMacHmacKey() {
+        return outgoingMacHmacKey;
+    }
+    public SecretKey getIncomingVerificationHmacKey() {
+        return incomingVerificationHmacKey;
     }
 
-    public SecretKey getEncryptionKey() {
-        return encryptionKey;
+    public SecretKey getOutgoingEncryptionKey() {
+        return outgoingEncryptionKey;
+    }
+    public SecretKey getIncomingDecryptionKey() {
+        return incomingDecryptionKey;
     }
 
     public byte[] toByteArray() {
         GGEP ggep = new GGEP();
         ggep.put("ID", id.bytes());
         ggep.put("SPK", signaturePublicKey.getEncoded());
-        ggep.put("HMAC", hmacKey.getEncoded());
-        ggep.put("ENC", encryptionKey.getEncoded());
+        ggep.put("OUTHMAC", outgoingMacHmacKey.getEncoded());
+        ggep.put("INHMAC", incomingVerificationHmacKey.getEncoded());
+        ggep.put("OUTENC", outgoingEncryptionKey.getEncoded());
+        ggep.put("INDEC", incomingDecryptionKey.getEncoded());
         return ggep.toByteArray();
     }
 }

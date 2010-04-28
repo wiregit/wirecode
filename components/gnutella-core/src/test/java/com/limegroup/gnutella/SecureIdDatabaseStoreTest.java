@@ -66,7 +66,7 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
     public void testPutLargeValue() {
         secureIdDatabaseStore.start();
         GUID guid = new GUID();
-        byte[] largeValue = createRandomBytes(200);
+        byte[] largeValue = createRandomBytes(250);
         secureIdDatabaseStore.put(guid, largeValue);
         byte[] result = secureIdDatabaseStore.get(guid);
         assertEquals(largeValue, result);

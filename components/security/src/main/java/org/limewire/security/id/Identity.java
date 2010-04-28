@@ -15,17 +15,24 @@ import org.limewire.io.GUID;
  * All the 4 fields are public information and should all be sent to 
  * remote nodes if requested. 
  */
-
 public interface Identity {
-
+    /**
+     * @return the local node's secure GUID
+     */
     public abstract GUID getGuid();
 
+    /**
+     * @return the local node's signature public key
+     */
     public abstract PublicKey getPublicSignatureKey();
 
+    /**
+     * @return the local node's Diffie-Hellman public component 
+     */
     public abstract BigInteger getPublicDiffieHellmanComponent();
 
+    /**
+     * @return the local node's signature on the other fields of the identity.
+     */
     public abstract byte[] getSignature();
-
-    public byte[] toByteArray();
-    
 }

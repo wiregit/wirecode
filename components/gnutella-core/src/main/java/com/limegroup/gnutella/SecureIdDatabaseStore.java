@@ -159,7 +159,7 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
                 if (dropDb) {
                     statement.execute("drop table ids if exists");
                 }
-                statement.execute("create cached table ids (guid binary(16) primary key, timestamp bigint, data varbinary(200))");
+                statement.execute("create cached table ids (guid binary(16) primary key, timestamp bigint, data varbinary(250))");
             } catch (SQLException se) {
                 LOG.debug("table already exists", se);
             }

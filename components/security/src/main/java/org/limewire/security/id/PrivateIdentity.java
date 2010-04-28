@@ -13,11 +13,25 @@ import java.security.PrivateKey;
  */
 public interface PrivateIdentity extends Identity {
     
+    /**
+     * @return the local node's private signature key
+     */
     public PrivateKey getPrivateSignatureKey();
     
+    /**
+     * @return the local node's private Diffie-Hellman key
+     */
     public PrivateKey getPrivateDiffieHellmanKey();
     
+    /**
+     * @return an integer used to identity different installation of the same user 
+     *  if the user shares the keys among her computers.  
+     */
     public int getMultiInstallationMark();
-
+    
+    /**
+     * @return Byte array of the local node's privateIdentity
+     *  Note that the returned byte array should not be send to other nodes in the network. 
+     */
     public byte[] toByteArray();
 }
