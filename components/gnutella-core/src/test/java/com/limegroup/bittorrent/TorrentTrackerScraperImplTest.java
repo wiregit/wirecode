@@ -1,22 +1,15 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.channels.FileChannel;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.bittorrent.BTData;
-import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
-import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
@@ -59,20 +52,26 @@ public class TorrentTrackerScraperImplTest extends LimeTestCase {
         assertGreaterThan(2000, data.getDownloaded());
     }
     
-    public static BTData parseTorrentFile(File torrentFile) throws Exception {
-        FileInputStream fis = null;
-        FileChannel fileChannel = null;
-        try {
-            fis = new FileInputStream(torrentFile);
-            fileChannel = fis.getChannel();
-            Object obj = Token.parse(fileChannel);
-            BTDataImpl torrentData = new BTDataImpl((Map)obj);
-            torrentData.clearPieces();
-            return torrentData;
-        } finally {
-            IOUtils.close(fis);
-            IOUtils.close(fileChannel);
-        }
+    public void testScrapeTorrentWithInvalidHash() throws Exception {
+        File torrentFile = TestUtils.getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents/test-peer-dl-single-file.torrent");
+        assertTrue(torrentFile.exists());
+        LimeXMLDocument xmlDocument = metaDataReader.readDocument(torrentFile);
+        String tracker = xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS);
+        byte[] hash = Base32.decode(xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH));
+        hash[0]++;
+        String hexSha1 = StringUtils.toHexString(hash);
+        BlockingScrapeCallback callback = new BlockingScrapeCallback();
+        torrentTrackerScraperImpl.submitScrape(URIUtils.toURI(tracker), hexSha1, callback);
+        String errorReason = callback.getErrorReason(3, TimeUnit.SECONDS);
+        assertNotNull(errorReason);
+    }
+    
+    public void testScrapeTorrentFromInvalidTracker() throws Exception {
+        BlockingScrapeCallback callback = new BlockingScrapeCallback();
+        String hexSha1 = StringUtils.toHexString(new byte[20]);
+        torrentTrackerScraperImpl.submitScrape(URIUtils.toURI("http://tracker.int/announce"), hexSha1, callback);
+        String errorReason = callback.getErrorReason(3, TimeUnit.SECONDS);
+        assertNotNull(errorReason);
     }
     
     private class BlockingScrapeCallback implements ScrapeCallback {
@@ -80,9 +79,12 @@ public class TorrentTrackerScraperImplTest extends LimeTestCase {
         private final CountDownLatch latch = new CountDownLatch(1);
         
         private volatile TorrentScrapeData data;
+        
+        private volatile String reason;
 
         @Override
         public void failure(String reason) {
+            this.reason = reason;
             latch.countDown();
         }
 
@@ -97,5 +99,9 @@ public class TorrentTrackerScraperImplTest extends LimeTestCase {
             return data;
         }
         
+        String getErrorReason(long timeout, TimeUnit unit) throws Exception {
+            assertTrue(latch.await(timeout, unit));
+            return reason;
+        }
     }
 }
