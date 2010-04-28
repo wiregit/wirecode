@@ -23,6 +23,10 @@ public class CoreGlueSearchModule extends AbstractModule {
         bind(new TypeLiteral<ListenerSupport<SearchEvent>>(){}).toInstance(searchMulticaster);
         
         bind(RemoteFileDescAdapter.Factory.class).toProvider(FactoryProvider.newFactory(RemoteFileDescAdapter.Factory.class, RemoteFileDescAdapter.class));
+        bind(TorrentWebSearchFactory.class).toProvider(FactoryProvider.newFactory(TorrentWebSearchFactory.class, TorrentWebSearch.class));
+        bind(TorrentUriPrioritizerFactory.class).toProvider(FactoryProvider.newFactory(TorrentUriPrioritizerFactory.class, TorrentUriPrioritizerImpl.class));
+        
+        bind(TorrentUriStore.class).to(SqlTorrentUriStore.class);
     }
 
 }
