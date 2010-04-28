@@ -1,0 +1,14 @@
+.DS_Store
+testData
+temp
+log.txt
+bin
+changes.txt
+out.txt
+clover
+output.txt
+junit
+.ivy2
+LimeWire.jar
+*.index
+*.hprof
