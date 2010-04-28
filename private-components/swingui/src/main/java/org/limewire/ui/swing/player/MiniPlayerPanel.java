@@ -185,11 +185,10 @@ public class MiniPlayerPanel extends JPanel {
                 playPauseButton.setRolloverIcon(pauseIconRollover);
                 playPauseButton.setPressedIcon(pauseIconPressed);
                 statusButton.start(); 
-            } else if (state == PlayerState.STOPPED || state == PlayerState.EOM || 
-                    state == PlayerState.UNKNOWN || state == PlayerState.NO_SOUND_DEVICE) {
+            } else if (state == PlayerState.EOM || state == PlayerState.UNKNOWN || state == PlayerState.NO_SOUND_DEVICE) {
                 setVisible(false);
                 statusButton.stop();
-            } else if(state == PlayerState.PAUSED){
+            } else if(state == PlayerState.PAUSED || state == PlayerState.STOPPED){
                 playPauseButton.setIcon(playIcon);
                 playPauseButton.setRolloverIcon(playIconRollover);
                 playPauseButton.setPressedIcon(playIconPressed);
