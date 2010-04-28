@@ -14,15 +14,18 @@ import org.limewire.bittorrent.BTDataImpl;
 import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.bittorrent.bencoding.Token;
-//import org.limewire.core.impl.XMLTorrent;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IOUtils;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
+import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class TorrentTrackerScraperImplTest extends LimeTestCase {
     
@@ -42,19 +45,19 @@ public class TorrentTrackerScraperImplTest extends LimeTestCase {
         LimeTestUtils.createInjectorNonEagerly(LimeTestUtils.createModule(this));
     }
     
-    //TODO: fix this
-//    public void testScrapeTorrent() throws Exception {
-//        File torrentFile = TestUtils.getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents/test-peer-dl-single-file.torrent");
-//        assertTrue(torrentFile.exists());
-//        LimeXMLDocument xmlDocument = metaDataReader.readDocument(torrentFile);
-//        XMLTorrent xmlTorrent = new XMLTorrent(xmlDocument);
-//        BlockingScrapeCallback callback = new BlockingScrapeCallback();
-//        torrentTrackerScraperImpl.submitScrape(xmlTorrent.getTrackerURIS().get(0), xmlTorrent.getSha1(), callback);
-//        TorrentScrapeData data = callback.getData(3, TimeUnit.SECONDS);
-//        assertEquals(2, data.getComplete());
-//        assertEquals(0, data.getIncomplete());
-//        assertGreaterThan(2000, data.getDownloaded());
-//    }
+    public void testScrapeTorrent() throws Exception {
+        File torrentFile = TestUtils.getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents/test-peer-dl-single-file.torrent");
+        assertTrue(torrentFile.exists());
+        LimeXMLDocument xmlDocument = metaDataReader.readDocument(torrentFile);
+        String tracker = xmlDocument.getValue(LimeXMLNames.TORRENT_TRACKERS);
+        String hexSha1 = StringUtils.toHexString(Base32.decode(xmlDocument.getValue(LimeXMLNames.TORRENT_INFO_HASH)));
+        BlockingScrapeCallback callback = new BlockingScrapeCallback();
+        torrentTrackerScraperImpl.submitScrape(URIUtils.toURI(tracker), hexSha1, callback);
+        TorrentScrapeData data = callback.getData(3, TimeUnit.SECONDS);
+        assertEquals(1, data.getComplete());
+        assertEquals(0, data.getIncomplete());
+        assertGreaterThan(2000, data.getDownloaded());
+    }
     
     public static BTData parseTorrentFile(File torrentFile) throws Exception {
         FileInputStream fis = null;
