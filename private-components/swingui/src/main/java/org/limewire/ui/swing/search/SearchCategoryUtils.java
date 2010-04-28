@@ -65,7 +65,7 @@ public class SearchCategoryUtils {
         case IMAGE:    return I18n.tr("Only images"); 
         case PROGRAM:  return I18n.tr("Only programs"); 
         case VIDEO:    return I18n.tr("Only videos");
-        case TORRENT:  return I18n.tr("Only Torrents");
+        case TORRENT:  return I18n.tr("Only torrents");
         case OTHER: 
         default:
             return I18n.tr("Other");
