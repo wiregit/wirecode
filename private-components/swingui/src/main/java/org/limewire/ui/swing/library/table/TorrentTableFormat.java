@@ -36,12 +36,12 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
     
     @Inject
     public TorrentTableFormat() {
-        super(ACTION_INDEX, "LIBRARY_OTHER_TALBE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_TORRENT_TALBE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_TORRENT_NAME", I18n.tr("Name"), 480, true, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_TORRENT_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_TORRENT_HITS", I18n.tr("Hits"), 100, false, true), 
                 new ColumnStateInfo(UPLOADS_INDEX, "LIBRARY_TORRENT_UPLOADS", I18n.tr("Uploads"), 100, false, true), 
-                new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARYTORRENT_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
+                new ColumnStateInfo(UPLOAD_ATTEMPTS_INDEX, "LIBRARY_TORRENT_UPLOAD_ATTEMPTS", I18n.tr("Upload attempts"), 200, false, true),
                 new ColumnStateInfo(PATH_INDEX, "LIBRARY_TORRENT_PATH", I18n.tr("Location"), 200, false, true),
                 new ColumnStateInfo(FILES_INDEX, "LIBRARY_TORRENT_FILES", I18n.tr("Files"), 400, 480, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
                 new ColumnStateInfo(TRACKERS_INDEX, "LIBRARY_TORRENT_TRACKERS", I18n.tr("Trackers"), 400, 480, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),

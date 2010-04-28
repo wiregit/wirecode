@@ -42,7 +42,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private final TorrentScrapeScheduler scrapeAdaptor;
     
     public TorrentTableFormat(TorrentScrapeScheduler scrapeAdaptor) {
-        super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
+        super("CLASSIC_SEARCH_TORRENT_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_TORRENT_FROM", I18n.tr("From"), 88, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_TORRENT_TITLE", I18n.tr("Name"), 255, true, true),     
                 new ColumnStateInfo(FILES_INDEX, "CLASS_SEARCH_TORRENT_FILES", I18n.tr("Files"), 180, true, true),
@@ -51,7 +51,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(SEEDERS_INDEX, "CLASS_SEARCH_TORRENT_SEEDERS", I18n.tr("Seeders"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
                 new ColumnStateInfo(LEECHERS_INDEX, "CLASS_SEARCH_TORRENT_LEECHERS", I18n.tr("Leechers"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
                 new ColumnStateInfo(DOWNLOADED_INDEX, "CLASS_SEARCH_TORRENT_DOWNLOADED", I18n.tr("Downloaded"), 20, SearchSettings.USE_TORRENT_SCRAPER.getValue(), true),
-                new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_AUDIO_IS_SPAM", "", 10, false, false)
+                new ColumnStateInfo(IS_SPAM_INDEX, "CLASSIC_SEARCH_TORRENT_IS_SPAM", "", 10, false, false)
         });
         
         this.scrapeAdaptor = scrapeAdaptor;
