@@ -20,6 +20,7 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
+import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.StoreEntity;
@@ -33,6 +34,8 @@ import org.limewire.mojito.handler.response.ValueResponseHandler2;
 import org.limewire.mojito.io.DefaultMessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.manager.BootstrapConfig;
+import org.limewire.mojito.manager.BootstrapManager2;
 import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.message2.MessageHelper2;
 import org.limewire.mojito.routing.Contact;
@@ -269,11 +272,15 @@ public class Context2 implements MojitoDHT2 {
         this.hostFilter = hostFilter;
     }
     
-    //@Override
-    /*public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+    @Override
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        return null;
-    }*/
+        
+        BootstrapConfig config = new BootstrapConfig();
+        AsyncProcess<BootstrapEntity> process 
+            = new BootstrapManager2(this, dst, config);
+        return futureManager.submit(process, timeout, unit);
+    }
     
     @Override
     public DHTFuture<PingEntity> ping(InetAddress address, int port, 

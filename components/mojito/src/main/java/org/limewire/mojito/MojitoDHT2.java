@@ -12,6 +12,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.db.StorableModelManager;
+import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.StoreEntity;
@@ -91,6 +92,12 @@ public interface MojitoDHT2 extends Closeable {
      * 
      */
     public void stop();
+    
+    /**
+     * 
+     */
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit);
     
     /**
      * 
