@@ -13,6 +13,5 @@
             
     	<!-- test dependencies. -->
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test"/>
-        <dependency org="org.limewire" name="core-glue" rev="latest.integration" conf="test"/>
     </dependencies>
 </ivy-module>
