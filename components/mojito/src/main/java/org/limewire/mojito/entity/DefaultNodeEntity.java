@@ -14,6 +14,8 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     
     private final Entry<Contact, SecurityToken>[] contacts;
     
+    private final Contact[] collisions;
+    
     private final int hop;
     
     public DefaultNodeEntity(State state) {
@@ -21,6 +23,7 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     
         this.key = state.getKey();
         this.contacts = state.getContacts();
+        this.collisions = state.getCollisions();
         this.hop = state.getHop();
     }
 
@@ -32,6 +35,11 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     @Override
     public Entry<Contact, SecurityToken>[] getContacts() {
         return contacts;
+    }
+    
+    @Override
+    public Contact[] getCollisions() {
+        return collisions;
     }
 
     @Override

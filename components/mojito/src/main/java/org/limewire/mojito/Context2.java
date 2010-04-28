@@ -38,6 +38,7 @@ import org.limewire.mojito.message2.MessageHelper2;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
@@ -310,6 +311,18 @@ public class Context2 implements MojitoDHT2 {
     }
     
     @Override
+    public DHTFuture<PingEntity> collisionPing(Contact[] dst, 
+            long timeout, TimeUnit unit) {
+        
+        Contact src = ContactUtils.createCollisionPingSender(getLocalNode());
+        
+        AsyncProcess<PingEntity> process = new PingResponseHandler2(
+                this, src, dst, timeout, unit);
+        
+        return futureManager.submit(process, timeout, unit);
+    }
+
+    @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler2(
@@ -440,6 +453,12 @@ public class Context2 implements MojitoDHT2 {
         }
     }
     
+    @Override
+    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+            long timeout, TimeUnit unit) {
+        return futureManager.submit(process, timeout, unit);
+    }
+
     /**
      * 
      */

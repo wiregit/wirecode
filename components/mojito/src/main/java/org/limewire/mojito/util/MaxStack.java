@@ -65,17 +65,18 @@ public class MaxStack {
     /**
      * Decrements the internal counter by one.
      */
-    public void pop() {
-        pop(1);
+    public int pop() {
+        return pop(1);
     }
     
     /**
      * Decrements the internal counter by the given value.
      */
-    public void pop(int value) {
+    public int pop(int value) {
         if (0 < value) {
             count = Math.max(count - value, 0);
         }
+        return count;
     }
     
     /**

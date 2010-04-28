@@ -3,6 +3,7 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.Context2;
@@ -15,6 +16,8 @@ import org.limewire.mojito.message2.PingResponse;
 import org.limewire.mojito.message2.RequestMessage;
 import org.limewire.mojito.message2.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito.util.MaxStack;
 
 /**
  * This class pings a given number of hosts in parallel and returns the 
@@ -23,6 +26,10 @@ import org.limewire.mojito.routing.Contact;
 public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
 
     //private static final Log LOG = LogFactory.getLog(PingResponseHandler2.class);
+    
+    private static final int ALPHA = 4;
+    
+    private final MaxStack stack = new MaxStack(ALPHA);
     
     private final Pinger pinger;
     
@@ -65,6 +72,14 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     /**
      * 
      */
+    public PingResponseHandler2(Context2 context, 
+            Contact src, Contact[] dst, long timeout, TimeUnit unit) {
+        this(context, new ContactPinger(src, dst), timeout, unit);
+    }
+    
+    /**
+     * 
+     */
     private PingResponseHandler2(Context2 context, 
             Pinger pinger, long timeout, TimeUnit unit) {
         super(context, timeout, unit);
@@ -74,7 +89,40 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     
     @Override
     protected void start() throws IOException {
-        pinger.ping(this, timeout, unit);
+        process(0);
+    }
+    
+    private void process(int count) throws IOException {
+        try {
+            preProcess(count);
+            
+            while (stack.hasFree()) {
+                if (!pinger.hasMore()) {
+                    break;
+                }
+                
+                pinger.ping(this, timeout, unit);
+                stack.push();
+            }
+            
+        } finally {
+            postProcess();
+        }
+    }
+    
+    private void preProcess(int count) {
+        stack.pop(count);
+    }
+    
+    private void postProcess() {
+        int count = stack.poll();
+        if (count == 0) {
+            complete();
+        }
+    }
+    
+    private void complete() {
+        setException(new IllegalStateException());
     }
     
     /**
@@ -91,14 +139,14 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
     protected void processResponse(RequestMessage request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         
-        PingResponse pr = (PingResponse)response;
+        PingResponse pong = (PingResponse)response;
         
-        Contact node = pr.getContact();
+        Contact src = pong.getContact();
         
-        SocketAddress externalAddress = pr.getExternalAddress();
-        BigInteger estimatedSize = pr.getEstimatedSize();
+        SocketAddress externalAddress = pong.getExternalAddress();
+        BigInteger estimatedSize = pong.getEstimatedSize();
         
-        if (node.getContactAddress().equals(externalAddress)) {
+        if (src.getContactAddress().equals(externalAddress)) {
             /*if (LOG.isErrorEnabled()) {
                 LOG.error(node + " is trying to set our external address to its address!");
             }*/
@@ -108,7 +156,7 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         }
         
         // Check if the other Node has the same ID as we do
-        if (context.isLocalNodeID(node.getNodeID()) 
+        if (context.isLocalNodeID(src.getNodeID()) 
                 && !isCollisionPing()) {
             
             // If so check if this was a Node ID collision
@@ -124,14 +172,52 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
             return;
         }
         
-        setValue(new DefaultPingEntity(node, externalAddress, 
+        setValue(new DefaultPingEntity(src, externalAddress, 
                 estimatedSize, time, unit));
     }
-
+    
+    @Override
+    protected synchronized void processTimeout(KUID contactId, SocketAddress dst,
+            RequestMessage request, long time, TimeUnit unit) throws IOException {
+        
+        int count = stack.poll();
+        if (count == 1 && !pinger.hasMore()) {
+            super.processTimeout(contactId, dst, request, time, unit);
+            return;
+        }
+        
+        process(1);
+    }
+    
+    @Override
+    protected synchronized void processException(
+            RequestMessage request, Throwable exception) {
+        
+        int count = stack.poll();
+        if (count == 1 && !pinger.hasMore()) {
+            super.processException(request, exception);
+            return;
+        }
+        
+        try {
+            process(1);
+        } catch (Throwable t) {
+            uncaughtException(t);
+        }
+    }
+    
+    private void uncaughtException(Throwable t) {
+        setException(t);
+    }
+    
     /**
      * 
      */
     private static interface Pinger {
+        
+        /**
+         */
+        public boolean hasMore();
         
         /**
          * 
@@ -145,28 +231,47 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
      */
     private static class SocketAddressPinger implements Pinger {
         
-        private final KUID contactId;
+        private final Entry<KUID, SocketAddress>[] entries;
         
-        private final SocketAddress dst;
+        private int index = 0;
         
         public SocketAddressPinger(SocketAddress dst) {
-            this(null, dst);
+            this(wrap(null, dst));
         }
         
         public SocketAddressPinger(KUID contactId, SocketAddress dst) {
-            this.contactId = contactId;
-            this.dst = dst;
+            this(wrap(contactId, dst));
+        }
+        
+        public SocketAddressPinger(Entry<KUID, SocketAddress>[] entries) {
+            this.entries = entries;
+        }
+
+        @Override
+        public boolean hasMore() {
+            return index < entries.length;
         }
 
         @Override
         public void ping(PingResponseHandler2 handler,
                 long timeout, TimeUnit unit) throws IOException {
             
+            Entry<KUID, SocketAddress> entry = entries[index++];
+            
+            KUID contactId = entry.getKey();
+            SocketAddress dst = entry.getValue();
+            
             Context2 context = handler.getContext();
             MessageHelper2 messageHelper = context.getMessageHelper();
             RequestMessage request = messageHelper.createPingRequest(dst);
             
             handler.send(contactId, dst, request, timeout, unit);
+        }
+        
+        @SuppressWarnings("unchecked")
+        private static Entry<KUID, SocketAddress>[] wrap(
+                KUID contactId, SocketAddress address) {
+            return new Entry[] { new EntryImpl<KUID, SocketAddress>(contactId, address) };
         }
     }
     
@@ -177,23 +282,34 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         
         private final Contact src;
         
-        private final Contact dst;
+        private final Contact[] contacts;
+        
+        private int index = 0;
         
         /**
          * 
          */
         public ContactPinger(Contact dst) {
-            this(null, dst);
+            this(null, new Contact[] { dst });
         }
         
         /**
          * 
          */
         public ContactPinger(Contact src, Contact dst) {
-            this.src = src;
-            this.dst = dst;
+            this(src, new Contact[] { dst });
         }
         
+        public ContactPinger(Contact src, Contact[] contacts) {
+            this.src = src;
+            this.contacts = contacts;
+        }
+        
+        @Override
+        public boolean hasMore() {
+            return index < contacts.length;
+        }
+
         /**
          * 
          */
@@ -204,6 +320,8 @@ public class PingResponseHandler2 extends AbstractResponseHandler2<PingEntity> {
         @Override
         public void ping(PingResponseHandler2 handler,
                 long timeout, TimeUnit unit) throws IOException {
+            
+            Contact dst = contacts[index++];
             
             KUID contactId = dst.getNodeID();
             SocketAddress addr = dst.getContactAddress();

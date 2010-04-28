@@ -13,5 +13,7 @@ public interface NodeEntity extends LookupEntity {
     
     public Entry<Contact, SecurityToken>[] getContacts();
     
+    public Contact[] getCollisions();
+    
     public int getHop();
 }

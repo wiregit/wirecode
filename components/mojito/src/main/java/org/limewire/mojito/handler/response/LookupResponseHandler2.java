@@ -252,11 +252,13 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         }
         
         Entry<Contact, SecurityToken>[] contacts = lookupManager.getContacts();
+        Contact[] collisions = lookupManager.getCollisions();
+        
         int hop = lookupManager.getCurrentHop();
         long time = System.currentTimeMillis() - startTime;
         
-        return new State(lookupId, contacts, hop, 
-                time, TimeUnit.MILLISECONDS);
+        return new State(lookupId, contacts, collisions, 
+                hop, time, TimeUnit.MILLISECONDS);
     }
     
     private static class LookupManager {
@@ -357,6 +359,10 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         @SuppressWarnings("unchecked")
         public Entry<Contact, SecurityToken>[] getContacts() {
             return responses.entrySet().toArray(new Entry[0]);
+        }
+        
+        public Contact[] getCollisions() {
+            return collisions.toArray(new Contact[0]);
         }
         
         public int getCurrentHop() {
@@ -471,6 +477,8 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         private final Entry<Contact, SecurityToken>[] contacts;
         
+        private final Contact[] collisions;
+        
         private final int hop;
         
         private final long time;
@@ -478,9 +486,11 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         private final TimeUnit unit;
         
         private State(KUID key, Entry<Contact, SecurityToken>[] contacts, 
-                int hop, long time, TimeUnit unit) {
+                Contact[] collisions, int hop, 
+                long time, TimeUnit unit) {
             this.key = key;
             this.contacts = contacts;
+            this.collisions = collisions;
             this.hop = hop;
             this.time = time;
             this.unit = unit;
@@ -492,6 +502,10 @@ public abstract class LookupResponseHandler2<V extends LookupEntity>
         
         public Entry<Contact, SecurityToken>[] getContacts() {
             return contacts;
+        }
+        
+        public Contact[] getCollisions() {
+            return collisions;
         }
         
         public int getHop() {

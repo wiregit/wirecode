@@ -1,10 +1,12 @@
 package org.limewire.mojito.manager;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.CollectionUtils;
@@ -32,10 +34,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
     private final BootstrapConfig config;
     
-    private final List<DHTFuture<NodeEntity>> phaseTwo 
-        = new ArrayList<DHTFuture<NodeEntity>>();
-    
-    private final MaxStack lookupCounter;
+    private final MaxStack refreshStack;
 
     private long startTime;
     
@@ -43,7 +42,12 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
     private DHTFuture<PingEntity> pingFuture = null;
     
-    private DHTFuture<NodeEntity> phaseOne = null;
+    private DHTFuture<NodeEntity> lookupFuture = null;
+    
+    private final List<DHTFuture<NodeEntity>> refreshFutures 
+        = new ArrayList<DHTFuture<NodeEntity>>();
+    
+    private DHTFuture<PingEntity> collisitonFuture = null;
     
     private Iterator<KUID> bucketsToRefresh = null;
     
@@ -54,7 +58,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
         this.address = address;
         this.config = config;
         
-        lookupCounter = new MaxStack(config.getAlpha());
+        refreshStack = new MaxStack(config.getAlpha());
     }
     
     @Override
@@ -82,15 +86,19 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                 pingFuture.cancel(true);
             }
             
-            if (phaseOne != null) {
-                phaseOne.cancel(true);
+            if (lookupFuture != null) {
+                lookupFuture.cancel(true);
             }
             
-            for (DHTFuture<?> future : phaseTwo) {
+            if (collisitonFuture != null) {
+                collisitonFuture.cancel(true);
+            }
+            
+            for (DHTFuture<?> future : refreshFutures) {
                 future.cancel(true);
             }
             
-            phaseTwo.clear();
+            refreshFutures.clear();
         }
     }
     
@@ -106,6 +114,17 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
      */
     private void onCancellation() {
         future.cancel(true);
+    }
+    
+    /**
+     * 
+     */
+    private void onCollision(PingEntity entity) {
+        future.setException(new IOException());
+    }
+    
+    private void onCompletation(BootstrapEntity entity) {
+        future.setValue(entity);
     }
     
     /**
@@ -167,11 +186,11 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             = entity.getContact();
         
         long timeout = config.getLookupTimeoutInMillis();
-        phaseOne = dht.lookup(lookupId, 
+        lookupFuture = dht.lookup(lookupId, 
                 new Contact[] { contact }, 
                 timeout, TimeUnit.MILLISECONDS);
         
-        phaseOne.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+        lookupFuture.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
             @Override
             public void handleEvent(FutureEvent<NodeEntity> event) {
                 handleLookup(event);
@@ -206,19 +225,74 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     }
     
     private void onLookup(NodeEntity entity) {
+        Contact[] collisions = entity.getCollisions();
         
+        if (collisions.length == 0) {
+            doRefreshAll();
+            return;
+        }
+        
+        long timeout = config.getPingTimeoutInMillis();
+        collisitonFuture = dht.collisionPing(
+                collisions, timeout, TimeUnit.MILLISECONDS);
+        
+        collisitonFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<PingEntity> event) {
+                handleCollision(event);
+            }
+        });
+    }
+    
+    private void handleCollision(FutureEvent<PingEntity> event) {
+        synchronized (future) {
+            if (future.isDone()) {
+                return;
+            }
+            
+            try {
+                switch (event.getType()) {
+                    case SUCCESS:
+                        onCollision(event.getResult());
+                        break;
+                    case EXCEPTION:
+                        onCollisionException(event.getException());
+                        break;
+                    default:
+                        onCancellation();
+                        break;
+                }
+            } catch (Throwable t) {
+                uncaughtException(t);
+            }
+        }
+    }
+    
+    private void onCollisionException(ExecutionException err) {
+        doRefreshAll();
+    }
+    
+    private void doRefreshAll() {
         KUID[] bucketIds = getBucketsToRefresh();
         
         long timeout = config.getRefreshTimeoutInMillis();
         bucketsToRefresh = new TimeAwareIterable<KUID>(
                 bucketIds, timeout, TimeUnit.MILLISECONDS).iterator();
         
-        doRefresh(0);
+        doRefreshNext(0);
+    }
+    
+    private KUID[] getBucketsToRefresh() {
+        RouteTable routeTable = dht.getRouteTable();
+        List<KUID> bucketIds = CollectionUtils.toList(
+                routeTable.getRefreshIDs(true));
+        Collections.reverse(bucketIds);
+        return bucketIds.toArray(new KUID[0]);
     }
     
     // --- REFRESH ---
     
-    private void doRefresh(int count) {
+    private void doRefreshNext(int count) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -227,7 +301,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             try {
                 preProcess(count);
                 
-                while (lookupCounter.hasFree()) {
+                while (refreshStack.hasFree()) {
                     if (!bucketsToRefresh.hasNext()) {
                         break;
                     }
@@ -242,15 +316,15 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
                         @Override
                         public void handleEvent(FutureEvent<NodeEntity> event) {
                             try {
-                                doRefresh(1);
+                                doRefreshNext(1);
                             } catch (Throwable t) {
                                 uncaughtException(t);
                             }
                         }
                     });
                     
-                    phaseTwo.add(future);
-                    lookupCounter.push();
+                    refreshFutures.add(future);
+                    refreshStack.push();
                 }
             } finally {
                 postProcess();
@@ -259,11 +333,11 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     }
     
     private void preProcess(int count) {
-        lookupCounter.pop(count);
+        refreshStack.pop(count);
     }
     
     private void postProcess() {
-        int count = lookupCounter.poll();
+        int count = refreshStack.poll();
         if (count == 0) {
             complete();
         }
@@ -276,16 +350,8 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
             }
             
             long time = System.currentTimeMillis() - startTime;
-            future.setValue(new DefaultBootstrapEntity(
+            onCompletation(new DefaultBootstrapEntity(
                     dht, time, TimeUnit.MILLISECONDS));
         }
-    }
-    
-    private KUID[] getBucketsToRefresh() {
-        RouteTable routeTable = dht.getRouteTable();
-        List<KUID> bucketIds = CollectionUtils.toList(
-                routeTable.getRefreshIDs(true));
-        Collections.reverse(bucketIds);
-        return bucketIds.toArray(new KUID[0]);
     }
 }

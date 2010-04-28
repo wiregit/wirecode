@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
@@ -112,7 +113,14 @@ public interface MojitoDHT2 extends Closeable {
     /**
      * 
      */
-    public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit);
+    public DHTFuture<PingEntity> ping(Contact dst, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
+    public DHTFuture<PingEntity> collisionPing(Contact[] dst, 
+            long timeout, TimeUnit unit);
     
     /**
      * 
@@ -148,5 +156,11 @@ public interface MojitoDHT2 extends Closeable {
      * 
      */
     public DHTFuture<StoreEntity> put(DHTValueEntity value, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
+    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
             long timeout, TimeUnit unit);
 }

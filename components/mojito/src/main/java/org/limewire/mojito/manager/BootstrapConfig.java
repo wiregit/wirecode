@@ -104,20 +104,4 @@ public class BootstrapConfig {
     public void setRefreshTimeout(long timeout, TimeUnit unit) {
         this.refreshTimeout = unit.toMillis(timeout);
     }
-    
-    /**
-     * 
-     */
-    public long getTime(TimeUnit unit) {
-        return getPingTimeout(unit) 
-                + getLookupTimeout(unit) 
-                + getRefreshTimeout(unit);
-    }
-    
-    /**
-     * 
-     */
-    public long getTimeInMillis() {
-        return getTime(TimeUnit.MILLISECONDS);
-    }
 }
