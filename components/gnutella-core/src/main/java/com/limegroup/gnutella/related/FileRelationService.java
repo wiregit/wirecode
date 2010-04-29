@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.related.berkeley;
+package com.limegroup.gnutella.related;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Asynchronous;
+import org.limewire.lifecycle.Join;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.CommonUtils;
@@ -26,31 +27,31 @@ import com.sleepycat.persist.SecondaryIndex;
 import com.sleepycat.persist.StoreConfig;
 
 @EagerSingleton
-public class BerkeleyFileRelationService implements Service {
+class FileRelationService implements Service {
 
-    private static final Log LOG =
-        LogFactory.getLog(BerkeleyFileRelationService.class);
+    private static final Log LOG = LogFactory.getLog(FileRelationService.class);
 
     private final BerkeleyFileRelationCache fileRelationCache;
-    private final BerkeleyCache<URN> goodFileCache, badFileCache, playCountCache;
-    private final BerkeleyCache<String> extCountCache;
+    private final BerkeleyFileCache goodFileCache, badFileCache;
+    private final InMemoryCountCache<URN> playCountCache;
+    private final InMemoryCountCache<String> extensionCountCache;
     private final AtomicBoolean open = new AtomicBoolean(false);
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private Environment environment;
-    private EntityStore fileRelationStore, goodFileStore, badFileStore;
+    private EntityStore relatedStore, goodStore, badStore;
     private EntityStore playCountStore, extCountStore;
 
     @Inject
-    BerkeleyFileRelationService(BerkeleyFileRelationCache fileRelationCache,
-            @GoodFileCache BerkeleyCache<URN> goodFileCache,
-            @BadFileCache BerkeleyCache<URN> badFileCache,
-            @PlayCountCache BerkeleyCache<URN> playCountCache,
-            @ExtensionCountCache BerkeleyCache<String> extensionCountCache) {
+    FileRelationService(BerkeleyFileRelationCache fileRelationCache,
+            @GoodFileCache BerkeleyFileCache goodFileCache,
+            @BadFileCache BerkeleyFileCache badFileCache,
+            @PlayCountCache InMemoryCountCache<URN> playCountCache,
+            @ExtensionCountCache InMemoryCountCache<String> extensionCountCache) {
         this.fileRelationCache = fileRelationCache;
         this.goodFileCache = goodFileCache;
         this.badFileCache = badFileCache;
         this.playCountCache = playCountCache;
-        this.extCountCache = extensionCountCache;
+        this.extensionCountCache = extensionCountCache;
     }
 
     @Inject
@@ -78,57 +79,61 @@ public class BerkeleyFileRelationService implements Service {
             environmentConfig.setReadOnly(false);
             environmentConfig.setAllowCreate(true);
             environmentConfig.setTransactional(true);
-            // Transactional StoreConfig for related, plays, extensions
-            StoreConfig txnStoreConfig = new StoreConfig();
-            txnStoreConfig.setReadOnly(false);
-            txnStoreConfig.setAllowCreate(true);
-            txnStoreConfig.setTransactional(true);
-            // Non-transactional StoreConfig for good, bad
             StoreConfig storeConfig = new StoreConfig();
             storeConfig.setReadOnly(false);
             storeConfig.setAllowCreate(true);
-            storeConfig.setTransactional(false);
+            storeConfig.setTransactional(true);
             getFile().mkdirs();
             environment = new Environment(getFile(), environmentConfig);
-            fileRelationStore =
-                new EntityStore(environment, "related", txnStoreConfig);
-            PrimaryIndex<String, UrnSet> index =
-                fileRelationStore.getPrimaryIndex(String.class, UrnSet.class);
-            SecondaryIndex<Long, String, UrnSet> accessTimeIndex =
-                fileRelationStore.getSecondaryIndex(index, long.class, "accessTime");
-            fileRelationCache.setIndex(index);
-            fileRelationCache.setAccessTimeIndex(accessTimeIndex);
+
+            relatedStore = new EntityStore(environment, "related", storeConfig);
+            PrimaryIndex<String, UrnSet> relatedPrimary =
+                relatedStore.getPrimaryIndex(String.class, UrnSet.class);
+            SecondaryIndex<Long, String, UrnSet> relatedSecondary =
+                relatedStore.getSecondaryIndex(relatedPrimary, long.class, "accessTime");
+            fileRelationCache.setIndex(relatedPrimary);
+            fileRelationCache.setAccessTimeIndex(relatedSecondary);
             fileRelationCache.setEnvironment(environment);
-            goodFileStore = new EntityStore(environment, "good", storeConfig);
-            goodFileCache.setIndex(goodFileStore.getPrimaryIndex(String.class, Count.class));
+
+            goodStore = new EntityStore(environment, "good", storeConfig);
+            PrimaryIndex<String, Urn> goodPrimary =
+                goodStore.getPrimaryIndex(String.class, Urn.class);
+            SecondaryIndex<Long, String, Urn> goodSecondary =
+                goodStore.getSecondaryIndex(goodPrimary, long.class, "accessTime");
+            goodFileCache.setIndex(goodPrimary);
+            goodFileCache.setAccessTimeIndex(goodSecondary);
             goodFileCache.setEnvironment(environment);
-            badFileStore = new EntityStore(environment, "bad", storeConfig);
-            badFileCache.setIndex(badFileStore.getPrimaryIndex(String.class, Count.class));
+
+            badStore = new EntityStore(environment, "bad", storeConfig);
+            PrimaryIndex<String, Urn> badPrimary =
+                badStore.getPrimaryIndex(String.class, Urn.class);
+            SecondaryIndex<Long, String, Urn> badSecondary =
+                badStore.getSecondaryIndex(badPrimary, long.class, "accessTime");
+            badFileCache.setIndex(badPrimary);
+            badFileCache.setAccessTimeIndex(badSecondary);
             badFileCache.setEnvironment(environment);
-            playCountStore = new EntityStore(environment, "plays", txnStoreConfig);
-            playCountCache.setIndex(playCountStore.getPrimaryIndex(String.class, Count.class));
-            playCountCache.setEnvironment(environment);
-            extCountStore = new EntityStore(environment, "extensions", txnStoreConfig);
-            extCountCache.setIndex(extCountStore.getPrimaryIndex(String.class, Count.class));
-            extCountCache.setEnvironment(environment);
+
             LOG.debug("Opened database");
         } catch(DatabaseException e) {
             LOG.error("Error opening database", e);
         }
+        playCountCache.load();
+        extensionCountCache.load();
     }
 
+    @Asynchronous(join=Join.TIMEOUT, timeout=60, daemon=false)
     @Override
     public void stop() {
         if(closed.getAndSet(true))
             return;
         LOG.debug("Closing database");
         try {
-            if(fileRelationStore != null)
-                fileRelationStore.close();
-            if(goodFileStore != null)
-                goodFileStore.close();
-            if(badFileStore != null)
-                badFileStore.close();
+            if(relatedStore != null)
+                relatedStore.close();
+            if(goodStore != null)
+                goodStore.close();
+            if(badStore != null)
+                badStore.close();
             if(playCountStore != null)
                 playCountStore.close();
             if(extCountStore != null)
@@ -139,6 +144,8 @@ public class BerkeleyFileRelationService implements Service {
         } catch(DatabaseException e) {
             LOG.error("Error closing database", e);
         }
+        playCountCache.save();
+        extensionCountCache.save();
     }
 
     Environment getEnvironment() {

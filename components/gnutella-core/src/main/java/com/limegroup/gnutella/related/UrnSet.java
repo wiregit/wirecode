@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.related.berkeley;
+package com.limegroup.gnutella.related;
 
 import java.util.Iterator;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.related.memory;
+package com.limegroup.gnutella.related;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,27 +16,24 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.related.Cache;
+class InMemoryCountCache<K> implements CountCache<K> {
 
-public class InMemoryCache<K> implements Cache<K> {
-
-    private static final Log LOG =
-        LogFactory.getLog(InMemoryCache.class);
+    private static final Log LOG = LogFactory.getLog(InMemoryCountCache.class);
 
     private final String filename;
     private final int maxSize;
     private Map<K, Integer> map; // LOCKING: this
 
-    public InMemoryCache(String filename, int initialSize, int maxSize) {
+    InMemoryCountCache(String filename, int initialSize, int maxSize) {
         this.filename = filename;
         this.maxSize = maxSize;
         map = new LinkedHashMap<K, Integer>(initialSize, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, Integer> e) {
-                if(size() > InMemoryCache.this.maxSize) {
+                if(size() > InMemoryCountCache.this.maxSize) {
                     if(LOG.isDebugEnabled())
                         LOG.debug(e.getKey() + " expired from " +
-                                InMemoryCache.this.filename);
+                                InMemoryCountCache.this.filename);
                     return true;
                 }
                 return false;

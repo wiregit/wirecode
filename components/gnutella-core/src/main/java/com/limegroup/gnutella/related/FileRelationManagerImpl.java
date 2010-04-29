@@ -41,8 +41,8 @@ class FileRelationManagerImpl implements FileRelationManager {
     private final URNFilter urnFilter;
     private final FileRelationCache fileRelationCache;
     private final Cache<URN> goodFileCache, badFileCache;
-    private final Cache<URN> playCountCache;
-    private final Cache<String> extensionCountCache; // Lock before accessing
+    private final CountCache<URN> playCountCache;
+    private final CountCache<String> extensionCountCache; // Lock before accessing
 
     // LOCKING: this for browsesInProgress, browsedOrQueued and queue.
     private int browsesInProgress = 0;
@@ -54,8 +54,8 @@ class FileRelationManagerImpl implements FileRelationManager {
             FileRelationCache fileRelationCache,
             @GoodFileCache Cache<URN> goodFileCache,
             @BadFileCache Cache<URN> badFileCache,
-            @PlayCountCache Cache<URN> playCountCache,
-            @ExtensionCountCache Cache<String> extensionCountCache) {
+            @PlayCountCache CountCache<URN> playCountCache,
+            @ExtensionCountCache CountCache<String> extensionCountCache) {
         this.browseFactory = browseFactory;
         this.urnFilter = urnFilter;
         this.fileRelationCache = fileRelationCache;

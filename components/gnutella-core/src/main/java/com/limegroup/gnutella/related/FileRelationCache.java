@@ -5,7 +5,7 @@ import java.util.SortedSet;
 
 import com.limegroup.gnutella.URN;
 
-public interface FileRelationCache {
+interface FileRelationCache {
 
     void addRelations(SortedSet<URN> files);
 

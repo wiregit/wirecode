@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.related.berkeley;
+package com.limegroup.gnutella.related;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import org.limewire.security.SHA1;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.related.FileRelationCache;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -20,7 +19,7 @@ import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.SecondaryIndex;
 
-public class BerkeleyFileRelationCache implements FileRelationCache {
+class BerkeleyFileRelationCache implements FileRelationCache {
 
     private static final int MAX_SIZE = 1000 * 1000;
     private static final int COMPACT_SIZE = 950 * 1000;
