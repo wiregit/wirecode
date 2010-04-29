@@ -223,8 +223,8 @@ public class FileInfoDialog extends LimeJDialog {
             Torrent localTorrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
             if(localTorrent != null && localTorrent.hasMetaData()) {
                 tabs.add(Tabs.BITTORENT);
+                tabs.add(Tabs.TRACKERS);
                 if(localTorrent.isEditable()) {
-                    tabs.add(Tabs.TRACKERS);
                     tabs.add(Tabs.TRANSFERS);
                 }
             }
@@ -258,8 +258,8 @@ public class FileInfoDialog extends LimeJDialog {
             Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
             if(torrent != null && torrent.hasMetaData()) {
                 tabs.add(Tabs.BITTORENT);
+                tabs.add(Tabs.TRACKERS);
                 if(torrent.isEditable()) {
-                    tabs.add(Tabs.TRACKERS);
                     tabs.add(Tabs.TRANSFERS);
                 }
             }
