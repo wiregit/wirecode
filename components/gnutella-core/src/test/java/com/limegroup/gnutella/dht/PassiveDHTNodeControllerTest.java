@@ -19,12 +19,12 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;

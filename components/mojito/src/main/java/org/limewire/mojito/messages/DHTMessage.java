@@ -22,8 +22,8 @@ package org.limewire.mojito.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Version;
 
 
 /**

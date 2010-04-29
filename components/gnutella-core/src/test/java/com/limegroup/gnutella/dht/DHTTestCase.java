@@ -7,11 +7,11 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Contact.State;
-import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RemoteContact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.Contact.State;
 
 import com.limegroup.gnutella.LifecycleManager;
 

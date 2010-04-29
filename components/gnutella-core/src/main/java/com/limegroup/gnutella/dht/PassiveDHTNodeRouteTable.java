@@ -17,11 +17,11 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Bucket;
-import org.limewire.mojito.routing.ClassfulNetworkCounter;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Bucket;
+import org.limewire.mojito2.routing.ClassfulNetworkCounter;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * Passive Nodes (Ultrapeers) use this slightly extended version 

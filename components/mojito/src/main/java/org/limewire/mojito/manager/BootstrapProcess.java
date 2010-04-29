@@ -41,15 +41,15 @@ import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.RouteTableUtils;
 import org.limewire.mojito.util.TimeAwareIterable;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable.PurgeMode;
 import org.limewire.mojito2.util.ContactUtils;
 
 /**

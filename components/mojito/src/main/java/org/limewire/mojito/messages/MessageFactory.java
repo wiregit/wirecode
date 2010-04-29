@@ -30,7 +30,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 /**

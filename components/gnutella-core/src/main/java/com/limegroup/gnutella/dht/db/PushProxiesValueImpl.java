@@ -21,7 +21,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.ByteUtils;
 
 

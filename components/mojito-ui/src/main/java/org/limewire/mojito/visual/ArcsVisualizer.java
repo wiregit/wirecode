@@ -24,7 +24,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.io.MessageDispatcherListener;
 import org.limewire.mojito2.message.DefaultNodeRequest;
@@ -36,6 +35,7 @@ import org.limewire.mojito2.message.DefaultStoreResponse;
 import org.limewire.mojito2.message.DefaultValueRequest;
 import org.limewire.mojito2.message.DefaultValueResponse;
 import org.limewire.mojito2.message.Message;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * Paints different representations of the Distributed Hash Table (DHT). 

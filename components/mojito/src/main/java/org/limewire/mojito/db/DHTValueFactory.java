@@ -20,7 +20,7 @@
 package org.limewire.mojito.db;
 
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 
 /**
  * Defines a factory interface to create a <code>DHTValue</code>.

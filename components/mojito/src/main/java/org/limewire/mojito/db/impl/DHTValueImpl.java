@@ -26,8 +26,8 @@ import java.util.Arrays;
 
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.mojito2.routing.Version;
 
 
 /**

@@ -2,7 +2,7 @@ package org.limewire.mojito2.message;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 public class DefaultValueRequest extends AbstractLookupRequest 
         implements ValueRequest {

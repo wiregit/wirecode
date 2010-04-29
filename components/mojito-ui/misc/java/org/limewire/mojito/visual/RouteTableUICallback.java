@@ -1,6 +1,6 @@
 package org.limewire.mojito.visual;
 
-import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito2.routing.Bucket;
 
 public interface RouteTableUICallback {
     

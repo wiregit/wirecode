@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.result;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 
 /**

@@ -22,13 +22,13 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;

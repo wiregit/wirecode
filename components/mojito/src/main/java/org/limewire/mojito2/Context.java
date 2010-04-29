@@ -25,15 +25,12 @@ import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
-import org.limewire.mojito.manager.BootstrapConfig;
-import org.limewire.mojito.manager.BootstrapManager2;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.io.BootstrapConfig;
+import org.limewire.mojito2.io.BootstrapProcess;
 import org.limewire.mojito2.io.DefaultMessageDispatcher;
 import org.limewire.mojito2.io.DefaultStoreForward;
 import org.limewire.mojito2.io.MessageDispatcher;
@@ -45,6 +42,9 @@ import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.io.ValueResponseHandler;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.LocalContact;
+import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.util.ExceptionUtils;
 
@@ -280,7 +280,7 @@ public class Context implements DHT {
         
         BootstrapConfig config = new BootstrapConfig();
         AsyncProcess<BootstrapEntity> process 
-            = new BootstrapManager2(this, dst, config);
+            = new BootstrapProcess(this, dst, config);
         return futureManager.submit(process, timeout, unit);
     }
     

@@ -24,8 +24,8 @@ import java.net.InetSocketAddress;
 
 import org.limewire.collection.IntHashMap;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * The SameClassFilter filters all Contacts that have the same

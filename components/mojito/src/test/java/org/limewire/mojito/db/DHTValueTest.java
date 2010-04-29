@@ -33,11 +33,11 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.StringUtils;
 
 public class DHTValueTest extends MojitoTestCase {

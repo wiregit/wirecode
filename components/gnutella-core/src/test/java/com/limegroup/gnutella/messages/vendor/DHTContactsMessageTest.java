@@ -9,10 +9,10 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;

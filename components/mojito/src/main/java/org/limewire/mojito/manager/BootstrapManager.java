@@ -25,9 +25,9 @@ import java.util.Set;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.result.BootstrapResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTFutureTask;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * Manages the bootstrap process and determines

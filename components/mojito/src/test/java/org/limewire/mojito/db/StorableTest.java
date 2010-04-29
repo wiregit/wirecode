@@ -31,11 +31,11 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 

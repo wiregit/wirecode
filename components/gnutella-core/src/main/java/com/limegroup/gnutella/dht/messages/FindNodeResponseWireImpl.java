@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.SecurityTokenProvider;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 

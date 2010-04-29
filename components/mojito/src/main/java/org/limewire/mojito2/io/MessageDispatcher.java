@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.FixedSizeHashSet;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.MessageID;
@@ -35,6 +34,7 @@ import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.StoreResponse;
 import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.message.ValueResponse;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.EventUtils;
 
 /**

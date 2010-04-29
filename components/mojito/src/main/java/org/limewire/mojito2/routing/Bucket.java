@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package org.limewire.mojito.routing;
+package org.limewire.mojito2.routing;
 
 import java.io.Serializable;
 import java.util.Collection;

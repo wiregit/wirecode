@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
+import org.limewire.mojito2.routing.Contact;
 
 abstract class AbstractRequestHandler implements RequestHandler {
 

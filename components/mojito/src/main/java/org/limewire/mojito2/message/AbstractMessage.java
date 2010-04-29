@@ -1,6 +1,6 @@
 package org.limewire.mojito2.message;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 public abstract class AbstractMessage implements Message {
 

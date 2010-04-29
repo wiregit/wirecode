@@ -1,4 +1,4 @@
-package org.limewire.mojito.manager;
+package org.limewire.mojito2.io;
 
 import java.util.concurrent.TimeUnit;
 

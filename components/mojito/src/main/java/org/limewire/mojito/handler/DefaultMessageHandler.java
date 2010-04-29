@@ -37,13 +37,13 @@ import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.SecurityTokenProvider;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 

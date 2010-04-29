@@ -26,13 +26,13 @@ import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 public class BootstrapManagerTest extends MojitoTestCase {
     

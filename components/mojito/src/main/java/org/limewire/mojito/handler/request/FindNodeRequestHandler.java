@@ -30,10 +30,10 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.util.ContactUtils;
 
 

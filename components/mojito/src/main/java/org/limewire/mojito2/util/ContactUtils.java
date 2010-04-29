@@ -36,12 +36,12 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.LocalContact;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 import com.google.inject.Inject;
 

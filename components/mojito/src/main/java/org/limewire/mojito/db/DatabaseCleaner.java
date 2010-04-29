@@ -26,9 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * Removes expired values from the local database.

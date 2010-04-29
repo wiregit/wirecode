@@ -1,14 +1,14 @@
 package org.limewire.mojito2;
 
 import org.limewire.mojito.db.impl.DatabaseImpl;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.routing.LocalContact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTableImpl;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 public class MojitoFactory2 {
 

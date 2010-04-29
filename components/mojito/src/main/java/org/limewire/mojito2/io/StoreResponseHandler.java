@@ -18,7 +18,6 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.entity.DefaultStoreEntity;
 import org.limewire.mojito.entity.StoreEntity;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.message.MessageHelper;
@@ -27,6 +26,7 @@ import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.StoreResponse;
 import org.limewire.mojito2.message.StoreStatusCode;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 

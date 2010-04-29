@@ -20,10 +20,10 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.routing.Contact;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

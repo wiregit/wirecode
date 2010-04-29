@@ -8,8 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.Context;
@@ -22,6 +20,8 @@ import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.ValueRequest;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.util.ContactUtils;
 
 public class DefaultMessageDispatcher extends MessageDispatcher {

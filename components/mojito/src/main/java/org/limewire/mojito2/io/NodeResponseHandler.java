@@ -8,13 +8,13 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultNodeEntity;
 import org.limewire.mojito.entity.NodeEntity;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.NodeRequest;
 import org.limewire.mojito2.message.NodeResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {

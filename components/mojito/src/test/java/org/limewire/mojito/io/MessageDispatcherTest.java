@@ -12,10 +12,10 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
 import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 
 public class MessageDispatcherTest extends MojitoTestCase {

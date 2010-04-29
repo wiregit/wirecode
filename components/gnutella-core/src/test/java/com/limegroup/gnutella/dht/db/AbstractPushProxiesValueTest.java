@@ -13,7 +13,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.BaseTestCase;
 
 

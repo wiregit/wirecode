@@ -40,8 +40,8 @@ import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.DatabaseUtils;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 

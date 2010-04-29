@@ -8,7 +8,7 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.security.MerkleTree;

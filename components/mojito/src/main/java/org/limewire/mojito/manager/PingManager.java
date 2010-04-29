@@ -31,10 +31,10 @@ import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTFutureTask;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 
 

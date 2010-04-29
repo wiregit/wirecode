@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.mojito.db.impl.DefaultEvictor;
-import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * Manages instances of an {@link Evictor}.

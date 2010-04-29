@@ -22,7 +22,7 @@ package org.limewire.mojito.db.impl;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 
 /**
  * Creates <code>DHTValue</code>s for unknown <code>DHTValueType</code>s.

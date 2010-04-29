@@ -17,8 +17,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;

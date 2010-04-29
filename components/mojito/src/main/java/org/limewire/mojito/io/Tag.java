@@ -43,7 +43,7 @@ import org.limewire.mojito.messages.StatsRequest;
 import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 
 

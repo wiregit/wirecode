@@ -50,7 +50,6 @@ import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.util.ContactsScrubber;
@@ -58,6 +57,7 @@ import org.limewire.mojito.util.EntityUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 

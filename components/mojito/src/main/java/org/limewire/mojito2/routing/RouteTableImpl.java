@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package org.limewire.mojito.routing.impl;
+package org.limewire.mojito2.routing;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,16 +40,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Bucket;
-import org.limewire.mojito.routing.ClassfulNetworkCounter;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.ExceptionUtils;
+import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
 import org.limewire.service.ErrorService;

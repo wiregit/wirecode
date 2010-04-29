@@ -9,7 +9,7 @@ import java.util.Collections;
 import org.limewire.io.IOUtils;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.limegroup.gnutella.messages.BadPacketException;

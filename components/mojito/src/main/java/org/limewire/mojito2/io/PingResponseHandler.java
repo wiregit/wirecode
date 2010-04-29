@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultPingEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
@@ -18,6 +17,7 @@ import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.PingResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * This class pings a given number of hosts in parallel and returns the 

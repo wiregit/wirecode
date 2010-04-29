@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.db;
 
-import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * Defines an interface to control the removal of an expired 

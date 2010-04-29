@@ -8,17 +8,17 @@ import java.util.List;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.MojitoFactory2;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.ContactFactory;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTableImpl;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.util.NopTransport;
 
 /**

@@ -14,10 +14,10 @@ import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * Publishes {@link Storable} values in the DHT.

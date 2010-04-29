@@ -5,8 +5,8 @@ import java.io.OutputStream;
 
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Version;
 
 import com.limegroup.gnutella.messages.AbstractMessage;
 

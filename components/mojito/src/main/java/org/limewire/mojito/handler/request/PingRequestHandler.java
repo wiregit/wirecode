@@ -27,8 +27,8 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.MessageUtils;
 
 

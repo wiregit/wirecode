@@ -21,8 +21,8 @@ package org.limewire.mojito.util;
 
 import java.util.Collection;
 
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * Utilities for the RouteTable.

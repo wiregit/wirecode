@@ -1,6 +1,6 @@
 package org.limewire.mojito.visual.components;
 
-import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito2.routing.Bucket;
 
 public class BucketVertex extends RouteTableVertex<Bucket>{
 

@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.dht.DHTTestCase;

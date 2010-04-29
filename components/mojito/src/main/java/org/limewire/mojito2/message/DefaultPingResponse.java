@@ -3,7 +3,7 @@ package org.limewire.mojito2.message;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 public class DefaultPingResponse extends AbstractResponse 
         implements PingResponse {

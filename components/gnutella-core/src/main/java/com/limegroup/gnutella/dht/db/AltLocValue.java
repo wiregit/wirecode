@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 
 /**
  * Defines an interface of an alternative location DHT value.

@@ -37,9 +37,9 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 

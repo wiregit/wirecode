@@ -19,9 +19,9 @@
 
 package org.limewire.mojito;
 
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 /**
  * Creates or loads <code>MojitoDHT</code>s.

@@ -1,11 +1,11 @@
 package org.limewire.mojito.visual.graph;
 
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.visual.RouteTableGraphCallback;
 import org.limewire.mojito.visual.components.BinaryEdge;
 import org.limewire.mojito.visual.components.InteriorNodeVertex;
 import org.limewire.mojito.visual.components.BinaryEdge.EdgeType;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 
 
 import edu.uci.ics.jung.graph.ArchetypeVertex;

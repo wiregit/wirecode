@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht;
 
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 
 import com.limegroup.gnutella.util.EventDispatcher;
 

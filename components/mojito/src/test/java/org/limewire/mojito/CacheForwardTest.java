@@ -43,14 +43,14 @@ import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 

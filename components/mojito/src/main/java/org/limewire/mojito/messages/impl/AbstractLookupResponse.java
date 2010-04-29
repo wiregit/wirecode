@@ -25,9 +25,9 @@ import java.net.SocketAddress;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.LookupResponse;
 import org.limewire.mojito.messages.MessageID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.Version;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Version;
 
 
 /**

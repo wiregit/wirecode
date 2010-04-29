@@ -44,10 +44,10 @@ import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 /**

@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito.routing.RouteTable.RouteTableListener;
-import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
+import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.statistic.Statistic;
 
 

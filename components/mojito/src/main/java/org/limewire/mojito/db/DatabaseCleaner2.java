@@ -11,9 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
+import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * 

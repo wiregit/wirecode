@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 public class DefaultPingEntity extends AbstractEntity implements PingEntity {
 

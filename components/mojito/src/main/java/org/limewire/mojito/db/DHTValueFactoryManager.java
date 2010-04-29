@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
 import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 
 /**
  * Manages multiple instances of a {@link DHTValueFactory}.

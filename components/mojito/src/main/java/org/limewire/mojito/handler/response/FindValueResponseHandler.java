@@ -38,10 +38,10 @@ import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 

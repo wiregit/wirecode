@@ -21,7 +21,7 @@ package org.limewire.mojito.messages;
 
 import java.util.Collection;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * Defines an interface for a <code>OpCode.FIND_NODE_RESPONSE</code>. 

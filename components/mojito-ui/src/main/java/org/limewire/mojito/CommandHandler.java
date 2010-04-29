@@ -46,13 +46,13 @@ import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.RouteTable.SelectMode;
-import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito2.routing.LocalContact;
+import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 
 /**
  * Executes various features of the Mojito DHT. <code>CommandHandler</code>

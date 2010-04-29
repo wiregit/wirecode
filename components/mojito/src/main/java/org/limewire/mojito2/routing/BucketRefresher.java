@@ -1,4 +1,4 @@
-package org.limewire.mojito.routing;
+package org.limewire.mojito2.routing;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.LookupSettings;
@@ -24,12 +23,13 @@ import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.util.EventUtils;
 
 /**
  * 
  */
-public class BucketRefresher2 implements Closeable {
+public class BucketRefresher implements Closeable {
     
     private static final ScheduledExecutorService EXECUTOR 
         = Executors.newSingleThreadScheduledExecutor(
@@ -60,8 +60,7 @@ public class BucketRefresher2 implements Closeable {
     /**
      * 
      */
-    public BucketRefresher2(DHT dht, 
-            Config config,
+    public BucketRefresher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;

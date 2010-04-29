@@ -27,7 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;

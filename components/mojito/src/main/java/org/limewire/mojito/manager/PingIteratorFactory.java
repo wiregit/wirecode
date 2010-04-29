@@ -32,9 +32,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
 import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 
 

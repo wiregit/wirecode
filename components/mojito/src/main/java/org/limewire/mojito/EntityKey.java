@@ -20,7 +20,7 @@
 package org.limewire.mojito;
 
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * An EntityKey specifies the exact location of a DHTValueEntity.

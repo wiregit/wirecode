@@ -22,8 +22,8 @@ package org.limewire.mojito.db;
 import java.io.Serializable;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.routing.Contact;
 
 /**
  * A <code>DHTValueEntity</code> is a row in a {@link Database}. 

@@ -8,10 +8,10 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 
 public class ContextTest extends MojitoTestCase {
     

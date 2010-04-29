@@ -10,7 +10,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.net.address.StrictIpPortSet;
 
 import com.limegroup.gnutella.ApplicationServices;

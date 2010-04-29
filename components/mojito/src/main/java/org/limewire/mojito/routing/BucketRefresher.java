@@ -34,11 +34,12 @@ import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 
 /**
  * The BucketRefresher goes in periodic intervals through all Buckets
@@ -104,7 +105,7 @@ public class BucketRefresher implements Runnable {
             // pointless. Try to bootstrap from the RouteTable if 
             // it's possible.
             
-            BootstrapManager bootstrapManager = context.getBootstrapManager();
+            BootstrapProcess bootstrapManager = context.getBootstrapManager();
             synchronized (bootstrapManager) {
                 if (!bootstrapManager.isBootstrapped()) {
                     if (!bootstrapManager.isBootstrapping()) {

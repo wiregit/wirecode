@@ -7,12 +7,12 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.PingResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
+import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.util.ContactUtils;
 
 public class DefaultMessageHandler implements ResponseHandler {
