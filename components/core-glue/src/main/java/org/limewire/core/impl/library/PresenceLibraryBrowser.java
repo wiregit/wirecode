@@ -18,7 +18,6 @@ import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.RemoteLibraryState;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.impl.friend.FriendRemoteFileDescDeserializer;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.LibraryChangedEvent;
@@ -69,7 +68,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
-            SocketsManager socketsManager, FriendRemoteFileDescDeserializer remoteFileDescDeserializer) {
+            SocketsManager socketsManager) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;

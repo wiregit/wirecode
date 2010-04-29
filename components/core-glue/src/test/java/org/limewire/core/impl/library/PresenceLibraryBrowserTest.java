@@ -59,7 +59,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final EventList<FriendLibrary> friendLibraryList = context.mock(EventList.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(null, remoteLibraryManager, socketsManager);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -91,7 +91,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
       
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager);
         
         final MatchAndCopy<EventListener> socketsListenerCollector = new MatchAndCopy<EventListener>(EventListener.class);
         
@@ -139,7 +139,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final ListEvent<FriendLibrary> listEventBlank = context.mock(ListEvent.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, remoteLibraryManager, null, null);
+            = new PresenceLibraryBrowser(null, remoteLibraryManager, null);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -202,7 +202,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final ListEvent<PresenceLibrary> updateAndRemoveEvent = context.mock(ListEvent.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager);
         
         context.checking(new Expectations() {{
             allowing(remoteLibraryManager).getFriendLibraryList();
@@ -347,7 +347,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final Address resolvedAddress = context.mock(Address.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, remoteLibraryManager, socketsManager);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -416,7 +416,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, null, null);
+            = new PresenceLibraryBrowser(null, null, null);
         
         context.checking(new Expectations() {{
             FriendPresence presence = context.mock(FriendPresence.class);
@@ -454,7 +454,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final PresenceLibrary presenceLibrary = context.mock(PresenceLibrary.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager);
         
         context.checking(new Expectations() {{
             FriendPresence presence = context.mock(FriendPresence.class);
@@ -508,7 +508,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final Address resolvedAddress = context.mock(Address.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -585,7 +585,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final Address resolvedAddress = context.mock(Address.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(null, null, socketsManager, null);
+            = new PresenceLibraryBrowser(null, null, socketsManager);
         
         final MatchAndCopy<AddressResolutionObserver> observerCollector 
             = new MatchAndCopy<AddressResolutionObserver>(AddressResolutionObserver.class);
@@ -657,7 +657,7 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
         final RemoteFileDescAdapter searchResult = context.mock(RemoteFileDescAdapter.class);
         
         final PresenceLibraryBrowser presenceLibraryBrowser
-            = new PresenceLibraryBrowser(browseFactory, null, socketsManager, null);
+            = new PresenceLibraryBrowser(browseFactory, null, socketsManager);
         
         final MatchAndCopy<BrowseListener> listenerCollector 
             = new MatchAndCopy<BrowseListener>(BrowseListener.class);
