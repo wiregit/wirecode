@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.IdentityHashSet;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.concurrent.AsyncProcess;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito2.concurrent.AsyncProcess;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTFutureTask;
 
 /**
  * The {@link FutureManager} executes and manages {@link DHTFuture}s.

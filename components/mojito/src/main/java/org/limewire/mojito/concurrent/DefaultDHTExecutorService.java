@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.mojito2.concurrent.Cancellable;
 
 /**
  * A default implementation of DHTExecutorService.

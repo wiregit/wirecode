@@ -22,6 +22,8 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import org.limewire.mojito2.concurrent.DHTValueFuture;
+
 /**
  * A CallableDHTTask takes a DHTTask, starts it and waits for
  * the result.

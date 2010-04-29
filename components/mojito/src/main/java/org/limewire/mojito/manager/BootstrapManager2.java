@@ -12,8 +12,6 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AsyncProcess;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.DefaultBootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
@@ -23,6 +21,8 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.TimeAwareIterable;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.concurrent.AsyncProcess;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {

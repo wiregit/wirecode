@@ -21,10 +21,10 @@ package org.limewire.mojito.manager;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.handler.response.GetValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTFutureTask;
 
 
 /**

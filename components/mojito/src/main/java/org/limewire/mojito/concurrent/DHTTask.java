@@ -19,6 +19,8 @@
 
 package org.limewire.mojito.concurrent;
 
+import org.limewire.mojito2.concurrent.AsyncProcess;
+
 
 /**
  * A DHTTask is an asynchronous non-blocking task.

@@ -15,10 +15,10 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.util.EventUtils;
 

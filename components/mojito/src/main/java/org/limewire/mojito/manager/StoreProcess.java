@@ -33,9 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
@@ -58,6 +56,8 @@ import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.EntityUtils;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 

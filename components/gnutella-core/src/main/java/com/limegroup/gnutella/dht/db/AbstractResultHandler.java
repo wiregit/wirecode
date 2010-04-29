@@ -7,11 +7,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito2.concurrent.DHTFuture;
 
 import com.limegroup.gnutella.dht.DHTManager;
 

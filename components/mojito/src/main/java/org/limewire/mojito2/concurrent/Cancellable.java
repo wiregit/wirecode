@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.concurrent;
+package org.limewire.mojito2.concurrent;
 
 /**
  * An interface for Cancellable Tasks.

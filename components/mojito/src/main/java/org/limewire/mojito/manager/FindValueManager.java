@@ -25,11 +25,11 @@ import java.util.Map;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTFutureTask;
 
 
 /**

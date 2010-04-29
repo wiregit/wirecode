@@ -27,7 +27,6 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueFactoryManager;
 import org.limewire.mojito.db.Database;
@@ -46,6 +45,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 

@@ -35,7 +35,6 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.concurrent.CallableDHTTask;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -51,6 +50,7 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 

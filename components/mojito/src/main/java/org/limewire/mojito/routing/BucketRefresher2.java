@@ -14,7 +14,6 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
@@ -23,6 +22,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.util.EventUtils;
 

@@ -30,10 +30,10 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito2.concurrent.DHTFuture;
 
 
 public class MojitoUtils {

@@ -23,11 +23,11 @@ import java.net.SocketAddress;
 import java.util.Set;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTFutureTask;
 
 /**
  * Manages the bootstrap process and determines

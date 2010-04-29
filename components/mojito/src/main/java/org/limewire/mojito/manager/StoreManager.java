@@ -23,13 +23,13 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTFutureTask;
 import org.limewire.security.SecurityToken;
 
 /**

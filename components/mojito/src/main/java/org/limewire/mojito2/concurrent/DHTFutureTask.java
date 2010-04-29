@@ -1,4 +1,4 @@
-package org.limewire.mojito.concurrent;
+package org.limewire.mojito2.concurrent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,7 +10,8 @@ import org.limewire.concurrent.AsyncFutureTask;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.AsyncProcess.Delay;
+import org.limewire.mojito.concurrent.DHTTask;
+import org.limewire.mojito2.concurrent.AsyncProcess.Delay;
 import org.limewire.mojito2.util.EventUtils;
 
 /**
