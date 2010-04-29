@@ -193,44 +193,41 @@ public class DownloadActionHandler {
         switch (item.getDownloadItemType()) {
         case ANTIVIRUS:
             avInfoPanelFactory.get().showVendorMessage();
-            break;
+            return;
         case BITTORRENT:
             switch (item.getState()) {
             case DANGEROUS:
                 avInfoPanelFactory.get().showDangerMessage(item, false);
-                break;
+                return;
             case SCANNING:
             case SCANNING_FRAGMENT:
                 avInfoPanelFactory.get().showVendorMessage();
-                break;
+                return;
             case THREAT_FOUND:
                 avInfoPanelFactory.get().showThreatMessage(item, false);
-                break;    
+                return;    
             case SCAN_FAILED:
                 avInfoPanelFactory.get().showFailureMessage(item, false);
-                break;
+                return;
             default:
                 createFileInfoDialog(item);
-                break;
+                return;
             }
         case GNUTELLA:
             switch (item.getState()) {
             case DANGEROUS:
                 avInfoPanelFactory.get().showDangerMessage(item, false);
-                break;
-
+                return;
             case SCANNING:
             case SCANNING_FRAGMENT:
                 avInfoPanelFactory.get().showVendorMessage();
-                break;
-                
+                return;
             case THREAT_FOUND:
                 avInfoPanelFactory.get().showThreatMessage(item, false);
-                break;
-                
+                return;
             case SCAN_FAILED:
                 avInfoPanelFactory.get().showFailureMessage(item, false);
-                break;
+                return;
             }
             break;
         }
