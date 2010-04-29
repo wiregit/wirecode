@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-28 11:30-0400\n"
+"POT-Creation-Date: 2010-04-29 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3127,24 +3127,28 @@ msgstr ""
 msgid "&Help"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:47
-msgid "&Using LimeWire"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
+msgid "Get Personalized &Tech Support"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:49
-msgid "&FAQ"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:51
-msgid "&Forum"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
+msgid "&Tech Support"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
-msgid "&Give Feedback"
+msgid "&Using LimeWire"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:59
-msgid "Get Personalized &Tech Support"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
+msgid "&FAQ"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
+msgid "&Forum"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
+msgid "&Give Feedback"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HideTransferTrayAction.java:21
@@ -4618,7 +4622,7 @@ msgid "New videos"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:44
-msgid "New Torrents"
+msgid "New torrents"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:47
@@ -4733,7 +4737,7 @@ msgid "Only videos"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:68
-msgid "Only Torrents"
+msgid "Only torrents"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsMessagePanel.java:89
