@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.util.Visitor;
 
@@ -18,6 +19,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A filter that checks query responses, query replies and individual URNs
@@ -116,6 +118,17 @@ class URNFilterImpl implements URNFilter {
         }
         return true;
     }
+    
+
+    @Override
+    public boolean allow(SearchResult result, LimeXMLDocument document) {
+        
+        if (isBlacklisted((URN)result.getUrn())) {
+            return false;
+        }
+    
+        return true;
+    }
 
     /**
      * Returns true if any response in the query reply matches the blacklist.
@@ -161,4 +174,5 @@ class URNFilterImpl implements URNFilter {
     public Set<String> getBlacklist() {
         return blacklist;
     }
+
 }

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
-import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
+import com.limegroup.gnutella.filters.response.FilterFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 
 import org.jmock.Mockery;
@@ -31,7 +31,7 @@ public class SpamServicesImplTest extends LimeTestCase {
         SpamFilterFactory spamFilterFactory = mockery.mock(SpamFilterFactory.class);
         ConnectionManager connectionManager = mockery.mock(ConnectionManager.class);
         SearchResultHandler searchResultHandler = mockery.mock(SearchResultHandler.class);
-        ResponseFilterFactory responseFilterFactory = mockery.mock(ResponseFilterFactory.class);
+        FilterFactory responseFilterFactory = mockery.mock(FilterFactory.class);
         spamServices = new SpamServicesImpl(Providers.of(connectionManager),
                 Providers.of(ipFilter),
                 Providers.of(urnFilter),

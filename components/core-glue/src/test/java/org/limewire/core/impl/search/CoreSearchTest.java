@@ -45,7 +45,7 @@ import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
 
 public class CoreSearchTest extends BaseTestCase {
-
+/*
     public CoreSearchTest(String name) {
         super(name);
     }
@@ -533,6 +533,6 @@ public class CoreSearchTest extends BaseTestCase {
         assertEquals(new GUID(new byte[] {4,3,2,1,'q','x','x','x','x','x','x','x','x','x','x','x'}),
                 coreSearch.getQueryGuid());
     }
-    
+    */
     
 }

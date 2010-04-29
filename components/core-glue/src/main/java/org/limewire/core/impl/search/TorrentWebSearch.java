@@ -29,6 +29,7 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -41,6 +42,8 @@ import org.limewire.util.URIUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
+import com.limegroup.gnutella.filters.response.FilterFactory;
+import com.limegroup.gnutella.filters.response.ResultFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -80,12 +83,15 @@ public class TorrentWebSearch {
 
     private final TorrentFactory torrentFactory;
 
+    private final ResultFilter filter;
+    
     @Inject
     public TorrentWebSearch(HttpExecutor httpExecutor, Provider<LimeHttpClient> httpClient,
             TorrentUriPrioritizerFactory torrentUriPrioritizerFactory,
             MetaDataReader metaDataReader,
             TorrentFactory torrentFactory,
-            @Assisted String query, @Assisted SearchListener searchListener) {
+            @Assisted String query, @Assisted SearchListener searchListener,
+            FilterFactory responseFilterFactory) {
         this.httpExecutor = httpExecutor;
         this.httpClient = httpClient;
         this.torrentUriPrioritizerFactory = torrentUriPrioritizerFactory;
@@ -93,6 +99,7 @@ public class TorrentWebSearch {
         this.torrentFactory = torrentFactory;
         this.query = query;
         this.searchListener = searchListener;
+        this.filter = responseFilterFactory.createResultFilter();
     }
 
     public void start() {
@@ -108,23 +115,35 @@ public class TorrentWebSearch {
     
     private void handleTorrentResult(File torrentFile, URI uri, URI referrer) {
         BTData torrentData = TorrentUtil.parseTorrentFile(torrentFile);
-        Torrent torrent = null;
-        try {
-            LimeXMLDocument xmlDocument = metaDataReader.readDocument(torrentFile);
-            if (xmlDocument != null) {
-                if (!matchesQuery(xmlDocument)) {
-                    LOG.debugf("query {0} does not match doc {1}", query, xmlDocument);
-                    return;
+        
+        if (torrentData != null) {
+            Torrent torrent = null;
+            LimeXMLDocument xmlDocument = null;
+            try {
+                xmlDocument = metaDataReader.readDocument(torrentFile);
+                if (xmlDocument != null) {
+                    if (!matchesQuery(xmlDocument)) {
+                        LOG.debugf("query {0} does not match doc {1}", query, xmlDocument);
+                        return;
+                    }
+                    torrent = torrentFactory.createTorrentFromXML(xmlDocument);
+                    if (torrent != null) {
+                        SearchResult result = new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent);
+                        if (filter.allow(result, xmlDocument)) {
+                            LOG.debugf("result accepted: {}", torrent.getName());
+                            searchListener.handleSearchResult(null, result);
+                        } else{
+                            LOG.debugf("result rejected: {}", torrent.getName());
+                        }
+                    } else {
+                        LOG.debugf("torrent null");
+                    }
                 }
-                torrent = torrentFactory.createTorrentFromXML(xmlDocument);
+            } catch (IOException ie) {
+                LOG.debug("error parsing torrent file", ie);
             }
-        } catch (IOException ie) {
-            LOG.debug("error parsing torrent file", ie);
-        }
-        if (torrentData != null && torrent != null) {
-            searchListener.handleSearchResult(null, new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent));
         } else {
-            LOG.debugf("torrent data or torrent null: {0}, {1}", torrentData, torrent);
+            LOG.debugf("torrent data null");
         }
     }
     

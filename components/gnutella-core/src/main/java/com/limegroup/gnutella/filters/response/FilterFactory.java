@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.filters.response;
 
-public interface ResponseFilterFactory {
+public interface FilterFactory {
     
     ResponseFilter createResponseFilter();
+    
+    ResultFilter createResultFilter();
 
 }

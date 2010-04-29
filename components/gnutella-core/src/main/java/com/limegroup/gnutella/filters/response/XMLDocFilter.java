@@ -14,6 +14,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FilterSettings;
 
 public class XMLDocFilter extends KeywordFilter {
@@ -49,6 +50,12 @@ public class XMLDocFilter extends KeywordFilter {
         // don't check the super -- that's done by the separate KeywordFilter
         LimeXMLDocument doc = response.getDocument();
         return doc == null || allowDoc(doc);
+    }
+    
+    @Override
+    public boolean allow(SearchResult result, LimeXMLDocument document) {
+        // don't check the super -- that's done by the separate KeywordFilter
+        return document == null || allowDoc(document);
     }
 
     /**

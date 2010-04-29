@@ -13,7 +13,7 @@ public class CompoundResponseFilterTest extends BaseTestCase {
     private Mockery context;
     private ResponseFilter blackListFilter;
     private ResponseFilter whiteListFilter;
-    private CompoundResponseFilter compoundFilter;
+    private CompoundFilter compoundFilter;
 
     public CompoundResponseFilterTest(String name) {
         super(name);
@@ -29,7 +29,10 @@ public class CompoundResponseFilterTest extends BaseTestCase {
         blackListFilter = context.mock(ResponseFilter.class);
         whiteListFilter = context.mock(ResponseFilter.class);
         
-        compoundFilter = new CompoundResponseFilter(Collections.singleton(blackListFilter), Collections.singleton(whiteListFilter));
+        compoundFilter = new CompoundFilter(Collections.singleton(blackListFilter), 
+                Collections.singleton(whiteListFilter),
+                Collections.<ResultFilter>emptyList(),
+                Collections.<ResultFilter>emptyList());
     }
     
     public void testWhiteListFilterOverridesBlackListFilter() {
@@ -40,7 +43,7 @@ public class CompoundResponseFilterTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
-        assertTrue(compoundFilter.allow(null, null));
+        assertTrue(((ResponseFilter)compoundFilter).allow(null, null));
         context.assertIsSatisfied();
     }
 
@@ -51,7 +54,7 @@ public class CompoundResponseFilterTest extends BaseTestCase {
             never(whiteListFilter).allow(null, null);
         }});
         
-        assertTrue(compoundFilter.allow(null, null));
+        assertTrue(((ResponseFilter)compoundFilter).allow(null, null));
         context.assertIsSatisfied();
     }
 }

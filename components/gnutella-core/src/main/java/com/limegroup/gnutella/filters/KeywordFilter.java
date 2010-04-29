@@ -4,19 +4,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FilterSettings;
 
 import com.google.common.collect.ImmutableList;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
+import com.limegroup.gnutella.filters.response.ResultFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /** 
  * A filter that blocks queries and responses matching certain banned keywords.
  */
-public class KeywordFilter implements SpamFilter, ResponseFilter {
+public class KeywordFilter implements SpamFilter, ResponseFilter, ResultFilter {
 
     static final String[] ADULT_WORDS = {
         "adult", "anal", "anul", "ass", "boob", "blow", "bondage", "centerfold",
@@ -74,7 +77,12 @@ public class KeywordFilter implements SpamFilter, ResponseFilter {
     public boolean allow(QueryReply qr, Response response) {
         return !matches(response.getName());
     }
-
+    
+    @Override // ResultFilter
+    public boolean allow(SearchResult result, LimeXMLDocument document) {
+        return !matches(result.getFileNameWithoutExtension());
+    }
+    
     /** 
      * Returns true if phrase matches any of the banned words.
      */

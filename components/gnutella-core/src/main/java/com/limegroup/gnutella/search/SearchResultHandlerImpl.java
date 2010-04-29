@@ -39,7 +39,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
-import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
+import com.limegroup.gnutella.filters.response.FilterFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -110,7 +110,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             RemoteFileDescFactory remoteFileDescFactory,
             NetworkInstanceUtils networkInstanceUtils,
             PushEndpointFactory pushEndpointFactory,
-            ResponseFilterFactory responseFilterFactory,
+            FilterFactory responseFilterFactory,
             QuerySettings querySettings) {
         this.networkManager = networkManager;
         this.activityCallback = activityCallback;

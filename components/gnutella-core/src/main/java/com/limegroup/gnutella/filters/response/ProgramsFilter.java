@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.StringUtils;
@@ -16,7 +17,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
-class ProgramsFilter implements ResponseFilter {
+class ProgramsFilter implements ResultFilter, ResponseFilter {
     
     private final CategoryManager categoryManager;
     
@@ -27,20 +28,28 @@ class ProgramsFilter implements ResponseFilter {
     @Override
     public boolean allow(QueryReply qr, Response response) {
         Category category = categoryManager.getCategoryForFilename(response.getName());
+        return isAllowed(category, response.getDocument());
+    }
+    
+    @Override
+    public boolean allow(SearchResult result, LimeXMLDocument document ) {
+        Category category = categoryManager.getCategoryForExtension(result.getFileExtension());
+        return isAllowed(category, document);
+    }
+    
+    private boolean isAllowed(Category category, LimeXMLDocument document) {
         
         if (category == Category.PROGRAM) {
             return LibrarySettings.ALLOW_PROGRAMS.getValue();
         } else if (category == Category.TORRENT) {
-            
             // If programs are permitted then there is no condition where 
             //  the response would not be allowed.  Return true.
             if (LibrarySettings.ALLOW_PROGRAMS.getValue()) {
                 return true;
             }
-            
+        
             List<String> paths = null;
             try {
-                LimeXMLDocument document = response.getDocument();
                 if (document != null) {
                     paths = parsePathEntries(document);
                 }
@@ -48,15 +57,15 @@ class ProgramsFilter implements ResponseFilter {
                 // No files found in xml
                 return true;
             }
-            
+        
             // If there is path metadata check if those paths do not lead to 
             //  executable programs.
             return !categoryManager.containsCategory(Category.PROGRAM, paths);
         }
-        else {
-            return true;
-        }
+        
+        return true;
     }
+    
     
     // TODO: Code is copied+modified from XMLTorrent... might want share 
     private static List<String> parsePathEntries(LimeXMLDocument xmlDocument) throws InvalidDataException {
