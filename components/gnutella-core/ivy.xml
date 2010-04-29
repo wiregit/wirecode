@@ -51,6 +51,7 @@
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>
         <dependency org="none" name="guice" rev="${guice.version}" conf="compile,runtime"/>
         <dependency org="none" name="jna" rev="${jna.version}" conf="compile,runtime"/>
+        <dependency org="none" name="je" rev="${je.version}" conf="compile,runtime"/>
         <dependency org="none" name="windows/jacob" rev="${jacob.version}" conf="compile,runtime"/> <!-- todo: scope to windows only -->
         
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test, test-common->master(*), test-common"/>
