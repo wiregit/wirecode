@@ -1,14 +1,24 @@
 package org.limewire.ui.swing.upload.table;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
+import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.transfer.TransferRendererResources;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -16,25 +26,73 @@ import org.limewire.ui.swing.util.I18n;
 /**
  * Cell renderer for the message column in the Uploads table.
  */
-class UploadMessageRenderer extends DefaultTableCellRenderer {
+class UploadMessageRenderer extends TableRendererEditor {
 
+    @Resource private Icon infoIcon;
+    
     private final NumberFormat formatter = new DecimalFormat("0.00");
+    
+    private final UploadActionHandler actionHandler;
+    private JLabel messageLabel;
+    private JButton infoButton;
+    
+    private UploadItem uploadItem;
     
     /**
      * Constructs an UploadMessageRenderer.
      */
-    public UploadMessageRenderer() {
+    public UploadMessageRenderer(UploadActionHandler actionHandler) {
+        this.actionHandler = actionHandler;
         new TransferRendererResources().decorateComponent(this);
+        
+        GuiUtils.assignResources(this);
+        
+        setLayout(new MigLayout("insets 0, gap 0, aligny center, nogrid, novisualpadding"));
+        
+        messageLabel = new JLabel();
+        
+        infoButton = new IconButton(infoIcon);
+        infoButton.setActionCommand(UploadActionHandler.PROPERTIES_COMMAND);
+        infoButton.setToolTipText(I18n.tr("Info"));
+        infoButton.addActionListener(new ButtonListener());
+        
+        add(messageLabel, "");
+        add(infoButton, "");
     }
     
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, 
+    protected Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
+            int row, int column) {
+        if (value instanceof UploadItem) {
+            uploadItem = (UploadItem) value;
+            setButtonVisible(uploadItem);
+            messageLabel.setText(getMessage(uploadItem));
+            return this;
+        } else {
+            setButtonVisible(null);
+            return emptyPanel;
+        }
+    }
+
+    @Override
+    protected Component doTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         if (value instanceof UploadItem) {
-            UploadItem item = (UploadItem) value;
-            return super.getTableCellRendererComponent(table, getMessage(item), isSelected, false, row, column);
+            uploadItem = (UploadItem) value;
+            messageLabel.setText(getMessage(uploadItem));
+            setButtonVisible(uploadItem);
+            return this;
         } else {
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            setButtonVisible(null);
+            return emptyPanel;
+        }
+    }
+    
+    private void setButtonVisible(UploadItem item) {
+        if(item == null) {
+            infoButton.setVisible(false);
+        } else {
+            infoButton.setVisible(item.getState() != UploadState.BROWSE_HOST && item.getState() != UploadState.BROWSE_HOST_DONE);
         }
     }
     
@@ -78,6 +136,24 @@ class UploadMessageRenderer extends DefaultTableCellRenderer {
 
         default:
             return "";
+        }
+    }
+    
+    /**
+     * Action listener for editor buttons.
+     */
+    private class ButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Reset cursor if source component is IconButton.  If the action
+            // displays a modal dialog, then IconButton does not receive the
+            // mouseExited event to reset the default cursor.
+            if (e.getSource() instanceof IconButton) {
+                ((IconButton) e.getSource()).resetDefaultCursor();
+            }
+            
+            actionHandler.performAction(e.getActionCommand(), uploadItem);
+            cancelCellEditing();
         }
     }
 }

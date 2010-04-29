@@ -123,7 +123,7 @@ public class UploadTable extends TransferTable<UploadItem> {
     private void initializeRenderers() {
         // Set column renderers.
         setColumnRenderer(UploadTableFormat.TITLE_COL, new UploadTitleRenderer(iconManager));
-        setColumnRenderer(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer());
+        setColumnRenderer(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer(uploadActionHandler));
         setColumnRenderer(UploadTableFormat.PROGRESS_COL, uploadProgressRenderer);
         setColumnRenderer(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(null));
         setColumnRenderer(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(null));
@@ -138,6 +138,7 @@ public class UploadTable extends TransferTable<UploadItem> {
         // Set column editors.
         setColumnEditor(UploadTableFormat.ACTION_COL, new UploadActionRendererEditor(uploadActionHandler));
         setColumnEditor(UploadTableFormat.CANCEL_COL, new UploadCancelRendererEditor(uploadActionHandler));
+        setColumnEditor(UploadTableFormat.MESSAGE_COL, new UploadMessageRenderer(uploadActionHandler));
     }
     
     /**
