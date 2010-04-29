@@ -29,7 +29,6 @@
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
 

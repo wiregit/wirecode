@@ -18,7 +18,6 @@
         <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="mock-core" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
@@ -37,10 +36,6 @@
         <dependency org="none" name="guice-assistedinject" rev="${guice-assistedinject.version}" conf="compile,runtime"/>
         <dependency org="none" name="swingx" rev="${swingx.version}" conf="compile,runtime"/>
         <dependency org="none" name="AppFramework" rev="${AppFramework.version}" conf="compile,runtime"/>
-        <dependency org="none" name="mozswing" rev="${mozswing.version}" conf="compile,runtime"/>
-        <dependency org="none" name="mozdom4java" rev="${mozdom4java.version}" conf="compile,runtime"/>
-        <dependency org="none" name="MozillaInterfaces" rev="${MozillaInterfaces.version}" conf="compile,runtime"/>
-        <dependency org="none" name="MozillaGlue" rev="${MozillaGlue.version}" conf="compile,runtime"/>
         <dependency org="none" name="jna" rev="${jna.version}" conf="compile,runtime"/>
         <dependency org="none" name="jdic" rev="${jdic.version}" conf="compile,runtime"/>
         <dependency org="none" name="gettext-commons" rev="${gettext-commons.version}" conf="compile,runtime"/>

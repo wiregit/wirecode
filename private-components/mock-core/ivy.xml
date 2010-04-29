@@ -14,7 +14,6 @@
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
         
