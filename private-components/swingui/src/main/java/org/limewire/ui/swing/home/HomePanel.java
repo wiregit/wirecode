@@ -33,6 +33,7 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.EncodingUtils;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -219,7 +220,8 @@ public class HomePanel extends JXPanel {
             } else {
                 url += "&firstRequest=true";
                 if(application.isNewInstall()) {
-                    url += "&newInstall=true";
+                    url += "&newInstall=" + true;
+                    url += "&ask=" + EncodingUtils.encode(application.getAskValue());
                 }
                 if(initialLoadTime == -1) {
                     initialLoadTime = System.currentTimeMillis();

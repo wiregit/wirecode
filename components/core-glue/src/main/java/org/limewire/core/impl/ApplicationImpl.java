@@ -73,4 +73,9 @@ class ApplicationImpl implements Application {
     public boolean isNewJavaVersion() {
         return applicationServices.isNewJavaVersion();
     }
+
+    @Override
+    public String getAskValue() {
+        return applicationServices.getAskValue();
+    }
 }

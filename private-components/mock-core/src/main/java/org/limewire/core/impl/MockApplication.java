@@ -60,5 +60,10 @@ public class MockApplication implements Application {
     public boolean isNewJavaVersion() {
         return false;
     }
+
+    @Override
+    public String getAskValue() {
+        return "";
+    }
     
 }

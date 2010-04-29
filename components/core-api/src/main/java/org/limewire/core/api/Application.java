@@ -45,5 +45,10 @@ public interface Application {
      * Returns true if the java version is differant that the one used to last run limewire. 
      */
     public boolean isNewJavaVersion();
+    
+    /**
+     * Returns the String on the status of the Ask Toolbar at install.
+     */
+    public String getAskValue();
 
 }
