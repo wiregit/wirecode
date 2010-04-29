@@ -20,7 +20,7 @@ public class ApplicationServicesImpl implements ApplicationServices {
     private final byte[] limewireGUID;
     private final boolean newInstall;
     private final boolean newJavaVersion;
-    private volatile String askValue = "UNKNOWN";
+    private volatile String askValue = "unknown";
     
     @Inject
     ApplicationServicesImpl() {
