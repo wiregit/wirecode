@@ -1,9 +1,6 @@
 package org.limewire.core.api.search;
 
 import java.util.Collection;
-import java.util.List;
-
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 
 /** A listener for a search. */
 public interface SearchListener {
@@ -18,9 +15,5 @@ public interface SearchListener {
     void searchStarted(Search search);
     
     /** Notification the search has stopped. */
-    void searchStopped(Search search);
-    
-    /** Notification that sponsored results have been received for the search. */
-    void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults);
-
+    void searchStopped(Search search);    
 }

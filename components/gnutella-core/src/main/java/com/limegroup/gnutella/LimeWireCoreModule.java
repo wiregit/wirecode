@@ -51,7 +51,6 @@ import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.FirewalledAddressSerializer;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.promotion.LimeWirePromotionModule;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
@@ -225,8 +224,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
         binder().install(new LimeWireSecurityCertificateModule());
-        binder().install(new LimewireGeocodeModule());        
-        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
+        binder().install(new LimewireGeocodeModule());
         binder().install(new LimeWireSecurityModule());
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireUpdateModule());

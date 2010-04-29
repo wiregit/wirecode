@@ -14,7 +14,6 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -219,10 +218,6 @@ class CoreSearchResultList implements SearchResultList {
         public void handleSearchResults(Search search,
                 Collection<? extends SearchResult> searchResults) {
             addResults(searchResults);
-        }
-
-        @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
         }
 
         @Override

@@ -1,15 +1,12 @@
 package org.limewire.ui.swing.search;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -22,7 +19,6 @@ import ca.odell.glazedlists.event.ListEventListener;
 class SwingSearchListener implements SearchListener {
 
     private final SearchResultsModel searchResultsModel;
-    private final SponsoredResultsView sponsoredView;
     private final SearchNavItem searchNavItem;
     
     /**
@@ -30,9 +26,8 @@ class SwingSearchListener implements SearchListener {
      * sponsored results view, and navigation item.
      */
     public SwingSearchListener(SearchResultsModel searchResultsModel, 
-            SponsoredResultsView searchView, SearchNavItem searchNavItem) {
+            SearchNavItem searchNavItem) {
         this.searchResultsModel = searchResultsModel;
-        this.sponsoredView = searchView;
         this.searchNavItem = searchNavItem;
         
         // sync UI result count to real count.
@@ -53,21 +48,10 @@ class SwingSearchListener implements SearchListener {
     }
 
     @Override
-    public void handleSponsoredResults(Search search, final List<SponsoredResult> sponsoredResults) {
-        SwingUtils.invokeNowOrLater(new Runnable() {
-            @Override
-            public void run() {
-                sponsoredView.addSponsoredResults(sponsoredResults);
-            }
-        });
-    }
-
-    @Override
     public void searchStarted(Search search) {
     }
 
     @Override
     public void searchStopped(Search search) {
     }
-
 }

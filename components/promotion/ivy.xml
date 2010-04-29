@@ -13,7 +13,6 @@
         <dependency org="org.limewire" name="security" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
         
-        <dependency org="none" name="hsqldb" rev="${hsqldb.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
         <dependency org="none" name="commons-codec" rev="${commons-codec.version}" conf="compile,runtime"/>

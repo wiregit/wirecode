@@ -1,11 +1,8 @@
 package org.limewire.core.impl.search;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.FilePropertyKey;
@@ -15,23 +12,12 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchEvent;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
-import org.limewire.core.settings.PromotionSettings;
-import org.limewire.geocode.GeocodeInformation;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.promotion.PromotionSearcher;
-import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
-import org.limewire.promotion.containers.PromotionMessageContainer;
-import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -42,8 +28,6 @@ public class CoreSearch implements Search {
     private final SearchDetails searchDetails;
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
-    private final PromotionSearcher promotionSearcher;
-    private final Provider<GeocodeInformation> geoLocation;
     private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
 
     /**
@@ -58,9 +42,7 @@ public class CoreSearch implements Search {
 
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
-    private final ScheduledExecutorService backgroundExecutor;
     private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
-    private final Clock clock;
     private final AdvancedQueryStringBuilder compositeQueryBuilder;
     
     /**
@@ -72,22 +54,14 @@ public class CoreSearch implements Search {
     public CoreSearch(@Assisted SearchDetails searchDetails,
             SearchServices searchServices,
             QueryReplyListenerList listenerList,
-            PromotionSearcher promotionSearcher,
-            Provider<GeocodeInformation> geoLocation,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<SearchEvent> searchEventBroadcaster,
             LimeXMLDocumentFactory xmlDocumentFactory,
-            Clock clock,
             AdvancedQueryStringBuilder compositeQueryBuilder,
             RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
-        this.promotionSearcher = promotionSearcher;
-        this.geoLocation = geoLocation;
-        this.backgroundExecutor = backgroundExecutor;
         this.searchEventBroadcaster = searchEventBroadcaster;
-        this.clock = clock;
         this.compositeQueryBuilder = compositeQueryBuilder;
         this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
     }
@@ -156,44 +130,7 @@ public class CoreSearch implements Search {
         
         String mutated = searchServices.mutateQuery(query);
         searchServices.query(searchGuid, mutated, advancedQuery,
-                searchDetails.getSearchCategory());
-        
-        if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
-            final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
-                @Override
-                public void process(PromotionMessageContainer result) {
-                    SponsoredResultTarget target;
-                    if(result.getOptions().isOpenInStoreTab()) {
-                        target = SponsoredResultTarget.STORE;
-                    } else if(result.getOptions().isOpenInHomeTab()) {
-                        target = SponsoredResultTarget.HOME;
-                    } else {
-                        target = SponsoredResultTarget.EXTERNAL;
-                    }
-                    String title = result.getTitle();
-                    String displayUrl = result.getDisplayUrl();
-                    if(displayUrl.isEmpty()) {
-                        displayUrl = SearchUrlUtils.stripUrl(result.getURL());
-                    }
-                    if(title.isEmpty()) {
-                        title = displayUrl;
-                    }
-                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(
-                            title, result.getDescription(),
-                            displayUrl, SearchUrlUtils.createPromotionUrl(result, clock.now() / 1000),
-                            target);
-                    handleSponsoredResults(coreSponsoredResult);
-                }
-            };
-            
-            final String finalQuery = query;
-            backgroundExecutor.execute(new Runnable() {
-                @Override
-                public void run() { 
-                    promotionSearcher.search(finalQuery, callback, geoLocation.get());
-                }
-            });            
-        }
+                searchDetails.getSearchCategory());        
     }
     
     /**
@@ -233,13 +170,6 @@ public class CoreSearch implements Search {
     
     public GUID getQueryGuid() {
         return new GUID(searchGuid);
-    }
-    
-    private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
-        List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);
-        for(SearchListener listener : searchListeners) {
-            listener.handleSponsoredResults(CoreSearch.this, resultList);
-        }
     }
     
     private void handleSearchResult(SearchResult searchResult) {

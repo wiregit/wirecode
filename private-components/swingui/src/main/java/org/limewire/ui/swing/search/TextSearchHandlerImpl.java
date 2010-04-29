@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,7 +14,6 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.nav.NavItem;
@@ -104,7 +102,7 @@ class TextSearchHandlerImpl implements SearchHandler {
             final SearchResultsPanel searchPanel, final SearchNavItem navItem) {
         // prevent search from starting until lifecycle manager completes loading
         if (lifeCycleManager.isStarted()) {
-            searchModel.start(new SwingSearchListener(searchModel, searchPanel, navItem));
+            searchModel.start(new SwingSearchListener(searchModel, navItem));
         } else {
              searchPanel.setLifeCycleComplete(false);
              final EventListener<LifeCycleEvent> listener = new EventListener<LifeCycleEvent>() {
@@ -112,7 +110,7 @@ class TextSearchHandlerImpl implements SearchHandler {
                  public void handleEvent(LifeCycleEvent event) {
                      if(event == LifeCycleEvent.STARTED) {
                          searchPanel.setLifeCycleComplete(true);
-                         searchModel.start(new SwingSearchListener(searchModel, searchPanel, navItem));
+                         searchModel.start(new SwingSearchListener(searchModel, navItem));
                          lifeCycleManager.removeListener(this);
                      }
                  }
@@ -223,7 +221,6 @@ class TextSearchHandlerImpl implements SearchHandler {
                 }
             }
 
-            @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
             @Override public void searchStarted(Search search) {}
             @Override public void searchStopped(Search search) {}                
         });

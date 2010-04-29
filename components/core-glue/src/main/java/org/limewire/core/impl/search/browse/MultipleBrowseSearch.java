@@ -17,7 +17,6 @@ import org.limewire.core.api.search.browse.BrowseSearchFactory;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.logging.Log;
@@ -124,13 +123,6 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         /** Clears the count of completed browses */
         public void clear() {
             stoppedBrowses.set(0);
-        }
-
-        @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
-            for (SearchListener listener : searchListeners) {
-                listener.handleSponsoredResults(MultipleBrowseSearch.this, sponsoredResults);
-            }
         }
 
         @Override

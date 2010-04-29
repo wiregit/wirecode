@@ -23,7 +23,6 @@ import org.limewire.core.impl.monitor.IncomingSearchListenerList;
 import org.limewire.core.impl.network.CoreGlueNetworkModule;
 import org.limewire.core.impl.player.CoreGluePlayerModule;
 import org.limewire.core.impl.properties.CoreGluePropertiesModule;
-import org.limewire.core.impl.rest.CoreGlueRestModule;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.browse.CoreGlueBrowseSearchModule;
@@ -68,10 +67,8 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueBrowseModule());
         install(new CoreGluePlayerModule());
         install(new CoreGluePropertiesModule());
-        install(new CoreGlueRestModule());
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());
         install(new CoreGlueUpdatesModule());
     }
-
 }

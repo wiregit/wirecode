@@ -72,7 +72,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
         // Add search results display to the UI, and select its navigation item.
         SearchNavItem item = searchNavigator.get().addSearch(title, searchPanel, search, searchPanel.getModel());
         item.select();
-        searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), searchPanel, item));
+        searchPanel.getModel().start(new SwingSearchListener(searchPanel.getModel(), item));
         searchPanel.setBrowseTitle(title);
         
         if (key != null) {

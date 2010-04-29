@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -18,20 +17,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Scrollable;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseStatus;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -58,7 +53,7 @@ import com.google.inject.assistedinject.Assisted;
  * tab items, sort and filter panel, sponsored results panel, and search
  * results tables.
  */
-public class SearchResultsPanel extends JXPanel implements SponsoredResultsView, Disposable {
+public class SearchResultsPanel extends JXPanel implements Disposable {
     
     /**
      * The type of overlay which should be placed over the search results.
@@ -89,9 +84,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * This is the subpanel that displays the actual search results.
      */
     private final ResultsContainer resultsContainer;
-       
-    /** The sponsored results. */
-    private final SponsoredResultsPanel sponsoredResultsPanel;
     
     /** The scroll pane embedding the search results & sponsored results. */
     private JScrollPane scrollPane;
@@ -148,7 +140,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
             @Assisted SearchResultsModel searchResultsModel,
             ResultsContainerFactory containerFactory,
             AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
-            SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
             CategoryIconManager categoryIconManager, 
             BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory) {
@@ -160,8 +151,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         this.headerBarDecorator = headerBarDecorator; 
         this.categoryIconManager = categoryIconManager;
         
-        this.sponsoredResultsPanel = sponsoredResultsPanel;
-        this.sponsoredResultsPanel.setVisible(false);
         this.browseFailedPanel = browseFailedMessagePanelFactory.create(searchResultsModel);
         
         filterPanel = filterPanelFactory.create(searchResultsModel, searchResultsModel.getSearchType());
@@ -294,24 +283,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     }
     
     /**
-     * Adds the specified list of sponsored results to the display.
-     */
-    @Override
-    public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
-        for (SponsoredResult result : sponsoredResults){
-            sponsoredResultsPanel.addEntry(result);
-        }
-        
-        if (!sponsoredResultsPanel.isVisible()) {
-            sponsoredResultsPanel.setVisible(true);
-            syncColumnHeader();
-        }
-
-        receivedSponsoredResults = true;
-        updateMessages();      
-    }
-    
-    /**
      * Sets the browse title in the container.  When not null, the browse title
      * is displayed at the top of the panel.  When null, the container displays 
      * the search title from the data model.
@@ -421,35 +392,9 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         if (resultHeader == null) {
             // If no headers, use nothing special.
             scrollPane.setColumnHeaderView(null);
-        } else if (!sponsoredResultsPanel.isVisible()) {
-            // If sponsored results aren't visible, just use the actual header.
-            scrollPane.setColumnHeaderView(resultHeader);
         } else {
-            // Otherwise, create a combined panel that has both sponsored results & header.
-            JXPanel headerPanel = new JXPanel();
-            // Make sure this syncs with the layout for the results & sponsored results!
-            headerPanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
-            headerPanel.add(resultHeader, "grow, push, alignx left, aligny top");
-            
-            DefaultTableColumnModel model = new DefaultTableColumnModel();
-            TableColumn column = new TableColumn();
-            model.addColumn(column);
-            JTableHeader header = new JTableHeader(model);
-            header.setDefaultRenderer(new TableCellHeaderRenderer());
-            header.setReorderingAllowed(false);
-            header.setResizingAllowed(false);
-            header.setTable(new JXTable(0, 1));
-            
-            int width = sponsoredResultsPanel.getPreferredSize().width;
-            int height = resultHeader.getPreferredSize().height;
-            column.setWidth(width);
-            Dimension dimension = new Dimension(width, height);
-            header.setPreferredSize(dimension);
-            header.setMaximumSize(dimension);
-            header.setMinimumSize(dimension);
-            
-            headerPanel.add(header, "aligny top, alignx right");
-            scrollPane.setColumnHeaderView(headerPanel);
+            // Use the actual header.
+            scrollPane.setColumnHeaderView(resultHeader);
         }
         
         scrollPane.validate();
@@ -496,7 +441,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
         scrollablePanel.setLayout(new BorderLayout());
         scrollablePanel.add(resultsContainer, BorderLayout.CENTER);
-        scrollablePanel.add(sponsoredResultsPanel, BorderLayout.EAST);
         scrollPane.setViewportView(scrollablePanel);
         
         syncScrollPieces();

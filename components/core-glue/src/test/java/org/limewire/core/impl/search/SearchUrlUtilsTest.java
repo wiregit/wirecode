@@ -1,10 +1,5 @@
 package org.limewire.core.impl.search;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.core.settings.PromotionSettings;
-import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.BaseTestCase;
 
 /**
@@ -16,40 +11,6 @@ public class SearchUrlUtilsTest extends BaseTestCase {
         super(name);
     }
 
-    /**
-     * Tests {@link SearchUrlUtils#createPromotionUrl(PromotionMessageContainer, long)}.
-     */
-    public void testCreatePromotionUrl() {
-        Mockery context = new Mockery() {{
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }};
-        
-        final String redirect = "http://blahh.om";
-        final String url = "asdsafasf.cob";
-
-        final PromotionMessageContainer container = context.mock(PromotionMessageContainer.class);
-        
-        context.checking(new Expectations() {{
-            allowing(container).getURL();
-            will(returnValue(url));
-            
-            allowing(container);
-        }});
-             
-        PromotionSettings.REDIRECT_URL.set(redirect);
-        
-        assertNotNull(SearchUrlUtils.createPromotionUrl(container, 0));
-        
-        // Test consistency 
-        assertEquals(SearchUrlUtils.createPromotionUrl(container, 1000), 
-                SearchUrlUtils.createPromotionUrl(container, 1000));
-        
-        assertTrue(SearchUrlUtils.createPromotionUrl(container, 1000).startsWith(redirect));
-        assertTrue(SearchUrlUtils.createPromotionUrl(container, 1000).indexOf(url) > 0);
-        
-        context.assertIsSatisfied();
-    }
-    
     /**
      * Tests {@link SearchUrlUtils#stripUrl(String)}.
      */

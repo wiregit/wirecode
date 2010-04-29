@@ -1,8 +1,6 @@
 package org.limewire.core.impl.search;
 
-import java.util.Arrays;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
@@ -12,13 +10,9 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
-import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 import org.limewire.friend.api.FriendPresence;
-
 
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
@@ -76,13 +70,6 @@ public class MockSearch implements Search {
     private void handleSearchResult(MockSearchResult mock) {
         for (SearchListener listener : listeners) {
             listener.handleSearchResult(this, mock);
-        }
-    }
-    
-    private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
-        List<SponsoredResult> mockList =  Arrays.asList(sponsoredResults);
-        for (SearchListener listener : listeners) {
-            listener.handleSponsoredResults(this, mockList);
         }
     }
     
@@ -290,25 +277,8 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
-
-        // Create a search result that will be categorized as "Video".
-
-        
-        SponsoredResult sponsored = new MockSponsoredResult(
-            "Internal Ad",
-            "a ad a daflad fajla\naldjfla awejl sdaf", 
-            "store.limewire.com",
-            "http://www.store.limewire.com/store/app/pages/help/Help/",
-            SponsoredResultTarget.STORE);
-        SponsoredResult sponsored2 = new MockSponsoredResult(
-            "External Ad",
-            "a ad a daflad fajla\naldjfla awejl sdaf",
-            "google.com",
-            "http://google.com",
-            SponsoredResultTarget.EXTERNAL);
-        handleSponsoredResults(sponsored, sponsored2);
-        
     }
+
     private void addRecordsMonkey(int i){
         //monkey
         MockSearchResult msr;
