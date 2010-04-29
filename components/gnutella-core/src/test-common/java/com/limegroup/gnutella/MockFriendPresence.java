@@ -16,9 +16,6 @@ public class MockFriendPresence extends AbstractFriendPresence {
     public MockFriendPresence(MockFriend friend, String presenceId, Feature...features) {
         this.presenceId = presenceId;
         this.friend = friend;
-        for(Feature feature : features) {
-            addFeature(feature);
-        }
     }
     
     @Override
@@ -29,25 +26,5 @@ public class MockFriendPresence extends AbstractFriendPresence {
     @Override
     public String getPresenceId() {
         return presenceId;
-    }
-
-    @Override
-    public Mode getMode() {
-        return null;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0;
-    }
-
-    @Override
-    public String getStatus() {
-        return null;
-    }
-
-    @Override
-    public Type getType() {
-        return null;
     }
 }

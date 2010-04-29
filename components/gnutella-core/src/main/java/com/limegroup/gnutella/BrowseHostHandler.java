@@ -3,10 +3,8 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -17,7 +15,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -33,8 +30,6 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
-import org.limewire.friend.api.feature.AuthTokenFeature;
-import org.limewire.friend.api.feature.Feature;
 import org.limewire.http.httpclient.SocketWrapperProtocolSocketFactory;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
@@ -218,17 +213,6 @@ public class BrowseHostHandler {
 //        SocketWrappingHttpClient client = clientProvider.get();
 //        client.setSocket(socket);
         SocketWrappingHttpClient client = new SocketWrappingHttpClient(socket);
-        if(!friendPresence.getFriend().isAnonymous()) {
-            String username = friendPresence.getFriend().getNetwork().getCanonicalizedLocalID();
-            Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
-            if(feature != null) {
-                AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
-                String password = StringUtils.toUTF8String(authTokenFeature.getFeature().getToken());
-                client.setCredentials(new UsernamePasswordCredentials(username, password));
-            } else {
-                LOG.infof("no auth token for: {0}", friendPresence);
-            }
-        }
         // hardcoding to "http" should work;
         // socket has already been established
         HttpGet get = new HttpGet("http://" +
@@ -253,15 +237,7 @@ public class BrowseHostHandler {
     }
 
     String getPath(FriendPresence friendPresence) {
-        if(friendPresence.getFriend().isAnonymous()) {
-            return "/";
-        } else {
-            try {
-                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getFriend().getNetwork().getCanonicalizedLocalID(), "UTF-8") + "/";
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        return "/";
     }
 
     private void validateResponse(HttpResponse response) throws IOException {

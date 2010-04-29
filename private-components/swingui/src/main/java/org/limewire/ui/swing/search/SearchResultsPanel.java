@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Scrollable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -33,20 +32,15 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel.CategoryListener;
-import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.SearchResultsMessagePanel.MessageType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -96,12 +90,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     private final ResultsContainer resultsContainer;
        
-    /**
-     * This is the subpanel that appears in the upper-right corner
-     * of each search results tab.
-     */
-    private final SortAndFilterPanel sortAndFilterPanel;
-    
     /** The sponsored results. */
     private final SponsoredResultsPanel sponsoredResultsPanel;
     
@@ -116,9 +104,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     
     /** This is the white gap which appears between the message panel and the search results */
     private Component messagePanelsGap;
-    
-    /** Listener for changes in the view type. */
-    private final SettingListener viewTypeListener;
     
     /** Listener for updates to the result count. */
     private final ListEventListener<VisualSearchResult> resultCountListener;
@@ -155,8 +140,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     /** This is the active OverlayType for the JXLayer */
     private OverlayType overlayType = OverlayType.NONE;
     
-    private SettingListener messagePanelGapHider;
-    
     /**
      * Constructs a SearchResultsPanel with the specified components.
      */
@@ -164,13 +147,11 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     public SearchResultsPanel(
             @Assisted SearchResultsModel searchResultsModel,
             ResultsContainerFactory containerFactory,
-            SortAndFilterPanelFactory sortAndFilterFactory,
             AdvancedFilterPanelFactory<VisualSearchResult> filterPanelFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             HeaderBarDecorator headerBarDecorator,
             CategoryIconManager categoryIconManager, 
-            BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory,
-            AllFriendsRefreshManager allFriendsRefreshManager) {
+            BrowseFailedMessagePanelFactory browseFailedMessagePanelFactory) {
         super(new BorderLayout());
         
         GuiUtils.assignResources(this);
@@ -183,9 +164,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         this.sponsoredResultsPanel.setVisible(false);
         this.browseFailedPanel = browseFailedMessagePanelFactory.create(searchResultsModel);
         
-        // Create sort and filter components.
-        sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
-        
         filterPanel = filterPanelFactory.create(searchResultsModel, searchResultsModel.getSearchType());
         
         scrollPane = new JScrollPane();
@@ -195,26 +173,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         
         // Create results container with tables.
         resultsContainer = containerFactory.create(searchResultsModel);
-        
-        viewTypeListener = new SettingListener() {
-            int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
-            @Override
-            public void settingChanged(SettingEvent evt) {
-               SwingUtilities.invokeLater(new Runnable() {
-                   @Override
-                   public void run() {
-                       int newSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
-                       if(newSearchViewTypeId != oldSearchViewTypeId) {
-                           SearchViewType newSearchViewType = SearchViewType.forId(newSearchViewTypeId);
-                           resultsContainer.setViewType(newSearchViewType);
-                           syncScrollPieces();
-                           oldSearchViewTypeId = newSearchViewTypeId;
-                       }
-                   }               
-               });
-            } 
-        };
-        SwingUiSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(viewTypeListener);
         
         // Initialize header label.
         updateTitle();
@@ -234,8 +192,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         searchResultsModel.getUnfilteredList().addListEventListener(resultCountListener);
         searchResultsModel.getFilteredList().addListEventListener(resultCountListener);
         
-        // Configure sort panel and results container.
-        sortAndFilterPanel.setSearchCategory(searchResultsModel.getSearchCategory());
+        // Configure results container.
         resultsContainer.showCategory(searchResultsModel.getSearchCategory());
         syncScrollPieces();
         
@@ -244,31 +201,15 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         filterPanel.addCategoryListener(new CategoryListener() {
             @Override
             public void categorySelected(SearchCategory displayCategory) {
-                sortAndFilterPanel.setSearchCategory(displayCategory);
                 resultsContainer.showCategory(displayCategory);
                 syncScrollPieces();
                 updateTitle();
             }
         });
 
-        browseStatusPanel = new BrowseStatusPanel(searchResultsModel, allFriendsRefreshManager);
+        browseStatusPanel = new BrowseStatusPanel(searchResultsModel);
         
         messagePanel = new SearchResultsMessagePanel();
-        
-        // if the user closes the hint showing where the classic search view is by clicking on the hint's close button,
-        // we need to hear about that in this class so that we can make the gap separating the message box from
-        // the search results disappear
-        if (messagePanel.isShowClassicSearchResultsHint()) {
-            messagePanelGapHider = new SettingListener() {
-                @Override
-                public void settingChanged(SettingEvent evt) {
-                    if (!SwingUiSettings.SHOW_CLASSIC_REMINDER.getValue()) {
-                        messagePanelsGap.setVisible(false);
-                    }
-                }
-            };
-            SwingUiSettings.SHOW_CLASSIC_REMINDER.addSettingListener(messagePanelGapHider);
-        }
         
         jxlayer = new JXLayer<JComponent>(createSearchResultsPanel());
         jxlayer.getGlassPane().setLayout(new BorderLayout());
@@ -325,16 +266,10 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      */
     @Override
     public void dispose() {
-        SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
-        if (messagePanelGapHider != null) SwingUiSettings.SHOW_CLASSIC_REMINDER.removeSettingListener(messagePanelGapHider);
         searchResultsModel.getFilteredList().removeListEventListener(resultCountListener);
         searchResultsModel.getUnfilteredList().removeListEventListener(resultCountListener);
-        sortAndFilterPanel.dispose();
         filterPanel.dispose();
-        messagePanel.dispose();
-        browseFailedPanel.dispose();
         searchResultsModel.dispose();
-        browseStatusPanel.dispose();
     }
     
     /**
@@ -550,8 +485,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         header.add(browseStatusPanel, "alignx 0%, growx, pushx");
         headerBarDecorator.decorateBasic(header);
         
-        sortAndFilterPanel.layoutComponents(header);
-        
         searchResultsComponentsPanel.add(header, "spanx 2, growx, growy, wrap");
         searchResultsComponentsPanel.add(filterPanel, "grow, spany 3");
         searchResultsComponentsPanel.add(messagePanel, "spanx 1, growx, wrap");
@@ -596,30 +529,20 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                 return super.getPreferredSize();
             } else {
                 int width = super.getPreferredSize().width;
-                int height = ((JComponent)scrollable).getPreferredSize().height;
-                
-                // the list view has some weird rendering sometimes (double space after last result)
-                // so don't fill full screen on list view
-                if( (scrollable instanceof ListViewTable)) {
-                    // old check, if sponsored results aren't showing properlly revert to just using this
-                    if(sponsoredResultsPanel.isVisible()) {
-                        height = Math.max(height, sponsoredResultsPanel.getPreferredSize().height);
-                    }
-                } else { // classic view
-                    int headerHeight = 0;
-                    
-                    //the table headers aren't being set on the scrollpane, so if its visible check its
-                    // height and subtract it from the viewport size
-                    JTableHeader header = ((JTable)scrollable).getTableHeader();
-                    if(header != null && header.isShowing()) {
-                        headerHeight = header.getHeight();
-                    }
-                    
-                    // if the height of table is less than the scrollPane height, set preferred height
-                    // to same size as scrollPane
-                    if(height < scrollPane.getSize().height - headerHeight) {
-                        height = scrollPane.getSize().height - headerHeight;
-                    }
+                int height = ((JComponent)scrollable).getPreferredSize().height;                
+                int headerHeight = 0;
+
+                //the table headers aren't being set on the scrollpane, so if its visible check its
+                // height and subtract it from the viewport size
+                JTableHeader header = ((JTable)scrollable).getTableHeader();
+                if(header != null && header.isShowing()) {
+                    headerHeight = header.getHeight();
+                }
+
+                // if the height of table is less than the scrollPane height, set preferred height
+                // to same size as scrollPane
+                if(height < scrollPane.getSize().height - headerHeight) {
+                    height = scrollPane.getSize().height - headerHeight;
                 }
                 return new Dimension(width, height);
             }
@@ -681,9 +604,6 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         // let's check whether we need to show the user any messages
         if (!fullyConnected && (receivedSearchResults || receivedSponsoredResults)) {
             messagePanel.setMessageType(MessageType.CONNECTING_TO_ULTRAPEERS);
-            messagePanelsGap.setVisible(true);
-        } else if (fullyConnected && receivedSearchResults && messagePanel.isShowClassicSearchResultsHint()) {
-            messagePanel.setMessageType(MessageType.CLASSIC_SEARCH_RESULTS_HINT);            
             messagePanelsGap.setVisible(true);
         } else {
             messagePanel.setMessageType(MessageType.NONE);

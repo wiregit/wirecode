@@ -20,11 +20,7 @@ public class BrowseStatus {
         /** Not all browses have completed, but none have failed yet. */
         LOADING(true),
         /** Useful in multi-browse: some browses have updates, but others have failed. */
-        UPDATED_PARTIAL_FAIL(true),
-        /** Useful for friend browses: the friend is currently offline. */
-        OFFLINE(false),
-        /** Useful for multi-friend browses: some friends are online, but sharing nothing. */
-        NO_FRIENDS_SHARING(false) ;
+        UPDATED_PARTIAL_FAIL(true);
         
         private boolean ok;
         BrowseState(boolean ok){

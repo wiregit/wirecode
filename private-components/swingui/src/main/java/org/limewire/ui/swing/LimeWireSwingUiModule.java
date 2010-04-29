@@ -1,11 +1,9 @@
 package org.limewire.ui.swing;
 
-import org.limewire.ui.swing.browser.LimeWireUiBrowserModule;
 import org.limewire.ui.swing.callback.GuiCallbackImpl;
 import org.limewire.ui.swing.components.LimeWireUiComponentsModule;
 import org.limewire.ui.swing.dock.LimeWireUiDockModule;
 import org.limewire.ui.swing.downloads.LimeWireUiDownloadsModule;
-import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.images.LimeWireUiImagesModule;
 import org.limewire.ui.swing.inspections.ActivityInspections;
 import org.limewire.ui.swing.library.LimeWireUiLibraryModule;
@@ -32,11 +30,9 @@ public class LimeWireSwingUiModule extends AbstractModule {
     protected void configure() {
         bind(GuiCallbackImpl.class);
         bind(ActivityInspections.class);
-        install(new LimeWireUiBrowserModule());
         install(new LimeWireUiComponentsModule());
         install(new LimeWireUiDockModule());
         install(new LimeWireUiDownloadsModule());
-        install(new LimeWireUiFriendsModule());
         install(new LimeWireUiImagesModule());
         install(new LimeWireUiLibraryModule());
         install(new LimeWireUiMainframeModule());

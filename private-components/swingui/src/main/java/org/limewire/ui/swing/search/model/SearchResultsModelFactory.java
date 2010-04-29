@@ -6,7 +6,6 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.search.SearchInfo;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
@@ -18,18 +17,11 @@ import com.google.inject.Provider;
  */
 public class SearchResultsModelFactory {
 
-    private final SearchManager searchManager;
-    
+    private final SearchManager searchManager;    
     private final SpamManager spamManager;
-
-    private final SimilarResultsDetectorFactory similarResultsDetectorFactory;
-
     private final LibraryManager libraryManager;
-
     private final DownloadListManager downloadListManager;
-
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
-
     private final VisualSearchResultFactory vsrFactory;
 
     /**
@@ -38,14 +30,12 @@ public class SearchResultsModelFactory {
      */
     @Inject
     public SearchResultsModelFactory(SearchManager searchManager,
-            SimilarResultsDetectorFactory similarResultsDetectorFactory,
             SpamManager spamManager, LibraryManager libraryManager,
             DownloadListManager downloadListManager,
             Provider<PropertiableHeadings> propertiableHeadings,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             VisualSearchResultFactory vsrFactory) {
         this.searchManager = searchManager;
-        this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
         this.downloadListManager = downloadListManager;
@@ -62,9 +52,6 @@ public class SearchResultsModelFactory {
                 searchInfo, search, vsrFactory, downloadListManager, 
                 downloadExceptionHandler, searchManager);
 
-        // Create detector to find similar results.
-        SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory.newSimilarResultsDetector();
-
         // Add list listener for results already downloaded or being downloaded. 
         // AlreadyDownloaded listener needs to be added to the list before the
         // grouping listener because the grouping listener uses values set by 
@@ -73,14 +60,8 @@ public class SearchResultsModelFactory {
                 new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
         searchResultsModel.addResultListener(alreadyDownloadedListEventListener);
 
-        // Add list listener to group similar results.
-        if (SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
-            GroupingListEventListener groupingListEventListener = new GroupingListEventListener(similarResultsDetector);
-            searchResultsModel.addResultListener(groupingListEventListener);
-        }
-
         // Add list listener to handle spam results.
-        SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager, similarResultsDetector);
+        SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager);
         searchResultsModel.addResultListener(spamListEventListener);
 
         return searchResultsModel;

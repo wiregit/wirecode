@@ -1,6 +1,5 @@
 package org.limewire.core.impl.support;
 
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.support.SessionInfo;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
@@ -51,7 +50,6 @@ class LimeSessionInfo implements SessionInfo {
     private final UploadSlotManager uploadSlotManager;
     private final ConnectionServices connectionServices;
     private final LifecycleManager lifecycleManager;
-    private final RemoteLibraryManager remoteLibraryManager;
     private final NetworkManager networkManager;
 
     @Inject
@@ -64,7 +62,7 @@ class LimeSessionInfo implements SessionInfo {
                            ConnectionCheckerManager connectionCheckerManager, NIODispatcher nioDispatcher,
                            Library library, SimppManager simppManager,
                            UploadSlotManager uploadSlotManager, ConnectionServices connectionServices,
-                           LifecycleManager lifecycleManager, RemoteLibraryManager remoteLibraryManager,
+                           LifecycleManager lifecycleManager,
                            @GnutellaFiles FileView gnutellaFileView,
                            NetworkManager networkManager) {
         this.dispatcher = dispatcher;
@@ -87,7 +85,6 @@ class LimeSessionInfo implements SessionInfo {
         this.uploadSlotManager = uploadSlotManager;
         this.connectionServices = connectionServices;
         this.lifecycleManager = lifecycleManager;
-        this.remoteLibraryManager = remoteLibraryManager;
         this.gnutellaFileView = gnutellaFileView;
         this.networkManager = networkManager;
     }
@@ -253,11 +250,6 @@ class LimeSessionInfo implements SessionInfo {
     @Override
     public int getManagedFileListSize() {
         return library.size();
-    }
-
-    @Override
-    public int getAllFriendsFileListSize() {
-        return remoteLibraryManager.getAllFriendsLibrary().size();
     }
 
     @Override

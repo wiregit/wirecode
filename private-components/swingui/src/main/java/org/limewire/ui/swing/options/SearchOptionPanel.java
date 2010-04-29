@@ -54,7 +54,6 @@ public class SearchOptionPanel extends OptionPanel {
     
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
-    private JCheckBox groupSimilarResults;
     
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
@@ -70,15 +69,9 @@ public class SearchOptionPanel extends OptionPanel {
  		this.filterKeywordOptionPanelProvider = filterKeywordOptionPanelProvider;
         this.filterFileExtensionsOptionPanelProvider = filterFileExtensionsOptionPanelProvider;
         
-        groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
-        groupSimilarResults.setContentAreaFilled(false);
-        
         setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx, gap 4"));
         add(getSearchBarPanel(), "growx, wrap");
         add(getFilteringPanel(), "growx, wrap");
-        
-        add(groupSimilarResults);
-        add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=groupSimilarResults", application), "wrap");
     }
 
     private OptionPanel getSearchBarPanel() {
@@ -91,7 +84,6 @@ public class SearchOptionPanel extends OptionPanel {
 
     @Override
     ApplyOptionResult applyOptions() {
-        SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
         ApplyOptionResult result = null;
         
         result = getSearchBarPanel().applyOptions();
@@ -104,26 +96,20 @@ public class SearchOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return getSearchBarPanel().hasChanged()
-        || getFilteringPanel().hasChanged()
-        || groupSimilarResults.isSelected() != SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue();
+        || getFilteringPanel().hasChanged();
     }
 
     @Override
     public void initOptions() {
         getSearchBarPanel().initOptions();
         getFilteringPanel().initOptions();
-        
-        groupSimilarResults.setSelected(SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
     }
 
     private class SearchBarPanel extends OptionPanel {
 
         private JComboBox defaultSearchSpinner;
-
         private JCheckBox searchTabNumberCheckBox;
-
         private JCheckBox suggestSmartQueries;
-
         private JButton clearNowButton;
 
         public SearchBarPanel() {

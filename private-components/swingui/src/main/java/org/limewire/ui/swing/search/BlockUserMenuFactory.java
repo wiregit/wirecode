@@ -66,9 +66,7 @@ public class BlockUserMenuFactory {
         final Map<String, Friend> p2pUsers = new TreeMap<String, Friend>();
         for (RemoteHost host : allHosts) {
             Friend friend = host.getFriendPresence().getFriend();
-            if (friend.isAnonymous()) {
-                p2pUsers.put(friend.getRenderName(), friend);
-            }
+            p2pUsers.put(friend.getRenderName(), friend);
         }
 
         if (p2pUsers.size() == 0) {

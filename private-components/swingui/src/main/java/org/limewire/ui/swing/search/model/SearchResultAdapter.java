@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,10 +38,7 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     
     private final Provider<PropertiableHeadings> propertiableHeadings;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
-    private CopyOnWriteArrayList<VisualSearchResult> similarResults = null;
-    private VisualSearchResult similarityParent;
     private boolean visible;
-    private boolean childrenVisible;    
     private Boolean spamCache;    
     private boolean preExistingDownload = false;    
     private String cachedHeading;    
@@ -59,15 +54,8 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
             VisualSearchResultStatusListener changeListener) {
         this.groupedSearchResult = groupedSearchResult;
         this.propertiableHeadings = propertiableHeadings;
-        this.changeListener = changeListener;
-        
+        this.changeListener = changeListener;        
         this.visible = true;
-        this.childrenVisible = false;
-    }
-
-    @Override
-    public boolean isAnonymous() {
-        return groupedSearchResult.isAnonymous();
     }
     
     @Override
@@ -121,39 +109,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     public String getNameProperty(boolean useAudioArtist) {
         return PropertiableFileUtils.getNameProperty(this, useAudioArtist);
     }
-    
-    @Override
-    public void addSimilarSearchResult(VisualSearchResult similarResult) {
-        assert similarResult != this;
-        if(similarResults == null) {
-            similarResults = new CopyOnWriteArrayList<VisualSearchResult>();
-        }
-        similarResults.addIfAbsent(similarResult);
-    }
-
-    @Override
-    public void removeSimilarSearchResult(VisualSearchResult result) {
-        if(similarResults != null) {
-            similarResults.remove(result);
-        }
-    }
-
-    @Override
-    public List<VisualSearchResult> getSimilarResults() {
-        return similarResults == null ? Collections.<VisualSearchResult>emptyList() : similarResults;
-    }
-
-    @Override
-    public void setSimilarityParent(VisualSearchResult parent) {
-        VisualSearchResult oldParent = this.similarityParent;
-        this.similarityParent = parent;
-        firePropertyChange(SIMILARITY_PARENT, oldParent, parent);
-    }
-
-    @Override
-    public VisualSearchResult getSimilarityParent() {
-        return similarityParent;
-    }
 
     @Override
     public long getSize() {
@@ -205,11 +160,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
     }
 
     @Override
-    public boolean isChildrenVisible() {
-        return childrenVisible;
-    }
-
-    @Override
     public boolean isSpam() {
         if (spamCache == null) {
             boolean spam = false;
@@ -227,26 +177,6 @@ class SearchResultAdapter implements VisualSearchResult, Comparable {
         firePropertyChange("spam-ui", oldSpam, spam);
     }
     
-    @Override
-    public void setChildrenVisible(boolean childrenVisible) {
-        boolean oldChildrenVisible = childrenVisible;
-        this.childrenVisible = childrenVisible;
-        for (VisualSearchResult similarResult : getSimilarResults()) {
-            similarResult.setVisible(childrenVisible);
-            similarResult.setChildrenVisible(false);
-        }
-        firePropertyChange("childrenVisible", oldChildrenVisible, childrenVisible);
-    }
-
-    @Override
-    public void toggleChildrenVisibility() {
-        setChildrenVisible(!isShowingSimilarResults());
-    }
-
-    private boolean isShowingSimilarResults() {
-        return getSimilarResults().size() > 0 && isChildrenVisible();
-    }
-
     @Override
     public URN getUrn() {
         return groupedSearchResult.getUrn();

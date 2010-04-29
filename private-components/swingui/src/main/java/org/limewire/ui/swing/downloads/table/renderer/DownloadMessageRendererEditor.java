@@ -19,7 +19,6 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.malware.AntivirusUpdateType;
-import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;
@@ -239,38 +238,9 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                 return I18n.trn("{0} P2P User", "{0} P2P Users", downloadSourceCount);
             }
         } else if (hosts.size() == 1) {
-
-            Friend friend = hosts.iterator().next().getFriendPresence().getFriend();
-            if (friend.isAnonymous()) {
-                return I18n.tr("1 P2P User");
-            } else {
-                return friend.getRenderName();
-            }
-
+            return I18n.tr("1 P2P User");
         } else {
-            boolean hasP2P = false;
-            boolean hasFriend = false;
-            
-            for (RemoteHost host : hosts) {                
-                if (host.getFriendPresence().getFriend().isAnonymous()) {
-                    hasP2P = true;
-                } else {
-                    hasFriend = true;
-                }
-                
-                if (hasP2P && hasFriend) {
-                    // We found both.  We're done.
-                    break;
-                }
-            }
-            if (hasP2P && hasFriend ) {
-                return I18n.trn("{0} Person", "{0} People", hosts.size());
-            } else if (hasP2P) {
-                return I18n.trn("{0} P2P User", "{0} P2P Users", hosts.size());
-            } else {
-                //just friends
-                return I18n.trn("{0} Friend", "{0} Friends", hosts.size());
-            }
+            return I18n.trn("{0} P2P User", "{0} P2P Users", hosts.size());
         }
     }
     

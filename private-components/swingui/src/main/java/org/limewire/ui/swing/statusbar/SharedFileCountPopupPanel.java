@@ -36,19 +36,11 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
-import org.limewire.friend.api.FriendConnection;
-import org.limewire.friend.api.FriendConnectionEvent;
-import org.limewire.listener.EventBean;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.PopupHeaderBar;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.friends.login.AutoLoginService;
-import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.DrawMode;
 import org.limewire.ui.swing.painter.StatusBarPopupButtonPainter.PopupVisibilityChecker;
@@ -66,7 +58,6 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 public class SharedFileCountPopupPanel extends Panel implements Resizable {
    
@@ -84,17 +75,12 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
     
     @Resource private Font listTextFont;
     @Resource private Color listTextForeground;
-    @Resource private Font signInTextFont;
     
     private final SharedFileCountPanel sharedFileCountPanel;
     private final SharedFileListManager shareListManager;
-    private final Provider<LoginPopupPanel> loginPanelProvider;
-    private final ListenerSupport<FriendConnectionEvent> connectionSupport;
     private final LibraryMediator libraryMediator;
-    private final Provider<AutoLoginService> autoLoginServiceProvider;
 
-    private Timer repaintTimer = null; 
-    
+    private Timer repaintTimer = null;    
     private JXPanel frame = null;
     private MouseableTable table = null;
     private VisiblityMatcher matcher = null;
@@ -108,26 +94,17 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         }
     };
     private HyperlinkButton signIntoFriendsButton = null;
-    private final EventBean<FriendConnectionEvent> friendConnectionBean;
         
     @Inject
     public SharedFileCountPopupPanel(SharedFileCountPanel sharedFileCountPanel,
             SharedFileListManager shareListManager,
-            Provider<LoginPopupPanel> loginPanelProvider,
-            ListenerSupport<FriendConnectionEvent> connectionSupport,
             LibraryMediator libraryMediator,
-            Provider<AutoLoginService> autoLoginServiceProvider,
-            EventBean<FriendConnectionEvent> friendConnectionBean,
             ButtonDecorator buttonDecorator) {
         super(new BorderLayout());
         
         this.sharedFileCountPanel = sharedFileCountPanel;
         this.shareListManager = shareListManager;
-        this.loginPanelProvider = loginPanelProvider;
-        this.connectionSupport = connectionSupport;
         this.libraryMediator = libraryMediator;
-        this.autoLoginServiceProvider = autoLoginServiceProvider;
-        this.friendConnectionBean = friendConnectionBean;
         
         GuiUtils.assignResources(this);
         
@@ -300,64 +277,11 @@ public class SharedFileCountPopupPanel extends Panel implements Resizable {
         JPanel bottomPanel = new JPanel(new MigLayout("gap 0, insets 0, align center"));
         bottomPanel.setOpaque(false);
         
-        setUpAndAddSignInButton(bottomPanel);
-        
         contentPanel.add(bottomPanel, BorderLayout.SOUTH);
         
         frame.add(scrollPane, BorderLayout.CENTER);
 
         add(frame, BorderLayout.CENTER);
-    }
-    
-    private void setUpAndAddSignInButton(final JPanel panel) {
-        if (shouldShowSignInButton()) {
-            signIntoFriendsButton = new HyperlinkButton(new AbstractAction(I18n.tr("Sign in to share with friends")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    loginPanelProvider.get().setVisible(true);
-                }
-            });
-            signIntoFriendsButton.setFont(signInTextFont);
-
-            panel.add(signIntoFriendsButton);
-            
-            connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
-                @SwingEDTEvent
-                @Override
-                public void handleEvent(FriendConnectionEvent event) {
-                    if (!shouldShowSignInButton()) {
-                        connectionSupport.removeListener(this);
-                        panel.remove(signIntoFriendsButton);
-                        signIntoFriendsButton = null;
-                        validate();
-                        resize();
-                        repaint();
-                    }
-                }
-            });
-        }
-    }
-    
-    private boolean shouldShowSignInButton() {
-        FriendConnectionEvent lastEvent = friendConnectionBean.getLastEvent();
-        FriendConnection friendConnection = lastEvent != null ? lastEvent.getSource() : null;
-        if ((friendConnection != null && (friendConnection.isLoggedIn() || friendConnection.isLoggingIn()))
-                || autoLoginServiceProvider.get().isAttemptingLogin()) {
-            return false;
-        }
-        if (shareListManager.getModel().size() == 1) {
-            return true;
-        }
-        
-        for ( SharedFileList list : shareListManager.getModel() ) {
-            if (!list.isPublic()) {
-                if (list.getFriendIds().size() != 0) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
     }
     
     @Override

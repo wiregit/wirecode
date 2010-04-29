@@ -8,8 +8,6 @@ import org.limewire.friend.api.FriendPresence;
 public interface RemoteHost {    
     boolean isBrowseHostEnabled();
     
-    boolean isChatEnabled();
-    
     boolean isSharingEnabled();
     
     public FriendPresence getFriendPresence();

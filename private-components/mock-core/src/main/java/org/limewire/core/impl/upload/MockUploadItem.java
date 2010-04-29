@@ -247,11 +247,6 @@ public class MockUploadItem implements UploadItem {
         }
 
         @Override
-        public boolean isChatEnabled() {
-            return false;
-        }
-
-        @Override
         public boolean isSharingEnabled() {
             return false;
         }

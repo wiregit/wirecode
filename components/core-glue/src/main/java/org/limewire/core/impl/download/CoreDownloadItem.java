@@ -25,9 +25,7 @@ import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
-import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -59,15 +57,13 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     private volatile boolean scanningFragment = false;
 
     private final QueueTimeCalculator queueTimeCalculator;
-    private final FriendManager friendManager;
     private final DownloadItemType downloadItemType;
     private final CategoryManager categoryManager;
     
     @Inject
-    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, FriendManager friendManager, CategoryManager categoryManager) {
+    public CoreDownloadItem(@Assisted Downloader downloader, @Assisted QueueTimeCalculator queueTimeCalculator, CategoryManager categoryManager) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
-        this.friendManager = friendManager;
         this.categoryManager = categoryManager;
         if(downloader instanceof BTDownloader)
             downloadItemType = DownloadItemType.BITTORRENT;
@@ -200,15 +196,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
      * returns a generic GnutellaPresence.
 	 */
     private FriendPresence getFriendPresence(RemoteFileDesc rfd) {
-        FriendPresence friendPresence = null;
-        
-        if(rfd.getAddress() instanceof FriendAddress) {
-            friendPresence = friendManager.getMostRelevantFriendPresence(((FriendAddress)rfd.getAddress()).getId());
-        } 
-        if(friendPresence == null) {
-            friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID());
-        }
-        return friendPresence;
+        return new GnutellaPresence.GnutellaPresenceWithGuid(rfd.getAddress(), rfd.getClientGUID());
     }
 
     @Override

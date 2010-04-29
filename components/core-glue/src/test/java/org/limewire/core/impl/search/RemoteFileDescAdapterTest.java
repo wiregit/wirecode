@@ -190,9 +190,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
             if(!anonymous) {
                 Friend friend = context.mock(Friend.class);
                 allowing(friendPresence).getFriend();
-                will(returnValue(friend));                 
-                allowing(friend).isAnonymous();
-                will(returnValue(false));
+                will(returnValue(friend));
                 allowing(friend);
             }
 
@@ -465,8 +463,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         context.checking(new Expectations() {{           
             exactly(3).of(friendPresence).getFriend();
             will(returnValue(friend));
-            exactly(3).of(friend).isAnonymous();
-            will(returnValue(true));
             exactly(1).of(rfd).isBrowseHostEnabled();
             will(returnValue(true));
             
@@ -477,7 +473,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
                 
         assertSame(friendPresence, remoteHost.getFriendPresence());
         assertTrue(remoteHost.isBrowseHostEnabled());
-        assertFalse(remoteHost.isChatEnabled());
         assertFalse(remoteHost.isSharingEnabled());
         
         context.assertIsSatisfied();
@@ -498,7 +493,6 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         //  therefore ignore the result but make sure they do not cause
         //  exceptions.
         remoteHost.isBrowseHostEnabled();
-        remoteHost.isChatEnabled();
         remoteHost.isSharingEnabled();
        
         assertNotNull(remoteHost.getFriendPresence());

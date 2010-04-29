@@ -24,7 +24,6 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -45,8 +44,7 @@ import com.google.inject.Provider;
 
 /** The container for advanced searching. */
 public class AdvancedSearchPanel extends JXPanel implements Disposable {
-        
-    private final FriendAutoCompleterFactory friendAutoCompleterFactory;
+
     private final Provider<KeywordAssistedSearchBuilder> advancedSearchBuilder;
     private final PropertyDictionary propertyDictionary;
     private final ButtonDecorator buttonDecorator;
@@ -66,11 +64,10 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
     private final JXButton searchButton = new JXButton(searchAction);
     
     @Inject
-    public AdvancedSearchPanel(PropertyDictionary propertyDictionary, FriendAutoCompleterFactory friendAutoCompleterFactory,
+    public AdvancedSearchPanel(PropertyDictionary propertyDictionary,
             HeaderBarDecorator headerDecorator, ButtonDecorator buttonDecorator, Provider<KeywordAssistedSearchBuilder> advancedSearchBuilder) {
         
         this.propertyDictionary = propertyDictionary;
-        this.friendAutoCompleterFactory = friendAutoCompleterFactory;
         this.buttonDecorator = buttonDecorator;
         this.advancedSearchBuilder = advancedSearchBuilder;
         
@@ -117,15 +114,15 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
         };
         AdvancedPanel panel = null;
         if(category == Category.AUDIO) {
-            panel =  new AdvancedAudioPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
+            panel =  new AdvancedAudioPanel(propertyDictionary, enterKeyAction);
         } else if(category == Category.VIDEO) {
-            panel = new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
+            panel = new AdvancedVideoPanel(propertyDictionary, enterKeyAction);
         } else if(category == Category.DOCUMENT) {
-            panel = new AdvancedDocumentPanel(friendAutoCompleterFactory, enterKeyAction);
+            panel = new AdvancedDocumentPanel(enterKeyAction);
         } else if(category == Category.IMAGE) {
-            panel = new AdvancedImagePanel(friendAutoCompleterFactory, enterKeyAction);
+            panel = new AdvancedImagePanel(enterKeyAction);
         } else if(category == Category.PROGRAM) {
-            panel = new AdvancedProgramPanel(friendAutoCompleterFactory, enterKeyAction);
+            panel = new AdvancedProgramPanel(enterKeyAction);
         }
         
         return panel;

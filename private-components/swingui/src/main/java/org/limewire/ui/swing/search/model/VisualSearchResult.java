@@ -12,8 +12,7 @@ import org.limewire.ui.swing.nav.NavSelectable;
 
 /**
  * Defines an interface for a displayed search result.  The displayed result
- * may be supported by multiple sources, and may also contain an aggregation 
- * of similar results.   
+ * may be supported by multiple sources.
  */
 public interface VisualSearchResult extends NavSelectable, PropertiableFile, FilterableItem {
 
@@ -64,11 +63,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
     Collection<RemoteHost> getSources();
     
     /**
-     * Returns a list of similar search results.
-     */
-    List<VisualSearchResult> getSimilarResults();
-
-    /**
      * Returns the size of the search result in bytes.
      */
     long getSize();
@@ -84,21 +78,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
     void setVisible(boolean visible);
 
     /**
-     * Returns an indicator that determines if similar results are visible.
-     */
-    boolean isChildrenVisible();
-    
-    /**
-     * Sets an indicator that determines if similar results are visible.
-     */
-    void setChildrenVisible(boolean childrenVisible);
-    
-    /**
-     * Toggles the indicator that determines if similar results are visible.
-     */
-    void toggleChildrenVisibility();
-    
-    /**
      * Returns an indicator that determines if the result is spam.
      */
     boolean isSpam();
@@ -107,26 +86,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      * Sets an indicator that determines if the result is spam.
      */
     void setSpam(boolean spam);
-
-    /**
-     * Adds the specified search result to the list of similar results.
-     */
-    public void addSimilarSearchResult(VisualSearchResult similarResult);
-
-    /**
-     * Removes the specified search result from the list of similar results.
-     */
-    public void removeSimilarSearchResult(VisualSearchResult result);
-
-    /**
-     * Returns the parent result that this result is similar to.  May be null.
-     */
-    VisualSearchResult getSimilarityParent();
-
-    /**
-     * Sets the specified result as the parent that this result is similar to.
-     */
-    public void setSimilarityParent(VisualSearchResult parent);
 
     /**
      * Returns the magnet link associated with the search result.
@@ -164,5 +123,4 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile, Fil
      * Returns true if the associated file contains a license.
      */
     boolean isLicensed();
-
 }

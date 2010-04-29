@@ -12,12 +12,6 @@ import org.limewire.friend.api.Friend;
 public interface FilterableItem extends PropertiableFile {
 
     /**
-     * Returns an indicator that determines if the item is from an anonymous
-     * source.
-     */
-    boolean isAnonymous();
-    
-    /**
      * Returns the file extension for the item.
      */
     String getFileExtension();

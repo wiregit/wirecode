@@ -39,11 +39,6 @@ public class MockFilterableItem implements FilterableItem {
     }
     
     @Override
-    public boolean isAnonymous() {
-        return true;
-    }
-    
-    @Override
     public String getFileExtension() {
         return null;
     }

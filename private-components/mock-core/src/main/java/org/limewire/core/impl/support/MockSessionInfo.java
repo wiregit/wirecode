@@ -135,11 +135,6 @@ public class MockSessionInfo implements SessionInfo {
     }
 
     @Override
-    public int getAllFriendsFileListSize() {
-        return 0;
-    }
-
-    @Override
     public int getSimppVersion() {
         return 0;
     }

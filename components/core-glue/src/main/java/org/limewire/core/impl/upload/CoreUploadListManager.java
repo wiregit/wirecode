@@ -15,7 +15,6 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.friend.BittorrentPresence;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.ConnectableImpl;
@@ -40,7 +39,6 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
 
     private final CoreUploadItem.Factory cuiFactory;
     private final UploadServices uploadServices;
-    private final FriendManager friendManager;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
 
     private final EventList<UploadItem> uploadItems;
@@ -51,10 +49,9 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     private static final int PERIOD = 1000;
 
     @Inject
-    public CoreUploadListManager(UploadServices uploadServices, FriendManager friendManager, CoreUploadItem.Factory cuiFactory) {
+    public CoreUploadListManager(UploadServices uploadServices, CoreUploadItem.Factory cuiFactory) {
         this.cuiFactory = cuiFactory;
         this.uploadServices = uploadServices;
-        this.friendManager = friendManager;
         
         threadSafeUploadItems = GlazedListsFactory.threadSafeList(new BasicEventList<UploadItem>());
         
@@ -224,21 +221,10 @@ public class CoreUploadListManager implements UploadListener, UploadListManager 
     }
     
     private FriendPresence getFriendPresence(Uploader uploader) {
-        
         if(uploader instanceof BTUploader) {
             return new BittorrentPresence(uploader);
-        }
-        
-        String id = uploader.getPresenceId();
-        FriendPresence currentPresence = null;
-        if (id != null) {
-             currentPresence = friendManager.getMostRelevantFriendPresence(id);
-        }
-        if (currentPresence == null) {
-            // copy construct connectable to give it full equals semantics
-            currentPresence = new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost());
-        }
-        return currentPresence;
+        }        
+        return new GnutellaPresence.GnutellaPresenceWithString(new ConnectableImpl(uploader), uploader.getHost());
     }
 
     /**

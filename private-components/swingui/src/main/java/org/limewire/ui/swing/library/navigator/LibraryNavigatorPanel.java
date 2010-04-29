@@ -18,17 +18,11 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.library.SharedFileListManager;
-import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.inject.LazySingleton;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
@@ -41,7 +35,6 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     private final LibraryNavigatorTable table;
     private final CreateListAction createAction;
-    private final SharedFileListManager sharedFileListManager;
     
     private HyperlinkButton createListButton;
     
@@ -54,7 +47,6 @@ public class LibraryNavigatorPanel extends JXPanel {
         super(new MigLayout("insets 0, gap 0, fillx", "[150!]", ""));
         
         this.table = table;
-        this.sharedFileListManager = sharedFileListManager;
         this.createAction = createAction;
         
         GuiUtils.assignResources(this);
@@ -81,22 +73,7 @@ public class LibraryNavigatorPanel extends JXPanel {
     }
     
     @Inject
-    void register(ListenerSupport<FriendConnectionEvent> connectionEvent) {
-        // listen for a friend sign on and create the private shared list
-        // if one doesn't exist on sign on.
-        connectionEvent.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendConnectionEvent event) {
-                if(event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                    EventList<SharedFileList> listsModel = sharedFileListManager.getModel();
-                    if(listsModel.size() == 1) {
-                        createPrivateShareList();
-                    }
-                }
-            }
-        });
-        
+    void register() {
         // when editing stops, reenable the Create List button
         table.getColumnModel().getColumn(0).getCellEditor().addCellEditorListener(new CellEditorListener(){
             @Override
@@ -109,13 +86,6 @@ public class LibraryNavigatorPanel extends JXPanel {
                 createListButton.setEnabled(true);
             }
         });
-    }
-    
-    /**
-     * If we haven't created the Private Shared list yet, create it
-     */
-    private void createPrivateShareList() {
-        sharedFileListManager.createNewSharedFileList(I18n.tr("Private Shared"));
     }
     
     private void initData() {

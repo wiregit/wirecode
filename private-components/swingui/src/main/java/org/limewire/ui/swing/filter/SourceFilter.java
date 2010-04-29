@@ -298,9 +298,7 @@ class SourceFilter<E extends FilterableItem> extends AbstractFilter<E> {
             @Override
             public List<SourceItem> getChildren(E parent) {
                 List<SourceItem> list = new ArrayList<SourceItem>();
-                if (parent.isAnonymous()) {
-                    list.add(SourceItem.ANONYMOUS_SOURCE);
-                }
+                list.add(SourceItem.ANONYMOUS_SOURCE);
                 if (parent.getFriends().size() > 0) {
                     list.add(SourceItem.ANY_FRIEND_SOURCE);
                 }

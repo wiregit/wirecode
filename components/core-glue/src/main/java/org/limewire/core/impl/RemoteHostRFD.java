@@ -2,7 +2,6 @@ package org.limewire.core.impl;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.feature.LimewireFeature;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 
@@ -27,32 +26,11 @@ public class RemoteHostRFD implements RemoteHost {
 
     @Override
     public boolean isBrowseHostEnabled() {
-        if(friendPresence.getFriend().isAnonymous()) {
-            return remoteFileDesc.isBrowseHostEnabled();
-        } else {
-            //ensure friend/user still logged in through LW
-            return friendPresence.hasFeatures(LimewireFeature.ID);
-        }
-    }
-
-    @Override
-    public boolean isChatEnabled() {
-        if(friendPresence.getFriend().isAnonymous()) {
-            return false;
-        }else { //TODO: this isn't entirely correct. Friend could have signed
-            // ouf of LW but still be logged in through other service allowing chat
-            return friendPresence.hasFeatures(LimewireFeature.ID);
-        }
+        return remoteFileDesc.isBrowseHostEnabled();
     }
 
     @Override
     public boolean isSharingEnabled() {
-        if(friendPresence.getFriend().isAnonymous()) {
-            return false;
-        } else {
-            //ensure friend/user still logged in through LW
-            return friendPresence.hasFeatures(LimewireFeature.ID);
-        }
+        return false;
     }
-
 }

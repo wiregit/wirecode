@@ -16,7 +16,6 @@ import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTUploader;
@@ -163,8 +162,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         { 
             exactly(3).of(presence).getFriend();
             will(returnValue(friend));
-            exactly(3).of(friend).isAnonymous();
-            will(returnValue(true));
             exactly(1).of(uploader).isBrowseHostEnabled();
             will(returnValue(true));
         }});
@@ -175,7 +172,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         assertNotNull(remoteHost);
         
         assertEquals(presence, remoteHost.getFriendPresence());
-        assertFalse(remoteHost.isChatEnabled());
         assertTrue(remoteHost.isBrowseHostEnabled());
         assertFalse(remoteHost.isSharingEnabled());
         
@@ -193,10 +189,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         { 
             exactly(3).of(presence).getFriend();
             will(returnValue(friend));
-            exactly(3).of(friend).isAnonymous();
-            will(returnValue(false));
-            exactly(3).of(presence).hasFeatures(LimewireFeature.ID);
-            will(returnValue(true));
         }});
         
         CoreUploadItem upload = new CoreUploadItem(uploader, presence, null);
@@ -205,7 +197,6 @@ public class CoreUploadItemTest extends BaseTestCase {
         assertNotNull(remoteHost);
         
         assertEquals(presence, remoteHost.getFriendPresence());
-        assertTrue(remoteHost.isChatEnabled());
         assertTrue(remoteHost.isBrowseHostEnabled());
         assertTrue(remoteHost.isSharingEnabled());
         

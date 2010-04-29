@@ -67,11 +67,6 @@ public class TestSearchResult implements SearchResult {
             }
 
             @Override
-            public boolean isChatEnabled() {
-                return false;
-            }
-
-            @Override
             public boolean isSharingEnabled() {
                 return false;
             }

@@ -1,16 +1,6 @@
 package org.limewire.ui.swing.filter;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.limewire.friend.api.Friend;
-import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.IncomingChatListener;
-import org.limewire.friend.api.MessageReader;
-import org.limewire.friend.api.MessageWriter;
-import org.limewire.friend.api.Network;
-import org.limewire.friend.api.PresenceEvent;
-import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 
 /**
@@ -56,7 +46,7 @@ public class SourceMatcherTest extends BaseTestCase {
         
         // Create test item.
         MockFilterableItem item = new MockFilterableItem("Test Item");
-        item.addFriend(new TestFriend("Vulcan", false));
+        item.addFriend(new TestFriend("Vulcan"));
         
         // Verify any friend matches.
         boolean actualReturn = sourceMatcher.matches(item);
@@ -71,7 +61,7 @@ public class SourceMatcherTest extends BaseTestCase {
         
         // Create test item.
         MockFilterableItem item = new MockFilterableItem("Test Item");
-        item.addFriend(new TestFriend("Vulcan", false));
+        item.addFriend(new TestFriend("Vulcan"));
         
         // Verify same friend matches.
         boolean actualReturn = sourceMatcher.matches(item);
@@ -79,7 +69,7 @@ public class SourceMatcherTest extends BaseTestCase {
         
         // Create 2nd test item.
         MockFilterableItem item2 = new MockFilterableItem("Test Item");
-        item2.addFriend(new TestFriend("Klingon", false));
+        item2.addFriend(new TestFriend("Klingon"));
         
         // Verify different friend does not match.
         actualReturn = sourceMatcher.matches(item2);
@@ -90,19 +80,12 @@ public class SourceMatcherTest extends BaseTestCase {
      * Test friend.
      */
     private static class TestFriend implements Friend {
-        private boolean anonymous;
         private String name;
 
-        public TestFriend(String name, boolean anonymous) {
+        public TestFriend(String name) {
             this.name = name;
-            this.anonymous = anonymous;
         }
         
-        @Override
-        public String getFirstName() {
-            return name;
-        }
-
         @Override
         public String getId() {
             return name;
@@ -114,80 +97,8 @@ public class SourceMatcherTest extends BaseTestCase {
         }
 
         @Override
-        public Network getNetwork() {
-            return new Network() {
-                @Override
-                public String getCanonicalizedLocalID() {
-                    return name;
-                }
-                
-                @Override
-                public String getNetworkName() {
-                    return "";
-                }
-
-                @Override
-                public Type getType() {
-                    return null;
-                }
-            };
-        }
-
-        @Override
         public String getRenderName() {
             return name;
-        }
-
-        @Override
-        public boolean isAnonymous() {
-            return anonymous;
-        }
-
-        @Override
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
-        }
-
-        @Override
-        public MessageWriter createChat(MessageReader reader) {
-            return null;
-        }
-
-        @Override
-        public FriendPresence getActivePresence() {
-            return null;
-        }
-
-        @Override
-        public Map<String, FriendPresence> getPresences() {
-            return Collections.emptyMap();
-        }
-
-        @Override
-        public boolean hasActivePresence() {
-            return false;
-        }
-
-        @Override
-        public boolean isSignedIn() {
-            return false;
-        }
-
-        @Override
-        public boolean isSubscribed() {
-            return false;
-        }
-
-        @Override
-        public void removeChatListener() {
-        }
-
-        @Override
-        public void setChatListenerIfNecessary(IncomingChatListener listener) {
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -37,7 +39,6 @@ import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
-import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
 import org.limewire.io.DiskException;
 import org.limewire.io.GUID;
@@ -57,7 +58,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -477,8 +477,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
 
-    private boolean isFriendDownload;
-
     /**
      * Creates a new ManagedDownload to download the given files.
      * <p/>
@@ -571,8 +569,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
 
-        isFriendDownload = isFriendDownload(rfds);
-
         if (rfds.size() > 0) {
             RemoteFileDesc initialRfd = rfds.iterator().next();
             initPropertiesMap(initialRfd);
@@ -582,15 +578,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         assert rfds.size() > 0 || defaultFileName != null;
         if (!hasDefaultFileName())
             setDefaultFileName(defaultFileName);
-    }
-
-    private boolean isFriendDownload(Collection<RemoteFileDesc> rfds) {
-        for (RemoteFileDesc rfd : rfds) {
-            if(!(rfd.getAddress() instanceof FriendAddress)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -2288,8 +2275,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Shares the newly downloaded file
      */
     protected void shareSavedFile(File saveFile) {
-        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()
-                && !isFriendDownload)
+        if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
             gnutellaFileCollection.add(saveFile, getXMLDocuments());
     }
 

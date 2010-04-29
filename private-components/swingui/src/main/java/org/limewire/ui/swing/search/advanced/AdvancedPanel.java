@@ -19,12 +19,9 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.BasicAutoCompleter;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
-import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
 import org.limewire.ui.swing.components.FilteredDocument;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.util.FilePropertyKeyUtils;
@@ -38,8 +35,6 @@ abstract class AdvancedPanel extends JPanel {
         new EnumMap<FilePropertyKey, JComponent>(FilePropertyKey.class);
     private final SearchCategory category;
 
-    private final FriendAutoCompleterFactory friendAutoCompleterFactory;
-    
     private final Action enterKeyAction;
 
 	/**
@@ -57,11 +52,10 @@ abstract class AdvancedPanel extends JPanel {
     /** 
      * Constructs an AdvancedPanel that will search the given category.
      */
-    public AdvancedPanel(SearchCategory category, FriendAutoCompleterFactory friendAutoCompleterFactory, Action enterKeyAction) {
+    public AdvancedPanel(SearchCategory category, Action enterKeyAction) {
         super(new MigLayout("fillx", "[]related[grow]", ""));
         
         this.category = category;
-        this.friendAutoCompleterFactory = friendAutoCompleterFactory;
         this.enterKeyAction = enterKeyAction;
         
         GuiUtils.assignResources(this);
@@ -88,8 +82,6 @@ abstract class AdvancedPanel extends JPanel {
         addEnterAction(textField);
         
         textField.setFont(resources.font);
-        final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(textField, new BasicAutoCompleter(friendAutoCompleterFactory.getDictionary(category, key)));
-        autoCompleteControl.setAutoComplete(true);
         add(textField, "growx, wrap");
         componentMap.put(key, textField);
     }

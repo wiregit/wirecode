@@ -42,7 +42,6 @@ import org.limewire.ui.swing.util.SwingInspectable;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -97,13 +96,13 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             
             ret.put("age", System.currentTimeMillis() - createTime);
             ret.put("type", searchInfo.getSearchType());
-            ret.put("files", sortedResultList.size());
+            ret.put("files", filteredResultList.size());
             
-            if (sortedResultList.size() > 0) {
+            if (filteredResultList.size() > 0) {
                 double random = new Random().nextDouble();
-                int randomIndex = (int) (sortedResultList.size() * random);
+                int randomIndex = (int) (filteredResultList.size() * random);
             
-                ret.put("random result bytes", sortedResultList.get(randomIndex).getSize());
+                ret.put("random result bytes", filteredResultList.get(randomIndex).getSize());
             } else {
                 // No files to get the size of
                 ret.put("random result bytes", -1);
@@ -154,18 +153,12 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     /** Listener to handle search result list events. */
     private EventListener<Collection<GroupedSearchResult>> searchListListener;
 
-    /** Current list of sorted and filtered results. */
-    private SortedList<VisualSearchResult> sortedResultList;
-
-    /** Current list of visible, sorted and filtered results. */
+    /** Current list of visible, filtered results. */
     private FilterList<VisualSearchResult> visibleResultList;
 
     /** Current selected search category. */
     private SearchCategory selectedCategory;
     
-    /** Current sort option. */
-    private SortOption sortOption;
-
     /** Current matcher editor for filtered search results. */
     private MatcherEditor<VisualSearchResult> filterEditor;
 
@@ -313,11 +306,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
         } finally {
             transactionList.commitEvent();
         }
-
-        // Reapply sort in case similarity parents have changed.
-        if (sortedResultList != null) {
-            sortedResultList.setComparator(sortedResultList.getComparator());
-        }
     }
     
     /**
@@ -439,19 +427,8 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     private void updateSortedList() {
         // Create visible and sorted lists if necessary.
         if (visibleResultList == null) {
-            sortedResultList = GlazedListsFactory.sortedList(filteredResultList, sortOption != null ? SortFactory.getSortComparator(sortOption) : null);
-            visibleResultList = GlazedListsFactory.filterList(sortedResultList, visibleEditor);
+            visibleResultList = GlazedListsFactory.filterList(filteredResultList, visibleEditor);
         }
-    }
-    
-    /**
-     * Sets the sort option.  This method updates the sorted list by changing 
-     * the sort comparator.
-     */
-    @Override
-    public void setSortOption(SortOption sortOption) {
-        this.sortOption = sortOption;
-        sortedResultList.setComparator((sortOption != null) ? SortFactory.getSortComparator(sortOption) : null);
     }
     
     @Override
@@ -599,17 +576,6 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     }
     
     /**
-     * Returns true if the specified search result is allowed by the current
-     * filter editor.  This means the result is a member of the filtered list.
-     */
-    private boolean isFilterMatch(VisualSearchResult vsr) {
-        if (filterEditor != null) {
-            return filterEditor.getMatcher().matches(vsr);
-        }
-        return true;
-    }
-
-    /**
      * A matcher editor used to filter visible search results. 
      */
     private class VisibleMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
@@ -618,11 +584,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
             currentMatcher = new Matcher<VisualSearchResult>() {
                 @Override
                 public boolean matches(VisualSearchResult item) {
-                    // Determine whether item has parent, and parent is hidden
-                    // due to filtering.  If so, we treat the item as visible.
-                    VisualSearchResult parent = item.getSimilarityParent();
-                    boolean parentHidden = (parent != null) && !isFilterMatch(parent);
-                    return item.isVisible() || parentHidden;
+                    return item.isVisible();
                 }
             };
         }

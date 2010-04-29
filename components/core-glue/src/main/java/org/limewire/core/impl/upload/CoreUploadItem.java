@@ -17,7 +17,6 @@ import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 
@@ -424,32 +423,12 @@ class CoreUploadItem implements UploadItem {
 
         @Override
         public boolean isBrowseHostEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return uploader.isBrowseHostEnabled();
-            } else {
-                //ensure friend/user still logged in through LW
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
-        }
-
-        @Override
-        public boolean isChatEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return false;
-            }else { //TODO: this isn't entirely correct. Friend could have signed
-                // ouf of LW but still be logged in through other service allowing chat
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
+            return uploader.isBrowseHostEnabled();
         }
 
         @Override
         public boolean isSharingEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return false;
-            } else {
-                //ensure friend/user still logged in through LW
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
+            return false;
         }
     }
 

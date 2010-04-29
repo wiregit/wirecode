@@ -1,8 +1,6 @@
 package org.limewire.core.impl.search;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -11,14 +9,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.IncomingChatListener;
-import org.limewire.friend.api.MessageReader;
-import org.limewire.friend.api.MessageWriter;
-import org.limewire.friend.api.Network;
-import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.feature.Feature;
-import org.limewire.friend.api.feature.FeatureTransport;
-import org.limewire.listener.EventListener;
 
 /**
  * Mock SearchResult for unit tests.
@@ -117,11 +108,6 @@ class TestSearchResult implements SearchResult {
         }
 
         @Override
-        public boolean isChatEnabled() {
-            return false;
-        }
-
-        @Override
         public boolean isSharingEnabled() {
             return false;
         }
@@ -135,21 +121,7 @@ class TestSearchResult implements SearchResult {
         }
         
         @Override
-        public void addFeature(Feature feature) {
-        }
-
-        @Override
-        public <D, F extends Feature<D>> void addTransport(Class<F> clazz,
-                FeatureTransport<D> transport) {
-        }
-
-        @Override
         public Feature getFeature(URI id) {
-            return null;
-        }
-
-        @Override
-        public Collection<Feature> getFeatures() {
             return null;
         }
 
@@ -159,42 +131,12 @@ class TestSearchResult implements SearchResult {
         }
 
         @Override
-        public Mode getMode() {
-            return null;
-        }
-
-        @Override
         public String getPresenceId() {
             return null;
         }
-
-        @Override
-        public int getPriority() {
-            return 0;
-        }
-
-        @Override
-        public String getStatus() {
-            return null;
-        }
-
-        @Override
-        public <F extends Feature<D>, D> FeatureTransport<D> getTransport(Class<F> feature) {
-            return null;
-        }
-
-        @Override
-        public Type getType() {
-            return null;
-        }
-
         @Override
         public boolean hasFeatures(URI... id) {
             return false;
-        }
-
-        @Override
-        public void removeFeature(URI id) {
         }
     }
     
@@ -206,25 +148,6 @@ class TestSearchResult implements SearchResult {
         }
         
         @Override
-        public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
-        }
-
-        @Override
-        public MessageWriter createChat(MessageReader reader) {
-            return null;
-        }
-
-        @Override
-        public FriendPresence getActivePresence() {
-            return null;
-        }
-
-        @Override
-        public String getFirstName() {
-            return null;
-        }
-
-        @Override
         public String getId() {
             return name;
         }
@@ -235,50 +158,8 @@ class TestSearchResult implements SearchResult {
         }
 
         @Override
-        public Network getNetwork() {
-            return null;
-        }
-
-        @Override
-        public Map<String, FriendPresence> getPresences() {
-            return null;
-        }
-
-        @Override
         public String getRenderName() {
             return name;
-        }
-
-        @Override
-        public boolean hasActivePresence() {
-            return false;
-        }
-
-        @Override
-        public boolean isAnonymous() {
-            return false;
-        }
-
-        @Override
-        public boolean isSignedIn() {
-            return false;
-        }
-
-        @Override
-        public boolean isSubscribed() {
-            return false;
-        }
-
-        @Override
-        public void removeChatListener() {
-        }
-
-        @Override
-        public void setChatListenerIfNecessary(IncomingChatListener listener) {
-        }
-
-        @Override
-        public void setName(String name) {
         }
     }
 }

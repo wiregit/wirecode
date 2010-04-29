@@ -1,7 +1,5 @@
 package org.limewire.core.impl.friend;
 
-import java.util.Map;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.friend.api.FriendPresence;
@@ -32,14 +30,9 @@ public class GnutellaFriendTest extends BaseTestCase {
         GnutellaFriend gnutellaFriend =
             new GnutellaFriend(address, friendPresence1);
         
-        assertTrue(gnutellaFriend.isAnonymous());
-        assertEquals("description", gnutellaFriend.getFirstName());
         assertEquals("description", gnutellaFriend.getName());
         assertEquals("description", gnutellaFriend.getRenderName());
         assertEquals(id1, gnutellaFriend.getId());
-        assertNull(gnutellaFriend.getNetwork());
-        Map<String, FriendPresence> friendPresences = gnutellaFriend.getPresences();
-        assertEquals(friendPresence1, friendPresences.get(id1));
         
         context.assertIsSatisfied();
     }

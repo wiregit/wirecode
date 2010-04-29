@@ -13,7 +13,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.friend.api.FriendManager;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
@@ -31,7 +30,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
 
     private QueueTimeCalculator queueTimeCalculator;
     private CategoryManager categoryManager;
-    private FriendManager friendManager;
 
     private CoreDownloadItem coreDownloadItem;
 
@@ -70,7 +68,6 @@ public class CoreDownloadItemTest extends BaseTestCase {
         downloader = context.mock(Downloader.class);
         queueTimeCalculator = context.mock(QueueTimeCalculator.class);
         document = context.mock(LimeXMLDocument.class);
-        friendManager = context.mock(FriendManager.class);
         categoryManager = context.mock(CategoryManager.class);
         
 
@@ -98,8 +95,7 @@ public class CoreDownloadItemTest extends BaseTestCase {
             }
         });
 
-        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, friendManager, categoryManager);
-
+        coreDownloadItem = new CoreDownloadItem(downloader, queueTimeCalculator, categoryManager);
     }
 
     /**

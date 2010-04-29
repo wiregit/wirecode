@@ -22,7 +22,6 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Address;
@@ -165,7 +164,6 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         MockFriendPresence mockFriendPresence = new MockFriendPresence();
-        mockFriendPresence.addFeature(new AddressFeature(host));
         browseHostHandler.browseHost(socket, mockFriendPresence);
 
         List<String> files = new ArrayList<String>();
@@ -204,7 +202,6 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         MockFriendPresence friendPresence = new MockFriendPresence();
-        friendPresence.addFeature(new AddressFeature(host));
         browseHostHandler.browseHost(socket, friendPresence);
 
         boolean mp3Found = false;
@@ -299,8 +296,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     }
     
     public void testGetPathForNonAnonymousFriend() {
-        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("me@you.com", false), null)));
-        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("Hello There", false), null)));
+        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("me@you.com"), null)));
+        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("Hello There"), null)));
     }
 
     @Singleton

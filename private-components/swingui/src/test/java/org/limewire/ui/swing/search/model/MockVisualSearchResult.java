@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,28 +14,15 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 
 public class MockVisualSearchResult implements VisualSearchResult {
-    private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
     private String name;
     private String subheading = "";
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
-    private VisualSearchResult similarityParent;
     private boolean spam;
     private HashMap<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
     private float relevance = 0;
     
     public MockVisualSearchResult(String name) {
         this.name = name;
-    }
-
-    public MockVisualSearchResult(String name, VisualSearchResult parent) {
-        this(name);
-        this.similarityParent = parent;
-        parent.getSimilarResults().add(this);
-    }
-
-    @Override
-    public boolean isAnonymous() {
-        return true;
     }
     
     @Override
@@ -90,20 +76,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
         return name;
     }
     
-    public void setSimilarResults(List<VisualSearchResult> similarResults) {
-        this.similarResults = similarResults;
-    }
-
-    @Override
-    public List<VisualSearchResult> getSimilarResults() {
-        return similarResults;
-    }
-    
-    @Override
-    public VisualSearchResult getSimilarityParent() {
-        return similarityParent;
-    }
-    
     @Override
     public long getSize() {
         // TODO Auto-generated method stub
@@ -134,12 +106,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public boolean isChildrenVisible() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public boolean isSpam() {
         return spam;
     }
@@ -150,23 +116,8 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public void setChildrenVisible(boolean childrenVisible) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public String toString() {
         return name;
-    }
-
-    public void removeSimilarSearchResult(VisualSearchResult result) {
-    }
-
-    public void addSimilarSearchResult(VisualSearchResult similarResult) {
-    }
-
-    public void setSimilarityParent(VisualSearchResult parent) {
     }
 
     @Override
@@ -230,11 +181,5 @@ public class MockVisualSearchResult implements VisualSearchResult {
     @Override
     public boolean isLicensed() {
         return false;
-    }
-
-    @Override
-    public void toggleChildrenVisibility() {
-        // TODO Auto-generated method stub
-        
     }
 }

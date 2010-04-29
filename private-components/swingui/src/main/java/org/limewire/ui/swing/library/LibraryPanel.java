@@ -12,8 +12,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +59,6 @@ import org.limewire.ui.swing.library.LibraryFilterPanel.LibraryCategoryListener;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
-import org.limewire.ui.swing.library.sharing.LibrarySharingAction;
-import org.limewire.ui.swing.library.sharing.LibrarySharingPanel;
 import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -105,7 +101,6 @@ public class LibraryPanel extends JPanel {
     private final LockableUI lockableUI;
     private final LibraryTable libraryTable;
     private final LibraryNavigatorPanel libraryNavigatorPanel;
-    private final LibrarySharingPanel librarySharingPanel;
     private final PublicSharedFeedbackPanel publicSharedFeedbackPanel;
     private final LibraryFilterPanel libraryFilterPanel;
     private final ButtonDecorator buttonDecorator;
@@ -131,16 +126,14 @@ public class LibraryPanel extends JPanel {
     
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
-            LibrarySharingPanel sharingPanel, LibraryFilterPanel libraryFilterPanel,
+            LibraryFilterPanel libraryFilterPanel,
             PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerControlPanelFactory playerPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryTransferHandler transferHandler,
-            Provider<LibraryImageTable> libraryImagePanelProvider,
-            LibrarySharingAction libraryAction) {
+            Provider<LibraryImageTable> libraryImagePanelProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         this.libraryNavigatorPanel = navPanel;
         this.libraryTable = libraryTable;
-        this.librarySharingPanel = sharingPanel;
         this.libraryFilterPanel = libraryFilterPanel;
         this.publicSharedFeedbackPanel = publicSharedFeedbackPanel;
         this.buttonDecorator = buttonDecorator;
@@ -151,16 +144,16 @@ public class LibraryPanel extends JPanel {
         GuiUtils.assignResources(this);
         this.lockableUI = new LockedUI();
         
-        layoutComponents(headerBarDecorator, playerPanel.createAudioControlPanel(), addFileAction, libraryAction);
+        layoutComponents(headerBarDecorator, playerPanel.createAudioControlPanel(), addFileAction);
 
         eventList = new BasicEventList<LocalFileItem>();
         selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, JComponent playerPanel, AddFileAction addFileAction, LibrarySharingAction libraryAction) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator, JComponent playerPanel, AddFileAction addFileAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
-        createAddFilesButton(addFileAction, libraryAction);
+        createAddFilesButton(addFileAction);
         createFilterToggleButton();
         
         fileCountLabel = new JLabel();
@@ -191,7 +184,6 @@ public class LibraryPanel extends JPanel {
         add(libraryNavigatorPanel, "dock west, growy");
         add(headerBar, "dock north, growx");
         add(libraryFilterPanel.getComponent(), "dock north, growx, hidemode 3");
-        add(librarySharingPanel.getComponent(), "dock west, growy, hidemode 3");
         add(tableListPanel, "grow");
         add(publicSharedFeedbackPanel.getComponent(), "dock south, growx, hidemode 3");    
     }
@@ -249,7 +241,6 @@ public class LibraryPanel extends JPanel {
                     libraryFilterPanel.setSelectedCategory(navItem.getSelectedCategory(), navItem.getFilteredText());
                     setPublicSharedComponentVisible(navItem);
                     eventList = navItem.getLocalFileList().getSwingModel();
-                    selectSharing(navItem);
                     selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 }
             }
@@ -290,23 +281,6 @@ public class LibraryPanel extends JPanel {
                 }
             }
         });
-        
-        librarySharingPanel.getComponent().addPropertyChangeListener(new PropertyChangeListener(){
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals(LibrarySharingPanel.EDIT_MODE)) {
-                    setEditSharingModeEnabled((Boolean)evt.getNewValue());
-                }
-            }
-        });
-    }
-    
-    /**
-     * When editing users, disables components.
-     */
-    private void setEditSharingModeEnabled(boolean value) {
-        lockableUI.setLocked(value);
-        addFilesButton.setEnabled(!value);
     }
     
     /**
@@ -335,16 +309,6 @@ public class LibraryPanel extends JPanel {
             libraryFilterPanel.clearFilters();
             libraryTable.selectAndScrollTo(urn);
         }
-    }
-    
-    private void selectSharing(LibraryNavItem navItem) {
-        if(navItem != null && navItem.getLocalFileList() instanceof SharedFileList) {
-            librarySharingPanel.setSharedFileList((SharedFileList)navItem.getLocalFileList());
-        }
-        librarySharingPanel.getComponent().setVisible(navItem != null && navItem.getType() == NavType.LIST);
-        // if the sharing panel isn't visible, ensure everything is enabled.
-        if(!librarySharingPanel.getComponent().isVisible())
-            setEditSharingModeEnabled(false);
     }
     
     private void createImageList() {
@@ -433,16 +397,14 @@ public class LibraryPanel extends JPanel {
         }
     }
     
-    private void createAddFilesButton(AddFileAction addFileAction, LibrarySharingAction libraryAction) {
+    private void createAddFilesButton(AddFileAction addFileAction) {
         addFilesButton = new JXButton(addFileAction);
         addFilesButton.setIcon(plusIcon);
         addFilesButton.setRolloverIcon(plusIcon);
         addFilesButton.setPressedIcon(plusIcon);
-        addFilesButton.addActionListener(libraryAction);
         addFilesButton.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         buttonDecorator.decorateDarkFullImageButton(addFilesButton, AccentType.SHADOW);
-    }
-    
+    }    
     
     private void createFilterToggleButton() {
         filterToggleButton = new JXButton(I18n.tr("Filter"));
@@ -541,14 +503,6 @@ public class LibraryPanel extends JPanel {
      */
     public void editSharedListName(SharedFileList sharedFileList) {
         libraryNavigatorPanel.editSharedListName(sharedFileList);     
-    }
-    
-    /**
-     * If the sharing panel is visible, try to show the edit mode.
-     */
-    public void showEditMode() {
-    	if(librarySharingPanel.getComponent().isVisible())
-        	librarySharingPanel.showEditMode();
     }
     
     /**

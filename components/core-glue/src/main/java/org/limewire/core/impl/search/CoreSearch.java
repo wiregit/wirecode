@@ -1,7 +1,6 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +17,6 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
-import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
@@ -45,7 +43,6 @@ public class CoreSearch implements Search {
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
-    private final FriendSearcher friendSearcher;
     private final Provider<GeocodeInformation> geoLocation;
     private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
 
@@ -61,7 +58,6 @@ public class CoreSearch implements Search {
 
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
-    private final FriendSearchListener friendSearchListener = new FriendSearchListenerImpl();
     private final ScheduledExecutorService backgroundExecutor;
     private final EventBroadcaster<SearchEvent> searchEventBroadcaster;
     private final Clock clock;
@@ -77,7 +73,6 @@ public class CoreSearch implements Search {
             SearchServices searchServices,
             QueryReplyListenerList listenerList,
             PromotionSearcher promotionSearcher,
-            FriendSearcher friendSearcher,
             Provider<GeocodeInformation> geoLocation,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<SearchEvent> searchEventBroadcaster,
@@ -89,7 +84,6 @@ public class CoreSearch implements Search {
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
-        this.friendSearcher = friendSearcher;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
         this.searchEventBroadcaster = searchEventBroadcaster;
@@ -163,13 +157,6 @@ public class CoreSearch implements Search {
         String mutated = searchServices.mutateQuery(query);
         searchServices.query(searchGuid, mutated, advancedQuery,
                 searchDetails.getSearchCategory());
-        
-        backgroundExecutor.execute(new Runnable() {
-            @Override
-            public void run() { 
-                friendSearcher.doSearch(searchDetails, friendSearchListener);
-            }
-        });        
         
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
@@ -261,12 +248,6 @@ public class CoreSearch implements Search {
         }   
     }
     
-    private void handleSearchResults(Collection<SearchResult> searchResults) {
-        for (SearchListener listener : searchListeners) {
-            listener.handleSearchResults(this, searchResults);
-        }
-    }
-    
     private class QrListener implements QueryReplyListener {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
@@ -275,12 +256,6 @@ public class CoreSearch implements Search {
             RemoteFileDescAdapter rfdAdapter = remoteFileDescAdapterFactory.create(rfd, locs);
             
             handleSearchResult(rfdAdapter);
-        }
-    }
-
-    private class FriendSearchListenerImpl implements FriendSearchListener {
-        public void handleFriendResults(Collection<SearchResult> results) {
-            handleSearchResults(results);
         }
     }
 }

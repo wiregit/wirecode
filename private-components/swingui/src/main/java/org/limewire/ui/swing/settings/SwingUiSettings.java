@@ -6,8 +6,6 @@ import java.util.Collection;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
@@ -86,17 +84,6 @@ public final class SwingUiSettings extends LimeProps {
                 "0.111111"},
                 "UpdateSettings.proAds");
     
-    /** Show classic warning. */
-    public static final BooleanSetting SHOW_CLASSIC_REMINDER =
-        FACTORY.createBooleanSetting("SHOW_CLASSIC_SEARCH_REMINDER", true);
-
-    /**
-     * Setting for whether or not to group similar results
-     */
-    @InspectionPoint(value = "group similar results enabled", category = DataCategory.USAGE)
-    public static final BooleanSetting GROUP_SIMILAR_RESULTS_ENABLED =
-        FACTORY.createBooleanSetting("GROUP_SIMILAR_RESULTS_ENABLED", true);
-
     /**
      * Setting for whether to display search tips for smart queries. 
      * If true, tips should be displayed, if false they should not. 
@@ -116,24 +103,6 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
         FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", -1);
-
-    /**
-     * The default search view, list versus classic.
-     */
-    public static final IntSetting SEARCH_VIEW_TYPE_ID =
-        FACTORY.createIntSetting("SEARCH_VIEW_TYPE_ID", -1);
-    
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private static class LazyInspectableContainer {
-        @InspectionPoint(value = "search view", category = DataCategory.USAGE)
-        private static final Inspectable searchViewType = new Inspectable() {
-            @Override
-            public Object inspect() {
-                return SEARCH_VIEW_TYPE_ID.get() == 1 ? "table" : "list";
-            }
-        };   
-    }
 
     /**
      * Auto rename new downloads with filenames matching old downloads.

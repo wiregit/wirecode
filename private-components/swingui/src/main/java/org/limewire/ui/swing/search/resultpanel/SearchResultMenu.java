@@ -27,7 +27,6 @@ import org.limewire.ui.swing.util.SwingHacks;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-
 /**
  * This class implements the popup menu that is displayed when the user 
  * right-clicks on a search result.
@@ -68,8 +67,6 @@ public class SearchResultMenu extends JPopupMenu {
         
         // Determine indicators to enable menu items.
         boolean locateInLibraryVisible = firstItem.getDownloadState() == BasicDownloadState.LIBRARY || firstItem.getDownloadState() == BasicDownloadState.DOWNLOADED;
-        boolean showHideSimilarFileVisible = selectedItems.size() == 1 && firstItem.getSimilarResults().size() > 0 && viewType == ViewType.List;
-        boolean showHideSimilarFileEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
         boolean viewFileInfoEnabled = selectedItems.size() == 1;
         boolean downloadAsVisible = selectedItems.size() == 1;
 
@@ -155,18 +152,6 @@ public class SearchResultMenu extends JPopupMenu {
             addSeparator();
         }
         
-        // Add optional item for Similar Files.
-        if (showHideSimilarFileVisible) {
-            add(new AbstractAction(firstItem.isChildrenVisible() ? tr("Hide Similar Files") : tr("Show Similar Files")) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    firstItem.toggleChildrenVisibility();
-                }
-            }).setEnabled(showHideSimilarFileEnabled);
-            
-            addSeparator();
-        }
-
         final List<RemoteHost> allNonSpamHosts = new ArrayList<RemoteHost>();
         for (VisualSearchResult result : selectedItems) {
             if (!result.isSpam())

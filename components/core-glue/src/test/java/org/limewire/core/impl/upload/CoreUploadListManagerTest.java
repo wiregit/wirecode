@@ -16,7 +16,6 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.BaseTestCase;
@@ -51,9 +50,8 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final UploadListenerList uploadListenerList = context.mock(UploadListenerList.class);
         final ServiceScheduler scheduler = context.mock(ServiceScheduler.class);
         final ScheduledExecutorService backgroundExecutor = context.mock(ScheduledExecutorService.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, null);
         
         final MatchAndCopy<Runnable> runnableMatcher = new MatchAndCopy<Runnable>(Runnable.class);
         
@@ -82,19 +80,14 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final Uploader uploader = context.mock(Uploader.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
-        final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);        
         
         final long testSize = 777;
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
         {   
-            exactly(3).of(friendManager).getMostRelevantFriendPresence("");
-            will(returnValue(presence));
-            
             allowing(uploader).getUploadType();
             will(returnValue(UploadType.BROWSE_HOST));
                 
@@ -139,16 +132,12 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final Uploader uploaderNotComplete = context.mock(Uploader.class);
         final Uploader uploaderSettingDisabled = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
             {   
-                exactly(2).of(friendManager).getMostRelevantFriendPresence("");
-                will(returnValue(presence));
-                
                 allowing(uploaderInternal).getUploadType();
                 will(returnValue(UploadType.MALFORMED_REQUEST));
                 
@@ -197,12 +186,11 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
         final PropertyChangeListener listener2 = context.mock(PropertyChangeListener.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
         
         // Do we really need this dependence in CoreUploadListManager? 
         final UploadServices uploadServices = context.mock(UploadServices.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(uploadServices, null);
         
         context.checking(new Expectations() {
             {   
@@ -252,20 +240,15 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final Uploader uploader = context.mock(Uploader.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
-        final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
         {   
             exactly(2).of(uploader).getPresenceId();
             will(returnValue(""));
             
-            exactly(2).of(friendManager).getMostRelevantFriendPresence("");
-            will(returnValue(presence));
-                           
             allowing(uploader).getUploadType();
             will(returnValue(UploadType.BROWSE_HOST));
 
@@ -307,9 +290,8 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final UploadItem uploadUploading1 = context.mock(UploadItem.class);
         final UploadItem uploadUploading2 = context.mock(UploadItem.class);
         final UploadItem uploadUploading3 = context.mock(UploadItem.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, null);
                 
         context.checking(new Expectations() {
             {   
@@ -383,19 +365,14 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final Uploader uploader = context.mock(Uploader.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
-        final FriendPresence presence = context.mock(FriendPresence.class);
         final CategoryManager categoryManager = context.mock(CategoryManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, new CUIFactory(categoryManager));
+        final CoreUploadListManager manager = new CoreUploadListManager(null, new CUIFactory(categoryManager));
                 
         context.checking(new Expectations() {
             {   
                 exactly(2).of(uploader).getPresenceId();
                 will(returnValue(""));
-                
-                exactly(2).of(friendManager).getMostRelevantFriendPresence("");
-                will(returnValue(presence));
                 
                 // Initial probe on add
                 allowing(uploader).getUploadType();
@@ -448,9 +425,8 @@ public class CoreUploadListManagerTest extends BaseTestCase {
         final CoreUploadItem item1 = context.mock(CoreUploadItem.class);
         final CoreUploadItem item2 = context.mock(CoreUploadItem.class);
         final CoreUploadItem item3 = context.mock(CoreUploadItem.class);
-        final FriendManager friendManager = context.mock(FriendManager.class);
         
-        final CoreUploadListManager manager = new CoreUploadListManager(null, friendManager, null);
+        final CoreUploadListManager manager = new CoreUploadListManager(null, null);
         
         context.checking(new Expectations() {
             {

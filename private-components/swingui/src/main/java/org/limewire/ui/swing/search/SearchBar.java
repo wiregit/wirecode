@@ -21,12 +21,8 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -181,28 +177,6 @@ public class SearchBar extends JXPanel {
         });
     }
 
-    /**
-     * Performs additional Guice injection tasks.  This method adds a listener
-     * to handle XMPP connection events.
-     */
-    @Inject
-    void register(ListenerSupport<FriendConnectionEvent> connectionSupport) {
-        connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendConnectionEvent event) {
-                switch (event.getType()) {
-                case CONNECTED:
-                    searchButton.setToolTipText(I18n.tr("Search P2P Network and Friends"));
-                    break;
-                default:
-                    searchButton.setToolTipText(I18n.tr("Search P2P Network"));
-                    break;
-                }
-            }
-        });
-    }
-    
     public boolean requestSearchFocus() {
         // Request w/ temporary==true to indicate we don't
         // want to select everything.

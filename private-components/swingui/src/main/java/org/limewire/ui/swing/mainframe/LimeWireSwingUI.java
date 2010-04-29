@@ -23,7 +23,6 @@ import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
-import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -33,7 +32,6 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
 import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.friends.login.LoginPopupPanel;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
@@ -44,7 +42,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 /**
  * Display panel for the application UI.  This serves as the content pane for
@@ -67,7 +64,6 @@ public class LimeWireSwingUI extends JPanel {
     private final JLayeredPane layeredPane;
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
-    private final Provider<SignOnMessageLayer> signOnMessageProvider;
     private final BottomHeaderPanel bottomHeaderPanel;
     private boolean isPro = false;
     
@@ -78,8 +74,6 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel,
             ProNagController proNagController, 
             SharedFileCountPopupPanel sharedFileCountPopup,
-            LoginPopupPanel loginPopup,
-            Provider<SignOnMessageLayer> signOnMessageProvider,
             MainDownloadPanel mainDownloadPanel,
             @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
             BottomPanel bottomPanel,
@@ -89,7 +83,6 @@ public class LimeWireSwingUI extends JPanel {
     	this.topPanel = topPanel;  	
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
-    	this.signOnMessageProvider = signOnMessageProvider;
         this.centerPanel = new JPanel(new GridBagLayout());   
         this.bottomHeaderPanel = bottomHeaderPanel;
     	
@@ -121,8 +114,6 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
-        layeredPane.add(loginPopup, JLayeredPane.POPUP_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(loginPopup));
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
         
@@ -335,7 +326,6 @@ public class LimeWireSwingUI extends JPanel {
      * @param updateEvent
      */
     @Inject void register(ListenerSupport<UpdateEvent> updateEvent,
-            ListenerSupport<FriendConnectionEvent> connectionSupport,
             final Application application) {
         updateEvent.addListener(new EventListener<UpdateEvent>() {
             @Override
@@ -350,18 +340,5 @@ public class LimeWireSwingUI extends JPanel {
                 dialog.setVisible(true);
             }
         });
-        
-        // Add listener to display sign-on message if enabled.
-        if (SignOnMessageLayer.isSignOnMessageEnabled()) {
-            connectionSupport.addListener(new EventListener<FriendConnectionEvent>() {
-                @Override
-                @SwingEDTEvent
-                public void handleEvent(FriendConnectionEvent event) {
-                    if (event.getType() == FriendConnectionEvent.Type.CONNECTED) {
-                        signOnMessageProvider.get().showMessage();
-                    }
-                }
-            });
-        }
     }
 }

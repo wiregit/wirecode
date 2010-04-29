@@ -81,8 +81,6 @@ public interface SessionInfo {
     
     public int getManagedFileListSize();
     
-    public int getAllFriendsFileListSize();
-
     public int getNumActiveDownloads();
 
     public int getSimppVersion();

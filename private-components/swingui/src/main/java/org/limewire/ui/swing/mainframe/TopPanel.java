@@ -42,7 +42,6 @@ import org.limewire.ui.swing.components.SelectableJXButton;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.components.AbstractTabList.ChangeType;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
-import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -82,7 +81,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     @Resource private Icon browseIcon;
     
-    private final JXButton friendButton;
     private final SearchBar searchBar;    
 
     private final FlexibleTabList searchList;    
@@ -112,8 +110,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @InspectablePrimitive(value = "maximum tab count", category = DataCategory.USAGE)
     private volatile long maxTabCount = 0;
 
-    private final AllFriendsRefreshManager allFriendsRefreshManager;    
-    
     @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
     private volatile int advancedSearchesOpened = 0;
     
@@ -135,8 +131,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final LibraryMediator myLibraryMediator,
                     Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder,
                     Provider<AdvancedSearchPanel> advancedSearchPanel,
-                    Provider<FriendsButton> friendsButtonProvider,
-                    AllFriendsRefreshManager allFriendsRefreshManager,
                     ButtonDecorator buttonDecorator) {        
         GuiUtils.assignResources(this);
         this.searchHandler = searchHandler;
@@ -146,7 +140,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
         this.advancedSearchPanel = advancedSearchPanel;
         this.homeMediator = homeMediator;
-        this.allFriendsRefreshManager = allFriendsRefreshManager;        
         setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
@@ -161,9 +154,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         libraryButton.setText(I18n.tr("My Files"));
         buttonDecorator.decorateBasicHeaderButton(libraryButton);
                 
-        friendButton = friendsButtonProvider.get();
-        friendButton.setName("WireframeTop.friendsButton");
-               
         searchList = tabListFactory.create();
         searchList.setName("WireframeTop.SearchList");
         searchList.setCloseAllText(I18n.tr("Close All Searches"));
@@ -177,8 +167,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setLayout(new MigLayout("gap 0, insets 0, fill, alignx leading"));
         add(libraryButton, "gapleft 5, gapbottom 2, gaptop 0");
-        add(friendButton, "gapleft 3, gapbottom 2, gaptop 0");
-
         add(searchBar, "gapleft 11, gapbottom 2, gaptop 1");
         add(searchList.getComponent(), "gapleft 10, gaptop 4, gapbottom 0, grow, push");
         
@@ -596,11 +584,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(model.getSearchType() == SearchType.ALL_FRIENDS_BROWSE){
-                allFriendsRefreshManager.refresh();
-            } else {            
-                new DefaultSearchRepeater(search, model).refresh();
-            }
+            new DefaultSearchRepeater(search, model).refresh();
         }
         
         @Override
@@ -611,7 +595,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void searchStarted(Search search) {
             setEnabled(true);            
         }
-        
     }
     
     /**Stops the search*/
@@ -636,6 +619,4 @@ class TopPanel extends JXPanel implements SearchNavigator {
             setEnabled(false);
         } 
     }
-    
-
 }

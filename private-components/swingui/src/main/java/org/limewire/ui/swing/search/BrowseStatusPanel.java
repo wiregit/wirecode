@@ -9,34 +9,29 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimePopupDialog;
-import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
-import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatus;
-import org.limewire.ui.swing.friends.refresh.BrowseRefreshStatusListener;
 import org.limewire.ui.swing.painter.ComponentBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
 /**
  * Shows status updates for browses.  Must be disposed.
  */
-public class BrowseStatusPanel extends JXPanel implements Disposable{
+public class BrowseStatusPanel extends JXPanel {
 
     private BrowseStatus status;
 
@@ -60,42 +55,17 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
     @Resource private Color headerForeground;
     @Resource private Font headerFont;
 
-
     private final SearchResultsModel searchResultsModel;
 
-    private final AllFriendsRefreshManager allFriendsRefreshManager;
-    
-    
-    private BrowseRefreshStatusListener browseRefreshStatusListener;
-    
-    public BrowseStatusPanel(SearchResultsModel searchResultsModel, AllFriendsRefreshManager allFriendsRefreshManager){
+    public BrowseStatusPanel(SearchResultsModel searchResultsModel){
         GuiUtils.assignResources(this);
-        this.searchResultsModel = searchResultsModel;
-        this.allFriendsRefreshManager = allFriendsRefreshManager;
-        
+        this.searchResultsModel = searchResultsModel;        
         setOpaque(false);        
         initializeComponents();      
-        if(isAllFriendsBrowse()){
-            initializeAllFriendsListener();
-        }
         layoutComponents();
         update();
     }
     
-    private void initializeAllFriendsListener(){
-        browseRefreshStatusListener = new BrowseRefreshStatusListener(){
-            @Override
-            public void statusChanged(final BrowseRefreshStatus status) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        refreshPanel.setVisible(status != BrowseRefreshStatus.REFRESHED);                              
-                    }
-                });
-            }            
-        };
-        allFriendsRefreshManager.addBrowseRefreshStatusListener(browseRefreshStatusListener);        
-    }
-
     private void initializeComponents() {        
         warningButton = new IconButton(warningIcon);
         warningButton.addActionListener(new WarningAction());
@@ -131,32 +101,19 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
     }
 
     private void update() {
-        if (!isAllFriendsBrowse()) {
-            warningButton.setVisible(status != null && status.getState() == BrowseState.PARTIAL_FAIL);
-            refreshPanel.setVisible(status != null && status.getState() == BrowseState.UPDATED);
-        }
+        warningButton.setVisible(status != null && status.getState() == BrowseState.PARTIAL_FAIL);
+        refreshPanel.setVisible(status != null && status.getState() == BrowseState.UPDATED);
     }
     
     private void showFailedBrowses(){
         //TODO: present this properly
-        List<String> friends = new ArrayList<String>();
         List<String> p2pUsers = new ArrayList<String>();
         
         for(Friend person : status.getFailedFriends()){
-            if(person.isAnonymous()){
-                p2pUsers.add(person.getRenderName());
-            } else {
-                friends.add(person.getRenderName());
-            }            
+            p2pUsers.add(person.getRenderName());
         }
         
         JXPanel centerPanel = new JXPanel(new MigLayout("insets 0 5 5 5, gap 0, novisualpadding, fill"));
-        if(friends.size() > 0){
-            centerPanel.add(createHeaderLabel(I18n.tr("Friends")), "gaptop 5, wrap");
-        }
-        for (String name : friends){
-            centerPanel.add(createItemLabel(name), "wrap");
-        }
         
         if(p2pUsers.size() > 0){
             centerPanel.add(createHeaderLabel(I18n.tr("P2P Users")), "gaptop 5, wrap");
@@ -189,10 +146,6 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
                 AccentType.NONE);
     }
     
-    private boolean isAllFriendsBrowse(){
-        return searchResultsModel.getSearchType() == SearchType.ALL_FRIENDS_BROWSE;
-    }
-        
     private class RefreshAction extends AbstractAction {
         public RefreshAction(){
             super(I18n.tr("Refresh"));
@@ -200,11 +153,7 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(isAllFriendsBrowse()){
-                allFriendsRefreshManager.refresh();
-            } else {            
-                new DefaultSearchRepeater(status.getBrowseSearch(), searchResultsModel).refresh();
-            }
+            new DefaultSearchRepeater(status.getBrowseSearch(), searchResultsModel).refresh();
         }        
     }
   
@@ -215,14 +164,5 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
         public void actionPerformed(ActionEvent e) {
             showFailedBrowses();
         }        
-    }
-
-
-    @Override
-    public void dispose() {
-        if(browseRefreshStatusListener != null){        
-            allFriendsRefreshManager.removeBrowseRefreshStatusListener(browseRefreshStatusListener);  
-            browseRefreshStatusListener = null;
-        }
     }
 }

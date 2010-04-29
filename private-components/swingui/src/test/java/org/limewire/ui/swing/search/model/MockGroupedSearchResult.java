@@ -87,10 +87,4 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     public URN getUrn() {
         return urn;
     }
-
-    @Override
-    public boolean isAnonymous() {
-        return true;
-    }
-
 }

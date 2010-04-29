@@ -36,17 +36,13 @@ import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.support.MockSupportModule;
 import org.limewire.core.impl.updates.MockUpdatesModule;
 import org.limewire.core.impl.upload.MockUploadModule;
-import org.limewire.core.impl.xmpp.MockXmppModule;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventMulticaster;
-import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.MockNetModule;
-import org.limewire.xmpp.activity.XmppActivityEvent;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -77,7 +73,6 @@ public class MockModule extends AbstractModule {
         install(new MockBrowseModule());
         install(new MockPlayerModule());
         install(new MockPropertyModule());
-        install(new MockXmppModule());
         install(new MockSupportModule());
         install(new MockMagnetModule());
         install(new MockNetModule());
@@ -87,10 +82,6 @@ public class MockModule extends AbstractModule {
         install(new MockBittorrentModule());
         install(new MockFileModule());
         install(new MockMalwareModule());
-                       
-        EventMulticaster<XmppActivityEvent> activityMulticaster = new EventMulticasterImpl<XmppActivityEvent>(); 
-        bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
-        bind(new TypeLiteral<ListenerSupport<XmppActivityEvent>>(){}).toInstance(activityMulticaster);        
         
         CachingEventMulticasterImpl<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticasterImpl<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);

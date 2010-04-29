@@ -165,7 +165,6 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
             LOG.debugf("Received status change event {0}", status);
             switch(status.getState()) {
             case FAILED:
-            case OFFLINE:
                 //getFailedFriends() will only return 1 person 
                 //since status is from a single browse
                 failedList.addAll(status.getFailedFriends());

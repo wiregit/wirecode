@@ -66,11 +66,6 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
     void setSelectedCategory(SearchCategory searchCategory);
     
     /**
-     * Sets the sort option.
-     */
-    void setSortOption(SortOption sortOption);
-
-    /**
      * Sets the MatcherEditor used to filter search results. 
      */
     void setFilterEditor(MatcherEditor<VisualSearchResult> editor);

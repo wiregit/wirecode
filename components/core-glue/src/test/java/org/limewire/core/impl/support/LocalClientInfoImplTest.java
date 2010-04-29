@@ -19,7 +19,6 @@ public class LocalClientInfoImplTest extends BaseTestCase {
         final boolean canReceiveSolicited = true;
         final boolean acceptedIncomingConnection = true;
         final boolean canDoFWT = false;
-        final int allFriendsFileListSize = 1;
         final long byteBufferCacheSize = 2L;
         final long contentResponsesSize = 3L;
         final long creationCacheSize = 4L;
@@ -62,8 +61,6 @@ public class LocalClientInfoImplTest extends BaseTestCase {
                 will(returnValue(canDoFWT));
                 allowing(sessionInfo).canReceiveSolicited();
                 will(returnValue(canReceiveSolicited));
-                allowing(sessionInfo).getAllFriendsFileListSize();
-                will(returnValue(allFriendsFileListSize));
                 allowing(sessionInfo).getByteBufferCacheSize();
                 will(returnValue(byteBufferCacheSize));
                 allowing(sessionInfo).getContentResponsesSize();
@@ -181,7 +178,6 @@ public class LocalClientInfoImplTest extends BaseTestCase {
         final boolean canReceiveSolicited = false;
         final boolean acceptedIncomingConnection = false;
         final boolean canDoFWT = true;
-        final int allFriendsFileListSize = 1;
         final long byteBufferCacheSize = 2L;
         final long contentResponsesSize = 3L;
         final long creationCacheSize = 4L;
@@ -226,8 +222,6 @@ public class LocalClientInfoImplTest extends BaseTestCase {
                 will(returnValue(canDoFWT));
                 allowing(sessionInfo).canReceiveSolicited();
                 will(returnValue(canReceiveSolicited));
-                allowing(sessionInfo).getAllFriendsFileListSize();
-                will(returnValue(allFriendsFileListSize));
                 allowing(sessionInfo).getByteBufferCacheSize();
                 will(returnValue(byteBufferCacheSize));
                 allowing(sessionInfo).getContentResponsesSize();

@@ -118,21 +118,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     @Override
     public void handleEvent(LibraryChangedEvent event) {
-        // The idea behind this is that we want to provide incremental updates to 
-        // a PresenceLibrary, without requiring the entire library disappear
-        // and reappear.  We need to know if adding the presence library succeeded,
-        // but also need to trigger a browse if it didn't (because it already existed).
-        FriendPresence friend = event.getData();
-        PresenceLibrary existingLibrary = remoteLibraryManager.getPresenceLibrary(friend);
-        if(!remoteLibraryManager.addPresenceLibrary(friend) && existingLibrary != null) {
-            LOG.debugf("Library changed event for {0}, but existing library -- rebrowsing into existing library", friend);
-            // the library already existed for this presence --
-            // we need to trigger our own browse.
-            // There's a small chance the existingLibrary is an older version of
-            // a PresenceLibrary (not the current one) -- if that does happen,
-            // the worst this will do is cause a second browse to happen.
-            tryToResolveAndBrowse(existingLibrary, latestConnectivityEventRevision);
-        }
+        // FIXME: remove this
     }
     
     void browse(final PresenceLibrary presenceLibrary) {
@@ -162,10 +148,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             {
                 int size = presenceLibrary.size();
                 if(size == 0) {
-                    transitList = null;
-                } else if (remoteLibraryManager.getAllFriendsLibrary().size() > 5000) {
-                    // can run low on memory, so clear old list & add as new ones come.
-                    presenceLibrary.clear();
                     transitList = null;
                 } else {
                     transitList = new ArrayList<SearchResult>(size);

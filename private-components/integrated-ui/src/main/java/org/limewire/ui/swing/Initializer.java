@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.malware.VirusEngine;
-import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -37,7 +35,6 @@ import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
 import org.limewire.ui.support.FatalBugManager;
-import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
@@ -56,7 +53,6 @@ import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
-import org.mozilla.browser.MozillaPanel;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -99,7 +95,6 @@ final class Initializer {
     @Inject private Provider<LifecycleManager> lifecycleManager;
     @Inject private Provider<LimeCoreGlue> limeCoreGlue;
     @Inject private Provider<NIODispatcher> nioDispatcher;
-    @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionInspections> connectionReporter;
     @Inject private Provider<VirusEngine> virusEngine;
     
@@ -559,38 +554,7 @@ final class Initializer {
                 stopwatch.resetAndLog("create HTML view");
             }
         });
-        stopwatch.resetAndLog("return from evt queue");
-        
-        splashRef.get().setStatusText(I18n.tr("Scouring NYC for Limes..."));           //loading browser
-        // Not pretty but Mozilla initialization errors should not crash the
-        // program
-        if (LimeMozillaInitializer.shouldInitialize()) {
-            // See LWC-2860 for why we change Turkish -> English.
-            // If MozSwing ever fixes this for us, we can remove this workaround.
-            Locale locale = Locale.getDefault();
-            if(locale.getLanguage().equals("tr")) {
-                Locale.setDefault(Locale.ENGLISH);
-            }
-            try {
-                LimeMozillaInitializer.initialize();
-                mozillaOverrides.get().overrideMozillaDefaults();
-            } catch (Exception e) {
-                // If it failed, don't keep the wrong locale active.
-                Locale.setDefault(locale);
-                LOG.error("Mozilla initialization failed");
-            }
-            
-            stopwatch.resetAndLog("Load XUL Library Path");
-            SwingUtils.invokeNowOrWait(new Runnable() {
-                public void run() {
-                    stopwatch.resetAndLog("enter evt queue");
-                    new MozillaPanel();
-                    stopwatch.resetAndLog("Load MozillaPanel");
-                }
-            });
-        }
-        
-        stopwatch.resetAndLog("return from evt queue");
+        stopwatch.resetAndLog("return from evt queue");        
     }
     
     /** Loads the UI. */

@@ -14,11 +14,6 @@ import org.limewire.friend.api.Friend;
 public interface GroupedSearchResult {
 
     /**
-     * Returns true if at least one source is anonymous (not a friend).
-     */
-    boolean isAnonymous();
-    
-    /**
      * Returns the complete file name including extension.
      */
     String getFileName();

@@ -14,7 +14,6 @@ import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
-import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -49,10 +48,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         RemoteFileDescAdapter create(RemoteFileDesc rfd, Set<? extends IpPort> locs, FriendPresence friendPresence);
     }
    
-    /**
-     * Non anonymous sources, XMPP friends, are considered very important. 
-     */
-    private static int FRIENDLY_PEER_FACTOR = 20;
     /**
      * Browseable sources are considered more important than unbrowseable ones.
      */
@@ -129,14 +124,10 @@ public class RemoteFileDescAdapter implements SearchResult {
         if(!StringUtils.isEmpty(query) && !rfd.matchesQuery(query))
             return 0;
         // Ignore alt locs for relevance ranking
-        if(friendPresence.getFriend().isAnonymous()) {
-            if(rfd.isBrowseHostEnabled())
-                return BROWSEABLE_ANONYMOUS_PEER_FACTOR;
-            else
-                return NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR;
-        } else {
-            return FRIENDLY_PEER_FACTOR;
-        }
+        if(rfd.isBrowseHostEnabled())
+            return BROWSEABLE_ANONYMOUS_PEER_FACTOR;
+        else
+            return NON_BROWSEABLE_ANONYMOUS_PEER_FACTOR;
     }
     
     /**
@@ -272,32 +263,12 @@ public class RemoteFileDescAdapter implements SearchResult {
         
         @Override
         public boolean isBrowseHostEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return browseHostEnabled;
-            } else {
-                //ensure friend/user still logged in through LW
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
-        }
-
-        @Override
-        public boolean isChatEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return false;
-            } else {
-                //ensure friend/user still logged in through LW
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
+            return browseHostEnabled;
         }
 
         @Override
         public boolean isSharingEnabled() {
-            if(friendPresence.getFriend().isAnonymous()) {
-                return false;
-            } else {
-                //ensure friend/user still logged in through LW
-                return friendPresence.hasFeatures(LimewireFeature.ID);
-            }
+            return false;
         }
 
         @Override
@@ -333,15 +304,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public boolean isBrowseHostEnabled() {
             return true;
-        }
-
-        /**
-         * Chat is unsupported for Gnutella/anonymous sources so it will
-         *  never be supported in an altloc.
-         */
-        @Override
-        public boolean isChatEnabled() {
-            return false;
         }
 
         /**

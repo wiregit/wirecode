@@ -1,14 +1,11 @@
 package org.limewire.core.impl.friend;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.Feature;
-import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
@@ -39,38 +36,8 @@ public abstract class GnutellaPresence implements FriendPresence {
     public abstract String getPresenceId();
 
     @Override
-    public Type getType() {
-        return Type.available;
-    }
-
-    @Override
-    public String getStatus() {
-        return "";
-    }
-
-    @Override
-    public int getPriority() {
-        return 0;
-    }
-
-    @Override
-    public Mode getMode() {
-        return Mode.available;
-    }
-    
-    @Override
     public String toString() {
         return "GnutellaPresence for: " + friend;
-    }
-    
-    @Override
-    public void addFeature(Feature feature) {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public <D, F extends Feature<D>> void addTransport(Class<F> clazz, FeatureTransport<D> transport) {
-        throw new UnsupportedOperationException();
     }
     
     @Override
@@ -83,26 +50,11 @@ public abstract class GnutellaPresence implements FriendPresence {
     }
     
     @Override
-    public Collection<Feature> getFeatures() {
-        return Collections.<Feature>singleton(getFeature(AddressFeature.ID));
-    }
-    
-    @Override
-    public <F extends Feature<D>, D> FeatureTransport<D> getTransport(Class<F> feature) {
-        return null;
-    }
-    
-    @Override
     public boolean hasFeatures(URI... ids) {
         for(URI uri : ids) {
             return uri.equals(AddressFeature.ID);
         }
         return false;
-    }
-    
-    @Override
-    public void removeFeature(URI id) {
-        throw new UnsupportedOperationException();
     }
     
     /// NOTE: These subclasses exist for memory optimizations,

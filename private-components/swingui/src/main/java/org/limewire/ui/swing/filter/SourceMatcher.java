@@ -28,7 +28,7 @@ class SourceMatcher<E extends FilterableItem> implements Matcher<E> {
     public boolean matches(E item) {
         switch (sourceItem.getType()) {
         case ANONYMOUS:
-            return item.isAnonymous();
+            return true;
             
         case ANY_FRIEND:
             return (item.getFriends().size() > 0);

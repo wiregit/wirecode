@@ -68,8 +68,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             exactly(1).of(listenerSupport).addListener(presenceLibraryBrowser);
             exactly(1).of(socketsManager).addListener(with(any(EventListener.class)));
             exactly(1).of(friendLibraryList).addListEventListener(with(any(ListEventListener.class)));
-            exactly(1).of(remoteLibraryManager).getPresenceLibrary(presence);
-            exactly(1).of(remoteLibraryManager).addPresenceLibrary(presence);
         }});
         
         presenceLibraryBrowser.register(listenerSupport);
@@ -291,7 +289,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             Friend friend = context.mock(Friend.class);
             allowing(friendPresence).getFriend();
             will(returnValue(friend));
-            allowing(friend).isAnonymous();
             will(returnValue(true));
             
             // Assertions
@@ -383,7 +380,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             Friend friend = context.mock(Friend.class);
             allowing(presence).getFriend();
             will(returnValue(friend));
-            allowing(friend).isAnonymous();
             will(returnValue(true));
             
             // Assertions
@@ -681,7 +677,6 @@ public class PresenceLibraryBrowserTest extends BaseTestCase {
             Friend friend = context.mock(Friend.class);
             allowing(presence).getFriend();
             will(returnValue(friend));
-            allowing(friend).isAnonymous();
             will(returnValue(true));
             
             Address address = context.mock(Address.class);

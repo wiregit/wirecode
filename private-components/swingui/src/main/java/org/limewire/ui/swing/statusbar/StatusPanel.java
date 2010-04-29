@@ -12,7 +12,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
-import org.limewire.ui.swing.friends.chat.ChatMediator;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -28,7 +27,7 @@ public class StatusPanel extends JXPanel {
     
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, MiniPlayerPanel miniPlayerPanel, 
-            ChatMediator chatMediator, ConnectionStatusPanel connectionStatus, 
+            ConnectionStatusPanel connectionStatus, 
             ProStatusPanel proStatusPanel, SharedFileCountPanel sharedFileCountPanel, 
             BarPainterFactory barPainterFactory, FileProcessingPanel fileProcessingPanel) {
         
@@ -57,7 +56,6 @@ public class StatusPanel extends JXPanel {
         
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
-        rightPanel.add(chatMediator.getChatButton(), "growy");
         
         add(leftPanel, BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);

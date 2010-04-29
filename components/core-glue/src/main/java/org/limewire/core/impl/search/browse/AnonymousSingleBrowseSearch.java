@@ -28,7 +28,7 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
      * @param friendPresence the person to be browsed - must be anonymous and can not be null; 
      */
     public AnonymousSingleBrowseSearch(BrowseFactory browseFactory, FriendPresence friendPresence) {
-        assert(friendPresence != null && friendPresence.getFriend().isAnonymous());
+        assert(friendPresence != null);
         this.friendPresence = friendPresence;
         this.browseFactory = browseFactory;
     }

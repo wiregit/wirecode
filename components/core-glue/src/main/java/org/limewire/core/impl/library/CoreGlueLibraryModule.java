@@ -1,6 +1,5 @@
 package org.limewire.core.impl.library;
 
-import org.limewire.core.api.library.FriendAutoCompleterFactory;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -22,12 +21,9 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
         bind(URNFactory.class).to(URNFactoryImpl.class);
         bind(PresenceLibraryBrowser.class);
-        bind(FriendSearcher.class);
         
         bind(CoreLocalFileItemFactory.class).toProvider(FactoryProvider.newFactory(CoreLocalFileItemFactory.class,CoreLocalFileItem.class));
         bind(MetaDataManager.class).to(MetaDataManagerImpl.class);
-        bind(FriendAutoCompleterFactory.class).to(FriendAutoCompleterFactoryImpl.class);
         bind(LibraryData.class).to(LibraryDataImpl.class);
     }
-
 }
