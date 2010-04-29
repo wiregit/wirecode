@@ -21,8 +21,7 @@ package org.limewire.mojito.handler;
 
 import java.io.IOException;
 
-import org.limewire.mojito.messages.RequestMessage;
-
+import org.limewire.mojito.message2.RequestMessage;
 
 /**
  * Interface to handle incoming requests.

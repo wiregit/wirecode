@@ -37,7 +37,6 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.result.PingResult;
@@ -51,6 +50,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.EventUtils;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
@@ -90,11 +90,6 @@ public class RouteTableImpl implements RouteTable {
      */
     private transient volatile List<RouteTableListener> listeners 
         = new CopyOnWriteArrayList<RouteTableListener>();
-    
-    /** 
-     * Executor where to offload notifications to RouteTableListeners.
-     */
-    private transient volatile DHTExecutorService notifier;
     
     /**
      * Create a new RouteTable and generates a new random Node ID
@@ -154,18 +149,11 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#setContactPinger(com.limegroup.mojito.routing.RouteTable.ContactPinger)
-     */
+    @Override
     public void setContactPinger(ContactPinger pinger) {
         this.pinger = pinger;
     }
     
-    public void setNotifier(DHTExecutorService executor) {
-        this.notifier = executor;
-    }
-
     /**
      * Adds a RouteTableListener.
      * <p>
@@ -1147,11 +1135,7 @@ public class RouteTableImpl implements RouteTable {
             }
         };
         
-        DHTExecutorService e = notifier;
-        if (e != null) 
-            e.executeSequentially(r);
-        else
-            r.run();
+        EventUtils.fireEvent(r);
     }
     
     @Override

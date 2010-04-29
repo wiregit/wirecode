@@ -1,27 +1,24 @@
 package org.limewire.mojito.manager;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoDHT2;
+import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.exceptions.DHTTimeoutException;
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.io.DatagramTransport;
+import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.PingSettings;
 
 public class PingManagerTest extends MojitoTestCase {
-    
-    /*static {
-        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }*/
     
     public PingManagerTest(String name){
         super(name);
@@ -41,47 +38,55 @@ public class PingManagerTest extends MojitoTestCase {
         setLocalIsPrivate(false);
     }
 
-    public void testParallelPings() throws Exception {
+    public void testPing() throws IOException, InterruptedException {
+        
         PingSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
-        MojitoDHT dht1 = null, dht2 = null;
+        DatagramTransport transport1 = null, transport2 = null;
+        MojitoDHT2 dht1 = null, dht2 = null;
         
         try {
-            dht1 = MojitoFactory.createDHT();
-            dht1.bind(new InetSocketAddress(2000));
+            
+            MessageFactory factory1 = new DefaultMessageFactory();
+            transport1 = new DatagramTransport(2000, factory1);
+            
+            MessageFactory factory2 = new DefaultMessageFactory();
+            transport2 = new DatagramTransport(3000, factory2);
+            
+            dht1 = MojitoFactory2.createDHT(transport1, factory1);
             dht1.start();
             
-            dht2 = MojitoFactory.createDHT();
-            dht2.bind(new InetSocketAddress(3000));
+            dht2 = MojitoFactory2.createDHT(transport2, factory2);
             dht2.start();
             
-            Set<SocketAddress> hosts = new LinkedHashSet<SocketAddress>();
-            hosts.add(new InetSocketAddress("www.apple.com", 80));
-            hosts.add(new InetSocketAddress("www.microsoft.com", 80));
-            hosts.add(new InetSocketAddress("www.google.com", 80));
-            hosts.add(new InetSocketAddress("www.cnn.com", 80));
-            assertEquals(4, hosts.size());
-            
             try {
-                ((Context)dht2).ping(hosts).get().getContact();
+                DHTFuture<PingEntity> future = dht2.ping(
+                        "www.google.com", 80, 
+                        1L, TimeUnit.SECONDS);
+                future.get();
                 fail("Ping should have failed");
             } catch (ExecutionException e) {
-                assertTrue(e.getCause() instanceof DHTTimeoutException);
+                assertTrue(e.getCause() instanceof TimeoutException);
             }
             
-            hosts.add(new InetSocketAddress("localhost", 2000));
-            assertEquals(5, hosts.size());
-            
             try {
-                Contact node = ((Context)dht2).ping(hosts).get().getContact();
-                assertEquals(dht1.getLocalNodeID(), node.getNodeID());
+                DHTFuture<PingEntity> future = dht2.ping(
+                        "localhost", 2000, 
+                        1L, TimeUnit.SECONDS);
+                PingEntity entity = future.get();
+                assertEquals(dht1.getLocalNode().getNodeID(), 
+                        entity.getContact().getNodeID());
             } catch (ExecutionException e) {
                 fail(e);
             }
+            
         } finally {
-            if (dht1 != null) { dht1.close(); }
-            if (dht2 != null) { dht2.close(); }
+            transport1.close();
+            transport2.close();
+            
+            dht1.close();
+            dht2.close();
         }
     }
 }

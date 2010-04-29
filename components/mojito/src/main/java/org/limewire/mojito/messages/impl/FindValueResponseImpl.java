@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.io.MessageInputStream;
@@ -46,7 +46,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     
     private final float requestLoad;
 
-    public FindValueResponseImpl(Context context, 
+    public FindValueResponseImpl(Context2 context, 
             Contact contact, MessageID messageId, 
             float requestLoad,
             Collection<? extends DHTValueEntity> entities, 
@@ -58,7 +58,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         this.secondaryKeys = secondaryKeys;
     }
 
-    public FindValueResponseImpl(Context context, SocketAddress src, 
+    public FindValueResponseImpl(Context2 context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, msgVersion, in);
         

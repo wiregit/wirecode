@@ -5,10 +5,12 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -16,6 +18,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
+import org.limewire.mojito.util.NopTransport;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 
 /**
@@ -201,7 +204,10 @@ public class RouteTableVisualizerDemo {
     }
 
     public RouteTableVisualizerDemo() {
-        Context dht = (Context)MojitoFactory.createDHT();
+        MessageFactory messageFactory = new DefaultMessageFactory();
+        Context2 dht = (Context2)MojitoFactory2.createDHT(
+                NopTransport.NOP, messageFactory);
+        
         RouteTableImpl rt = (RouteTableImpl)dht.getRouteTable();
         populateRouteTable(rt);
         RouteTableVisualizer.show(dht);        

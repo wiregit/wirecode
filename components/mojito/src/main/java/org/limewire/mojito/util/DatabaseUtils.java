@@ -109,20 +109,23 @@ public class DatabaseUtils {
                 || valueType.equals(entity.getValue().getValueType());
     }
 
-    public static Collection<? extends DHTValueEntity> filter(DHTValueType valueType, 
-            Collection<? extends DHTValueEntity> entities) {
+    public static DHTValueEntity[] filter(
+            DHTValueType valueType,  DHTValueEntity[] entities) {
         
         if (valueType.equals(DHTValueType.ANY)) {
             return entities;
         }
         
-        List<DHTValueEntity> filtered = new ArrayList<DHTValueEntity>(entities.size());
+        List<DHTValueEntity> filtered 
+            = new ArrayList<DHTValueEntity>(entities.length);
+        
         for (DHTValueEntity entity : entities) {
             if (isDHTValueType(valueType, entity)) {
                 filtered.add(entity);
             }
         }
-        return filtered;
+        
+        return filtered.toArray(new DHTValueEntity[0]);
     }
     
     public static DHTValueEntity getFirstEntityFor(DHTValueType valueType, 

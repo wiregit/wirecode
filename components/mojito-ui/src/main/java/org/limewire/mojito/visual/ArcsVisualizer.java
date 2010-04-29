@@ -23,30 +23,36 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
-import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.messages.DHTMessage.OpCode;
+import org.limewire.mojito.io.MessageDispatcherListener2;
+import org.limewire.mojito.message2.DefaultNodeRequest;
+import org.limewire.mojito.message2.DefaultNodeResponse;
+import org.limewire.mojito.message2.DefaultPingRequest;
+import org.limewire.mojito.message2.DefaultPingResponse;
+import org.limewire.mojito.message2.DefaultStoreRequest;
+import org.limewire.mojito.message2.DefaultStoreResponse;
+import org.limewire.mojito.message2.DefaultValueRequest;
+import org.limewire.mojito.message2.DefaultValueResponse;
+import org.limewire.mojito.message2.Message;
+import org.limewire.mojito.routing.Contact;
 
 /**
  * Paints different representations of the Distributed Hash Table (DHT). 
  * <code>ArcsVisualizer</code> is a small framework for visually representing 
  * the DHT messages distinguished by color and dash patterns.
  */
-public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
+public class ArcsVisualizer extends JPanel implements MessageDispatcherListener2 {
 
     private static final int SLEEP = 100;
     
     private static final float FONT_SIZE = 24f;
     
-    private final Context context;
+    private final Context2 context;
 
     private Timer timer;
     
-    public static ArcsVisualizer show(final Context context) {
+    public static ArcsVisualizer show(final Context2 context) {
         final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -70,12 +76,18 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     public void startArcs() {
         timer.start();
-        context.getMessageDispatcher().addMessageDispatcherListener(this);
+        
+        if (context != null) {
+            context.getMessageDispatcher().addMessageDispatcherListener(this);
+        }
     }
     
     public void stopArcs() {
         timer.stop();
-        context.getMessageDispatcher().removeMessageDispatcherListener(this);
+        
+        if (context != null) {
+            context.getMessageDispatcher().removeMessageDispatcherListener(this);
+        }
     }
     
     private final Object lock = new Object();
@@ -86,7 +98,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private final List<Painter> painters = new ArrayList<Painter>();
     
-    public ArcsVisualizer(Context context, KUID nodeId) {
+    public ArcsVisualizer(Context2 context, KUID nodeId) {
         this.context = context;
         addPainter(new SnowMan(nodeId));
         addPainter(new PlasmaLamp(nodeId));
@@ -140,7 +152,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
         };
         
-        if(SwingUtilities.isEventDispatchThread()) {
+        if (SwingUtilities.isEventDispatchThread()) {
             runner.run();
         } else {
             try {
@@ -195,63 +207,63 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             painter.paint(this, g2);
         }
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener#handleMessageDispatcherEvent(org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent)
-     */
-    public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
-        EventType type = evt.getEventType();
-        KUID nodeId = null;
-        SocketAddress addr = null;
+
+    @Override
+    public void messageSent(KUID contactId, 
+            SocketAddress dst, Message message) {
         
-        if (type.equals(EventType.MESSAGE_RECEIVED)) {
-            nodeId = evt.getMessage().getContact().getNodeID();
-            addr = evt.getMessage().getContact().getContactAddress();
-        } else if (type.equals(EventType.MESSAGE_SENT)) {
-            nodeId = evt.getNodeID();
-            addr = evt.getSocketAddress();
-        } else {
-            return;
+        if (contactId != null) {
+            synchronized (lock) {
+                painter.handle(true, contactId, dst, message);
+            }
         }
+    }
+    
+    @Override
+    public void messageReceived(Message message) {
+        Contact contact = message.getContact();
+        KUID contactId = contact.getNodeID();
+        SocketAddress src = contact.getContactAddress();
         
-        OpCode opcode = evt.getMessage().getOpCode();
-        boolean request = (evt.getMessage() instanceof RequestMessage);
         synchronized (lock) {
-            painter.handle(type, nodeId, addr, opcode, request);
+            painter.handle(false, contactId, src, message);
         }
     }
     
     @SuppressWarnings({"InfiniteLoopStatement"})
     public static void main(String[] args) throws Exception {
         ArcsVisualizer arcs = new ArcsVisualizer(null, KUID.createRandomID());
+        arcs.startArcs();
+        
+        List<Message> messages = new ArrayList<Message>();
+        messages.add(new DefaultPingRequest(null, null));
+        messages.add(new DefaultPingResponse(null, null, (SocketAddress)null, null));
+        messages.add(new DefaultNodeRequest(null, null, null));
+        messages.add(new DefaultNodeResponse(null, null, null, null));
+        messages.add(new DefaultValueRequest(null, null, null, null, null));
+        messages.add(new DefaultValueResponse(null, null, 0, null, null));
+        messages.add(new DefaultStoreRequest(null, null, null, null));
+        messages.add(new DefaultStoreResponse(null, null, null));
         
         JFrame frame = new JFrame();
         frame.getContentPane().add(arcs);
-        frame.setBounds(20, 30, 640, 480);
+        frame.setBounds(20, 30, 800, 600);
         frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         Random generator = new Random();
-        
-        EventType type = null;
-        KUID nodeId = null;
         
         final int sleep = 100;
         
         while(true) {
-
+            
             // Simulate an received or sent message
-            nodeId = KUID.createRandomID();
-            if (generator.nextBoolean()) {
-                type = EventType.MESSAGE_RECEIVED;
-            } else {
-                type = EventType.MESSAGE_SENT;
-            }
+            KUID nodeId = KUID.createRandomID();
+            boolean outgoing = generator.nextBoolean();
             
-            OpCode opcode = OpCode.valueOf(1 + generator.nextInt(OpCode.values().length-1));
-            //OpCode opcode = OpCode.FIND_NODE_REQUEST;
+            Message message = messages.get(generator.nextInt(messages.size()));
             
-            arcs.painter.handle(type, nodeId, null, opcode, true);
+            arcs.painter.handle(outgoing, nodeId, null, message);
             
             // Sleep a bit...
             //Thread.sleep(sleep);
@@ -259,11 +271,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             // Send every now an then a response
             if (generator.nextBoolean()) {
-                if (type.equals(EventType.MESSAGE_SENT)) {
-                    arcs.painter.handle(EventType.MESSAGE_RECEIVED, nodeId, null, opcode, false);
-                } else {
-                    arcs.painter.handle(EventType.MESSAGE_SENT, nodeId, null, opcode, false);
-                }
+                //arcs.painter.handle(!outgoing, nodeId, null, message);
             }
         }
     }

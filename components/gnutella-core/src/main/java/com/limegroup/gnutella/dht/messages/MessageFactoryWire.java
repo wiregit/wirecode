@@ -88,25 +88,25 @@ public class MessageFactoryWire implements MessageFactory {
     
     public FindNodeRequest createFindNodeRequest(Contact src, SocketAddress dst, KUID lookupId) {
         return new FindNodeRequestWireImpl(
-                delegate.createFindNodeRequest(src, dst, lookupId));
+                delegate.createNodeRequest(src, dst, lookupId));
     }
 
     public FindNodeResponse createFindNodeResponse(Contact src, Contact dst, 
             MessageID messageId, Collection<? extends Contact> nodes) {
         return new FindNodeResponseWireImpl(
-                delegate.createFindNodeResponse(src, dst, messageId, nodes));
+                delegate.createNodeResponse(src, dst, messageId, nodes));
     }
 
     public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
             KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
         return new FindValueRequestWireImpl(
-                delegate.createFindValueRequest(src, dst, lookupId, keys, valueType));
+                delegate.createValueRequest(src, dst, lookupId, keys, valueType));
     }
 
     public FindValueResponse createFindValueResponse(Contact src, Contact dst, 
             MessageID messageId, float requestLoad, Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
         return new FindValueResponseWireImpl(
-                delegate.createFindValueResponse(src, dst, messageId, requestLoad, entities, secondaryKeys));
+                delegate.createValueResponse(src, dst, messageId, requestLoad, entities, secondaryKeys));
     }
 
     public PingRequest createPingRequest(Contact src, SocketAddress dst) {

@@ -4,12 +4,13 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoDHT2;
+import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.messages.MessageFactory;
-import org.limewire.mojito.messages.PingRequest;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
+import org.limewire.mojito.message2.PingRequest;
 import org.limewire.mojito.routing.Contact;
 
 public class MessageUtilsTest extends MojitoTestCase {
@@ -27,17 +28,21 @@ public class MessageUtilsTest extends MojitoTestCase {
     }
     
     public void testIsCollisionPing() {
-        MojitoDHT dht = MojitoFactory.createDHT();
-        MessageFactory factory = ((Context)dht).getMessageFactory();
+        Transport transport = NopTransport.NOP;
+        MessageFactory factory = new DefaultMessageFactory();
+        
+        MojitoDHT2 dht = MojitoFactory2.createDHT(transport, factory);
+        Contact localhost = dht.getLocalNode();
+        
         PingRequest ping = null;
         
-        assertFalse(ContactUtils.isCollisionPingSender(dht.getLocalNodeID(), dht.getLocalNode()));
+        assertFalse(ContactUtils.isCollisionPingSender(localhost.getNodeID(), dht.getLocalNode()));
         ping = factory.createPingRequest(dht.getLocalNode(), new InetSocketAddress("localhost", 2000));
-        assertFalse(MessageUtils.isCollisionPingRequest(dht.getLocalNodeID(), ping));
+        assertFalse(MessageUtils.isCollisionPingRequest(localhost.getNodeID(), ping));
         
         Contact sender = ContactUtils.createCollisionPingSender(dht.getLocalNode());
-        assertTrue(ContactUtils.isCollisionPingSender(dht.getLocalNodeID(), sender));
+        assertTrue(ContactUtils.isCollisionPingSender(localhost.getNodeID(), sender));
         ping = factory.createPingRequest(sender, new InetSocketAddress("localhost", 2000));
-        assertTrue(MessageUtils.isCollisionPingRequest(dht.getLocalNodeID(), ping));
+        assertTrue(MessageUtils.isCollisionPingRequest(localhost.getNodeID(), ping));
     }
 }

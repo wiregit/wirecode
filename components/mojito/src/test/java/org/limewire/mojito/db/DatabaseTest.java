@@ -30,18 +30,21 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoDHT2;
+import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.message2.DefaultMessageFactory;
+import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito.util.NopTransport;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
@@ -206,8 +209,11 @@ public class DatabaseTest extends MojitoTestCase {
         assertEquals(1, database.getValueCount());
         
         // The originator is issuing a direct store request
-        DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
-													 value1.getPrimaryKey(), StringUtils.toAsciiBytes("Mojito"));
+        DHTValueEntity value2 = createDirectDHTValue(
+                value1.getSecondaryKey(), 
+                value1.getPrimaryKey(), 
+                StringUtils.toAsciiBytes("Mojito"));
+        
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -217,8 +223,12 @@ public class DatabaseTest extends MojitoTestCase {
         
         // A directly stored value cannot be replaced by
         // an indirect value
-        DHTValueEntity value3 = createIndirectDHTValue(value2.getSecondaryKey(), 
-													   KUID.createRandomID(), value2.getPrimaryKey(), StringUtils.toAsciiBytes("Tough"));
+        DHTValueEntity value3 = createIndirectDHTValue(
+                value2.getSecondaryKey(), 
+                KUID.createRandomID(), 
+                value2.getPrimaryKey(), 
+                StringUtils.toAsciiBytes("Tough"));
+        
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -231,8 +241,10 @@ public class DatabaseTest extends MojitoTestCase {
         Database database = new DatabaseImpl();
         
         // Add an indirectly stored value
-        DHTValueEntity value1 = createIndirectDHTValue(StringUtils.toAsciiBytes("Hello World"));
+        DHTValueEntity value1 = createIndirectDHTValue(
+                StringUtils.toAsciiBytes("Hello World"));
         database.store(value1);
+        
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals(StringUtils.toAsciiBytes("Hello World"), 
@@ -240,8 +252,12 @@ public class DatabaseTest extends MojitoTestCase {
                     .get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Indirect replaces indirect
-        DHTValueEntity value2 = createIndirectDHTValue(value1.getSecondaryKey(), 
-													   KUID.createRandomID(), value1.getPrimaryKey(), StringUtils.toAsciiBytes("Mojito"));
+        DHTValueEntity value2 = createIndirectDHTValue(
+                value1.getSecondaryKey(), 
+                KUID.createRandomID(), 
+                value1.getPrimaryKey(), 
+                StringUtils.toAsciiBytes("Mojito"));
+        
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -250,8 +266,11 @@ public class DatabaseTest extends MojitoTestCase {
                     .get(value2.getSecondaryKey()).getValue().getValue()));
         
         // Direct replaces indirect
-        DHTValueEntity value3 = createDirectDHTValue(value2.getSecondaryKey(), 
-													 value2.getPrimaryKey(), StringUtils.toAsciiBytes("Tonic"));
+        DHTValueEntity value3 = createDirectDHTValue(
+                value2.getSecondaryKey(), 
+				value2.getPrimaryKey(), 
+				StringUtils.toAsciiBytes("Tonic"));
+        
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -260,8 +279,12 @@ public class DatabaseTest extends MojitoTestCase {
                     .get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Indirect shouldn't replace direct
-        DHTValueEntity value4 = createIndirectDHTValue(value3.getSecondaryKey(), 
-													   KUID.createRandomID(), value3.getPrimaryKey(), StringUtils.toAsciiBytes("Mary"));
+        DHTValueEntity value4 = createIndirectDHTValue(
+                value3.getSecondaryKey(), 
+				KUID.createRandomID(), 
+				value3.getPrimaryKey(), 
+				StringUtils.toAsciiBytes("Mary"));
+        
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -390,7 +413,9 @@ public class DatabaseTest extends MojitoTestCase {
      * "better solution" this test will fail!
      */
     public void testMultiRemove() {
-        MojitoDHT dht = MojitoFactory.createDHT();
+        MessageFactory messageFactory = new DefaultMessageFactory();
+        MojitoDHT2 dht = MojitoFactory2.createDHT(
+                NopTransport.NOP, messageFactory);
         
         DatabaseImpl database = (DatabaseImpl)dht.getDatabase();
         

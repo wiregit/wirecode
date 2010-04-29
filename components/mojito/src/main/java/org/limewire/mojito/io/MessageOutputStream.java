@@ -287,7 +287,7 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the DHTValueType to the OutputStream.
      */
     public void writeDHTValueType(DHTValueType type) throws IOException {
-        writeInt(type.toInt());
+        writeInt(type.intValue());
     }
     
     /**

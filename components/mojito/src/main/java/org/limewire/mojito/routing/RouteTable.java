@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
 
@@ -194,11 +193,6 @@ public interface RouteTable extends Serializable {
      * Sets the RouteTable PingCallback.
      */
     public void setContactPinger(ContactPinger pinger);
-    
-    /**
-     * Sets the executor on which to notify for route table events.
-     */
-    public void setNotifier(DHTExecutorService executor);
     
     /**
      * Adds a RouteTableListener.

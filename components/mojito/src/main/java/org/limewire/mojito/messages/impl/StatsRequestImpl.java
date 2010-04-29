@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -45,7 +45,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     
     private Status secureStatus = Status.INSECURE;
     
-    public StatsRequestImpl(Context context, 
+    public StatsRequestImpl(Context2 context, 
             Contact contact, MessageID messageId, StatisticType request) {
         super(context, OpCode.STATS_REQUEST, contact, messageId, Version.ZERO);
 
@@ -53,7 +53,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
         this.signature = null;
     }
 
-    public StatsRequestImpl(Context context, SocketAddress src, 
+    public StatsRequestImpl(Context2 context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.STATS_REQUEST, src, messageId, msgVersion, in);
         

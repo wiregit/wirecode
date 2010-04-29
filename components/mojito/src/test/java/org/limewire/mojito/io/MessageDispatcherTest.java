@@ -33,6 +33,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
     }
     
     public void testSendMethod() throws Exception {
+        
         MojitoDHT dht = MojitoFactory.createDHT("Test");
         try {
             dht.bind(5000);
