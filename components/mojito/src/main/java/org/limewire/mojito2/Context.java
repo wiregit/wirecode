@@ -119,7 +119,6 @@ public class Context implements DHT {
      * 
      */
     public Context(String name,
-            Transport transport,
             MessageFactory messageFactory,
             RouteTable routeTable, 
             Database database) {
@@ -134,7 +133,7 @@ public class Context implements DHT {
             = new DefaultStoreForward(routeTable, database);
         
         this.messageDispatcher = new DefaultMessageDispatcher(
-                this, transport, storeForward);
+                this, storeForward);
     }
     
     @Override
@@ -146,16 +145,22 @@ public class Context implements DHT {
     public void close() {
         futureManager.close();
         estimator.clear();
+        messageDispatcher.close();
     }
     
     @Override
-    public void start() {
-        messageDispatcher.bind();
+    public void bind(Transport transport) throws IOException {
+        messageDispatcher.bind(transport);
     }
 
     @Override
-    public void stop() {
-        messageDispatcher.unbind();
+    public Transport unbind() {
+        return messageDispatcher.unbind();
+    }
+    
+    @Override
+    public boolean isBound() {
+        return messageDispatcher.isBound();
     }
 
     @Override

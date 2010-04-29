@@ -1,6 +1,7 @@
 package org.limewire.mojito2;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
@@ -14,6 +15,7 @@ import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.MessageDispatcher;
+import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -86,12 +88,17 @@ public interface DHT extends Closeable {
     /**
      * 
      */
-    public void start();
+    public void bind(Transport transport) throws IOException;
     
     /**
      * 
      */
-    public void stop();
+    public Transport unbind();
+    
+    /**
+     * 
+     */
+    public boolean isBound();
     
     /**
      * 

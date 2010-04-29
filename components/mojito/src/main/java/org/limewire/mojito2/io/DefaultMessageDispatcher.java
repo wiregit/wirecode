@@ -42,8 +42,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     private final StoreRequestHandler store;
     
     public DefaultMessageDispatcher(Context context, 
-            Transport transport, StoreForward storeForward) {
-        super(transport);
+            StoreForward storeForward) {
         
         this.context = context;
         

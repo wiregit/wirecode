@@ -36,6 +36,8 @@ import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.message.ValueResponse;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.EventUtils;
+import org.limewire.mojito2.util.IoUtils;
+import org.limewire.util.Objects;
 
 /**
  * 
@@ -75,40 +77,75 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
-    private final Transport transport;
+    private volatile Transport transport = null;
     
     /**
      * 
      */
-    public MessageDispatcher(Transport transport) {
+    private boolean open = true;
+    
+    /**
+     * 
+     */
+    public synchronized void bind(Transport transport) throws IOException {
+        Objects.nonNull(transport, "transport");
+        
+        if (!open) {
+            throw new IOException();
+        }
+        
+        if (this.transport != null) {
+            throw new IOException();
+        }
+        
         this.transport = transport;
-    }
-    
-    /**
-     * 
-     */
-    public void bind() {
         transport.bind(this);
     }
     
     /**
      * 
      */
-    public void unbind() {
-        transport.bind(null);
+    public synchronized Transport unbind() {
+        return unbind(false);
+    }
+    
+    /**
+     * 
+     */
+    private synchronized Transport unbind(boolean close) {
+        Transport transport = this.transport;
+        
+        if (transport != null) {
+            transport.bind(null);
+            
+            if (close && transport instanceof Closeable) {
+                IoUtils.close((Closeable)transport);
+            }
+            
+            this.transport = null;
+        }
+        
+        return transport;
+    }
+    
+    /**
+     * 
+     */
+    public synchronized boolean isBound() {
+        return transport != null;
+    }
+    
+    @Override
+    public void close() {
+        unbind(true);
+        requestManager.close();
     }
     
     /**
      * Returns the {@link Transport}
      */
-    public Transport getTransport() {
+    public synchronized Transport getTransport() {
         return transport;
-    }
-    
-    @Override
-    public void close() {
-        unbind();
-        requestManager.close();
     }
     
     /**
@@ -130,8 +167,13 @@ public abstract class MessageDispatcher implements Closeable {
      */
     public void send(Contact dst, ResponseMessage response) throws IOException {
         SocketAddress address = dst.getContactAddress();
-        transport.send(address, response);
         
+        Transport transport = this.transport;
+        if (transport == null) {
+            throw new IOException("Not Bound!");
+        }
+        
+        transport.send(address, response);
         fireMessageSent(dst.getNodeID(), address, response);
     }
     
@@ -144,8 +186,13 @@ public abstract class MessageDispatcher implements Closeable {
         
         requestManager.add(callback, contactId, dst, 
                 request, timeout, unit);
-        transport.send(dst, request);
         
+        Transport transport = this.transport;
+        if (transport == null) {
+            throw new IOException("Not Bound!");
+        }
+        
+        transport.send(dst, request);
         fireMessageSent(contactId, dst, request);
     }
     

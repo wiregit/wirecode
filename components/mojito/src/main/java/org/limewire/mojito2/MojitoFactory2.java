@@ -1,6 +1,5 @@
 package org.limewire.mojito2;
 
-import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -14,12 +13,12 @@ public class MojitoFactory2 {
 
     private static final String NAME = "DHT";
     
-    public static DHT createDHT(Transport transport, MessageFactory messageFactory) {
-        return createDHT(transport, messageFactory, ContextSettings.getVendor(), 
+    public static DHT createDHT(MessageFactory messageFactory) {
+        return createDHT(messageFactory, ContextSettings.getVendor(), 
                 ContextSettings.getVersion(), false);
     }
     
-    public static DHT createDHT(Transport transport, MessageFactory messageFactory,
+    public static DHT createDHT(MessageFactory messageFactory,
             Vendor vendor, Version version, boolean firewalled) {
         
         DatabaseImpl database = new DatabaseImpl();
@@ -31,6 +30,6 @@ public class MojitoFactory2 {
         localhost.setVersion(version);
         localhost.setFirewalled(firewalled);
         
-        return new Context(NAME, transport, messageFactory, routeTable, database);
+        return new Context(NAME, messageFactory, routeTable, database);
     }
 }
