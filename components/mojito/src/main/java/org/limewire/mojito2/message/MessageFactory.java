@@ -24,10 +24,10 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.security.SecurityTokenHelper;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
@@ -45,7 +45,7 @@ public interface MessageFactory {
     /**
      * 
      */
-    public SecurityTokenHelper2 getSecurityTokenHelper();
+    public SecurityTokenHelper getSecurityTokenHelper();
     
     /**
      * 

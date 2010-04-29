@@ -10,8 +10,8 @@ import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;

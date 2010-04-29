@@ -5,10 +5,10 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.Entity;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.util.Objects;

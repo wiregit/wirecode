@@ -27,11 +27,6 @@ import java.net.SocketAddress;
 import java.security.KeyPair;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.EvictorManager;
-import org.limewire.mojito.db.StorableModelManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.messages.MessageFactory;
@@ -46,6 +41,11 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.DHTValueFactoryManager;
+import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.EvictorManager;
+import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 

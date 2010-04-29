@@ -37,10 +37,6 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.StorableModelManager;
-import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.FindValueResult;
@@ -53,6 +49,10 @@ import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.storage.DHTValueImpl;
+import org.limewire.mojito2.storage.DHTValueType;
+import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.StorableModelManager;
 
 /**
  * Executes various features of the Mojito DHT. <code>CommandHandler</code>

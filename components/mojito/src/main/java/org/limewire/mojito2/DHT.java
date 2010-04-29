@@ -8,22 +8,22 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.Storable;
-import org.limewire.mojito.db.StorableModelManager;
-import org.limewire.mojito.entity.BootstrapEntity;
-import org.limewire.mojito.entity.NodeEntity;
-import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.entity.StoreEntity;
-import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.BootstrapEntity;
+import org.limewire.mojito2.entity.NodeEntity;
+import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.Storable;
+import org.limewire.mojito2.storage.StorableModelManager;
 
 /**
  * 

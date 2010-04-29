@@ -29,6 +29,9 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.EvictorManager;
 
 /**
  * Removes expired values from the local database.

@@ -9,18 +9,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.entity.DefaultValueEntity;
-import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.entity.DefaultValueEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.message.ValueResponse;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueType;
 
 public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity> {
 

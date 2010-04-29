@@ -30,8 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
@@ -44,6 +42,8 @@ import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 

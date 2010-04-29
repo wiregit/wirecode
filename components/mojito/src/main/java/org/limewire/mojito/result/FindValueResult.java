@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 

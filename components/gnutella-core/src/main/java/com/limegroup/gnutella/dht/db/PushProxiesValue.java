@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.PushEndpoint;
 

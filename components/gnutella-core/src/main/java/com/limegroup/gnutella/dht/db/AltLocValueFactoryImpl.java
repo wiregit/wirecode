@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValueType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

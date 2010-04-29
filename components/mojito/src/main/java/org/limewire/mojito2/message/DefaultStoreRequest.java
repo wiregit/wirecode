@@ -1,7 +1,7 @@
 package org.limewire.mojito2.message;
 
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 public class DefaultStoreRequest extends AbstractRequest 

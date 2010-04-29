@@ -11,8 +11,6 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.Database;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
@@ -21,6 +19,8 @@ import org.limewire.mojito2.message.SecurityTokenProvider;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Database;
 import org.limewire.security.SecurityToken;
 
 public class DefaultStoreForward implements StoreForward {

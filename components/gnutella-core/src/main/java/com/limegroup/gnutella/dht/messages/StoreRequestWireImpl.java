@@ -2,8 +2,8 @@ package com.limegroup.gnutella.dht.messages;
 
 import java.util.Collection;
 
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.StoreRequest;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 

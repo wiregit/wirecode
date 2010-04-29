@@ -18,6 +18,9 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Storable;
+import org.limewire.mojito2.storage.StorableModelManager;
 
 /**
  * Publishes {@link Storable} values in the DHT.

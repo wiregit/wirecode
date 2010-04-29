@@ -7,11 +7,11 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.entity.DefaultPingEntity;
-import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.entity.DefaultPingEntity;
+import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.PingResponse;

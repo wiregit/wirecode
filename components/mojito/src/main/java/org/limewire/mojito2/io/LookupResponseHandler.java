@@ -22,11 +22,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.entity.LookupEntity;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
+import org.limewire.mojito2.entity.LookupEntity;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.routing.Contact;

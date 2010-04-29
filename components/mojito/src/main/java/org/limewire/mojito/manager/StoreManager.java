@@ -24,12 +24,12 @@ import java.util.Map.Entry;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTFutureTask;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 /**

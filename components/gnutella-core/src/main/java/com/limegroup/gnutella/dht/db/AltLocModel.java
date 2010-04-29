@@ -11,12 +11,12 @@ import java.util.Map;
 import org.limewire.collection.MultiCollection;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.Storable;
-import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.Storable;
+import org.limewire.mojito2.storage.StorableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

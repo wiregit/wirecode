@@ -27,9 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.security.SecurityTokenHelper2;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
@@ -38,6 +35,9 @@ import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.StoreResponse;
 import org.limewire.mojito2.message.StoreStatusCode;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.security.SecurityTokenHelper;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.Database;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
@@ -85,7 +85,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         }
         
         MessageFactory messageFactory = context.getMessageFactory();
-        SecurityTokenHelper2 tokenHelper = messageFactory.getSecurityTokenHelper();
+        SecurityTokenHelper tokenHelper = messageFactory.getSecurityTokenHelper();
         
         Contact src = request.getContact();
         TokenData expectedToken = tokenHelper.createTokenData(src);

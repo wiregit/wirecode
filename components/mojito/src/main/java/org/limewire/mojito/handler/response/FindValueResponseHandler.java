@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.LookupRequest;
@@ -42,6 +41,7 @@ import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 

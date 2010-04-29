@@ -4,9 +4,9 @@ import java.util.Set;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValueType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

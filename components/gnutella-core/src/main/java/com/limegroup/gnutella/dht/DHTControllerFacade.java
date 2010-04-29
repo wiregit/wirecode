@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.db.DHTValueFactory;
-import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.mojito2.storage.DHTValueFactory;
+import org.limewire.mojito2.storage.StorableModel;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 

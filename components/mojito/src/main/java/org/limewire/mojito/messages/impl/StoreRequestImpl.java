@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -31,6 +30,7 @@ import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.security.SecurityToken;
 
 

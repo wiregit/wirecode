@@ -30,9 +30,6 @@ import java.util.Collection;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
@@ -40,6 +37,9 @@ import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 

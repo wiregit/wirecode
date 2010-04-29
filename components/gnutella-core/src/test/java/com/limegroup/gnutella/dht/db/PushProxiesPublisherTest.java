@@ -22,8 +22,8 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;

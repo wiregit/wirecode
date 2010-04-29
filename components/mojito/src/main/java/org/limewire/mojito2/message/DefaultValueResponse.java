@@ -1,8 +1,8 @@
 package org.limewire.mojito2.message;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 
 public class DefaultValueResponse extends AbstractLookupResponse 
         implements ValueResponse {

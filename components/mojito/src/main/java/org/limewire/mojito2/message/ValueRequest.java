@@ -1,7 +1,7 @@
 package org.limewire.mojito2.message;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito2.storage.DHTValueType;
 
 public interface ValueRequest extends LookupRequest {
 

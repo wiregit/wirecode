@@ -24,7 +24,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
-import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueEntity;
 
 
 /**

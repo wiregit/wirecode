@@ -2,9 +2,9 @@ package com.limegroup.gnutella.dht.db;
 
 import java.io.Serializable;
 
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.DHTValueType;
 
 /**
  * Defines an interface of an alternative location DHT value.

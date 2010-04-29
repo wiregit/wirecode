@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.util.ByteUtils;
 
 

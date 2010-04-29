@@ -19,10 +19,10 @@ import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.db.Database;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.Database;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.connection.Connection;

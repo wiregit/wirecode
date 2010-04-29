@@ -8,6 +8,8 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.inject.AbstractModule;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.Storable;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Inject;

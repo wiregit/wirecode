@@ -22,10 +22,10 @@ package org.limewire.mojito.result;
 import java.util.Collection;
 import java.util.Map;
 
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito2.message.StoreStatusCode;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValueEntity;
 
 
 /**
