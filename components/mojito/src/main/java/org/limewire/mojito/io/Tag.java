@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.ResponseHandler;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
@@ -43,6 +42,7 @@ import org.limewire.mojito.messages.StatsRequest;
 import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.ContactUtils;
 

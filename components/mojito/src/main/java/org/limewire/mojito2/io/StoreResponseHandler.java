@@ -12,10 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.StatusCode;
-import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.entity.DefaultStoreEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.message.MessageHelper;
@@ -28,6 +27,7 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.MaxStack;
 import org.limewire.security.SecurityToken;
 
 public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
@@ -142,7 +142,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private synchronized void complete() {
         long time = getTime(TimeUnit.MILLISECONDS);
-        setValue(new DefaultStoreEntity(time, TimeUnit.MILLISECONDS));
+        Contact[] contacts = codes.keySet().toArray(new Contact[0]);
+        
+        setValue(new DefaultStoreEntity(contacts, time, TimeUnit.MILLISECONDS));
     }
     
     private synchronized boolean store(StoreProcess process) throws IOException {

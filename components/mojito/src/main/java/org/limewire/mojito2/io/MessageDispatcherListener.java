@@ -2,7 +2,7 @@ package org.limewire.mojito2.io;
 
 import java.net.SocketAddress;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
 
 public interface MessageDispatcherListener {

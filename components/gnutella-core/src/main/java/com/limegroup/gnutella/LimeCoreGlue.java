@@ -8,7 +8,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito.settings.MojitoProps;
+import org.limewire.mojito2.settings.MojitoProps;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;

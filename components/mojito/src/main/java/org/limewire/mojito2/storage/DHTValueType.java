@@ -22,8 +22,8 @@ package org.limewire.mojito2.storage;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.limewire.mojito.util.ArrayUtils;
-import org.limewire.mojito.util.FixedSizeHashMap;
+import org.limewire.mojito2.collection.FixedSizeHashMap;
+import org.limewire.mojito2.util.ArrayUtils;
 
 /**
  * Specifies the type of a DHT value. You can use the existing values (BINARY, 

@@ -1,6 +1,5 @@
 package org.limewire.mojito2;
 
-import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.LocalContact;
@@ -8,6 +7,7 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.storage.DatabaseImpl;
 
 public class MojitoFactory2 {

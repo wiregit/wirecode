@@ -36,15 +36,15 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
-import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.ExceptionUtils;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
+import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
+import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
 
@@ -335,10 +335,11 @@ public class RouteTableImpl implements RouteTable {
      * state is that both Contacts have the same Node ID.
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
-        DHTFutureAdapter<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+        EventListener<FutureEvent<PingEntity>> listener 
+                = new EventListener<FutureEvent<PingEntity>>() {
             
             @Override
-            protected void operationComplete(FutureEvent<PingResult> event) {
+            public void handleEvent(FutureEvent<PingEntity> event) {
                 switch (event.getType()) {
                     case SUCCESS:
                         handleFutureSuccess(event.getResult());
@@ -349,9 +350,9 @@ public class RouteTableImpl implements RouteTable {
                 }
             }
 
-            private void handleFutureSuccess(PingResult result) {
+            private void handleFutureSuccess(PingEntity entity) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(node + " is trying to spoof " + result);
+                    LOG.warn(node + " is trying to spoof " + entity);
                 }
                 
                 // DO NOTHING! The DefaultMessageHandler takes care 
@@ -905,7 +906,7 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null.
      */
-    private void ping(Contact node, DHTFutureAdapter<PingResult> listener) {
+    private void ping(Contact node, EventListener<FutureEvent<PingEntity>> listener) {
         ContactPinger pinger = this.pinger;
         if (pinger != null) {
             pinger.ping(node, listener);
@@ -917,7 +918,7 @@ public class RouteTableImpl implements RouteTable {
                         new DHTTimeoutException(node.getNodeID(), 
                                 node.getContactAddress(), null, 0L));
                 
-                FutureEvent<PingResult> event 
+                FutureEvent<PingEntity> event 
                     = FutureEvent.createException(exception);
                 listener.handleEvent(event);
             }

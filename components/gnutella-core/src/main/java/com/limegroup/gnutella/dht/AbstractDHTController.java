@@ -24,16 +24,16 @@ import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.statistics.DHTStatsManager;
-import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.HostFilter;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.service.ErrorService;
 

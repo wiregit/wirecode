@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 

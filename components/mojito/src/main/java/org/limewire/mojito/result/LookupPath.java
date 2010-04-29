@@ -22,7 +22,7 @@ package org.limewire.mojito.result;
 import java.util.Collection;
 import java.util.Map.Entry;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.security.SecurityToken;
 

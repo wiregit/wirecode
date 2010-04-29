@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.statistic.Statistic;
 
 

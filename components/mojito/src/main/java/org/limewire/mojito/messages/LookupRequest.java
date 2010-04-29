@@ -19,7 +19,7 @@
  
 package org.limewire.mojito.messages;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 /**
  * Defines an interface for a lookup request.

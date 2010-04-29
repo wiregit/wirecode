@@ -5,13 +5,13 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
 import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;

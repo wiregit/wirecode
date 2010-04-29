@@ -19,8 +19,8 @@
 
 package org.limewire.mojito2.storage;
 
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.StoreEntity;
 
 /**
  * A key-value pair ({@link KUID}, {@link DHTValue}) that can be stored in the DHT.
@@ -93,9 +93,9 @@ public class Storable {
     /**
      * Called by <code>StorablePublisher</code>.
      */
-    protected synchronized void handleStoreResult(StoreResult result) {
+    protected synchronized void handleStoreResult(StoreEntity entity) {
         setPublishTime(System.currentTimeMillis());
-        setLocationCount(result.getLocations().size());
+        setLocationCount(entity.getContacts().length);
     }
     
     @Override

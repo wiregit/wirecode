@@ -28,9 +28,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 

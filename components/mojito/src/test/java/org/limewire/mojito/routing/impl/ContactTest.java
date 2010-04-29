@@ -4,8 +4,8 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.LocalContact;

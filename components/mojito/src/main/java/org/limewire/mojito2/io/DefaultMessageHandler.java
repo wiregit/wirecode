@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.PingResponse;
 import org.limewire.mojito2.message.RequestMessage;

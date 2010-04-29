@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.settings.DatabaseSettings;
 /**
  * Stores a {@link DHTValueEntity} in a map.
  */

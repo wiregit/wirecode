@@ -24,8 +24,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.settings.SecuritySettings;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.SecuritySettings;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 

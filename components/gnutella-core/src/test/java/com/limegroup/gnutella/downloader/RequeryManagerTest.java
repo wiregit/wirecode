@@ -8,7 +8,7 @@ import org.jmock.Sequence;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.mojito.settings.LookupSettings;
+import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.LegacyProActivationManager;

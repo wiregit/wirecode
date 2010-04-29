@@ -6,11 +6,8 @@ import java.util.Arrays;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
@@ -21,6 +18,9 @@ import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.Contact.State;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
 
 
 public class BucketNodeTest extends MojitoTestCase {

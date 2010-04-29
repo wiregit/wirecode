@@ -2,8 +2,8 @@ package com.limegroup.gnutella.dht.messages;
 
 import java.util.Collection;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindValueResponse;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.storage.DHTValueEntity;
 
 

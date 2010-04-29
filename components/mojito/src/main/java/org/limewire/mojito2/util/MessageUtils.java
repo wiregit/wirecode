@@ -20,7 +20,7 @@
 package org.limewire.mojito2.util;
 
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.PingRequest;
 

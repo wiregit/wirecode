@@ -26,14 +26,14 @@ import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.RequestMessage;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 

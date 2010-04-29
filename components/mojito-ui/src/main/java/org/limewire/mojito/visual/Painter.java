@@ -7,7 +7,7 @@ import java.awt.Stroke;
 import java.math.BigDecimal;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.NodeRequest;
 import org.limewire.mojito2.message.NodeResponse;

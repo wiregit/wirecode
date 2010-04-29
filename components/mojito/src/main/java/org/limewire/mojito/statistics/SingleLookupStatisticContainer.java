@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 
 abstract class SingleLookupStatisticContainer extends StatisticContainer {

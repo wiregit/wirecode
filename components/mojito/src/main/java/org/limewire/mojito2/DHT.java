@@ -6,9 +6,6 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
@@ -24,6 +21,7 @@ import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
+import org.limewire.mojito2.util.HostFilter;
 
 /**
  * 

@@ -7,10 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.MessageID;
 import org.limewire.mojito2.message.NodeRequest;
@@ -22,7 +20,9 @@ import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.HostFilter;
 
 public class DefaultMessageDispatcher extends MessageDispatcher {
 

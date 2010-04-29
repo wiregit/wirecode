@@ -27,19 +27,19 @@ import junit.framework.Test;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Storable;
+import org.limewire.mojito2.util.DatabaseUtils;
 import org.limewire.util.StringUtils;
 
 public class DHTValueTest extends MojitoTestCase {

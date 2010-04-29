@@ -21,7 +21,7 @@ package org.limewire.mojito2.storage;
 
 import java.util.Collection;
 
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito2.entity.StoreEntity;
 
 /**
  * Defines an interface for returning a {@link Storable} collection, storing the
@@ -37,7 +37,7 @@ public interface StorableModel {
     /**
      * Called for every successful STORE.
      */
-    public void handleStoreResult(Storable value, StoreResult result);
+    public void handleStoreResult(Storable value, StoreEntity result);
     
     /**
      * Notifies the <code>StorableModel</code> that the local Contact's

@@ -19,8 +19,8 @@
 
 package org.limewire.mojito2.storage;
 
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.util.DatabaseUtils;
 
 /**
  * Decides whether a {@link DHTValueEntity} is expired for a given {@link RouteTable}.

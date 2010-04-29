@@ -21,10 +21,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.entity.LookupEntity;
 import org.limewire.mojito2.message.RequestMessage;
@@ -32,7 +30,9 @@ import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.util.ContactsScrubber;
+import org.limewire.mojito2.util.MaxStack;
 import org.limewire.security.SecurityToken;
 
 public abstract class LookupResponseHandler<V extends LookupEntity> 

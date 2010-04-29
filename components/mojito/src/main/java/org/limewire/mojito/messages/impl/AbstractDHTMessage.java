@@ -28,12 +28,12 @@ import java.security.SignatureException;
 
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;

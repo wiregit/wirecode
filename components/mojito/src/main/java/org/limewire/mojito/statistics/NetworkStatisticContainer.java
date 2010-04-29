@@ -22,10 +22,10 @@ package org.limewire.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
+import org.limewire.mojito2.KUID;
 import org.limewire.statistic.AbstractStatistic;
 import org.limewire.statistic.Statistic;
 

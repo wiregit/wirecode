@@ -1,6 +1,6 @@
 package org.limewire.mojito2.message;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 
 public class DefaultNodeRequest extends AbstractLookupRequest 

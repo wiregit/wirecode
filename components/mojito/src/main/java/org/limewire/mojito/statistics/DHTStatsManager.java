@@ -22,7 +22,7 @@ package org.limewire.mojito.statistics;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 
 public class DHTStatsManager {

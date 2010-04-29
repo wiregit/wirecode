@@ -8,14 +8,14 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.KademliaSettings;
 
 @SuppressWarnings("null")
 public class PassiveLeafRouteTableTest extends DHTTestCase {

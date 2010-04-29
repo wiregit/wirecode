@@ -8,10 +8,10 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.NetworkSettings;
 
 import ca.odell.glazedlists.jfreechart.SimpleEventCategoryDataset.Context;
 

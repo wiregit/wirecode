@@ -2,8 +2,8 @@ package org.limewire.mojito2.entity;
 
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.io.LookupResponseHandler.State;
 import org.limewire.mojito2.storage.DHTValueEntity;
 

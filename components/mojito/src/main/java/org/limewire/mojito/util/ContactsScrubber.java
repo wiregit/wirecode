@@ -27,10 +27,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.SameClassFilter;
 
 /**
  * The ContactsScrubber is a pre-processing tool to ensure that

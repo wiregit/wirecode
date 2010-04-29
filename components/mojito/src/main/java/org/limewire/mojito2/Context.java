@@ -11,11 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.util.DHTSizeEstimator;
-import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
@@ -46,6 +41,8 @@ import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.DHTSizeEstimator;
+import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
 
 /**
@@ -56,10 +53,10 @@ public class Context implements DHT {
     /**
      * 
      */
-    private final DHTFutureAdapter<PingEntity> onPong 
-            = new DHTFutureAdapter<PingEntity>() {
+    private final EventListener<FutureEvent<PingEntity>> onPong 
+            = new EventListener<FutureEvent<PingEntity>>() {
         @Override
-        protected void operationComplete(FutureEvent<PingEntity> event) {
+        public void handleEvent(FutureEvent<PingEntity> event) {
             if (event.getType() == Type.SUCCESS) {
                 update(event.getResult());
             }

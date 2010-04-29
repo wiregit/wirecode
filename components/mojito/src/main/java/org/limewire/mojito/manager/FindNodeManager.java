@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
 import org.limewire.mojito.result.FindNodeResult;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTFutureTask;
 

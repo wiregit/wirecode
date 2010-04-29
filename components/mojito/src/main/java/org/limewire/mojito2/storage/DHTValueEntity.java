@@ -21,8 +21,8 @@ package org.limewire.mojito2.storage;
 
 import java.io.Serializable;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 
 /**

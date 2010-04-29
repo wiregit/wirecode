@@ -6,12 +6,12 @@ import java.util.List;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;

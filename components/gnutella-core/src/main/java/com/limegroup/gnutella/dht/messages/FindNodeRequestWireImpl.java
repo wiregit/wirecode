@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht.messages;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindNodeRequest;
+import org.limewire.mojito2.KUID;
 
 
 public class FindNodeRequestWireImpl extends AbstractMessageWire<FindNodeRequest> 

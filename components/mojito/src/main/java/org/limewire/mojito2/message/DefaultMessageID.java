@@ -28,7 +28,7 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.mojito2.util.ArrayUtils;
 import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;

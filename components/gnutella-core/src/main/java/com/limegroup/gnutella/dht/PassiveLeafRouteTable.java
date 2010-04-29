@@ -9,11 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.mojito.util.FixedSizeHashMap;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.collection.FixedSizeHashMap;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
@@ -21,6 +19,8 @@ import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.util.CollectionUtils;
 
 class PassiveLeafRouteTable implements RouteTable {
     

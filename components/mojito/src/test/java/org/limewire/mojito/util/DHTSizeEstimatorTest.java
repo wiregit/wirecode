@@ -6,10 +6,10 @@ import java.net.SocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
@@ -17,6 +17,7 @@ import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.ContactPinger;
+import org.limewire.mojito2.util.DHTSizeEstimator;
 
 
 public class DHTSizeEstimatorTest extends MojitoTestCase {

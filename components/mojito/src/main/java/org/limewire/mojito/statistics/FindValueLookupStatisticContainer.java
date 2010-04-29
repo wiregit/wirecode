@@ -20,7 +20,7 @@
 package org.limewire.mojito.statistics;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.statistic.Statistic;
 
 public class FindValueLookupStatisticContainer extends SingleLookupStatisticContainer{

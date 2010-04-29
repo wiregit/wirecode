@@ -21,7 +21,7 @@ package org.limewire.mojito2.routing;
 
 import java.io.Serializable;
 
-import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.mojito2.util.ArrayUtils;
 
 /**
  * Vendor is a four byte value in big-endian byte order where

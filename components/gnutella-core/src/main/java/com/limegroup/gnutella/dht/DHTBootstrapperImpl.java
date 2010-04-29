@@ -16,15 +16,15 @@ import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
-import org.limewire.mojito.util.ExceptionUtils;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Provider;

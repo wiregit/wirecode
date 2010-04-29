@@ -26,19 +26,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.DatabaseSettings;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModel;
+import org.limewire.mojito2.util.DatabaseUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 

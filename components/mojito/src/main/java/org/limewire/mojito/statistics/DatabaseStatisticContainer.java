@@ -22,7 +22,7 @@ package org.limewire.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.statistic.Statistic;
 
 

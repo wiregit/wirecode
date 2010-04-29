@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutionException;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
@@ -26,13 +25,14 @@ import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.BootstrapSettings;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.BootstrapSettings;
+import org.limewire.mojito2.settings.NetworkSettings;
 
 public class BootstrapManagerTest extends MojitoTestCase {
     

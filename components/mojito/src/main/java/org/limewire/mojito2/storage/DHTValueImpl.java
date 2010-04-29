@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.util.ArrayUtils;
 
 
 /**

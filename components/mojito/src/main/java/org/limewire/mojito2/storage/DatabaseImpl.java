@@ -36,9 +36,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntHashMap;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 

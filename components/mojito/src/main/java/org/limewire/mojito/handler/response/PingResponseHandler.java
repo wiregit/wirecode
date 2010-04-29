@@ -27,7 +27,6 @@ import java.net.SocketException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTBadResponseException;
 import org.limewire.mojito.exceptions.DHTException;
@@ -35,8 +34,9 @@ import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.PingSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.PingSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 

@@ -22,8 +22,8 @@ package org.limewire.mojito2.storage;
 import java.util.Collection;
 import java.util.Map;
 
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.settings.DatabaseSettings;
 
 /**
  * Determines when it is acceptable to store a {@link DHTValueEntity} in a {@link Database}.

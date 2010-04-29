@@ -11,15 +11,15 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RemoteContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.Contact.State;
+import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;

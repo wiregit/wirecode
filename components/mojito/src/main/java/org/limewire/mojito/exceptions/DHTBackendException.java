@@ -21,7 +21,7 @@ package org.limewire.mojito.exceptions;
 
 import java.net.SocketAddress;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.RequestMessage;
 
 /**

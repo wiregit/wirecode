@@ -29,11 +29,9 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoFactory2;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;
@@ -41,6 +39,8 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueEntityBag;

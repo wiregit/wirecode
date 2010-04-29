@@ -25,13 +25,13 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.result.StatsResult;
+import org.limewire.mojito2.KUID;
 
 
 /**

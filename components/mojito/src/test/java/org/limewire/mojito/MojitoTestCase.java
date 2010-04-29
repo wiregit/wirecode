@@ -1,9 +1,9 @@
 package org.limewire.mojito;
 
 import org.limewire.io.SimpleNetworkInstanceUtils;
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.MojitoProps;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.MojitoProps;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.util.BaseTestCase;
 

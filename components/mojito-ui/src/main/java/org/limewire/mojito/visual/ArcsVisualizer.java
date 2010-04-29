@@ -23,8 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.io.MessageDispatcherListener;
 import org.limewire.mojito2.message.DefaultNodeRequest;
 import org.limewire.mojito2.message.DefaultNodeResponse;

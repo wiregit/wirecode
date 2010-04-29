@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito.settings.LookupSettings;
+import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.ConnectionServices;

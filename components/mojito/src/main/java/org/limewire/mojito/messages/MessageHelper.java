@@ -24,10 +24,10 @@ import java.net.SocketAddress;
 import java.util.Collection;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.messages.impl.DefaultMessageFactory;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;

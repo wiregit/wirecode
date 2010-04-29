@@ -28,10 +28,11 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
 
 
 public class CollisionTest extends MojitoTestCase {

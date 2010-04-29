@@ -29,17 +29,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.BucketRefresherSettings;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.BucketRefresherSettings;
+import org.limewire.mojito2.settings.KademliaSettings;
 
 /**
  * The BucketRefresher goes in periodic intervals through all Buckets

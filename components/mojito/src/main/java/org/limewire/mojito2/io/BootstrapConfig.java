@@ -2,9 +2,9 @@ package org.limewire.mojito2.io;
 
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.settings.BootstrapSettings;
-import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.settings.BootstrapSettings;
+import org.limewire.mojito2.settings.LookupSettings;
+import org.limewire.mojito2.settings.NetworkSettings;
 
 /**
  * 

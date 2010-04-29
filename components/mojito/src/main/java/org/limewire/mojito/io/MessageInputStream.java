@@ -33,13 +33,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;

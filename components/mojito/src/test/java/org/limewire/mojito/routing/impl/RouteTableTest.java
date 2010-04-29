@@ -15,13 +15,10 @@ import junit.framework.TestSuite;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.EntryImpl;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
@@ -34,6 +31,9 @@ import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.PurgeMode;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
+import org.limewire.mojito2.util.EntryImpl;
 import org.limewire.util.TestUtils;
 
 @SuppressWarnings("null")

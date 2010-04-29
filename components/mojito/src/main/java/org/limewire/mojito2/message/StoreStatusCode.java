@@ -2,8 +2,8 @@ package org.limewire.mojito2.message;
 
 import java.io.Serializable;
 
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.StatusCode;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.storage.DHTValueEntity;
 
 /**

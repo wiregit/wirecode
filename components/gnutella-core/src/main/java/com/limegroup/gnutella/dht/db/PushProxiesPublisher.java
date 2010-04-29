@@ -12,11 +12,11 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.settings.DatabaseSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

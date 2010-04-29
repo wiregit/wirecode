@@ -32,10 +32,10 @@ import java.util.Map;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.collection.Trie.Cursor;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.FixedSizeHashMap;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.collection.FixedSizeHashMap;
+import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
 
 
 /**

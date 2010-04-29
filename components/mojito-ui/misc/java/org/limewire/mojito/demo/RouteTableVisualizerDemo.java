@@ -5,11 +5,11 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoFactory2;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;

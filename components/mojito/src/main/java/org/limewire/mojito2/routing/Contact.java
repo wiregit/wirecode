@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 
 /**

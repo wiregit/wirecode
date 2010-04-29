@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntHashMap;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 /**

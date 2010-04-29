@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SyncWrapper;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
@@ -41,15 +40,16 @@ import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
-import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.RouteTableUtils;
 import org.limewire.mojito.util.TimeAwareIterable;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.PurgeMode;
+import org.limewire.mojito2.settings.BootstrapSettings;
 import org.limewire.mojito2.util.ContactUtils;
 
 /**

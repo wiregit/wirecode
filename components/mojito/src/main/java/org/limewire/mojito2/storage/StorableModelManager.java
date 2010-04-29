@@ -28,8 +28,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.entity.StoreEntity;
 
 /**
  * Manages multiple instances of a <code>StorableModel</code>.
@@ -109,7 +109,7 @@ public class StorableModelManager {
      * Notifies a StorableModel about the result of a STORE
      * operation.
      */
-    void handleStoreResult(Storable value, StoreResult result) {
+    void handleStoreResult(Storable value, StoreEntity result) {
         DHTValueType type = value.getValue().getValueType();
         StorableModel model = models.get(type);
         if (model != null) {

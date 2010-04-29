@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 
 /**

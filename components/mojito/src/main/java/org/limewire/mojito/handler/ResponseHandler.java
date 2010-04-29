@@ -22,9 +22,9 @@ package org.limewire.mojito.handler;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito2.KUID;
 
 
 /**

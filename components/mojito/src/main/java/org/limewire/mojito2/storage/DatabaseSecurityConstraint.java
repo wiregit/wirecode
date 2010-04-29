@@ -22,7 +22,7 @@ package org.limewire.mojito2.storage;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 /**
  * Defines an interface that controls the <code>Database</code> storing policy.

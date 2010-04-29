@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.result;
 
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 
 /**
  * An abstract base class for FIND_NODE and FIND_VALUE lookup results.

@@ -26,7 +26,7 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.KUID;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.security.SecurityTokenHelper;
 import org.limewire.mojito2.storage.DHTValueEntity;
