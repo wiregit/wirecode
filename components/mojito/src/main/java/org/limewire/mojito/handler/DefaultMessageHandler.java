@@ -44,7 +44,7 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 
 

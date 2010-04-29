@@ -34,7 +34,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 
 
 /**

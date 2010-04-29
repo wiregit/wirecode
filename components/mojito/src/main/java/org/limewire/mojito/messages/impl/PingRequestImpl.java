@@ -22,13 +22,13 @@ package org.limewire.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.Context;
 
 
 /**
@@ -37,12 +37,12 @@ import org.limewire.mojito.routing.Version;
 public class PingRequestImpl extends AbstractRequestMessage
         implements PingRequest {
 
-    public PingRequestImpl(Context2 context,
+    public PingRequestImpl(Context context,
             Contact contact, MessageID messageId) {
         super(context, OpCode.PING_REQUEST, contact, messageId, Version.ZERO);
     }
     
-    public PingRequestImpl(Context2 context, SocketAddress src, 
+    public PingRequestImpl(Context context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.PING_REQUEST, src, messageId, msgVersion, in);
     }

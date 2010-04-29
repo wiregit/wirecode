@@ -29,7 +29,6 @@ import java.util.Collection;
 import org.limewire.io.ByteBufferInputStream;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -53,6 +52,7 @@ import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.Context;
 import org.limewire.security.SecurityToken;
 
 
@@ -61,9 +61,9 @@ import org.limewire.security.SecurityToken;
  */
 public class DefaultMessageFactory implements MessageFactory {
 
-    protected final Context2 context;
+    protected final Context context;
     
-    public DefaultMessageFactory(Context2 context) {
+    public DefaultMessageFactory(Context context) {
         this.context = context;
     }
     

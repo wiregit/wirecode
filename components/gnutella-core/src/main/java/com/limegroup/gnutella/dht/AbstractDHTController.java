@@ -32,8 +32,8 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.statistics.DHTStatsManager;
-import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.service.ErrorService;
 

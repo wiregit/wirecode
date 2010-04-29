@@ -37,7 +37,7 @@ import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 
 
 /**

@@ -29,7 +29,7 @@ import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
-import org.limewire.mojito.util.MessageUtils;
+import org.limewire.mojito2.util.MessageUtils;
 
 
 /**

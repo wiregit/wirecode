@@ -49,9 +49,9 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.ContactUtils;
-import org.limewire.mojito.util.EventUtils;
 import org.limewire.mojito.util.ExceptionUtils;
+import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.EventUtils;
 import org.limewire.service.ErrorService;
 
 

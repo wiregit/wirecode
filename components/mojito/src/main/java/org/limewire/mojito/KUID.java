@@ -34,8 +34,8 @@ import java.util.Random;
 import java.util.Map.Entry;
 
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
-import org.limewire.mojito.io.Writeable;
 import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.mojito2.io.Writeable;
 import org.limewire.security.SecurityUtils;
 
 

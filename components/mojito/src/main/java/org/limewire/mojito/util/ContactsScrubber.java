@@ -30,6 +30,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito2.util.ContactUtils;
 
 /**
  * The ContactsScrubber is a pre-processing tool to ensure that

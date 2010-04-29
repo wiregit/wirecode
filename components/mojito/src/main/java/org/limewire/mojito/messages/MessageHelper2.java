@@ -23,13 +23,13 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.Context;
 import org.limewire.security.SecurityToken;
 
 
@@ -40,11 +40,11 @@ import org.limewire.security.SecurityToken;
  */
 public class MessageHelper2 {
 
-    protected final Context2 context;
+    protected final Context context;
 
     protected final MessageFactory factory;
 
-    public MessageHelper2(Context2 context, MessageFactory factory) {
+    public MessageHelper2(Context context, MessageFactory factory) {
         this.context = context;
         this.factory = factory;
     }

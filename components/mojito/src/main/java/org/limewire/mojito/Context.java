@@ -56,7 +56,6 @@ import org.limewire.mojito.db.StorablePublisher;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
-import org.limewire.mojito.io.MessageDispatcher2;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.io.MessageDispatcherFactoryImpl;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
@@ -96,10 +95,11 @@ import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.statistics.GlobalLookupStatisticContainer;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.statistics.RoutingStatisticContainer;
-import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito2.io.MessageDispatcher;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -403,7 +403,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * 
      */
-    public MessageDispatcher2 getMessageDispatcher2() {
+    public MessageDispatcher getMessageDispatcher2() {
         throw new NotImplementedException();
     }
     

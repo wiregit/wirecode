@@ -5,12 +5,8 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.message2.DefaultMessageFactory;
-import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -18,8 +14,12 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
-import org.limewire.mojito.util.NopTransport;
 import org.limewire.mojito.visual.RouteTableVisualizer;
+import org.limewire.mojito2.Context;
+import org.limewire.mojito2.MojitoFactory2;
+import org.limewire.mojito2.message.DefaultMessageFactory;
+import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.util.NopTransport;
 
 /**
  * Displays the a sample route table visually, where all the 500 node IDs are 
@@ -205,7 +205,7 @@ public class RouteTableVisualizerDemo {
 
     public RouteTableVisualizerDemo() {
         MessageFactory messageFactory = new DefaultMessageFactory();
-        Context2 dht = (Context2)MojitoFactory2.createDHT(
+        Context dht = (Context)MojitoFactory2.createDHT(
                 NopTransport.NOP, messageFactory);
         
         RouteTableImpl rt = (RouteTableImpl)dht.getRouteTable();

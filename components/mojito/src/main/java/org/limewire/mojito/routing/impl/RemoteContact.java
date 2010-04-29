@@ -34,7 +34,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 
 
 /**

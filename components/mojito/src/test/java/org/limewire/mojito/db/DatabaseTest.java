@@ -30,21 +30,21 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT2;
-import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueEntityBag;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
-import org.limewire.mojito.message2.DefaultMessageFactory;
-import org.limewire.mojito.message2.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.util.NopTransport;
+import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.MojitoFactory2;
+import org.limewire.mojito2.message.DefaultMessageFactory;
+import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.util.NopTransport;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
@@ -414,7 +414,7 @@ public class DatabaseTest extends MojitoTestCase {
      */
     public void testMultiRemove() {
         MessageFactory messageFactory = new DefaultMessageFactory();
-        MojitoDHT2 dht = MojitoFactory2.createDHT(
+        DHT dht = MojitoFactory2.createDHT(
                 NopTransport.NOP, messageFactory);
         
         DatabaseImpl database = (DatabaseImpl)dht.getDatabase();

@@ -14,9 +14,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
@@ -24,7 +22,9 @@ import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.concurrent.ManagedRunnable;
+import org.limewire.mojito2.util.EventUtils;
 
 /**
  * 
@@ -35,7 +35,7 @@ public class BucketRefresher2 implements Closeable {
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("BucketRefresherThread"));
     
-    private final MojitoDHT2 dht;
+    private final DHT dht;
     
     private final Config config;
     
@@ -60,7 +60,7 @@ public class BucketRefresher2 implements Closeable {
     /**
      * 
      */
-    public BucketRefresher2(MojitoDHT2 dht, 
+    public BucketRefresher2(DHT dht, 
             Config config,
             long frequency, TimeUnit unit) {
         
@@ -134,7 +134,7 @@ public class BucketRefresher2 implements Closeable {
      */
     private static abstract class AbstractTask implements Closeable {
         
-        protected final MojitoDHT2 dht;
+        protected final DHT dht;
         
         protected final Runnable callback;
         
@@ -144,7 +144,7 @@ public class BucketRefresher2 implements Closeable {
         
         protected volatile boolean open = true;
         
-        public AbstractTask(MojitoDHT2 dht, Runnable callback, 
+        public AbstractTask(DHT dht, Runnable callback, 
                 long timeout, TimeUnit unit) {
             
             this.dht = dht;
@@ -175,7 +175,7 @@ public class BucketRefresher2 implements Closeable {
         
         private volatile DHTFuture<PingEntity> future = null;
         
-        public PingTask(MojitoDHT2 dht, 
+        public PingTask(DHT dht, 
                 Runnable callback, 
                 long timeout, TimeUnit unit) {
             super(dht, callback, timeout, unit);
@@ -252,7 +252,7 @@ public class BucketRefresher2 implements Closeable {
         
         private volatile DHTFuture<NodeEntity> future = null;
         
-        public LookupTask(MojitoDHT2 dht, 
+        public LookupTask(DHT dht, 
                 Runnable callback, 
                 long timeout, TimeUnit unit) {
             

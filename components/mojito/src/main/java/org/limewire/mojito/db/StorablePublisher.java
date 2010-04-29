@@ -12,12 +12,12 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.Context;
 
 /**
  * Publishes {@link Storable} values in the DHT.
@@ -29,13 +29,13 @@ public class StorablePublisher implements Runnable {
     @InspectablePrimitive(value = "The number of times values have been re-published")
     private static final AtomicInteger REPUBLISHED_COUNT = new AtomicInteger();
     
-    private final Context2 context;
+    private final Context context;
     
     private ScheduledFuture future;
     
     private final PublishTask publishTask = new PublishTask();
     
-    public StorablePublisher(Context2 context) {
+    public StorablePublisher(Context context) {
         this.context = context;
     }
     

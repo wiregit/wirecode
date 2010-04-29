@@ -24,8 +24,8 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.handler.RequestHandler;
 import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito2.io.RequestHandler;
 
 
 /**

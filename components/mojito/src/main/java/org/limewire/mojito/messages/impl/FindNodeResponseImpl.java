@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -31,6 +30,7 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.Context;
 import org.limewire.security.SecurityToken;
 
 
@@ -44,7 +44,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
 
     private final Collection<? extends Contact> nodes;
 
-    public FindNodeResponseImpl(Context2 context, 
+    public FindNodeResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             SecurityToken securityToken, Collection<? extends Contact> nodes) {
         super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId, Version.ZERO);
@@ -53,7 +53,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
         this.nodes = nodes;
     }
     
-    public FindNodeResponseImpl(Context2 context, SocketAddress src, 
+    public FindNodeResponseImpl(Context context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, msgVersion, in);
         

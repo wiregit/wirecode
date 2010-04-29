@@ -1,6 +1,6 @@
 package org.limewire.mojito;
 
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 
 import com.google.inject.AbstractModule;
 

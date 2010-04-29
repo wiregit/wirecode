@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -31,6 +30,7 @@ import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito2.Context;
 
 
 /**
@@ -41,7 +41,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
 
     private final Collection<StoreStatusCode> statusCodes;
 
-    public StoreResponseImpl(Context2 context, 
+    public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<StoreStatusCode> statusCodes) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId, Version.ZERO);
@@ -49,7 +49,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
         this.statusCodes = statusCodes;
     }
 
-    public StoreResponseImpl(Context2 context, SocketAddress src, 
+    public StoreResponseImpl(Context context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_RESPONSE, src, messageId, msgVersion, in);
         

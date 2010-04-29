@@ -11,9 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.MojitoDHT2;
-import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.concurrent.ManagedRunnable;
 
 /**
  * 
@@ -41,7 +41,7 @@ public class DatabaseCleaner2 implements Closeable {
     /**
      * 
      */
-    public DatabaseCleaner2(MojitoDHT2 dht, long frequency, TimeUnit unit) {
+    public DatabaseCleaner2(DHT dht, long frequency, TimeUnit unit) {
         this(dht.getRouteTable(), dht.getDatabase(), frequency, unit);
     }
     

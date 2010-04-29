@@ -1,8 +1,8 @@
 package org.limewire.mojito.entity;
 
-import org.limewire.mojito.MojitoDHT2;
+import org.limewire.mojito2.DHT;
 
 public interface BootstrapEntity extends Entity {
 
-    public MojitoDHT2 getDHT();
+    public DHT getDHT();
 }

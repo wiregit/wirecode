@@ -4,14 +4,17 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.MojitoDHT2;
-import org.limewire.mojito.MojitoFactory2;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.io.Transport;
-import org.limewire.mojito.message2.DefaultMessageFactory;
-import org.limewire.mojito.message2.MessageFactory;
-import org.limewire.mojito.message2.PingRequest;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.MojitoFactory2;
+import org.limewire.mojito2.io.Transport;
+import org.limewire.mojito2.message.DefaultMessageFactory;
+import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.message.PingRequest;
+import org.limewire.mojito2.util.ContactUtils;
+import org.limewire.mojito2.util.MessageUtils;
+import org.limewire.mojito2.util.NopTransport;
 
 public class MessageUtilsTest extends MojitoTestCase {
     
@@ -31,7 +34,7 @@ public class MessageUtilsTest extends MojitoTestCase {
         Transport transport = NopTransport.NOP;
         MessageFactory factory = new DefaultMessageFactory();
         
-        MojitoDHT2 dht = MojitoFactory2.createDHT(transport, factory);
+        DHT dht = MojitoFactory2.createDHT(transport, factory);
         Contact localhost = dht.getLocalNode();
         
         PingRequest ping = null;

@@ -42,7 +42,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseSecurityConstraint;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito2.util.ContactUtils;
 
 
 /*

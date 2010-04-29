@@ -14,7 +14,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.visual.components.BinaryEdge;
@@ -26,6 +25,7 @@ import org.limewire.mojito.visual.helper.RouteTableGraphMousePlugin;
 import org.limewire.mojito.visual.helper.RouteTableToolTipFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexPaintFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexShapeFunction;
+import org.limewire.mojito2.Context;
 
 import edu.uci.ics.jung.graph.ArchetypeEdge;
 import edu.uci.ics.jung.graph.ArchetypeVertex;
@@ -69,7 +69,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
         return viz;
     }
     
-    public static RouteTableVisualizer show(final Context2 context) {
+    public static RouteTableVisualizer show(final Context context) {
         RouteTableVisualizer viz = new RouteTableVisualizer(context);
         createAndShowFrame(viz, context.getName());
         return viz;
@@ -97,7 +97,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
         });
     }
     
-    public RouteTableVisualizer(Context2 dht) {
+    public RouteTableVisualizer(Context dht) {
         this(dht.getRouteTable());
     }
     

@@ -15,12 +15,12 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.concurrent.ManagedRunnable;
+import org.limewire.mojito2.util.EventUtils;
 
 /**
  * 
@@ -37,7 +37,7 @@ public class DatabasePublisher implements Closeable {
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("DatabasePublisherThread"));
     
-    private final MojitoDHT2 dht;
+    private final DHT dht;
     
     private final Config config;
     
@@ -54,7 +54,7 @@ public class DatabasePublisher implements Closeable {
      */
     private StoreTask storeTask = null;
     
-    public DatabasePublisher(MojitoDHT2 dht, Config config,
+    public DatabasePublisher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
@@ -110,7 +110,7 @@ public class DatabasePublisher implements Closeable {
             }
         };
         
-        private final MojitoDHT2 dht;
+        private final DHT dht;
         
         private final Runnable callback;
         
@@ -124,7 +124,7 @@ public class DatabasePublisher implements Closeable {
         
         private volatile DHTFuture<StoreEntity> future = null;
         
-        public StoreTask(MojitoDHT2 dht, Runnable callback, 
+        public StoreTask(DHT dht, Runnable callback, 
                 long timeout, TimeUnit unit) {
             
             this.dht = dht;

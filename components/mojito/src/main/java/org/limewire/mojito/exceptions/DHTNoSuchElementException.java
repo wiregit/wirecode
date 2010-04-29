@@ -19,7 +19,7 @@
 
 package org.limewire.mojito.exceptions;
 
-import org.limewire.mojito.message2.ResponseMessage;
+import org.limewire.mojito2.message.ResponseMessage;
 
 /**
  * Thrown if an attempt was made to get a <code>DHTValue</code> from a 

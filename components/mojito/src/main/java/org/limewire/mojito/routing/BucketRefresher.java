@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
@@ -39,6 +38,7 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito2.Context;
 
 /**
  * The BucketRefresher goes in periodic intervals through all Buckets
@@ -49,13 +49,13 @@ public class BucketRefresher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(BucketRefresher.class);
     
-    private final Context2 context;
+    private final Context context;
     
     private final RefreshTask refreshTask = new RefreshTask();
     
     private ScheduledFuture future;
     
-    public BucketRefresher(Context2 context) {
+    public BucketRefresher(Context context) {
         this.context = context;
     }
     

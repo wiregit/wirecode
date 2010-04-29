@@ -28,7 +28,6 @@ import java.security.SignatureException;
 
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
@@ -37,6 +36,7 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.Context;
 
 
 /**
@@ -44,7 +44,7 @@ import org.limewire.mojito.routing.Version;
  */
 abstract class AbstractDHTMessage implements DHTMessage {
     
-    protected final Context2 context;
+    protected final Context context;
     
     private final OpCode opcode;
     
@@ -56,7 +56,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     private byte[] payload;
     
-    public AbstractDHTMessage(Context2 context, 
+    public AbstractDHTMessage(Context context, 
             OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
 
         if (opcode == null) {
@@ -82,7 +82,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         this.msgVersion = msgVersion;
     }
 
-    public AbstractDHTMessage(Context2 context, OpCode opcode, SocketAddress src, 
+    public AbstractDHTMessage(Context context, OpCode opcode, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         
         if (opcode == null) {
@@ -124,7 +124,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
     protected abstract Contact createContact(SocketAddress src, Vendor vendor, Version version,
             KUID nodeId, SocketAddress contactAddress, int instanceId, int flags);
     
-    public Context2 getContext2() {
+    public Context getContext2() {
         return context;
     }
     

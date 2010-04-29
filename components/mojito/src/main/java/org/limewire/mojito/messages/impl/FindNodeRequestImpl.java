@@ -22,13 +22,13 @@ package org.limewire.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito2.Context;
 
 
 /**
@@ -37,13 +37,13 @@ import org.limewire.mojito.routing.Version;
 public class FindNodeRequestImpl extends AbstractLookupRequest
         implements FindNodeRequest {
 
-    public FindNodeRequestImpl(Context2 context, 
+    public FindNodeRequestImpl(Context context, 
             Contact contact, MessageID messageId, KUID lookupId) {
         super(context, OpCode.FIND_NODE_REQUEST, 
                 contact, messageId, Version.ZERO, lookupId);
     }
     
-    public FindNodeRequestImpl(Context2 context, SocketAddress src, 
+    public FindNodeRequestImpl(Context context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_REQUEST, src, messageId, msgVersion, in);
     }

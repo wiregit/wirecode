@@ -1,0 +1,11 @@
+package org.limewire.mojito2.message;
+
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueType;
+
+public interface ValueRequest extends LookupRequest {
+
+    public KUID[] getSecondaryKeys();
+    
+    public DHTValueType getValueType();
+}

@@ -23,36 +23,36 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcherListener2;
-import org.limewire.mojito.message2.DefaultNodeRequest;
-import org.limewire.mojito.message2.DefaultNodeResponse;
-import org.limewire.mojito.message2.DefaultPingRequest;
-import org.limewire.mojito.message2.DefaultPingResponse;
-import org.limewire.mojito.message2.DefaultStoreRequest;
-import org.limewire.mojito.message2.DefaultStoreResponse;
-import org.limewire.mojito.message2.DefaultValueRequest;
-import org.limewire.mojito.message2.DefaultValueResponse;
-import org.limewire.mojito.message2.Message;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito2.Context;
+import org.limewire.mojito2.io.MessageDispatcherListener;
+import org.limewire.mojito2.message.DefaultNodeRequest;
+import org.limewire.mojito2.message.DefaultNodeResponse;
+import org.limewire.mojito2.message.DefaultPingRequest;
+import org.limewire.mojito2.message.DefaultPingResponse;
+import org.limewire.mojito2.message.DefaultStoreRequest;
+import org.limewire.mojito2.message.DefaultStoreResponse;
+import org.limewire.mojito2.message.DefaultValueRequest;
+import org.limewire.mojito2.message.DefaultValueResponse;
+import org.limewire.mojito2.message.Message;
 
 /**
  * Paints different representations of the Distributed Hash Table (DHT). 
  * <code>ArcsVisualizer</code> is a small framework for visually representing 
  * the DHT messages distinguished by color and dash patterns.
  */
-public class ArcsVisualizer extends JPanel implements MessageDispatcherListener2 {
+public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
 
     private static final int SLEEP = 100;
     
     private static final float FONT_SIZE = 24f;
     
-    private final Context2 context;
+    private final Context context;
 
     private Timer timer;
     
-    public static ArcsVisualizer show(final Context2 context) {
+    public static ArcsVisualizer show(final Context context) {
         final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -98,7 +98,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener2
     
     private final List<Painter> painters = new ArrayList<Painter>();
     
-    public ArcsVisualizer(Context2 context, KUID nodeId) {
+    public ArcsVisualizer(Context context, KUID nodeId) {
         this.context = context;
         addPainter(new SnowMan(nodeId));
         addPainter(new PlasmaLamp(nodeId));

@@ -26,9 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito2.Context;
 
 /**
  * Removes expired values from the local database.
@@ -40,11 +40,11 @@ public class DatabaseCleaner implements Runnable {
     @InspectablePrimitive(value = "Expired Value Count")
     private static final AtomicInteger EXPIRED_VALUE_COUNT = new AtomicInteger();
     
-    private final Context2 context;
+    private final Context context;
     
     private ScheduledFuture future;
     
-    public DatabaseCleaner(Context2 context) {
+    public DatabaseCleaner(Context context) {
         this.context = context;
     }
     

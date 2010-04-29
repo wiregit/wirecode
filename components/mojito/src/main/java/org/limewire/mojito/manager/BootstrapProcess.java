@@ -48,9 +48,9 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.RouteTableUtils;
 import org.limewire.mojito.util.TimeAwareIterable;
+import org.limewire.mojito2.util.ContactUtils;
 
 /**
  * The BootstrapProcess controls the whole process of bootstrapping.

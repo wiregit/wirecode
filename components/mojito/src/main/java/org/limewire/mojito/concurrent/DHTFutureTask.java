@@ -11,7 +11,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.AsyncProcess.Delay;
-import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito2.util.EventUtils;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 

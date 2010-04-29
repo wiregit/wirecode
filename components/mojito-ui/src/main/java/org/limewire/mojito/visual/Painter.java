@@ -8,15 +8,15 @@ import java.math.BigDecimal;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.message2.Message;
-import org.limewire.mojito.message2.NodeRequest;
-import org.limewire.mojito.message2.NodeResponse;
-import org.limewire.mojito.message2.PingRequest;
-import org.limewire.mojito.message2.PingResponse;
-import org.limewire.mojito.message2.StoreRequest;
-import org.limewire.mojito.message2.StoreResponse;
-import org.limewire.mojito.message2.ValueRequest;
-import org.limewire.mojito.message2.ValueResponse;
+import org.limewire.mojito2.message.Message;
+import org.limewire.mojito2.message.NodeRequest;
+import org.limewire.mojito2.message.NodeResponse;
+import org.limewire.mojito2.message.PingRequest;
+import org.limewire.mojito2.message.PingResponse;
+import org.limewire.mojito2.message.StoreRequest;
+import org.limewire.mojito2.message.StoreResponse;
+import org.limewire.mojito2.message.ValueRequest;
+import org.limewire.mojito2.message.ValueResponse;
 
 /**<p>
  * Draws graphical representations of the DHT. <code>Painter</code> creates 

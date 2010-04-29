@@ -22,7 +22,6 @@ package org.limewire.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.MessageID;
@@ -32,6 +31,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito2.Context;
 
 
 /**
@@ -40,12 +40,12 @@ import org.limewire.mojito.settings.RouteTableSettings;
 abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
-    public AbstractRequestMessage(Context2 context, 
+    public AbstractRequestMessage(Context context, 
             OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
         super(context, opcode, contact, messageId, msgVersion);
     }
 
-    public AbstractRequestMessage(Context2 context, OpCode opcode, 
+    public AbstractRequestMessage(Context context, OpCode opcode, 
             SocketAddress src, MessageID messageId, Version msgVersion, MessageInputStream in) 
             throws IOException {
         super(context, opcode, src, messageId, msgVersion, in);

@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.Context2;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -23,11 +22,12 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.TimeAwareIterable;
+import org.limewire.mojito2.Context;
 import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
-    private final Context2 context;
+    private final Context context;
     
     private final Contact contact;
     
@@ -50,7 +50,7 @@ public class BootstrapManager2 implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
-    public BootstrapManager2(Context2 context, 
+    public BootstrapManager2(Context context, 
             Contact contact, BootstrapConfig config) {
         
         this.context = context;

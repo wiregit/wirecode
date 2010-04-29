@@ -5,13 +5,13 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.MojitoDHT2;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito2.DHT;
 
 import ca.odell.glazedlists.jfreechart.SimpleEventCategoryDataset.Context;
 
@@ -41,8 +41,8 @@ public class PingRequestHandlerTest extends MojitoTestCase {
         NetworkSettings.MAX_ERRORS.setValue(0);
         NetworkSettings.DEFAULT_TIMEOUT.setValue(250);
         
-        MojitoDHT2 dht1 = null;
-        MojitoDHT2 dht2 = null;
+        DHT dht1 = null;
+        DHT dht2 = null;
         
         try {
             
