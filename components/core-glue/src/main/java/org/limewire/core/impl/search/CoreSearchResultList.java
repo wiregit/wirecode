@@ -169,38 +169,36 @@ class CoreSearchResultList implements SearchResultList {
                 // Some results can be missing a URN, specifically secure results.
                 // For now, we drop these.  We should figure out a way to show 
                 // them later on.
-                if (urn == null)
-                    continue;
-                int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
-                if (idx >= 0) {
-                    // Found URN so add result to grouping.
-                    GroupedSearchResultImpl gsr =
-                        (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
-                    gsr.addNewSource(result, searchDetails.getSearchQuery());
-                    groupedUrnResultList.set(idx, gsr);
-                    // Notify listeners that result changed.
-                    gsr.notifyNewSource();
-                } else {
-                    // URN not found so add new result at insertion point.
-                    // This keeps the list in sorted order.
-                    idx = -(idx + 1);
-                    // Calculate the relevance of the grouped result
-                    float relevance = calculateRelevance(result);
-                    GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
-                            searchDetails.getSearchQuery(), relevance);
-                    groupedUrnResultList.add(idx, gsr);
-                    newResults.add(gsr);
+                if (urn != null) {
+                    int idx = Collections.binarySearch(groupedUrnResultList, urn, resultFinder);
+                    if (idx >= 0) {
+                        // Found URN so add result to grouping.
+                        GroupedSearchResultImpl gsr = (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
+                        gsr.addNewSource(result, searchDetails.getSearchQuery());
+                        groupedUrnResultList.set(idx, gsr);
+                        newResults.add(gsr);
+                    } else {
+                        // URN not found so add new result at insertion point.
+                        // This keeps the list in sorted order.
+                        idx = -(idx + 1);
+                        // Calculate the relevance of the grouped result
+                        float relevance = calculateRelevance(result);
+                        GroupedSearchResult gsr = new GroupedSearchResultImpl(result,
+                                searchDetails.getSearchQuery(), relevance);
+                        groupedUrnResultList.add(idx, gsr);
+                        newResults.add(gsr);
+                    }
+                    resultCount ++;
                 }
-                resultCount ++;
             }
         } finally {
             // Release lock.
             lock.unlock();
         }
         
-        // Forward new results to list listeners.
+        // Forward added results to list listeners.
         if (newResults.size() > 0) {
-            notifyResultsCreated(newResults);
+            notifyResultsAdded(newResults);
         }
     }
 
@@ -211,10 +209,10 @@ class CoreSearchResultList implements SearchResultList {
     }
 
     /**
-     * Forwards the specified collection of new results to all registered
+     * Forwards the specified collection of added results to all registered
      * listeners. 
      */
-    private void notifyResultsCreated(Collection<GroupedSearchResult> results) {
+    private void notifyResultsAdded(Collection<GroupedSearchResult> results) {
         listListeners.broadcast(results);
     }
     

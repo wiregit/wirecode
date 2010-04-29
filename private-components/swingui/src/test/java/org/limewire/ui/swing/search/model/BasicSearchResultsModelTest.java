@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
@@ -77,13 +80,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     private void addResult(BasicSearchResultsModel model, GroupedSearchResult result) {
-        List<GroupedSearchResult> list = new ArrayList<GroupedSearchResult>();
-        list.add(result);
-        model.addResultsInternal(0, list);
+        model.addResultsInternal(Collections.<GroupedSearchResult>singletonList(result));
     }
     
     private void addGroupedResult(MockGroupedSearchResult mockResult, String fileName) {
         mockResult.addResult(mockResult.getUrn(), fileName);
+        
+        GroupedSearchResult newResult = new MockGroupedSearchResult(mockResult.getUrn(), fileName);
+        model.addResultsInternal(Collections.<GroupedSearchResult>singletonList(newResult));
         waitForUiThread();
     }
 
@@ -95,13 +99,26 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
             list.add(result);
         }
         
+        // Define listener to count list change events.
+        class ListEventCounter implements ListEventListener<VisualSearchResult> {
+            public int count;
+            
+            @Override
+            public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+                count++;
+            }
+        }
+        ListEventCounter counter = new ListEventCounter();
+        model.getUnfilteredList().addListEventListener(counter);
+        
         // Add results.
-        model.addResultsInternal(0, list);
+        model.addResultsInternal(list);
         waitForUiThread();
         
-        // Verify results added.
+        // Verify results added and list change events.
         List<VisualSearchResult> results = model.getUnfilteredList();
         assertEquals(1005, results.size());
+        assertEquals(1, counter.count);
     }
     
     public void testGroupingByName2UrnsNameComesEarly() {

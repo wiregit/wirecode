@@ -12,7 +12,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
-import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.util.Objects;
@@ -25,9 +24,7 @@ import org.limewire.util.Objects;
 class GroupedSearchResultImpl implements GroupedSearchResult {
 
     private static final Comparator<Friend> FRIEND_COMPARATOR = new FriendComparator();
-    private static final Comparator<RemoteHost> REMOTE_HOST_COMPARATOR = new RemoteHostComparator();
     
-    private final List<GroupedSearchResultListener> resultListeners;
     private final Set<RemoteHost> remoteHosts;
     
     private volatile List<SearchResult> coreResults;
@@ -40,7 +37,6 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
      * with the specified initial relevance.
      */
     public GroupedSearchResultImpl(SearchResult searchResult, String query, float relevance) {
-        this.resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
         this.remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
         this.relevance = relevance;
         addNewSource(searchResult, query);
@@ -90,26 +86,6 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
         }
     }
     
-    /**
-     * Notifies result listeners that new sources have been added.  This method
-     * is usually called by a background thread when sources are added.
-     */
-    void notifyNewSource() {
-        for (GroupedSearchResultListener listener : resultListeners) {
-            listener.sourceAdded();
-        }
-    }
-    
-    @Override
-    public void addResultListener(GroupedSearchResultListener listener) {
-        resultListeners.add(listener);
-    }
-    
-    @Override
-    public void removeResultListener(GroupedSearchResultListener listener) {
-        resultListeners.remove(listener);
-    }
-    
     @Override
     public boolean isAnonymous() {
         return anonymous;
@@ -144,10 +120,7 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
 
     @Override
     public Collection<RemoteHost> getSources() {
-        // Create sorted set of sources.
-        Set<RemoteHost> sources = new TreeSet<RemoteHost>(REMOTE_HOST_COMPARATOR);
-        sources.addAll(remoteHosts);
-        return sources;
+        return remoteHosts;
     }
 
     @Override
@@ -165,28 +138,5 @@ class GroupedSearchResultImpl implements GroupedSearchResult {
             String id2 = o2.getId();
             return Objects.compareToNullIgnoreCase(id1, id2, false);
         }
-    }
-    
-    /**
-     * Comparator to order RemoteHost objects.
-     */
-    private static class RemoteHostComparator implements Comparator<RemoteHost> {
-        @Override
-        public int compare(RemoteHost o1, RemoteHost o2) {
-            int compare = 0;
-            boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
-            boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
-
-            if (anonymous1 == anonymous2) {
-                String name1 = o1.getFriendPresence().getFriend().getRenderName();
-                String name2 = o2.getFriendPresence().getFriend().getRenderName();
-                compare = name1.compareToIgnoreCase(name2);
-            } else if (anonymous1) {
-                compare = 1;
-            } else if (anonymous2) {
-                compare = -1;
-            }
-            return compare;
-        }
-    }
+    }    
 }

@@ -12,14 +12,12 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
-import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableFileUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
@@ -28,7 +26,7 @@ import com.google.inject.Provider;
  * An implementation of VisualSearchResult for displaying actual search 
  * results. 
  */
-class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultListener, Comparable {
+class SearchResultAdapter implements VisualSearchResult, Comparable {
 
     private static final Log LOG = LogFactory.getLog(SearchResultAdapter.class);
     
@@ -65,13 +63,6 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
         
         this.visible = true;
         this.childrenVisible = false;
-    }
-    
-    /**
-     * Initializes adapter to listen for new sources added.
-     */
-    void initialize() {
-        groupedSearchResult.addResultListener(this);
     }
 
     @Override
@@ -340,27 +331,12 @@ class SearchResultAdapter implements VisualSearchResult, GroupedSearchResultList
     }
 
     @Override
-    public void sourceAdded() {
-        // Forward source added event to UI change listener.
-        SwingUtils.invokeNowOrLater(new Runnable() {
-            @Override
-            public void run() {
-                firePropertyChange(NEW_SOURCES);
-            }
-        });
-    }
-
-    @Override
     public int compareTo(Object o) {
         if(!(o instanceof SearchResultAdapter)) 
             return -1;
         
         SearchResultAdapter sra = (SearchResultAdapter) o;
         return getHeading().compareTo(sra.getHeading());
-    }
-
-    private void firePropertyChange(String propertyName) {
-        changeListener.resultChanged(this, propertyName, null, null);
     }
 
     private void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {
