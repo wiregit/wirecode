@@ -7,14 +7,11 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.MojitoFactory2;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.io.DatagramTransport;
-import org.limewire.mojito2.message.DefaultMessageFactory;
-import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.PingSettings;
 
@@ -43,22 +40,11 @@ public class PingManagerTest extends MojitoTestCase {
         PingSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
-        DatagramTransport transport1 = null, transport2 = null;
         DHT dht1 = null, dht2 = null;
         
         try {
-            
-            MessageFactory factory1 = new DefaultMessageFactory();
-            transport1 = new DatagramTransport(2000, factory1);
-            
-            MessageFactory factory2 = new DefaultMessageFactory();
-            transport2 = new DatagramTransport(3000, factory2);
-            
-            dht1 = MojitoFactory2.createDHT(transport1, factory1);
-            dht1.start();
-            
-            dht2 = MojitoFactory2.createDHT(transport2, factory2);
-            dht2.start();
+            dht1 = MojitoFactory.createDHT("DHT1", 2000);
+            dht2 = MojitoFactory.createDHT("DHT2", 3000);
             
             try {
                 DHTFuture<PingEntity> future = dht2.ping(
@@ -82,9 +68,6 @@ public class PingManagerTest extends MojitoTestCase {
             }
             
         } finally {
-            transport1.close();
-            transport2.close();
-            
             dht1.close();
             dht2.close();
         }
