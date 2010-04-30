@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -37,6 +38,10 @@ public class MojitoDHT implements DHT {
     
     public MojitoDHT(DHT dht) {
         this.dht = dht;
+    }
+    
+    public Context getContext() {
+        return (Context)dht;
     }
     
     @Override
@@ -116,6 +121,16 @@ public class MojitoDHT implements DHT {
         return dht.isFirewalled();
     }
     
+    @Override
+    public boolean isBootstrapped() {
+        return dht.isBootstrapped();
+    }
+
+    @Override
+    public boolean isBootstrapping() {
+        return dht.isBootstrapping();
+    }
+
     public KUID getLocalNodeID() {
         return dht.getLocalNode().getNodeID();
     }
@@ -127,7 +142,11 @@ public class MojitoDHT implements DHT {
     public void setContactId(KUID contactId) {
         ((LocalContact)dht.getLocalNode()).setNodeID(contactId);
     }
-
+    
+    public void setContactAddress(SocketAddress address) {
+        ((LocalContact)dht.getLocalNode()).setContactAddress(address);
+    }
+    
     @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
@@ -213,6 +232,13 @@ public class MojitoDHT implements DHT {
     public DHTFuture<PingEntity> ping(SocketAddress addr) {
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
         return ping(addr, timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    public DHTFuture<PingEntity> collisionPing(Contact dst) {
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        Context context = getContext();
+        return context.collisionPing(new Contact[] { dst }, 
+                timeout, TimeUnit.MILLISECONDS);
     }
     
     public DHTFuture<BootstrapEntity> bootstrap(String address, int port) {

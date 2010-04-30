@@ -103,6 +103,16 @@ public interface DHT extends Closeable {
     /**
      * 
      */
+    public boolean isBootstrapping();
+    
+    /**
+     * 
+     */
+    public boolean isBootstrapped();
+    
+    /**
+     * 
+     */
     public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
             long timeout, TimeUnit unit);
     

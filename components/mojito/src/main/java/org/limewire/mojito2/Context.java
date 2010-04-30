@@ -91,6 +91,12 @@ public class Context implements DHT {
     /**
      * 
      */
+    private volatile DHTFuture<BootstrapEntity> bootstrap = null;
+    
+    
+    /**
+     * 
+     */
     private final String name;
     
     /**
@@ -127,6 +133,11 @@ public class Context implements DHT {
     /**
      * 
      */
+    private boolean open = true;
+    
+    /**
+     * 
+     */
     public Context(String name,
             MessageFactory messageFactory,
             RouteTable routeTable, 
@@ -152,6 +163,10 @@ public class Context implements DHT {
 
     @Override
     public void close() {
+        synchronized (this) {
+            open = false;
+        }
+        
         futureManager.close();
         estimator.clear();
         
@@ -318,13 +333,6 @@ public class Context implements DHT {
         return getContactAddress().equals(address);
     }
     
-    /**
-     * 
-     */
-    public boolean isBootstrapping() {
-        return false;
-    }
-    
     @Override
     public boolean isFirewalled() {
         return getLocalNode().isFirewalled();
@@ -341,25 +349,48 @@ public class Context implements DHT {
     }
     
     @Override
-    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
-            long timeout, TimeUnit unit) {
-        
-        BootstrapConfig config = new BootstrapConfig();
-        AsyncProcess<BootstrapEntity> process 
-            = new BootstrapProcess(this, dst, config);
-        
-        return futureManager.submit(process, timeout, unit);
+    public boolean isBootstrapping() {
+        DHTFuture<BootstrapEntity> bootstrap = this.bootstrap;
+        return bootstrap != null && !bootstrap.isDone();
     }
     
     @Override
-    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+    public boolean isBootstrapped() {
+        DHTFuture<BootstrapEntity> bootstrap = this.bootstrap;
+        return bootstrap != null && bootstrap.isDone() 
+                && !bootstrap.isCompletedAbnormally();
+    }
+    
+    @Override
+    public synchronized DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
             long timeout, TimeUnit unit) {
+        
+        if (bootstrap != null) {
+            bootstrap.cancel(true);
+        }
         
         BootstrapConfig config = new BootstrapConfig();
         AsyncProcess<BootstrapEntity> process 
             = new BootstrapProcess(this, dst, config);
         
-        return futureManager.submit(process, timeout, unit);
+        bootstrap = futureManager.submit(process, timeout, unit);
+        return bootstrap;
+    }
+    
+    @Override
+    public synchronized DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit) {
+        
+        if (bootstrap != null) {
+            bootstrap.cancel(true);
+        }
+        
+        BootstrapConfig config = new BootstrapConfig();
+        AsyncProcess<BootstrapEntity> process 
+            = new BootstrapProcess(this, dst, config);
+        
+        bootstrap = futureManager.submit(process, timeout, unit);
+        return bootstrap;
     }
     
     @Override
