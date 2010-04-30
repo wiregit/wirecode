@@ -446,7 +446,6 @@
         		<link href="http://www.limewire.org/nightly/modules/security/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/setting/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/statistic/api/"/>
-    	    	<link href="http://www.limewire.org/nightly/modules/swarm/api/"/>
     	    	<link href="http://www.limewire.org/nightly/modules/test-util/api/"/>
 				<link href="http://www.limewire.org/nightly/modules/integrated-ui/api/"/>
 				<link href="http://www.limewire.org/nightly/modules/mock-core/api/"/>

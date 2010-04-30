@@ -56,9 +56,6 @@
 	<classpathentry kind="src" output="components/setting/build/classes" path="components/setting/src/main/java"/>
 	<classpathentry kind="src" output="components/setting/build/tests" path="components/setting/src/test/java"/>
 	<classpathentry kind="src" output="components/statistic/build/classes" path="components/statistic/src/main/java"/>
-	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
-	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
-	<classpathentry kind="src" output="components/swarm/src/test-common/resources" path="components/swarm/src/test-common/resources"/>
 	<classpathentry kind="src" output="private-components/swingui/build/classes" path="private-components/swingui/src/main/java"/>
 	<classpathentry kind="src" output="private-components/swingui/src/main/resources" path="private-components/swingui/src/main/resources"/>
 	<classpathentry kind="src" output="private-components/swingui/build/tests" path="private-components/swingui/src/test/java"/>
