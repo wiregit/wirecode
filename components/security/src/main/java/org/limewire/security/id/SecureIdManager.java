@@ -17,6 +17,9 @@ import org.limewire.io.InvalidDataException;
  * agreement to setup long term symmetric keys shared between these 
  * two nodes. Those keys can be used for authentication and encryption
  * between them.
+ * 
+ * See {@link SecureIdManagerImplTest#testAliceAndBobSecureCommunication()} as 
+ * an example.
  */
 public interface SecureIdManager {
     /**
