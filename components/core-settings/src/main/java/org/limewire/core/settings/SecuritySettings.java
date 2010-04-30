@@ -1,6 +1,7 @@
 package org.limewire.core.settings;
 
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Security Settings.
@@ -22,4 +23,9 @@ public final class SecuritySettings extends LimeProps {
     public static final LongSetting QK_GRACE_PERIOD
         = FACTORY.createRemoteLongSetting("QK_GRACE_PERIOD", 
                 20L*60L*1000L, "qk_grace_period", 1L*60L*1000L, 24L*60L*60L*1000L);
+    /**
+     * The local node's private identity information
+     */
+    public static final StringSetting SECURE_IDENTITY
+        = FACTORY.createStringSetting("SECURE_IDENTITY", "");
 }

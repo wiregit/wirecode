@@ -10,7 +10,9 @@ import org.limewire.util.FileUtils;
 
 /** Provides a non-blocking cryptographically strong random number generator. */
 public class SecurityUtils {
-
+    
+    private static SecureRandom rand = createSecureRandomNoBlock();
+    
     /**
      * On some OSes, creating a new <code>SeucureRandom</code> instance
      * with the default constructor may block if the OS's
@@ -43,4 +45,12 @@ public class SecurityUtils {
         return new SecureRandom();
     }
     
+    /**
+     * @return a random number in 4 bytes as the nonce
+     */    
+    public static byte[] createNonce(){
+        byte [] buf = new byte[4];
+        rand.nextBytes(buf);        
+        return buf;
+    }
 }
