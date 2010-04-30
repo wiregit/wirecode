@@ -32,15 +32,20 @@ public class DefaultMessageHandler implements ResponseHandler {
     }
     
     @Override
-    public void handleResponse(RequestMessage request, ResponseMessage response, 
-            long time, TimeUnit unit) throws IOException {
+    public void handleResponse(RequestHandle request, 
+            ResponseMessage response, long time, TimeUnit unit) 
+                throws IOException {
         processContact(response.getContact(), response);
     }
     
     @Override
-    public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) {
-        routeTable.handleFailure(nodeId, dst);
+    public void handleTimeout(RequestHandle request, 
+            long time, TimeUnit unit) {
+        
+        KUID contactId = request.getContactId();
+        SocketAddress address = request.getAddress();
+        
+        routeTable.handleFailure(contactId, address);
     }
     
     public void handleLateResponse(ResponseMessage message) {
@@ -52,7 +57,7 @@ public class DefaultMessageHandler implements ResponseHandler {
     }
     
     @Override
-    public void handleException(RequestMessage request, Throwable exception) {
+    public void handleException(RequestHandle request, Throwable exception) {
     }
 
     public void handleRequest(RequestMessage message) {

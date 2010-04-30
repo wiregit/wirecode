@@ -18,7 +18,6 @@ import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.entity.DefaultStoreEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.message.MessageHelper;
-import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.StoreResponse;
@@ -157,17 +156,16 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     }
 
     @Override
-    protected void processResponse(RequestMessage request, 
+    protected void processResponse(RequestHandle request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         try {
-            processResponse0((StoreRequest)request, 
-                    (StoreResponse)response, time, unit);
+            processResponse0(request, (StoreResponse)response, time, unit);
         } finally {
             process(1);
         }
     }
     
-    private void processResponse0(StoreRequest request, 
+    private void processResponse0(RequestHandle request, 
             StoreResponse response, long time, TimeUnit unit) throws IOException {
         
         Contact src = response.getContact();
@@ -200,29 +198,32 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     }
     
     @Override
-    protected void processTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) throws IOException {
+    protected void processTimeout(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
         try {
-            processTimeout0(nodeId, dst, message, time, unit);
+            processTimeout0(request, time, unit);
         } finally {
             process(1);
         }
     }
     
-    private void processTimeout0(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) throws IOException {
+    private void processTimeout0(RequestHandle handle, 
+            long time, TimeUnit unit) throws IOException {
         
-        StoreRequest request = (StoreRequest)message;
+        KUID contactId = handle.getContactId();
+        SocketAddress dst = handle.getAddress();
+        
+        StoreRequest request = (StoreRequest)handle.getRequest();
         DHTValueEntity[] entities = request.getValueEntities();
         
         DHTValueEntity entity = entities[0];
         
         if (LOG.isInfoEnabled()) {
             LOG.info("Couldn't store " + entity + " at " 
-                    + ContactUtils.toString(nodeId, dst));
+                    + ContactUtils.toString(contactId, dst));
         }
         
-        StoreProcess process = active.remove(new ProcessKey(nodeId, entity));
+        StoreProcess process = active.remove(new ProcessKey(contactId, entity));
         if (process == null) {
             return;
         }

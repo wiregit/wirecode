@@ -136,7 +136,7 @@ public abstract class AbstractResponseHandler<V extends Entity>
     }
 
     @Override
-    public final void handleResponse(RequestMessage request, 
+    public final void handleResponse(RequestHandle request, 
             ResponseMessage response, long time,
             TimeUnit unit) throws IOException {
         
@@ -155,13 +155,13 @@ public abstract class AbstractResponseHandler<V extends Entity>
     /**
      * 
      */
-    protected abstract void processResponse(RequestMessage request, 
+    protected abstract void processResponse(RequestHandle request, 
             ResponseMessage response, long time,
             TimeUnit unit) throws IOException;
     
     @Override
-    public final void handleTimeout(KUID contactId, SocketAddress dst,
-            RequestMessage request, long time, TimeUnit unit) throws IOException {
+    public final void handleTimeout(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
         
         synchronized (future) {
             if (future.isDone()) {
@@ -169,7 +169,7 @@ public abstract class AbstractResponseHandler<V extends Entity>
             }
             
             synchronized (this) {
-                processTimeout(contactId, dst, request, time, unit);
+                processTimeout(request, time, unit);
             }
         }
     }
@@ -177,14 +177,13 @@ public abstract class AbstractResponseHandler<V extends Entity>
     /**
      * 
      */
-    protected synchronized void processTimeout(KUID contactId, SocketAddress dst,
-            RequestMessage request, long time, TimeUnit unit) throws IOException {
-        setException(new RequestTimeoutException(
-                contactId, dst, request, time, unit));
+    protected synchronized void processTimeout(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
+        setException(new RequestTimeoutException(request, time, unit));
     }
     
     @Override
-    public final void handleException(RequestMessage request, Throwable exception) {
+    public final void handleException(RequestHandle request, Throwable exception) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -200,7 +199,7 @@ public abstract class AbstractResponseHandler<V extends Entity>
      * 
      */
     protected synchronized void processException(
-            RequestMessage request, Throwable exception) {
+            RequestHandle request, Throwable exception) {
         setException(exception);
     }
     
@@ -219,22 +218,15 @@ public abstract class AbstractResponseHandler<V extends Entity>
     
     public static class RequestTimeoutException extends IOException {
         
-        private final KUID contactId;
-        
-        private final SocketAddress dst;
-        
-        private final RequestMessage request;
+        private final RequestHandle request;
         
         private final long time;
         
         private final TimeUnit unit;
         
-        public RequestTimeoutException(KUID contactId, 
-                SocketAddress dst, RequestMessage request, 
+        public RequestTimeoutException(RequestHandle request, 
                 long time, TimeUnit unit) {
             
-            this.contactId = contactId;
-            this.dst = dst;
             this.request = request;
             this.time = time;
             this.unit = unit;

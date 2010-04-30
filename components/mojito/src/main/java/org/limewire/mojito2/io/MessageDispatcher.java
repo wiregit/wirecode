@@ -24,16 +24,8 @@ import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.collection.FixedSizeHashSet;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.MessageID;
-import org.limewire.mojito2.message.NodeRequest;
-import org.limewire.mojito2.message.NodeResponse;
-import org.limewire.mojito2.message.PingRequest;
-import org.limewire.mojito2.message.PingResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
-import org.limewire.mojito2.message.StoreRequest;
-import org.limewire.mojito2.message.StoreResponse;
-import org.limewire.mojito2.message.ValueRequest;
-import org.limewire.mojito2.message.ValueResponse;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.util.EventUtils;
 import org.limewire.mojito2.util.IoUtils;
@@ -184,8 +176,10 @@ public abstract class MessageDispatcher implements Closeable {
             SocketAddress dst, RequestMessage request, 
             long timeout, TimeUnit unit) throws IOException {
         
-        requestManager.add(callback, contactId, dst, 
-                request, timeout, unit);
+        RequestHandle handle = new RequestHandle(
+                contactId, dst, request);
+        
+        requestManager.add(callback, handle, timeout, unit);
         
         Transport transport = this.transport;
         if (transport == null) {
@@ -246,29 +240,28 @@ public abstract class MessageDispatcher implements Closeable {
      * 
      */
     protected void handleResponse(ResponseHandler callback, 
-            RequestMessage request, ResponseMessage response, 
+            RequestHandle handle, ResponseMessage response, 
             long time, TimeUnit unit) throws IOException {
-        callback.handleResponse(request, response, time, unit);
+        callback.handleResponse(handle, response, time, unit);
     }
     
     /**
      * 
      */
-    protected void handleTimeout(ResponseHandler callback, KUID contactId, 
-            SocketAddress dst, RequestMessage request, 
-            long time, TimeUnit unit) throws IOException {
-        callback.handleTimeout(contactId, dst, request, time, unit);
+    protected void handleTimeout(ResponseHandler callback, 
+            RequestHandle handle, long time, TimeUnit unit) throws IOException {
+        callback.handleTimeout(handle, time, unit);
     }
     
     /**
      * 
      */
     protected void handleIllegalResponse(ResponseHandler callback, 
-            RequestMessage request, ResponseMessage response, 
+            RequestHandle handle, ResponseMessage response, 
             long time, TimeUnit unit) throws IOException {
         
         if (LOG.isErrorEnabled()) {
-            LOG.error("Illegal Response: " + request + " -> " + response);
+            LOG.error("Illegal Response: " + handle + " -> " + response);
         }
     }
     
@@ -340,11 +333,10 @@ public abstract class MessageDispatcher implements Closeable {
         /**
          * 
          */
-        public void add(ResponseHandler callback, KUID contactId, 
-                SocketAddress dst, RequestMessage request, 
+        public void add(ResponseHandler callback, RequestHandle handle, 
                 long timeout, TimeUnit unit) {
             
-            final MessageID messageId = request.getMessageId();
+            final MessageID messageId = handle.getMessageId();
             
             synchronized (callbacks) {
                 if (!open) {
@@ -375,7 +367,7 @@ public abstract class MessageDispatcher implements Closeable {
                     = EXECUTOR.schedule(task, timeout, unit);
                 
                 RequestEntity entity = new RequestEntity(
-                        future, callback, contactId, dst, request);
+                        future, callback, handle);
                 callbacks.put(messageId, entity);
             }
         }
@@ -399,24 +391,17 @@ public abstract class MessageDispatcher implements Closeable {
         
         private final ResponseHandler callback;
         
-        private final KUID contactId;
-        
-        private final SocketAddress dst;
-        
-        private final RequestMessage request;
+        private final RequestHandle handle;
         
         private final AtomicBoolean open = new AtomicBoolean(true);
         
         public RequestEntity(ScheduledFuture<?> future, 
-                ResponseHandler callback, KUID contactId,
-                SocketAddress dst, RequestMessage request) {
+                ResponseHandler callback, RequestHandle handle) {
             
             this.future = future;
             this.callback = callback;
             
-            this.contactId = contactId;
-            this.dst = dst;
-            this.request = request;
+            this.handle = handle;
         }
         
         /**
@@ -430,33 +415,15 @@ public abstract class MessageDispatcher implements Closeable {
         /**
          * 
          */
-        public boolean check(ResponseMessage response) {
-            if (request instanceof PingRequest) {
-                return response instanceof PingResponse;
-            } else if (request instanceof NodeRequest) {
-                return response instanceof NodeResponse;
-            } else if (request instanceof ValueRequest) {
-                return response instanceof ValueResponse 
-                    || response instanceof NodeResponse;
-            } else if (request instanceof StoreRequest) {
-                return response instanceof StoreResponse;
-            }
-            
-            return false;
-        }
-        
-        /**
-         * 
-         */
         public boolean handleResponse(ResponseMessage response) throws IOException {
             if (cancel()) {
                 long time = System.currentTimeMillis() - creationTime;
                 
-                if (check(response)) {
-                    MessageDispatcher.this.handleResponse(callback, request, 
+                if (handle.check(response)) {
+                    MessageDispatcher.this.handleResponse(callback, handle, 
                             response, time, TimeUnit.MILLISECONDS);
                 } else {
-                    MessageDispatcher.this.handleIllegalResponse(callback, request, 
+                    MessageDispatcher.this.handleIllegalResponse(callback, handle, 
                             response, time, TimeUnit.MILLISECONDS);
                 }
                 
@@ -473,8 +440,7 @@ public abstract class MessageDispatcher implements Closeable {
             if (cancel()) {
                 long time = System.currentTimeMillis() - creationTime;
                 MessageDispatcher.this.handleTimeout(callback, 
-                        contactId, dst, request, 
-                        time, TimeUnit.MILLISECONDS);
+                        handle, time, TimeUnit.MILLISECONDS);
             }
         }
     }

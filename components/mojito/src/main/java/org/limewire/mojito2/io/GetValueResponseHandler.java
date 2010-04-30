@@ -13,7 +13,6 @@ import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.entity.DefaultValueEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.MessageHelper;
-import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.message.ValueResponse;
@@ -59,7 +58,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     }
 
     @Override
-    protected void processResponse(RequestMessage request, 
+    protected void processResponse(RequestHandle request, 
             ResponseMessage message, long time, TimeUnit unit) {
         
         if (LOG.isDebugEnabled()) {
@@ -92,8 +91,8 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     }
     
     @Override
-    protected void processTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) {
+    protected void processTimeout(RequestHandle message, 
+            long time, TimeUnit unit) {
         setException(new FileNotFoundException());
     }
 }

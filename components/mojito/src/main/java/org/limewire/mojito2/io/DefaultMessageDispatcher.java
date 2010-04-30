@@ -161,7 +161,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     }
     
     @Override
-    protected void handleResponse(ResponseHandler callback, RequestMessage request,
+    protected void handleResponse(ResponseHandler callback, RequestHandle request,
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         
         Contact node = response.getContact();
@@ -206,11 +206,10 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     
     @Override
     protected void handleTimeout(ResponseHandler callback, 
-            KUID contactId, SocketAddress dst, 
-            RequestMessage request, long time, TimeUnit unit) throws IOException {
+            RequestHandle request, long time, TimeUnit unit) throws IOException {
         
-        super.handleTimeout(callback, contactId, dst, request, time, unit);
-        defaultHandler.handleTimeout(contactId, dst, request, time, unit);
+        super.handleTimeout(callback, request, time, unit);
+        defaultHandler.handleTimeout(request, time, unit);
     }
 
     /**

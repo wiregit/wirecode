@@ -16,7 +16,6 @@ import org.limewire.mojito2.entity.DefaultValueEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.NodeResponse;
-import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.message.ValueRequest;
 import org.limewire.mojito2.message.ValueResponse;
@@ -80,7 +79,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
     }
     
     @Override
-    protected void processResponse0(RequestMessage request, 
+    protected void processResponse0(RequestHandle request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         
         if (response instanceof NodeResponse) {

@@ -136,7 +136,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     @Override
-    protected void processResponse(RequestMessage request, 
+    protected void processResponse(RequestHandle request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
         
         PingResponse pong = (PingResponse)response;
@@ -177,12 +177,12 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     @Override
-    protected synchronized void processTimeout(KUID contactId, SocketAddress dst,
-            RequestMessage request, long time, TimeUnit unit) throws IOException {
+    protected synchronized void processTimeout(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
         
         int count = stack.poll();
         if (count == 1 && !pinger.hasMore()) {
-            super.processTimeout(contactId, dst, request, time, unit);
+            super.processTimeout(request, time, unit);
             return;
         }
         
@@ -191,7 +191,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     
     @Override
     protected synchronized void processException(
-            RequestMessage request, Throwable exception) {
+            RequestHandle request, Throwable exception) {
         
         int count = stack.poll();
         if (count == 1 && !pinger.hasMore()) {

@@ -196,7 +196,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
      * 
      */
     @Override
-    protected final void processResponse(RequestMessage request, 
+    protected final void processResponse(RequestHandle request, 
             ResponseMessage response, long time,
             TimeUnit unit) throws IOException {
         try {
@@ -209,7 +209,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     /**
      * 
      */
-    protected abstract void processResponse0(RequestMessage request, 
+    protected abstract void processResponse0(RequestHandle request, 
             ResponseMessage response, long time,
             TimeUnit unit) throws IOException;
     
@@ -226,10 +226,10 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
      * 
      */
     @Override
-    protected final void processTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) throws IOException {
+    protected final void processTimeout(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
         try {
-            processTimeout0(nodeId, dst, message, time, unit);
+            processTimeout0(request, time, unit);
         } finally {
             process(1);
         }
@@ -238,8 +238,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     /**
      * 
      */
-    protected void processTimeout0(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time, TimeUnit unit) throws IOException {
+    protected void processTimeout0(RequestHandle request, 
+            long time, TimeUnit unit) throws IOException {
         lookupManager.handleTimeout(time, unit);
     }
     
