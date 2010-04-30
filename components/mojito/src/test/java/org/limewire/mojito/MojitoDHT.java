@@ -21,6 +21,7 @@ import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.settings.BootstrapSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
@@ -113,6 +114,18 @@ public class MojitoDHT implements DHT {
     @Override
     public boolean isFirewalled() {
         return dht.isFirewalled();
+    }
+    
+    public KUID getLocalNodeID() {
+        return dht.getLocalNode().getNodeID();
+    }
+    
+    public SocketAddress getContactAddress() {
+        return dht.getLocalNode().getContactAddress();
+    }
+    
+    public void setContactId(KUID contactId) {
+        ((LocalContact)dht.getLocalNode()).setNodeID(contactId);
     }
 
     @Override

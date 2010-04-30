@@ -164,9 +164,19 @@ public class Context implements DHT {
     
     @Override
     public void bind(Transport transport) throws IOException {
+        routeTable.bind(this);
         messageDispatcher.bind(transport);
     }
 
+    @Override
+    public Transport unbind() {
+        if (isBound()) {
+            shutdown();
+        }
+        
+        return messageDispatcher.unbind();
+    }
+    
     private void shutdown() {
         if (isFirewalled() || !ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
             return;
@@ -210,15 +220,6 @@ public class Context implements DHT {
                 }
             }
         }
-    }
-    
-    @Override
-    public Transport unbind() {
-        if (isBound()) {
-            shutdown();
-        }
-        
-        return messageDispatcher.unbind();
     }
     
     @Override
@@ -346,6 +347,7 @@ public class Context implements DHT {
         BootstrapConfig config = new BootstrapConfig();
         AsyncProcess<BootstrapEntity> process 
             = new BootstrapProcess(this, dst, config);
+        
         return futureManager.submit(process, timeout, unit);
     }
     
@@ -356,6 +358,7 @@ public class Context implements DHT {
         BootstrapConfig config = new BootstrapConfig();
         AsyncProcess<BootstrapEntity> process 
             = new BootstrapProcess(this, dst, config);
+        
         return futureManager.submit(process, timeout, unit);
     }
     

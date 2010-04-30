@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,10 +39,13 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.exceptions.DHTTimeoutException;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
@@ -71,7 +76,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * A reference to the ContactPinger.
      */
-    private transient ContactPinger pinger;
+    private transient Context context;
     
     /**
      * The local Node.
@@ -143,8 +148,8 @@ public class RouteTableImpl implements RouteTable {
     }
     
     @Override
-    public void setContactPinger(ContactPinger pinger) {
-        this.pinger = pinger;
+    public void bind(Context context) {
+        this.context = context;
     }
     
     /**
@@ -233,8 +238,8 @@ public class RouteTableImpl implements RouteTable {
             } else {
                 // only cache node if the bucket can't be split
                 if (!canSplit(bucket)) {
-                addContactToBucketCache(bucket, node);
-            }
+                    addContactToBucketCache(bucket, node);
+                }
             }
         } else if (split(bucket)) {
             add(node); // re-try to add
@@ -334,7 +339,9 @@ public class RouteTableImpl implements RouteTable {
      * respond it will try to replace it with the new Contact. The initial 
      * state is that both Contacts have the same Node ID.
      */
-    protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
+    protected synchronized void doSpoofCheck(Bucket bucket, 
+            final Contact existing, final Contact node) {
+        
         EventListener<FutureEvent<PingEntity>> listener 
                 = new EventListener<FutureEvent<PingEntity>>() {
             
@@ -342,15 +349,15 @@ public class RouteTableImpl implements RouteTable {
             public void handleEvent(FutureEvent<PingEntity> event) {
                 switch (event.getType()) {
                     case SUCCESS:
-                        handleFutureSuccess(event.getResult());
+                        onPong(event.getResult());
                         break;
                     case EXCEPTION:
-                        handleExecutionException(event.getException());
+                        onException(event.getException());
                         break;
                 }
             }
 
-            private void handleFutureSuccess(PingEntity entity) {
+            private void onPong(PingEntity entity) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to spoof " + entity);
                 }
@@ -360,16 +367,18 @@ public class RouteTableImpl implements RouteTable {
                 // Reason: It was maybe just a Node ID collision!
             }
             
-            private void handleExecutionException(ExecutionException e) {
-                DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
+            private void onException(ExecutionException e) {
+                
+                TimeoutException timeout = ExceptionUtils.getCause(
+                        e, TimeoutException.class);
                 
                 // We can only make decisions for timeouts! 
                 if (timeout == null) {
                     return;
                 }
                 
-                KUID nodeId = timeout.getNodeID();
-                SocketAddress address = timeout.getSocketAddress();
+                KUID nodeId = existing.getNodeID();
+                SocketAddress address = existing.getContactAddress();
                 
                 if (LOG.isInfoEnabled()) {
                     LOG.info(ContactUtils.toString(nodeId, address) 
@@ -907,21 +916,30 @@ public class RouteTableImpl implements RouteTable {
      * the DHTFuture if it's not null.
      */
     private void ping(Contact node, EventListener<FutureEvent<PingEntity>> listener) {
-        ContactPinger pinger = this.pinger;
-        if (pinger != null) {
-            pinger.ping(node, listener);
-        } else {
-            handleFailure(node.getNodeID(), node.getContactAddress());
+        Context context = this.context;
+        
+        if (context != null) {
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            DHTFuture<PingEntity> future = context.ping(
+                    node, timeout, TimeUnit.MILLISECONDS);
+            future.addFutureListener(listener);
+            return;
+        }
+        
+        // --- ELSE ---
+        
+        handleFailure(node.getNodeID(), node.getContactAddress());
+        
+        if (listener != null) {
+            ExecutionException exception = new ExecutionException(
+                    new RequestTimeoutException(
+                            node.getNodeID(), 
+                            node.getContactAddress(), 
+                            0L, TimeUnit.MILLISECONDS));
             
-            if (listener != null) {
-                ExecutionException exception = new ExecutionException(
-                        new DHTTimeoutException(node.getNodeID(), 
-                                node.getContactAddress(), null, 0L));
-                
-                FutureEvent<PingEntity> event 
-                    = FutureEvent.createException(exception);
-                listener.handleEvent(event);
-            }
+            FutureEvent<PingEntity> event 
+                = FutureEvent.createException(exception);
+            listener.handleEvent(event);
         }
     }
     

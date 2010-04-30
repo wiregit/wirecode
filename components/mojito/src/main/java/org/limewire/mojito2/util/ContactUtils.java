@@ -262,6 +262,7 @@ public final class ContactUtils {
                 && !context.isLocalContactAddress(node.getContactAddress())) {
             return true;
         }
+        
         return false;
     }
     

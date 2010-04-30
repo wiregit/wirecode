@@ -2,6 +2,7 @@ package org.limewire.mojito2.io;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
@@ -66,7 +67,6 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
         SecurityToken securityToken = response.getSecurityToken();
         
         Contact[] contacts = response.getContacts();
-        
         processContacts(src, securityToken, contacts, time, unit);
     }
     

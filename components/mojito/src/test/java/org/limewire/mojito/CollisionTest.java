@@ -19,20 +19,22 @@
  
 package org.limewire.mojito;
 
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.RouteTableSettings;
+import org.limewire.mojito2.util.ExceptionUtils;
+import org.limewire.mojito2.util.IoUtils;
 
 
 public class CollisionTest extends MojitoTestCase {
@@ -71,32 +73,32 @@ public class CollisionTest extends MojitoTestCase {
         MojitoDHT bootstrap = null, original = null, spoofer = null;
         
         try {
-            bootstrap = MojitoFactory.createDHT("Bootstrap Node");
-            bootstrap.bind(new InetSocketAddress("localhost", PORT));
-            bootstrap.start();
+            bootstrap = MojitoFactory.createDHT("Bootstrap Node", PORT);
+            original = MojitoFactory.createDHT("OriginalDHT", PORT+1);
+            spoofer = MojitoFactory.createDHT("Spoofer Node", PORT+2);
             
-            original = MojitoFactory.createDHT("OriginalDHT");
-            original.bind(new InetSocketAddress(PORT+1));
-            original.start();
-            original.bootstrap(bootstrap.getContactAddress()).get();
-            bootstrap.bootstrap(original.getContactAddress()).get();
-            
-            // The spoofer Node
-            spoofer = MojitoFactory.createDHT("Spoofer Node");
+            original.bootstrap("localhost", PORT).get();
+            bootstrap.bootstrap("localhost", PORT+1).get();
             
             assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
-            Method m = spoofer.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
-            m.setAccessible(true);
-            m.invoke(spoofer, new Object[]{ original.getLocalNodeID() });
+            
+            spoofer.setContactId(original.getLocalNodeID());
             assertEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
             
-            spoofer.bind(new InetSocketAddress(PORT+2));
-            spoofer.start();
-            spoofer.bootstrap(bootstrap.getContactAddress()).get();
-            Thread.sleep(500);
-            
-            assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
-            assertNotEquals(original.getContactAddress(), spoofer.getContactAddress());
+            try {
+                spoofer.bootstrap("localhost", PORT).get();
+                fail("Shoud have failed!");
+            } catch (ExecutionException err) {
+                // Make sure it was a CollisionException
+                CollisionException ex = ExceptionUtils.getCause(
+                        err, CollisionException.class);
+                assertNotNull("Expected a CollisionException", ex);
+                
+                Contact cause = ex.getContact();
+                
+                assertEquals(original.getLocalNodeID(), cause.getNodeID());
+                assertEquals(original.getContactAddress(), cause.getContactAddress());
+            }
             
             Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
@@ -115,20 +117,10 @@ public class CollisionTest extends MojitoTestCase {
             assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
             
             assertContains(map.keySet(), spoofer.getLocalNodeID());
-            assertEquals(map.get(spoofer.getLocalNodeID()), spoofer.getContactAddress());
+            assertNotEquals(map.get(spoofer.getLocalNodeID()), spoofer.getContactAddress());
             
         } finally {
-            if (bootstrap != null) {
-                bootstrap.close();
-            }
-            
-            if (original != null) {
-                original.close();
-            }
-            
-            if (spoofer != null) {
-                spoofer.close();
-            }
+            IoUtils.closeAll(bootstrap, original, spoofer);
         }
     }
     
@@ -140,16 +132,14 @@ public class CollisionTest extends MojitoTestCase {
         MojitoDHT bootstrap = null, original = null, replacement = null;
         
         try {
-            bootstrap = MojitoFactory.createDHT("Bootstrap-DHT");
-            bootstrap.bind(new InetSocketAddress(PORT));
-            bootstrap.start();
+            bootstrap = MojitoFactory.createDHT("Bootstrap-DHT", PORT);
+            original = MojitoFactory.createDHT("OriginalDHT", PORT+1);
             
-            original = MojitoFactory.createDHT("OriginalDHT");
-            original.bind(new InetSocketAddress(PORT+1));
-            original.start();
-            original.bootstrap(bootstrap.getContactAddress()).get();
-            bootstrap.bootstrap(original.getContactAddress()).get();
-            original.stop();
+            original.bootstrap("localhost", PORT).get();
+            bootstrap.bootstrap("localhost", PORT+1).get();
+            replacement = MojitoFactory.createDHT("ReplacementDHT", PORT+2);
+            
+            original.unbind();
             
             Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
@@ -165,16 +155,12 @@ public class CollisionTest extends MojitoTestCase {
             assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
             
             // The replacement Node
-            replacement = MojitoFactory.createDHT("ReplacementDHT");
             assertNotEquals(original.getLocalNodeID(), replacement.getLocalNodeID());
-            Method m = replacement.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
-            m.setAccessible(true);
-            m.invoke(replacement, new Object[]{ original.getLocalNodeID() });
+            replacement.setContactId(original.getLocalNodeID());
             assertEquals(original.getLocalNodeID(), replacement.getLocalNodeID());
             
-            replacement.bind(new InetSocketAddress(PORT+2));
-            replacement.start();
-            replacement.bootstrap(bootstrap.getContactAddress()).get();
+            // Bootstrap the replacement Contact
+            replacement.bootstrap("localhost", PORT).get();
             
             Thread.sleep(5L * NetworkSettings.DEFAULT_TIMEOUT.getValue());
             
@@ -191,18 +177,7 @@ public class CollisionTest extends MojitoTestCase {
             assertNotEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
             
         } finally {
-            
-            if (bootstrap != null) {
-                bootstrap.close();
-            }
-            
-            if (original != null) {
-                original.close();
-            }
-            
-            if (replacement != null) {
-                replacement.close();
-            }
+            IoUtils.closeAll(bootstrap, original, replacement);
         }
     }
 }

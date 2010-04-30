@@ -23,6 +23,7 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
+import org.limewire.mojito2.util.MessageUtils;
 
 public class DefaultMessageDispatcher extends MessageDispatcher {
 
@@ -63,6 +64,23 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
      */
     public Context getContext() {
         return context;
+    }
+
+    @Override
+    protected boolean isLocalhost(KUID contactId, 
+            SocketAddress address, Message message) {
+        
+        if (address.equals(context.getContactAddress())) {
+            return true;
+        }
+        
+        if (context.isLocalNodeID(contactId) 
+                && !MessageUtils.isCollisionPingRequest(
+                        context.getLocalNodeID(), message)) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**

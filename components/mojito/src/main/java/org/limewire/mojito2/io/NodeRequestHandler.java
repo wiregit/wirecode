@@ -32,6 +32,7 @@ import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.NodeResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.util.CollectionUtils;
@@ -73,9 +74,12 @@ public class NodeRequestHandler extends AbstractRequestHandler {
         
         Collection<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
+            
+            RouteTable routeTable = context.getRouteTable();
+            
             if (context.isFirewalled()) {
                 nodes = ContactUtils.sort(
-                            context.getRouteTable().getContacts(), 
+                            routeTable.getContacts(), 
                             KademliaSettings.REPLICATION_PARAMETER.getValue());
                 
                 // If the external port is not set then make sure
@@ -85,8 +89,9 @@ public class NodeRequestHandler extends AbstractRequestHandler {
                 }
                 
             } else {
-                nodes = context.getRouteTable().select(lookupId, 
-                        KademliaSettings.REPLICATION_PARAMETER.getValue(), SelectMode.ALIVE);
+                nodes = routeTable.select(lookupId, 
+                            KademliaSettings.REPLICATION_PARAMETER.getValue(), 
+                            SelectMode.ALIVE);
             }
         }
         

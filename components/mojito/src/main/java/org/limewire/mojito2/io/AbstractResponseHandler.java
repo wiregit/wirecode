@@ -9,6 +9,7 @@ import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.Entity;
+import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.util.Objects;
@@ -214,22 +215,5 @@ public abstract class AbstractResponseHandler<V extends Entity>
             = context.getMessageDispatcher();
         messageDispatcher.send(this, contactId, dst, 
                 request, timeout, unit);
-    }
-    
-    public static class RequestTimeoutException extends IOException {
-        
-        private final RequestHandle request;
-        
-        private final long time;
-        
-        private final TimeUnit unit;
-        
-        public RequestTimeoutException(RequestHandle request, 
-                long time, TimeUnit unit) {
-            
-            this.request = request;
-            this.time = time;
-            this.unit = unit;
-        }
     }
 }

@@ -48,7 +48,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
     protected void processRequest(RequestMessage message) throws IOException {
         
         PingRequest request = (PingRequest)message;
-        Contact node = request.getContact();
+        Contact contact = request.getContact();
         
         // Don't respond to pings while we're bootstrapping! This
         // makes sure nobody can use us as the initial bootstrap
@@ -59,7 +59,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
                 && !MessageUtils.isCollisionPingRequest(
                         context.getLocalNodeID(), message)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Received a PingRequest from " + node 
+                LOG.info("Received a PingRequest from " + contact 
                         + " but local Node is bootstrapping");
             }
             return;
@@ -67,8 +67,8 @@ public class PingRequestHandler extends AbstractRequestHandler {
         
         MessageHelper messageHelper = context.getMessageHelper();
         PingResponse response = messageHelper.createPingResponse(
-                request, node.getContactAddress());
+                request, contact.getContactAddress());
 
-        send(node, response);
+        send(contact, response);
     }
 }

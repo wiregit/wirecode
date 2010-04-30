@@ -15,7 +15,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -26,6 +25,7 @@ import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
@@ -108,7 +108,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
             ((Context)TEST_DHT).ping(BOOTSTRAP_DHT.getLocalNode()).get();
             fail("BOOTSTRAP_DHT should not respond");
         } catch (ExecutionException err) {
-            assertTrue(err.getCause() instanceof DHTTimeoutException);
+            assertTrue(err.getCause() instanceof RequestTimeoutException);
         }
         
         // made sure we tried to ping them

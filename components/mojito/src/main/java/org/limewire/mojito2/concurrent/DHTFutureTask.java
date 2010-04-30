@@ -78,12 +78,17 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         }
         
         Runnable task = new Runnable() {
+            
+            private final long creationTime = System.currentTimeMillis();
+            
             @Override
             public void run() {
                 synchronized (DHTFutureTask.this) {
                     if (!isDone() && !isDelay()) {
                         wasTimeout = true;
-                        handleTimeout();
+                        
+                        long time = System.currentTimeMillis() - creationTime;
+                        handleTimeout(time, TimeUnit.MILLISECONDS);
                     }
                 }
             }
@@ -115,8 +120,8 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * 
      */
-    protected synchronized void handleTimeout() {
-        setException(new TimeoutException());
+    protected synchronized void handleTimeout(long time, TimeUnit unit) {
+        setException(new TimeoutException("Watchdog: " + time + " " + unit));
     }
     
     @Override

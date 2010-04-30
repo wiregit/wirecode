@@ -1,6 +1,5 @@
 package org.limewire.mojito2.io;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +16,7 @@ import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
+import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.DefaultBootstrapEntity;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
@@ -137,7 +137,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
      * 
      */
     private void onCollision(PingEntity entity) {
-        future.setException(new IOException());
+        Contact contact = entity.getContact();
+        future.setException(new CollisionException(contact));
     }
     
     /**

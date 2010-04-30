@@ -1,6 +1,7 @@
 package org.limewire.mojito;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.DHT;
@@ -8,6 +9,7 @@ import org.limewire.mojito2.io.DatagramTransport;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -39,6 +41,10 @@ public class MojitoFactory {
         Transport transport = new DatagramTransport(
                 port, dht.getMessageFactory());
         dht.bind(transport);
+        
+        ((LocalContact)dht.getLocalNode()).setContactAddress(
+                new InetSocketAddress("localhost", port));
+        
         return transport;
     }
 }

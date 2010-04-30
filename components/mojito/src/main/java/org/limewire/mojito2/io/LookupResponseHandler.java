@@ -347,7 +347,9 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 }
             }
             
-            collisions.addAll(Arrays.asList(scrubber.getCollisions()));
+            for (Contact collision : scrubber.getCollisions()) {
+                collisions.add(collision);
+            }
             
             return true;
         }

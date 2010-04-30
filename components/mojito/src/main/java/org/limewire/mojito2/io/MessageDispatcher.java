@@ -157,8 +157,21 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
+    protected boolean isLocalhost(KUID contactId, SocketAddress address, Message message) {
+        return false;
+    }
+    
+    /**
+     * 
+     */
     public void send(Contact dst, ResponseMessage response) throws IOException {
+        
+        KUID contactId = dst.getNodeID();
         SocketAddress address = dst.getContactAddress();
+        
+        if (isLocalhost(contactId, address, response)) {
+            throw new IOException();
+        }
         
         Transport transport = this.transport;
         if (transport == null) {
@@ -166,7 +179,7 @@ public abstract class MessageDispatcher implements Closeable {
         }
         
         transport.send(address, response);
-        fireMessageSent(dst.getNodeID(), address, response);
+        fireMessageSent(contactId, address, response);
     }
     
     /**
@@ -188,6 +201,10 @@ public abstract class MessageDispatcher implements Closeable {
             SocketAddress dst, RequestMessage request, 
             long timeout, TimeUnit unit) throws IOException {
         
+        if (isLocalhost(contactId, dst, request)) {
+            throw new IOException();
+        }
+
         if (callback != null) {
             RequestHandle handle = new RequestHandle(
                     contactId, dst, request);
