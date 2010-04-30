@@ -14,7 +14,6 @@ import junit.framework.Test;
 
 import org.apache.http.params.BasicHttpParams;
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
@@ -29,7 +28,6 @@ import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
-import org.limewire.util.Visitor;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Provider;
@@ -335,11 +333,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
 
             @Override
             public void writeSnapshot() {
-                
-            }
-
-            @Override
-            public void visitDownloads(Visitor<CoreDownloader> d) {
                 
             }
 

@@ -16,7 +16,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -40,8 +39,8 @@ import com.limegroup.mozilla.MozillaDownload;
  * of completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
-LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadManagerEvent> {
+public interface DownloadManager extends BandwidthTracker, SaveLocationManager,
+PushedSocketHandler, ListenerSupport<DownloadManagerEvent> {
     
     /**
      * Adds a new downloader that this will manager.

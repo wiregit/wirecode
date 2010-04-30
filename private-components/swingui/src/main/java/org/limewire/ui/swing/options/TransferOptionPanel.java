@@ -246,12 +246,6 @@ public class TransferOptionPanel extends OptionPanel {
             singleLocationButton.addActionListener(downloadSwitchAction);
             multiLocationButton.addActionListener(downloadSwitchAction);
             
-            // only show the store download option if the geo location
-            // can be used to purchase from the LWS
-            if(SwingUiSettings.SHOW_STORE_COMPONENTS.get()) {
-                add(new JLabel(I18n.tr("Configure how LimeWire Store downloads are organized")));
-                add(new JButton(new DialogDisplayAction(TransferOptionPanel.this, storeOptionPanel, I18n.tr("Store File Organization"), I18n.tr("Configure..."), I18n.tr("Configure how files downloaded from the LimeWire Store are organized"))), "wrap");
-            }
             add(buyAntivirusButton, "hidemode 3, wrap");
         }
 

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import org.limewire.core.settings.LWSSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
@@ -11,7 +10,6 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
-import com.limegroup.gnutella.lws.server.LWSManager;
 
 @EagerSingleton
 class ConnectionAcceptorGlue {
@@ -23,7 +21,6 @@ class ConnectionAcceptorGlue {
     private final HTTPAcceptor externalHttpAcceptor;
     private final PushDownloadManager pushDownloadManager;
     private final ControlRequestAcceptor controlRequestAcceptor;
-    private final LWSManager lwsManager;
 
     @Inject
     public ConnectionAcceptorGlue(
@@ -32,15 +29,13 @@ class ConnectionAcceptorGlue {
             HTTPAcceptor externalHttpAcceptor,
             LocalHTTPAcceptor localHttpAcceptor,
             PushDownloadManager pushDownloadManager,
-            ControlRequestAcceptor controlRequestAcceptor,
-            LWSManager lwsManager) {
+            ControlRequestAcceptor controlRequestAcceptor) {
         this.externalDispatcher = externalDispatcher;
         this.localDispatcher = localDispatcher;
         this.externalHttpAcceptor = externalHttpAcceptor;
         this.pushDownloadManager = pushDownloadManager;
         this.localHttpAcceptor = localHttpAcceptor;
         this.controlRequestAcceptor = controlRequestAcceptor;
-        this.lwsManager = lwsManager;
     }
 
     @Inject
@@ -68,11 +63,6 @@ class ConnectionAcceptorGlue {
                             true, "MAGNET", "TORRENT");
                 externalDispatcher.addConnectionAcceptor(controlRequestAcceptor,
                             true, "MAGNET","TORRENT");
-                
-                if (LWSSettings.LWS_IS_ENABLED.getValue()) {
-                    localHttpAcceptor.registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.getHandler());
-                }
-
             }
 
             public void stop() {

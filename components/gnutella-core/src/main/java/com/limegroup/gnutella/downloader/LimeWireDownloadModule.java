@@ -43,7 +43,6 @@ public class LimeWireDownloadModule extends AbstractModule {
         bind(RequeryManagerFactory.class).to(RequeryManagerFactoryImpl.class);
         bind(PushedSocketHandlerRegistry.class).to(PushDownloadManager.class);
         bind(CoreDownloaderFactory.class).to(CoreDownloaderFactoryImpl.class);
-        bind(LWSIntegrationServices.class).to(LWSIntegrationServicesImpl.class);
         bind(DownloadSerializer.class).to(DownloadSerializerImpl.class);
         bind(DownloadSerializeSettings.class).to(DownloadSerializeSettingsImpl.class);
         bind(OldDownloadConverter.class).to(OldDownloadConverterImpl.class);
