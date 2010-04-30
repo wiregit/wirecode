@@ -20,6 +20,8 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
+import org.limewire.core.impl.search.torrentweb.TorrentWebSearch;
+import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.io.GUID;

@@ -1,4 +1,4 @@
-package org.limewire.core.impl.search;
+package org.limewire.core.impl.search.torrentweb;
 
 import java.io.File;
 import java.io.IOException;

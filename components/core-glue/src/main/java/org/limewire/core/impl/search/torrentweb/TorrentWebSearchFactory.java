@@ -1,4 +1,4 @@
-package org.limewire.core.impl.search;
+package org.limewire.core.impl.search.torrentweb;
 
 import org.limewire.core.api.search.SearchListener;
 

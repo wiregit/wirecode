@@ -3,6 +3,12 @@ package org.limewire.core.impl.search;
 import org.limewire.core.api.search.SearchEvent;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchManager;
+import org.limewire.core.impl.search.torrentweb.TorrentUriDatabaseStore;
+import org.limewire.core.impl.search.torrentweb.TorrentUriPrioritizerFactory;
+import org.limewire.core.impl.search.torrentweb.TorrentUriPrioritizerImpl;
+import org.limewire.core.impl.search.torrentweb.TorrentUriStore;
+import org.limewire.core.impl.search.torrentweb.TorrentWebSearch;
+import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -26,7 +32,7 @@ public class CoreGlueSearchModule extends AbstractModule {
         bind(TorrentWebSearchFactory.class).toProvider(FactoryProvider.newFactory(TorrentWebSearchFactory.class, TorrentWebSearch.class));
         bind(TorrentUriPrioritizerFactory.class).toProvider(FactoryProvider.newFactory(TorrentUriPrioritizerFactory.class, TorrentUriPrioritizerImpl.class));
         
-        bind(TorrentUriStore.class).to(SqlTorrentUriStore.class);
+        bind(TorrentUriStore.class).to(TorrentUriDatabaseStore.class);
     }
 
 }

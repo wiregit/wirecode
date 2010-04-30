@@ -1,9 +1,7 @@
-package org.limewire.core.impl.search;
+package org.limewire.core.impl.search.torrentweb;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -32,10 +30,6 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     
     private final static Pattern numbers = Pattern.compile("[0-9]+");
     
-    private final URI referrer;
-
-    private final String query;
-    
     private final String referrerHost;
     
     @SuppressWarnings("unchecked")
@@ -55,8 +49,6 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     @Inject
     public TorrentUriPrioritizerImpl(@Assisted URI referrer, @Assisted String query,
             TorrentUriStore torrentUriStore) {
-        this.referrer = referrer;
-        this.query = query;
         this.torrentUriStore = torrentUriStore;
         this.queryTokens = toLowerCase(query.split("\\s"));
         String host = getCanonicalHost(referrer);
@@ -124,12 +116,6 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         }
     }
     
-    public static void main(String[] args) throws URISyntaxException {
-        URI uri = org.limewire.util.URIUtils.toURI("http://torrent/download/134545/query.torrent");
-        System.out.println(uri.getPath());
-        System.out.println(Arrays.asList(uri.getPath().split("[/?#]")));
-    }
-    
     Set<URI> getTorrentUrisForDomain(URI uri) {
         String host = getCanonicalHost(uri);
         if (host != null) {
@@ -175,7 +161,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
             score += 1;
         }
         for (Tuple<String, String> tuple : zip(pathTokens, torrentPathTokens)) {
-            if (tuple.getFirst().equals(tuple.getSecond())) {
+            if (tuple.getFirst().equalsIgnoreCase(tuple.getSecond())) {
                 score += 1;
             } else {
                 score -= 1;
@@ -264,12 +250,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     }
     
     private class NotTorrenUriPredicate implements Predicate<URI> {
-        
         @Override
         public boolean apply(URI uri) {
             return !torrentUriStore.isNotTorrentUri(uri);
         }
-        
     }
     
     private class TorrentUriLikelihoodFunction implements Function<URI, Tuple<URI, Integer>> {
