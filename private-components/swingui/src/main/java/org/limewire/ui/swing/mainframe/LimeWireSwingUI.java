@@ -189,6 +189,8 @@ public class LimeWireSwingUI extends JPanel {
         String title = frame.getTitle();
         if(title == null)
             return;
+        if(!title.startsWith("LAN Mode Prototype - "))
+            title = "LAN Mode Prototype - " + title;
         if(isPro) {
             if(!title.endsWith("PRO"))
                 title += " PRO";
