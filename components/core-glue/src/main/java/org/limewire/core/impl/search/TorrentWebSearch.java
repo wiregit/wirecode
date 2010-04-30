@@ -321,10 +321,6 @@ public class TorrentWebSearch {
         }
         return null;
     }
-    
-    public static void main(String[] args) throws Exception {
-
-    }
 
     private class GoogleJsonResponseHandler implements HttpClientListener {
 

@@ -21,7 +21,8 @@ class ProgramsFilter implements ResultFilter, ResponseFilter {
     
     private final CategoryManager categoryManager;
     
-    @Inject ProgramsFilter(CategoryManager categoryManager) {
+    @Inject
+    ProgramsFilter(CategoryManager categoryManager) {
         this.categoryManager = categoryManager;
     }
 
@@ -33,7 +34,7 @@ class ProgramsFilter implements ResultFilter, ResponseFilter {
     
     @Override
     public boolean allow(SearchResult result, LimeXMLDocument document ) {
-        Category category = categoryManager.getCategoryForExtension(result.getFileExtension());
+        Category category = result.getCategory();
         return isAllowed(category, document);
     }
     
@@ -67,14 +68,13 @@ class ProgramsFilter implements ResultFilter, ResponseFilter {
     }
     
     
-    // TODO: Code is copied+modified from XMLTorrent... might want share 
+    // TODO: Code is copied+simplified from XMLTorrent... might want to share code 
     private static List<String> parsePathEntries(LimeXMLDocument xmlDocument) throws InvalidDataException {
         String encodedPath = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_PATHS);
-        String encodedSizes = xmlDocument.getValue(LimeXMLNames.TORRENT_FILE_SIZES);
-        if (encodedPath == null || encodedSizes == null) {
+
+        if (encodedPath == null) {
             String name = xmlDocument.getValue(LimeXMLNames.TORRENT_NAME);
-            String length = xmlDocument.getValue(LimeXMLNames.TORRENT_LENGTH);
-            if (name != null && length != null) {
+            if (name != null) {
                 try {
                     return Collections.<String>singletonList(name);
                 } catch (NumberFormatException nfe) {
@@ -83,10 +83,6 @@ class ProgramsFilter implements ResultFilter, ResponseFilter {
             return Collections.<String>emptyList();
         }
         String[] paths = encodedPath.split("//");
-        String[] sizes = encodedSizes.split(" ");
-        if (paths.length != sizes.length) {
-            return Collections.<String>emptyList();
-        }
         List<String> entries = new ArrayList<String>(paths.length);
         for (int i = 0; i < paths.length; i++) {
             try {
