@@ -19,8 +19,6 @@
 	<classpathentry kind="src" output="components/core-glue/build/test-common" path="components/core-glue/src/test-common/java"/>
 	<classpathentry kind="src" output="components/core-settings/build/classes" path="components/core-settings/src/main/java"/>
 	<classpathentry kind="src" output="components/friend/build/classes" path="components/friend/src/main/java"/>
-	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
-	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
 	<classpathentry kind="src" output="components/gnutella-core/build/classes" path="components/gnutella-core/src/main/java"/>
 	<classpathentry kind="src" output="components/gnutella-core/src/main/resources" path="components/gnutella-core/src/main/resources"/>
 	<classpathentry kind="src" output="components/gnutella-core/build/tests" path="components/gnutella-core/src/test/java"/>

@@ -313,12 +313,7 @@ final class Initializer {
         // message with the right L&F.
         SwingUtils.invokeNowOrLater(new Runnable() {
             public void run() {
-                String name = UIManager.getSystemLookAndFeelClassName();                
-                if(OSUtils.isLinux()) {
-                    //mozswing on linux is not compatible with the gtklook and feel in jvms less than 1.7
-                    //forcing cross platform look and feel for linux.
-                    name = UIManager.getCrossPlatformLookAndFeelClassName();
-                }           
+                String name = UIManager.getSystemLookAndFeelClassName();
                 try {
                     UIManager.setLookAndFeel(name);
                 } catch(Throwable ignored) {}
