@@ -18,7 +18,6 @@ import org.limewire.ui.swing.mainframe.OptionsAction;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
-import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -62,8 +61,7 @@ class ToolsMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
         add(new AbstractAction(I18n.tr("Advanced &Search")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SearchNavItem item = searchNavigatorProvider.get().addAdvancedSearch();
-                item.select();
+                searchNavigatorProvider.get().openAdvancedSearch();
             }
         });
         

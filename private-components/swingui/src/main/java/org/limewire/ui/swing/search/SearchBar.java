@@ -4,12 +4,13 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JPopupMenu;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -31,13 +32,14 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.components.decorators.ComboBoxDecorator;
 import org.limewire.ui.swing.components.decorators.TextFieldDecorator;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.search.advanced.AdvancedPopupPanel;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -46,6 +48,7 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.I18NConvert;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 /**
@@ -64,6 +67,8 @@ public class SearchBar extends JXPanel {
     private final SmartAutoCompleteFactory smartAutoCompleteFactory;
     private final AutoCompleteDictionary searchHistory;
     private final SearchNavigator searchNavigator;
+    private final Provider<AdvancedPopupPanel> advancedPopupProvider;
+    private final Action advancedAction;
     
     private SearchCategory categoryToSearch; 
     
@@ -76,6 +81,7 @@ public class SearchBar extends JXPanel {
             SmartAutoCompleteFactory smartAutoCompleteFactory,
             @Named("searchHistory") AutoCompleteDictionary searchHistory,
             final HistoryAndFriendAutoCompleter autoCompleter,
+            Provider<AdvancedPopupPanel> advancedPopupProvider,
             CategoryIconManager categoryIconManager,
             TextFieldDecorator textFieldDecorator,
             SearchNavigator searchNavigator) {
@@ -87,7 +93,9 @@ public class SearchBar extends JXPanel {
         this.searchNavigator = searchNavigator;
         this.searchHistory = searchHistory;
         this.autoCompleter = autoCompleter;
+        this.advancedPopupProvider = advancedPopupProvider;
         this.categoryToSearch = SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
+        this.advancedAction = new AdvancedAction();
         
         Action actionToSelect = null;
         
@@ -108,16 +116,34 @@ public class SearchBar extends JXPanel {
 
             typeActions.add(action);
         }
+        typeActions.add(advancedAction);
 
         comboBox = new LimeComboBox(typeActions);
         comboBoxDecorator.decorateLightFullComboBox(comboBox);
         comboBox.setName("SearchBar.comboBox");
-        addAdvancedSearch(comboBox);
+        // Disable fields when Advanced Search selected.
+        comboBox.addSelectionListener(new SelectionListener() {
+            @Override
+            public void selectionChanged(Action action) {
+                boolean advanced = action instanceof AdvancedAction;
+                searchField.setEnabled(!advanced);
+                searchButton.setEnabled(!advanced);
+            }
+        });
                 
         searchField = new PromptTextField(I18n.tr("Search..."));
         textFieldDecorator.decoratePromptField(searchField, AccentType.BUBBLE, searchBorder);
         searchField.setName("SearchBar.searchField");
         searchField.setDocument(new SearchFieldDocument());
+        // Show Advanced Search popup when field disabled.
+        searchField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!searchField.isEnabled()) {
+                    advancedAction.actionPerformed(null);
+                }
+            }
+        });
         
         searchButton = new IconButton();
         searchButton.removeActionHandListener();
@@ -162,23 +188,6 @@ public class SearchBar extends JXPanel {
         add(comboBox);
         add(searchField, "gap 5");
         add(searchButton, "gap 5");
-    }
-    
-    private void addAdvancedSearch(LimeComboBox comboBox) {
-        comboBox.addMenuCreationListener(new LimeComboBox.MenuCreationListener() {
-            @Override
-            public void menuCreated(LimeComboBox comboBox, final JPopupMenu menu) {
-                menu.addSeparator();
-                menu.add(new HyperlinkButton(new AbstractAction(I18n.tr("Advanced Search")) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        SearchNavItem navItem = searchNavigator.addAdvancedSearch();
-                        navItem.select();
-                        menu.setVisible(false);
-                    }
-                }));
-            }
-        });
     }
 
     /**
@@ -230,7 +239,7 @@ public class SearchBar extends JXPanel {
             if (a instanceof CategoryAction) {
                 CategoryAction categoryAction = (CategoryAction) a;
                 if (categoryAction.getCategory() == category) {
-                    comboBox.setSelectedAction(categoryAction);
+                    comboBox.selectAction(categoryAction);
                     categoryAction.actionPerformed(null);
                     return;
                 }
@@ -258,6 +267,37 @@ public class SearchBar extends JXPanel {
         return categoryToSearch;
     }
     
+    /**
+     * Selects the advanced search option.
+     */
+    public void selectAdvancedSearch() {
+        comboBox.selectAction(advancedAction);
+        advancedAction.actionPerformed(null);
+    }
+    
+    /**
+     * Action to display the advanced search popup dialog.
+     */
+    private class AdvancedAction extends AbstractAction {
+
+        AdvancedAction() {
+            super(I18n.tr("Advanced"));
+            putValue(AbstractAction.SEPARATOR, true);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Notify navigator to record activity.
+            searchNavigator.logAdvancedSearchOpened();
+            // Display popup dialog.
+            advancedPopupProvider.get().showPopup(comboBox, searchField.getX(), 
+                    searchField.getY() + searchField.getHeight() - 1, searchField.getWidth());
+        }
+    }
+    
+    /**
+     * Action representing a search category.
+     */
     private class CategoryAction extends AbstractAction {
         private final SearchCategory category;
         

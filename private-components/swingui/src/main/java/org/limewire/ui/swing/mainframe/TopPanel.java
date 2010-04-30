@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +28,6 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -40,7 +38,6 @@ import org.limewire.ui.swing.components.FlexibleTabListFactory;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SelectableJXButton;
 import org.limewire.ui.swing.components.TabActionMap;
-import org.limewire.ui.swing.components.AbstractTabList.ChangeType;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.home.HomeMediator;
@@ -64,9 +61,7 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
-import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder.CategoryOverride;
-import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -101,8 +96,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final NavItem homeNav;
     private final NavItem libraryNav;
     private final Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder;
-    private final Provider<AdvancedSearchPanel> advancedSearchPanel;
-    private final SearchHandler searchHandler;
     private final HomeMediator homeMediator;
 
     private final String repeatSearchTitle = I18n.tr("Repeat Search");
@@ -125,7 +118,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     
     @Inject
-    public TopPanel(final SearchHandler searchHandler,
+    public TopPanel(SearchHandler searchHandler,
                     Navigator navigator,
                     final HomeMediator homeMediator,
                     SearchBar searchBar,
@@ -134,17 +127,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     SearchTabPainterFactory tabPainterFactory,
                     final LibraryMediator myLibraryMediator,
                     Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder,
-                    Provider<AdvancedSearchPanel> advancedSearchPanel,
                     Provider<FriendsButton> friendsButtonProvider,
                     AllFriendsRefreshManager allFriendsRefreshManager,
                     ButtonDecorator buttonDecorator) {        
         GuiUtils.assignResources(this);
-        this.searchHandler = searchHandler;
         this.searchBar = searchBar;
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
-        this.advancedSearchPanel = advancedSearchPanel;
         this.homeMediator = homeMediator;
         this.allFriendsRefreshManager = allFriendsRefreshManager;        
         setName("WireframeTop");
@@ -219,40 +209,18 @@ class TopPanel extends JXPanel implements SearchNavigator {
     }
     
     @Override
-    public SearchNavItem addAdvancedSearch() {
+    public void openAdvancedSearch() {
+        searchBar.selectAdvancedSearch();
+    }
+    
+    @Override
+    public void logAdvancedSearchOpened() {
         advancedSearchesOpened++;
-        String title = I18n.tr("Advanced Search");
-        AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
-        
-        NavItem item = navigator.createNavItem(NavCategory.SEARCH_RESULTS, title, new SearchResultMediator(advancedPanel));
-        SearchAction action = new SearchAction(item);
-        action.putValue(Action.LONG_DESCRIPTION, action.getValue(Action.NAME));
-        
-        Action moreTextAction = new NoOpAction();
-        TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, new ArrayList<Action>());
-        
-        searchList.addTabActionMapAt(actionMap, 0);
-        maybeIncrementMaxTabCount();
-        
-        item.addNavItemListener(new SearchTabNavItemListener(action, actionMap, advancedPanel, "", SearchCategory.ALL));
-        
-        final SearchNavItem searchNavItem =  new SearchNavItemImpl(item, action, true);
-        
-        advancedPanel.addSearchListener(new UiSearchListener() {
-            @Override
-            public void searchTriggered(SearchInfo searchInfo) {
-                advancedSearchesMade++;
-                
-                searchList.freezeTabLayout();
-                searchHandler.doSearch(searchInfo);
-                if ((searchInfo.getSearchCategory() != SearchCategory.PROGRAM || LibrarySettings.ALLOW_PROGRAMS.getValue())) {
-                    searchNavItem.remove();
-                }
-                searchList.updateTabLayout(ChangeType.ADDED);
-            }
-        });
-        
-        return searchNavItem;
+    }
+    
+    @Override
+    public void logAdvancedSearchStarted() {
+        advancedSearchesMade++;
     }
     
     private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, 

@@ -14,8 +14,9 @@ import org.limewire.ui.swing.util.SwingUtils;
  */
 public abstract class AbstractAction extends javax.swing.AbstractAction {
     
-    public static String PRESSED_ICON = "limewire.pressedIcon";
-    public static String ROLLOVER_ICON = "limewire.rolloverIcon";
+    public static final String PRESSED_ICON = "limewire.pressedIcon";
+    public static final String ROLLOVER_ICON = "limewire.rolloverIcon";
+    public static final String SEPARATOR = "limewire.separator";
 
     public AbstractAction(String name, Icon icon) {
         super(name, icon);

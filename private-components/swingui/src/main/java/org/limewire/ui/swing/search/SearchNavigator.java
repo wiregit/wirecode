@@ -15,7 +15,13 @@ public interface SearchNavigator {
     /** Adds a new browse search whose results will show in the given panel. */
     SearchNavItem addSearch(String title, JComponent searchPanel, BrowseSearch search, SearchResultsModel model);
 
-    /** Adds a new advanced search panel */
-    SearchNavItem addAdvancedSearch();
+    /** Opens a new advanced search display. */
+    void openAdvancedSearch();
+
+    /** Logs action to open advanced search. */
+    void logAdvancedSearchOpened();
+
+    /** Logs action to start advanced search. */
+    void logAdvancedSearchStarted();
 
 }

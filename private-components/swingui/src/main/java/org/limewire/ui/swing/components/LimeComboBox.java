@@ -31,6 +31,7 @@ import javax.swing.event.PopupMenuListener;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SwingHacks;
 import org.limewire.util.Objects;
@@ -294,6 +295,18 @@ public class LimeComboBox extends JXButton {
     }
 
     /** 
+     * Selects the specified action and fires a change event.
+     */
+    public void selectAction(Action action) {
+        // Make sure the selected action is in the list
+        if (actions.contains(action)) {
+            selectedAction = action;
+            repaint();
+            fireChangeEvent(action);
+        }        
+    }
+    
+    /** 
      * Selects the specific action.
      * <p>
      * This method has no effect if the popupmenu is overridden, unless
@@ -528,6 +541,11 @@ public class LimeComboBox extends JXButton {
             decorateMenuComponent(menuItem);
             menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
 
+            // Add separator if specified.
+            if (action.getValue(AbstractAction.SEPARATOR) != null) {
+                menu.addSeparator();
+            }
+            
             menu.add(panel);
         }
         

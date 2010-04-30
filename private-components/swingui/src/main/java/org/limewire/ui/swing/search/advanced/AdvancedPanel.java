@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.advanced;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -41,6 +42,8 @@ abstract class AdvancedPanel extends JPanel {
     private final FriendAutoCompleterFactory friendAutoCompleterFactory;
     
     private final Action enterKeyAction;
+    
+    private Component firstComponent;
 
 	/**
 	 * Resource package since this class is abstract.
@@ -92,6 +95,8 @@ abstract class AdvancedPanel extends JPanel {
         autoCompleteControl.setAutoComplete(true);
         add(textField, "growx, wrap");
         componentMap.put(key, textField);
+        
+        setFirstComponent(textField);
     }
 
     private void addEnterAction(JComponent component) {
@@ -127,6 +132,8 @@ abstract class AdvancedPanel extends JPanel {
         comboBox.setFont(resources.font);
         add(comboBox, "growx, wrap");
         componentMap.put(key, comboBox);
+        
+        setFirstComponent(comboBox);
     }
 
     /** 
@@ -166,5 +173,23 @@ abstract class AdvancedPanel extends JPanel {
         }
     }
     
-
+    /**
+     * Sets the first focusable component only if it is not already set.
+     */
+    private void setFirstComponent(Component component) {
+        if (firstComponent == null && component.isFocusable()) {
+            firstComponent = component;
+        }
+    }
+    
+    /**
+     * Requests focus on the first component in the panel.
+     */
+    public boolean requestFocusFirstComponent() {
+        if (firstComponent != null) {
+            return firstComponent.requestFocusInWindow();
+        } else {
+            return false;
+        }
+    }
 }
