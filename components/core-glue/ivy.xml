@@ -21,14 +21,11 @@
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
-		<dependency org="org.limewire" name="rest" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="rudp" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="security" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="mojito" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="geocode" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="promotion" rev="latest.integration" conf="compile,runtime"/>
 		<dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
 		<dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
 

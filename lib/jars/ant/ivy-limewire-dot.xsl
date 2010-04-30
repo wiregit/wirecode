@@ -35,10 +35,6 @@ digraph G {
    	    <xsl:text>[color="khaki4"];
 </xsl:text>
         </xsl:when>
-        <xsl:when test="@name='xmpp'">
-   	    <xsl:text>[color="lavenderblush3"];
-</xsl:text>
-        </xsl:when>
         <xsl:when test="@name='player'">
    	    <xsl:text>[color="lemonchiffon2"];
 </xsl:text>
@@ -49,14 +45,6 @@ digraph G {
         </xsl:when>
         <xsl:when test="@name='core-settings'">
    	    <xsl:text>[color="lightcyan1"];
-</xsl:text>
-        </xsl:when>
-        <xsl:when test="@name='promotion'">
-   	    <xsl:text>[color="lightgoldenrod1"];
-</xsl:text>
-        </xsl:when>
-        <xsl:when test="@name='lwsserver'">
-   	    <xsl:text>[color="lightgray"];
 </xsl:text>
         </xsl:when>
         <xsl:when test="@name='mojito'">
@@ -95,11 +83,6 @@ digraph G {
    	    <xsl:text>[color="blue"];
 </xsl:text>
         </xsl:when>        
-        <xsl:when test="@name='xmpp-api'">
-   	    <xsl:text>[color="mediumorchid"];
-</xsl:text>
-        </xsl:when>
-        
         <xsl:when test="@name='net'">
    	    <xsl:text>[color="mediumpurple"];
 </xsl:text>
@@ -118,10 +101,6 @@ digraph G {
         </xsl:when>      
         <xsl:when test="@name='common'">
    	    <xsl:text>[color="navajowhite2"];
-</xsl:text>
-        </xsl:when>      
-        <xsl:when test="@name='geocode'">
-   	    <xsl:text>[color="olivedrab4"];
 </xsl:text>
         </xsl:when>   
         <xsl:when test="@name='integrated-ui'">
