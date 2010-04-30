@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.inject.LazySingleton;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -123,20 +122,16 @@ class FileRelationManagerImpl implements FileRelationManager {
     // LOCKING: this
     private void browse(BrowseRecord record) {
         browsesInProgress++;
-        GnutellaPresence presence;
         Address address = record.address;
         if(address instanceof Connectable) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Browsing " + record + " with Connectable");
-            presence = new GnutellaPresence.GnutellaPresenceWithConnectable(
-                    (Connectable)address);
+            browseFactory.createBrowse((Connectable) address).start(new Browser());
         } else {
             if(LOG.isDebugEnabled())
                 LOG.debug("Browsing " + record + " with GUID");
-            presence = new GnutellaPresence.GnutellaPresenceWithGuid(address,
-                    record.guid);
+            browseFactory.createBrowse(address, record.guid).start(new Browser());
         }
-        browseFactory.createBrowse(presence).start(new Browser());
     }
 
     @Override

@@ -6,16 +6,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.util.Objects;
 
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -31,10 +34,31 @@ class CoreBrowse implements Browse {
     private volatile byte[] browseGuid;
     private volatile BrowseResultAdapter listener;
 
-    @Inject
+    @AssistedInject
     public CoreBrowse(@Assisted FriendPresence friendPresence, SearchServices searchServices,
             QueryReplyListenerList listenerList, RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
         this.friendPresence = Objects.nonNull(friendPresence, "friendPresence");
+        this.searchServices = searchServices;
+        this.listenerList = listenerList;
+        this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
+    }
+
+    @AssistedInject
+    public CoreBrowse(@Assisted Connectable connectable, SearchServices searchServices,
+            QueryReplyListenerList listenerList, RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
+        Objects.nonNull(connectable, "connectable");
+        friendPresence = new GnutellaPresence.GnutellaPresenceWithConnectable(connectable);
+        this.searchServices = searchServices;
+        this.listenerList = listenerList;
+        this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
+    }
+
+    @AssistedInject
+    public CoreBrowse(@Assisted Address address, @Assisted byte[] guid, SearchServices searchServices,
+            QueryReplyListenerList listenerList, RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory) {
+        Objects.nonNull(address, "address");
+        Objects.nonNull(guid, "guid");
+        friendPresence = new GnutellaPresence.GnutellaPresenceWithGuid(address, guid);
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
