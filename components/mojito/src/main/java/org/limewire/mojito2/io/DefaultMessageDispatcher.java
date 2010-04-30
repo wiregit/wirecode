@@ -80,6 +80,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     
     @Override
     public void handleMessage(Message message) throws IOException {
+        
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();

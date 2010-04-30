@@ -1,6 +1,7 @@
 package org.limewire.mojito2.io;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private final Contact contact;
     
+    private final SocketAddress address;
+    
     private final BootstrapConfig config;
     
     private final MaxStack refreshStack;
@@ -50,11 +53,22 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
-    public BootstrapProcess(Context context, 
-            Contact contact, BootstrapConfig config) {
+    public BootstrapProcess(Context context, Contact contact, 
+            BootstrapConfig config) {
+        this(context, contact, null, config);
+    }
+    
+    public BootstrapProcess(Context context, SocketAddress address, 
+            BootstrapConfig config) {
+        this(context, null, address, config);
+    }
+    
+    private BootstrapProcess(Context context, Contact contact,
+            SocketAddress address, BootstrapConfig config) {
         
         this.context = context;
         this.contact = contact;
+        this.address = address;
         this.config = config;
         
         refreshStack = new MaxStack(config.getAlpha());
@@ -76,7 +90,11 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     }
     
     private void start() {
-        lookup();
+        if (contact != null) {
+            lookup(contact);
+        } else {
+            ping(address);
+        }
     }
     
     private void stop() {
@@ -122,6 +140,9 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         future.setException(new IOException());
     }
     
+    /**
+     * 
+     */
     private void onCompletation(BootstrapEntity entity) {
         future.setValue(entity);
     }
@@ -134,7 +155,64 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         ExceptionUtils.reportIfUnchecked(t);
     }
     
-    private void lookup() {
+    // --- PING ---
+    
+    /**
+     * 
+     */
+    private void ping(SocketAddress address) {
+        long timeout = config.getPingTimeoutInMillis();
+        
+        pingFuture = context.ping(address, 
+                timeout, TimeUnit.MILLISECONDS);
+        
+        pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<PingEntity> event) {
+                handlePong(event);
+            }
+        });
+    }
+    
+    /**
+     * 
+     */
+    private void handlePong(FutureEvent<PingEntity> event) {
+        synchronized (future) {
+            if (future.isDone()) {
+                return;
+            }
+            
+            try {
+                switch (event.getType()) {
+                    case SUCCESS:
+                        onPong(event.getResult());
+                        break;
+                    case EXCEPTION:
+                        onException(event.getException());
+                        break;
+                    default:
+                        onCancellation();
+                        break;
+                }
+            } catch (Throwable t) {
+                uncaughtException(t);
+            }
+        }
+    }
+    
+    /**
+     * 
+     */
+    private void onPong(PingEntity entity) {
+        Contact contact = entity.getContact();
+        lookup(contact);
+    }
+    
+    /**
+     * 
+     */
+    private void lookup(Contact contact) {
         Contact localhost = context.getLocalNode();
         KUID lookupId = localhost.getNodeID();
         

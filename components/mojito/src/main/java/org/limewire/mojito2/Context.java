@@ -5,9 +5,12 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
@@ -31,9 +34,13 @@ import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.io.ValueResponseHandler;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
+import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.DHTValueType;
@@ -49,6 +56,8 @@ import org.limewire.util.ExceptionUtils;
  * 
  */
 public class Context implements DHT {
+    
+    private static final Log LOG = LogFactory.getLog(Context.class);
     
     /**
      * 
@@ -145,6 +154,11 @@ public class Context implements DHT {
     public void close() {
         futureManager.close();
         estimator.clear();
+        
+        if (isBound()) {
+            shutdown();
+        }
+        
         messageDispatcher.close();
     }
     
@@ -153,8 +167,57 @@ public class Context implements DHT {
         messageDispatcher.bind(transport);
     }
 
+    private void shutdown() {
+        if (isFirewalled() || !ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
+            return;
+        }
+        
+        MessageFactory messageFactory = getMessageFactory();
+        
+        // Shutdown the local Node
+        Contact localhost = getLocalNode();
+        localhost.shutdown(true);
+        
+        Contact shutdown = new LocalContact(
+                localhost.getVendor(), 
+                localhost.getVersion(),
+                localhost.getNodeID(), 
+                localhost.getInstanceID(), 
+                Contact.SHUTDOWN_FLAG);
+        
+        
+        // We're nice guys and send shutdown messages to the 2*k-closest
+        // Nodes which should help to reduce the overall latency.
+        int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        int count = m*k;
+        
+        Collection<Contact> contacts = routeTable.select(
+                localhost.getNodeID(), count, SelectMode.ALIVE);
+        
+        for (Contact contact : contacts) {
+            if (!contact.equals(localhost)) {
+                // We are not interested in the responses as we're going
+                // to shutdown. Send pings without a response handler.
+                RequestMessage request = messageFactory.createPingRequest(
+                        shutdown, contact.getContactAddress());
+                
+                try {
+                    messageDispatcher.send(null, contact, request, 
+                            -1L, TimeUnit.MILLISECONDS);
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
+                }
+            }
+        }
+    }
+    
     @Override
     public Transport unbind() {
+        if (isBound()) {
+            shutdown();
+        }
+        
         return messageDispatcher.unbind();
     }
     
@@ -278,6 +341,16 @@ public class Context implements DHT {
     
     @Override
     public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
+            long timeout, TimeUnit unit) {
+        
+        BootstrapConfig config = new BootstrapConfig();
+        AsyncProcess<BootstrapEntity> process 
+            = new BootstrapProcess(this, dst, config);
+        return futureManager.submit(process, timeout, unit);
+    }
+    
+    @Override
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
             long timeout, TimeUnit unit) {
         
         BootstrapConfig config = new BootstrapConfig();

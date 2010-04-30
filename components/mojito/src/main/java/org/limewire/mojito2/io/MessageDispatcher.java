@@ -172,14 +172,28 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
+    public void send(ResponseHandler callback, Contact dst, 
+            RequestMessage request, long timeout, TimeUnit unit) 
+                throws IOException {
+        KUID contactId = dst.getNodeID();
+        SocketAddress address = dst.getContactAddress();
+        
+        send(callback, contactId, address, request, timeout, unit);
+    }
+    
+    /**
+     * 
+     */
     public void send(ResponseHandler callback, KUID contactId, 
             SocketAddress dst, RequestMessage request, 
             long timeout, TimeUnit unit) throws IOException {
         
-        RequestHandle handle = new RequestHandle(
-                contactId, dst, request);
-        
-        requestManager.add(callback, handle, timeout, unit);
+        if (callback != null) {
+            RequestHandle handle = new RequestHandle(
+                    contactId, dst, request);
+            
+            requestManager.add(callback, handle, timeout, unit);
+        }
         
         Transport transport = this.transport;
         if (transport == null) {
@@ -194,6 +208,7 @@ public abstract class MessageDispatcher implements Closeable {
      * 
      */
     public void handleMessage(Message message) throws IOException {
+        
         if (message instanceof RequestMessage) {
             handleRequest((RequestMessage)message);
         } else {

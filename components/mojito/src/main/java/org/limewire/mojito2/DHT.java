@@ -109,6 +109,12 @@ public interface DHT extends Closeable {
     /**
      * 
      */
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
     public DHTFuture<PingEntity> ping(String address, int port, 
             long timeout, TimeUnit unit);
     

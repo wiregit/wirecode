@@ -16,19 +16,21 @@ public class MojitoFactory {
     
     private MojitoFactory() {}
     
-    public static DHT createDHT(String name) throws IOException {
+    public static MojitoDHT createDHT(String name) throws IOException {
         MessageFactory messageFactory 
             = new DefaultMessageFactory();
         
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();
         
-        return new Context(name, messageFactory, 
+        Context context = new Context(name, messageFactory, 
                 routeTable, database);
+        
+        return new MojitoDHT(context);
     }
     
-    public static DHT createDHT(String name, int port) throws IOException {
-        DHT dht = createDHT(name);
+    public static MojitoDHT createDHT(String name, int port) throws IOException {
+        MojitoDHT dht = createDHT(name);
         bind(dht, port);
         return dht;
     }

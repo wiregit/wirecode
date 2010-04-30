@@ -66,6 +66,7 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
         SecurityToken securityToken = response.getSecurityToken();
         
         Contact[] contacts = response.getContacts();
+        
         processContacts(src, securityToken, contacts, time, unit);
     }
     

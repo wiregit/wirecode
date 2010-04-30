@@ -2,7 +2,6 @@ package org.limewire.mojito;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito2.Context;
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.routing.Contact;
@@ -84,30 +82,31 @@ public class ContextTest extends MojitoTestCase {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         int expected = m*k;
         
-        List<DHT> dhts = new ArrayList<DHT>();
+        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         
         try {
             for (int i = 0; i < (2*expected); i++) {
                 
                 int port = 2000 + i;
                 
-                DHT dht = MojitoFactory.createDHT("DHT-" + i, port);
-                InetSocketAddress addr = new InetSocketAddress(
-                        "localhost", port); 
+                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, port);
                 
                 if (i > 0) {
                     // bootstrap from the node 0, but make sure node 0
                     // pings back to mark the new node as ALIVE.
-                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
-                    dhts.get(0).ping(addr).get();
+                    dht.bootstrap("localhost", 2000).get();
+                    dhts.get(0).ping("localhost", port).get();
                     
                     // make sure after the first k nodes bootstrap the rest have at least k nodes in the rt
-                    if (i > k)
+                    if (i > k) {
                         assertGreaterThanOrEquals(k, dht.getRouteTable().getContacts().size());
+                    }
                 }
+                
                 dhts.add(dht);
             }
-            dhts.get(0).bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
+            
+            dhts.get(0).bootstrap("localhost", 2000+1).get();
             Thread.sleep(250);
             
             // Shutdown a random MojitoDHT instance
@@ -127,7 +126,7 @@ public class ContextTest extends MojitoTestCase {
             
             for (int i = 0; i < dhts.size(); i++) {
                 if (i != index) {
-                    Context dht = (Context)dhts.get(i);
+                    MojitoDHT dht = dhts.get(i);
                     RouteTable routeTable = dht.getRouteTable();
                     Collection<Contact> nodes = routeTable.getContacts();
                     boolean flag = false;
