@@ -142,7 +142,7 @@ public class Context implements DHT {
             = new DefaultStoreForward(routeTable, database);
         
         this.messageDispatcher = new DefaultMessageDispatcher(
-                this, storeForward);
+                this, messageFactory, storeForward);
     }
     
     @Override

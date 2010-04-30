@@ -1,8 +1,7 @@
 package org.limewire.mojito2.io;
 
 import java.io.IOException;
-
-import org.limewire.mojito2.message.Message;
+import java.net.SocketAddress;
 
 /**
  * 
@@ -29,11 +28,12 @@ public abstract class AbstractTransport implements Transport {
     /**
      * 
      */
-    public boolean handleMessage(Message message) throws IOException {
-        MessageDispatcher messageDispatcher = this.messageDispatcher;
+    public boolean handleMessage(SocketAddress src, byte[] message, 
+            int offset, int length) throws IOException {
         
+        MessageDispatcher messageDispatcher = this.messageDispatcher;
         if (messageDispatcher != null) {
-            messageDispatcher.handleMessage(message);
+            messageDispatcher.handleMessage(src, message, offset, length);
             return true;
         }
         

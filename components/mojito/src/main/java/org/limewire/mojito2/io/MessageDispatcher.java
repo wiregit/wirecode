@@ -23,6 +23,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.collection.FixedSizeHashSet;
 import org.limewire.mojito2.message.Message;
+import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageID;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
@@ -44,10 +45,10 @@ public abstract class MessageDispatcher implements Closeable {
             ExecutorsHelper.defaultThreadFactory(
                 "MessageDispatcherThread"));
     
-    @InspectablePrimitive(value = "")
+    @InspectablePrimitive(value = "Number of messages sent")
     private static final AtomicInteger MESSAGES_SENT = new AtomicInteger();
     
-    @InspectablePrimitive(value = "")
+    @InspectablePrimitive(value = "Number of messages received")
     private static final AtomicInteger MESSAGES_RECEIVED = new AtomicInteger();
     
     /**
@@ -69,12 +70,24 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
+    private final MessageFactory messageFactory;
+    
+    /**
+     * 
+     */
     private volatile Transport transport = null;
     
     /**
      * 
      */
     private boolean open = true;
+    
+    /**
+     * 
+     */
+    public MessageDispatcher(MessageFactory messageFactory) {
+        this.messageFactory = messageFactory;
+    }
     
     /**
      * 
@@ -178,7 +191,9 @@ public abstract class MessageDispatcher implements Closeable {
             throw new IOException("Not Bound!");
         }
         
-        transport.send(address, response);
+        byte[] data = messageFactory.serialize(response);
+        transport.send(address, data, 0, data.length);
+        
         fireMessageSent(contactId, address, response);
     }
     
@@ -217,8 +232,22 @@ public abstract class MessageDispatcher implements Closeable {
             throw new IOException("Not Bound!");
         }
         
-        transport.send(dst, request);
+        byte[] data = messageFactory.serialize(request);
+        transport.send(dst, data, 0, data.length);
+        
         fireMessageSent(contactId, dst, request);
+    }
+    
+    /**
+     * 
+     */
+    public void handleMessage(SocketAddress src, byte[] data, 
+            int offset, int length) throws IOException {
+        
+        Message message = messageFactory.deserialize(
+                src, data, offset, length);
+        
+        handleMessage(message);
     }
     
     /**

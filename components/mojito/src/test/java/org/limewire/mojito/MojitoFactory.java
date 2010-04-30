@@ -38,8 +38,7 @@ public class MojitoFactory {
     }
     
     public static Transport bind(DHT dht, int port) throws IOException {
-        Transport transport = new DatagramTransport(
-                port, dht.getMessageFactory());
+        Transport transport = new DatagramTransport(port);
         dht.bind(transport);
         
         ((LocalContact)dht.getLocalNode()).setContactAddress(

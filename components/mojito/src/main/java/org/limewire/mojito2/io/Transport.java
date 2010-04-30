@@ -3,8 +3,6 @@ package org.limewire.mojito2.io;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import org.limewire.mojito2.message.Message;
-
 /**
  * 
  */
@@ -18,5 +16,6 @@ public interface Transport {
     /**
      * 
      */
-    public void send(SocketAddress dst, Message message) throws IOException;
+    public void send(SocketAddress dst, byte[] message, 
+            int offset, int length) throws IOException;
 }

@@ -14,8 +14,6 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito2.message.Message;
-import org.limewire.mojito2.message.MessageFactory;
 
 public class DatagramTransport extends AbstractTransport implements Closeable {
 
@@ -31,28 +29,23 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
         = ExecutorsHelper.newSingleThreadExecutor(
             ExecutorsHelper.defaultThreadFactory("DatagramTransportThread"));
     
-    private final MessageFactory messageFactory;
-    
     private final DatagramSocket socket;
     
     private volatile boolean open = true;
     
     private Future<?> future = null;
     
-    public DatagramTransport(int port, 
-            MessageFactory messageFactory) throws IOException {
-        this(new InetSocketAddress(port), messageFactory);
+    public DatagramTransport(int port) throws IOException {
+        this(new InetSocketAddress(port));
     }
     
-    public DatagramTransport(InetAddress addr, int port, 
-            MessageFactory messageFactory) throws IOException {
-        this(new InetSocketAddress(addr, port), messageFactory);
+    public DatagramTransport(InetAddress addr, int port) throws IOException {
+        this(new InetSocketAddress(addr, port));
     }
 
-    public DatagramTransport(SocketAddress bindaddr, 
-            MessageFactory messageFactory) throws IOException {
-        this.messageFactory = messageFactory;
+    public DatagramTransport(SocketAddress bindaddr) throws IOException {
         socket = new DatagramSocket(bindaddr);
+        socket.setReuseAddress(true);
         
         bind(EXECUTOR);
     }
@@ -62,13 +55,6 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
      */
     public DatagramSocket getDatagramSocket() {
         return socket;
-    }
-    
-    /**
-     * 
-     */
-    public MessageFactory getMessageFactory() {
-        return messageFactory;
     }
     
     /**
@@ -111,17 +97,16 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     }
     
     @Override
-    public void send(final SocketAddress dst, final Message message) throws IOException {
+    public void send(final SocketAddress dst, final byte[] message, 
+            final int offset, final int length) throws IOException {
         
         if (isBound() && !socket.isClosed()) {
             Runnable task = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        byte[] data = messageFactory.serialize(message);
-                        
                         DatagramPacket packet = new DatagramPacket(
-                                data, 0, data.length, dst);
+                                message, offset, length, dst);
                         
                         socket.send(packet);
                     } catch (IOException err) {
@@ -186,9 +171,7 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
                     int length = packet.getLength();
                     
                     try {
-                        Message msg = messageFactory.deserialize(
-                                src, data, offset, length);
-                        handleMessage(msg);
+                        handleMessage(src, data, offset, length);
                     } catch (IOException err) {
                         LOG.error("IOException", err);
                     }

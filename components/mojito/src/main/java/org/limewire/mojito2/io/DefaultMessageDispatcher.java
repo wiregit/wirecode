@@ -10,6 +10,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.Message;
+import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageID;
 import org.limewire.mojito2.message.NodeRequest;
 import org.limewire.mojito2.message.PingRequest;
@@ -43,7 +44,9 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     private final StoreRequestHandler store;
     
     public DefaultMessageDispatcher(Context context, 
+            MessageFactory messageFactory,
             StoreForward storeForward) {
+        super(messageFactory);
         
         this.context = context;
         
