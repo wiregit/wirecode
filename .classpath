@@ -92,8 +92,6 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jogg.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jorbis.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
