@@ -3,40 +3,76 @@ package org.limewire.mojito2.io;
 import java.io.IOException;
 import java.net.SocketAddress;
 
+import org.limewire.util.Objects;
+
 /**
- * 
+ * An abstract implementation of {@link Transport}
  */
 public abstract class AbstractTransport implements Transport {
 
     /**
-     * 
+     * The {@link Callback} handle
      */
-    private volatile MessageDispatcher messageDispatcher;
+    private volatile Callback callback;
+    
+    /**
+     * Creates an unbound {@link AbstractTransport}
+     */
+    public AbstractTransport() {
+    }
+    
+    /**
+     * Creates a bound {@link AbstractTransport}
+     */
+    public AbstractTransport(Callback callback) throws IOException {
+        bind(callback);
+    }
     
     @Override
-    public void bind(MessageDispatcher messageDispatcher) {
-        this.messageDispatcher = messageDispatcher;
-    }
-    
-    /**
-     * 
-     */
-    public boolean isBound() {
-        return messageDispatcher != null;
-    }
-    
-    /**
-     * 
-     */
-    public boolean handleMessage(SocketAddress src, byte[] message, 
-            int offset, int length) throws IOException {
+    public synchronized void bind(Callback callback) throws IOException {
+        Objects.nonNull(callback, "callback");
         
-        MessageDispatcher messageDispatcher = this.messageDispatcher;
-        if (messageDispatcher != null) {
-            messageDispatcher.handleMessage(src, message, offset, length);
-            return true;
+        if (isBound()) {
+            throw new IOException();
         }
         
+        this.callback = callback;
+    }
+    
+    @Override
+    public void unbind() {
+        callback = null;
+    }
+    
+    @Override
+    public boolean isBound() {
+        return callback != null;
+    }
+    
+    @Override
+    public void send(SocketAddress dst, byte[] message) throws IOException {
+        send(dst, message, 0, message.length);
+    }
+
+    /**
+     * Notifies the {@link Callback}
+     */
+    protected boolean handleMessage(SocketAddress src, byte[] message) 
+            throws IOException {
+        return handleMessage(src, message, 0, message.length);
+    }
+         
+    /**
+     * Notifies the {@link Callback}
+     */
+    protected boolean handleMessage(SocketAddress src, byte[] message, 
+                int offset, int length) throws IOException {
+        
+        Callback callback = this.callback;
+        if (callback != null) {
+            callback.handleMessage(src, message, offset, length);
+            return true;
+        }
         return false;
     }
 }

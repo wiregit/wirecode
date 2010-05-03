@@ -22,6 +22,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.collection.FixedSizeHashSet;
+import org.limewire.mojito2.io.Transport.Callback;
 import org.limewire.mojito2.message.Message;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageID;
@@ -50,6 +51,14 @@ public abstract class MessageDispatcher implements Closeable {
     
     @InspectablePrimitive(value = "Number of messages received")
     private static final AtomicInteger MESSAGES_RECEIVED = new AtomicInteger();
+    
+    private final Callback callback = new Callback() {
+        @Override
+        public void handleMessage(SocketAddress src, byte[] message, 
+                int offset, int length) throws IOException {
+            MessageDispatcher.this.handleMessage(src, message, offset, length);
+        }
+    };
     
     /**
      * 
@@ -99,12 +108,12 @@ public abstract class MessageDispatcher implements Closeable {
             throw new IOException();
         }
         
-        if (this.transport != null) {
+        if (isBound()) {
             throw new IOException();
         }
         
         this.transport = transport;
-        transport.bind(this);
+        transport.bind(callback);
     }
     
     /**
@@ -121,7 +130,7 @@ public abstract class MessageDispatcher implements Closeable {
         Transport transport = this.transport;
         
         if (transport != null) {
-            transport.bind(null);
+            transport.unbind();
             
             if (close && transport instanceof Closeable) {
                 IoUtils.close((Closeable)transport);
