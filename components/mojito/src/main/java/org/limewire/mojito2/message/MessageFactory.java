@@ -58,8 +58,9 @@ public interface MessageFactory {
     public TokenData createTokenData(Contact src);
     
     /**
+     * 
      */
-    public byte[] serialize(Message message) throws IOException;
+    public byte[] serialize(SocketAddress dst, Message message) throws IOException;
     
     /**
      * 

@@ -4,18 +4,20 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.messages.MessageFactory;
-import org.limewire.mojito.messages.MessageHelper;
-import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.io.MessageDispatcher;
+import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.message.MessageHelper;
+import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.util.IoUtils;
 
 
 public class MessageDispatcherTest extends MojitoTestCase {
@@ -34,14 +36,14 @@ public class MessageDispatcherTest extends MojitoTestCase {
     
     public void testSendMethod() throws Exception {
         
-        MojitoDHT dht = MojitoFactory.createDHT("Test");
+        MojitoDHT dht = null;
         try {
-            dht.bind(5000);
-            dht.start();
+            
+            dht = MojitoFactory.createDHT("Test", 5000);
             
             boolean sent = false;
             
-            Context context = (Context)dht;
+            Context context = dht.getContext();
             MessageHelper helper = context.getMessageHelper();
             MessageFactory factory = context.getMessageFactory();
             MessageDispatcher dispatcher = context.getMessageDispatcher();
@@ -96,7 +98,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             assertTrue(sent);
             
         } finally {
-            dht.close();
+            IoUtils.close(dht);
         }
     }
 }

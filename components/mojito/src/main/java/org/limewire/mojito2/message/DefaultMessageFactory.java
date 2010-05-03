@@ -44,6 +44,8 @@ public class DefaultMessageFactory implements MessageFactory {
     
     protected final SecurityTokenHelper tokenHelper;
     
+    protected final MessageCodec codec;
+    
     public DefaultMessageFactory() {
         this(new MACCalculatorRepositoryManager());
     }
@@ -55,6 +57,7 @@ public class DefaultMessageFactory implements MessageFactory {
             = new SecurityToken.AddressSecurityTokenProvider(calculator);
         
         this.tokenHelper = new SecurityTokenHelper(tokenProvider);
+        this.codec = new DefaultMessageCodec(calculator);
     }
     
     @Override
@@ -70,24 +73,12 @@ public class DefaultMessageFactory implements MessageFactory {
     @Override
     public Message deserialize(SocketAddress src, byte[] message, 
             int offset, int length) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(message, offset, length);
-        MessageInputStream in = new MessageInputStream(bais, calculator);
-        
-        try {
-            return in.readMessage(src);
-        } finally {
-            in.close();
-        }
+        return codec.decode(src, message, offset, length);
     }
     
     @Override
-    public byte[] serialize(Message message) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(8 * 128);
-        MessageOutputStream out = new MessageOutputStream(baos);
-        out.writeMessage(message);
-        out.close();
-        
-        return baos.toByteArray();
+    public byte[] serialize(SocketAddress dst, Message message) throws IOException {
+        return codec.encode(dst, message);
     }
     
     @Override

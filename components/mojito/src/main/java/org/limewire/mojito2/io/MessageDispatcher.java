@@ -200,7 +200,7 @@ public abstract class MessageDispatcher implements Closeable {
             throw new IOException("Not Bound!");
         }
         
-        byte[] data = messageFactory.serialize(response);
+        byte[] data = messageFactory.serialize(address, response);
         transport.send(address, data, 0, data.length);
         
         fireMessageSent(contactId, address, response);
@@ -241,7 +241,7 @@ public abstract class MessageDispatcher implements Closeable {
             throw new IOException("Not Bound!");
         }
         
-        byte[] data = messageFactory.serialize(request);
+        byte[] data = messageFactory.serialize(dst, request);
         transport.send(dst, data, 0, data.length);
         
         fireMessageSent(contactId, dst, request);
