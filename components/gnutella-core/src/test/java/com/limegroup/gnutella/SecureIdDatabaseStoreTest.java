@@ -112,17 +112,18 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
     
     public void testOldEntriesGetExpired() {
         Mockery context = new Mockery();
-        final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
         final Clock clock = context.mock(Clock.class);
         final long currentTime = System.currentTimeMillis();
-        final AtomicReference<Runnable> runnable = new AtomicReference<Runnable>();
         context.checking(new SequencedExpectations(context) {{
+            // for first start()
             one(clock).now();
             will(returnValue(System.currentTimeMillis()));
+            // for put()
+            one(clock).now();
+            will(returnValue(System.currentTimeMillis()));
+            // for second start()
             one(clock).now();
             will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
-            one(executorService).schedule(with(any(Runnable.class)), with(equal(1L)), with(equal(TimeUnit.MINUTES)));
-            will(new AssignParameterAction<Runnable>(runnable));
         }});
         
         secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
@@ -132,9 +133,10 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         secureIdDatabaseStore.put(guid, value);
         byte[] result = secureIdDatabaseStore.get(guid);
         assertEquals(value, result);
+        secureIdDatabaseStore.stop();
         
-        secureIdDatabaseStore.register(executorService);
-        runnable.get().run();
+        secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
+        secureIdDatabaseStore.start();
         
         assertNull(secureIdDatabaseStore.get(guid));
         secureIdDatabaseStore.stop();
@@ -142,12 +144,16 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
     
     public void testRecentlyReadEntriesAreNotExpired() {
         Mockery context = new Mockery();
-        final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
         final Clock clock = context.mock(Clock.class);
         final long currentTime = System.currentTimeMillis();
-        final AtomicReference<Runnable> runnable = new AtomicReference<Runnable>();
         context.checking(new SequencedExpectations(context) {{
+            // initial start()
+            one(clock).now();
+            will(returnValue(System.currentTimeMillis()));
             // initial store
+            one(clock).now();
+            will(returnValue(System.currentTimeMillis()));
+            // second start()
             one(clock).now();
             will(returnValue(System.currentTimeMillis()));
             // update on read access
@@ -159,9 +165,6 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
             // update on read access
             one(clock).now();
             will(returnValue(currentTime + TimeUnit.DAYS.toMillis(400)));
-            
-            one(executorService).schedule(with(any(Runnable.class)), with(equal(1L)), with(equal(TimeUnit.MINUTES)));
-            will(new AssignParameterAction<Runnable>(runnable));
         }});
         
         secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
@@ -178,8 +181,8 @@ public class SecureIdDatabaseStoreTest extends LimeTestCase {
         byte[] result = secureIdDatabaseStore.get(guid);
         assertEquals(value, result);
         
-        secureIdDatabaseStore.register(executorService);
-        runnable.get().run();
+        secureIdDatabaseStore = new SecureIdDatabaseStore(clock);
+        secureIdDatabaseStore.start();
         
         assertEquals(value, secureIdDatabaseStore.get(guid));
         secureIdDatabaseStore.stop();

@@ -51,21 +51,7 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     void register(ServiceRegistry serviceRegistry) {
         serviceRegistry.register(this).in(ServiceStage.VERY_LATE);
     }
-    
-    @Inject
-    void register(@Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService) {
-        scheduledExecutorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                long aYearAgo = clock.now() - TimeUnit.DAYS.toMillis(365);
-                synchronized (store) {
-                    store.deleteOlderThan(aYearAgo);
-                    cache.clear();
-                }
-            }
-        }, 1, TimeUnit.MINUTES);
-    }
-    
+        
     @Override
     public byte[] getLocalData() {
         String value = SecuritySettings.SECURE_IDENTITY.get();
@@ -95,6 +81,10 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     public void start() {
         try {
             store = new DbStore(resetDatabase);
+            long aYearAgo = clock.now() - TimeUnit.DAYS.toMillis(365);
+            synchronized (store) {
+                store.deleteOlderThan(aYearAgo);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
