@@ -30,7 +30,8 @@ class FutureManager implements Closeable {
      * A {@link Set} of all currently active {@link DHTFuture}s.
      */
     private final Set<DHTFuture<?>> futures 
-        = Collections.synchronizedSet(new IdentityHashSet<DHTFuture<?>>());
+        = Collections.synchronizedSet(
+                new IdentityHashSet<DHTFuture<?>>());
     
     private boolean open = true;
     
@@ -38,13 +39,16 @@ class FutureManager implements Closeable {
      * Submits the given {@link AsyncProcess} for execution and returns
      * a {@link DHTFuture} for it.
      */
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, long timeout, TimeUnit unit) {
+    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+            long timeout, TimeUnit unit) {
+        
         synchronized (futures) {
             if (!open) {
                 throw new IllegalStateException();
             }
             
-            DHTFutureTask<T> future = new ManagedFutureTask<T>(process, timeout, unit);
+            DHTFutureTask<T> future 
+                = new ManagedFutureTask<T>(process, timeout, unit);
             futures.add(future);
             EXECUTOR.execute(future);
             return future;
@@ -69,7 +73,9 @@ class FutureManager implements Closeable {
     }
     
     /**
-     * 
+     * An implementation of {@link DHTFutureTask} that overrides 
+     * the {@link #done0()} method and removes itself from the 
+     * {@link FutureManager}'s futures {@link Set}.
      */
     private class ManagedFutureTask<T> extends DHTFutureTask<T> {
 

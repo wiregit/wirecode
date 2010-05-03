@@ -55,7 +55,7 @@ import org.limewire.util.ExceptionUtils;
 /**
  * 
  */
-public class Context implements DHT {
+public class Context extends AbstractDHT {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -76,11 +76,6 @@ public class Context implements DHT {
      * 
      */
     private final DHTSizeEstimator estimator = new DHTSizeEstimator();
-    
-    /**
-     * 
-     */
-    private final FutureManager futureManager = new FutureManager();
     
     /**
      * 
@@ -163,11 +158,12 @@ public class Context implements DHT {
 
     @Override
     public void close() {
+        super.close();
+        
         synchronized (this) {
             open = false;
         }
         
-        futureManager.close();
         estimator.clear();
         
         if (isBound()) {
@@ -373,7 +369,7 @@ public class Context implements DHT {
         AsyncProcess<BootstrapEntity> process 
             = new BootstrapProcess(this, dst, config);
         
-        bootstrap = futureManager.submit(process, timeout, unit);
+        bootstrap = submit(process, timeout, unit);
         return bootstrap;
     }
     
@@ -389,20 +385,8 @@ public class Context implements DHT {
         AsyncProcess<BootstrapEntity> process 
             = new BootstrapProcess(this, dst, config);
         
-        bootstrap = futureManager.submit(process, timeout, unit);
+        bootstrap = submit(process, timeout, unit);
         return bootstrap;
-    }
-    
-    @Override
-    public DHTFuture<PingEntity> ping(InetAddress address, int port, 
-            long timeout, TimeUnit unit) {
-        return ping(new InetSocketAddress(address, port), timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<PingEntity> ping(String address, int port, 
-            long timeout, TimeUnit unit) {
-        return ping(new InetSocketAddress(address, port), timeout, unit);
     }
     
     @Override
@@ -412,7 +396,7 @@ public class Context implements DHT {
                 this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
-            = futureManager.submit(process, timeout, unit);
+            = submit(process, timeout, unit);
         future.addFutureListener(onPong);
         return future;
     }
@@ -423,7 +407,7 @@ public class Context implements DHT {
                 this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
-            = futureManager.submit(process, timeout, unit);
+            = submit(process, timeout, unit);
         future.addFutureListener(onPong);
         return future;
     }
@@ -436,7 +420,7 @@ public class Context implements DHT {
         AsyncProcess<PingEntity> process = new PingResponseHandler(
                 this, src, dst, timeout, unit);
         
-        return futureManager.submit(process, timeout, unit);
+        return submit(process, timeout, unit);
     }
 
     @Override
@@ -445,7 +429,7 @@ public class Context implements DHT {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler(
                 this, lookupId, timeout, unit);
         
-        return futureManager.submit(process, timeout, unit);
+        return submit(process, timeout, unit);
     }
     
     @Override
@@ -454,17 +438,7 @@ public class Context implements DHT {
         AsyncProcess<NodeEntity> process = new NodeResponseHandler(
                 this, lookupId, contacts, timeout, unit);
         
-        return futureManager.submit(process, timeout, unit);
-    }
-    
-    @Override
-    public DHTFuture<ValueEntity> get(KUID lookupId, 
-            long timeout, TimeUnit unit) {
-        
-        EntityKey key = EntityKey.createEntityKey(
-                lookupId, DHTValueType.ANY);
-        
-        return get(key, timeout, unit);
+        return submit(process, timeout, unit);
     }
     
     @Override
@@ -474,17 +448,7 @@ public class Context implements DHT {
         AsyncProcess<ValueEntity> process = new ValueResponseHandler(
                 this, key, timeout, unit);
         
-        return futureManager.submit(process, timeout, unit);
-    }
-    
-    @Override
-    public DHTFuture<StoreEntity> put(Storable storable, 
-            long timeout, TimeUnit unit) {
-        
-        DHTValueEntity value = DHTValueEntity.createFromStorable(
-                this, storable);
-        
-        return put(value, timeout, unit);
+        return submit(process, timeout, unit);
     }
     
     @Override
@@ -556,7 +520,7 @@ public class Context implements DHT {
             });
             
             DHTFuture<StoreEntity> store 
-                = futureManager.submit(process, timeout, unit);
+                = submit(process, timeout, unit);
             futureRef.set(store);
             
             store.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
@@ -570,11 +534,7 @@ public class Context implements DHT {
         }
     }
     
-    @Override
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
-            long timeout, TimeUnit unit) {
-        return futureManager.submit(process, timeout, unit);
-    }
+    
 
     /**
      * 
