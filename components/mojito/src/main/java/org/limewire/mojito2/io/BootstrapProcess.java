@@ -30,11 +30,11 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private final Context context;
     
-    private final Contact contact;
-    
-    private final SocketAddress address;
-    
     private final BootstrapConfig config;
+    
+    private final long timeout;
+    
+    private final TimeUnit unit;
     
     private final MaxStack refreshStack;
 
@@ -53,23 +53,13 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
-    public BootstrapProcess(Context context, Contact contact, 
-            BootstrapConfig config) {
-        this(context, contact, null, config);
-    }
-    
-    public BootstrapProcess(Context context, SocketAddress address, 
-            BootstrapConfig config) {
-        this(context, null, address, config);
-    }
-    
-    private BootstrapProcess(Context context, Contact contact,
-            SocketAddress address, BootstrapConfig config) {
+    public BootstrapProcess(Context context, BootstrapConfig config, 
+            long timeout, TimeUnit unit) {
         
         this.context = context;
-        this.contact = contact;
-        this.address = address;
         this.config = config;
+        this.timeout = timeout;
+        this.unit = unit;
         
         refreshStack = new MaxStack(config.getAlpha());
     }
@@ -90,10 +80,11 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     }
     
     private void start() {
-        if (contact != null) {
-            lookup(contact);
+        SocketAddress address = config.getAddress();
+        if (address != null) {
+            doPing(address);
         } else {
-            ping(address);
+            doLookup(config.getContact());
         }
     }
     
@@ -161,7 +152,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     /**
      * 
      */
-    private void ping(SocketAddress address) {
+    private void doPing(SocketAddress address) {
         long timeout = config.getPingTimeoutInMillis();
         
         pingFuture = context.ping(address, 
@@ -170,7 +161,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
-                handlePong(event);
+                onPong(event);
             }
         });
     }
@@ -178,7 +169,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     /**
      * 
      */
-    private void handlePong(FutureEvent<PingEntity> event) {
+    private void onPong(FutureEvent<PingEntity> event) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -207,13 +198,15 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
      */
     private void onPong(PingEntity entity) {
         Contact contact = entity.getContact();
-        lookup(contact);
+        doLookup(contact);
     }
+    
+    // --- LOOKUP ---
     
     /**
      * 
      */
-    private void lookup(Contact contact) {
+    private void doLookup(Contact contact) {
         Contact localhost = context.getLocalNode();
         KUID lookupId = localhost.getNodeID();
         
@@ -225,14 +218,15 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         lookupFuture.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
             @Override
             public void handleEvent(FutureEvent<NodeEntity> event) {
-                handleLookup(event);
+                onLookup(event);
             }
         });
     }
     
-    // --- LOOKUP ---
-    
-    private void handleLookup(FutureEvent<NodeEntity> event) {
+    /**
+     * 
+     */
+    private void onLookup(FutureEvent<NodeEntity> event) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -256,6 +250,9 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         }
     }
     
+    /**
+     * 
+     */
     private void onLookup(NodeEntity entity) {
         Contact[] collisions = entity.getCollisions();
         
@@ -271,12 +268,15 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         collisitonFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
-                handleCollision(event);
+                onCollision(event);
             }
         });
     }
     
-    private void handleCollision(FutureEvent<PingEntity> event) {
+    /**
+     * 
+     */
+    private void onCollision(FutureEvent<PingEntity> event) {
         synchronized (future) {
             if (future.isDone()) {
                 return;
@@ -300,10 +300,18 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         }
     }
     
+    /**
+     * 
+     */
     private void onCollisionException(ExecutionException err) {
         doRefreshAll();
     }
     
+    // --- REFRESH ---
+    
+    /**
+     * 
+     */
     private void doRefreshAll() {
         KUID[] bucketIds = getBucketsToRefresh();
         
@@ -314,6 +322,9 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         doRefreshNext(0);
     }
     
+    /**
+     * 
+     */
     private KUID[] getBucketsToRefresh() {
         RouteTable routeTable = context.getRouteTable();
         List<KUID> bucketIds = CollectionUtils.toList(
@@ -322,8 +333,9 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         return bucketIds.toArray(new KUID[0]);
     }
     
-    // --- REFRESH ---
-    
+    /**
+     * 
+     */
     private void doRefreshNext(int count) {
         synchronized (future) {
             if (future.isDone()) {

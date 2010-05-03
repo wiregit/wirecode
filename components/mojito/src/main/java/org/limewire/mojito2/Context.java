@@ -2,8 +2,6 @@ package org.limewire.mojito2;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -43,9 +41,7 @@ import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueFactoryManager;
-import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.DHTSizeEstimator;
@@ -358,32 +354,15 @@ public class Context extends AbstractDHT {
     }
     
     @Override
-    public synchronized DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
-            long timeout, TimeUnit unit) {
+    protected synchronized DHTFuture<BootstrapEntity> bootstrap(
+            BootstrapConfig config, long timeout, TimeUnit unit) {
         
         if (bootstrap != null) {
             bootstrap.cancel(true);
         }
         
-        BootstrapConfig config = new BootstrapConfig();
         AsyncProcess<BootstrapEntity> process 
-            = new BootstrapProcess(this, dst, config);
-        
-        bootstrap = submit(process, timeout, unit);
-        return bootstrap;
-    }
-    
-    @Override
-    public synchronized DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
-            long timeout, TimeUnit unit) {
-        
-        if (bootstrap != null) {
-            bootstrap.cancel(true);
-        }
-        
-        BootstrapConfig config = new BootstrapConfig();
-        AsyncProcess<BootstrapEntity> process 
-            = new BootstrapProcess(this, dst, config);
+            = new BootstrapProcess(this, config, timeout, unit);
         
         bootstrap = submit(process, timeout, unit);
         return bootstrap;

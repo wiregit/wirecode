@@ -2,13 +2,17 @@ package org.limewire.mojito2;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.io.BootstrapConfig;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Storable;
@@ -27,6 +31,26 @@ public abstract class AbstractDHT implements DHT {
     public void close() {
         futureManager.close();
     }
+    
+    @Override
+    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
+            long timeout, TimeUnit unit) {
+        BootstrapConfig config = new BootstrapConfig(dst);
+        return bootstrap(config, timeout, unit);
+    }
+    
+    @Override
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit) {
+        BootstrapConfig config = new BootstrapConfig(dst);
+        return bootstrap(config, timeout, unit);
+    }
+    
+    /**
+     * 
+     */
+    protected abstract DHTFuture<BootstrapEntity> bootstrap(
+            BootstrapConfig config, long timeout, TimeUnit unit);
     
     @Override
     public DHTFuture<PingEntity> ping(InetAddress address, int port, 
