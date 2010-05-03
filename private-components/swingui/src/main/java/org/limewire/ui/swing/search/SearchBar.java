@@ -237,7 +237,6 @@ public class SearchBar extends JXPanel {
                 CategoryAction categoryAction = (CategoryAction) a;
                 if (categoryAction.getCategory() == category) {
                     comboBox.selectAction(categoryAction);
-                    categoryAction.actionPerformed(null);
                     return;
                 }
             }
@@ -269,7 +268,6 @@ public class SearchBar extends JXPanel {
      */
     public void selectAdvancedSearch() {
         comboBox.selectAction(advancedAction);
-        advancedAction.actionPerformed(null);
     }
     
     /**

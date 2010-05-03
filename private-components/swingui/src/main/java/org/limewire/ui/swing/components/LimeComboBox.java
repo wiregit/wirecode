@@ -298,12 +298,44 @@ public class LimeComboBox extends JXButton {
      * Selects the specified action and fires a change event.
      */
     public void selectAction(Action action) {
-        // Make sure the selected action is in the list
-        if (actions.contains(action)) {
+        boolean found = false;
+        if (menu != null && menu.getComponentCount() > 0) {
+            // Find menu component associated with action.
+            for (Component component : menu.getComponents()) {
+                if (component instanceof JPanel) {
+                    Component child = ((JPanel) component).getComponent(0);
+                    if (child instanceof ActionLabel) {
+                        ActionLabel label = (ActionLabel) child;
+                        if (label.getAction().equals(action)) {
+                            // Update previously selected label.
+                            if (selectedComponent != null && selectedComponent != component) {
+                                selectedComponent.setOpaque(false);
+                                selectedLabel.setForeground(UIManager.getColor("MenuItem.foreground"));
+                            }
+                            // Update newly selected label.
+                            ((JComponent) component).setOpaque(true);
+                            label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
+                            selectedComponent = (JComponent) component;
+                            selectedLabel = label;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+        } else {
+            // Determine if action is in the list.
+            found = actions.contains(action);
+        }
+        
+        if (found) {
+            // Perform action and fire change event.
             selectedAction = action;
-            repaint();
+            action.actionPerformed(null);
             fireChangeEvent(action);
-        }        
+            repaint();
+        }
     }
     
     /** 
