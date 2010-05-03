@@ -16,9 +16,10 @@ import junit.framework.TestSuite;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
@@ -466,9 +467,10 @@ public class RouteTableTest extends MojitoTestCase {
         toPing.clear();
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node, DHTFutureAdapter<PingResult> listener) {
+        routeTable.bind(new RouteTable.ContactPinger() {
+            public DHTFuture<PingEntity> ping(Contact node) {
                 toPing.add(node);
+                return new DHTValueFuture<PingEntity>(new IllegalStateException());
             }
         });
         
@@ -658,11 +660,6 @@ public class RouteTableTest extends MojitoTestCase {
     
     public void testSelectLiveNodes() throws Exception { 
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node,
-                    DHTFutureAdapter<PingResult> listener) {
-            }
-        });
         
         //add 10 live nodes and 10 dead nodes
         List<Contact> liveContacts = new ArrayList<Contact>();
@@ -711,11 +708,6 @@ public class RouteTableTest extends MojitoTestCase {
     
     public void testPurge() {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node,
-                    DHTFutureAdapter<PingResult> listener) {
-            }
-        });
         
         int port = 3000;
         for(String nodeId : NODE_IDS) {

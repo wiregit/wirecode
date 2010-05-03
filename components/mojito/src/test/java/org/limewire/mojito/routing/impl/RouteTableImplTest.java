@@ -5,7 +5,6 @@ import java.text.MessageFormat;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.BucketNode;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTableImpl;
