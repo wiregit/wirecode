@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-29 11:30-0400\n"
+"POT-Creation-Date: 2010-05-03 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1138,7 +1138,7 @@ msgid "Use TLS"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/AddConnectionPanel.java:84
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:149
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:76
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:384
 msgid "Add"
 msgstr ""
@@ -1831,6 +1831,7 @@ msgid "Remove download"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:56
 msgid "Info"
 msgstr ""
 
@@ -1861,7 +1862,7 @@ msgid "Connecting to {0}"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:161
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:119
 #, java-format
 msgid "{0} of {1} ({2})"
 msgstr ""
@@ -1956,7 +1957,7 @@ msgstr[1] ""
 
 #. if(queueTime == DownloadItem.UNKNOWN_TIME){
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:279
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:129
 msgid "Waiting..."
 msgstr ""
 
@@ -4422,24 +4423,24 @@ msgstr ""
 msgid "Pieces"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:77
-msgid "URL"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:80
-msgid "Tier"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:141
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:68
 msgid "Add Tracker:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:70
 msgid "Tier:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:72
 msgid "Tracker URL Invalid"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:116
+msgid "URL"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:119
+msgid "Tier"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:98
@@ -5295,30 +5296,30 @@ msgstr ""
 msgid "Remove upload"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:106
 msgid "Library was browsed"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:51
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:109
 msgid "Done uploading"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:115
 #, java-format
 msgid "{0} to {1} person - ratio: {2}"
 msgid_plural "{0} to {1} people - ratio: {2}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:126
 msgid "Paused"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:132
 msgid "Unable to upload: invalid request"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:77
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:135
 msgid "Unable to upload: upload limit reached"
 msgstr ""
 
