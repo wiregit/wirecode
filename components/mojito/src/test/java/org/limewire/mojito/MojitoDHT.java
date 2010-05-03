@@ -26,6 +26,7 @@ import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.settings.BootstrapSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.settings.StoreSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
@@ -262,5 +263,10 @@ public class MojitoDHT implements DHT {
     public DHTFuture<BootstrapEntity> bootstrap(SocketAddress addr) {
         long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
         return bootstrap(addr, timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    public DHTFuture<StoreEntity> store(Storable storable) {
+        long timeout = StoreSettings.STORE_TIMEOUT.getValue();
+        return dht.put(storable, timeout, TimeUnit.MILLISECONDS);
     }
 }

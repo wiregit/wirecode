@@ -18,7 +18,7 @@ public class MojitoFactory {
     
     private MojitoFactory() {}
     
-    public static MojitoDHT createDHT(String name) throws IOException {
+    public static MojitoDHT createDHT(String name) {
         MessageFactory messageFactory 
             = new DefaultMessageFactory();
         

@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.db;
+package org.limewire.mojito2.storage;
 
 import java.util.Collections;
 import java.util.Map;
@@ -26,14 +26,14 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.Context;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueImpl;
@@ -81,10 +81,11 @@ public class DHTValueTest extends MojitoTestCase {
             
             long time = System.currentTimeMillis();
             
-            Context context = (Context)dhts.values().iterator().next();
+            MojitoDHT dht = dhts.values().iterator().next();
             
             final Object lock = new Object();
-            final Storable storable = new Storable(key, new DHTValueImpl(type, version, b));
+            final Storable storable = new Storable(key, 
+                    new DHTValueImpl(type, version, b));
             
             // Pre-Condition
             assertEquals(0, storable.getLocationCount());
@@ -92,13 +93,14 @@ public class DHTValueTest extends MojitoTestCase {
             assertTrue(DatabaseUtils.isPublishingRequired(storable));
             
             // Store...
-            DHTFuture<StoreResult> future = context.store(storable);
-            future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
+            DHTFuture<StoreEntity> future = dht.store(storable);
+            future.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
                 @Override
-                public void operationComplete(FutureEvent<StoreResult> event) {
+                public void handleEvent(FutureEvent<StoreEntity> event) {
                     assertEquals(Type.SUCCESS, event.getType());
                     
-                    storable.handleStoreResult(event.getResult());
+                    StoreEntity entity = event.getResult();
+                    storable.handleStoreResult(entity);
                     synchronized (lock) {
                         lock.notifyAll();
                     }
