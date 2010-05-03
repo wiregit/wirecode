@@ -269,6 +269,22 @@ public class MessageOutputStream extends DataOutputStream {
         writeInt(valueType.intValue());
     }
     
+    /**
+     * Writes the given String to the OutputStream. This is different
+     * from writeUTF(String) which writes the String in the so called
+     * Modified-UTF format!
+     *
+     *  @param str must not be null
+     */
+    public void writeString(String str) throws IOException {
+        byte[] b = str.getBytes("UTF-8");
+        if (b.length > 0xFFFF) {
+            throw new IOException("String is too big");
+        }
+        writeShort(b.length);
+        write(b);
+    }
+    
     private static byte[] getBytes(String value) {
         if (value == null || value.isEmpty()) {
             return EMPTY;
