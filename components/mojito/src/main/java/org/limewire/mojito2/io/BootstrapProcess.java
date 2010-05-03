@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
@@ -22,13 +22,14 @@ import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.MaxStack;
 import org.limewire.mojito2.util.TimeAwareIterable;
 import org.limewire.util.ExceptionUtils;
 
 public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
-    private final Context context;
+    private final DHT dht;
     
     private final BootstrapConfig config;
     
@@ -53,10 +54,10 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
-    public BootstrapProcess(Context context, BootstrapConfig config, 
+    public BootstrapProcess(DHT dht, BootstrapConfig config, 
             long timeout, TimeUnit unit) {
         
-        this.context = context;
+        this.dht = dht;
         this.config = config;
         this.timeout = timeout;
         this.unit = unit;
@@ -155,7 +156,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     private void doPing(SocketAddress address) {
         long timeout = config.getPingTimeoutInMillis();
         
-        pingFuture = context.ping(address, 
+        pingFuture = dht.ping(address, 
                 timeout, TimeUnit.MILLISECONDS);
         
         pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
@@ -207,11 +208,11 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
      * 
      */
     private void doLookup(Contact contact) {
-        Contact localhost = context.getLocalNode();
+        Contact localhost = dht.getLocalNode();
         KUID lookupId = localhost.getNodeID();
         
         long timeout = config.getLookupTimeoutInMillis();
-        lookupFuture = context.lookup(lookupId, 
+        lookupFuture = dht.lookup(lookupId, 
                 new Contact[] { contact }, 
                 timeout, TimeUnit.MILLISECONDS);
         
@@ -261,9 +262,12 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
             return;
         }
         
+        Contact src = ContactUtils.createCollisionPingSender(
+                dht.getLocalNode());
+        
         long timeout = config.getPingTimeoutInMillis();
-        collisitonFuture = context.collisionPing(
-                collisions, timeout, TimeUnit.MILLISECONDS);
+        collisitonFuture = dht.ping(
+                src, collisions, timeout, TimeUnit.MILLISECONDS);
         
         collisitonFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
             @Override
@@ -326,7 +330,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
      * 
      */
     private KUID[] getBucketsToRefresh() {
-        RouteTable routeTable = context.getRouteTable();
+        RouteTable routeTable = dht.getRouteTable();
         List<KUID> bucketIds = CollectionUtils.toList(
                 routeTable.getRefreshIDs(true));
         Collections.reverse(bucketIds);
@@ -353,7 +357,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
                     KUID bucketId = bucketsToRefresh.next();
                     
                     long timeout = config.getLookupTimeoutInMillis();
-                    DHTFuture<NodeEntity> future = context.lookup(
+                    DHTFuture<NodeEntity> future = dht.lookup(
                             bucketId, timeout, TimeUnit.MILLISECONDS);
                     
                     future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
@@ -395,7 +399,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
             
             long time = System.currentTimeMillis() - startTime;
             onCompletation(new DefaultBootstrapEntity(
-                    context, time, TimeUnit.MILLISECONDS));
+                    dht, time, TimeUnit.MILLISECONDS));
         }
     }
 }

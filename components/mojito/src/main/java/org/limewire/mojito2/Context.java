@@ -43,7 +43,6 @@ import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.StorableModelManager;
-import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.DHTSizeEstimator;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
@@ -391,10 +390,9 @@ public class Context extends AbstractDHT {
         return future;
     }
     
-    public DHTFuture<PingEntity> collisionPing(Contact[] dst, 
+    @Override
+    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst, 
             long timeout, TimeUnit unit) {
-        
-        Contact src = ContactUtils.createCollisionPingSender(getLocalNode());
         
         AsyncProcess<PingEntity> process = new PingResponseHandler(
                 this, src, dst, timeout, unit);

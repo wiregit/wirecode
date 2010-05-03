@@ -149,6 +149,12 @@ public interface DHT extends Closeable {
     /**
      * 
      */
+    public DHTFuture<PingEntity> ping(Contact src, 
+            Contact[] dst, long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit);
     
