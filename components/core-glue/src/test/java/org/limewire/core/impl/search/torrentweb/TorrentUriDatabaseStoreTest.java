@@ -29,8 +29,8 @@ public class TorrentUriDatabaseStoreTest extends LimeTestCase {
     public void testCanonicalTorrentUrisAreUnique() {
         URI uri = URI.create("http://torrent/url/canonical");
         String host = "torrent";
-        torrentUriDatabaseStore.addCanonicalTorrentUris(host, uri);
-        torrentUriDatabaseStore.addCanonicalTorrentUris(host, uri);
+        torrentUriDatabaseStore.addCanonicalTorrentUri(host, uri);
+        torrentUriDatabaseStore.addCanonicalTorrentUri(host, uri);
         
         Set<URI> uris = torrentUriDatabaseStore.getTorrentUrisForHost(host);
         assertEquals(1, uris.size());
@@ -72,5 +72,16 @@ public class TorrentUriDatabaseStoreTest extends LimeTestCase {
         torrentUriDatabaseStore.setIsTorrentUri(uri, false);
         assertFalse(torrentUriDatabaseStore.isTorrentUri(uri));
         assertTrue(torrentUriDatabaseStore.isNotTorrentUri(uri));
+    }
+    
+    public void testStoreRobotsTxt() {
+        String robotsTxt = "User-agent: *\nAllow: /\n";
+        torrentUriDatabaseStore.storeRobotsTxt("host.info", robotsTxt);
+        assertEquals(robotsTxt, torrentUriDatabaseStore.getRobotsTxt("host.info"));
+        assertNull(torrentUriDatabaseStore.getRobotsTxt("unknown.host.com"));
+        torrentUriDatabaseStore.stop();
+        
+        torrentUriDatabaseStore = new TorrentUriDatabaseStore(new ClockImpl());
+        assertEquals(robotsTxt, torrentUriDatabaseStore.getRobotsTxt("host.info"));
     }
 }

@@ -3,6 +3,9 @@ package org.limewire.core.impl.search;
 import org.limewire.core.api.search.SearchEvent;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchManager;
+import org.limewire.core.impl.search.torrentweb.TorrentRobotsTxt;
+import org.limewire.core.impl.search.torrentweb.TorrentRobotsTxtImpl;
+import org.limewire.core.impl.search.torrentweb.TorrentRobotsTxtStore;
 import org.limewire.core.impl.search.torrentweb.TorrentUriDatabaseStore;
 import org.limewire.core.impl.search.torrentweb.TorrentUriPrioritizerFactory;
 import org.limewire.core.impl.search.torrentweb.TorrentUriPrioritizerImpl;
@@ -33,6 +36,8 @@ public class CoreGlueSearchModule extends AbstractModule {
         bind(TorrentUriPrioritizerFactory.class).toProvider(FactoryProvider.newFactory(TorrentUriPrioritizerFactory.class, TorrentUriPrioritizerImpl.class));
         
         bind(TorrentUriStore.class).to(TorrentUriDatabaseStore.class);
+        bind(TorrentRobotsTxtStore.class).to(TorrentUriDatabaseStore.class);
+        bind(TorrentRobotsTxt.class).to(TorrentRobotsTxtImpl.class);
     }
 
 }

@@ -62,4 +62,8 @@ public class URIUtilsTest extends BaseTestCase {
     public void testGetPort() throws Exception {
         assertEquals(80, URIUtils.getPort(new URI("HTTP://SOME.DOMAIN/")));
     }
+    
+    public void testGetCanonicalHost() {
+        assertEquals("www.hello.com", URIUtils.getCanonicalHost(URI.create("http://wwW.hello.Com/")));
+    }
 }

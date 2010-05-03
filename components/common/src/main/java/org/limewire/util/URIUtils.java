@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.Locale;
 
 /**
  * Utilities for <code>URIs</code>.
@@ -104,6 +105,15 @@ public class URIUtils {
         } catch (IllegalArgumentException iae) {
             throw new URISyntaxException(uri, "invalid url");
         }
+    }
+    
+    /**
+     * @return the canonical lower case host or null if <code>uri</code> does
+     * not have a host
+     */
+    public static String getCanonicalHost(URI uri) {
+        String host = uri.getHost();
+        return host != null ? host.toLowerCase(Locale.US) : null;
     }
     
     /**

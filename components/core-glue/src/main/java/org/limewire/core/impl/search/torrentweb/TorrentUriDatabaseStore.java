@@ -27,7 +27,7 @@ import com.google.inject.Singleton;
 // can be lazily singleton, uses Service only to be stopped properly, but if
 // it's never started no need for service registration
 @Singleton
-public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
+public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTxtStore, Service {
     
     private static final Log LOG = LogFactory.getLog(TorrentUriDatabaseStore.class);
     
@@ -86,8 +86,8 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
     }
 
     @Override
-    public void addCanonicalTorrentUris(String host, URI uri) {
-        getStore().addCanonicalTorrentUris(host, uri);
+    public void addCanonicalTorrentUri(String host, URI uri) {
+        getStore().addCanonicalTorrentUri(host, uri);
     }
     
     @Override
@@ -109,8 +109,18 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
     public void setIsTorrentUri(URI uri, boolean isTorrent) {
         getStore().setIsTorrentUri(uri, isTorrent);
     }
+
+    @Override
+    public String getRobotsTxt(String host) {
+        return getStore().getRobotsTxt(host);
+    }
+    
+    @Override
+    public void storeRobotsTxt(String host, String robotsTxt) {
+        getStore().storeRobotsTxt(host, robotsTxt);
+    }
         
-    private class DbStore implements TorrentUriStore {
+    private class DbStore implements TorrentUriStore, TorrentRobotsTxtStore {
     
         private final Connection connection;
 
@@ -122,7 +132,11 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
 
         private final PreparedStatement insertTorrentUriByHost;
 
-        private PreparedStatement updateTorrentUri;
+        private final PreparedStatement updateTorrentUri;
+
+        private final PreparedStatement selectRobotsTxt;
+
+        private final PreparedStatement insertRobotsTxt;
         
         
         public DbStore() {
@@ -145,6 +159,7 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
                     statement.execute("create index torrent_uris_index on torrent_uris(hash)");
                     statement.execute("create cached table torrent_uris_by_host(host varchar_ignorecase(255), uri varchar(2048), timestamp bigint, constraint unique_host_uri unique (host, uri))");
                     statement.execute("create index torrentindex on torrent_uris_by_host(host)");
+                    statement.execute("create cached table torrent_robots_txt (host varchar_ignorecase(255) primary key, robots_txt varchar(5120), timestamp bigint)");
                 } catch (SQLException se) {
                     LOG.debug("sql exception while creating", se);
                 }
@@ -153,6 +168,8 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
                 insertTorrentUri = connection.prepareStatement("insert into torrent_uris values (?, ?, ?, ?)");
                 updateTorrentUri = connection.prepareStatement("update torrent_uris set is_torrent = ?, timestamp = ? where hash = ? and uri = ?");
                 insertTorrentUriByHost = connection.prepareStatement("insert into torrent_uris_by_host values (?, ?, ?)");
+                selectRobotsTxt = connection.prepareStatement("select robots_txt from torrent_robots_txt where host = ?");
+                insertRobotsTxt = connection.prepareStatement("insert into torrent_robots_txt values (?, ?, ?)");
             } catch (SQLException se) {
                 throw new RuntimeException(se);
             }
@@ -238,7 +255,7 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
         }
         
         @Override
-        public synchronized void addCanonicalTorrentUris(String host, URI uri) {
+        public synchronized void addCanonicalTorrentUri(String host, URI uri) {
             try {
                 insertTorrentUriByHost.setString(1, host);
                 insertTorrentUriByHost.setString(2, uri.toASCIIString());
@@ -258,6 +275,36 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, Service {
                 throw new RuntimeException(e);
             }
         }
+
+        @Override
+        public synchronized String getRobotsTxt(String host) {
+            try {
+                selectRobotsTxt.setString(1, host);
+                ResultSet resultSet = selectRobotsTxt.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getString(1);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        }
+
+        @Override
+        public synchronized void storeRobotsTxt(String host, String robotsTxt) {
+            if (robotsTxt.length() > TorrentRobotsTxtStore.MAX_ROBOTS_TXT_SIZE) {
+                throw new IllegalArgumentException("robots txt too large: " + robotsTxt);
+            }
+            try {
+                insertRobotsTxt.setString(1, host);
+                insertRobotsTxt.setString(2, robotsTxt);
+                insertRobotsTxt.setLong(3, clock.now());
+                insertRobotsTxt.execute();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
+
 
 }

@@ -29,6 +29,7 @@ import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -41,6 +42,8 @@ import org.limewire.util.URIUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
+import com.limegroup.gnutella.filters.response.FilterFactory;
+import com.limegroup.gnutella.filters.response.ResultFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -48,9 +51,7 @@ import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * 
- * TODO robots.txt support
- * TODO locale aware searches
+ * TODO stop search
  * TODO cap of too many head requests
  * TODO check large files before reading
  * TODO handle magnet links
@@ -80,12 +81,18 @@ public class TorrentWebSearch {
 
     private final TorrentFactory torrentFactory;
 
+    private final ResultFilter filter;
+
+    private final TorrentRobotsTxt torrentRobotsTxt;
+    
     @Inject
     public TorrentWebSearch(HttpExecutor httpExecutor, Provider<LimeHttpClient> httpClient,
             TorrentUriPrioritizerFactory torrentUriPrioritizerFactory,
             MetaDataReader metaDataReader,
             TorrentFactory torrentFactory,
-            @Assisted String query, @Assisted SearchListener searchListener) {
+            @Assisted String query, @Assisted SearchListener searchListener,
+            FilterFactory responseFilterFactory,
+            TorrentRobotsTxt torrentRobotsTxt) {
         this.httpExecutor = httpExecutor;
         this.httpClient = httpClient;
         this.torrentUriPrioritizerFactory = torrentUriPrioritizerFactory;
@@ -93,6 +100,8 @@ public class TorrentWebSearch {
         this.torrentFactory = torrentFactory;
         this.query = query;
         this.searchListener = searchListener;
+        this.torrentRobotsTxt = torrentRobotsTxt;
+        this.filter = responseFilterFactory.createResultFilter();
     }
 
     public void start() {
@@ -108,23 +117,34 @@ public class TorrentWebSearch {
     
     private void handleTorrentResult(File torrentFile, URI uri, URI referrer) {
         BTData torrentData = TorrentUtil.parseTorrentFile(torrentFile);
-        Torrent torrent = null;
-        try {
-            LimeXMLDocument xmlDocument = metaDataReader.readDocument(torrentFile);
-            if (xmlDocument != null) {
-                if (!matchesQuery(xmlDocument)) {
-                    LOG.debugf("query {0} does not match doc {1}", query, xmlDocument);
-                    return;
+        if (torrentData != null) {
+            Torrent torrent = null;
+            LimeXMLDocument xmlDocument = null;
+            try {
+                xmlDocument = metaDataReader.readDocument(torrentFile);
+                if (xmlDocument != null) {
+                    if (!matchesQuery(xmlDocument)) {
+                        LOG.debugf("query {0} does not match doc {1}", query, xmlDocument);
+                        return;
+                    }
+                    torrent = torrentFactory.createTorrentFromXML(xmlDocument);
+                    if (torrent != null) {
+                        SearchResult result = new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent);
+                        if (filter.allow(result, xmlDocument)) {
+                            LOG.debugf("result accepted: {0}", torrent);
+                            searchListener.handleSearchResult(null, result);
+                        } else{
+                            LOG.debugf("result rejected: {0}", torrent);
+                        }
+                    } else {
+                        LOG.debug("torrent null");
+                    }
                 }
-                torrent = torrentFactory.createTorrentFromXML(xmlDocument);
+            } catch (IOException ie) {
+                LOG.debug("error parsing torrent file", ie);
             }
-        } catch (IOException ie) {
-            LOG.debug("error parsing torrent file", ie);
-        }
-        if (torrentData != null && torrent != null) {
-            searchListener.handleSearchResult(null, new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent));
         } else {
-            LOG.debugf("torrent data or torrent null: {0}, {1}", torrentData, torrent);
+            LOG.debug("torrent data null");
         }
     }
     
@@ -150,6 +170,10 @@ public class TorrentWebSearch {
     private void handleGoogleResults(List<URI> uris, String query) {
         LOG.debugf("results: {0}", uris);
         for (URI uri : uris) {
+            if (!torrentRobotsTxt.isAllowed(uri)) {
+                LOG.debugf("not allowed by robots.txt {0}", uri);
+                continue;
+            }
             File file = getContent(uri);
             if (file == null) {
                 continue;
@@ -157,34 +181,8 @@ public class TorrentWebSearch {
             if (isTorrentFile(file)) {
                 handleTorrentResult(file, uri, null);
             } else if (isHtmlFile(file)) {
-                HtmlCleaner cleaner = new HtmlCleaner();
                 try {
-                    TagNode tagNode = cleaner.clean(file);
-                    @SuppressWarnings("unchecked")
-                    List<TagNode> anchors = tagNode.getElementListHavingAttribute("href", true);
-                    List<URI> candidates = new ArrayList<URI>(anchors.size());
-                    for (TagNode node : anchors) {
-                        if (!"a".equalsIgnoreCase(node.getName())) {
-                            continue;
-                        }
-                        String href = node.getAttributeByName("href");
-                        LOG.debugf("resolving: {0} with {1}", href, uri);
-                        try {
-                            URI link = URIUtils.toURI(href);
-                            if (canBeTorrentUri(link)) {
-                                candidates.add(link);
-                            } else {
-                                link = org.apache.http.client.utils.URIUtils.resolve(uri, link);
-                                if (canBeTorrentUri(link)) {
-                                    candidates.add(link);
-                                } else {
-                                    LOG.debugf("not a potential torrent link: {0}", link);
-                                }
-                            }
-                        } catch (URISyntaxException e) {
-                            LOG.debug("error parsing", e);
-                        }
-                    }
+                    List<URI> candidates = extractTorrentUriCandidates(file, uri);
                     TorrentUriPrioritizer prioritizer = torrentUriPrioritizerFactory.create(query, uri);
                     checkForTorrents(prioritizer.prioritize(candidates), prioritizer, uri);
                 } catch (IOException e) {
@@ -194,10 +192,45 @@ public class TorrentWebSearch {
         }
     }
     
+    List<URI> extractTorrentUriCandidates(File htmlFile, URI referrer) throws IOException {
+        HtmlCleaner cleaner = new HtmlCleaner();
+        TagNode tagNode = cleaner.clean(htmlFile);
+        @SuppressWarnings("unchecked")
+        List<TagNode> anchors = tagNode.getElementListHavingAttribute("href", true);
+        List<URI> candidates = new ArrayList<URI>(anchors.size());
+        for (TagNode node : anchors) {
+            if (!"a".equalsIgnoreCase(node.getName())) {
+                continue;
+            }
+            String href = node.getAttributeByName("href");
+            LOG.debugf("resolving: {0} with {1}", href, referrer);
+            try {
+                URI link = URIUtils.toURI(href);
+                if (canBeTorrentUri(link)) {
+                    candidates.add(link);
+                } else {
+                    link = org.apache.http.client.utils.URIUtils.resolve(referrer, link);
+                    if (canBeTorrentUri(link)) {
+                        candidates.add(link);
+                    } else {
+                        LOG.debugf("not a potential torrent link: {0}", link);
+                    }
+                }
+            } catch (URISyntaxException e) {
+                LOG.debug("error parsing", e);
+            }
+        }
+        return candidates;
+    }
+    
     private void checkForTorrents(List<URI> candidates, TorrentUriPrioritizer prioritizer,
             URI referrer) {
         int count = 0;
         for (URI uri : candidates) {
+            if (!torrentRobotsTxt.isAllowed(uri)) {
+                LOG.debugf("not allowed by robots.txt: {0}", uri);
+                continue;
+            }
             ++count;
             try {
                 if (isTorrent(uri)) {
@@ -251,18 +284,22 @@ public class TorrentWebSearch {
         }
     }
     
-    private File createTmpFile(URI uri, String contentType) throws IOException {
+    private static File createTmpFile(URI uri, String contentType) throws IOException {
         try {
             String prefix = URIUtils.encodeUriComponent(uri.toASCIIString());
+            File file;
             if (BITTORENT_CONTENT_TYPE.equals(contentType)) {
-                return File.createTempFile(prefix, ".torrent");
+                file = File.createTempFile(prefix, ".torrent");
             } else if (HTML_CONTENT_TYPE.equals(contentType)) {
-                return File.createTempFile(prefix, ".html");
+                file = File.createTempFile(prefix, ".html");
+            } else {
+                return null;
             }
+            file.deleteOnExit();
+            return file;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
     
     private File getContent(URI uri) {
@@ -290,6 +327,7 @@ public class TorrentWebSearch {
             }
             out = new BufferedOutputStream(new FileOutputStream(file));
             entity.writeTo(out);
+            out.close();
             return file;
         } catch (IOException ie) {
             LOG.debug("error with GET request", ie);
@@ -298,10 +336,6 @@ public class TorrentWebSearch {
             client.releaseConnection(response);
         }
         return null;
-    }
-    
-    public static void main(String[] args) throws Exception {
-
     }
 
     private class GoogleJsonResponseHandler implements HttpClientListener {
@@ -347,6 +381,7 @@ public class TorrentWebSearch {
 
         @Override
         public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
+            LOG.debugf(exc, "request failed: {0}, {1}", request, response);
             return false;
         }
     }

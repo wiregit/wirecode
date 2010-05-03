@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -32,6 +31,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     
     private final String referrerHost;
     
+    /**
+     * List of predicates contributing to the likelihood score of a uri
+     * being a torrent uri. They are ordered by weight.
+     */
     @SuppressWarnings("unchecked")
     private final List<Predicate<URI>> predicates = ImmutableList.of(
             new IsTorrentUriPredicate(),
@@ -51,15 +54,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
             TorrentUriStore torrentUriStore) {
         this.torrentUriStore = torrentUriStore;
         this.queryTokens = toLowerCase(query.split("\\s"));
-        String host = getCanonicalHost(referrer);
+        String host = org.limewire.util.URIUtils.getCanonicalHost(referrer);
         this.referrerHost = host != null ? host : "";
     }
     
-    private static String getCanonicalHost(URI uri) {
-        String host = uri.getHost();
-        return host != null ? host.toLowerCase(Locale.US) : null;
-    }
-
     @Override
     public List<URI> prioritize(List<URI> candidates) {
         // remove duplicates
@@ -102,7 +100,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     public void setIsTorrent(URI uri, boolean isTorrent) {
         torrentUriStore.setIsTorrentUri(uri, isTorrent);
         if (isTorrent) {
-            String host = getCanonicalHost(uri);
+            String host = org.limewire.util.URIUtils.getCanonicalHost(uri);
             String path = uri.getPath();
             if (host == null || path == null) {
                 LOG.debugf("host or path null {0}, {1}", host, path);
@@ -112,12 +110,12 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
             String canonicalPath = "/" + StringUtils.explode(tokens, "/");
             uri = URIUtils.resolve(uri, canonicalPath);
             LOG.debugf("canonicalized uri: {0}", uri);
-            torrentUriStore.addCanonicalTorrentUris(host, uri);
+            torrentUriStore.addCanonicalTorrentUri(host, uri);
         }
     }
     
     Set<URI> getTorrentUrisForDomain(URI uri) {
-        String host = getCanonicalHost(uri);
+        String host = org.limewire.util.URIUtils.getCanonicalHost(uri);
         if (host != null) {
            return torrentUriStore.getTorrentUrisForHost(host);
         }
@@ -245,7 +243,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     private class UriOnSameHostAsReferrerPredicate implements Predicate<URI> {
         @Override
         public boolean apply(URI uri) {
-            return referrerHost.equals(getCanonicalHost(uri));
+            return referrerHost.equals(org.limewire.util.URIUtils.getCanonicalHost(uri));
         }
     }
     
