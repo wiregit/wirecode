@@ -1,14 +1,13 @@
 package org.limewire.mojito.util;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.MojitoFactory2;
-import org.limewire.mojito2.io.Transport;
-import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.PingRequest;
 import org.limewire.mojito2.routing.Contact;
@@ -30,11 +29,11 @@ public class MessageUtilsTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void testIsCollisionPing() {
-        Transport transport = NopTransport.NOP;
-        MessageFactory factory = new DefaultMessageFactory();
+    public void testIsCollisionPing() throws IOException {
+        DHT dht = MojitoFactory.createDHT("DHT-1");
+        dht.bind(NopTransport.NOP);
         
-        DHT dht = MojitoFactory2.createDHT(transport, factory);
+        MessageFactory factory = dht.getMessageFactory();
         Contact localhost = dht.getLocalNode();
         
         PingRequest ping = null;
