@@ -28,9 +28,9 @@ import junit.framework.Test;
 
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
@@ -39,6 +39,7 @@ import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModel;
 import org.limewire.mojito2.util.DatabaseUtils;
+import org.limewire.mojito2.util.IoUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
@@ -82,10 +83,13 @@ public class StorableTest extends MojitoTestCase {
             final Object lock1 = new Object();
             final Object lock2 = new Object();
             
-            final Storable storable = new Storable(key, new DHTValueImpl(type, version, b));
+            final Storable storable = new Storable(key, 
+                    new DHTValueImpl(type, version, b));
+            
             final AtomicBoolean publisherDidRun = new AtomicBoolean(false);
             
             dhts.values().iterator().next().getStorableModelManager().addStorableModel(type, new StorableModel() {
+                @Override
                 public Collection<Storable> getStorables() {
                     synchronized (lock1) {
                         try {
@@ -101,12 +105,14 @@ public class StorableTest extends MojitoTestCase {
                     }
                 }
                 
-                public void handleStoreResult(Storable value, StoreResult result) {
+                @Override
+                public void handleStoreResult(Storable value, StoreEntity result) {
                     synchronized (lock2) {
                         lock2.notifyAll();
                     }
                 }
                 
+                @Override
                 public void handleContactChange() {
                 }
             });
@@ -128,9 +134,7 @@ public class StorableTest extends MojitoTestCase {
             assertFalse(DatabaseUtils.isPublishingRequired(storable));
             
         } finally {
-            for (MojitoDHT dht : dhts.values()) {
-                dht.close();
-            }
+            IoUtils.closeAll(dhts.values());
         }
     }
 }

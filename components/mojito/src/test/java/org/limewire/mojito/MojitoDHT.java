@@ -30,6 +30,7 @@ import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
 
 public class MojitoDHT implements DHT {
@@ -221,6 +222,12 @@ public class MojitoDHT implements DHT {
         dht.close();
     }
     
+    @Override
+    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst, 
+            long timeout, TimeUnit unit) {
+        return dht.ping(src, dst, timeout, unit);
+    }
+
     public DHTFuture<PingEntity> ping(String address, int port) {
         return ping(new InetSocketAddress(address, port));
     }
@@ -235,9 +242,12 @@ public class MojitoDHT implements DHT {
     }
     
     public DHTFuture<PingEntity> collisionPing(Contact dst) {
+        
+        Contact src = ContactUtils.createCollisionPingSender(
+                dht.getLocalNode());
+        
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-        Context context = getContext();
-        return context.collisionPing(new Contact[] { dst }, 
+        return ping(src, new Contact[] { dst }, 
                 timeout, TimeUnit.MILLISECONDS);
     }
     
