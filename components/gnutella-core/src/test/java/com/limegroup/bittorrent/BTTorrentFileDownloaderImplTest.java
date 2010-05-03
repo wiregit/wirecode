@@ -14,7 +14,6 @@ import junit.framework.Test;
 
 import org.apache.http.params.BasicHttpParams;
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentFileEntry;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;

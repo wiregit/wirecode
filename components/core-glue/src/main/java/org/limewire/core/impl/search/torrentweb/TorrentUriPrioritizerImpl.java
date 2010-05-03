@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -70,6 +71,8 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         List<Tuple<URI, Integer>> scoredUris = transform(candidates, new TorrentUriLikelihoodFunction());
         // sort by how likely a candidate
         Collections.sort(scoredUris, new ScoreComparator());
+        
+        scoredUris = filter(scoredUris, new UnlikelyUriFilter(10, scoredUris.size()));
         // transform back
         return transform(scoredUris, new UriExtractor());
     }
@@ -273,6 +276,42 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         public URI apply(Tuple<URI, Integer> tuple) {
             return tuple.getFirst();
         }
+    }
+    
+    private class UnlikelyUriFilter implements Predicate<Tuple<URI, Integer>> {
+
+        private final int maxUnlikelyUris;
+        private final int totalUris;
+        private int count = 0;
+        private float likelihood = -1; 
+        private final Random random = new Random();
+
+        public UnlikelyUriFilter(int maxUnlikelyUris, int totalUris) {
+            this.maxUnlikelyUris = maxUnlikelyUris;
+            this.totalUris = totalUris;
+        }
+
+        @Override
+        public boolean apply(Tuple<URI, Integer> tuple) {
+            ++count;
+            if (tuple.getSecond() > 0) {
+                LOG.debugf("keeping : {0}", tuple);
+                return true;
+            } else {
+                if (likelihood == -1) {
+                    int left = totalUris - count;
+                    likelihood = left > 0 ? maxUnlikelyUris / left : 1;
+                }
+                if (random.nextFloat() < likelihood) {
+                    LOG.debugf("trying: {0}", tuple);
+                    return true;
+                } else {
+                    LOG.debugf("leaving: {0}", tuple);
+                    return false;
+                }
+            }
+        }
+        
     }
 
     static <S, T> Iterable<Tuple<S, T>> zip(final Iterable<S> iterableS, final Iterable<T> iterableT) {

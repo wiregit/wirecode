@@ -1,7 +1,7 @@
 package org.limewire.core.impl.search;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +20,6 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
-import org.limewire.core.impl.search.torrentweb.TorrentWebSearch;
 import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.geocode.GeocodeInformation;
@@ -41,7 +40,7 @@ import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
-public class CoreSearch implements Search {
+public class CoreSearch implements Search, SearchListener {
 
     private final SearchDetails searchDetails;
     private final SearchServices searchServices;
@@ -73,7 +72,9 @@ public class CoreSearch implements Search {
      * The guid of the last active search.
      */
     volatile byte[] searchGuid;
-    private final TorrentWebSearchFactory googleTorrentSearchFactory;
+    private final TorrentWebSearchFactory torrentWebSearchFactory;
+    
+    private volatile Search torrentWebSearch;
 
     @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
@@ -100,7 +101,7 @@ public class CoreSearch implements Search {
         this.clock = clock;
         this.compositeQueryBuilder = compositeQueryBuilder;
         this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
-        this.googleTorrentSearchFactory = googleTorrentSearchFactory;
+        this.torrentWebSearchFactory = googleTorrentSearchFactory;
     }
     
     @Override
@@ -177,31 +178,9 @@ public class CoreSearch implements Search {
         });        
         
         if (initial && searchDetails.getSearchCategory() == SearchCategory.TORRENT) {
-            TorrentWebSearch googleTorrentSearch = googleTorrentSearchFactory.create(searchDetails.getSearchQuery(), new SearchListener() {
-                @Override
-                public void handleSearchResult(Search search, SearchResult searchResult) {
-                    CoreSearch.this.handleSearchResult(searchResult);
-                }
-
-                @Override
-                public void handleSearchResults(Search search,
-                        Collection<? extends SearchResult> searchResults) {
-                }
-
-                @Override
-                public void handleSponsoredResults(Search search,
-                        List<SponsoredResult> sponsoredResults) {
-                }
-
-                @Override
-                public void searchStarted(Search search) {
-                }
-
-                @Override
-                public void searchStopped(Search search) {
-                }
-            });
-            googleTorrentSearch.start();
+            torrentWebSearch = torrentWebSearchFactory.create(searchDetails.getSearchQuery());
+            torrentWebSearch.addSearchListener(this);
+            torrentWebSearch.start();
         }
         
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
@@ -228,7 +207,7 @@ public class CoreSearch implements Search {
                             title, result.getDescription(),
                             displayUrl, SearchUrlUtils.createPromotionUrl(result, clock.now() / 1000),
                             target);
-                    handleSponsoredResults(coreSponsoredResult);
+                    handleSponsoredResults(CoreSearch.this, Collections.singletonList(coreSponsoredResult));
                 }
             };
             
@@ -268,6 +247,10 @@ public class CoreSearch implements Search {
             return;
         }
         
+        if (torrentWebSearch != null) {
+            torrentWebSearch.stop();
+        }
+        
         searchEventBroadcaster.broadcast(new SearchEvent(this, SearchEvent.Type.STOPPED));
         listenerList.removeQueryReplyListener(searchGuid, qrListener);
         searchServices.stopQuery(new GUID(searchGuid));
@@ -281,23 +264,34 @@ public class CoreSearch implements Search {
         return new GUID(searchGuid);
     }
     
-    private void handleSponsoredResults(SponsoredResult... sponsoredResults) {
-        List<SponsoredResult> resultList =  Arrays.asList(sponsoredResults);
-        for(SearchListener listener : searchListeners) {
-            listener.handleSponsoredResults(CoreSearch.this, resultList);
-        }
-    }
-    
-    private void handleSearchResult(SearchResult searchResult) {
+    @Override
+    public void handleSearchResult(Search search, SearchResult searchResult) {
         for (SearchListener listener : searchListeners) {
             listener.handleSearchResult(this, searchResult);
         }   
     }
     
-    private void handleSearchResults(Collection<SearchResult> searchResults) {
+    @Override
+    public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {
         for (SearchListener listener : searchListeners) {
             listener.handleSearchResults(this, searchResults);
         }
+    }
+
+    @Override
+    public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSponsoredResults(this, sponsoredResults);
+        }
+    }
+
+    @Override
+    public void searchStarted(Search search) {
+        
+    }
+
+    @Override
+    public void searchStopped(Search search) {
     }
     
     private class QrListener implements QueryReplyListener {
@@ -307,13 +301,14 @@ public class CoreSearch implements Search {
             
             RemoteFileDescAdapter rfdAdapter = remoteFileDescAdapterFactory.create(rfd, locs);
             
-            handleSearchResult(rfdAdapter);
+            handleSearchResult(CoreSearch.this, rfdAdapter);
         }
     }
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
         public void handleFriendResults(Collection<SearchResult> results) {
-            handleSearchResults(results);
+            handleSearchResults(CoreSearch.this, results);
         }
     }
+
 }

@@ -127,7 +127,7 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
         }
 
         @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
+        public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
             for (SearchListener listener : searchListeners) {
                 listener.handleSponsoredResults(MultipleBrowseSearch.this, sponsoredResults);
             }

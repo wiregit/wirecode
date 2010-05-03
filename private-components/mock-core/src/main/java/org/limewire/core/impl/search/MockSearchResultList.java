@@ -175,7 +175,7 @@ class MockSearchResultList implements SearchResultList {
         }
 
         @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
+        public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
         }
 
         @Override

@@ -491,7 +491,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         }
         
         @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {
+        public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
             // do nothing
         }
         
@@ -554,7 +554,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         @Override
         public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
         @Override
-        public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+        public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {}
     }
 
     /**

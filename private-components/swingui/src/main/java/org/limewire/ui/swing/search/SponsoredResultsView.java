@@ -12,6 +12,6 @@ public interface SponsoredResultsView {
     /**
      * Adds the specified list of sponsored results to the display.
      */
-    void addSponsoredResults(List<SponsoredResult> sponsoredResults);
+    void addSponsoredResults(List<? extends SponsoredResult> sponsoredResults);
     
 }

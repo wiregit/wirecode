@@ -362,7 +362,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * Adds the specified list of sponsored results to the display.
      */
     @Override
-    public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
+    public void addSponsoredResults(List<? extends SponsoredResult> sponsoredResults){
         for (SponsoredResult result : sponsoredResults){
             sponsoredResultsPanel.addEntry(result);
         }

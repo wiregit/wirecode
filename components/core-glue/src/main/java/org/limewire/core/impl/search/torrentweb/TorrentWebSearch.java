@@ -28,6 +28,8 @@ import org.json.JSONObject;
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.util.TorrentUtil;
+import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
@@ -57,7 +59,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * TODO handle magnet links
  * TODO implement meaningful remote host, link to referrer
  */
-public class TorrentWebSearch {
+public class TorrentWebSearch implements Search {
     
     private static final Log LOG = LogFactory.getLog(TorrentWebSearch.class);
     
@@ -71,8 +73,6 @@ public class TorrentWebSearch {
     
     private final Provider<LimeHttpClient> httpClient;
 
-    private final SearchListener searchListener;
-
     private final String query;
 
     private final TorrentUriPrioritizerFactory torrentUriPrioritizerFactory;
@@ -85,12 +85,16 @@ public class TorrentWebSearch {
 
     private final TorrentRobotsTxt torrentRobotsTxt;
     
+    private volatile boolean stopped = false;
+    
+    private volatile SearchListener searchListener;
+    
     @Inject
     public TorrentWebSearch(HttpExecutor httpExecutor, Provider<LimeHttpClient> httpClient,
             TorrentUriPrioritizerFactory torrentUriPrioritizerFactory,
             MetaDataReader metaDataReader,
             TorrentFactory torrentFactory,
-            @Assisted String query, @Assisted SearchListener searchListener,
+            @Assisted String query,
             FilterFactory responseFilterFactory,
             TorrentRobotsTxt torrentRobotsTxt) {
         this.httpExecutor = httpExecutor;
@@ -99,11 +103,11 @@ public class TorrentWebSearch {
         this.metaDataReader = metaDataReader;
         this.torrentFactory = torrentFactory;
         this.query = query;
-        this.searchListener = searchListener;
         this.torrentRobotsTxt = torrentRobotsTxt;
         this.filter = responseFilterFactory.createResultFilter();
     }
 
+    @Override
     public void start() {
         try {
             HttpGet get = new HttpGet(MessageFormat.format(searchUriTemplate, URIUtils.encodeUriComponent(query)));
@@ -113,6 +117,33 @@ public class TorrentWebSearch {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public void stop() {
+        LOG.debug("stop");
+        stopped = true;
+    }
+
+    @Override
+    public void addSearchListener(SearchListener searchListener) {
+        assert this.searchListener == null;
+        this.searchListener = searchListener;
+    }
+
+    @Override
+    public SearchCategory getCategory() {
+        return SearchCategory.TORRENT;
+    }
+
+    @Override
+    public void removeSearchListener(SearchListener searchListener) {
+        assert this.searchListener == searchListener;
+        this.searchListener = null;
+    }
+
+    @Override
+    public void repeat() {
     }
     
     private void handleTorrentResult(File torrentFile, URI uri, URI referrer) {
@@ -170,6 +201,10 @@ public class TorrentWebSearch {
     private void handleGoogleResults(List<URI> uris, String query) {
         LOG.debugf("results: {0}", uris);
         for (URI uri : uris) {
+            if (stopped) {
+                LOG.debug("stopping");
+                break;
+            }
             if (!torrentRobotsTxt.isAllowed(uri)) {
                 LOG.debugf("not allowed by robots.txt {0}", uri);
                 continue;
@@ -227,6 +262,10 @@ public class TorrentWebSearch {
             URI referrer) {
         int count = 0;
         for (URI uri : candidates) {
+            if (stopped) {
+                LOG.debug("stopping");
+                break;
+            }
             if (!torrentRobotsTxt.isAllowed(uri)) {
                 LOG.debugf("not allowed by robots.txt: {0}", uri);
                 continue;

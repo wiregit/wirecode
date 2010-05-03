@@ -21,6 +21,6 @@ public interface SearchListener {
     void searchStopped(Search search);
     
     /** Notification that sponsored results have been received for the search. */
-    void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults);
+    void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults);
 
 }
