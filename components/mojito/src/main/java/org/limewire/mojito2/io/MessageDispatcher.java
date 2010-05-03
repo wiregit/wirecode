@@ -179,7 +179,8 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
-    protected boolean isLocalhost(KUID contactId, SocketAddress address, Message message) {
+    protected boolean isLocalhost(KUID contactId, 
+            SocketAddress address, Message message) {
         return false;
     }
     

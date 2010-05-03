@@ -1,6 +1,8 @@
 package org.limewire.mojito.io;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
@@ -41,61 +43,69 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             dht = MojitoFactory.createDHT("Test", 5000);
             
-            boolean sent = false;
-            
             Context context = dht.getContext();
             MessageHelper helper = context.getMessageHelper();
             MessageFactory factory = context.getMessageFactory();
             MessageDispatcher dispatcher = context.getMessageDispatcher();
             
             // Send to an address
-            sent = dispatcher.send(new InetSocketAddress("www.google.com", 5000), 
-                    helper.createPingRequest(new InetSocketAddress("www.google.com", 5000)), null);
-            assertTrue(sent);
+            dispatcher.send(null, null, new InetSocketAddress("www.google.com", 5000),
+                    helper.createPingRequest(new InetSocketAddress("www.google.com", 5000)), 1, TimeUnit.SECONDS);
             
             // Send to local Node's contact address
-            sent = dispatcher.send(context.getContactAddress(), 
-                    helper.createPingRequest(context.getContactAddress()), null);
-            assertFalse(sent);
+            try {
+                dispatcher.send(null, null, context.getContactAddress(), 
+                        helper.createPingRequest(context.getContactAddress()), 1, TimeUnit.SECONDS);
+                fail("Should have failed!");
+            } catch (IOException expected) {
+            }
             
             // Send to a non local Node
             Contact node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(), new InetSocketAddress("www.google.com", 5000));
-            sent = dispatcher.send(node, helper.createPingRequest(node.getContactAddress()), null);
-            assertTrue(sent);
+            dispatcher.send(null, node, helper.createPingRequest(node.getContactAddress()), 1, TimeUnit.SECONDS);
+            //assertTrue(sent);
             
             // Sent to local Node
-            sent = dispatcher.send(context.getLocalNode(), 
-                    helper.createPingRequest(context.getContactAddress()), null);
-            assertFalse(sent);
+            try {
+                dispatcher.send(null, context.getLocalNode(), 
+                        helper.createPingRequest(context.getContactAddress()), 1, TimeUnit.SECONDS);
+                fail("Should have failed!");
+            } catch (IOException expected) {
+            }
             
             // Send to a Node that has the local Node's ID
-            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
-                    context.getLocalNodeID(), new InetSocketAddress("www.google.com", 5000));
-            sent = dispatcher.send(node, helper.createPingRequest(node.getContactAddress()), null);
-            assertFalse(sent);
+            try {
+                node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
+                        context.getLocalNodeID(), new InetSocketAddress("www.google.com", 5000));
+                dispatcher.send(null, node, helper.createPingRequest(node.getContactAddress()), 1, TimeUnit.SECONDS);
+                fail("Should have failed!");
+            } catch (IOException expected) {
+            }
             
             // Sender is not firewalled
-            Contact sender = ContactFactory.createLiveContact(
-                    new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
-                    context.getLocalNodeID().invert(), 
-                    new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
-            
-            RequestMessage request = factory.createPingRequest(
-                    sender, new InetSocketAddress("www.google.com", 5000));
-            sent = dispatcher.send(node, request, null);
-            assertFalse(sent);
+            try {
+                Contact sender = ContactFactory.createLiveContact(
+                        new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
+                        context.getLocalNodeID().invert(), 
+                        new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
+                
+                RequestMessage request = factory.createPingRequest(
+                        sender, new InetSocketAddress("www.google.com", 5000));
+                dispatcher.send(null, node, request, 1, TimeUnit.SECONDS);
+                fail("Should have failed!");
+            } catch (IOException expected) {
+            }
             
             // Same as above but sender is firewalled
-            sender = ContactFactory.createLiveContact(
+            Contact sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
                     context.getLocalNodeID().invert(), 
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             
-            request = factory.createPingRequest(
+            RequestMessage request = factory.createPingRequest(
                     sender, new InetSocketAddress("www.google.com", 5000));
-            sent = dispatcher.send(node, request, null);
-            assertTrue(sent);
+            dispatcher.send(null, node, request, 1, TimeUnit.SECONDS);
             
         } finally {
             IoUtils.close(dht);
