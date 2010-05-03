@@ -24,8 +24,9 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.PingEntity;
 
 
 /**
@@ -189,9 +190,9 @@ public interface RouteTable extends Serializable {
     public Contact getLocalNode();
     
     /**
-     * Sets the RouteTable PingCallback.
+     * Sets the {@link RouteTable}'s {@link ContactPinger}
      */
-    public void bind(Context context);
+    public void bind(ContactPinger pinger);
     
     /**
      * Adds a RouteTableListener.
@@ -206,6 +207,17 @@ public interface RouteTable extends Serializable {
      * @param l the RouteTableListener to remove
      */
     public void removeRouteTableListener(RouteTableListener l);
+    
+    /**
+     * 
+     */
+    public static interface ContactPinger {
+        
+        /**
+         * 
+         */
+        public DHTFuture<PingEntity> ping(Contact contact);
+    }
     
     /**
      * The interface to receive RouteTable events.

@@ -39,13 +39,12 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
-import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
@@ -76,7 +75,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * A reference to the ContactPinger.
      */
-    private transient Context context;
+    private transient ContactPinger pinger;
     
     /**
      * The local Node.
@@ -148,8 +147,8 @@ public class RouteTableImpl implements RouteTable {
     }
     
     @Override
-    public void bind(Context context) {
-        this.context = context;
+    public void bind(ContactPinger pinger) {
+        this.pinger = pinger;
     }
     
     /**
@@ -417,7 +416,9 @@ public class RouteTableImpl implements RouteTable {
         
         fireContactCheck(bucket, existing, node);
         
-        ping(existing, listener);
+        DHTFuture<PingEntity> future = ping(existing);
+        future.addFutureListener(listener);
+        
         touchBucket(bucket);
     }
     
@@ -907,7 +908,7 @@ public class RouteTableImpl implements RouteTable {
     private void pingLeastRecentlySeenNode(Bucket bucket) {
         Contact lrs = bucket.getLeastRecentlySeenActiveContact();
         if (!isLocalNode(lrs)) {
-            ping(lrs, null);
+            ping(lrs);
         }
     }
     
@@ -915,32 +916,24 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null.
      */
-    private void ping(Contact node, EventListener<FutureEvent<PingEntity>> listener) {
-        Context context = this.context;
+    private DHTFuture<PingEntity> ping(Contact node) {
+        ContactPinger pinger = this.pinger;
         
-        if (context != null) {
-            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-            DHTFuture<PingEntity> future = context.ping(
-                    node, timeout, TimeUnit.MILLISECONDS);
-            future.addFutureListener(listener);
-            return;
+        if (pinger != null) {
+            return pinger.ping(node);
         }
         
         // --- ELSE ---
         
         handleFailure(node.getNodeID(), node.getContactAddress());
         
-        if (listener != null) {
-            ExecutionException exception = new ExecutionException(
-                    new RequestTimeoutException(
-                            node.getNodeID(), 
-                            node.getContactAddress(), 
-                            0L, TimeUnit.MILLISECONDS));
-            
-            FutureEvent<PingEntity> event 
-                = FutureEvent.createException(exception);
-            listener.handleEvent(event);
-        }
+        RequestTimeoutException exception 
+            = new RequestTimeoutException(
+                node.getNodeID(), 
+                node.getContactAddress(), 
+                0L, TimeUnit.MILLISECONDS);
+        
+        return new DHTValueFuture<PingEntity>(exception);
     }
     
     /*
