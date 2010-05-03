@@ -13,13 +13,8 @@ import com.google.inject.Provider;
 
 @LazySingleton
 public class CategoryIconManager {
-    
-    private Icon audioIcon;
-    private Icon imageIcon;
-    private Icon videoIcon;
-    private Icon documentIcon;
+
     private Icon programIcon;
-    private Icon otherIcon;
     
     @Resource
     private Icon smallAudioIcon;
@@ -29,6 +24,8 @@ public class CategoryIconManager {
     private Icon smallVideoIcon;
     @Resource
     private Icon smallDocumentIcon;
+    @Resource
+    private Icon smallTorrentIcon;
     @Resource
     private Icon smallProgramIconWinVista;
     @Resource
@@ -48,12 +45,6 @@ public class CategoryIconManager {
         
         GuiUtils.assignResources(this);
         
-        audioIcon = smallAudioIcon;
-        imageIcon = smallImageIcon;
-        videoIcon = smallVideoIcon;
-        documentIcon = smallDocumentIcon;
-        otherIcon = smallOtherIcon;
-            
         if (OSUtils.isMacOSX()) {
             programIcon = smallProgramIconOSX;
         } else if (OSUtils.isWindowsVista()) {
@@ -72,19 +63,23 @@ public class CategoryIconManager {
         switch (category) {
         case AUDIO:
             
-            return audioIcon;
+            return smallAudioIcon;
             
         case DOCUMENT:
             
-            return documentIcon;
+            return smallDocumentIcon;
             
         case IMAGE:
             
-            return imageIcon;
+            return smallImageIcon;
             
         case VIDEO:
             
-            return videoIcon;
+            return smallVideoIcon;
+            
+        case TORRENT:
+            
+            return smallTorrentIcon;
             
         case PROGRAM:
             
@@ -92,7 +87,7 @@ public class CategoryIconManager {
             
         default:
             
-            return otherIcon;
+            return smallOtherIcon;
             
         }
     }
