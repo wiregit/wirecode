@@ -66,7 +66,6 @@ public class SearchBar extends JXPanel {
     private final HistoryAndFriendAutoCompleter autoCompleter;
     private final SmartAutoCompleteFactory smartAutoCompleteFactory;
     private final AutoCompleteDictionary searchHistory;
-    private final SearchNavigator searchNavigator;
     private final Provider<AdvancedPopupPanel> advancedPopupProvider;
     private final Action advancedAction;
     
@@ -83,14 +82,12 @@ public class SearchBar extends JXPanel {
             final HistoryAndFriendAutoCompleter autoCompleter,
             Provider<AdvancedPopupPanel> advancedPopupProvider,
             CategoryIconManager categoryIconManager,
-            TextFieldDecorator textFieldDecorator,
-            SearchNavigator searchNavigator) {
+            TextFieldDecorator textFieldDecorator) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
         
         this.smartAutoCompleteFactory = smartAutoCompleteFactory;
-        this.searchNavigator = searchNavigator;
         this.searchHistory = searchHistory;
         this.autoCompleter = autoCompleter;
         this.advancedPopupProvider = advancedPopupProvider;
@@ -287,8 +284,6 @@ public class SearchBar extends JXPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Notify navigator to record activity.
-            searchNavigator.logAdvancedSearchOpened();
             // Display popup dialog.
             advancedPopupProvider.get().showPopup(comboBox, searchField.getX(), 
                     searchField.getY() + searchField.getHeight() - 1, searchField.getWidth());

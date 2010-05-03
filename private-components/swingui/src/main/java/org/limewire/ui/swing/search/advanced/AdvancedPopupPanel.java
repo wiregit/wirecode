@@ -39,7 +39,7 @@ import org.limewire.ui.swing.painter.factories.BarPainterFactory;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
-import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.search.SearchInspectionUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -87,7 +87,6 @@ public class AdvancedPopupPanel extends JXPanel {
     private final ButtonDecorator buttonDecorator;
     private final Provider<KeywordAssistedSearchBuilder> advancedSearchBuilder;
     private final SearchHandler searchHandler;
-    private final SearchNavigator searchNavigator;
     
     private final Map<TabId, AdvancedSearchTabItem> tabItemMap = 
         new EnumMap<TabId, AdvancedSearchTabItem>(TabId.class);
@@ -110,13 +109,11 @@ public class AdvancedPopupPanel extends JXPanel {
             AdvancedPanelFactory advancedPanelFactory,
             ButtonDecorator buttonDecorator,
             Provider<KeywordAssistedSearchBuilder> advancedSearchBuilder,
-            SearchHandler searchHandler,
-            SearchNavigator searchNavigator) {
+            SearchHandler searchHandler) {
         this.advancedPanelFactory = advancedPanelFactory;
         this.buttonDecorator = buttonDecorator;
         this.advancedSearchBuilder = advancedSearchBuilder;
         this.searchHandler = searchHandler;
-        this.searchNavigator = searchNavigator;
         
         // Inject annotated resource values.
         GuiUtils.assignResources(this);
@@ -299,6 +296,8 @@ public class AdvancedPopupPanel extends JXPanel {
      * to the specified invoker.
      */
     public void showPopup(JComponent invoker, int x, int y, int width) {
+        SearchInspectionUtils.advancedSearchOpened();
+        
         // Select tab.
         if (selectedItem == null) {
             select(TabId.AUDIO);
@@ -417,7 +416,7 @@ public class AdvancedPopupPanel extends JXPanel {
             
             // Start search if any fields filled in.
             if (searchData != null) {
-                searchNavigator.logAdvancedSearchStarted();
+                SearchInspectionUtils.advancedSearchStarted();
                 SearchInfo info = advancedSearchBuilder.get().createAdvancedSearch(
                         searchData, visiblePanel.getSearchCategory());
                 searchHandler.doSearch(info);

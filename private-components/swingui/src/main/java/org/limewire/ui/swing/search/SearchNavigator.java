@@ -18,10 +18,4 @@ public interface SearchNavigator {
     /** Opens a new advanced search display. */
     void openAdvancedSearch();
 
-    /** Logs action to open advanced search. */
-    void logAdvancedSearchOpened();
-
-    /** Logs action to start advanced search. */
-    void logAdvancedSearchStarted();
-
 }

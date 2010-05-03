@@ -106,13 +106,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private volatile long maxTabCount = 0;
 
     private final AllFriendsRefreshManager allFriendsRefreshManager;    
-    
-    @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
-    private volatile int advancedSearchesOpened = 0;
-    
-    @InspectablePrimitive(value = "advanced searches executed", category = DataCategory.USAGE)
-    private volatile int advancedSearchesMade = 0;
-    
+
     @InspectablePrimitive(value = "textual advanced searches executed", category = DataCategory.USAGE)
     private volatile int textAdvancedSearchesMade = 0;
     
@@ -211,16 +205,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @Override
     public void openAdvancedSearch() {
         searchBar.selectAdvancedSearch();
-    }
-    
-    @Override
-    public void logAdvancedSearchOpened() {
-        advancedSearchesOpened++;
-    }
-    
-    @Override
-    public void logAdvancedSearchStarted() {
-        advancedSearchesMade++;
     }
     
     private SearchNavItem addSearch(String title, final JComponent searchPanel, final Search search, SearchResultsModel model, 
