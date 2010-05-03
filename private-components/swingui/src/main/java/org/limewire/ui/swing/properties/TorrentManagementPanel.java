@@ -63,6 +63,10 @@ public class TorrentManagementPanel implements FileInfoPanel {
 
     @Override
     public boolean hasChanged() {
+        if (!torrent.isValid()) {
+            return false;
+        }
+        
         float ratio = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, -1f);
         int time = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, -1);
         
