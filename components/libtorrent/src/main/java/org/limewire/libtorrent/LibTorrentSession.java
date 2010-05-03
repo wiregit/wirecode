@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.limewire.bittorrent.LimeWireTorrentProperties;
 import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
@@ -145,6 +146,10 @@ public class LibTorrentSession implements TorrentManager {
             updateStatus(torrent);
             torrents.put(sha1, torrent);
             torrent.addListener(torrentListener);
+            
+            torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, params.getSeedRatioLimit());
+            torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, params.getTimeRatioLimit());
+            
             return torrent;
         } finally {
             lock.unlock();

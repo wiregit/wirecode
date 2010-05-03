@@ -103,6 +103,11 @@ public class TorrentManagementPanel implements FileInfoPanel {
 
     @Override
     public void save() {
+        
+        if (!torrent.isValid()) {
+            return;
+        }
+        
         if(defaultRadioButton.isSelected()) {
             torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, null);
             torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, null);
@@ -144,10 +149,15 @@ public class TorrentManagementPanel implements FileInfoPanel {
             limitUploadBandwidthCheckBox.setSelected(false);            
         } else {
             float ratio = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, -1f);
-            int uploadRate = torrent.getMaxUploadBandwidth()/1024;
-            int downloadRate = torrent.getMaxDownloadBandwidth()/1024;
             int time = torrent.getProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, -1);
-
+            int uploadRate = -1;
+            int downloadRate = -1;
+            
+            if (torrent.isValid()) {
+                uploadRate = torrent.getMaxUploadBandwidth()/1024;
+                downloadRate = torrent.getMaxDownloadBandwidth()/1024;
+            }
+            
             // seed forever
             if(ratio == Float.MAX_VALUE && time == Integer.MAX_VALUE) {
                 uploadForeverRadioButton.setSelected(true);

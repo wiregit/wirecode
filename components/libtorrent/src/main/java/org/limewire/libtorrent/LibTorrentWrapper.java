@@ -338,8 +338,8 @@ class LibTorrentWrapper {
      */
     // TODO: disable until talking to everrettt
     public void set_seed_ratio(String id, float seed_ratio) {
-        LOG.debugf("before set_seed_ratio");
-        //catchWrapperException(libTorrent.set_seed_ratio(id, seed_ratio));
+        LOG.debugf("before set_seed_ratio: {0} - {1}", id, seed_ratio);
+        catchWrapperException(libTorrent.set_seed_ratio(id, seed_ratio));
         LOG.debugf("after set_seed_ratio");
     }
 
@@ -347,7 +347,7 @@ class LibTorrentWrapper {
      * Sets the upload limit for this particular Torrent.
      */
     public void set_upload_limit(String id, int limit) {
-        LOG.debugf("before set_upload_limit");
+        LOG.debugf("before set_upload_limit: {0} - {1}", id, limit);
         catchWrapperException(libTorrent.set_upload_limit(id, limit));
         LOG.debugf("after set_upload_limit");
     }

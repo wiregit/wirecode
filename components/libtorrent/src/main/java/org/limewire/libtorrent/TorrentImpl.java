@@ -78,8 +78,6 @@ class TorrentImpl implements Torrent {
         this.torrentFile.set(params.getTorrentFile());
         this.fastResumeFile.set(params.getFastResumeFile());
         this.torrentDataFile.set(params.getTorrentDataFile());
-        setProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, params.getSeedRatioLimit());
-        setProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, params.getTimeRatioLimit());
         
         if (isPrivate != null) {
             this.isPrivate.set(isPrivate);
@@ -446,8 +444,10 @@ class TorrentImpl implements Torrent {
     @Override
     public void setProperty(String key, Object value) {
         properties.put(key, value);
-        if(key.equals(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT) && value instanceof Float)
+        if (key.equals(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT) 
+                && value instanceof Float) {
             setSeedRatioLimit((Float)value);
+        }
     }
 
     @Override
