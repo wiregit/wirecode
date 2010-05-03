@@ -94,9 +94,9 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             
             switch (column) {
             case FILES_INDEX:
-                return StringUtils.explode(torrent.getTorrentFileEntries(), "\r\n", 14, 40, AND_MORE_MSG);
+                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n", 14, 40, AND_MORE_MSG);
             case TRACKERS_INDEX:
-                return StringUtils.explode(torrent.getTrackers(), "\r\n", 14, 40, AND_MORE_MSG);
+                return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40, AND_MORE_MSG);
             case SEEDERS_INDEX:
                 if (torrent.getTrackerURIS().size() > 0) {
                     data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);

@@ -13,11 +13,19 @@ public class MultilineTooltipRenderer extends DefaultLimeTableCellRenderer {
             boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        String text = getText();
+        String text = String.valueOf(value);
+        
+        String[] lines = text.split("\n");
+        
         StringBuilder builder = new StringBuilder("<html>");
-        builder.append(StringUtils.explode(text.split("\n"), "<br/>"));
+        builder.append(StringUtils.explode(lines, "<br/>"));
         builder.append("</html>");
         setToolTipText(builder.toString());
+        
+        // Only should show the first line in the table...
+        if (lines.length > 0) {
+            setText(lines[0]);
+        }
         
         return this;
     }
