@@ -33,6 +33,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
@@ -68,7 +69,7 @@ public class TorrentWebSearch implements Search {
     
     private final HttpExecutor httpExecutor;
     
-    private static final String searchUriTemplate = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=small&safe=off&q={0}%20filetype%3Atorrent";
+    private final String searchUriTemplate = SearchSettings.TORRENT_WEB_SEARCH_URI_TEMPLATE.get();
     
     private final Provider<LimeHttpClient> httpClient;
 

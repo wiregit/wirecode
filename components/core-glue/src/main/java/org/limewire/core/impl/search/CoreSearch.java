@@ -22,6 +22,7 @@ import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
 import org.limewire.core.settings.PromotionSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -177,7 +178,9 @@ public class CoreSearch implements Search, SearchListener {
             }
         });        
         
-        if (initial && searchDetails.getSearchCategory() == SearchCategory.TORRENT) {
+        if (initial 
+                && SearchSettings.USE_TORRENT_WEB_SEARCH.getValue()
+                && searchDetails.getSearchCategory() == SearchCategory.TORRENT) {
             torrentWebSearch = torrentWebSearchFactory.create(searchDetails.getSearchQuery());
             torrentWebSearch.addSearchListener(this);
             torrentWebSearch.start();
