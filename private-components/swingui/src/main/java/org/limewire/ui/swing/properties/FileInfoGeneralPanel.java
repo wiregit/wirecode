@@ -179,7 +179,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 
         switch(propertiableFile.getCategory()) {
             case TORRENT :
-                if (urn != null) {
+                if (urn != null && type == FileInfoType.REMOTE_FILE) {
                     Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
                     String sha1HexString = null; 
                     if (torrent != null) {
@@ -190,19 +190,22 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                         // Manually convert the base 16 string hash to a more recognisable format
                         //  without going into core
                         String payloadHashString = "urn:sha1:" + Base32.encode(StringUtils.fromHexString(sha1HexString));
+                        String torrentHashString = urn.toString(); 
                         
-                        JLabel torrentHashLabel = createPlainLabel(I18n.tr("torrent file hash:"));
-                        JLabel payloadHashLabel = createPlainLabel(I18n.tr("payload hash:"));
+                        if (!torrentHashString.equals(payloadHashString)) {
+                            JLabel torrentHashLabel = createPlainLabel(I18n.tr("torrent file hash:"));
+                            JLabel payloadHashLabel = createPlainLabel(I18n.tr("payload hash:"));
                         
-                        FontUtils.bold(torrentHashLabel);
-                        FontUtils.bold(payloadHashLabel);
+                            FontUtils.bold(torrentHashLabel);
+                            FontUtils.bold(payloadHashLabel);
                         
-                        component.add(createHeaderLabel(I18n.tr("Hashes")), "wrap");
-                        component.add(torrentHashLabel, "split 2, gapright 5");
-                        component.add(createLabelField(propertiableFile.getUrn().toString()), "gapleft 0, growx, span, wrap");
-                        component.add(payloadHashLabel, "split 2, gapright 5"); 
-                        component.add(createLabelField(payloadHashString), "gapleft 0, growx, span, wrap");
-                        break;
+                            component.add(createHeaderLabel(I18n.tr("Hashes")), "wrap");
+                            component.add(torrentHashLabel, "split 2, gapright 5");
+                            component.add(createLabelField(torrentHashString), "gapleft 0, growx, span, wrap");
+                            component.add(payloadHashLabel, "split 2, gapright 5"); 
+                            component.add(createLabelField(payloadHashString), "gapleft 0, growx, span, wrap");
+                            break;
+                        }
                     }
                 }
                 // else, no payload hash, fall through... 

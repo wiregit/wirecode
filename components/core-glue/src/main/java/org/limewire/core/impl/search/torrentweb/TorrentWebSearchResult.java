@@ -42,7 +42,13 @@ public class TorrentWebSearchResult implements SearchResult {
         this.torrentFile = torrentFile;
         this.torrent = torrent;
         try {
-            urn = URN.createSHA1UrnFromBytes(torrentData.getInfoHash());
+            URN topLevelURN = null;
+            try {
+                topLevelURN = URN.createSHA1Urn(torrentFile);
+            } catch (InterruptedException e) {
+                topLevelURN =  URN.createSHA1UrnFromBytes(torrentData.getInfoHash());
+            }
+            urn = topLevelURN;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
