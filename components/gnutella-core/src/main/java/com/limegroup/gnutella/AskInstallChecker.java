@@ -16,12 +16,12 @@ import com.google.inject.Inject;
  */
 class AskInstallChecker {
     
-    /** Ask Toolbar was not shown or was not installed. */
-    public static final String ASK_NOT_INSTALLED = "not";
+    /** Ask Toolbar was not installed. */
+    public static final String ASK_NOT_INSTALLED = "not_installed";
     
-    /** Ask Toolbar is already installed. NOTE: this may not be the LW
+    /** Ask Toolbar is already installed or not shown. NOTE: this may not be the LW
      *  Toolbar but another Ask Toolbar. */
-    public static final String ASK_ALREADY_INSTALLED = "already";
+    public static final String ASK_ALREADY_INSTALLED = "not_shown";
     
     /** Ask Toolbar was installed on this LW installation. */
     public static final String ASK_INSTALLED = "installed";
