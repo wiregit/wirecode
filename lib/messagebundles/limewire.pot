@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-03 11:30-0400\n"
+"POT-Creation-Date: 2010-05-04 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3372,12 +3372,12 @@ msgstr ""
 #. add the spinners to the component
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:120
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:175
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:211
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:225
 msgid "Ratio:"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:122
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:213
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:227
 msgid "Maximum days:"
 msgstr ""
 
@@ -4483,23 +4483,23 @@ msgstr ""
 msgid "Torrent Download"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:196
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:210
 msgid "Use default torrent options"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:197
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:211
 msgid "Upload this torrent forever"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:198
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:212
 msgid "Upload this torrent until either of the following:"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:223
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:237
 msgid "Limit this torrent's download bandwidth"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:233
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:247
 msgid "Limit this torrent's upload bandwidth"
 msgstr ""
 
