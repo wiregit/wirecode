@@ -82,7 +82,6 @@
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar" sourcepath="lib/sources/icu4jsrc_2_6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
-	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/gettext-commons.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
@@ -164,5 +163,6 @@
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar" sourcepath="lib/sources/fmj-source.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
