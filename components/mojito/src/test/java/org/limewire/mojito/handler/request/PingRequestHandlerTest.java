@@ -2,6 +2,7 @@ package org.limewire.mojito.handler.request;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
@@ -13,6 +14,7 @@ import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.IoUtils;
 
 public class PingRequestHandlerTest extends MojitoTestCase {
@@ -62,7 +64,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // Pings to prevent other Nodes from selecting it as
             // their initial bootstrap Node
             
-            UnitTestUtils.setBootstrapping(dht1, true);
+            UnitTestUtils.setBooting(dht1, true);
             assertFalse(dht1.isReady());
             assertTrue(dht1.isBooting());
             
@@ -72,10 +74,9 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 assertTrue(dht1.isBooting());
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
-                assertTrue(expected.getCause() instanceof DHTException);
+                assertTrue(ExceptionUtils.isCausedBy(
+                        expected, TimeoutException.class));
             }
-            
-            Thread.sleep(waitForFutureDone);
             
             // next collision Ping. Different Node IDs -> should not work (same as above)
             dht1.setContactAddress(new InetSocketAddress("localhost", 2000));
@@ -87,12 +88,11 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
-                assertTrue(expected.getCause() instanceof DHTException);
+                assertTrue(ExceptionUtils.isCausedBy(
+                        expected, TimeoutException.class));
             } catch (IllegalArgumentException err) {
                 fail("Should not have thrown an IllegalArgumentException", err);
             }
-            
-            Thread.sleep(waitForFutureDone);
             
             // Re-Enable local assertion to make sure you can't create
             // malformed collision pings like above
@@ -101,14 +101,13 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
-                assertTrue(expected.getCause() instanceof DHTException);
+                assertTrue(ExceptionUtils.isCausedBy(
+                        expected, TimeoutException.class));
             } catch (IllegalArgumentException expected) {
             }
             
-            Thread.sleep(waitForFutureDone);
-            
             // Set DHT-2's Node ID to DHT-1 and try again. This should work!
-            UnitTestUtils.setNodeID(dht2, dht1.getLocalNodeID());
+            dht2.setContactId(dht1.getLocalNodeID());
             try {
                 PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
                 assertNotNull(entity);

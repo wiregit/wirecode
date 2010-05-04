@@ -1,15 +1,12 @@
 package org.limewire.mojito.util;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
-import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.manager.BootstrapManager;
-import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.entity.BootstrapEntity;
 
 
 public class UnitTestUtils {
@@ -18,56 +15,30 @@ public class UnitTestUtils {
         
     }
     
-    @SuppressWarnings("unchecked")
-    public static void setBootstrapping(MojitoDHT dht, boolean bootstrapping) throws Exception {
-        Context context = (Context)dht;
-        Field bmField = Context.class.getDeclaredField("bootstrapManager");
-        bmField.setAccessible(true);
+    public static void setBooting(MojitoDHT dht, boolean booting) throws Exception {
+        Field field = Context.class.getDeclaredField("bootstrap");
+        field.setAccessible(true);
         
-        BootstrapManager bootstrapManager = (BootstrapManager)bmField.get(context);
-        Field futureField = BootstrapManager.class.getDeclaredField("future");
-        futureField.setAccessible(true);
-        
-        synchronized (bootstrapManager) {
-            if (bootstrapping) {
-                Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
-                Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, DHTTask.class);
-                con.setAccessible(true);
-                
-                Object future = con.newInstance(bootstrapManager, new DHTTask() {
-                    public void cancel() {
-                        throw new UnsupportedOperationException();
-                    }
-
-                    public long getWaitOnLockTimeout() {
-                        return -1L;
-                    }
-
-                    public void start(DHTFuture future) {
-                        throw new UnsupportedOperationException();
-                    } 
-                });
-                
-                futureField.set(bootstrapManager, future);
-            } else {
-                futureField.set(bootstrapManager, null);
-            }
+        DHTFuture<BootstrapEntity> future = null;
+        if (booting) {
+            future = new DHTValueFuture<BootstrapEntity>();
         }
-    }
-    
-    public static void setBootstrapped(MojitoDHT dht, boolean bootstrapped) throws Exception {
-        Context context = (Context)dht;
-        Field bmField = Context.class.getDeclaredField("bootstrapManager");
-        bmField.setAccessible(true);
         
-        BootstrapManager bootstrapManager = (BootstrapManager)bmField.get(context);
-        bootstrapManager.setBootstrapped(bootstrapped);
+        Context context = dht.getContext();
+        field.set(context, future);
     }
     
-    public static void setNodeID(MojitoDHT dht, KUID nodeId) throws Exception {
-        Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
-        m.setAccessible(true);
-        m.invoke(dht, new Object[]{nodeId});
+    public static void setReady(MojitoDHT dht, boolean ready) throws Exception {
+        Field field = Context.class.getDeclaredField("bootstrap");
+        field.setAccessible(true);
+        
+        DHTFuture<BootstrapEntity> future = null;
+        if (ready) {
+            future = new DHTValueFuture<BootstrapEntity>(
+                    (BootstrapEntity)null);
+        }
+        
+        Context context = dht.getContext();
+        field.set(context, future);
     }
-   
 }

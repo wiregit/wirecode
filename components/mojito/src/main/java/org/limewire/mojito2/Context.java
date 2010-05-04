@@ -17,12 +17,14 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.BootstrapConfig;
 import org.limewire.mojito2.io.BootstrapProcess;
 import org.limewire.mojito2.io.DefaultMessageDispatcher;
 import org.limewire.mojito2.io.DefaultStoreForward;
+import org.limewire.mojito2.io.SecurityTokenResponseHandler;
 import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.io.NodeResponseHandler;
 import org.limewire.mojito2.io.PingResponseHandler;
@@ -523,7 +525,16 @@ public class Context extends AbstractDHT {
         }
     }
     
-    
+    public DHTFuture<SecurityTokenEntity> getSecurityToken(
+            Contact src, long timeout, TimeUnit unit) {
+        
+        KUID lookupId = KUID.createRandomID();
+        AsyncProcess<SecurityTokenEntity> process 
+            = new SecurityTokenResponseHandler(this, 
+                    src, lookupId, timeout, unit);
+        
+        return submit(process, timeout, unit);
+    }
 
     /**
      * 

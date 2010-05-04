@@ -19,29 +19,25 @@
  
 package org.limewire.mojito;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
-import org.limewire.mojito.concurrent.CallableDHTTask;
-import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.exceptions.DHTException;
-import org.limewire.mojito.result.Result;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.SecurityTokenEntity;
+import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.BucketRefresherSettings;
@@ -84,55 +80,43 @@ public class CacheForwardTest extends MojitoTestCase {
         RouteTableSettings.INCOMING_REQUESTS_UNKNOWN.setValue(true);
     }
 
-    @SuppressWarnings("unchecked")
     public void testGetSecurityToken() throws Exception {
         
         MojitoDHT dht1 = null;
         MojitoDHT dht2 = null;
         
         try {
-            
             // Setup the first instance so that it thinks it's bootstrapping
             dht1 = MojitoFactory.createDHT("DHT-1", 2000);
             
-            UnitTestUtils.setBootstrapping(dht1, true);            
+            UnitTestUtils.setBooting(dht1, true);            
             assertFalse(dht1.isReady());
             assertTrue(dht1.isBooting());
             
             // And setup the second instance so that it thinks it's bootstrapped 
             dht2 = MojitoFactory.createDHT("DHT-2", 3000);
             
-            UnitTestUtils.setBootstrapped(dht2, true);
+            UnitTestUtils.setReady(dht2, true);
             assertTrue(dht2.isReady());
             assertFalse(dht2.isBooting());
             
             // Get the SecurityToken...
-            Class clazz = Class.forName("org.limewire.mojito.manager.StoreProcess$GetSecurityTokenHandler");
-            Constructor<DHTTask<Result>> con 
-                = clazz.getDeclaredConstructor(Context.class, Contact.class);
-            con.setAccessible(true);
+            Context context1 = dht1.getContext();
             
-            DHTTask<Result> task = con.newInstance(context2, context1.getLocalNode());
-            CallableDHTTask<Result> callable = new CallableDHTTask<Result>(task);
+            DHTFuture<SecurityTokenEntity> future 
+                = context1.getSecurityToken(dht2.getLocalNode(), 
+                    500, TimeUnit.MILLISECONDS);
             
-            try {
-                Result result = callable.call();
-                clazz = Class.forName("org.limewire.mojito.manager.StoreProcess$GetSecurityTokenResult");
-                Method m = clazz.getDeclaredMethod("getSecurityToken", new Class[0]);
-                m.setAccessible(true);
-                
-                SecurityToken securityToken = (SecurityToken)m.invoke(result, new Object[0]);
-                assertNotNull(securityToken);
-            } catch (ExecutionException err) {
-            	assertInstanceof(DHTException.class, err.getCause());
-                fail("DHT-1 did not return a SecurityToken", err);
-            }
+            SecurityTokenEntity entity = future.get();
+            SecurityToken token = entity.getSecurityToken();
+            
+            assertNotNull(token);
             
         } finally {
             IoUtils.closeAll(dht1, dht2);
         }
     }
-    
+
     public void disabledtestCacheForward() throws Exception {
         // This test is testing a disabled feature and keeps failing. 
         // We disable this test for now. See LWC-2778 for detail
@@ -159,9 +143,7 @@ public class CacheForwardTest extends MojitoTestCase {
         MojitoDHT first = null;
         try {
             for (int i = 0; i < 3*k; i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(PORT + i);
-                dht.start();
+                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, PORT+i);
                 
                 if (i > 0) {
                     Thread.sleep(100);
@@ -194,7 +176,7 @@ public class CacheForwardTest extends MojitoTestCase {
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             // Store the value
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
-            StoreResult evt = creator.put(valueId, value).get();            
+            StoreEntity evt = creator.put(valueId, value).get();            
             
             // see LWC-2778. In case the root is UNKNOWN in others route table, 
             // we wait BOOTSTRAP_TIME (the delay of ping the nearest bucket)
@@ -202,30 +184,30 @@ public class CacheForwardTest extends MojitoTestCase {
             // the root is ALIVE
             boolean waiting = true;
             KUID rootsID = TrieUtils.select(trie, valueId, 1).get(0);
-            for (Contact c : evt.getLocations()){
+            for (Contact c : evt.getContacts()){
                 if (c.getNodeID().equals(rootsID)){
                     waiting = false;
                     break;
                 }
             }
             if (waiting) {
-                for (Contact c: evt.getLocations()) {
-                    Context dht = (Context)dhts.get(c.getNodeID());
+                for (Contact c: evt.getContacts()) {
+                    MojitoDHT dht = dhts.get(c.getNodeID());
                     dht.getDatabase().clear();
                 }
                 Thread.sleep(BOOTSTRAP_TIME);
                 evt = creator.put(valueId, value).get();
             }
             
-            assertEquals(k, evt.getLocations().size());
+            assertEquals(k, evt.getContacts().length);
             
             // Give everybody time to process the store request
             Thread.sleep(waitForNodes);
             
             // And check the initial state
-            Context closest = null;
-            for (Contact remote : evt.getLocations()) {
-                Context dht = (Context)dhts.get(remote.getNodeID());
+            MojitoDHT closest = null;
+            for (Contact remote : evt.getContacts()) {
+                MojitoDHT dht = dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
                 for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
@@ -242,13 +224,9 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Create a Node with the nearest possible Node ID
             // That means we set the Node ID to the Value ID
-            Context nearest = (Context)MojitoFactory.createDHT("Nearest");
-            Method m = nearest.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
-            m.setAccessible(true);
-            m.invoke(nearest, new Object[]{valueId});
+            MojitoDHT nearest = MojitoFactory.createDHT("Nearest", PORT+500);
+            nearest.setContactId(valueId);
             
-            nearest.bind(PORT+500);
-            nearest.start();
             bootstrap(nearest, dhts.values());
             
             
@@ -259,8 +237,8 @@ public class CacheForwardTest extends MojitoTestCase {
             // The Node with the nearest possible ID should have the value
             assertEquals(1, nearest.getDatabase().getValueCount());
             
-            for (Contact remote : evt.getLocations()) {
-                Context dht = (Context)dhts.get(remote.getNodeID());
+            for (Contact remote : evt.getContacts()) {
+                MojitoDHT dht = dhts.get(remote.getNodeID());
 
                 assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
@@ -323,11 +301,11 @@ public class CacheForwardTest extends MojitoTestCase {
             // Pick a Node from the middle of the k-closest Nodes,
             // clear its Database and do the same test as with the
             // nearest Node above
-            Context middle = null;
+            MojitoDHT middle = null;
             int index = 0;
-            for (Contact node : evt.getLocations()) {
+            for (Contact node : evt.getContacts()) {
                 if (index == k/2) {
-                    middle = (Context)dhts.get(node.getNodeID());
+                    middle = dhts.get(node.getNodeID());
                     break;
                 }
                 
@@ -363,12 +341,12 @@ public class CacheForwardTest extends MojitoTestCase {
             int count = 0;
             dhts.put(nearest.getLocalNodeID(), nearest);
             for (MojitoDHT dht : dhts.values()) {
-                count += ((Context)dht).getDatabase().values().size();
+                count += dht.getDatabase().values().size();
             }
             
             // If the creator is a member of the k-closest Nodes then
             // make sure we're counting it as well
-            for (Contact node : evt.getLocations()) {
+            for (Contact node : evt.getContacts()) {
                 if (node.getNodeID().equals(creator.getLocalNodeID())) {
                     count++;
                     break;
@@ -391,41 +369,6 @@ public class CacheForwardTest extends MojitoTestCase {
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.revertToDefault();
         assertFalse(DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue());
     }
-    
-    public void testStoreMultipleValues() throws Exception {
-        MojitoDHT dht1 = null;
-        MojitoDHT dht2 = null;
-        
-        try {
-            dht1 = MojitoFactory.createDHT("DHT1", 2000);
-            dht2 = MojitoFactory.createDHT("DHT2", 2001);
-            
-            dht1.bootstrap(new InetSocketAddress("localhost", 2001)).get();
-            dht2.bootstrap(new InetSocketAddress("localhost", 2000)).get();
-            
-            Context context1 = (Context)dht1;
-            
-            KUID primaryKey1 = KUID.createRandomID();
-            KUID primaryKey2 = KUID.createRandomID();
-            
-            DHTValue value1 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
-            DHTValue value2 = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Foo Bar"));
-            
-            DHTValueEntity entity1 = DHTValueEntity.createFromValue(context1, primaryKey1, value1);
-            DHTValueEntity entity2 = DHTValueEntity.createFromValue(context1, primaryKey2, value2);
-            
-            Collection<DHTValueEntity> entities = Arrays.asList(entity1, entity2);
-            DHTFuture<StoreResult> future = context1.store(
-                    dht2.getLocalNode(), null, entities);
-          /*  StoreResult result = */ future.get(); // TODO: should result be tested?
-            
-            assertEquals(2, dht2.getDatabase().getKeyCount());
-            assertEquals(2, dht2.getDatabase().getValueCount());
-        } finally {
-            IoUtils.closeAll(dht1, dht2);
-        }
-    }
-    
     
     /**
      * Bootstraps the given Node from one of the other Nodes and makes sure a
