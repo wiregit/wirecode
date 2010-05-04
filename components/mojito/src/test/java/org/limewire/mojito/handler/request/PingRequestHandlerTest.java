@@ -63,13 +63,13 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // their initial bootstrap Node
             
             UnitTestUtils.setBootstrapping(dht1, true);
-            assertFalse(dht1.isBootstrapped());
-            assertTrue(dht1.isBootstrapping());
+            assertFalse(dht1.isReady());
+            assertTrue(dht1.isBooting());
             
             try {
                 PingEntity entity = dht2.ping("localhost", 2000).get();
-                assertFalse(dht1.isBootstrapped());
-                assertTrue(dht1.isBootstrapping());
+                assertFalse(dht1.isReady());
+                assertTrue(dht1.isBooting());
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
@@ -117,8 +117,8 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             }
             
             // Make sure DHT-1 is still bootstrapping!
-            assertFalse(dht1.isBootstrapped());
-            assertTrue(dht1.isBootstrapping());
+            assertFalse(dht1.isReady());
+            assertTrue(dht1.isBooting());
         } finally {
             IoUtils.closeAll(dht1, dht2);
         }
