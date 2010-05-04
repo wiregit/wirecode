@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.FixedsizeForgetfulHashMap;
@@ -27,7 +26,6 @@ import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 @EagerSingleton
 public class SecureIdDatabaseStore implements SecureIdStore, Service {

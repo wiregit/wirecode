@@ -95,6 +95,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "simpp sender snapshot", "ScheduledService",
         "Virus Definition Service", "VirusDefinitionManagerImpl",
         "Activation-Manager Service", "ActivationManagerImpl",
+        "id db store", "SecureIdDatabaseStore",
         // WINDOWS ONLY: "AntiVirusService", "VirusScannerImpl"
         };
         
