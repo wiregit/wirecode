@@ -101,14 +101,14 @@ public interface DHT extends Closeable {
     public boolean isBound();
     
     /**
-     * 
+     * Returns true if the {@link DHT} is in the process of bootstrapping
      */
-    public boolean isBootstrapping();
+    public boolean isBooting();
     
     /**
-     * 
+     * Returns true if the {@link DHT} is ready (i.e. bootstrapped)
      */
-    public boolean isBootstrapped();
+    public boolean isReady();
     
     /**
      * 

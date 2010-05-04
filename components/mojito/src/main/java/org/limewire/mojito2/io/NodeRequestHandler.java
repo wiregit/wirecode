@@ -65,7 +65,7 @@ public class NodeRequestHandler extends AbstractRequestHandler {
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
         
-        // Cast to LookupRequest because FindValueRequestHandler
+        // Cast to LookupRequest because ValueRequestHandler
         // is delegating requests to this class!
         LookupRequest request = (LookupRequest)message;
 
@@ -73,7 +73,10 @@ public class NodeRequestHandler extends AbstractRequestHandler {
         Contact node = request.getContact();
         
         Collection<Contact> nodes = Collections.emptyList();
-        if (!context.isBootstrapping()) {
+        
+        // Don't respond with Contacts if we're bootstrapping!
+        // We have incomplete information.
+        if (!context.isBooting()) {
             
             RouteTable routeTable = context.getRouteTable();
             
@@ -96,11 +99,7 @@ public class NodeRequestHandler extends AbstractRequestHandler {
         }
         
         if (LOG.isTraceEnabled()) {
-            if (!nodes.isEmpty()) {
-                LOG.trace("Sending back: " + CollectionUtils.toString(nodes) + " to: " + node);
-            } else {
-                LOG.trace("Sending back an empty list to: " + node);
-            }
+            LOG.trace("Sending back: " + CollectionUtils.toString(nodes) + " to: " + node);
         }
         
         MessageHelper messageHelper = context.getMessageHelper();

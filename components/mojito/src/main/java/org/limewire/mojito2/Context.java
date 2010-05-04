@@ -351,15 +351,15 @@ public class Context extends AbstractDHT {
     }
     
     @Override
-    public boolean isBootstrapping() {
+    public synchronized boolean isBooting() {
         DHTFuture<BootstrapEntity> bootstrap = this.bootstrap;
-        return bootstrap != null && !bootstrap.isDone();
+        return open && bootstrap != null && !bootstrap.isDone();
     }
     
     @Override
-    public boolean isBootstrapped() {
+    public synchronized boolean isReady() {
         DHTFuture<BootstrapEntity> bootstrap = this.bootstrap;
-        return bootstrap != null && bootstrap.isDone() 
+        return open && bootstrap != null && bootstrap.isDone() 
                 && !bootstrap.isCompletedAbnormally();
     }
     

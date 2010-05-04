@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.PingRequest;
 import org.limewire.mojito2.message.PingResponse;
@@ -44,23 +45,31 @@ public class PingRequestHandler extends AbstractRequestHandler {
         super(context);
     }
     
+    /**
+     * Returns true if the "localhost" is in the process of booting
+     * and the PING is not a collision 
+     */
+    private boolean isBooting(PingRequest message) {
+        Contact localhost = context.getLocalNode();
+        KUID contactId = localhost.getNodeID();
+        
+        boolean collisionPing = MessageUtils.isCollisionPingRequest(contactId, message);
+        return context.isBooting() && !collisionPing;
+    }
+    
     @Override
     protected void processRequest(RequestMessage message) throws IOException {
         
         PingRequest request = (PingRequest)message;
         Contact contact = request.getContact();
         
-        // Don't respond to pings while we're bootstrapping! This
-        // makes sure nobody can use us as the initial bootstrap
-        // Node as we've (likely) poor knowledge of the DHT in this
-        // stage. The only exception from this are collision test
-        // pings!
-        if (context.isBootstrapping() 
-                && !MessageUtils.isCollisionPingRequest(
-                        context.getLocalNodeID(), message)) {
+        // Don't respond to PINGs while we're bootstrapping! This makes
+        // sure nobody can use as their initial bootstrap Node as we've
+        // (likely) poor knowledge of the DHT and it's best to ignore
+        // the request. The only exception are collision test PINGs.
+        if (isBooting(request)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Received a PingRequest from " + contact 
-                        + " but local Node is bootstrapping");
+                LOG.info("Ignoring PING from " + contact);
             }
             return;
         }
