@@ -72,6 +72,6 @@ public class LibTorrentFileEntry extends Structure implements Structure.ByRefere
 
     @Override
     public String toString() {
-        return index + " - " + path + " - " + total_done + "/" + size + "priority: " + priority;
+        return getPath();
     }
 }
