@@ -141,8 +141,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private synchronized void complete() {
         long time = getTime(TimeUnit.MILLISECONDS);
-        Contact[] contacts = codes.keySet().toArray(new Contact[0]);
         
+        Contact[] contacts = codes.keySet().toArray(new Contact[0]);
         setValue(new DefaultStoreEntity(contacts, time, TimeUnit.MILLISECONDS));
     }
     
@@ -158,6 +158,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     @Override
     protected void processResponse(RequestHandle request, 
             ResponseMessage response, long time, TimeUnit unit) throws IOException {
+        
         try {
             processResponse0(request, (StoreResponse)response, time, unit);
         } finally {
@@ -179,6 +180,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
                 LOG.error(response.getContact() 
                         + " sent a wrong number of StoreStatusCodes: " + codes);
             }
+            
             return;
         }
         
@@ -193,8 +195,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             if (LOG.isErrorEnabled()) {
                 LOG.error(src + " sent a wrong [" + code + "] for " + entity);
             }
+            
             return;
         }
+        
+        addStoreStatusCode(src, entity, code.getStatusCode());
     }
     
     @Override
@@ -233,6 +238,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private void addStoreStatusCode(Contact dst, 
             DHTValueEntity entity, StatusCode code) {
+        
         
         List<StoreStatusCode> list = codes.get(dst);
         if (list == null) {
