@@ -339,7 +339,10 @@ public class LibraryTable extends MouseableTable {
                 setCellRenderer(TorrentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(TorrentTableFormat.ACTION_INDEX, removeRenderer.get());
                 setCellEditor(TorrentTableFormat.ACTION_INDEX, removeEditor);
+                
                 setUnsortable(TorrentTableFormat.ACTION_INDEX);
+                setUnsortable(TorrentTableFormat.TRACKERS_INDEX);
+                setUnsortable(TorrentTableFormat.FILES_INDEX);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown category:" + category);

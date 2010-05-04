@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JTable;
 
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
@@ -29,7 +30,7 @@ public class MultilineTooltipRenderer extends DefaultLimeTableCellRenderer {
         List<Object> lines = (List<Object>) value;
         
         StringBuilder builder = new StringBuilder("<html>");
-        builder.append(StringUtils.explode(lines, "<br/>", 14, 40, AND_MORE_MSG));
+        builder.append(StringUtils.explode(lines, "<br/>", 14, 60, AND_MORE_MSG));
         builder.append("</html>");
         setToolTipText(builder.toString());
         
@@ -38,16 +39,14 @@ public class MultilineTooltipRenderer extends DefaultLimeTableCellRenderer {
             setText(String.valueOf(lines.get(0)));
         }
         
+        if (lines.size() > 1) {
+            // Overriden so these cells always exceed their table's space restrictions and thus
+            //  always show tooltips and subsequent lines.
+            setPreferredSize(INFINITE_SIZE);
+        } else {
+            setPreferredSize(new Dimension(FontUtils.getPixelWidth(getText(), getFont()), Integer.MAX_VALUE));
+        }
+        
         return this;
     }
-    
-    /**
-     * Overriden so these cells always exceed their table's space restrictions and thus
-     *  always show tooltips and subsequent lines. 
-     */
-    @Override
-    public Dimension getPreferredSize() {
-        return INFINITE_SIZE;
-    }
-    
 }
