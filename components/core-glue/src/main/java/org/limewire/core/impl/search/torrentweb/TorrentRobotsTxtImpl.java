@@ -68,11 +68,12 @@ public class TorrentRobotsTxtImpl implements TorrentRobotsTxt {
             response = httpClient.execute(get);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
+                if (entity == null) {
+                    return "";
+                }
                 File file = createTmpFile(uri);
                 out = new BufferedOutputStream(new FileOutputStream(file));
-                if (entity != null) {
-                    entity.writeTo(out);
-                }
+                entity.writeTo(out);
                 out.close();
                 if (file.length() < TorrentRobotsTxtStore.MAX_ROBOTS_TXT_SIZE) {
                     byte[] contents = FileUtils.readFileFully(file);

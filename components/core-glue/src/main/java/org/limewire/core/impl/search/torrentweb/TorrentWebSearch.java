@@ -53,7 +53,6 @@ import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * TODO stop search
  * TODO cap of too many head requests
  * TODO check large files before reading
  * TODO handle magnet links
@@ -366,7 +365,6 @@ public class TorrentWebSearch implements Search {
             }
             out = new BufferedOutputStream(new FileOutputStream(file));
             entity.writeTo(out);
-            out.close();
             return file;
         } catch (IOException ie) {
             LOG.debug("error with GET request", ie);
