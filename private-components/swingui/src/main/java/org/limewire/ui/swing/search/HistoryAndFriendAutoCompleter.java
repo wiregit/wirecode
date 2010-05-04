@@ -287,7 +287,9 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
                 }
                 setSelectedIndex(selectedIndex);
                 ensureIndexIsVisible(selectedIndex);
-                callback.itemSuggested(getSelectedValue().toString(), true, false);
+                if (getSelectedValue() != null) {
+                    callback.itemSuggested(getSelectedValue().toString(), true, false);
+                }
             }
         }
     }
