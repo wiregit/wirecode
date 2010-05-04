@@ -1,7 +1,9 @@
 package org.limewire.mojito2;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -57,6 +59,7 @@ class FutureManager implements Closeable {
     
     @Override
     public void close() {
+        List<DHTFuture<?>> copy = null;
         synchronized (futures) {
             if (!open) {
                 return;
@@ -64,11 +67,12 @@ class FutureManager implements Closeable {
             
             open = false;
             
-            for (DHTFuture<?> future : futures) {
-                future.cancel(true);
-            }
-            
+            copy = new ArrayList<DHTFuture<?>>(futures);
             futures.clear();
+        }
+        
+        for (DHTFuture<?> future : copy) {
+            future.cancel(true);
         }
     }
     

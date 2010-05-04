@@ -39,13 +39,17 @@ public class BucketRefresher implements Closeable {
     
     private final Config config;
     
-    private final ScheduledFuture<?> future;
+    private final long frequency;
+    
+    private final TimeUnit unit;
+    
+    private ScheduledFuture<?> future;
     
     /**
      * 
      */
-    private final AtomicBoolean barrier 
-        = new AtomicBoolean(true);
+    private final AtomicBoolean active 
+        = new AtomicBoolean(false);
     
     /**
      * 
@@ -60,25 +64,58 @@ public class BucketRefresher implements Closeable {
     /**
      * 
      */
+    private boolean open = true;
+    
+    /**
+     * 
+     */
+    public BucketRefresher(DHT dht, long frequency, TimeUnit unit) {
+        this(dht, new Config(), frequency, unit);
+    }
+    
+    /**
+     * 
+     */
     public BucketRefresher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
         this.config = config;
+        this.frequency = frequency;
+        this.unit = unit;
+    }
+    
+    /**
+     * 
+     */
+    public synchronized void start() {
+        
+        if (!open) {
+            throw new IllegalStateException();
+        }
+        
+        if (future != null && !future.isDone()) {
+            return;
+        }
         
         Runnable task = new ManagedRunnable() {
             @Override
             protected void doRun() {
-                process();
+                if (dht.isReady()) {
+                    process();
+                }
             }
         };
         
+        active.set(false);
         future = EXECUTOR.scheduleWithFixedDelay(
                 task, frequency, frequency, unit);
     }
     
-    @Override
-    public synchronized void close() {
+    /**
+     * 
+     */
+    public synchronized void stop() {
         if (future != null) {
             future.cancel(true);
         }
@@ -92,11 +129,17 @@ public class BucketRefresher implements Closeable {
         }
     }
     
+    @Override
+    public synchronized void close() {
+        open = false;
+        stop();
+    }
+    
     /**
      * 
      */
     private synchronized void process() {
-        if (barrier.getAndSet(false)) {
+        if (!active.getAndSet(true)) {
             ping();
         }
     }
@@ -119,7 +162,7 @@ public class BucketRefresher implements Closeable {
         Runnable callback = new Runnable() {
             @Override
             public void run() {
-                barrier.set(true);
+                active.set(false);
             }
         };
         

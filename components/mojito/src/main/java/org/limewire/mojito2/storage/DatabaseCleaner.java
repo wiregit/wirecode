@@ -11,17 +11,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.routing.RouteTable;
 
 /**
  * 
  */
-public class DatabaseCleaner2 implements Closeable {
+public class DatabaseCleaner implements Closeable {
 
     private static final Log LOG 
-        = LogFactory.getLog(DatabaseCleaner2.class);
+        = LogFactory.getLog(DatabaseCleaner.class);
     
     @InspectablePrimitive(value = "Expired Value Count")
     private static final AtomicInteger EXPIRED_COUNT = new AtomicInteger();
@@ -36,23 +35,38 @@ public class DatabaseCleaner2 implements Closeable {
     
     private final Database database;
     
-    private final ScheduledFuture<?> future;
+    private final long frequency;
+    
+    private final TimeUnit unit;
+    
+    private ScheduledFuture<?> future;
+    
+    private boolean open = true;
     
     /**
      * 
      */
-    public DatabaseCleaner2(DHT dht, long frequency, TimeUnit unit) {
-        this(dht.getRouteTable(), dht.getDatabase(), frequency, unit);
-    }
-    
-    /**
-     * 
-     */
-    public DatabaseCleaner2(RouteTable routeTable, 
+    public DatabaseCleaner(RouteTable routeTable, 
             Database database, long frequency, TimeUnit unit) {
         
         this.routeTable = routeTable;
         this.database = database;
+        this.frequency = frequency;
+        this.unit = unit;
+    }
+    
+    public EvictorManager getEvictorManager() {
+        return evictorManager;
+    }
+    
+    public synchronized void start() {
+        if (!open) {
+            throw new IllegalStateException();
+        }
+        
+        if (future != null && !future.isDone()) {
+            return;
+        }
         
         Runnable task = new ManagedRunnable() {
             @Override
@@ -65,15 +79,16 @@ public class DatabaseCleaner2 implements Closeable {
                 task, frequency, frequency, unit);
     }
     
-    public EvictorManager getEvictorManager() {
-        return evictorManager;
-    }
-    
-    @Override
-    public void close() {
+    public synchronized void stop() {
         if (future != null) {
             future.cancel(true);
         }
+    }
+
+    @Override
+    public synchronized void close() {
+        open = false;
+        stop();
     }
     
     private void process() {

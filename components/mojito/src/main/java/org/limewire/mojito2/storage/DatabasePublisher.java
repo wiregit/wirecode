@@ -1,6 +1,7 @@
 package org.limewire.mojito2.storage;
 
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,38 +42,74 @@ public class DatabasePublisher implements Closeable {
     
     private final Config config;
     
-    private final ScheduledFuture<?> future;
+    private final long frequency;
+    
+    private final TimeUnit unit;
     
     /**
      * 
      */
-    private final AtomicBoolean barrier 
-        = new AtomicBoolean(true);
+    private final AtomicBoolean active 
+        = new AtomicBoolean(false);
+    
+    /**
+     * 
+     */
+    private ScheduledFuture<?> future;
     
     /**
      * 
      */
     private StoreTask storeTask = null;
     
+    /**
+     * 
+     */
+    private boolean open = true;
+    
+    /**
+     * 
+     */
+    public DatabasePublisher(DHT dht, long frequency, TimeUnit unit) {
+        this(dht, new Config(), frequency, unit);
+    }
+    
+    /**
+     * 
+     */
     public DatabasePublisher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
         this.config = config;
+        this.frequency = frequency;
+        this.unit = unit;
+    }
+    
+    public synchronized void start() {
+        if (!open) {
+            throw new IllegalStateException();
+        }
+        
+        if (future != null && !future.isDone()) {
+            return;
+        }
         
         Runnable task = new ManagedRunnable() {
             @Override
             protected void doRun() {
-                process();
+                if (dht.isReady()) {
+                    process();
+                }
             }
         };
         
+        active.set(false);
         future = EXECUTOR.scheduleWithFixedDelay(
                 task, frequency, frequency, unit);
     }
     
-    @Override
-    public synchronized void close() {
+    public synchronized void stop() {
         if (future != null) {
             future.cancel(true);
         }
@@ -82,12 +119,18 @@ public class DatabasePublisher implements Closeable {
         }
     }
     
+    @Override
+    public synchronized void close() {
+        open = false;
+        stop();
+    }
+    
     private synchronized void process() {
-        if (barrier.getAndSet(false)) {
+        if (!active.getAndSet(true)) {
             Runnable callback = new Runnable() {
                 @Override
                 public void run() {
-                    barrier.set(true);
+                    active.set(false);
                 }
             };
             
@@ -135,7 +178,12 @@ public class DatabasePublisher implements Closeable {
             StorableModelManager modelManager 
                 = dht.getStorableModelManager();
             
-            storables = modelManager.getStorables().iterator();
+            Collection<Storable> elements 
+                = modelManager.getStorables();
+            
+            storables = elements.iterator();
+            
+            doNext();
         }
         
         @Override
@@ -154,10 +202,22 @@ public class DatabasePublisher implements Closeable {
                 return;
             }
             
-            Storable storable = storables.next();
+            final Storable storable = storables.next();
             
             future = dht.put(storable, timeout, unit);
             future.addFutureListener(listener);
+            
+            future.addFutureListener(
+                    new EventListener<FutureEvent<StoreEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<StoreEntity> event) {
+                    StoreEntity entity = event.getResult();
+                    
+                    if (entity != null) {
+                        storable.handleStoreResult(entity);
+                    }
+                }
+            });
         }
     }
     

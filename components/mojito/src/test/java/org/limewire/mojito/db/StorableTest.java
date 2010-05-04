@@ -66,7 +66,9 @@ public class StorableTest extends MojitoTestCase {
     public void testStorableModel() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        PrivilegedAccessor.setValue(DatabaseSettings.STORABLE_PUBLISHER_PERIOD, "value", new Long(100));
+        PrivilegedAccessor.setValue(
+                DatabaseSettings.STORABLE_PUBLISHER_PERIOD, 
+                "value", new Long(100));
         
         Map<KUID, MojitoDHT> dhts = Collections.emptyMap();
         try {
@@ -88,7 +90,10 @@ public class StorableTest extends MojitoTestCase {
             
             final AtomicBoolean publisherDidRun = new AtomicBoolean(false);
             
-            dhts.values().iterator().next().getStorableModelManager().addStorableModel(type, new StorableModel() {
+            MojitoDHT dht = dhts.values().iterator().next();
+            
+            dht.getStorableModelManager().addStorableModel(
+                    type, new StorableModel() {
                 @Override
                 public Collection<Storable> getStorables() {
                     synchronized (lock1) {

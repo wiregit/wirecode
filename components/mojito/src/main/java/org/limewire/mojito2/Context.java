@@ -24,10 +24,10 @@ import org.limewire.mojito2.io.BootstrapConfig;
 import org.limewire.mojito2.io.BootstrapProcess;
 import org.limewire.mojito2.io.DefaultMessageDispatcher;
 import org.limewire.mojito2.io.DefaultStoreForward;
-import org.limewire.mojito2.io.SecurityTokenResponseHandler;
 import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.io.NodeResponseHandler;
 import org.limewire.mojito2.io.PingResponseHandler;
+import org.limewire.mojito2.io.SecurityTokenResponseHandler;
 import org.limewire.mojito2.io.StoreForward;
 import org.limewire.mojito2.io.StoreResponseHandler;
 import org.limewire.mojito2.io.Transport;
@@ -35,17 +35,22 @@ import org.limewire.mojito2.io.ValueResponseHandler;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
 import org.limewire.mojito2.message.RequestMessage;
+import org.limewire.mojito2.routing.BucketRefresher;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.ContactPinger;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.BucketRefresherSettings;
 import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.DatabaseCleaner;
+import org.limewire.mojito2.storage.DatabasePublisher;
 import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.DHTSizeEstimator;
 import org.limewire.mojito2.util.HostFilter;
@@ -81,6 +86,27 @@ public class Context extends AbstractDHT {
      */
     private final DHTValueFactoryManager factoryManager 
         = new DHTValueFactoryManager();
+    
+    /**
+     * 
+     */
+    private final BucketRefresher bucketRefresher 
+        = new BucketRefresher(this, 
+                BucketRefresherSettings.BUCKET_REFRESHER_DELAY.get(), 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    private final DatabasePublisher databasePublisher 
+        = new DatabasePublisher(this, 
+                DatabaseSettings.STORABLE_PUBLISHER_PERIOD.get(), 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    private final DatabaseCleaner databaseCleaner;
     
     /**
      * 
@@ -141,6 +167,11 @@ public class Context extends AbstractDHT {
         this.routeTable = routeTable;
         this.database = database;
         
+        this.databaseCleaner = new DatabaseCleaner(
+                routeTable, database, 
+                DatabaseSettings.DATABASE_CLEANER_PERIOD.get(), 
+                TimeUnit.MILLISECONDS);
+        
         this.messageHelper = new MessageHelper(this, messageFactory);
         
         StoreForward storeForward 
@@ -169,6 +200,10 @@ public class Context extends AbstractDHT {
             shutdown();
         }
         
+        databasePublisher.close();
+        databaseCleaner.close();
+        bucketRefresher.close();
+        
         messageDispatcher.close();
     }
     
@@ -192,6 +227,10 @@ public class Context extends AbstractDHT {
         if (isBound()) {
             shutdown();
         }
+        
+        databasePublisher.stop();
+        databaseCleaner.stop();
+        bucketRefresher.stop();
         
         return messageDispatcher.unbind();
     }
@@ -378,6 +417,19 @@ public class Context extends AbstractDHT {
             = new BootstrapProcess(this, config, timeout, unit);
         
         bootstrap = submit(process, timeout, unit);
+        
+        bootstrap.addFutureListener(
+                new EventListener<FutureEvent<BootstrapEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<BootstrapEntity> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    databasePublisher.start();
+                    databaseCleaner.start();
+                    bucketRefresher.start();
+                }
+            }
+        });
+        
         return bootstrap;
     }
     
