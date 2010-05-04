@@ -96,7 +96,7 @@ public class MouseableTable extends StripedJXTable {
         Object value = getValueAt(row, col);
         JComponent renderer = getRendererComponent(row, col, value);
 
-        if (value != null) {
+        if (value != null && isClipped(renderer, col)) {
             String toolTip = renderer.getToolTipText();
 
             if (toolTip != null) {
@@ -110,6 +110,18 @@ public class MouseableTable extends StripedJXTable {
         }
         
         return null;
+    }
+
+    /**
+     * Checks if the renderer fits in the column.
+     * 
+     * @param row the view index of the row
+     * @param col the view index of the column
+     * @return true if the column width is less than the preferred width of the
+     *         renderer
+     */
+    private boolean isClipped(JComponent renderer, int col) {
+        return renderer.getPreferredSize().width > getColumnModel().getColumn(col).getWidth();
     }
 
     private JComponent getRendererComponent(int row, int col, Object value) {
