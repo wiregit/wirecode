@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.settings.KademliaSettings;
 
 public class MojitoUtils {

@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 
 import org.limewire.core.api.mojito.MojitoManager;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
-import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito2.MojitoDHT;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.dht.DHTEvent;

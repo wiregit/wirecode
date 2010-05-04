@@ -4,11 +4,11 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;

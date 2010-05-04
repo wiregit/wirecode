@@ -26,10 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.DatabaseSettings;

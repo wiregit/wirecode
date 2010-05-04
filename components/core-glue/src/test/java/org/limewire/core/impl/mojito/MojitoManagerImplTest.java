@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 

@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;

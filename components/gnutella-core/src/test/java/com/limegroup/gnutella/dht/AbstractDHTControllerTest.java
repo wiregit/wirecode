@@ -13,7 +13,6 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -25,6 +24,7 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;

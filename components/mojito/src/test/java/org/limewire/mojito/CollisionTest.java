@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;

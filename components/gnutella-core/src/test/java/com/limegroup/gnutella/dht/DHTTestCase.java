@@ -4,9 +4,9 @@ import java.net.InetSocketAddress;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RemoteContact;
 import org.limewire.mojito2.routing.RouteTable;

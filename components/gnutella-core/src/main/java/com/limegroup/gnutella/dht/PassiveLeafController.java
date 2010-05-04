@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.dht;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;

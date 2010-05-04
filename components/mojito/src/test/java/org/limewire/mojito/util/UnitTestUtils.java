@@ -2,8 +2,8 @@ package org.limewire.mojito.util;
 
 import java.lang.reflect.Field;
 
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;

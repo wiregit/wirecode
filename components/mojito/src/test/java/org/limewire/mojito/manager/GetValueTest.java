@@ -7,11 +7,11 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;

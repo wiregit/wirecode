@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.io.DatagramTransport;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.DefaultMessageFactory;

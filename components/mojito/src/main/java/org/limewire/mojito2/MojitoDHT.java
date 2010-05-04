@@ -1,4 +1,4 @@
-package org.limewire.mojito;
+package org.limewire.mojito2;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,10 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito2.Context;
-import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
