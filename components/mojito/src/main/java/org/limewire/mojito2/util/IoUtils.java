@@ -20,16 +20,20 @@ public class IoUtils {
     
     public static boolean closeAll(Closeable... closeables) {
         boolean success = true;
-        for (Closeable closeable : closeables) {
-            success |= close(closeable);
+        if (closeables != null) {
+            for (Closeable closeable : closeables) {
+                success |= close(closeable);
+            }
         }
         return success;
     }
     
     public static boolean closeAll(Iterable<? extends Closeable> closeables) {
         boolean success = true;
-        for (Closeable closeable : closeables) {
-            success |= close(closeable);
+        if (closeables != null) {
+            for (Closeable closeable : closeables) {
+                success |= close(closeable);
+            }
         }
         return success;
     }

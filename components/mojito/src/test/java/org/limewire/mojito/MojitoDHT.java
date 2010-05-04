@@ -5,6 +5,9 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito2.Context;
@@ -202,6 +205,23 @@ public class MojitoDHT implements DHT {
             long timeout, TimeUnit unit) {
         return dht.put(value, timeout, unit);
     }
+    
+    private Contact[] getActiveContacts() {
+        Set<Contact> nodes = new LinkedHashSet<Contact>();
+        Collection<Contact> active = getRouteTable().getActiveContacts();
+        active = ContactUtils.sort(active);
+        nodes.addAll(active);
+        nodes.remove(getLocalNode());
+        return nodes.toArray(new Contact[0]);
+    }
+    
+    public DHTFuture<PingEntity> findActiveContact() {
+        Contact localhost = getLocalNode();
+        Contact[] dst = getActiveContacts();
+        
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue() * dst.length;
+        return ping(localhost, dst, timeout, TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public void setHostFilter(HostFilter hostFilter) {
@@ -269,6 +289,11 @@ public class MojitoDHT implements DHT {
     public DHTFuture<BootstrapEntity> bootstrap(SocketAddress addr) {
         long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
         return bootstrap(addr, timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    public DHTFuture<BootstrapEntity> bootstrap(Contact contact) {
+        long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
+        return bootstrap(contact, timeout, TimeUnit.MILLISECONDS);
     }
     
     public DHTFuture<StoreEntity> store(Storable storable) {

@@ -34,6 +34,7 @@ public class BootstrapSettings extends MojitoProps {
      * The maximum number of bootstrap failures before bootstrapping 
      * is given up.
      */
+    @Deprecated
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
         = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
 

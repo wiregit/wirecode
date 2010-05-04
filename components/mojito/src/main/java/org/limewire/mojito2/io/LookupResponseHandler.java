@@ -1,17 +1,17 @@
 package org.limewire.mojito2.io;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -25,7 +25,6 @@ import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.entity.LookupEntity;
-import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -240,7 +239,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
      */
     protected void processTimeout0(RequestHandle request, 
             long time, TimeUnit unit) throws IOException {
-        lookupManager.handleTimeout(time, unit);
+        lookupManager.handleTimeout(request, time, unit);
     }
     
     /**
@@ -254,10 +253,13 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         Entry<Contact, SecurityToken>[] contacts = lookupManager.getContacts();
         Contact[] collisions = lookupManager.getCollisions();
         
+        int routeTableTimeouts = lookupManager.getRouteTableTimeouts();
+        int timeouts = lookupManager.getTimeouts();
         int hop = lookupManager.getCurrentHop();
         long time = System.currentTimeMillis() - startTime;
         
         return new State(lookupId, contacts, collisions, 
+                routeTableTimeouts, timeouts,
                 hop, time, TimeUnit.MILLISECONDS);
     }
     
@@ -270,6 +272,11 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         private final Context context;
         
         private final KUID lookupId;
+        
+        /**
+         * 
+         */
+        private final Set<KUID> init = new HashSet<KUID>();
         
         private final List<Contact> collisions = new ArrayList<Contact>();
         
@@ -285,6 +292,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         private int currentHop = 0;
         
         private int timeouts = 0;
+        
+        private int routeTableTimeouts = 0;
         
         public LookupManager(Context context, 
                 KUID lookupId, Contact[] contacts) {
@@ -310,6 +319,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 
                 for (Contact contact : contacts) {
                     addToQuery(contact, 1);
+                    
+                    init.add(contact.getNodeID());
                 }
             }
         }
@@ -354,7 +365,14 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return true;
         }
         
-        public void handleTimeout(long time, TimeUnit unit) {
+        public void handleTimeout(RequestHandle handle, 
+                long time, TimeUnit unit) {
+            
+            KUID contactId = handle.getContactId();
+            if (init.contains(contactId)) {
+                ++routeTableTimeouts;
+            }
+            
             ++timeouts;
         }
         
@@ -371,8 +389,12 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return currentHop;
         }
         
-        public int getTimeoutCount() {
+        public int getTimeouts() {
             return timeouts;
+        }
+        
+        public int getRouteTableTimeouts() {
+            return routeTableTimeouts;
         }
         
         private boolean addToResponses(Contact contact, 
@@ -483,16 +505,22 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         private final int hop;
         
+        private final int routeTableTimeouts;
+        
+        private final int timeouts;
+        
         private final long time;
         
         private final TimeUnit unit;
         
         private State(KUID key, Entry<Contact, SecurityToken>[] contacts, 
-                Contact[] collisions, int hop, 
-                long time, TimeUnit unit) {
+                Contact[] collisions, int routeTableTimeouts, int timeouts, 
+                int hop, long time, TimeUnit unit) {
             this.key = key;
             this.contacts = contacts;
             this.collisions = collisions;
+            this.routeTableTimeouts = routeTableTimeouts;
+            this.timeouts = timeouts;
             this.hop = hop;
             this.time = time;
             this.unit = unit;
@@ -508,6 +536,14 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         public Contact[] getCollisions() {
             return collisions;
+        }
+        
+        public int getTimeouts() {
+            return timeouts;
+        }
+        
+        public int getRouteTableTimeouts() {
+            return routeTableTimeouts;
         }
         
         public int getHop() {

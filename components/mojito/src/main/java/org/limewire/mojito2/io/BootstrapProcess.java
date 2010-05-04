@@ -54,6 +54,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     
     private Iterator<KUID> bucketsToRefresh = null;
     
+    private int routeTableTimeouts = 0;
+    
     public BootstrapProcess(DHT dht, BootstrapConfig config, 
             long timeout, TimeUnit unit) {
         
@@ -159,7 +161,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         pingFuture = dht.ping(address, 
                 timeout, TimeUnit.MILLISECONDS);
         
-        pingFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
+        pingFuture.addFutureListener(
+                new EventListener<FutureEvent<PingEntity>>() {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
                 onPong(event);
@@ -216,7 +219,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
                 new Contact[] { contact }, 
                 timeout, TimeUnit.MILLISECONDS);
         
-        lookupFuture.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+        lookupFuture.addFutureListener(
+                new EventListener<FutureEvent<NodeEntity>>() {
             @Override
             public void handleEvent(FutureEvent<NodeEntity> event) {
                 onLookup(event);
@@ -269,7 +273,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         collisitonFuture = dht.ping(
                 src, collisions, timeout, TimeUnit.MILLISECONDS);
         
-        collisitonFuture.addFutureListener(new EventListener<FutureEvent<PingEntity>>() {
+        collisitonFuture.addFutureListener(
+                new EventListener<FutureEvent<PingEntity>>() {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
                 onCollision(event);
@@ -360,7 +365,8 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
                     DHTFuture<NodeEntity> future = dht.lookup(
                             bucketId, timeout, TimeUnit.MILLISECONDS);
                     
-                    future.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
+                    future.addFutureListener(
+                            new EventListener<FutureEvent<NodeEntity>>() {
                         @Override
                         public void handleEvent(FutureEvent<NodeEntity> event) {
                             try {

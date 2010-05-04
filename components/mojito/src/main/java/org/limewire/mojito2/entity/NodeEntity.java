@@ -15,5 +15,9 @@ public interface NodeEntity extends LookupEntity {
     
     public Contact[] getCollisions();
     
+    public int getRouteTableTimeouts();
+    
+    public int getTimeouts();
+    
     public int getHop();
 }

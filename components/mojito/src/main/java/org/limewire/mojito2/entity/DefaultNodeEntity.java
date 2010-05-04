@@ -16,6 +16,10 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     
     private final Contact[] collisions;
     
+    private final int routeTableTimeouts;
+    
+    private final int timeouts;
+    
     private final int hop;
     
     public DefaultNodeEntity(State state) {
@@ -24,6 +28,8 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
         this.key = state.getKey();
         this.contacts = state.getContacts();
         this.collisions = state.getCollisions();
+        this.routeTableTimeouts = state.getRouteTableTimeouts();
+        this.timeouts = state.getTimeouts();
         this.hop = state.getHop();
     }
 
@@ -40,6 +46,16 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     @Override
     public Contact[] getCollisions() {
         return collisions;
+    }
+
+    @Override
+    public int getRouteTableTimeouts() {
+        return routeTableTimeouts;
+    }
+
+    @Override
+    public int getTimeouts() {
+        return timeouts;
     }
 
     @Override

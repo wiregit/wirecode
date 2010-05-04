@@ -59,7 +59,12 @@ public class MojitoUtils {
     
     public static List<MojitoDHT> createBootStrappedDHTs(int factor) 
             throws IOException, InterruptedException, ExecutionException {
-        Collection<MojitoDHT> dhts = createBootStrappedDHTsMap(factor).values();
+        return createBootStrappedDHTs(factor, PORT);
+    }
+    
+    public static List<MojitoDHT> createBootStrappedDHTs(int factor, int port) 
+            throws IOException, InterruptedException, ExecutionException {
+        Collection<MojitoDHT> dhts = createBootStrappedDHTsMap(factor, port).values();
         return new ArrayList<MojitoDHT>(dhts);
     }
 }
