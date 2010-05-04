@@ -28,7 +28,6 @@
         <dependency org="org.limewire" name="geocode" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="xmpp-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
@@ -54,7 +53,6 @@
         <dependency org="none" name="windows/jacob" rev="${jacob.version}" conf="compile,runtime"/> <!-- todo: scope to windows only -->
         
         <dependency org="org.limewire" name="common" rev="latest.integration" conf="test, test-common->master(*), test-common"/>
-        <dependency org="org.limewire" name="swarm" rev="latest.integration" conf="test"/>
         <dependency org="org.limewire" name="lwsserver" rev="latest.integration" conf="test"/>
         
         <dependency org="none" name="commons-math" rev="${commons-math.version}" conf="test"/>
