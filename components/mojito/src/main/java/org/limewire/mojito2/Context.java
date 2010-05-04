@@ -367,6 +367,7 @@ public class Context extends AbstractDHT {
     protected synchronized DHTFuture<BootstrapEntity> bootstrap(
             BootstrapConfig config, long timeout, TimeUnit unit) {
         
+        // There can be only one bootstrap process active!
         if (bootstrap != null) {
             bootstrap.cancel(true);
         }

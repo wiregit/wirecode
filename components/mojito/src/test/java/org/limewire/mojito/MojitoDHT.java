@@ -86,8 +86,8 @@ public class MojitoDHT implements DHT {
     }
 
     @Override
-    public Contact getLocalNode() {
-        return dht.getLocalNode();
+    public LocalContact getLocalNode() {
+        return (LocalContact)dht.getLocalNode();
     }
 
     @Override
@@ -126,29 +126,33 @@ public class MojitoDHT implements DHT {
     }
     
     @Override
-    public boolean isBootstrapped() {
-        return dht.isBootstrapped();
+    public boolean isReady() {
+        return dht.isReady();
     }
 
     @Override
-    public boolean isBootstrapping() {
-        return dht.isBootstrapping();
+    public boolean isBooting() {
+        return dht.isBooting();
     }
 
     public KUID getLocalNodeID() {
-        return dht.getLocalNode().getNodeID();
+        return getLocalNode().getNodeID();
     }
     
     public SocketAddress getContactAddress() {
-        return dht.getLocalNode().getContactAddress();
+        return getLocalNode().getContactAddress();
     }
     
     public void setContactId(KUID contactId) {
-        ((LocalContact)dht.getLocalNode()).setNodeID(contactId);
+        getLocalNode().setNodeID(contactId);
     }
     
     public void setContactAddress(SocketAddress address) {
-        ((LocalContact)dht.getLocalNode()).setContactAddress(address);
+        getLocalNode().setContactAddress(address);
+    }
+    
+    public void setExternalAddress(SocketAddress address) {
+        getLocalNode().setExternalAddress(address);
     }
     
     @Override

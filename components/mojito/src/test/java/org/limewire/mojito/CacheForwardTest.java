@@ -52,6 +52,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
+import org.limewire.mojito2.util.IoUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 
@@ -92,24 +93,18 @@ public class CacheForwardTest extends MojitoTestCase {
         try {
             
             // Setup the first instance so that it thinks it's bootstrapping
-            dht1 = MojitoFactory.createDHT();
-            dht1.bind(2000);
-            dht1.start();
-            Context context1 = (Context)dht1;
+            dht1 = MojitoFactory.createDHT("DHT-1", 2000);
             
             UnitTestUtils.setBootstrapping(dht1, true);            
-            assertFalse(dht1.isBootstrapped());
-            assertTrue(context1.isBootstrapping());
+            assertFalse(dht1.isReady());
+            assertTrue(dht1.isBooting());
             
             // And setup the second instance so that it thinks it's bootstrapped 
-            dht2 = MojitoFactory.createDHT();
-            dht2.bind(3000);
-            dht2.start();
-            Context context2 = (Context)dht2;
+            dht2 = MojitoFactory.createDHT("DHT-2", 3000);
             
             UnitTestUtils.setBootstrapped(dht2, true);
-            assertTrue(dht2.isBootstrapped());
-            assertFalse(context2.isBootstrapping());
+            assertTrue(dht2.isReady());
+            assertFalse(dht2.isBooting());
             
             // Get the SecurityToken...
             Class clazz = Class.forName("org.limewire.mojito.manager.StoreProcess$GetSecurityTokenHandler");
@@ -134,8 +129,7 @@ public class CacheForwardTest extends MojitoTestCase {
             }
             
         } finally {
-            if (dht1 != null) { dht1.close(); }
-            if (dht2 != null) { dht2.close(); }
+            IoUtils.closeAll(dht1, dht2);
         }
     }
     
@@ -384,9 +378,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(k + 1, count);
             
         } finally {
-            for (MojitoDHT dht : dhts.values()) {
-                dht.close();
-            }
+            IoUtils.closeAll(dhts.values());
         }
     }
     
@@ -405,13 +397,8 @@ public class CacheForwardTest extends MojitoTestCase {
         MojitoDHT dht2 = null;
         
         try {
-            dht1 = MojitoFactory.createDHT("DHT1");
-            dht1.bind(2000);
-            dht1.start();
-            
-            dht2 = MojitoFactory.createDHT("DHT2");
-            dht2.bind(2001);
-            dht2.start();
+            dht1 = MojitoFactory.createDHT("DHT1", 2000);
+            dht2 = MojitoFactory.createDHT("DHT2", 2001);
             
             dht1.bootstrap(new InetSocketAddress("localhost", 2001)).get();
             dht2.bootstrap(new InetSocketAddress("localhost", 2000)).get();
@@ -435,8 +422,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(2, dht2.getDatabase().getKeyCount());
             assertEquals(2, dht2.getDatabase().getValueCount());
         } finally {
-            if (dht1 != null) { dht1.close(); }
-            if (dht2 != null) { dht2.close(); }
+            IoUtils.closeAll(dht1, dht2);
         }
     }
     
