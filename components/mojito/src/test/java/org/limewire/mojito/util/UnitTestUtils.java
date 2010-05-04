@@ -15,7 +15,10 @@ public class UnitTestUtils {
         
     }
     
-    public static void setBooting(MojitoDHT dht, boolean booting) throws Exception {
+    public static void setBooting(MojitoDHT dht, boolean booting) 
+            throws SecurityException, NoSuchFieldException, 
+                IllegalArgumentException, IllegalAccessException {
+        
         Field field = Context.class.getDeclaredField("bootstrap");
         field.setAccessible(true);
         
@@ -28,7 +31,10 @@ public class UnitTestUtils {
         field.set(context, future);
     }
     
-    public static void setReady(MojitoDHT dht, boolean ready) throws Exception {
+    public static void setReady(MojitoDHT dht, boolean ready) 
+            throws SecurityException, NoSuchFieldException, 
+                IllegalArgumentException, IllegalAccessException {
+        
         Field field = Context.class.getDeclaredField("bootstrap");
         field.setAccessible(true);
         
