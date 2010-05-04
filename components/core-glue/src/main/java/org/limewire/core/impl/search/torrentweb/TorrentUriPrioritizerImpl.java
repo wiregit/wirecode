@@ -65,7 +65,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         // remove known non torrent uris
         int size = candidates.size();
         candidates = filter(candidates, new NotTorrenUriPredicate());
-        LOG.debugf("removed non torrents: {0}", size - candidates.size());
+        LOG.debugf("removed non torrents: {0}, new size {1}", size - candidates.size(), candidates.size());
         // compute scores
         List<Tuple<URI, Integer>> scoredUris = transform(candidates, new TorrentUriLikelihoodFunction());
         // sort by how likely a candidate
