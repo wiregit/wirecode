@@ -19,15 +19,12 @@ import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.StringUtils;
 
 /**
  * This class specifies the content of a table that contains
  * music track descriptions.
  */
 public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
-    
-    private static final String AND_MORE_MSG = I18n.tr("...and more...");
     
     static final int FROM_INDEX = 0;
     static final int TITLE_INDEX = 1;
@@ -94,9 +91,9 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             
             switch (column) {
             case FILES_INDEX:
-                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n", 14, 40, AND_MORE_MSG);
+                return torrent.getTorrentFileEntries();
             case TRACKERS_INDEX:
-                return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40, AND_MORE_MSG);
+                return torrent.getTrackers();
             case SEEDERS_INDEX:
                 if (torrent.getTrackerURIS().size() > 0) {
                     data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);

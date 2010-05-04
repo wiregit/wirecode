@@ -13,7 +13,6 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 
@@ -21,9 +20,7 @@ import com.google.inject.Inject;
  * Table format for the Torrent Table when it is in My Library.
  */
 public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibraryFormat<T> {
-
-    private static final String AND_MORE_MSG = I18n.tr("...and more...");
-    
+   
     static final int NAME_INDEX = 0;
     static final int SIZE_INDEX = 1;
     static final int HIT_INDEX = 2;
@@ -64,16 +61,10 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
         case ACTION_INDEX: return baseObject;
         case FILES_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
-            if (torrent != null)
-                return StringUtils.explode(torrent.getTorrentFileEntries(), "\n", 14, 40, AND_MORE_MSG);
-            else 
-                return "";
+            return torrent.getTorrentFileEntries();
         case TRACKERS_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
-            if (torrent != null)
-                return StringUtils.explode(torrent.getTrackers(), "\n", 14, 40, AND_MORE_MSG);
-            else 
-                return "";
+            return torrent.getTrackers();
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
