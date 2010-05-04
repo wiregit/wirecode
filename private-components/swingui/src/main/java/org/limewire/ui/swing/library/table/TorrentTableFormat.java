@@ -36,7 +36,7 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
     
     @Inject
     public TorrentTableFormat() {
-        super(ACTION_INDEX, "LIBRARY_TORRENT_TALBE", NAME_INDEX, true, new ColumnStateInfo[] {
+        super(ACTION_INDEX, "LIBRARY_TORRENT_TABLE", NAME_INDEX, true, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_TORRENT_NAME", I18n.tr("Name"), 480, true, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_TORRENT_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(HIT_INDEX, "LIBRARY_TORRENT_HITS", I18n.tr("Hits"), 100, false, true), 
