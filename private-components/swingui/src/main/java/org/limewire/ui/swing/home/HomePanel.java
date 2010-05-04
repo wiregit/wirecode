@@ -33,7 +33,7 @@ import com.google.inject.Inject;
 @LazySingleton
 public class HomePanel extends JXPanel {
     
-    private static final String DEFAULT_URL = "http://client-data.limewire.com/client_startup/home/";
+    private static final String DEFAULT_URL = "http://184.73.110.223/home/lightweight/";
     
     private final Application application;
     private final HTMLPane fallbackBrowser;
