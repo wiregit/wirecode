@@ -98,7 +98,6 @@
 	<classpathentry kind="lib" path="lib/jars/base64-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcip-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/jars/dnsjava-2.0.6.jar" sourcepath="lib/sources/dnsjava-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/hamcrest-core.jar"/>
@@ -164,5 +163,6 @@
 	<classpathentry kind="lib" path="lib/jars/AnimatedTransitions-0.11.jar" sourcepath="lib/sources/AnimatedTransitions-0.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar" sourcepath="lib/sources/fmj-source.zip"/>
+	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
