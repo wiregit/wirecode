@@ -197,7 +197,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             throw new IllegalArgumentException("Bad feature = " +
                                                featureSelector);
         _featureSelector = featureSelector;
-        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 508))
+        //NOTE: 504 is the maximum value here since it is the sum of all flags minus
+        // the smallest flag. If all flags are set we should not send a flag at all
+        // and perform an all request
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 504))
             throw new IllegalArgumentException("Bad Meta Flag = " +
                                                metaFlagMask);
         if (metaFlagMask > 0)

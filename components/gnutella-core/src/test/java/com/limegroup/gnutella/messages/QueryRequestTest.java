@@ -982,13 +982,14 @@ public final class QueryRequestTest extends LimeTestCase {
         // when no flag is set
         testMetaFlag(0);
 
-        int[] flags = new int[6];
+        int[] flags = new int[7];
         flags[0] = QueryRequest.AUDIO_MASK;
         flags[1] = QueryRequest.VIDEO_MASK;
         flags[2] = QueryRequest.DOC_MASK;
         flags[3] = QueryRequest.IMAGE_MASK;
         flags[4] = QueryRequest.WIN_PROG_MASK;
         flags[5] = QueryRequest.LIN_PROG_MASK;
+        flags[6] = QueryRequest.TORRENT_MASK;
         for (int i = 0; i < flags.length; i++) {
             testMetaFlag(0 | flags[i]);
             for (int j = 0; j < flags.length; j++) {
@@ -1015,7 +1016,7 @@ public final class QueryRequestTest extends LimeTestCase {
             queryRequestFactory.createQueryRequest(GUID.makeGuid(),
                     (byte)3, "whatever", "", null, null, true, Network.TCP,
                     false, 0, false, 0 | flags[0] | flags[1] | flags[2] |  flags[3] | 
-                     flags[4] | flags[5]);
+                     flags[4] | flags[5] | flags[6]);
             assertTrue(false);
         }
         catch (IllegalArgumentException yes) {}
@@ -1040,6 +1041,8 @@ public final class QueryRequestTest extends LimeTestCase {
             assertTrue(query.desiresWindowsPrograms());
         if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
             assertTrue(query.desiresLinuxOSXPrograms());
+        if ((flag & QueryRequest.TORRENT_MASK) > 0)
+            assertTrue(query.desiresTorrents());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         query.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -1057,6 +1060,8 @@ public final class QueryRequestTest extends LimeTestCase {
             assertTrue(qr.desiresWindowsPrograms());
         if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
             assertTrue(qr.desiresLinuxOSXPrograms());
+        if ((flag & QueryRequest.TORRENT_MASK) > 0)
+            assertTrue(qr.desiresTorrents());
     }
 
     
