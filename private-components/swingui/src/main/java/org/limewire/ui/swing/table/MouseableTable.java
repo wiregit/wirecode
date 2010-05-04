@@ -96,7 +96,7 @@ public class MouseableTable extends StripedJXTable {
         Object value = getValueAt(row, col);
         JComponent renderer = getRendererComponent(row, col, value);
 
-        if (value != null && isClipped(renderer, col)) {
+        if (value != null) {
             String toolTip = renderer.getToolTipText();
 
             if (toolTip != null) {
