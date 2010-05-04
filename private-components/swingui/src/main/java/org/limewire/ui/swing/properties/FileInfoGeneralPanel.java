@@ -179,14 +179,13 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
 
         switch(propertiableFile.getCategory()) {
             case TORRENT :
-                if (urn != null) {
+                if (urn != null && type == FileInfoType.REMOTE_FILE) {
                     Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
                     String sha1HexString = null; 
                     if (torrent != null) {
                         sha1HexString = torrent.getSha1();
                     }
                     if (sha1HexString != null) {
-                        
                         // Manually convert the base 16 string hash to a more recognisable format
                         //  without going into core
                         String payloadHashString = "urn:sha1:" + Base32.encode(StringUtils.fromHexString(sha1HexString));
