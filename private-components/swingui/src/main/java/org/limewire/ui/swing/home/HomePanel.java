@@ -42,7 +42,7 @@ import com.google.inject.Inject;
 @LazySingleton
 public class HomePanel extends JXPanel {
     
-    private static final String DEFAULT_URL = "http://184.73.110.223/home/georestrict/";
+    private static final String DEFAULT_URL = "http://184.73.110.223/home/geo-restrict/";
     
     private final Application application;
     private final Browser browser;
