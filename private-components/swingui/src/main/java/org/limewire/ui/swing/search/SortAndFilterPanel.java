@@ -164,6 +164,9 @@ public class SortAndFilterPanel implements Disposable {
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
                     SwingUiSettings.SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.LIST.getId());
+                    if (searchResultsModel.getSearchCategory() == SearchCategory.TORRENT) {
+                        SwingUiSettings.TORRENT_SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.LIST.getId());
+                    }
                     selectListView();
                 }
             }
@@ -181,6 +184,9 @@ public class SortAndFilterPanel implements Disposable {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
                     SwingUiSettings.SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.TABLE.getId());
                     SwingUiSettings.SHOW_CLASSIC_REMINDER.setValue(false);
+                    if (searchResultsModel.getSearchCategory() == SearchCategory.TORRENT) {
+                        SwingUiSettings.TORRENT_SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.TABLE.getId());
+                    }
                     selectTableView();
                 }
             }
@@ -203,10 +209,7 @@ public class SortAndFilterPanel implements Disposable {
         viewGroup.add(listViewToggleButton);
         viewGroup.add(tableViewToggleButton);
         
-        int viewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
-        SearchViewType searchViewType = SearchViewType.forId(viewTypeId);
-        
-        updateView(searchViewType);
+        updateView(SearchViewType.getSearchViewType(searchResultsModel.getSearchCategory()));
     }
 
     /**

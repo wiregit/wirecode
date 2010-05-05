@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.settings.SwingUiSettings;
+
 public enum SearchViewType {
     LIST(0), TABLE(1);
 
@@ -29,5 +32,17 @@ public enum SearchViewType {
             }
         }
         return LIST;
+    }
+    
+    /**
+     * @return the search view type for the search category taking settings into
+     * account 
+     */
+    public static SearchViewType getSearchViewType(SearchCategory searchCategory) {
+        if (searchCategory == SearchCategory.TORRENT) {
+            return SearchViewType.forId(SwingUiSettings.TORRENT_SEARCH_VIEW_TYPE_ID.getValue());
+        } else {
+            return SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue());
+        } 
     }
 }
