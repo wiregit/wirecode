@@ -3,6 +3,7 @@ package org.limewire.mojito2.entity;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.io.LookupResponseHandler.State;
 import org.limewire.mojito2.routing.Contact;
@@ -34,13 +35,17 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     }
 
     @Override
-    public Entry<Contact, SecurityToken> getContact(int index) {
-        return contacts[index];
-    }
-
-    @Override
     public Entry<Contact, SecurityToken>[] getContacts() {
         return contacts;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public Entry<Contact, SecurityToken>[] getClosest() {
+        Entry<Contact, SecurityToken>[] dst 
+            = new Entry[Math.min(DHT.K, contacts.length)];
+        System.arraycopy(contacts, 0, dst, 0, dst.length);
+        return dst;
     }
     
     @Override

@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.entity.DefaultStoreEntity;
@@ -38,7 +40,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private final Entry<Contact, SecurityToken>[] contacts;
     
-    private final DHTValueEntity[] values;
+    private final DHTValueEntity entity;
     
     private final MaxStack processCounter 
         = new MaxStack(PARALLELISM);
@@ -54,37 +56,36 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private final AtomicBoolean once = new AtomicBoolean(false);
     
+    private final AtomicInteger complete = new AtomicInteger();
+    
     public StoreResponseHandler(Context context, 
-            DHTValueEntity[] entities, 
+            DHTValueEntity entity, 
             long timeout, TimeUnit unit) {
-        this(context, null, entities, timeout, unit);
+        this(context, null, entity, timeout, unit);
     }
     
     public StoreResponseHandler(Context context, 
             Entry<Contact, SecurityToken>[] contacts, 
-            DHTValueEntity[] values, 
+            DHTValueEntity entity, 
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
         this.contacts = contacts;
-        this.values = values;
+        this.entity = entity;
     }
     
-    private void init(Entry<Contact, SecurityToken>[] contacts, 
-            DHTValueEntity[] entities) {
+    private void init(Entry<Contact, SecurityToken>[] contacts) {
         
         for (Entry<Contact, SecurityToken> entry : contacts) {
             Contact node = entry.getKey();
             SecurityToken securityToken = entry.getValue();
             
-            for (DHTValueEntity entity : entities) {
-                if (context.isLocalNode(node)) {
-                    processes.add(new LocalStoreProcess(
-                            node, securityToken, entity));
-                } else {
-                    processes.add(new RemoteStoreProcess(
-                            node, securityToken, entity));
-                }
+            if (context.isLocalNode(node)) {
+                processes.add(new LocalStoreProcess(
+                        node, securityToken, entity));
+            } else {
+                processes.add(new RemoteStoreProcess(
+                        node, securityToken, entity));
             }
         }
     }
@@ -102,7 +103,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             throw new IllegalStateException();
         }
         
-        init(contacts, values);
+        init(contacts);
         process(0);
     }
     
@@ -111,6 +112,10 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             preProcess(decrement);
             while (processCounter.hasFree()) {
                 if (processes.isEmpty()) {
+                    break;
+                }
+                
+                if ((DHT.K - complete.get() - 1) < processCounter.poll()) {
                     break;
                 }
                 
@@ -239,13 +244,16 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     private void addStoreStatusCode(Contact dst, 
             DHTValueEntity entity, StatusCode code) {
         
-        
         List<StoreStatusCode> list = codes.get(dst);
         if (list == null) {
             list = new ArrayList<StoreStatusCode>();
             codes.put(dst, list);
         }
         list.add(new StoreStatusCode(entity, code));
+        
+        if (code.equals(StoreStatusCode.OK)) {
+            complete.incrementAndGet();
+        }
     }
     
     private abstract class StoreProcess {

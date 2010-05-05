@@ -33,6 +33,11 @@ public interface DHT extends Closeable {
     /**
      * 
      */
+    public static final int K = 20;
+    
+    /**
+     * 
+     */
     public String getName();
     
     /**

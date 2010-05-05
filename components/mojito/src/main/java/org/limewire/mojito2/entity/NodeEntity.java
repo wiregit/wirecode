@@ -9,9 +9,9 @@ public interface NodeEntity extends LookupEntity {
 
     public int size();
     
-    public Entry<Contact, SecurityToken> getContact(int index);
-    
     public Entry<Contact, SecurityToken>[] getContacts();
+    
+    public Entry<Contact, SecurityToken>[] getClosest();
     
     public Contact[] getCollisions();
     

@@ -513,8 +513,7 @@ public class Context extends AbstractDHT {
                 = new AtomicReference<DHTFuture<StoreEntity>>();
             
             final StoreResponseHandler process 
-                = new StoreResponseHandler(
-                    this, new DHTValueEntity[] { value }, timeout, unit);
+                = new StoreResponseHandler(this, value, timeout, unit);
             
             KUID lookupId = value.getPrimaryKey();
             final DHTFuture<NodeEntity> lookup 
