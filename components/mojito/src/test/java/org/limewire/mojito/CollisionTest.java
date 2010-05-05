@@ -19,6 +19,7 @@
  
 package org.limewire.mojito;
 
+import java.io.Closeable;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import junit.framework.TestSuite;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.CollisionException;
+import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
@@ -71,7 +73,9 @@ public class CollisionTest extends MojitoTestCase {
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
-        MojitoDHT bootstrap = null, original = null, spoofer = null;
+        MojitoDHT bootstrap = null;
+        MojitoDHT original = null;
+        MojitoDHT spoofer = null;
         
         try {
             bootstrap = MojitoFactory.createDHT("Bootstrap Node", PORT);
@@ -130,7 +134,9 @@ public class CollisionTest extends MojitoTestCase {
         NetworkSettings.DEFAULT_TIMEOUT.setValue(100L);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
-        MojitoDHT bootstrap = null, original = null, replacement = null;
+        MojitoDHT bootstrap = null;
+        MojitoDHT original = null;
+        MojitoDHT replacement = null;
         
         try {
             bootstrap = MojitoFactory.createDHT("Bootstrap-DHT", PORT);
@@ -140,7 +146,10 @@ public class CollisionTest extends MojitoTestCase {
             bootstrap.bootstrap("localhost", PORT+1).get();
             replacement = MojitoFactory.createDHT("ReplacementDHT", PORT+2);
             
-            original.unbind();
+            Transport transport = original.unbind();
+            if (transport instanceof Closeable) {
+                IoUtils.close((Closeable)transport);
+            }
             
             Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
