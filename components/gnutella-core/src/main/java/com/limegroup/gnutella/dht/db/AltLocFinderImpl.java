@@ -12,10 +12,10 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
@@ -66,8 +66,8 @@ class AltLocFinderImpl implements AltLocFinder {
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
       
           
-          final DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
-          if(future == null) {
+          final DHTFuture<ValueEntity> future = dhtManager.get(lookupKey);
+          if (future == null) {
               return null;
           } else {
               future.addFutureListener(new AltLocsHandler(dhtManager, urn, key, listener));

@@ -10,12 +10,12 @@ import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.settings.DatabaseSettings;
 
 import com.google.inject.Inject;
@@ -95,11 +95,14 @@ public class PushProxiesPublisher implements DHTEventListener {
             }
             GUID guid = new GUID(lastPublishedValue.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
-            DHTFuture<StoreResult> future = dhtManager.put(primaryKey, lastPublishedValue);
+            
+            DHTFuture<StoreEntity> future 
+                = dhtManager.put(primaryKey, lastPublishedValue);
+            
             if (LOG.isDebugEnabled() && future != null) {
-                future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
+                future.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
                     @Override
-                    protected void operationComplete(FutureEvent<StoreResult> event) {
+                    public void handleEvent(FutureEvent<StoreEntity> event) {
                         switch (event.getType()) {
                             case SUCCESS:
                                 LOG.debugf("Success: {0}", event.getResult());

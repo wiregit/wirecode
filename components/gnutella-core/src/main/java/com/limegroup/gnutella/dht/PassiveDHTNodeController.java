@@ -186,7 +186,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
      */
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
+        if(!isRunning() || !getMojitoDHT().isReady()) {
             return Collections.emptyList();
         }
         

@@ -292,7 +292,7 @@ public class MessageInputStream extends DataInputStream {
                 contactId, address, instanceId, flags);
     }
     
-    private Contact[] readContacts() throws IOException {
+    public Contact[] readContacts() throws IOException {
         int size = readUnsignedByte();
         
         Contact[] contacts = new Contact[size];

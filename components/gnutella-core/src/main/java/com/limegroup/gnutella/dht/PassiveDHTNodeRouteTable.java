@@ -12,12 +12,11 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.mojito.concurrent.DHTExecutorService;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.PingResult;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
@@ -72,11 +71,12 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         }
         
         final InetSocketAddress addr = new InetSocketAddress(host, port);
-        DHTFuture<PingResult> future = dht.ping(addr);
+        DHTFuture<PingEntity> future = dht.ping(addr);
         
-        DHTFutureAdapter<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+        EventListener<FutureEvent<PingEntity>> listener 
+                = new EventListener<FutureEvent<PingEntity>>() {
             @Override
-            protected void operationComplete(FutureEvent<PingResult> event) {
+            public void handleEvent(FutureEvent<PingEntity> event) {
                 switch (event.getType()) {
                     case SUCCESS:
                         handleFutureSuccess(event.getResult());
@@ -87,7 +87,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
                 }
             }
 
-            private void handleFutureSuccess(PingResult result) {
+            private void handleFutureSuccess(PingEntity result) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping succeeded to: " + result);
                 }
@@ -182,86 +182,102 @@ class PassiveDHTNodeRouteTable implements RouteTable {
     
     // --- ROUTE TABLE ---
     
+    @Override
     public synchronized void add(Contact node) {
         delegate.add(node);
     }
 
+    @Override
     public synchronized void addRouteTableListener(RouteTableListener l) {
         delegate.addRouteTableListener(l);
     }
 
+    @Override
     public synchronized void removeRouteTableListener(RouteTableListener l) {
         delegate.removeRouteTableListener(l);
     }
     
+    @Override
     public synchronized Contact get(KUID nodeId) {
         return delegate.get(nodeId);
     }
 
+    @Override
     public synchronized Collection<Contact> getActiveContacts() {
         return delegate.getActiveContacts();
     }
 
+    @Override
     public synchronized Bucket getBucket(KUID nodeId) {
         return delegate.getBucket(nodeId);
     }
 
+    @Override
     public synchronized Collection<Bucket> getBuckets() {
         return delegate.getBuckets();
     }
 
+    @Override
     public synchronized Collection<Contact> getCachedContacts() {
         return delegate.getCachedContacts();
     }
 
+    @Override
     public synchronized Collection<Contact> getContacts() {
         return delegate.getContacts();
     }
 
+    @Override
     public synchronized Contact getLocalNode() {
         return delegate.getLocalNode();
     }
 
+    @Override
     public synchronized Collection<KUID> getRefreshIDs(boolean bootstrapping) {
         return delegate.getRefreshIDs(bootstrapping);
     }
 
+    @Override
     public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
         delegate.handleFailure(nodeId, address);
     }
 
+    @Override
     public synchronized boolean isLocalNode(Contact node) {
         return delegate.isLocalNode(node);
     }
 
+    @Override
     public synchronized void purge(long elapsedTimeSinceLastContact) {
         delegate.purge(elapsedTimeSinceLastContact);
     }
 
+    @Override
     public synchronized void purge(PurgeMode first, PurgeMode... rest) {
         delegate.purge(first, rest);
     }
     
+    @Override
     public synchronized Contact select(KUID nodeId) {
         return delegate.select(nodeId);
     }
     
+    @Override
     public synchronized Collection<Contact> select(KUID nodeId, int count, SelectMode mode) {
         return delegate.select(nodeId, count, mode);
     }
     
-    public synchronized void setContactPinger(ContactPinger pinger) {
-        delegate.setContactPinger(pinger);
+    @Override
+    public synchronized void bind(ContactPinger pinger) {
+        delegate.bind(pinger);
     }
     
-    public synchronized void setNotifier(DHTExecutorService e) {
-        delegate.setNotifier(e);
-    }
-
+    @Override
     public synchronized int size() {
         return delegate.size();
     }
     
+    @Override
     public synchronized void clear() {
         delegate.clear();
     }

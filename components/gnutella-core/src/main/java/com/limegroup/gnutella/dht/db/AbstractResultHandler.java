@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.FindValueResult;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
 
@@ -22,7 +22,7 @@ import com.limegroup.gnutella.dht.DHTManager;
  * Iterates over entity keys and retrieves their values from the node and
  * calls {@link #handleDHTValueEntity(DHTValueEntity)} for them.
  */
-abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
+abstract class AbstractResultHandler implements EventListener<FutureEvent<ValueEntity>> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResultHandler.class);
     
@@ -73,7 +73,7 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     }
     
     @Override
-    protected void operationComplete(FutureEvent<FindValueResult> event) {
+    public void handleEvent(FutureEvent<ValueEntity> event) {
         switch (event.getType()) {
             case SUCCESS:
                 handleFutureSuccess(event.getResult());
@@ -87,7 +87,7 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         }
     }
 
-    private void handleFutureSuccess(FindValueResult result) {
+    private void handleFutureSuccess(ValueEntity result) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("result: " + result);
         }
@@ -103,11 +103,12 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
                 if (!entityKey.getDHTValueType().equals(valueType)) {
                     continue;
                 }
-                DHTFuture<FindValueResult> future = dhtManager.get(entityKey);
+                DHTFuture<ValueEntity> future = dhtManager.get(entityKey);
+                
                 if(future != null) {
                     try {                        
                         // TODO make this a non-blocking call
-                        FindValueResult resultFromKey = future.get();
+                        ValueEntity resultFromKey = future.get();
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("result from second lookup: " + resultFromKey);
                         }

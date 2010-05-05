@@ -1,14 +1,9 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,14 +29,13 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.statistics.DHTStats;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -419,28 +413,26 @@ public class DHTManagerImpl implements DHTManager, Service {
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      *          
      */
-    public synchronized DHTFuture<FindValueResult> get(EntityKey eKey) {
+    public synchronized DHTFuture<ValueEntity> get(EntityKey eKey) {
         MojitoDHT mojitoDHT = getMojitoDHT();
         
         if (LOG.isDebugEnabled())
             LOG.debug("DHT:" + mojitoDHT);
         
-        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+        if (mojitoDHT == null || !mojitoDHT.isReady()) {
             LOG.debug("DHT is null or is not bootstrapped");                
             return null;
         }            
 
         // instantiated here so it can record its instantiation time
-        TimeInspector<FindValueResult> inspector 
-                = new TimeInspector<FindValueResult>(getInspectable) {
+        TimeInspector<ValueEntity> inspector 
+                = new TimeInspector<ValueEntity>(getInspectable) {
             @Override
-            protected void operationComplete(FutureEvent<FindValueResult> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    count(event.getResult().isSuccess());
-                }
+            public void handleEvent(FutureEvent<ValueEntity> event) {
+                count(event.getType() == Type.SUCCESS);
             }
         };
-        DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
+        DHTFuture<ValueEntity> future = mojitoDHT.get(eKey);
         future.addFutureListener(inspector);
         return future;
     }
@@ -455,27 +447,33 @@ public class DHTManagerImpl implements DHTManager, Service {
      * @return an instance of <code>DHTFuture</code> containing the result of the storage.
      * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
      */
-    public synchronized DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+    public synchronized DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         MojitoDHT mojitoDHT = getMojitoDHT();
 
         if (LOG.isDebugEnabled())
             LOG.debug("DHT: " + mojitoDHT);
 
-        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+        if (mojitoDHT == null || !mojitoDHT.isReady()) {
             LOG.debug("DHT is null or unable to bootstrap");                
             return null;
         }
+        
         // instantiated here so it can record its instantiation time
-        TimeInspector<StoreResult> inspector = new TimeInspector<StoreResult>(putInspectable) {
+        TimeInspector<StoreEntity> inspector 
+                = new TimeInspector<StoreEntity>(putInspectable) {
             @Override
-            protected void operationComplete(FutureEvent<StoreResult> event) {
+            public void handleEvent(FutureEvent<StoreEntity> event) {
                 if (event.getType() == Type.SUCCESS) {
-                    boolean success = event.getResult().getLocations().size() > 0.8 * KademliaSettings.REPLICATION_PARAMETER.getValue();
+                    StoreEntity entity = event.getResult();
+                    Contact[] contacts = entity.getContacts();
+                    
+                    boolean success = contacts.length > 0.8 
+                        * KademliaSettings.REPLICATION_PARAMETER.getValue();
                     count(success);
                 }
             }
         };
-        DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
+        DHTFuture<StoreEntity> future = mojitoDHT.put(key, value);
         future.addFutureListener(inspector);
         return future;
     }
@@ -759,28 +757,6 @@ public class DHTManagerImpl implements DHTManager, Service {
             }
         };
         
-        @InspectionPoint("dht internal format stats")
-        public Inspectable mojitoStats = new Inspectable() {
-            @Override
-            public Object inspect() {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                Writer w = new OutputStreamWriter(baos, Charset.forName("UTF-8"));
-                try {
-                    MojitoDHT dht = getMojitoDHT();
-                    if(dht != null) {
-                        DHTStats stats = dht.getDHTStats();
-                        stats.dump(w, false);
-                        w.flush();
-                        return baos.toByteArray();
-                    } else {
-                        return null;
-                    }
-                } catch (IOException impossible) {
-                    return impossible.getMessage();
-                }
-            }
-        };
-        
         /** Histograms of the stored keys with various detail */
         @InspectionPoint("dht database 10 histogram")
         public Inspectable database10StoredHist = new DBHist(10);
@@ -889,7 +865,8 @@ public class DHTManagerImpl implements DHTManager, Service {
         }
     }
     
-    abstract static class TimeInspector<T> extends DHTFutureAdapter<T> {
+    abstract static class TimeInspector<T> 
+            implements EventListener<FutureEvent<T>> {
         
         private final long startTime = System.currentTimeMillis();
         private final TimeValuesInspectable values;

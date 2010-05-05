@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.limewire.collection.MultiCollection;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModel;
@@ -130,17 +130,11 @@ public class AltLocModel implements StorableModel {
         return new MultiCollection<Storable>(toRemove, toPublish);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.StorableModel#handleStoreResult(org.limewire.mojito.db.Storable, org.limewire.mojito.result.StoreResult)
-     */
-    public void handleStoreResult(Storable storable, StoreResult result) {
+    @Override
+    public void handleStoreResult(Storable storable, StoreEntity result) {
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.StorableModel#handleContactChange()
-     */
+    @Override
     public void handleContactChange() {
         
     }

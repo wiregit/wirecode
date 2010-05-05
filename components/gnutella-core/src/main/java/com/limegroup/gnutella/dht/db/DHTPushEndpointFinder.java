@@ -10,10 +10,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
@@ -52,8 +52,8 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         KUID key = KUIDUtils.toKUID(guid);
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);        
       
-        DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
-        if(future != null) {                        
+        DHTFuture<ValueEntity> future = dhtManager.get(lookupKey);
+        if (future != null) {                        
             future.addFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
         } else {
             LOG.debug("dht manager not bootstrapped or no dht");

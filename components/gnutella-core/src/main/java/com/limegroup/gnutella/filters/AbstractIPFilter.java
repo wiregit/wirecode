@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IP;
-import org.limewire.mojito.messages.DHTMessage;
+import org.limewire.mojito2.routing.Contact;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -45,10 +45,14 @@ public abstract class AbstractIPFilter implements IPFilter {
             else
                 return ALLOWED;
         }
-        else if (m instanceof DHTMessage){
-            DHTMessage message = (DHTMessage)m;
+        else if (m instanceof org.limewire.mojito2.message.Message){
+            org.limewire.mojito2.message.Message message 
+                = (org.limewire.mojito2.message.Message)m;
+            
+            Contact src = message.getContact();
             InetSocketAddress addr = 
-                (InetSocketAddress) message.getContact().getContactAddress();
+                (InetSocketAddress) src.getContactAddress();
+            
             if (addr != null && addr.getAddress() instanceof Inet4Address)
                 return getIP(addr.getAddress().getAddress());
             // dht messages do not require contact address.

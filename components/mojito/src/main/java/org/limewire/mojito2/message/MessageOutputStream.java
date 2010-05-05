@@ -251,7 +251,7 @@ public class MessageOutputStream extends DataOutputStream {
         write(data);
     }
     
-    private void writeContacts(Contact[] contacts) throws IOException {
+    public void writeContacts(Contact[] contacts) throws IOException {
         writeByte(contacts.length);
         for (Contact contact : contacts) {
             writeContact(contact);
