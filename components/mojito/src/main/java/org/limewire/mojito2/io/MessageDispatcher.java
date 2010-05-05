@@ -36,7 +36,7 @@ import org.limewire.util.Objects;
 /**
  * 
  */
-public abstract class MessageDispatcher implements Closeable {
+public abstract class MessageDispatcher implements Callback, Closeable {
 
     private static final Log LOG 
         = LogFactory.getLog(MessageDispatcher.class);
@@ -51,14 +51,6 @@ public abstract class MessageDispatcher implements Closeable {
     
     @InspectablePrimitive(value = "Number of messages received")
     private static final AtomicInteger MESSAGES_RECEIVED = new AtomicInteger();
-    
-    private final Callback callback = new Callback() {
-        @Override
-        public void handleMessage(SocketAddress src, byte[] message, 
-                int offset, int length) throws IOException {
-            MessageDispatcher.this.handleMessage(src, message, offset, length);
-        }
-    };
     
     /**
      * 
@@ -113,7 +105,7 @@ public abstract class MessageDispatcher implements Closeable {
         }
         
         this.transport = transport;
-        transport.bind(callback);
+        transport.bind(this);
     }
     
     /**
@@ -251,6 +243,7 @@ public abstract class MessageDispatcher implements Closeable {
     /**
      * 
      */
+    @Override
     public void handleMessage(SocketAddress src, byte[] data, 
             int offset, int length) throws IOException {
         

@@ -33,6 +33,7 @@ import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
+import org.limewire.mojito2.util.IoUtils;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.service.ErrorService;
 
@@ -189,7 +190,6 @@ public abstract class AbstractDHTController implements DHTController {
         }
 
         DHTSettings.DHT_NODE_ID.set(dht.getLocalNodeID().toHexString());
-        DHTStatsManager.clear();
     }
 
     /**
@@ -279,7 +279,8 @@ public abstract class AbstractDHTController implements DHTController {
         bootstrapper.stop();
         dhtNodeAdder.stop();
         nodeForwarder.stop();
-        dht.close();
+        
+        IoUtils.close(dht);
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
     }

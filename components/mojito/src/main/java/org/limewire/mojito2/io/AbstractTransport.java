@@ -55,6 +55,13 @@ public abstract class AbstractTransport implements Transport {
     }
 
     /**
+     * Returns the {@link Callback}
+     */
+    protected Callback getCallback() {
+        return callback;
+    }
+    
+    /**
      * Notifies the {@link Callback}
      */
     protected boolean handleMessage(SocketAddress src, byte[] message) 

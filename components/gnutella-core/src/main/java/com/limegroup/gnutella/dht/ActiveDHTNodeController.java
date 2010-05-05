@@ -42,7 +42,8 @@ public class ActiveDHTNodeController extends AbstractDHTController {
     /**
      * The file to persist this Mojito DHT
      */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
+    private static final File FILE 
+        = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
     ActiveDHTNodeController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
