@@ -53,7 +53,8 @@ public class PassiveDHTNodeController extends AbstractDHTController {
     /**
      * The file to persist the list of host
      */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
+    private static final File FILE 
+        = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
     
     /**
      * A RouteTable for passive Nodes.

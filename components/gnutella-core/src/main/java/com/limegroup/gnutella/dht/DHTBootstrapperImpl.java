@@ -16,14 +16,13 @@ import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.exceptions.DHTException;
-import org.limewire.mojito.result.BootstrapResult;
-import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.BootstrapEntity;
+import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
@@ -39,7 +38,8 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * A list of DHT bootstrap hosts coming from the Gnutella network. 
      * Limit size to 50 for now.
      */
-    private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
+    private final Set<SocketAddress> hosts 
+        = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
     
     /**
      * A flag that indicates whether or not we've tried to
@@ -50,7 +50,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     /**
      * The future of the ping process
      */
-    private DHTFuture<PingResult> pingFuture;
+    private DHTFuture<PingEntity> pingFuture;
     
     /**
      * A flag that indicates whether or not the current
@@ -62,7 +62,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     /**
      * The future of the bootstrap process
      */
-    private DHTFuture<BootstrapResult> bootstrapFuture;
+    private DHTFuture<BootstrapEntity> bootstrapFuture;
     
     /**
      * The DHT controller
@@ -106,7 +106,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     public void bootstrap() {
         synchronized (lock) {
             
-            if (getMojitoDHT().isBootstrapped()) {
+            if (getMojitoDHT().isReady()) {
                 return;
             }
             
@@ -130,7 +130,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     public void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (lock) {
             
-            if (!getMojitoDHT().isRunning() || getMojitoDHT().isBootstrapped()) {
+            if (!getMojitoDHT().isBound() || getMojitoDHT().isReady()) {
                 return;
             }
             
@@ -185,7 +185,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      */
     public boolean isWaitingForNodes() {
         synchronized (lock) {
-            return !getMojitoDHT().isBootstrapped() && bootstrapFuture == null;
+            return !getMojitoDHT().isReady() && bootstrapFuture == null;
         }
     }
 
@@ -336,12 +336,12 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
     
     /** For testing. */
-    DHTFuture<PingResult> getPingFuture() {
+    DHTFuture<PingEntity> getPingFuture() {
         return pingFuture;
     }
     
     /** For testing */
-    DHTFuture<BootstrapResult> getBootstrapFuture() {
+    DHTFuture<BootstrapEntity> getBootstrapFuture() {
         return bootstrapFuture;
     }
     
@@ -354,16 +354,16 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * <li>check the hosts Set for other Nodes and ping 'em
      * </ol>
      */
-    private class PongListener extends DHTFutureAdapter<PingResult> {
+    private class PongListener implements EventListener<FutureEvent<PingEntity>> {
         
-        private final DHTFuture<PingResult> myFuture;
+        private final DHTFuture<PingEntity> myFuture;
         
-        public PongListener(DHTFuture<PingResult> myFuture) {
+        public PongListener(DHTFuture<PingEntity> myFuture) {
             this.myFuture = myFuture;
         }
         
         @Override
-        protected void operationComplete(FutureEvent<PingResult> event) {
+        public void handleEvent(FutureEvent<PingEntity> event) {
             switch (event.getType()) {
                 case SUCCESS:
                     handleFutureSuccess(event.getResult());
@@ -378,7 +378,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         }
 
 
-        private void handleFutureSuccess(PingResult result) {
+        private void handleFutureSuccess(PingEntity result) {
             synchronized (lock) {
                 if (pingFuture != myFuture) {
                     return;
@@ -454,10 +454,10 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * On a success we'll update our capabilities and if bootstrapping failed
      * we'll just try it again. 
      */
-    private class BootstrapListener extends DHTFutureAdapter<BootstrapResult> {
+    private class BootstrapListener implements EventListener<FutureEvent<BootstrapEntity>> {
         
         @Override
-        protected void operationComplete(FutureEvent<BootstrapResult> event) {
+        public void handleEvent(FutureEvent<BootstrapEntity> event) {
             switch (event.getType()) {
                 case SUCCESS:
                     handleFutureSuccess(event.getResult());
@@ -471,32 +471,13 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             }
         }
 
-        private void handleFutureSuccess(BootstrapResult result) {
-            boolean finish = false;
+        private void handleFutureSuccess(BootstrapEntity result) {
             synchronized (lock) {
                 bootstrapFuture = null;
-
-                ResultType type = result.getResultType();
-                
-                LOG.debug("Future success type: "+ type);
-                switch(type) {
-                    case BOOTSTRAP_SUCCEEDED:
-                        finish = true;
-                        break;
-                    case BOOTSTRAP_FAILED:
-                        // Try again!
-                        bootstrap();
-                        break;
-                    default:
-                        //ignore other results
-                        break;
-                }
             }
             
             // Do not hold 'lock' when calling finish.
-            if (finish) {
-                finish();
-            }
+            finish();
         }
         
         private void handleExecutionException(ExecutionException e) {

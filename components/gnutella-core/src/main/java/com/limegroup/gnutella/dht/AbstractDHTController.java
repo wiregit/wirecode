@@ -24,7 +24,6 @@ import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
@@ -127,10 +126,12 @@ public abstract class AbstractDHTController implements DHTController {
         
         switch(mode) {
             case ACTIVE:
-                routeTableVersion = DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.getValue();
+                routeTableVersion 
+                    = DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.getValue();
                 break;
             case PASSIVE:
-                routeTableVersion = DHTSettings.PASSIVE_DHT_ROUTETABLE_VERSION.getValue();
+                routeTableVersion 
+                    = DHTSettings.PASSIVE_DHT_ROUTETABLE_VERSION.getValue();
                 break;
             default:
                 routeTableVersion = -1;
@@ -294,7 +295,7 @@ public abstract class AbstractDHTController implements DHTController {
      * is bootstrapped.
      */
     protected void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
-        if(!dht.isBootstrapped()){
+        if(!dht.isReady()){
             bootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
             dhtNodeAdder.addDHTNode(hostAddress);
@@ -307,7 +308,7 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     public void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (!dht.isBootstrapped()) {
+        if (!dht.isReady()) {
             bootstrapper.addPassiveNode(hostAddress);
         }
     }
@@ -341,12 +342,12 @@ public abstract class AbstractDHTController implements DHTController {
         return ipps;
     }
     
-    public boolean isRunning() {
-        return dht.isRunning();
+    public boolean isBound() {
+        return dht.isBound();
     }
     
-    public boolean isBootstrapped() {
-        return dht.isBootstrapped();
+    public boolean isReady() {
+        return dht.isReady();
     }
 
     public boolean isWaitingForNodes() {
