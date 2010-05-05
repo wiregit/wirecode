@@ -68,8 +68,7 @@ public class AdvancedPopupPanel extends JXPanel {
             return category;
         }
         
-        @Override
-        public String toString() {
+        public String getName() {
             return name;
         }
     }
@@ -240,11 +239,8 @@ public class AdvancedPopupPanel extends JXPanel {
         
         // Get array of TabId values.
         TabId[] tabIds = TabId.values();
-
-        // Normalize index.
-        index = (index + tabIds.length) % tabIds.length;
         
-        // Get index of next/previous tab.
+        // Get normalized index of next/previous tab.
         int nextTab = (index + (forward ? 1 : -1) + tabIds.length) % tabIds.length;
         
         // Return TabId.
@@ -256,11 +252,6 @@ public class AdvancedPopupPanel extends JXPanel {
      * @param tabId the identifier of the tab
      */
     private void select(TabId tabId) {
-        // Skip if identifier is null.
-        if (tabId == null) {
-            return;
-        }
-        
         // De-select current item.
         if (selectedItem != null) {
             selectedItem.fireSelected(false);
@@ -273,14 +264,14 @@ public class AdvancedPopupPanel extends JXPanel {
         final AdvancedPanel tabPanel = selectedItem.getTabPanel();
         if (!cardPanel.isAncestorOf(tabPanel)) {
             tabPanel.setBackground(background);
-            cardPanel.add(tabPanel, tabId.toString());
+            cardPanel.add(tabPanel, tabId.getName());
         }
+
+        // Display selected tab panel.
+        cardLayout.show(cardPanel, tabId.getName());
         
         // Fire event to select tab.
         selectedItem.fireSelected(true);
-
-        // Display selected tab panel.
-        cardLayout.show(cardPanel, tabId.toString());
         
         // Post an event to request focus on first input field.
         SwingUtilities.invokeLater(new Runnable() {
@@ -323,7 +314,7 @@ public class AdvancedPopupPanel extends JXPanel {
         
         @Override
         public String getId() {
-            return tabId.toString();
+            return tabId.getName();
         }
 
         @Override
@@ -351,11 +342,11 @@ public class AdvancedPopupPanel extends JXPanel {
         private final TabId tabId;
 
         public TabAction(AdvancedSearchTabItem tabItem, Icon icon) {
-            super(tabItem.getTabId().toString(), icon);
+            super(tabItem.getTabId().getName(), icon);
             
             // Store tab identifier and action command.
             tabId = tabItem.getTabId();
-            putValue(ACTION_COMMAND_KEY, tabId.toString());
+            putValue(ACTION_COMMAND_KEY, tabId.getName());
 
             // Install listener to handle tab item selection. 
             tabItem.addTabItemListener(new TabItemListener() {

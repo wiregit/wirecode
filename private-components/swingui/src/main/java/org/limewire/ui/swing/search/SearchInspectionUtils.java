@@ -13,6 +13,9 @@ public class SearchInspectionUtils {
     
     @InspectablePrimitive(value = "advanced searches executed", category = DataCategory.USAGE)
     private static volatile int advancedSearchesMade = 0;
+
+    @InspectablePrimitive(value = "textual advanced searches executed", category = DataCategory.USAGE)
+    private static volatile int textAdvancedSearchesMade = 0;
     
     @InspectablePrimitive(value = "search sorts", category = DataCategory.USAGE)
     private static volatile int searchSorts;
@@ -29,6 +32,13 @@ public class SearchInspectionUtils {
      */
     public static void advancedSearchStarted() {
         advancedSearchesMade++;
+    }
+
+    /**
+     * Increment data for starting a text advanced search.
+     */
+    public static void textAdvancedSearchStarted() {
+        textAdvancedSearchesMade++;
     }
 
     /**

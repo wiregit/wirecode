@@ -35,7 +35,7 @@ class AdvancedPanelFactory {
             return new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
             
         default:
-            return null;
+            throw new IllegalArgumentException("Search category not supported");
         }
     }
 }

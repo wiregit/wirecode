@@ -130,6 +130,8 @@ public class PopupWindow extends JWindow {
         Container container = getContentPane();
         if (container instanceof JComponent) {
             JComponent contentPane = (JComponent) container;
+            contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).remove(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
             contentPane.getActionMap().remove(CLOSE_ACTION_KEY);
         }
     }

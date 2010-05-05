@@ -58,6 +58,7 @@ import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.SearchInspectionUtils;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
@@ -106,10 +107,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private volatile long maxTabCount = 0;
 
     private final AllFriendsRefreshManager allFriendsRefreshManager;    
-
-    @InspectablePrimitive(value = "textual advanced searches executed", category = DataCategory.USAGE)
-    private volatile int textAdvancedSearchesMade = 0;
-    
     
     @Inject
     public TopPanel(SearchHandler searchHandler,
@@ -390,7 +387,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     search = DefaultSearchInfo.createKeywordSearch(query, category);
                 } 
                 else {
-                    textAdvancedSearchesMade++;
+                    SearchInspectionUtils.textAdvancedSearchStarted();
                 }
                 
                 if(searchHandler.doSearch(search)) {

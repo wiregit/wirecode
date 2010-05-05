@@ -16,6 +16,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
     
     public static final String PRESSED_ICON = "limewire.pressedIcon";
     public static final String ROLLOVER_ICON = "limewire.rolloverIcon";
+    /** Key to indicate action should be preceded by separator in menu */
     public static final String SEPARATOR = "limewire.separator";
 
     public AbstractAction(String name, Icon icon) {
