@@ -17,7 +17,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 import org.limewire.ui.swing.settings.TablesHandler;
 import org.limewire.ui.swing.table.ColumnStateInfo;
-import org.limewire.ui.swing.table.TrackComparator;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -72,6 +71,11 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
         }
     }    
     
+    private static boolean shouldScrape(VisualSearchResult vsr, Torrent torrent) {
+        return !vsr.isSpam() && torrent.getTrackerURIS().size() > 0; 
+    }
+
+    
     @Override
     public Object getColumnValue(VisualSearchResult vsr, int column) {
         switch(column) {
@@ -83,7 +87,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         Torrent torrent = (Torrent) vsr.getProperty(FilePropertyKey.TORRENT);
         if (torrent != null) {
-            if (torrent.getTrackerURIS().size() > 0) {
+            if (shouldScrape(vsr, torrent)) {
                 scrapeAdaptor.queueScrapeIfNew(torrent);
             }
 
@@ -95,7 +99,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TRACKERS_INDEX:
                 return torrent.getTrackers();
             case SEEDERS_INDEX:
-                if (torrent.getTrackerURIS().size() > 0) {
+                if (shouldScrape(vsr, torrent)) {
                     data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
                     if (data != null) {
                         return data.getComplete();
@@ -104,7 +108,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
                     }
                 }
             case LEECHERS_INDEX:
-                if (torrent.getTrackerURIS().size() > 0) {
+                if (shouldScrape(vsr, torrent)) {
                     data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
                     if (data != null) {
                         return data.getIncomplete();
@@ -113,7 +117,7 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
                     }
                 }
             case DOWNLOADED_INDEX:
-                if (torrent.getTrackerURIS().size() > 0) {
+                if (shouldScrape(vsr, torrent)) {
                     data = scrapeAdaptor.getScrapeDataIfAvailable(torrent);
                     if (data != null) {
                         return data.getDownloaded();
@@ -145,11 +149,5 @@ public class TorrentTableFormat extends ResultsTableFormat<VisualSearchResult> {
             return Collections.emptyList();
         }
     }
-    
-    /**
-     * Returns a comparator for the track column.
-     */
-    public Comparator getTrackComparator() {
-        return new TrackComparator();
-    }
+
 }

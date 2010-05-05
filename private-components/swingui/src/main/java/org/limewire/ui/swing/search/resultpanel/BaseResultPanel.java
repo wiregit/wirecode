@@ -22,6 +22,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.logging.Log;
@@ -453,9 +454,17 @@ public class BaseResultPanel extends JXPanel {
             setCellRenderer(TorrentTableFormat.SIZE_INDEX, fileSizeRenderer.get());
             setCellRenderer(TorrentTableFormat.FILES_INDEX, renderer);
             setCellRenderer(TorrentTableFormat.TRACKERS_INDEX, renderer);
+            
+            setUnsortable(TorrentTableFormat.TRACKERS_INDEX);
+            setUnsortable(TorrentTableFormat.FILES_INDEX);
         default:
             break;
         }
+    }
+    
+    /** Prevents the given column from being sortable. */
+    private void setUnsortable(int column) {
+        ((TableColumnExt)resultsTable.getColumnModel().getColumn(column)).setSortable(false);
     }
 
     /**
