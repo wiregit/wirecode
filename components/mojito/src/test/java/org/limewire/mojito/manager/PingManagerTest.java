@@ -14,6 +14,7 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.PingSettings;
+import org.limewire.mojito2.util.IoUtils;
 
 public class PingManagerTest extends MojitoTestCase {
     
@@ -40,7 +41,8 @@ public class PingManagerTest extends MojitoTestCase {
         PingSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);
         
-        DHT dht1 = null, dht2 = null;
+        DHT dht1 = null;
+        DHT dht2 = null;
         
         try {
             dht1 = MojitoFactory.createDHT("DHT1", 2000);
@@ -68,8 +70,7 @@ public class PingManagerTest extends MojitoTestCase {
             }
             
         } finally {
-            dht1.close();
-            dht2.close();
+            IoUtils.closeAll(dht1, dht2);
         }
     }
 }

@@ -56,16 +56,16 @@ public class ValueTest extends MojitoTestCase {
         MojitoDHT dht2 = null;
         
         try {
-            // Setup the first instance so that it thinks it's bootstrapping
-            dht1 = MojitoFactory.createDHT("DHT-1", 2000);
             
+            dht1 = MojitoFactory.createDHT("DHT-1", 2000);
+            dht2 = MojitoFactory.createDHT("DHT-2", 3000);
+            
+            // Setup the first instance so that it thinks it's bootstrapping
             UnitTestUtils.setBooting(dht1, true);            
             assertFalse(dht1.isReady());
             assertTrue(dht1.isBooting());
             
             // And setup the second instance so that it thinks it's bootstrapped 
-            dht2 = MojitoFactory.createDHT("DHT-2", 3000);
-            
             UnitTestUtils.setReady(dht2, true);
             assertTrue(dht2.isReady());
             assertFalse(dht2.isBooting());
