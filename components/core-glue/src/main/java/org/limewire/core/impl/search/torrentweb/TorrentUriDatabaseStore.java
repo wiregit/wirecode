@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -137,6 +138,10 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
         private final PreparedStatement selectRobotsTxt;
 
         private final PreparedStatement insertRobotsTxt;
+
+        private final PreparedStatement selectTorrentUriByHostAndUri;
+
+        private final PreparedStatement updateTorrentUriByHostTimestamp;
         
         
         public DbStore() {
@@ -151,7 +156,8 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
                 String connectionUrl = "jdbc:hsqldb:file:" + dbFile.getAbsolutePath();
                 connection = DriverManager.getConnection(connectionUrl, "sa", "");
                 Statement statement = connection.createStatement();
-                // set properties to make memory footprint small
+                // set properties to make memory footprint small, will only take
+                // effect after restart
                 statement.execute("set property \"hsqldb.cache_scale\" 8");
                 statement.execute("set property \"hsqldb.cache_size_scale\" 6");
                 try {
@@ -164,12 +170,15 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
                     LOG.debug("sql exception while creating", se);
                 }
                 selectTorrentUris = connection.prepareStatement("select uri, is_torrent from torrent_uris where hash = ?");
-                selectTorrentUrisByHost = connection.prepareStatement("select uri from torrent_uris_by_host where host = ?");
                 insertTorrentUri = connection.prepareStatement("insert into torrent_uris values (?, ?, ?, ?)");
                 updateTorrentUri = connection.prepareStatement("update torrent_uris set is_torrent = ?, timestamp = ? where hash = ? and uri = ?");
+                selectTorrentUrisByHost = connection.prepareStatement("select uri from torrent_uris_by_host where host = ?");
                 insertTorrentUriByHost = connection.prepareStatement("insert into torrent_uris_by_host values (?, ?, ?)");
+                selectTorrentUriByHostAndUri = connection.prepareStatement("select uri from torrent_uris_by_host where host = ? and uri = ?");
+                updateTorrentUriByHostTimestamp = connection.prepareStatement("update torrent_uris_by_host set timestamp = ? where host = ? and uri = ?");
                 selectRobotsTxt = connection.prepareStatement("select robots_txt from torrent_robots_txt where host = ?");
                 insertRobotsTxt = connection.prepareStatement("insert into torrent_robots_txt values (?, ?, ?)");
+                purgeOldEntries();
             } catch (SQLException se) {
                 throw new RuntimeException(se);
             }
@@ -257,10 +266,20 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
         @Override
         public synchronized void addCanonicalTorrentUri(String host, URI uri) {
             try {
-                insertTorrentUriByHost.setString(1, host);
-                insertTorrentUriByHost.setString(2, uri.toASCIIString());
-                insertTorrentUriByHost.setLong(3, clock.now());
-                insertTorrentUriByHost.execute();
+                selectTorrentUriByHostAndUri.setString(1, host);
+                selectTorrentUriByHostAndUri.setString(2, uri.toASCIIString());
+                ResultSet resultSet = selectTorrentUriByHostAndUri.executeQuery();
+                if (resultSet.next()) {
+                    updateTorrentUriByHostTimestamp.setLong(1, clock.now());
+                    updateTorrentUriByHostTimestamp.setString(2, host);
+                    updateTorrentUriByHostTimestamp.setString(3, uri.toASCIIString());
+                    updateTorrentUriByHostTimestamp.execute();
+                } else {
+                    insertTorrentUriByHost.setString(1, host);
+                    insertTorrentUriByHost.setString(2, uri.toASCIIString());
+                    insertTorrentUriByHost.setLong(3, clock.now());
+                    insertTorrentUriByHost.execute();
+                }
             } catch (SQLException e) {
                 LOG.debugf(e, "host {0}, uri {1}", host, uri);
             }
@@ -300,6 +319,24 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
                 insertRobotsTxt.setString(2, robotsTxt);
                 insertRobotsTxt.setLong(3, clock.now());
                 insertRobotsTxt.execute();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        private void purgeOldEntries() {
+            try {
+                long threeMonthsAgo = clock.now() - TimeUnit.DAYS.toMillis(90);
+                PreparedStatement statement = connection.prepareStatement("delete from torrent_uris where timestamp < ?");
+                statement.setLong(1, threeMonthsAgo);
+                statement.execute();
+                statement = connection.prepareStatement("delete from torrent_uris_by_host where timestamp < ?");
+                statement.setLong(1, threeMonthsAgo);
+                statement.execute();
+                long twoWeeksAgo = clock.now() - TimeUnit.DAYS.toMillis(14);
+                statement = connection.prepareStatement("delete from torrent_robots_txt where timestamp < ?");
+                statement.setLong(1, twoWeeksAgo);
+                statement.execute();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

@@ -53,12 +53,12 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     /**
      * Threshold before clearing cached results.
      */
-    private static final int MAX_RESULTS_TO_KEEP_CACHED = 100;
+    private static final int MAX_RESULTS_TO_KEEP_CACHED = 250;
     
     /**
      * Threshold before clearing cached fails
      */
-    private static final int MAX_FAILURES_TO_KEEP_CACHED = 100;
+    private static final int MAX_FAILURES_TO_KEEP_CACHED = 250;
 
     /**
      * Number of cycles to wait with an empty
