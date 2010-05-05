@@ -224,7 +224,7 @@ public class AdvancedPopupPanel extends JXPanel {
     private void disposePopup() {
         Container ancestor = getTopLevelAncestor();
         if (ancestor instanceof Window) {
-            ((Window) ancestor).dispose();
+            ((Window) ancestor).setVisible(false);
         }
     }
     

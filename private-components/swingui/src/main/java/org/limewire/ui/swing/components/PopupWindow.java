@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Point;
@@ -21,13 +22,27 @@ import javax.swing.JWindow;
 import javax.swing.KeyStroke;
 import javax.swing.RootPaneContainer;
 
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.TimingTargetAdapter;
+
 /**
- * An extension of JWindow that can be used as a popup window.
+ * An extension of JWindow that can be used as a popup window.  PopupWindow
+ * may be displayed using an animation that opens and closes the popup like a 
+ * window shade.
+ * 
+ * Note that when a PopupWindow is opened, it installs a mouse listener on 
+ * the glass pane of its owner window.  This handles mouse pressed events
+ * to automatically close the popup.
  */
 public class PopupWindow extends JWindow {
     private static final String CLOSE_ACTION_KEY = "closeWindow";
+    private static final int DURATION = 250;
+    private static final int RESOLUTION = 30;
 
     private final OwnerListener ownerListener = new OwnerListener();
+    
+    private boolean animated = true;
+    private Animator animator;
     
     /**
      * Creates a window with no specified owner.
@@ -117,7 +132,7 @@ public class PopupWindow extends JWindow {
             contentPane.getActionMap().put(CLOSE_ACTION_KEY, new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    dispose();
+                    setVisible(false);
                 }
             });
         }
@@ -165,6 +180,66 @@ public class PopupWindow extends JWindow {
     }
     
     /**
+     * Sets an indicator to animate the popup window.  The built-in animation
+     * opens and closes the popup like a window shade.
+     */
+    public void setAnimated(boolean animated) {
+        this.animated = animated;
+    }
+    
+    /**
+     * Overrides superclass method to animate the display.
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        if (animated) {
+            startAnimation(visible);
+        } else {
+            super.setVisible(visible);
+            // Always call dispose() when hidden to ensure windowClosed event
+            // is fired.  The event is used to remove the owner listener.
+            if (!visible) {
+                dispose();
+            }
+        }
+    }
+    
+    /**
+     * Starts an animation to show or hide the popup window.
+     */
+    private void startAnimation(boolean visible) {
+        if (isVisible() != visible) {
+            // Stop existing animator.
+            stopAnimator();
+            
+            // Save preferred size.
+            Dimension initialSize = visible ? getPreferredSize() : getSize();
+            
+            // Make visible if requested with zero height.  The animation will
+            // change the height to make the window grow.
+            if (!isVisible() && visible) {
+                setSize(new Dimension(initialSize.width, 0));
+                super.setVisible(true);
+            }
+            
+            // Create new animator and start.
+            animator = new Animator(DURATION, new AnimationTarget(visible, initialSize));
+            animator.setResolution(RESOLUTION);
+            animator.start();
+        }
+    }
+    
+    /**
+     * Stops the animation.
+     */
+    private void stopAnimator() {
+        if (animator != null) {
+            animator.stop();
+            animator = null;
+        }
+    }
+    
+    /**
      * Listener to handle events on the popup owner.  The popup is closed
      * when the owner is moved, or when the mouse is pressed on the owner's
      * glass pane.
@@ -192,7 +267,44 @@ public class PopupWindow extends JWindow {
         
         @Override
         public void mousePressed(MouseEvent e) {
-            dispose();
+            setVisible(false);
         }
+    }
+    
+    /**
+     * Animation target to handle timing events.
+     */
+    private class AnimationTarget extends TimingTargetAdapter {
+        private final boolean makeVisible;
+        private final Dimension initialSize;
+        
+        public AnimationTarget(boolean makeVisible, Dimension initialSize) {
+            this.makeVisible = makeVisible;
+            this.initialSize = initialSize;
+        }
+        
+        @Override
+        public void timingEvent(float fraction) {
+            // Determine size percentage.
+            float sizePct = makeVisible ? fraction : 1.0f - fraction;
+            
+            // Stop timer when we reach the end.
+            if (makeVisible && sizePct > 0.98f) {
+                stopAnimator();
+                sizePct = 1.0f;
+                
+            } else if (!makeVisible && sizePct < 0.02f) {
+                stopAnimator();
+                sizePct = 0.0f;
+                dispose();
+            }
+            
+            // Set window size.
+            setSize(new Dimension(initialSize.width,
+                    (int) (initialSize.getHeight() * sizePct)));
+            
+            // Request repaint.
+            repaint();
+        }        
     }
 }
