@@ -91,6 +91,8 @@ public class TorrentWebSearchResult implements SearchResult {
             return torrentData.getName();
         case TORRENT:
             return torrent;
+        case REFERRER:
+            return referrer;
         }
         return null;
     }

@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -44,8 +44,10 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.properties.PropertyDictionary;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.core.api.upload.UploadItem;
 import org.limewire.friend.api.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.CollectionBackedComboBoxModel;
 import org.limewire.ui.swing.components.FilteredDocument;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -80,20 +82,20 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
     private final FileInfoType type;
     private PropertiableFile propertiableFile;
     private final PropertyDictionary propertyDictionary;
-    private final TorrentManagerSettings torrentSettings;
+    
     private final SpamManager spamManager;
     private final MetaDataManager metaDataManager;
     private final LibraryMediator libraryMediator;
     private JTextField locationField;
-    private TorrentManagementPanel torrentManagementPanel;
+
     
     private final Map<FilePropertyKey, JComponent> changedProps = new HashMap<FilePropertyKey, JComponent>();
     
-    public FileInfoGeneralPanel(FileInfoType type, PropertiableFile propertiableFile, TorrentManagerSettings torrentSettings,
+    public FileInfoGeneralPanel(FileInfoType type, PropertiableFile propertiableFile,
             PropertyDictionary propertyDictionary, SpamManager spamManager, MetaDataManager metaDataManager, LibraryMediator libraryMediator) {
         this.type = type;
         this.propertiableFile = propertiableFile;
-        this.torrentSettings = torrentSettings;
+        
         this.propertyDictionary = propertyDictionary;
         this.spamManager = spamManager;
         this.metaDataManager = metaDataManager;
@@ -149,8 +151,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             }     
             break;
         }
-        if(torrentManagementPanel != null && torrentManagementPanel.hasChanged())
-            torrentManagementPanel.save();
+
     }
     
     @Override
@@ -170,8 +171,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
         createLocation();
         
         createUrnSection();
-        
-        createTorrentSettings();
+
     }
 
     private void createUrnSection() {
@@ -333,16 +333,27 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
             }
             break;
         case REMOTE_FILE:
+            
+            
             component.add(createHeaderLabel(I18n.tr("Location")), "span, gaptop 15, wrap");
             
             if(propertiableFile instanceof VisualSearchResult) {
+                
+                VisualSearchResult vsr = ((VisualSearchResult)propertiableFile);
+                                
                 final ReadOnlyTableModel model = new ReadOnlyTableModel();
                 final MouseableTable table = new MouseableTable(model);
                 table.setDefaultRenderer(Object.class, new DefaultLimeTableCellRenderer());
                 
                 model.setColumnIdentifiers(new Object[] { I18n.tr("Name"), I18n.tr("Address"), I18n.tr("Filename") });
     
-                for (SearchResult result : ((VisualSearchResult)propertiableFile).getCoreSearchResults()) {
+                // Find a referrer link
+                Object referrer = null;
+                
+                for (SearchResult result : vsr.getCoreSearchResults()) {
+                    
+                    referrer = result.getProperty(FilePropertyKey.REFERRER);
+                    
                     RemoteHost host = result.getSource();
                     Friend f = host.getFriendPresence().getFriend();
                     model.addRow(new Object[] {
@@ -351,81 +362,92 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                             result.getFileName()
                     });
                 }
-                component.add(new JScrollPane(table), "span, grow, wrap");
                 
-                table.addMouseListener(new MousePopupListener() {
-                    @Override
-                    public void handlePopupMouseEvent(final MouseEvent e) {
-                        JPopupMenu blockingMenu = new JPopupMenu();
-                        blockingMenu.add(new AbstractAction(I18n.tr("Block Address")) {
-                            @Override
-                            public void actionPerformed(ActionEvent actionEvent) {
-                                int blockRow = table.rowAtPoint(e.getPoint());
-                                table.getSelectionModel().setSelectionInterval(blockRow, blockRow);
-                                Object value = model.getValueAt(blockRow, 1);
-                                if (value != null) {
-                                    addToFilterList(value.toString());
+                // The referrer takes precedence since it indicates a torrent web search
+                if (referrer instanceof URI) {
+                    URI referrerURI = (URI) referrer;
+                    component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), referrerURI.getPath())));
+                } else {
+                    component.add(new JScrollPane(table), "span, grow, wrap");
+                
+                    table.addMouseListener(new MousePopupListener() {
+                        @Override
+                        public void handlePopupMouseEvent(final MouseEvent e) {
+                            JPopupMenu blockingMenu = new JPopupMenu();
+                            blockingMenu.add(new AbstractAction(I18n.tr("Block Address")) {
+                                @Override
+                                public void actionPerformed(ActionEvent actionEvent) {
+                                    int blockRow = table.rowAtPoint(e.getPoint());
+                                    table.getSelectionModel().setSelectionInterval(blockRow, blockRow);
+                                    Object value = model.getValueAt(blockRow, 1);
+                                    if (value != null) {
+                                        addToFilterList(value.toString());
+                                    }
                                 }
-                            }
-                        });
-                        blockingMenu.show(table, e.getX(), e.getY());
-                    }
-                });
-            } else if(propertiableFile instanceof SearchResult) {
-                String friend = ((SearchResult)propertiableFile).getSource().getFriendPresence().getFriend().getRenderName();
-                component.add(createLabelField(friend), "span, growx, wrap");
+                            });
+                            blockingMenu.show(table, e.getX(), e.getY());
+                        }
+                    });
+                }
             }
             break;
         case DOWNLOADING_FILE:
-            if(propertiableFile instanceof DownloadItem) {
-                File launchableFile = ((DownloadItem)propertiableFile).getDownloadingFile();
-                
-                HyperlinkButton locateOnDisk2 = new HyperlinkButton(
+        case UPLOADING_FILE:
+
+            HyperlinkButton locateOnDisk2 = new HyperlinkButton(
                     new AbstractAction(I18n.tr("Locate on Disk")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            if( ((DownloadItem)propertiableFile).getDownloadingFile() != null) {
-                                NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getDownloadingFile());
+                            if (propertiableFile instanceof DownloadItem) {
+                                if (((DownloadItem)propertiableFile).getDownloadingFile() != null) {
+                                    NativeLaunchUtils.launchExplorer(((DownloadItem)propertiableFile).getDownloadingFile());
+                                } 
+                            } else if (propertiableFile instanceof UploadItem) {
+                                if (((UploadItem)propertiableFile).getFile() != null) {
+                                    NativeLaunchUtils.launchExplorer(((UploadItem)propertiableFile).getFile());
+                                } 
                             }
                         }
                     });
-                
-                HyperlinkButton locateInLibrary2 = new HyperlinkButton( 
+
+            HyperlinkButton locateInLibrary2 = new HyperlinkButton( 
                     new AbstractAction(I18n.tr("Locate in Library")) {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             component.getRootPane().getParent().setVisible(false);
-                            
-                            DownloadItem item = (DownloadItem)propertiableFile;
-                            libraryMediator.locateInLibrary(item);
+
+                            if (propertiableFile instanceof DownloadItem) {
+                                DownloadItem item = (DownloadItem)propertiableFile;
+                                libraryMediator.locateInLibrary(item);
+                            } else if (propertiableFile instanceof UploadItem) {
+                                UploadItem item = (UploadItem)propertiableFile;
+                                libraryMediator.locateInLibrary(item);
+                            }
                         }
                     });
 
-                component.add(createHeaderLabel(I18n.tr("Location")), "gaptop 15");
-                
-                component.add(locateOnDisk2, "span, alignx right, split");
-                component.add(locateInLibrary2, "gapleft 15, wrap");
-                
-                if(launchableFile != null && launchableFile.getAbsoluteFile() != null) {
-                    component.add(createLabelField(launchableFile.getAbsolutePath()), "span, growx, wrap");
-                }
-                else {
-                    component.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
-                }
+            component.add(createHeaderLabel(I18n.tr("Location")), "gaptop 15");
+
+            component.add(locateOnDisk2, "span, alignx right, split");
+            
+            // TODO: is this even ever possible for downloads?  incomplete uploads?
+            component.add(locateInLibrary2, "gapleft 15, wrap");
+
+            File launchableFile = null;
+            if (propertiableFile instanceof DownloadItem) {
+                launchableFile = ((DownloadItem)propertiableFile).getDownloadingFile();
+            } else if (propertiableFile instanceof UploadItem) {
+                launchableFile = ((UploadItem)propertiableFile).getFile();
+            }
+
+            if(launchableFile != null && launchableFile.getAbsoluteFile() != null) {
+                component.add(createLabelField(launchableFile.getAbsolutePath()), "span, growx, wrap");
+            }
+            else {
+                component.add(createLabelField(propertiableFile.getFileName()), "span, growx, wrap");
             }
             
             break;
-        }
-    }
-    
-    private void createTorrentSettings() {
-        Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
-        
-        if(torrent != null && torrent.isEditable()) {
-            component.add(createHeaderLabel(I18n.tr("Torrent Settings")), "span, gaptop 15, wrap");
-            
-            torrentManagementPanel = new TorrentManagementPanel(torrent, torrentSettings);
-            component.add(torrentManagementPanel.getComponent(), "span, wrap");
         }
     }
     

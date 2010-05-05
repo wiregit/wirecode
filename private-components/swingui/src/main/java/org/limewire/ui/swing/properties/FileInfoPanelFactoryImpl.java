@@ -72,7 +72,12 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createGeneralPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoGeneralPanel(type, propertiableFile, torrentSettings, propertyDictionary.get(), spamManager.get(), metaDataManager.get(), libraryMediator.get());
+        return new FileInfoGeneralPanel(type, propertiableFile, propertyDictionary.get(), spamManager.get(), metaDataManager.get(), libraryMediator.get());
+    }
+    
+    @Override
+    public FileInfoPanel createLimitsPanel(FileInfoType type, PropertiableFile propertiableFile) {
+        return new FileInfoLimitsPanel(type, propertiableFile, torrentSettings);
     }
 
     @Override

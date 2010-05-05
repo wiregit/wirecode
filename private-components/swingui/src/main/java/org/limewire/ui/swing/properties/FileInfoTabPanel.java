@@ -40,7 +40,8 @@ class FileInfoTabPanel {
         TRACKERS(I18n.tr("Trackers")),
         TRANSFERS(I18n.tr("Transfers")),
         PIECES(I18n.tr("Pieces")), 
-        BITTORENT(I18n.tr("Files"));
+        BITTORENT(I18n.tr("Files")),
+        LIMITS(I18n.tr("Limits"));
         
         private final String name;
         

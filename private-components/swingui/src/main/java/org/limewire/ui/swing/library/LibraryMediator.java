@@ -14,6 +14,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.core.api.upload.UploadItem;
 import org.limewire.inject.LazySingleton;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -209,5 +210,11 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         } else if (urn != null){
             selectInLibrary(urn);
         }
+    }
+    
+    public void locateInLibrary(UploadItem item) {
+        URN urn = item.getUrn();
+        
+        selectInLibrary(urn);
     }
 }

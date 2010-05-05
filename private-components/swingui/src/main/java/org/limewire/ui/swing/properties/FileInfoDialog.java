@@ -25,12 +25,9 @@ import org.jdesktop.application.Resource;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.properties.FileInfoTabPanel.FileInfoTabListener;
@@ -163,6 +160,12 @@ public class FileInfoDialog extends LimeJDialog {
                         cards.put(tab, fileInfoFactory.createGeneralPanel(type, propertiableFile));
                     } else if(tab == Tabs.SHARING) {
                         cards.put(tab, fileInfoFactory.createSharingPanel(type, propertiableFile));
+                    } else if(tab== Tabs.LIMITS) {
+                        Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
+                        
+                        if (torrent != null && torrent.isEditable()) {
+                            cards.put(tab, fileInfoFactory.createLimitsPanel(type, propertiableFile));
+                        }
                     } else if (tab == Tabs.TRACKERS) {
                         cards.put(tab, fileInfoFactory.createTrackersPanel(type, propertiableFile));
                     } else if(tab == Tabs.TRANSFERS) {
@@ -217,54 +220,35 @@ public class FileInfoDialog extends LimeJDialog {
         List<Tabs> tabs = new ArrayList<Tabs>();
         // general tab is always shown
         tabs.add(Tabs.GENERAL);
-        switch(type) {
-        case LOCAL_FILE:
-            tabs.add(Tabs.SHARING);
-            Torrent localTorrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
-            if(localTorrent != null && localTorrent.hasMetaData()) {
+        
+        Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
+
+        if (torrent != null) {
+            if (torrent.isEditable()) {
+                tabs.add(Tabs.LIMITS);
+            }
+
+            if (torrent.hasMetaData()) {
                 tabs.add(Tabs.BITTORENT);
-                if(localTorrent.isEditable()) {
-                    tabs.add(Tabs.TRACKERS);
-                    tabs.add(Tabs.TRANSFERS);
-                }
+                tabs.add(Tabs.TRACKERS);
             }
-            break;
-        case DOWNLOADING_FILE:
-            if(propertiableFile instanceof DownloadItem && ((DownloadItem)propertiableFile).getDownloadItemType() == DownloadItemType.BITTORRENT) {
-                Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
-                if(torrent != null) {
-                    if (torrent.hasMetaData()) {
-                        tabs.add(Tabs.BITTORENT);
-                    }
-                    tabs.add(Tabs.TRACKERS);
-                }
+
+            if (torrent.isEditable()) {
+                tabs.add(Tabs.TRANSFERS);
+                tabs.add(Tabs.PIECES);
             }
-            tabs.add(Tabs.TRANSFERS);
-            tabs.add(Tabs.PIECES);
-            break;
-        case UPLOADING_FILE:
-            if(propertiableFile instanceof UploadItem && ((UploadItem)propertiableFile).getUploadItemType() == UploadItemType.BITTORRENT) {
-                Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
-                if(torrent != null) {
-                    if (torrent.hasMetaData()) {
-                        tabs.add(Tabs.BITTORENT);
-                    }
-                    tabs.add(Tabs.TRACKERS);
-                }
+        } else {
+            if (type == FileInfoType.LOCAL_FILE) {
+                tabs.add(Tabs.SHARING);
             }
-            tabs.add(Tabs.TRANSFERS);
-            break;
-        case REMOTE_FILE:
-            Torrent torrent = (Torrent) propertiableFile.getProperty(FilePropertyKey.TORRENT);
-            if(torrent != null && torrent.hasMetaData()) {
-                tabs.add(Tabs.BITTORENT);
-                if(torrent.isEditable()) {
-                    tabs.add(Tabs.TRACKERS);
-                    tabs.add(Tabs.TRANSFERS);
-                }
+            if (type != FileInfoType.REMOTE_FILE) {
+                tabs.add(Tabs.TRANSFERS);
             }
-            break;
+            if (type == FileInfoType.DOWNLOADING_FILE) {
+                tabs.add(Tabs.PIECES);
+            }
         }
+        
         tabPanel.setTabs(tabs);
     }
     
