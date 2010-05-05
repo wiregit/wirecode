@@ -20,6 +20,7 @@ import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
@@ -84,6 +85,11 @@ public interface DHT extends Closeable {
      * 
      */
     public void setHostFilter(HostFilter hostFilter);
+    
+    /**
+     * 
+     */
+    public DHTValueFactoryManager getDHTValueFactoryManager();
     
     /**
      * 

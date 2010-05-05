@@ -29,6 +29,7 @@ import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.StoreSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
+import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
@@ -109,6 +110,11 @@ public class MojitoDHT implements DHT {
         return dht.getRouteTable();
     }
 
+    @Override
+    public DHTValueFactoryManager getDHTValueFactoryManager() {
+        return dht.getDHTValueFactoryManager();
+    }
+    
     @Override
     public StorableModelManager getStorableModelManager() {
         return dht.getStorableModelManager();
