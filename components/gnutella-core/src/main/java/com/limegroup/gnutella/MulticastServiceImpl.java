@@ -125,7 +125,9 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
             LOG.debug("Binding port " + port + ", group address " + group);
         try {
             MulticastSocket sock = new MulticastSocket(port);
-            sock.setInterface(chooseInterface());
+            // Bind to a specific interface unless we're doing loopback tests
+            if(!ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue())
+                sock.setInterface(chooseInterface());
             sock.setTimeToLive(3);
             sock.joinGroup(group);
             if(LOG.isDebugEnabled())
@@ -243,6 +245,7 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
                             continue;
                         }
                     }
+                    LOG.debug("Ready to receive");
                     try {
                         _socket.receive(datagram);
                     } 
@@ -275,6 +278,7 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
                         LOG.debug("Received a null message");
                         continue;
                     }
+                    LOG.debug("Received a multicast message");
                     messageDispatcher.get().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
                 catch (IOException e) {
@@ -304,6 +308,7 @@ public final class MulticastServiceImpl implements MulticastService, Runnable {
         if(_port == -1) {
             LOG.debug("Socket not ready for writing");
         } else {
+            LOG.debug("Sending a multicast message");
             udpService.get().send(msg, _group, _port);
         }
     }
