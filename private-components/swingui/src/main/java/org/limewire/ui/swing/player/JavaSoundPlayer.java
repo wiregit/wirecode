@@ -156,7 +156,7 @@ public class JavaSoundPlayer implements Player {
     }
     @Override
     public Time getMediaTime() {
-        if ((audioProperties != null) && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
+        if ((audioProperties != null) && audioProperties.containsKey(AUDIO_LENGTH_BYTES) && audioProperties.containsKey("duration")) {
             float byteslength = ((Integer) audioProperties.get(AUDIO_LENGTH_BYTES)).floatValue();
             float progress = bytesRead / byteslength;
             long currentTime = (long) ((((Long)audioProperties.get("duration"))/1000) * progress);// System.out.println("progress " + currentTime + " " + byteslength + " " + bytesRead + " " + progress);//+ " " + total);
@@ -249,7 +249,7 @@ public class JavaSoundPlayer implements Player {
         @Override
         public void songOpened(Map<String, Object> properties) {
             audioProperties = properties;
-            if(audioProperties != null && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
+            if(audioProperties != null && audioProperties.containsKey("duration")) {
                 duration = new Time(((Long)audioProperties.get("duration"))/1000);
             } else {
                 duration = Time.TIME_UNKNOWN;
