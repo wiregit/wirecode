@@ -144,14 +144,10 @@ public abstract class AbstractDHTController implements DHTController {
         this.dht = createMojitoDHT(vendor, version);
 
         assert (dht != null);
+        
         dht.setMessageDispatcher(dhtControllerFacade.getMessageDispatcherFactory());
         dht.setMACCalculatorRepositoryManager(dhtControllerFacade.getMACCalculatorRespositoryManager());
         dht.setSecurityTokenProvider(dhtControllerFacade.getSecurityTokenProvider());                
-        dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
-            public Thread newThread(Runnable runnable) {
-                return new ManagedThread(runnable);
-            }
-        });
         
         dht.setHostFilter(new FilterDelegate());
         
@@ -481,8 +477,11 @@ public abstract class AbstractDHTController implements DHTController {
         }
     }
     
+    /**
+     * 
+     */
     private class FilterDelegate implements HostFilter {
-        
+        @Override
         public boolean allow(SocketAddress addr) {
             return dhtControllerFacade.allow(addr);
         }
@@ -503,28 +502,43 @@ public abstract class AbstractDHTController implements DHTController {
         private volatile Future<?> forwarderFuture;
         
         void start() {
-            forwarderFuture = dhtControllerFacade.scheduleWithFixedDelay(this, 60, 60, TimeUnit.SECONDS);
+            forwarderFuture = dhtControllerFacade.scheduleWithFixedDelay(
+                    this, 60, 60, TimeUnit.SECONDS);
+        }
+        
+        void stop() {
+            Future<?> f = forwarderFuture;
+            if (f != null)
+                f.cancel(false);
         }
         
         synchronized void addContact(Contact contact) {
             contactsToForward.add(contact);
         }
         
+        @Override
         public void run() {
             if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue() || !isRunning()) {
                 return;
             }
-            Collection<Contact> contacts;
+            
+            List<Contact> contacts;
             synchronized(this) {
-                if (contactsToForward.isEmpty())
+                if (contactsToForward.isEmpty()) {
                     return;
+                }
+                
                 contacts = new ArrayList<Contact>(10);
-                for(Contact c : contactsToForward)
+                for (Contact c : contactsToForward) {
                     contacts.add(c);
+                }
+                
                 // do not erase contacts - can be re-forwarded to new connections
             }
 
-            DHTContactsMessage msg = new DHTContactsMessage(contacts);
+            DHTContactsMessage msg = new DHTContactsMessage(
+                    contacts.toArray(new Contact[0]));
+            
             List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
             for (RoutedConnection mc : list) {
                 if (mc.isPushProxyFor()
@@ -532,12 +546,6 @@ public abstract class AbstractDHTController implements DHTController {
                     mc.send(msg);
                 }
             }
-        }
-        
-        void stop() {
-            Future<?> f = forwarderFuture;
-            if (f != null)
-                f.cancel(false);
         }
     }
 }

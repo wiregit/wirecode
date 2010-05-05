@@ -38,7 +38,8 @@ public interface DHTControllerFacade {
 
     void sendUpdatedCapabilities();
 
-    ScheduledFuture<?> scheduleWithFixedDelay(Runnable runner, long initialDelay, long delay, TimeUnit milliseconds);
+    ScheduledFuture<?> scheduleWithFixedDelay(Runnable runner, 
+            long initialDelay, long delay, TimeUnit milliseconds);
 
     boolean allow(SocketAddress addr);
 

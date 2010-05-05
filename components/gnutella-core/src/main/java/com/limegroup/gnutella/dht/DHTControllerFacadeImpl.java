@@ -6,7 +6,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.mojito2.storage.DHTValueFactory;
 import org.limewire.mojito2.storage.StorableModel;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -79,72 +78,91 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
     }
     
+    @Override
     public boolean allow(SocketAddress addr) {
         return ipFilter.get().allow(addr);
     }
     
+    @Override
     public byte[] getAddress() {
         return networkManager.getAddress();
     }
     
+    @Override
     public StorableModel getAltLocModel() {
         return altLocModel.get();
     }
     
+    @Override
     public DHTValueFactory getAltLocValueFactory() {
         return altLocValueFactory.get();
     }
     
+    @Override
     public List<RoutedConnection> getInitializedClientConnections() {
         return connectionManager.get().getInitializedClientConnections();
     }
     
+    @Override
     public MessageDispatcherFactory getMessageDispatcherFactory() {
         return messageDispatcherFactory.get();
     }
     
+    @Override
     public int getPort() {
         return networkManager.getPort();
     }
 
+    @Override
     public DHTValueFactory getPushProxyValueFactory() {
         return pushProxyValueFactory.get();
     }
     
+    @Override
     public boolean isActiveSupernode() {
         return connectionServices.isActiveSuperNode();
     }
     
+    @Override
     public boolean isConnected() {
         return connectionServices.isConnected();
     }
     
+    @Override
     public void reloadIPFilter() {
         spamServices.reloadIPFilter();
     }
     
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable runner, long initialDelay, long delay, TimeUnit milliseconds) {
-        return backgroundExecutor.scheduleWithFixedDelay(runner, initialDelay, delay, milliseconds);
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(
+            Runnable runner, long initialDelay, 
+            long delay, TimeUnit milliseconds) {
+        return backgroundExecutor.scheduleWithFixedDelay(
+                runner, initialDelay, delay, milliseconds);
     }
     
+    @Override
     public void sendUpdatedCapabilities() {
         connectionManager.get().sendUpdatedCapabilities();        
     }
     
+    @Override
     public void updateCapabilities() {
         capabilitiesVMFactory.updateCapabilities();
     }
 
+    @Override
     public DHTBootstrapper getDHTBootstrapper(DHTController dhtController) {
         return dhtBootstrapperFactory.createBootstrapper(dhtController);
     }
     
+    @Override
     public SecurityToken.TokenProvider getSecurityTokenProvider() {
         return securityTokenProvider.get();
     }
     
+    @Override
     public MACCalculatorRepositoryManager getMACCalculatorRespositoryManager() {
         return MACCalculatorRepositoryManager.get();
     }
-
 }
