@@ -147,6 +147,10 @@ public class ContextTest extends MojitoTestCase {
             }
             
             assertGreaterThanOrEquals(expected, locationCounter);
+            
+            // Test is failing because we're not waiting for the
+            // shutdown messages to be sent, received or processed.
+            // It's essentially a network race-condition.
             assertEquals(expected, downCounter);
             
         } finally {
