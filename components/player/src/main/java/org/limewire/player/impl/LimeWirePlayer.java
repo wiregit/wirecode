@@ -1,8 +1,8 @@
 package org.limewire.player.impl;
 
-import static org.limewire.player.api.PlayerState.NO_SOUND_DEVICE;
 import static org.limewire.player.api.PlayerState.EOM;
 import static org.limewire.player.api.PlayerState.GAIN;
+import static org.limewire.player.api.PlayerState.NO_SOUND_DEVICE;
 import static org.limewire.player.api.PlayerState.PAUSED;
 import static org.limewire.player.api.PlayerState.PLAYING;
 import static org.limewire.player.api.PlayerState.SEEKING;
@@ -19,9 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.GainChangeEvent;
+import javax.media.GainChangeListener;
+import javax.media.GainControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.SwingUtilities;
+
+import net.sf.fmj.media.AbstractGainControl;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.LazySingleton;
@@ -32,7 +37,7 @@ import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 
 /**
- *  An audio player to play compressed and uncompressed music.
+ * An audio player to play compressed and uncompressed music.
  */
 @LazySingleton
 public class LimeWirePlayer implements Runnable, AudioPlayer {
@@ -41,15 +46,15 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * Sleep time is for when the song is loaded or paused but not playing.
      */
     private static final long SLEEP_NONPLAYING = 100;
-    
+
     /**
-     * Sleep time for when the song is playing but the sourceLine is full and 
-     * no reading/writing occurs.
+     * Sleep time for when the song is playing but the sourceLine is full and no
+     * reading/writing occurs.
      */
     private static final long SLEEP_PLAYING = 100;
 
     /**
-     *  Maximum size of the buffer to read/write from.
+     * Maximum size of the buffer to read/write from.
      */
     public static final int EXTERNAL_BUFFER_SIZE = 4096 * 8;
 
@@ -67,20 +72,20 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * Synchronized holder for reading/writing the next song to be played.
      */
-    private final LoadSongBuffer songBuffer;   
-    
+    private final LoadSongBuffer songBuffer;
+
     /**
      * Used in playerThread to sleep when player is paused.
      */
     private final Object threadLock = new Object();
-       
+
     /**
      * Current state of the player.
      */
     private volatile PlayerState playerState = UNKNOWN;
-    
-    
+
     private final Object seekLock = new Object();
+
     /**
      * byte location to skip to in file.
      */
@@ -90,40 +95,40 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * true==the thread should close the current song and load the next song.
      */
     private volatile boolean loadSong = false;
-    
-    
+
     private final Object volumeLock = new Object();
+
     /**
      * true== the thread should update the volume on the sourceDataLine.
      */
     private boolean setVolume = false;
-    
+
     /**
      * The current volume of the player.
      */
-    private double volume = 0;
+    private GainControl gainControl;
 
     /**
-     * Contains the Input and Output streams for the IO
-     * only <code>playerThread</code> should touch this.
+     * Contains the Input and Output streams for the IO only
+     * <code>playerThread</code> should touch this.
      */
     private LimeAudioFormat currentAudioFormat;
-    
+
     /**
      * The source that the thread is currently reading from.
      */
     private AudioSource currentSong;
-    
+
     /**
      * Buffer for reading from input stream/ writing to the data line.
      */
     private final byte[] buffer = new byte[EXTERNAL_BUFFER_SIZE];
-    
+
     /**
      * Bytes read from the input stream.
      */
     private int readBytes = 0;
-    
+
     /**
      * Available bytes that can be written to the sourceDataLine.
      */
@@ -131,6 +136,13 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
 
     public LimeWirePlayer() {
         songBuffer = new LoadSongBuffer();
+        gainControl = new JavaGainControl();
+        gainControl.addGainChangeListener(new GainChangeListener(){
+            @Override
+            public void gainChange(GainChangeEvent event) {
+                setVolume = true;
+            }
+        });
     }
 
     /**
@@ -154,32 +166,30 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     public PlayerState getStatus() {
         return playerState;
     }
-    
+
     /**
      * Loads a AudioSource into the player to play next.
      */
     @Override
     public void loadSong(AudioSource source) {
-        if( source == null )
+        if (source == null)
             throw new IllegalArgumentException();
         songBuffer.setSong(source);
     }
-    
-
 
     @Override
     public void loadSong(File songFile) {
-        loadSong(new AudioSourceImpl(songFile));        
+        loadSong(new AudioSourceImpl(songFile));
     }
 
     @Override
     public void loadSong(InputStream songStream) {
-        loadSong(new AudioSourceImpl(songStream));  
+        loadSong(new AudioSourceImpl(songStream));
     }
 
     @Override
     public void loadSong(URL songUrl) {
-        loadSong(new AudioSourceImpl(songUrl));  
+        loadSong(new AudioSourceImpl(songUrl));
     }
 
     /**
@@ -188,7 +198,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     public void playSong() {
         loadSong = true;
         playerState = PLAYING;
-        if( (playerthread == null || !playerthread.isAlive()) ){ 
+        if ((playerthread == null || !playerthread.isAlive())) {
             playerthread = ThreadExecutor.newManagedThread(this, "LimewirePlayer");
             playerthread.setDaemon(true);
             playerthread.start();
@@ -200,7 +210,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * Pausing the current song.
      */
     public void pause() {
-        if( !(playerState == UNKNOWN || playerState == STOPPED)){
+        if (!(playerState == UNKNOWN || playerState == STOPPED)) {
             playerState = PAUSED;
             notifyEvent(PAUSED, -1);
         }
@@ -210,7 +220,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * Unpauses the current song.
      */
     public void unpause() {
-        if( !(playerState == UNKNOWN || playerState == STOPPED)){
+        if (!(playerState == UNKNOWN || playerState == STOPPED)) {
             playerState = PLAYING;
             notifyEvent(PLAYING, -1);
         }
@@ -220,7 +230,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * Stops the current song.
      */
     public void stop() {
-        if( !(playerState == UNKNOWN || playerState == STOPPED)) {
+        if (!(playerState == UNKNOWN || playerState == STOPPED)) {
             playerState = STOPPED;
             notifyEvent(STOPPED, -1);
         }
@@ -230,19 +240,19 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * Seeks to a new location in the current song.
      */
     public long seekLocation(long value) {
-        if( !(playerState == UNKNOWN || playerState == STOPPED) ) {
-            if( playerState == PAUSED || playerState == SEEKING_PAUSED )
+        if (!(playerState == UNKNOWN || playerState == STOPPED)) {
+            if (playerState == PAUSED || playerState == SEEKING_PAUSED)
                 playerState = SEEKING_PAUSED;
             else
                 playerState = SEEKING_PLAY;
             synchronized (seekLock) {
                 seekValue = value;
             }
-            notifyEvent(SEEKING,value);
+            notifyEvent(SEEKING, value);
         }
         return value;
     }
-    
+
     /**
      * Sets the gain(volume) for the outputline.
      * 
@@ -250,25 +260,31 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * @throws IOException thrown when the soundcard does not support this
      *         operation
      */
-    public void setVolume(double fGain) {
+    public void setVolume(float fGain) {
         synchronized (volumeLock) {
-            volume = fGain;
+            // volume = fGain;
+            gainControl.setLevel(fGain);
             setVolume = true;
         }
-    }  
+    }
+    
+    public GainControl getGainControl() {
+        return gainControl;
+    }
 
     /**
      * Handles all the IO for reading and writing a song to the sound card.
      */
     public void run() {
         // while the thread is not stopped or unknown, keep alive
-        while( playerState != UNKNOWN ) {
+        while (playerState != UNKNOWN) {
 
-            // after stopping, wait a few milliseconds in case a new song is loaded to
-            //  avoid recreating the thread
-            if( playerState == STOPPED ){
-                for(int i = 0; i < 3; i++) {
-                    if( playerState == STOPPED )
+            // after stopping, wait a few milliseconds in case a new song is
+            // loaded to
+            // avoid recreating the thread
+            if (playerState == STOPPED) {
+                for (int i = 0; i < 3; i++) {
+                    if (playerState == STOPPED)
                         try {
                             synchronized (threadLock) {
                                 threadLock.wait(SLEEP_NONPLAYING);
@@ -276,68 +292,68 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
                         } catch (InterruptedException e) { // dont catch
                         }
                 }
-                if( playerState == STOPPED )
+                if (playerState == STOPPED)
                     playerState = UNKNOWN;
             }
             // update the volume if changed
-            if( currentAudioFormat != null && setVolume) {
-                try {                  
-                    double vol = 0;
+            if (currentAudioFormat != null && setVolume) {
+                try {
+                    float vol = 0;
                     synchronized (volumeLock) {
-                        vol = volume;
+
+                        vol = gainControl.getLevel();
                         setVolume = false;
                     }
                     currentAudioFormat.setGain(vol);
-                    notifyEvent(GAIN, volume);
-                    
-                } catch (IOException e) { 
-                } 
+                    notifyEvent(GAIN, vol);
+
+                } catch (IOException e) {
+                }
             }
             // load a new song
-            if( loadSong ){
-                if( currentAudioFormat != null )
-                    currentAudioFormat.closeStreams();    
+            if (loadSong) {
+                if (currentAudioFormat != null)
+                    currentAudioFormat.closeStreams();
                 loadFromSongBuffer();
-                if( currentSong != null ) 
+                if (currentSong != null)
                     loading();
                 else
                     playerState = STOPPED;
             }
             // play the song
-            if( playerState == PLAYING ){
-                if(currentAudioFormat == null )
+            if (playerState == PLAYING) {
+                if (currentAudioFormat == null)
                     playerState = STOPPED;
-                else 
+                else
                     playing();
             }
             // pause the song
-            else if( playerState == PAUSED ){
-                if( currentAudioFormat == null )
+            else if (playerState == PAUSED) {
+                if (currentAudioFormat == null)
                     playerState = STOPPED;
                 else
                     pausing();
-            } 
+            }
             // seek to a new position in the song
-            else if( playerState == SEEKING || playerState == SEEKING_PAUSED ||
-                    playerState == SEEKING_PLAY){   
+            else if (playerState == SEEKING || playerState == SEEKING_PAUSED
+                    || playerState == SEEKING_PLAY) {
                 seeking();
             }
         }
-        if( currentAudioFormat != null)
+        if (currentAudioFormat != null)
             currentAudioFormat.closeStreams();
         currentAudioFormat = null;
         playerState = UNKNOWN;
     }
-    
+
     /**
-     * Attempts to remove the next song for playing from the songBuffer.
-     * If there is no song waiting, the current song is placed back on
-     * the buffer in case play() is pressed again prior to loading a new
-     * song.
+     * Attempts to remove the next song for playing from the songBuffer. If
+     * there is no song waiting, the current song is placed back on the buffer
+     * in case play() is pressed again prior to loading a new song.
      */
-    private void loadFromSongBuffer(){
+    private void loadFromSongBuffer() {
         // if another song to play, load it and keep playing
-        if( songBuffer.hasSong() ) { 
+        if (songBuffer.hasSong()) {
             currentSong = songBuffer.getSong();
             loadSong = false;
         }
@@ -348,17 +364,17 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             playerState = STOPPED;
         }
     }
-    
+
     /**
-     *  Processes loading the current song.
+     * Processes loading the current song.
      */
-    private void loading(){          
+    private void loading() {
         try {
             currentAudioFormat = new LimeAudioFormat(currentSong, 0);
             readBytes = 0;
             notifyOpened(currentAudioFormat.getProperties());
             playerState = PLAYING;
-        } catch (IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             playerState = STOPPED;
             notifyEvent(NO_SOUND_DEVICE, -1);
         } catch (UnsupportedAudioFileException e) {
@@ -375,7 +391,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             notifyEvent(EOM, -1);
         }
     }
-    
+
     /**
      * Processes playing the current song.
      */
@@ -386,29 +402,28 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
         // if we can write without blocking to the audio card, do so
         if (avail > 0) {
             try {
-                readBytes = currentAudioFormat.getAudioInputStream().read(
-                        buffer, 0, Math.min(avail,buffer.length));
-            } 
+                readBytes = currentAudioFormat.getAudioInputStream().read(buffer, 0,
+                        Math.min(avail, buffer.length));
+            }
             // TODO: this is a hack for capturing problems in the JLayer decoder. The problems
-            //  should really fixed there but for the time being, this will hide the error from
-            //  the user and just proceed to the next song. 
+            // should really fixed there but for the time being, this will hide the error from
+            // the user and just proceed to the next song.
             catch (ArrayIndexOutOfBoundsException e) {
-                playerState = STOPPED;  
+                playerState = STOPPED;
                 notifyEvent(EOM, -1);
                 loadSong = true;
-            } 
-            catch (IOException e) {
+            } catch (IOException e) {
                 playerState = STOPPED;
             }
             // write whatever we were able to read
             if (readBytes > 0) {
-                currentAudioFormat.getSourceDataLine().write(buffer, 0,
-                        readBytes);
+                currentAudioFormat.getSourceDataLine().write(buffer, 0, readBytes);
                 notifyProgress(currentAudioFormat.getEncodedStreamPosition());
             }
-            // if the end of the song has been reached, see if there's a new song
-            //  waiting to be played
-            else if (readBytes == -1) { 
+            // if the end of the song has been reached, see if there's a new
+            // song
+            // waiting to be played
+            else if (readBytes == -1) {
                 notifyEvent(EOM, -1);
                 loadSong = true;
             }
@@ -426,69 +441,64 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * Processes pausing the current song.
      */
-    private void pausing(){
+    private void pausing() {
         currentAudioFormat.stopSourceDataLine();
         try {
             synchronized (threadLock) {
-                threadLock.wait(SLEEP_NONPLAYING);  
-            }           
+                threadLock.wait(SLEEP_NONPLAYING);
+            }
         } catch (InterruptedException e) {
             // dont catch
         }
     }
-    
+
     /**
      * Processes a seek to a location in the song.
      */
-    private void seeking(){
+    private void seeking() {
         try {
-            
+
             long seekLocation = 0;
             synchronized (seekLock) {
                 seekLocation = seekValue;
                 seekValue = 0;
             }
 
-            if( currentAudioFormat != null )
-                currentAudioFormat.closeStreams();    
-            //open new file and seek to location
+            if (currentAudioFormat != null)
+                currentAudioFormat.closeStreams();
+            // open new file and seek to location
             currentAudioFormat = new LimeAudioFormat(currentSong, seekLocation);
-            //TODO: the above should be replaced once the mp3 decoder is fixed
+            // TODO: the above should be replaced once the mp3 decoder is fixed
 
             // reload new volume
             synchronized (volumeLock) {
                 setVolume = true;
             }
-            if( playerState == SEEKING_PAUSED )
+            if (playerState == SEEKING_PAUSED)
                 playerState = PAUSED;
             else
                 playerState = PLAYING;
-        } 
-        catch (UnsupportedAudioFileException e) {
+        } catch (UnsupportedAudioFileException e) {
             playerState = STOPPED;
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             playerState = STOPPED;
-        } 
-        catch (LineUnavailableException e) {
+        } catch (LineUnavailableException e) {
             playerState = STOPPED;
-        } 
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             playerState = STOPPED;
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             playerState = STOPPED;
         }
     }
-    
+
     /**
-     * Notify listeners when a new audio source has been opened. 
+     * Notify listeners when a new audio source has been opened.
      * 
      * @param properties any properties about the source that we extracted
      */
-    protected void notifyOpened(final Map<String,Object> properties){
-        SwingUtilities.invokeLater(new Runnable(){
-            public void run(){
+    protected void notifyOpened(final Map<String, Object> properties) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
                 fireOpened(properties);
             }
         });
@@ -496,8 +506,8 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
 
     /**
      * Notify listeners about an AudioPlayerEvent. This creates general state
-     * modifications to the player such as the transition from opened to 
-     * playing to paused to end of song.
+     * modifications to the player such as the transition from opened to playing
+     * to paused to end of song.
      * 
      * @param value if the event was a modification such as a volume update,
      *        list the new value
@@ -505,7 +515,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     protected void notifyEvent(final PlayerState state, final double value) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                fireStateUpdated(new AudioPlayerEvent(state,value));
+                fireStateUpdated(new AudioPlayerEvent(state, value));
             }
         });
     }
@@ -533,7 +543,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     }
 
     /**
-     * Fired every time a byte stream is written to the sound card. This lets 
+     * Fired every time a byte stream is written to the sound card. This lets
      * listeners be aware of what point in the entire file is song is currently
      * playing. This also returns a copy of the written byte[] so it can get
      * passed along to objects such as a FFT for visual feedback of the song.
@@ -553,34 +563,33 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             listener.stateChange(event);
     }
 
-    
     /**
      * Holds a reference to the next song to be played.
      */
     private static class LoadSongBuffer {
-        
+
         private AudioSource nextItem;
-        
-        public synchronized void setSong(AudioSource song){ 
+
+        public synchronized void setSong(AudioSource song) {
             nextItem = song;
         }
         
         /**
-         * @return the next song to be played, returns null if no new song is 
-         * awaiting play
+         * @return the next song to be played, returns null if no new song is
+         *         awaiting play
          */
-        public synchronized AudioSource getSong(){
-            AudioSource next = nextItem; 
+        public synchronized AudioSource getSong() {
+            AudioSource next = nextItem;
             nextItem = null;
             return next;
         }
-        
-        public synchronized boolean hasSong(){
+
+        public synchronized boolean hasSong() {
             return nextItem != null;
         }
     }
-    
-    public boolean isPlaying(File file){
+
+    public boolean isPlaying(File file) {
         return playerState == PLAYING && currentSong != null && file.equals(currentSong.getFile());
     }
 
@@ -588,10 +597,33 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     public boolean isPaused(File file) {
         return playerState == PAUSED && currentSong != null && file.equals(currentSong.getFile());
     }
-    
+
     @Override
     public AudioSource getCurrentSong() {
         return currentSong;
     }
-    
+
+    private class JavaGainControl extends AbstractGainControl {
+        private static final float MAX = 1.0f;
+        private static final float MIN = 0.0f;
+        private float level = 0.0f;
+
+        public float getLevel() {
+            return level;
+        }
+
+        public float setLevel(final float level) {
+            if(level > MAX)
+                this.level = MAX;
+            else if(level < MIN)
+                this.level = MIN;
+            else
+                this.level = level;
+            
+            notifyListenersGainChangeEvent();
+            
+            return this.level;
+        }
+
+    }
 }

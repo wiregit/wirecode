@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
+import javax.media.GainControl;
 
 
 /**
@@ -73,7 +74,12 @@ public interface AudioPlayer {
     /**
      * Sets Volume(Gain) value Linear scale 0.0 <--> 1.0.
      */
-    public void setVolume(double value);
+    public void setVolume(float value);
+    
+    /**
+     * Returns the GainController used by this Player.
+     */
+    public GainControl getGainControl();
     
     /**
      * Adds a listener to the list of player listeners.

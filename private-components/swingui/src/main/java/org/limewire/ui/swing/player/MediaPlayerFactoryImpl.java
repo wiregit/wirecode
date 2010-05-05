@@ -6,24 +6,49 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.IncompatibleSourceException;
 import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.protocol.DataSource;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.limewire.inject.LazySingleton;
-import org.limewire.service.ErrorService;
-import org.limewire.ui.swing.util.MacOSXUtils;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 @LazySingleton
 class MediaPlayerFactoryImpl implements MediaPlayerFactory {
-    // Flag indicating whether the native library that provides the bridge between Java and Cocoa could be loaded.
-    private boolean initializationOfJavaToCocoaBridgeFailed = false;
+
+    private final Provider<AudioPlayer> player;
+    
+    private final List<String> handlers = new ArrayList<String>(2);
+    
+    private final JPanel p = new JPanel();
+        
+    @Inject
+    public MediaPlayerFactoryImpl(Provider<AudioPlayer> player) {
+        this.player = player;
+        
+        registerHandlers();
+    }
+    
+    private void registerHandlers() {
+        if(OSUtils.isWindows()) {
+            handlers.add("net.sf.fmj.ds.media.content.unknown.Handler");
+        } else if(OSUtils.isMacOSX()) {
+            handlers.add("net.sf.fmj.qt.media.content.unknown.JavaToCocoaHandler");
+            handlers.add("net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler");
+        }
+    }
     
     public Player createMediaPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
         if (!OSUtils.isWindows() && !OSUtils.isMacOSX()) {
@@ -32,48 +57,35 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
 
         Player handler = null;
         
-        try {
-            handler = createDefaultPlayer(file);
-            setupPlayer(handler, file);
-        } catch(IncompatibleSourceException e) {
-            handler = createBackupPlayer(file, parentComponent);
-            setupPlayer(handler, file);
-        } catch(ExceptionInInitializerError e) {
-            if(OSUtils.isMacOSX())
-                ErrorService.error(e, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("rococoa.jnilib"));
-            handler = createBackupPlayer(file, parentComponent);
-            setupPlayer(handler, file);
+        //attempt to cycle through the list of player handles. If one fails
+        // attempt loading file with the next one
+        for(String handle : handlers) {
+            try {
+                Class clazz = Class.forName(handle);
+                Player player = (Player)clazz.newInstance();
+                setupPlayer(player, file);
+                return player;
+            } catch (IncompatibleSourceException e) {
+            } catch (ClassNotFoundException e) {
+            } catch (InstantiationException e) {
+            } catch (IllegalAccessException e) {
+            }
         }
-
+        
+        if(OSUtils.isWindows7()) {
+            try { 
+                Player player = createWindows7MFPlayer(file, parentComponent);
+                setupPlayer(player, file);
+                return player;
+            } catch (IncompatibleSourceException e) {}
+        }
+        
+        // default to the java sound player if all else fails
+        handler = new JavaSoundPlayer(player);
+        setupPlayer(handler, file);
+        parentComponent.add(p);
+        
         return handler;
-    }
-    
-    /**
-     * Attempts to return the appropriate player for each platform.
-     */
-    private Player createDefaultPlayer(File file) throws IncompatibleSourceException, ExceptionInInitializerError {
-        if(OSUtils.isWindows())
-            return new net.sf.fmj.ds.media.content.unknown.Handler();
-        else {
-            if (!initializationOfJavaToCocoaBridgeFailed)
-                return new net.sf.fmj.qt.media.content.unknown.JavaToCocoaHandler();
-            else
-                return new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
-        }
-    }
-     
-    /**
-     * Attempts to try and fallback to another player if the first failed. If
-     * no other player exists, will throw a new IncompatibleSourceException.
-     */
-    private Player createBackupPlayer(File file, Container parentComponent) throws IncompatibleSourceException {
-        if(OSUtils.isWindows7())
-            return createWindows7MFPlayer(file, parentComponent);
-        else if(OSUtils.isMacOSX() && !initializationOfJavaToCocoaBridgeFailed) {
-            initializationOfJavaToCocoaBridgeFailed = true;
-            return new net.sf.fmj.qt.media.content.unknown.QuickTimeForJavaHandler();
-        }
-        throw new IncompatibleSourceException("Unable to create native player.");
     }
     
     /**
