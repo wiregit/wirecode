@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.util.IoUtils;
 
 public class MojitoUtils {
 
@@ -35,24 +36,39 @@ public class MojitoUtils {
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         
-        MojitoDHT first = null;
-        MojitoDHT last = null;
-        
-        for (int i = 0; i < count; i++) {
-            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, port + i);
+        try {
+            MojitoDHT first = null;
+            MojitoDHT last = null;
             
-            if (first == null) {
-                first = dht;
-            } else {
-                dht.bootstrap("localhost", port).get();
-                last = dht;
+            for (int i = 0; i < count; i++) {
+                
+                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, port + i);
+                
+                dhts.put(dht.getLocalNodeID(), dht);
+                
+                if (first == null) {
+                    first = dht;
+                } else {
+                    dht.bootstrap("localhost", port).get();
+                    last = dht;
+                }
             }
             
-            dhts.put(dht.getLocalNodeID(), dht);
-        }
-        
-        if (first != null && last != null) {
-            first.bootstrap("localhost", port + 1).get();
+            if (first != null && last != null) {
+                first.bootstrap("localhost", port + 1).get();
+            }
+        } catch (Exception err) {
+            IoUtils.closeAll(dhts.values());
+            
+            if (err instanceof IOException) {
+                throw (IOException)err;
+            } else if (err instanceof InterruptedException) {
+                throw (InterruptedException)err;
+            } else if (err instanceof ExecutionException) {
+                throw (ExecutionException)err;
+            }
+            
+            throw new IllegalStateException(err);
         }
         
         return dhts;
