@@ -919,8 +919,13 @@ public class RouteTableImpl implements RouteTable {
     private DHTFuture<PingEntity> ping(Contact node) {
         ContactPinger pinger = this.pinger;
         
+        DHTFuture<PingEntity> future = null;
         if (pinger != null) {
-            return pinger.ping(node);
+            future = pinger.ping(node);
+        }
+        
+        if (future != null) {
+            return future;
         }
         
         // --- ELSE ---
