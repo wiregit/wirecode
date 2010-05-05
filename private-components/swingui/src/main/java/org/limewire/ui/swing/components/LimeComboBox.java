@@ -31,6 +31,7 @@ import javax.swing.event.PopupMenuListener;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SwingHacks;
 import org.limewire.util.Objects;
@@ -294,6 +295,50 @@ public class LimeComboBox extends JXButton {
     }
 
     /** 
+     * Selects the specified action and fires a change event.
+     */
+    public void selectAction(Action action) {
+        boolean found = false;
+        if (menu != null && menu.getComponentCount() > 0) {
+            // Find menu component associated with action.
+            for (Component component : menu.getComponents()) {
+                if (component instanceof JPanel) {
+                    Component child = ((JPanel) component).getComponent(0);
+                    if (child instanceof ActionLabel) {
+                        ActionLabel label = (ActionLabel) child;
+                        if (label.getAction().equals(action)) {
+                            // Update previously selected label.
+                            if (selectedComponent != null && selectedComponent != component) {
+                                selectedComponent.setOpaque(false);
+                                selectedLabel.setForeground(UIManager.getColor("MenuItem.foreground"));
+                            }
+                            // Update newly selected label.
+                            ((JComponent) component).setOpaque(true);
+                            label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
+                            selectedComponent = (JComponent) component;
+                            selectedLabel = label;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+        } else {
+            // Determine if action is in the list.
+            found = actions.contains(action);
+        }
+        
+        if (found) {
+            // Perform action and fire change event.
+            selectedAction = action;
+            action.actionPerformed(null);
+            fireChangeEvent(action);
+            repaint();
+        }
+    }
+    
+    /** 
      * Selects the specific action.
      * <p>
      * This method has no effect if the popupmenu is overridden, unless
@@ -528,6 +573,11 @@ public class LimeComboBox extends JXButton {
             decorateMenuComponent(menuItem);
             menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
 
+            // Add separator if specified.
+            if (action.getValue(AbstractAction.SEPARATOR) != null) {
+                menu.addSeparator();
+            }
+            
             menu.add(panel);
         }
         
