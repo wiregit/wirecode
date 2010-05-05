@@ -28,11 +28,16 @@ import org.json.JSONObject;
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.util.TorrentUtil;
+import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
+import org.limewire.core.impl.download.DownloadItemFactoryRegistry;
+import org.limewire.core.impl.download.DownloadItemFactory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -111,6 +116,11 @@ public class TorrentWebSearch implements Search {
         this.query = query;
         this.torrentRobotsTxt = torrentRobotsTxt;
         this.filter = responseFilterFactory.createResultFilter();
+    }
+    
+    @Inject
+    void register(DownloadItemFactoryRegistry registry, DownloadListManager downloadListManager) {
+        registry.register(new TorrentWebSearchCoreDownloadItemFactory(downloadListManager));
     }
 
     @Override
@@ -428,6 +438,26 @@ public class TorrentWebSearch implements Search {
             LOG.debugf(exc, "request failed: {0}, {1}", request, response);
             return false;
         }
+    }
+    
+    private static class TorrentWebSearchCoreDownloadItemFactory implements DownloadItemFactory {
+        
+        private final DownloadListManager downloadListManager;
+
+        public TorrentWebSearchCoreDownloadItemFactory(DownloadListManager downloadListManager) {
+            this.downloadListManager = downloadListManager;
+        }
+
+        @Override
+        public DownloadItem create(Search search, List<? extends SearchResult> searchResults,
+                File saveFile, boolean overwrite) throws DownloadException {
+            if (searchResults.get(0) instanceof TorrentWebSearchResult) {
+                TorrentWebSearchResult result = (TorrentWebSearchResult)searchResults.get(0);
+                return downloadListManager.addTorrentDownload(result.getTorrentFile(), saveFile, overwrite);
+            }
+            return null;
+        }
+        
     }
     
 }
