@@ -1,5 +1,8 @@
 package org.limewire.core.impl.search.torrentweb;
 
+/**
+ * Defines requirements for a class that stores robots.txt entries.
+ */
 public interface TorrentRobotsTxtStore {
 
     /**

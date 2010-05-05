@@ -25,6 +25,12 @@ import org.limewire.util.URIUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Implements {@link TorrentUriStore} and {@link TorrentRobotsTxtStore} and does
+ * all persistent caching of data related to web torrent searches.
+ * <p>
+ * Uses hsqldb database and stores everything in ~/.limewire/torrent-uris.*
+ */
 // can be lazily singleton, uses Service only to be stopped properly, but if
 // it's never started no need for service registration
 @Singleton
@@ -36,12 +42,13 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
      * Invariant: once initialized <code>dbStore</code> will not become null.
      */
     private volatile DbStore dbStore = null;
-    
     /**
      * Lock for construction of <code>dbStore</code>. 
      */
     private final Object lock = new Object();
-
+    /**
+     * Used for timestamps.
+     */
     private final Clock clock;
     
     @Inject
@@ -342,6 +349,4 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
             }
         }
     }
-
-
 }

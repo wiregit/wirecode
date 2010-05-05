@@ -25,6 +25,9 @@ import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
 
+/**
+ * A torrent web search result.
+ */
 public class TorrentWebSearchResult implements SearchResult {
     
     private final URI uri;

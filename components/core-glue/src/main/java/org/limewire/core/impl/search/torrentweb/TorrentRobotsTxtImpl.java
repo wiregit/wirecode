@@ -25,6 +25,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ * Implements {@link TorrentRobotsTxt} by first doing a local lookup for
+ * a cached robots.txt file in {@link TorrentRobotsTxtStore}, otherwise downloads
+ * robotst.txt from webserver and stores it in {@link TorrentRobotsTxtStore}.
+ */
 public class TorrentRobotsTxtImpl implements TorrentRobotsTxt {
 
     private final static Log LOG = LogFactory.getLog(TorrentRobotsTxtImpl.class);
@@ -59,6 +64,9 @@ public class TorrentRobotsTxtImpl implements TorrentRobotsTxt {
         }
     }
     
+    /**
+     * @return empty string on error to avoid future requests for robots.txt
+     */
     private String getRobotsTxt(URI uri) {
         LimeHttpClient httpClient = limeHttpClient.get();
         HttpGet get = new HttpGet(org.apache.http.client.utils.URIUtils.resolve(uri, "/robots.txt"));

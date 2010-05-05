@@ -54,25 +54,31 @@ import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * TODO cap of too many head requests
- * TODO check large files before reading
- * TODO handle magnet links
- * TODO implement meaningful remote host, link to referrer
+ * Performs a websearch for torrents.
  */
 public class TorrentWebSearch implements Search {
     
     private static final Log LOG = LogFactory.getLog(TorrentWebSearch.class);
     
+    /**
+     * Content type of torrent files.
+     */
     private static final String BITTORENT_CONTENT_TYPE = "application/x-bittorrent";
-    
+    /**
+     * Conent type of html files.
+     */
     private static final String HTML_CONTENT_TYPE = "text/html";
     
     private final HttpExecutor httpExecutor;
-    
+    /**
+     * Template for search uri.
+     */
     private final String searchUriTemplate = SearchSettings.TORRENT_WEB_SEARCH_URI_TEMPLATE.get();
     
     private final Provider<LimeHttpClient> httpClient;
-
+    /**
+     * The query as entered by the user.
+     */
     private final String query;
 
     private final TorrentUriPrioritizerFactory torrentUriPrioritizerFactory;
@@ -112,7 +118,7 @@ public class TorrentWebSearch implements Search {
         try {
             HttpGet get = new HttpGet(MessageFormat.format(searchUriTemplate, URIUtils.encodeUriComponent(query)));
             get.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_CLOSE);
-            get.addHeader("Referrer", "http://www.limewire.com/");
+            get.addHeader("Referer", "http://www.limewire.com/");
             httpExecutor.execute(get, new GoogleJsonResponseHandler(query));
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);

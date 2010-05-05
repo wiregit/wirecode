@@ -22,7 +22,7 @@ public interface TorrentUriStore {
     void setIsTorrentUri(URI uri, boolean isTorrent);
     /**
      * @return set of canoncicalized torrent uris for <code>host</code> or empty
-     * set if there are none  
+     * set if there are none
      */
     Set<URI> getTorrentUrisForHost(String host);
     /**

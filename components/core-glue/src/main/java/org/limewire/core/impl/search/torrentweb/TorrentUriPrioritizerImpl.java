@@ -23,6 +23,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+/**
+ * Implements {@link TorrentUriPrioritizer} by performing the following steps
+ * on a list of uris:
+ * <ul>
+ * <li>Remove duplicate uris</li>
+ * <li>Remove uris that are known to not be torrent uris</li>
+ * <li>Calculate a likelihood score for a uri being a torrent uri</li>
+ * <li>Sort list by this score</li>
+ * <li>Cap list to the top 20 elements in it</li>
+ * </ul>
+ */
 public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     
     private static final Log LOG = LogFactory.getLog(TorrentUriPrioritizerImpl.class);
@@ -45,6 +56,9 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
             new UriOnSameHostAsReferrerPredicate());
             
 
+    /**
+     * Tokenized and lowercased query tokens.
+     */
     private final String[] queryTokens;
 
     private final TorrentUriStore torrentUriStore;
@@ -76,6 +90,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return transform(scoredUris, new UriExtractor());
     }
     
+    /**
+     * Applies <code>function</code> to elements of <code>list</code> and
+     * returns a new {@link ArrayList} with results.
+     */
     static <S, T> List<T> transform(List<S> list, Function<S, T> function) {
         List<T> transformed = new ArrayList<T>(list.size());
         for (S element : list) {
@@ -84,6 +102,11 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return transformed;
     }
 
+    /**
+     * Filters elements of <code>list</code> using <code>predicate</code>
+     * keeping elements that the predicated applies to and returns a new
+     * {@link ArrayList} with those elements. 
+     */
     <T> List<T> filter(List<T> list, Predicate<T> predicate) {
         List<T> filtered = new ArrayList<T>(list.size());
         for (T element : list) {
@@ -94,6 +117,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return filtered;
     }
 
+    /**
+     * Uniquifies list by converting it to a hash set and then back to an
+     * {@link ArrayList}.
+     */
     private List<URI> uniquify(List<URI> candidates) {
         return new ArrayList<URI>(new HashSet<URI>(candidates));
     }
@@ -124,6 +151,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return Collections.emptySet();
     }
     
+    /**
+     * @return true if <code>uri</code> is structurally similar to any of the
+     * uris in <code>torrentUris</code>
+     */
     boolean isStructurallySimilar(URI uri, Iterable<URI> torrentUris) {
         for (URI torrentUri : torrentUris) {
             if (isStructurallySimilar(uri, torrentUri)) {
@@ -133,6 +164,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return false;
     }
     
+    /**
+     * Tokenizes a uri path, normalizing it and replacing the query and numerical
+     * elements in the path with placeholders. 
+     */
     List<String> tokenize(String path) {
         String[] tokens = path.split("[/?#]");
         List<String> canonicalized = new ArrayList<String>(tokens.length);
@@ -148,6 +183,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return canonicalized;
     }
     
+    /**
+     * @return true if the two uris are structurally similar, for that their
+     * paths are {@link #tokenize(String) tokenized} and then compared
+     */
     boolean isStructurallySimilar(URI uri, URI torrentUri) {
         String path = uri.getPath();
         String torrentPath = torrentUri.getPath();
@@ -170,6 +209,9 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return score > 3;
     }
     
+    /**
+     * @return true if <code>value</code> contains all query tokens
+     */
     boolean containsQuery(String value) {
         value = value.toLowerCase();
         for (String token : queryTokens) {
@@ -180,6 +222,9 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         return true;
     }
     
+    /**
+     * @return the likelihood score of a uri being a torrent uri
+     */
     private int computeScore(URI uri) {
         int score = 0;
         for (Predicate<URI> predicate : predicates) {
@@ -277,6 +322,9 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         }
     }
     
+    /**
+     * @return an iterable of tuples from <code>iterableS</code> and <code>iterableT</code>
+     */
     static <S, T> Iterable<Tuple<S, T>> zip(final Iterable<S> iterableS, final Iterable<T> iterableT) {
         return new Iterable<Tuple<S,T>>() {
             @Override
