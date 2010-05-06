@@ -11,7 +11,6 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileArraySetting;
 import org.limewire.setting.FileSetting;
-import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
@@ -19,7 +18,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.common.collect.ImmutableList;
-
 
 /**
  * Settings to deal with UI.
@@ -32,20 +30,6 @@ public final class SwingUiSettings extends LimeProps {
     public static final FileArraySetting VISTA_WARN_DIRECTORIES =
         FACTORY.createFileArraySetting("VISTA_WARN_DIRECTORIES", new File[0]);
     
-//    /**
-//     * This setting is used to track whether or not the user wants to show offline buddies in the left panel.
-//     */
-//    public static final BooleanSetting XMPP_SHOW_OFFLINE =
-//        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_SHOW_OFFLINE", true).setPrivate(true);
-
-    /**
-     * Whether or not 'REMEMBER_ME' is checked -- this has nothing to do with
-     * auto logging in. It's only the state of the REMEMBER ME checkbox, so if
-     * you uncheck it it doesn't stay checked on the next login.
-     */
-    public static final BooleanSetting REMEMBER_ME_CHECKED =
-        FACTORY.createBooleanSetting("REMEMBER_ME_XMPP", true);
-
     /**
      * Pro ads.
      */
@@ -202,42 +186,6 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting PLAY_NOTIFICATION_SOUND =
         FACTORY.createBooleanSetting("PLAY_NOTIFICATION_SOUND", false);
 
-    /** User-defined custom jabber server. */
-    public static final StringSetting USER_DEFINED_JABBER_SERVICENAME =
-        (StringSetting)FACTORY.createStringSetting("CUSTOM_JABBER_SERVICENAME", "").setPrivate(true);
-
-    public static final StringSetting XMPP_AUTO_LOGIN =
-    (StringSetting)FACTORY.createStringSetting("XMPP_AUTO_LOGIN", "").setPrivate(true);
-    
-    /** If the 'offline contacts' in the nav are collapsed. */
-    public static final BooleanSetting OFFLINE_COLLAPSED = 
-        FACTORY.createBooleanSetting("OFFLINE_CONTACTS_COLLAPSED", true);
-    
-    /** If the 'online contacts' in the nav are collapsed. */
-    public static final BooleanSetting ONLINE_COLLAPSED =
-        FACTORY.createBooleanSetting("ONLINE_CONTACTS_COLLAPSED", false);
-
-    /** If the LimeWire media player is enabled. */
-    @InspectionPoint(value = "player enabled", category = DataCategory.USAGE)
-    public static final BooleanSetting PLAYER_ENABLED =
-        FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
-    
-    /** Volume for the LimeWire media player. */
-    public static final FloatSetting PLAYER_VOLUME =
-        FACTORY.createFloatSetting("PLAYER_VOLUME", .5f, 0, 1);
-      
-    /** Setting for whether or not video should stretch to fill the screen. */
-    public static final BooleanSetting VIDEO_FIT_TO_SCREEN =
-        FACTORY.createBooleanSetting("VIDEO_FIT_TO_SCREEN", false);
-    
-    /** Shows a sign-on overlay message to highlight the Library/Private Shared feature. */
-    public static final BooleanSetting SHOW_LIBRARY_OVERLAY_MESSAGE =
-        FACTORY.createBooleanSetting("SHOW_LIBRARY_OVERLAY_MESSAGE", true);
-    
-    /** Shows a sign-on overlay message to highlight the Sharing features. */
-    public static final BooleanSetting SHOW_SHARING_OVERLAY_MESSAGE =
-        FACTORY.createBooleanSetting("SHOW_SHARING_OVERLAY_MESSAGE", true);
-    
     /** If the Library filters are displayed or not. */
     @InspectionPoint(value = "library filters showing", category = DataCategory.USAGE)
     public static final BooleanSetting SHOW_LIBRARY_FILTERS =

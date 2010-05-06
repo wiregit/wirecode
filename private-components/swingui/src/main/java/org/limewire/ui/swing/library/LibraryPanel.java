@@ -20,7 +20,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -49,8 +48,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.inject.LazySingleton;
-import org.limewire.player.api.PlayerState;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
@@ -63,16 +60,13 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.player.PlayerControlPanelFactory;
 import org.limewire.ui.swing.player.PlayerMediator;
-import org.limewire.ui.swing.player.PlayerMediatorListener;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingHacks;
-import org.limewire.util.OSUtils;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -127,7 +121,7 @@ public class LibraryPanel extends JPanel {
     @Inject
     public LibraryPanel(LibraryNavigatorPanel navPanel, HeaderBarDecorator headerBarDecorator, LibraryTable libraryTable,
             LibraryFilterPanel libraryFilterPanel,
-            PublicSharedFeedbackPanel publicSharedFeedbackPanel, PlayerControlPanelFactory playerPanel, AddFileAction addFileAction,
+            PublicSharedFeedbackPanel publicSharedFeedbackPanel, AddFileAction addFileAction,
             ButtonDecorator buttonDecorator, LibraryTransferHandler transferHandler,
             Provider<LibraryImageTable> libraryImagePanelProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
@@ -144,13 +138,14 @@ public class LibraryPanel extends JPanel {
         GuiUtils.assignResources(this);
         this.lockableUI = new LockedUI();
         
-        layoutComponents(headerBarDecorator, playerPanel.createAudioControlPanel(), addFileAction);
+        layoutComponents(headerBarDecorator, addFileAction);
 
         eventList = new BasicEventList<LocalFileItem>();
         selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
     }
     
-    private void layoutComponents(HeaderBarDecorator headerBarDecorator, JComponent playerPanel, AddFileAction addFileAction) {
+    private void layoutComponents(HeaderBarDecorator headerBarDecorator,
+            AddFileAction addFileAction) {
         headerBarDecorator.decorateBasic(headerBar);
         
         createAddFilesButton(addFileAction);
@@ -162,7 +157,6 @@ public class LibraryPanel extends JPanel {
 
         headerBar.setLayout(new MigLayout("insets 0 5 1 5, gap 0, fill"));
         headerBar.add(addFilesButton, "push");
-        headerBar.add(playerPanel, "pos 0.5al 0.5al");
         headerBar.add(fileCountLabel, "gapafter 5, pad -2 0 0 0");
         headerBar.add(filterToggleButton);
                 
@@ -244,43 +238,7 @@ public class LibraryPanel extends JPanel {
                     selectTable(libraryFilterPanel.getSelectedTableFormat(), libraryFilterPanel.getSelectedCategory());
                 }
             }
-        });
-        
-        // Add player listener to repaint table when song changes or player stops.
-        playerMediator.addMediatorListener(new PlayerMediatorListener(){
-            @Override
-            public void progressUpdated(float progress) {
-            }
-
-            @Override
-            public void mediaChanged(String name) {
-                if(libraryTable.isVisible() && isPlayable(libraryFilterPanel.getSelectedCategory())) {
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            libraryTable.repaint();     
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void stateChanged(final PlayerState state) {
-                if ((state == PlayerState.STOPPED || state == PlayerState.EOM || state == PlayerState.UNKNOWN || state == PlayerState.NO_SOUND_DEVICE) 
-                        && libraryTable.isVisible() 
-                        && isPlayable(libraryFilterPanel.getSelectedCategory())) {
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            libraryTable.repaint();
-                            
-                            // gives feedback to Windows 7 users when headphone/speaker jack is not plugged in.
-                            if(state == PlayerState.NO_SOUND_DEVICE && OSUtils.isWindows7()) {
-                                FocusJOptionPane.showConfirmDialog(null, I18n.tr("LimeWire could not play this file. There may not be a sound device installed on your computer or your speakers may not be plugged in."), I18n.tr("Problem Playing File"), JOptionPane.OK_CANCEL_OPTION); 
-                            }
-                        }
-                    });
-                }
-            }
-        });
+        });        
     }
     
     /**

@@ -101,13 +101,9 @@ class RemoveFromLibraryAction extends AbstractAction {
     
     public static void removeFromLibrary(final LibraryManager libraryManager, final PlayerMediator playerMediator,
             final List<LocalFileItem> selected) {
-        File currentSong = playerMediator.getCurrentMediaFile();
         
         final List<File> toRemove = new ArrayList<File>(selected.size());
         for(LocalFileItem item : selected) {
-            if(item.getFile().equals(currentSong)){
-                playerMediator.stop();
-            }
             if(!item.isIncomplete()) {
                 toRemove.add(item.getFile());
             }

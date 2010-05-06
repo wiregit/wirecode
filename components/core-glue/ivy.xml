@@ -15,8 +15,6 @@
         <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="gnutella-core" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="player" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="io" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>

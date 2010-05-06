@@ -68,7 +68,6 @@ public class LibraryTable extends MouseableTable {
     private final Provider<FileSizeRenderer> fileSizeRenderer;
     private final Provider<NameRenderer> nameRenderer;
     private final Provider<RemoveRenderer> removeRenderer;
-    private final Provider<IsPlayingRenderer> isPlayingRenderer;
     private final Provider<LaunchFileAction> launchAction;
     private final IconLabelRenderer iconLabelRenderer;
     private final RemoveEditor removeEditor;
@@ -82,7 +81,6 @@ public class LibraryTable extends MouseableTable {
             Provider<NameRenderer> nameRenderer,
             Provider<LibraryPopupMenu> libraryPopupMenu,
             Provider<RemoveRenderer> removeRenderer,
-            Provider<IsPlayingRenderer> isPlayingRenderer,
             Provider<LaunchFileAction> launchAction,
             IconLabelRendererFactory iconLabelRendererFactory,
             RemoveEditor removeEditor,
@@ -94,7 +92,6 @@ public class LibraryTable extends MouseableTable {
         this.fileSizeRenderer = fileSizeRenderer;
         this.nameRenderer = nameRenderer;
         this.removeRenderer = removeRenderer;
-        this.isPlayingRenderer = isPlayingRenderer;
         this.launchAction = launchAction;
         this.iconLabelRenderer = iconLabelRendererFactory.createIconRenderer(false);
         this.removeEditor = removeEditor;
@@ -284,7 +281,6 @@ public class LibraryTable extends MouseableTable {
             switch(category) {
             case AUDIO:
                 setHeaderRenderer(AudioTableFormat.LENGTH_INDEX, new TableCellHeaderRenderer(JLabel.TRAILING));
-                setCellRenderer(AudioTableFormat.PLAY_INDEX, isPlayingRenderer.get());
                 setUnsortable(AudioTableFormat.PLAY_INDEX);
                 setCellRenderer(AudioTableFormat.SIZE_INDEX, fileSizeRenderer.get());
                 setCellRenderer(AudioTableFormat.LENGTH_INDEX, timeRenderer.get());
@@ -345,7 +341,6 @@ public class LibraryTable extends MouseableTable {
                 throw new IllegalArgumentException("Unknown category:" + category);
             }
         } else {
-            setCellRenderer(AllTableFormat.PLAY_INDEX, isPlayingRenderer.get());
             setUnsortable(AllTableFormat.PLAY_INDEX);
             setCellRenderer(AllTableFormat.NAME_INDEX, nameCategoryRenderer.get());
             setCellRenderer(AllTableFormat.SIZE_INDEX, fileSizeRenderer.get());

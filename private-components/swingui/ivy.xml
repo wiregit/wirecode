@@ -18,12 +18,10 @@
         <dependency org="org.limewire" name="collection" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="setting" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
-        <dependency org="org.limewire" name="player-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="mock-core" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
 
 		<dependency org="none" name="compile/AppleJavaExtensions" rev="${AppleJavaExtensions.version}" conf="compile"/>
-        <dependency org="none" name="fmj" rev="${fmj.version}" conf="compile,runtime"/>
         <dependency org="none" name="osx/asm" rev="${asm.version}" conf="compile,runtime"/>
         <dependency org="none" name="osx/cglib" rev="${cglib.version}" conf="compile,runtime"/>
         <dependency org="none" name="osx/rococoa-core" rev="${rococoa-core.version}" conf="compile,runtime"/>
@@ -39,7 +37,6 @@
         <dependency org="none" name="jdic" rev="${jdic.version}" conf="compile,runtime"/>
         <dependency org="none" name="gettext-commons" rev="${gettext-commons.version}" conf="compile,runtime"/>
         <dependency org="none" name="miglayout" rev="${miglayout.version}" conf="compile,runtime"/>
-        <dependency org="none" name="mp3spi" rev="${mp3spi.version}" conf="compile,runtime"/>
         <dependency org="none" name="jxlayer" rev="${jxlayer.version}" conf="compile,runtime"/>
         <dependency org="none" name="log4j" rev="${log4j.version}" conf="compile,runtime"/>
         <dependency org="none" name="commons-logging" rev="${commons-logging.version}" conf="compile,runtime"/>

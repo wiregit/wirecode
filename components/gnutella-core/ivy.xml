@@ -30,8 +30,6 @@
 		<dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>        
         <dependency org="none" name="clink" rev="${clink.version}" conf="compile,runtime"/>
         <dependency org="none" name="guice-assistedinject" rev="${guice-assistedinject.version}" conf="compile,runtime"/>
-        <dependency org="none" name="jogg" rev="${jogg.version}" conf="compile,runtime"/>
-        <dependency org="none" name="jorbis" rev="${jorbis.version}" conf="compile,runtime"/>
         <dependency org="none" name="onion-common" rev="${onion-common.version}" conf="compile,runtime"/>
         <dependency org="none" name="onion-fec" rev="${onion-fec.version}" conf="compile,runtime"/>
         <dependency org="none" name="log4j" rev="${log4j.version}" conf="compile,runtime"/>

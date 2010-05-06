@@ -45,7 +45,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractLibraryFo
     @Inject
     public AudioTableFormat() {
         super(ACTION_INDEX, "LIBRARY_AUDIO_TABLE", ARTIST_INDEX, true, new ColumnStateInfo[] {
-                new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 16, 16, true, false), 
+                new ColumnStateInfo(PLAY_INDEX, "LIBRARY_AUDIO_PLAY", "", 0, 0, true, false), 
                 new ColumnStateInfo(TITLE_INDEX, "LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 274, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 182, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 163, true, true), 

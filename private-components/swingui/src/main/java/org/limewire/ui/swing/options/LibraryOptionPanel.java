@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -14,7 +13,6 @@ import org.limewire.core.api.Application;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -30,7 +28,6 @@ public class LibraryOptionPanel extends OptionPanel {
     @Resource private Icon sharingArrowIcon;
     
     private final Application application;
-    private final UsePlayerPanel playerPanel;
     
     private OptionPanel iTunesPanel;
     private OptionPanel sharingPanel;
@@ -48,8 +45,6 @@ public class LibraryOptionPanel extends OptionPanel {
         
         GuiUtils.assignResources(this);
         
-        this.playerPanel = new UsePlayerPanel();
-        
         setLayout(new MigLayout("insets 15, fillx, gap 4"));
 
         add(getSharingPanel(), "growx, wrap");
@@ -59,17 +54,13 @@ public class LibraryOptionPanel extends OptionPanel {
         } else {
             iTunesPanel = null;
         }
-        
-        add(playerPanel, "wrap");
     }
 
     @Override
     ApplyOptionResult applyOptions() {
         ApplyOptionResult result = null;
         
-        result = playerPanel.applyOptions();
-        if (result.isSuccessful())
-            result.applyResult(getSharingPanel().applyOptions());
+        result = getSharingPanel().applyOptions();
         
         if (iTunesPanel != null && result.isSuccessful())
             result.applyResult(iTunesPanel.applyOptions());
@@ -79,14 +70,13 @@ public class LibraryOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        return playerPanel.hasChanged() || getSharingPanel().hasChanged()
+        return getSharingPanel().hasChanged()
             || iTunesPanel != null ? iTunesPanel.hasChanged() : false;
     }
 
     @Override
     public void initOptions() {
         getSharingPanel().initOptions();
-        playerPanel.initOptions();
         if (iTunesPanel != null) {
             iTunesPanel.initOptions();
         }
@@ -125,41 +115,6 @@ public class LibraryOptionPanel extends OptionPanel {
         }
     }
 
-    
-    /** Do you want to use the LW player? */
-    private static class UsePlayerPanel extends OptionPanel {
-
-        private JCheckBox useLimeWirePlayer;
-
-        public UsePlayerPanel() {
-            super("");
-            setBorder(BorderFactory.createEmptyBorder());
-            setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
-
-            useLimeWirePlayer = new JCheckBox(I18n
-                    .tr("Use the LimeWire player when I play Audio and Video files"));
-            useLimeWirePlayer.setOpaque(false);
-
-            add(useLimeWirePlayer);
-        }
-
-        @Override
-        ApplyOptionResult applyOptions() {
-            SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
-            return new ApplyOptionResult(false, true);
-        }
-
-        @Override
-        boolean hasChanged() {
-            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue();
-        }
-
-        @Override
-        public void initOptions() {
-            useLimeWirePlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
-        }
-    }
-    
     private OptionPanel getSharingPanel() {
         if(sharingPanel == null) {
             sharingPanel = new SharingPanel();
@@ -180,8 +135,6 @@ public class LibraryOptionPanel extends OptionPanel {
         super.setOptionTabItem(tab);
         getITunesPanel().setOptionTabItem(tab);
         getSharingPanel().setOptionTabItem(tab);
-        this.playerPanel.setOptionTabItem(tab);
-
     }
     
     private class SharingPanel extends OptionPanel {
@@ -258,5 +211,4 @@ public class LibraryOptionPanel extends OptionPanel {
                     SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
         }
     }
-
 }

@@ -440,8 +440,6 @@
                 <link href="http://www.limewire.org/nightly/modules/mojito-ui/api/"/>
     	    	<link href="http://www.limewire.org/nightly/modules/net/api/"/>
             	<link href="http://www.limewire.org/nightly/modules/nio/api/"/>
-            	<link href="http://www.limewire.org/nightly/modules/player/api/"/>
-            	<link href="http://www.limewire.org/nightly/modules/player-api/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/rudp/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/security/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/setting/api/"/>

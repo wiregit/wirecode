@@ -1,13 +1,11 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
@@ -91,16 +89,7 @@ class DeleteAction extends AbstractAction {
             final DownloadListManager downloadListManager, final List<LocalFileItem> selectedItems) {
         BackgroundExecutorService.execute(new Runnable(){
             public void run() {                  
-                File currentSong = playerMediator.getCurrentMediaFile();
                 for(LocalFileItem item : selectedItems) {
-                    if(item.getFile().equals(currentSong)){
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                playerMediator.stop();
-                            }
-                        });
-                    }
                     if(!item.isIncomplete()) {
                         FileUtils.unlockFile(item.getFile());
                         removeDownloadItem(item.getUrn(), downloadListManager);

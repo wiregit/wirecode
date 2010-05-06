@@ -28,7 +28,6 @@ import org.limewire.core.impl.malware.MockMalwareModule;
 import org.limewire.core.impl.mojito.MockMojitoModule;
 import org.limewire.core.impl.monitor.MockMonitorModule;
 import org.limewire.core.impl.network.MockNetworkModule;
-import org.limewire.core.impl.player.MockPlayerModule;
 import org.limewire.core.impl.properties.MockPropertyModule;
 import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.core.impl.search.browse.MockBrowseSearchModule;
@@ -71,7 +70,6 @@ public class MockModule extends AbstractModule {
         install(new MockMojitoModule());
         install(new MockMonitorModule());
         install(new MockBrowseModule());
-        install(new MockPlayerModule());
         install(new MockPropertyModule());
         install(new MockSupportModule());
         install(new MockMagnetModule());
