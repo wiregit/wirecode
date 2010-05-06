@@ -368,7 +368,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                 // The referrer takes precedence since it indicates a torrent web search
                 if (referrer instanceof URI) {
                     URI referrerURI = (URI) referrer;
-                    component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), referrerURI.getPath())));
+                    component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), referrerURI.getPath())), "gapbottom 15, span, wrap");
                 } else if (model.getRowCount() != 0) {
                     component.add(new JScrollPane(table), "span, grow, wrap");
                 
@@ -391,7 +391,16 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                         }
                     });
                 } else {
-                    component.add(createPlainLabel(I18n.tr("Unable to Locate")), "gapbottom 15, span, wrap");
+                    Torrent torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);
+                    if (torrent != null) {
+                        String sha1Base16 = torrent.getSha1();
+                        String sha1Base32 = Base32.encode(StringUtils.fromHexString(sha1Base16));
+                        String uri = "http://www.google.com/#q=" + sha1Base16 + "+|+" + sha1Base32;
+                        component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), uri)), "gapbottom 15, span, wrap");
+                    } else {
+                        component.add(createPlainLabel(I18n.tr("Unable to Locate")), "gapbottom 15, span, wrap");
+                    }
+                        
                 }
             }
             break;
@@ -427,6 +436,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                                 UploadItem item = (UploadItem)propertiableFile;
                                 libraryMediator.locateInLibrary(item);
                             }
+                            
                         }
                     });
 
