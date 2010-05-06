@@ -157,7 +157,7 @@ class AudioPlayerMediator implements PlayerMediator {
      */
     @Override
     public void setVolume(double value) {
-        getPlayer().setVolume(value);
+        getPlayer().setVolume((float)value);
     }
     
     /* (non-Javadoc)
