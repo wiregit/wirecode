@@ -483,7 +483,7 @@ class PlayerControlPanel extends JXPanel implements PlayerMediatorListener, Disp
                 } else {
                     List<LocalFileItem> selectedItems = libraryMediator.getSelectedItems();
                     if (selectedItems.size() > 0) {
-                        playerProvider.get().playOrLaunchNatively(selectedItems.get(0).getFile());
+                        playerProvider.get().play(selectedItems.get(0));
                     }
                 }
                 
