@@ -16,16 +16,16 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 
-class LimeTransport extends AbstractTransport {
+class MojitoTransport extends AbstractTransport {
 
     private static final Log LOG 
-        = LogFactory.getLog(LimeTransport.class);
+        = LogFactory.getLog(MojitoTransport.class);
     
     private final Provider<UDPService> udpService;
     
     private final Provider<MessageRouter> messageRouter;
     
-    public LimeTransport(Provider<UDPService> udpService, 
+    public MojitoTransport(Provider<UDPService> udpService, 
             Provider<MessageRouter> messageRouter) {
         
         this.udpService = udpService;
@@ -43,7 +43,7 @@ class LimeTransport extends AbstractTransport {
                 
                 try {
                     byte[] message = ((MojitoMessage)msg).getMessage();
-                    LimeTransport.this.handleMessage(
+                    MojitoTransport.this.handleMessage(
                             addr, message, 0, message.length);
                 } catch (IOException err) {
                     LOG.error("IOException", err);

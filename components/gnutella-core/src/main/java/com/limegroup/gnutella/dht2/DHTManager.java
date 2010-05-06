@@ -237,7 +237,7 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
     }
     
     private Controller createActive() throws IOException {
-        LimeTransport transport = new LimeTransport(
+        MojitoTransport transport = new MojitoTransport(
                 udpService, messageRouter);
         
         MessageFactory messageFactory 
