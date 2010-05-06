@@ -14,7 +14,7 @@ public interface LWSDispatcher extends NHttpRequestHandler {
      * The prefix to all requests. This will be stripped off when sending to our
      * handlers.
      */
-    String PREFIX = "store:";
+    String PREFIX = "lws:";
     
     /**
      * Returns <code>true</code> if <code>lis</code> was added as a listener,
@@ -41,9 +41,4 @@ public interface LWSDispatcher extends NHttpRequestHandler {
      */
     void notifyConnectionListeners(boolean isConnected);
     
-    /**
-     * Reset all keys to <code>null</code> and de-authenticates.
-     */
-    void deauthenticate();
-  
 }

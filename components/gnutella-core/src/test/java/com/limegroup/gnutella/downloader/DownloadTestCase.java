@@ -27,6 +27,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lws.server.TestNetworkManagerImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -167,6 +168,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
         activityCallback = new MyCallback();
         injector = LimeTestUtils.createInjector(new LimeWireIOTestModule(),
+                TestUtils.bind(org.limewire.core.api.network.NetworkManager.class).toInstances(new TestNetworkManagerImpl()),
                 NetworkManagerStub.MODULE, new AbstractModule() {
             @Override
             protected void configure() {

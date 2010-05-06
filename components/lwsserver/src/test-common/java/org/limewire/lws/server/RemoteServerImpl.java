@@ -1,6 +1,8 @@
 package org.limewire.lws.server;
 
 import java.io.File;
+import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -15,10 +17,13 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
     /** The port on which we'll connect this server. */
     public final static int PORT = 8080;
     
+    private final PrivateKey privateKey;
+    
 //    private final LocalServerDelegate del;
 
-    public RemoteServerImpl(SocketsManager socketsManager, int otherPort) {
-        super(PORT, "Remote Server");
+    public RemoteServerImpl(SocketsManager socketsManager, int otherPort, KeyPair keypair) {
+        super(PORT, "Remote Server", keypair);
+        privateKey = keypair.getPrivate();
         setDispatcher(new DispatcherImpl());
 //        this.del = new LocalServerDelegate(socketsManager, "localhost", otherPort);
     }
@@ -111,77 +116,13 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
     }
     
     private final class DispatcherImpl extends LWSDispatcherSupport {
-
+        
         @Override
         protected final Handler[] createHandlers() {
-            return new Handler[] { new StoreKey(), new GiveKey(), };
+            return new Handler[] { new Download() };
 
         }
-
-        // ------------------------------------------------------------
-        // Handlers
-        // ------------------------------------------------------------
-
-        /**
-         * Sent from local server with parameters {@link Parameters#PUBLIC} and
-         * {@link Parameters#PRIVATE} to store the in coming ip and these
-         * parameters for when the local code asks for it.
-         */
-        class StoreKey extends AbstractHandler {
-
-            public void handle(final Map<String, String> args, StringCallback cb) {
-                String publicKey = args.get(LWSDispatcherSupport.Parameters.PUBLIC);
-                if (publicKey == null) {
-                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
-                    return;
-                }
-                String privateKey = args.get(LWSDispatcherSupport.Parameters.PRIVATE);
-                if (privateKey == null) {
-                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
-                    return;
-                }
-                String ip = args.get(LWSDispatcherSupport.Parameters.IP);
-                if (ip == null) {
-                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
-                    return;
-                }                
-                if (LWSServerUtil.isEmpty(publicKey)) {
-                    cb.process(LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY);
-                    return;
-                }
-                storeKeys(publicKey, privateKey, ip);
-                cb.process(LWSDispatcherSupport.Responses.OK);
-            }
-        }
-
-        /**
-         * Sent from local code to retrieve the private key with parameter
-         * {@link Parameters#PUBLIC}.
-         * {@link Parameters#IP}
-         */
-        class GiveKey extends HandlerWithCallback {
-
-            @Override
-            public void handleRest(final Map<String, String> args, StringCallback cb) {
-                String publicKey = args.get(LWSDispatcherSupport.Parameters.PUBLIC);
-                if (publicKey == null) {
-                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PUBLIC_KEY_PARAMETER));
-                    return;
-                }
-                String ip = args.get(LWSDispatcherSupport.Parameters.IP);
-                if (ip == null) {
-                    cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));
-                    return;
-                }                
-                String privateKey = lookupPrivateKey(publicKey, ip);
-                cb.process(privateKey);
-            }
-        }
-
-//        public void sendMessageToServer(String msg, Map<String,String> args, StringCallback cb) throws IOException {
-//            del.sendMessageToServer(msg, args, cb, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
-//        }
-
+        
         @Override
         protected Map<String, String> getArgs(String request) {
             return RemoteServerImpl.getArgs(request);
@@ -192,66 +133,46 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
             return RemoteServerImpl.getCommand(request);
         }
         
-        @Override
-        protected boolean isAuthenticated() {
-            // This doesn't matter
-            return false;
+        // ------------------------------------------------------------
+        // Handlers
+        // ------------------------------------------------------------
+        
+        /**
+         * Sent from local code to retrieve the download-url
+         * {@link Parameters#URL}.
+         * 
+         */
+        class Download extends HandlerWithCallback {
+            
+            @Override
+            public void handleRest(final Map<String, String> args, StringCallback cb) {
+                String downloadURL = generateDownloadURL(args.get("hash"), args.get("browserIP"));
+                cb.process(downloadURL);
+            }
         }
 
-        public void deauthenticate() {
-            // This isn't used
-        }
     }    
 
     // ---------------------------------------------------------------
     // RemoteServer
     // ---------------------------------------------------------------
     
-    /** A pair. */
-    private static class Pair {
-
-        final String key;
-        final String ip;
-
-        Pair(final String key, final String ip) {
-            this.key = key;
-            this.ip = ip;
+    public String generateDownloadURL(String hash, String ip){
+        StringBuilder sb = new StringBuilder("/store/downloads");
+        
+        if(hash != null && hash.length() > 0){
+            sb.append("hash=").append(hash).append("&signedHash=");
         }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (!(o instanceof Pair)) return false;
-            Pair that = (Pair) o;
-            return this.key.equals(that.key) && this.ip.equals(that.ip);
+        
+        if(ip != null && ip.length() > 0){
+            sb.append("browserIP=").append(ip).append("&signedBrowserIP=");
         }
-
-        @Override
-        public int hashCode() {
-            return this.key.hashCode() << 16 + this.ip.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "<" + key + "," + ip + ">";
-        }
+        
+        return sb.toString();
     }
-
-    private final Map<Pair, String> pairs2privateKeys = new HashMap<Pair, String>();
-
-    public boolean storeKeys(String publicKey, String privateKey, String ip) {
-        boolean result = pairs2privateKeys.put(new Pair(publicKey, ip), privateKey) != null;
-        return result;
+    
+    public PrivateKey getPrivateKey(){
+        return this.privateKey;
     }
-
-    public String lookupPrivateKey(String publicKey, String ip) {
-        if (publicKey == null) {
-            return LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP;
-        }
-        Pair p = new Pair(publicKey, ip);
-        String privateKey = pairs2privateKeys.get(p);
-        String res = privateKey == null 
-                ? LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP
-                : privateKey;
-        return res;
-    }
+    
 }

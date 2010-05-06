@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.lws.server;
 
 
@@ -20,8 +17,8 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.NHttpResponseTrigger;
 import org.apache.http.protocol.HttpContext;
@@ -37,6 +34,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     private final static Log LOG = LogFactory.getLog(LWSDispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
     private LWSReceivesCommandsFromDispatcher commandReceiver;
+    private LWSCommandValidator commandVerifier;
     private final Executor handlerExecutor = ExecutorsHelper.newProcessingQueue("lws-handlers");
     
     /** Package protected for testing. */
@@ -75,12 +73,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     // ------------------------------------------------------
     // Abstract
     // ------------------------------------------------------
-    
-    /**
-     * Returns whether the web page has authenticated yet. This is used for
-     * determining whether to handle a PING request or not.
-     */
-    protected abstract boolean isAuthenticated();
     
     
     /*
@@ -170,48 +162,47 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     }
     
     
-    public final void handle(HttpRequest httpReq, final HttpResponse response,
+    public final void handle(HttpRequest httpReq, final HttpResponse httpResp,
             final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
-        String request = httpReq.getRequestLine().getUri();
+        final String request = httpReq.getRequestLine().getUri();
         final String command = getCommand(request);
         note("Have command {0} ", command);
-        //
-        // If the command is ping and we are authenticated, then send
-        // back the special PING response
-        //
-        if (isAuthenticated() && command.equals(Commands.PING)) {
+        final Map<String, String> args = getArgs(request);
+        note("Have args {0} ", args);
+        
+        if (command.equals(Commands.PING)) {  // If the command is ping, then send back the special (1x1 png image) PING response
             note("Handling PING");
             handlerExecutor.execute(new Runnable() {
                 public void run() {
-                        response.setEntity(new ByteArrayEntity(PING_BYTES));
-                        trigger.submitResponse(response);
+                    httpResp.setEntity(new NByteArrayEntity(PING_BYTES));
+                    trigger.submitResponse(httpResp);
                 }
             });
             notifyConnectionListeners(true);
             return;
         }
+        
         final Handler h = names2handlers.get(command.toLowerCase(Locale.US));
-        if (h == null) {
+        if(h == null){
             if (LOG.isErrorEnabled()) {
                 LOG.error("Couldn't create a handler for " + command);
             }
-            String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
-            response.setEntity(new NStringEntity(str));
-            trigger.submitResponse(response);
+            String response = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            httpResp.setEntity(new NStringEntity(response));
+            trigger.submitResponse(httpResp);
             return;
         }
         if (LOG.isDebugEnabled())
             LOG.debug("have handler: " + h.name());
-        final Map<String, String> args = getArgs(request);
-        note("Have args {0} ", args);
         handlerExecutor.execute(new Runnable() {
             public void run() {
                 h.handle(args, new StringCallback() {
                     public void process(String input) {
                         try {
                             note("Have response {0}",input);
-                            response.setEntity(new NStringEntity(input));
-                            trigger.submitResponse(response);
+                            httpResp.setEntity(new NStringEntity(input));
+                            trigger.submitResponse(httpResp);
+                            return;
                         } catch (UnsupportedEncodingException e) {
                             trigger.handleException(e);
                         }
@@ -257,13 +248,29 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         return commandReceiver;
     }
     
+    
+    /**
+     * Returns the {@link LWSCommandValidator} instance.
+     * 
+     * @return the {@link LWSCommandValidator} instance
+     */
+    public final LWSCommandValidator getCommandVerifier() {
+        return commandVerifier;
+    }
+
+
+    public final void setCommandVerifier(LWSCommandValidator commandVerifier) {
+        this.commandVerifier = commandVerifier;
+    }
+
+
     /**
      * Create an instance of Handler from the top level name as well as trying a
      * static inner class and calls its {@link Handler#handle()} method.
      */
     public final void handle(String request, PrintStream out, StringCallback callback) {
         final String req = getCommand(request);
-        if (isAuthenticated() && req.equals(Commands.PING)) {
+        if (req.equals(Commands.PING)) {
             note("Handling PING");
             callback.process(new String(PING_BYTES));
             notifyConnectionListeners(true);
@@ -473,41 +480,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      * Collection of all the commands we send.
      */
     public interface Commands {
-    
-        /**
-         * Sent from Code to Local with no parameters.
-         */
-        String START_COM = "StartCom";
-    
-        /**
-         * Sent from Local to Remote with parameters.
-         * <ul>
-         * <li>{@link LocalServer.Parameters#PUBLIC}</li>
-         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
-         * </ul>
-         */
-        String STORE_KEY = "StoreKey";
-    
-        /**
-         * Sent from Code to Remote with parameters.
-         * <ul>
-         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
-         * </ul>
-         */
-        String GIVE_KEY = "GiveKey";
-    
-        /**
-         * Send from Code to Local with no parameters.
-         */
-        String DETATCH = "Detatch";
-    
-        /**
-         * Sent from Code to Local with parameters.
-         * <ul>
-         * <li>{@link LocalServer.Parameters#PRIVATE}</li>
-         * </ul>
-         */
-        String AUTHENTICATE = "Authenticate";
         
         /**
          * Sent from Code to Local no parameters for sending back the special ping response.
@@ -515,13 +487,16 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String PING = "Ping";        
         
         /**
-         * Sent from Code to Local with parameters.
-         * <ul>
-         * <li>{@link LocalServer.Parameters#COMMAND}</li>
-         * </ul>
-         * for executing an actual command.
+         * Sent from Code to Local with signed hash and IP.
+         * 
          */
-        String MSG = "Msg";
+        String DOWNLOAD = "Download";
+        
+        /**
+         * Sent from Code to Local with not parameters, response contains 
+         * the download status of all active store-download(s)
+         */
+        String GET_DOWNLOAD_PROGRESS = "GetDownloadProgress";
     }
 
     /**
@@ -533,31 +508,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * Name of the callback function.
          */
         String CALLBACK = "callback";
-    
-        /**
-         * Private key.
-         */
-        String PRIVATE = "private";
-    
-        /**
-         * Public key.
-         */
-        String PUBLIC = "public";
-    
-        /**
-         * Shared key.
-         */
-        String SHARED = "shared";        
-    
-        /**
-         * Name of the command to send to the {@link LWSReceivesCommandsFromDispatcher}.
-         */
-        String COMMAND = "command";
-    
-        /**
-         * Message to send to the <tt>ECHO</tt> command.
-         */
-        String MSG = "msg";
     
         /**
          * Name of a URL.
@@ -579,26 +529,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     public interface ErrorCodes {
     
         /**
-         * Indicating an invalid public key.
-         */
-        String INVALID_PUBLIC_KEY = "invalid.public.key";
-    
-        /**
-         * Indicating an invalid private key.
-         */
-        String INVALID_PRIVATE_KEY = "invalid.private.key";
-    
-        /**
-         * Indicating an invalid shared key.
-         */
-        String INVALID_SHARED_KEY = "invalid.shared.key";        
-    
-        /**
-         * Indicating an invalid public key or IP address.
-         */
-        String INVALID_PUBLIC_KEY_OR_IP = "invalid.public.key.or.ip.address";
-    
-        /**
          * Indicating the code has not included a callback parameter.
          */
         String MISSING_CALLBACK_PARAMETER = "missing.callback.parameter";
@@ -607,36 +537,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * A command was not understood or did not have valid handler.
          */
         String UNKNOWN_COMMAND = "unknown.command";
-    
-        /**
-         * No private key has been generated yet.
-         */
-        String UNITIALIZED_PRIVATE_KEY = "uninitialized.private.key";
-    
-        /**
-         * No private key parameter was supplied.
-         */
-        String MISSING_PRIVATE_KEY_PARAMETER = "missing.private.parameter";
-    
-        /**
-         * No shared key has been generated yet.
-         */
-        String UNITIALIZED_SHARED_KEY = "uninitialized.shared.key";
-                
-        /**
-         * No shared key parameter was supplied.
-         */
-        String MISSING_SHARED_KEY_PARAMETER = "missing.shared.parameter";        
-    
-        /**
-         * No public key parameter was supplied.
-         */
-        String MISSING_PUBLIC_KEY_PARAMETER = "missing.public.parameter";
-    
-        /**
-         * No command parameter was supplied to decide on a handler.
-         */
-        String MISSING_COMMAND_PARAMETER = "missing.command.parameter";
     
         /**
          * No IP was given.  In ths real system this will not be used.
@@ -671,18 +571,20 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * didn't understand it.
          */
         String UNKNOWN_COMMAND = "unknown.command";
-    
+          
+        String INVALID_DOWNLOAD = "invalid.download";
+        
+        String INVALID_HASH_SIGNATURE = "invalid.hash_signature";
+        
+        String INVALID_IP_SIGNATURE = "invalid.ip_signature";
+        
+        String BROWSER_CLIENT_IP_DONOT_MATCH = "browser_client_ip.donot_match";
     }
 
     /**
      * A general place for constants.
      */
     public interface Constants {
-    
-        /**
-         * The length of the public and private keys generated.
-         */
-        int KEY_LENGTH = 10; // TODO
     
         /**
          * Carriage return and line feed.

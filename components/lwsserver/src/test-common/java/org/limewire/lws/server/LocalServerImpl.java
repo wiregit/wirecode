@@ -1,13 +1,10 @@
 package org.limewire.lws.server;
 
+import java.security.KeyPair;
 import java.util.Map;
 
-import org.limewire.core.impl.network.MockNetworkManagerImpl;
-import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
-import org.limewire.lws.server.LWSDispatcherImpl;
-import org.limewire.lws.server.LWSSenderOfMessagesToServer;
-import org.limewire.lws.server.StringCallback;
 import org.limewire.net.SocketsManager;
+import org.limewire.util.Base32;
 
 /**
  * Base class for local servers.
@@ -17,25 +14,23 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
     /** The port on which we'll connect this server. */
     public final static int PORT = 45100;
     
-    private final LocalServerDelegate del;
+    private final String lwsPublickey;
+    
 
-    public LocalServerImpl(SocketsManager socketsManager, String host, int otherPort) {
-        super(PORT, "Local Server");
-        LWSDispatcherImpl ssd = new LWSDispatcherImpl(new LWSSenderOfMessagesToServer() {
-            public void sendMessageToServer(String msg, Map<String, String> args, StringCallback cb) {
-                del.sendMessageToServer(msg, args, cb, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
-            }
-
-        }, new MockNetworkManagerImpl());
+    public LocalServerImpl(SocketsManager socketsManager, String host, int otherPort, KeyPair keyPair) {
+        super(PORT, "Local Server", keyPair);
+        lwsPublickey = Base32.encode(keyPair.getPublic().getEncoded());
+        LWSDispatcherImpl ssd = new LWSDispatcherImpl();       
         setDispatcher(ssd);
         
         ssd.setCommandReceiver(new AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
-                return null;
+                return "ok";
             }
             
         });
-        this.del = new LocalServerDelegate(socketsManager, host, otherPort);
+        
+        ssd.setCommandVerifier(new LWSCommandValidatorImpl(getLwsPublicKey(), new TestNetworkManagerImpl()) );
     }
     
     /**
@@ -45,4 +40,11 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
     protected final boolean sendIPToHandlers() {
         return false;
     }
+    
+    @Override
+    public String getLwsPublicKey(){
+        return lwsPublickey;
+    }
+    
+    
 }

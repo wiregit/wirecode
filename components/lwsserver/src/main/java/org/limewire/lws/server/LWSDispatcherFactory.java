@@ -7,12 +7,13 @@ public interface LWSDispatcherFactory {
 
     /**
      * Returns a new {@link LWSDispatcher}. A {@link LWSDispatcher} has to know how
-     * to send a message to a remote server -- i.e. a
-     * {@link LWSSenderOfMessagesToServer} -- and to whom commands should go after
+     * to validate a command  -- i.e. a
+     * {@link LWSCommandValidator} -- and to whom commands should go after
      * authentication -- i.e. a {@link LWSReceivesCommandsFromDispatcher}.
      *
      * @return a new {@link LWSDispatcher}
      */ 
-    public LWSDispatcher createDispatcher(LWSSenderOfMessagesToServer sender, LWSReceivesCommandsFromDispatcher recipient);
+    public LWSDispatcher createDispatcher(LWSReceivesCommandsFromDispatcher recipient,
+                                          LWSCommandValidator verifier);
 
 }

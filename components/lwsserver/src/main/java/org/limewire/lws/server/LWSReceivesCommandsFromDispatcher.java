@@ -5,15 +5,15 @@ import java.util.Map;
 /**
  * Implementations of this class are responsible for Dispatching commands after
  * the process of authentication has gone through. A {@link LWSDispatcher} will
- * recieve messages, listening to a web server, perform authentication, and then
+ * receive messages, listening to a web server, perform authentication, and then
  * call {@link #receiveCommand(String, Map)} with commands that come after
  * authentication. When receiving these commands, an implementation should take
  * the appropriate action for that command and arguments. <br/> <br/> Example:
- * Authentation has been performed and a {@link LWSDispatcher} receives the
+ * Authentication has been performed and a {@link LWSDispatcher} receives the
  * following URL
  * 
  * <pre>
- * http://localhost:8091/store:Msg?command=DownloadSong&hash=123&amp;code=456&amp;privateKey=abc
+ * http://localhost:8091/store:Download?hash=123&amp;code=456
  * </pre>
  * 
  * For a given {@link LWSReceivesCommandsFromDispatcher}, <code>d</code>, the {@link LWSDispatcher}

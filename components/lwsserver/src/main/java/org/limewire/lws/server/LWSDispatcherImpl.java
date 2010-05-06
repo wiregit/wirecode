@@ -3,72 +3,27 @@
  */
 package org.limewire.lws.server;
 
-import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.network.NetworkManager;
+import org.limewire.util.URIUtils;
 
 
 /**
  * Dispatches commands after going through an authentication phase explained
- * here. <br/> This represents the state in the FSA. Basically, the operation of
- * the local server is the following:
- * 
- * <pre>
- * Code -&gt; Local : Authenticate  
- *       +------+                             
- *  + -- | Wait | &lt;---------------------------+
- *  |    +------+                             | Local -&gt; Remote : StoreKey
- *  |    | Code -&gt; Local : Detach             | Local -&gt; Code : PrivateKey
- *  |    |                                    |
- *  |    V         Code -&gt; Local : Detach     |
- *  |    +------+ &lt;-------------------------- +-------+
- *  |    | Idle |                             | Store |
- *  |    +------+ --------------------------&gt; +-------+
- *  |    &circ;         Code -&gt; Local : StartCom
- *  |    |
- *  |    | Code -&gt; Local : Detach
- *  |    |
- *  |    +---------------+
- *  +--&gt; | Communicating |
- *       +---------------+
- * </pre>
+ * here.
  * 
  */
 public final class LWSDispatcherImpl extends LWSDispatcherSupport {
-       
-    private final LWSSenderOfMessagesToServer sender;
-    private String publicKey;
-    private String privateKey;
-    private String sharedKey;
-    private final NetworkManager networkManager;
-    
-    public LWSDispatcherImpl(LWSSenderOfMessagesToServer sender, NetworkManager networkManager) {
-        this.sender = sender;
-        this.networkManager = networkManager;
-    }
-    
-    public void deauthenticate() {
-        publicKey = null;
-        privateKey = null;
-        sharedKey = null;
-    }
+
 
     @Override
     protected final Handler[] createHandlers() {
-        return new Handler[] { 
-                new StartCom(),
-                new Authenticate(), 
-                new Detatch(), 
-                new Msg() 
+        return new Handler[] {
+                new GetDownloadProgress(),
+                new Download()
          };
-    }
-    
-    @Override
-    protected final boolean isAuthenticated() {
-        return publicKey != null && privateKey != null && sharedKey != null;
     }
     
       /**
@@ -102,167 +57,95 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                  res = res.substring(0, id);
          }
          return res;
-     }     
-    
-    final String getPublicKey() {
-        return publicKey;
-    }
-
-    final String getPrivateKey() {
-        return privateKey;
-    }
-
-    final String getSharedKey() {
-        return sharedKey;
-    }
-
-    private void regenerateKeys() {
-        publicKey = LWSServerUtil.generateKey();
-        privateKey = LWSServerUtil.generateKey();
-        sharedKey = LWSServerUtil.generateKey();
-        note("public key  : {0}", publicKey);
-        note("private key : {0}", privateKey);
-        note("shared key  : {0}", sharedKey);
-    }
+     }
 
     // ------------------------------------------------------------
     // Handlers
     // ------------------------------------------------------------
-
-    /**
-     * A {@link Handler} that needs both a callback and private
-     * key.
-     */
-    protected abstract class HandlerWithCallbackWithPrivateKey extends HandlerWithCallback {
-
+    
+    class GetDownloadProgress extends HandlerWithCallback{
+        
         @Override
-        protected final void handleRest(final Map<String, String> args, StringCallback cb) {
-            //
-            // Check the private key
-            //
-            String privateKey = getPrivateKey();
-            if (privateKey == null) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
+        protected void handleRest(Map<String, String> args, StringCallback cb){
+            if (getCommandReceiver() == null) {
+                cb.process(LWSDispatcherSupport.Responses.NO_DISPATCHEE);
                 return;
             }
-            String herPrivateKey = args.get(LWSDispatcherSupport.Parameters.PRIVATE);
-            if (herPrivateKey == null) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
-                return;
-            }
-            if (!herPrivateKey.equals(privateKey)) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY));
-                return;
-            }
-            //
-            // Check the shared key
-            //
-            String sharedKey = getSharedKey();
-            if (sharedKey == null) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_SHARED_KEY));
-                return;
-            }
-            String herSharedKey = args.get(LWSDispatcherSupport.Parameters.SHARED);
-            if (herSharedKey == null) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_SHARED_KEY_PARAMETER));
-                return;
-            }
-            if (!herSharedKey.equals(sharedKey)) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.INVALID_SHARED_KEY));
-                return;
-            }            
-            handleRest(herPrivateKey, herSharedKey, args, cb);
-        }
-
-        /**
-         * The result <b>IN PLAIN TEXT</b> using the private key,
-         * <tt>privateKey</tt>. Override this to do something meaningful
-         * with the passed along private key, too.
-         * 
-         * @param privateKey private key pulled from the args
-         * @param herSharedKey the shared key sent from a Browser
-         * @param args original, untouched arguments
-         * @return result <b>IN PLAIN TEXT</b> using the private key,
-         *         <tt>privateKey</tt>
-         */
-        abstract void handleRest(String privateKey,String herSharedKey, Map<String, String> args, StringCallback cb);
-    }
-
-    /**
-     * Issues a command to start authentication.
-     */
-    class StartCom extends HandlerWithCallback {
-        @Override
-        protected void handleRest(final Map<String, String> args, final StringCallback cb) {
-            regenerateKeys();
-            //
-            // send the keys to the Server and wait for a response
-            //
-            final Map<String, String> sendArgs = new HashMap<String, String>();
-            sendArgs.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-            sendArgs.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
-            try {
-                sender.sendMessageToServer(LWSDispatcherSupport.Commands.STORE_KEY, sendArgs, new StringCallback() {
-                    public void process(String response) {
-                        //
-                        // This could have a trailing space, so be nice
-                        //
-                        cb.process(response.indexOf(Responses.OK) != -1 ? publicKey + " " + sharedKey : "0");
-                    }
-                });
-            } catch (IOException e) {
-                // ignored
-            }
-        }
-    }
-
-    /**
-     * Sent from code with private key to authenticate.
-     */
-    class Authenticate extends HandlerWithCallbackWithPrivateKey {
-        @Override
-        protected void handleRest(String privateKey, String sharedKey, Map<String, String> args, StringCallback cb) {
-            notifyConnectionListeners(true);
-            cb.process(LWSDispatcherSupport.Responses.OK);
-        }
-    }
-
-    /**
-     * Send from code to end session.
-     */
-    class Detatch extends HandlerWithCallback {
-        @Override
-        protected void handleRest(Map<String, String> args, StringCallback cb) {
-            privateKey = null;
-            publicKey = null;
-            sharedKey = null;
-            notifyConnectionListeners(false);
-            cb.process(LWSDispatcherSupport.Responses.OK);
+            
+            String res = getCommandReceiver().receiveCommand(name(), args);
+            cb.process(res);         
         }
     }
 
     /**
      * Sent from code with parameter {@link Parameters#COMMAND}.
      */
-    class Msg extends HandlerWithCallbackWithPrivateKey {
+    class Download extends HandlerWithCallback{
+        
         @Override
-        protected void handleRest(String privateKey,
-                                    String herSharedKey,
-                                    Map<String, String> args, StringCallback cb) {
-            String cmd = args.get(LWSDispatcherSupport.Parameters.COMMAND);
-            if (cmd == null) {
-                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER));
+        protected void handleRest(Map<String, String> args, StringCallback cb) {
+            
+            LWSReceivesCommandsFromDispatcher receiver = getCommandReceiver();
+            LWSCommandValidator verifier = getCommandVerifier();
+            
+            if (receiver == null) {    
+                cb.process(LWSDispatcherSupport.Responses.NO_DISPATCHEE);
                 return;
             }
-            if (getCommandReceiver() != null) {
-                Map<String, String> newArgs = new HashMap<String, String>(args);
-                String newCmd = LWSServerUtil.addURLEncodedArguments(cmd, newArgs);
-                String res = getCommandReceiver().receiveCommand(newCmd, newArgs);
+            
+            String lwsDownloadRequest = null;
+            String url = args.get(Parameters.URL);
+            if(LWSServerUtil.isEmpty(url)){
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PARAMETER));
+                return;
+            }
+            
+            
+            try { lwsDownloadRequest = URIUtils.decodeToUtf8(url);
+            } catch (URISyntaxException e) {
+                cb.process(LWSDispatcherSupport.Responses.INVALID_DOWNLOAD);
+                return;
+            }
+            Map<String, String> downloadArgs = getArgs(lwsDownloadRequest);
+             
+            // extract required parameters from download URL
+            String signedHash = downloadArgs.get("signedHash");
+            String hash = downloadArgs.get("hash");
+            String signedBrowserIP = downloadArgs.get("signedBrowserIP");
+            String browserIP = downloadArgs.get("browserIP");
+            if(LWSServerUtil.isEmpty(signedHash) || LWSServerUtil.isEmpty(hash) ||
+                    LWSServerUtil.isEmpty(signedBrowserIP) ||LWSServerUtil.isEmpty(browserIP) ){
+                cb.process(report(LWSDispatcherSupport.Responses.INVALID_DOWNLOAD));
+                return;
+            }
+             
+            // verify hash signature 
+            if(!verifier.verifySignedParameter(hash, signedHash)){
+                cb.process(LWSDispatcherSupport.Responses.INVALID_HASH_SIGNATURE);
+                return;
+            }
+            
+            // verify browserIP signature
+            if(!verifier.verifySignedParameter(browserIP, signedBrowserIP)){
+                cb.process(LWSDispatcherSupport.Responses.INVALID_IP_SIGNATURE);
+                return; 
+            }
+            
+            
+            // verify browser and client are on same machine
+            if(!verifier.verifyBrowserIPAddresswithClientIP(browserIP)){  
+                cb.process(LWSDispatcherSupport.Responses.BROWSER_CLIENT_IP_DONOT_MATCH);
+                return; 
+            }
+            
+            String res = receiver.receiveCommand(name(), args);
+            if(res != null){
                 cb.process(res);
                 return;
             }
-            cb.process(LWSDispatcherSupport.Responses.NO_DISPATCHEE);
+            
+            cb.process(LWSDispatcherSupport.Responses.INVALID_DOWNLOAD);
         }
-    }
+    }   
 
 }

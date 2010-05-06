@@ -3,6 +3,7 @@ package org.limewire.lws.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.apache.http.util.EntityUtils;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
+import org.limewire.util.URIUtils;
 
 /**
  * This class defines instances of {@link LWSSenderOfMessagesToServer} that
@@ -95,10 +97,13 @@ public final class LocalServerDelegate {
             StringBuffer sb = new StringBuffer("store/app/pages/client/ClientCom/command");
             sb.append("/").append(msg);
             for (String key : args.keySet()) {
+                String value = args.get(key);
+                try{ value = URIUtils.encodeUriComponent(value);
+                }catch(URISyntaxException ex){ /* ignore */ }
                 sb.append("/")
                   .append(key)
                   .append("/")
-                  .append(args.get(key));
+                  .append(value);
             }
             return sb.toString();
         } 
@@ -120,10 +125,13 @@ public final class LocalServerDelegate {
             StringBuffer sb = new StringBuffer(msg);
             boolean first = true;
             for (String key : args.keySet()) {
+                String value = args.get(key);
+                try{ value = URIUtils.encodeUriComponent(value);
+                }catch(URISyntaxException ex){ /* ignore */ }
                 sb.append(first ? "?" : "&")
                   .append(key)
                   .append("=")
-                  .append(args.get(key));
+                  .append(value);
                 first = false;
             }
             return sb.toString();
