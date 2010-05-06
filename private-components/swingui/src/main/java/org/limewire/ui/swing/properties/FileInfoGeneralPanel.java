@@ -356,18 +356,20 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     
                     RemoteHost host = result.getSource();
                     Friend f = host.getFriendPresence().getFriend();
-                    model.addRow(new Object[] {
+                    if (f.getName() != null || f.getRenderName() != null) {
+                        model.addRow(new Object[] {
                             f.getRenderName(),
                             f.getName(),
                             result.getFileName()
-                    });
+                        });
+                    }
                 }
                 
                 // The referrer takes precedence since it indicates a torrent web search
                 if (referrer instanceof URI) {
                     URI referrerURI = (URI) referrer;
                     component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), referrerURI.getPath())));
-                } else {
+                } else if (model.getRowCount() != 0) {
                     component.add(new JScrollPane(table), "span, grow, wrap");
                 
                     table.addMouseListener(new MousePopupListener() {
@@ -388,6 +390,8 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                             blockingMenu.show(table, e.getX(), e.getY());
                         }
                     });
+                } else {
+                    component.add(createPlainLabel(I18n.tr("Unable to Locate")), "gapbottom 15, span, wrap");
                 }
             }
             break;
