@@ -26,7 +26,7 @@ import com.limegroup.gnutella.dht.messages.StoreResponseWireImpl;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 
-public class LimeTransport extends AbstractTransport 
+class LimeTransport extends AbstractTransport 
         implements MessageHandler {
 
     private static final Log LOG 

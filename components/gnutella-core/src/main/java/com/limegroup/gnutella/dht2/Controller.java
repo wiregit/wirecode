@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
@@ -23,5 +24,5 @@ abstract class Controller implements Closeable, ConnectionLifecycleListener {
     
     public abstract boolean isRunning();
     
-    public abstract void start();
+    public abstract void start() throws IOException;
 }

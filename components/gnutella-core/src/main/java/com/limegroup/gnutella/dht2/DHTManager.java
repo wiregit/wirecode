@@ -1,18 +1,37 @@
 package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
+import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.lifecycle.Service;
+import org.limewire.mojito2.message.DefaultMessageFactory;
+import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.filters.IPFilter;
 
+@Singleton
 public class DHTManager implements ConnectionLifecycleListener, Service, Closeable {
 
+    private static final Log LOG 
+        = LogFactory.getLog(DHTManager.class);
+    
     /**
      * Defines the modes of a DHT Node (inactive, active, passive and passive leaf).
      */
@@ -110,12 +129,40 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         }
     }
     
+    private final NetworkManager networkManager;
+    
+    private final Provider<UDPService> udpService;
+    
+    private final Provider<MessageRouter> messageRouter;
+
+    private final Provider<ConnectionManager> connectionManager;
+    
+    private final Provider<MACCalculatorRepositoryManager> calculator;
+    
+    private final Provider<IPFilter> ipFilter;
+    
+    private final ConnectionServices connectionServices;
+    
     private volatile Controller controller = InactiveController.CONTROLLER;
     
     private boolean open = true;
     
-    public DHTManager() {
+    @Inject
+    public DHTManager(NetworkManager networkManager,
+            Provider<UDPService> udpService, 
+            Provider<MessageRouter> messageRouter, 
+            Provider<MACCalculatorRepositoryManager> calculator,
+            Provider<ConnectionManager> connectionManager,
+            Provider<IPFilter> ipFilter,
+            ConnectionServices connectionServices) {
         
+        this.networkManager = networkManager;
+        this.udpService = udpService;
+        this.messageRouter = messageRouter;
+        this.calculator = calculator;
+        this.connectionManager = connectionManager;
+        this.ipFilter = ipFilter;
+        this.connectionServices = connectionServices;
     }
     
     @Inject
@@ -141,33 +188,41 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         return controller.isRunning();
     }
     
-    public synchronized void start(DHTMode mode) {
+    public synchronized boolean start(DHTMode mode) {
         if (!open) {
             throw new IllegalStateException();
         }
         
         if (controller.isMode(mode)) {
-            return;
+            return true;
         }
         
         stop();
         
-        switch (mode) {
-            case INACTIVE:
-                controller = createInactive();
-                break;
-            case ACTIVE:
-                controller = createActive();
-                break;
-            case PASSIVE:
-                controller = createPassive();
-                break;
-            case PASSIVE_LEAF:
-                controller = createLeaf();
-                break;
+        try {
+            switch (mode) {
+                case INACTIVE:
+                    controller = InactiveController.CONTROLLER;
+                    break;
+                case ACTIVE:
+                    controller = createActive();
+                    break;
+                case PASSIVE:
+                    controller = createPassive();
+                    break;
+                case PASSIVE_LEAF:
+                    controller = createLeaf();
+                    break;
+            }
+        
+            controller.start();
+            return true;
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+            stop();
         }
         
-        controller.start();
+        return false;
     }
 
     public synchronized void stop() {
@@ -180,13 +235,20 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         open = false;
         stop();
     }
-
-    private Controller createInactive() {
-        return InactiveController.CONTROLLER;
-    }
     
-    private Controller createActive() {
-        return new ActiveController();
+    private Controller createActive() throws IOException {
+        LimeTransport transport = new LimeTransport(
+                udpService, messageRouter);
+        
+        MessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        HostFilter hostFilter 
+            = new HostFilterDelegate(ipFilter);
+        
+        return new ActiveController(networkManager, transport, 
+                connectionManager, messageFactory, connectionServices, 
+                hostFilter);
     }
     
     private Controller createPassive() {

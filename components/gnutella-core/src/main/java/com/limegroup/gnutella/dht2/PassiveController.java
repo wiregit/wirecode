@@ -2,14 +2,11 @@ package com.limegroup.gnutella.dht2;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.connection.Connection;
-import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
@@ -40,7 +37,7 @@ class PassiveController extends Controller {
     
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        // Ignore everything that's not a Connection Event
+        /*// Ignore everything that's not a Connection Event
         Connection connection = evt.getConnection();
         if (connection == null) {
             return;
@@ -82,6 +79,6 @@ class PassiveController extends Controller {
                 removeLeafDHTNode( host , port );
             }
         } 
-        
+        */
     }
 }
