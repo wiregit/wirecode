@@ -448,7 +448,9 @@ public class Context extends AbstractDHT {
     
     @Override
     public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
-        AsyncProcess<PingEntity> process = new PingResponseHandler(
+        
+        AsyncProcess<PingEntity> process 
+            = new PingResponseHandler(
                 this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
@@ -461,16 +463,26 @@ public class Context extends AbstractDHT {
     public DHTFuture<PingEntity> ping(Contact src, Contact[] dst, 
             long timeout, TimeUnit unit) {
         
-        AsyncProcess<PingEntity> process = new PingResponseHandler(
+        AsyncProcess<PingEntity> process 
+            = new PingResponseHandler(
                 this, src, dst, timeout, unit);
         
-        return submit(process, timeout, unit);
+        DHTFuture<PingEntity> future 
+            = submit(process, timeout * dst.length, unit);
+        
+        if (src.equals(getLocalNode())) {
+            future.addFutureListener(onPong);
+        }
+        
+        return future;
     }
 
     @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
-        AsyncProcess<NodeEntity> process = new NodeResponseHandler(
+        
+        AsyncProcess<NodeEntity> process 
+            = new NodeResponseHandler(
                 this, lookupId, timeout, unit);
         
         return submit(process, timeout, unit);
