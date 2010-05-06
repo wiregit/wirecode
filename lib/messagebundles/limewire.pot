@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-05 11:30-0400\n"
+"POT-Creation-Date: 2010-05-06 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,6 +22,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:93
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedPopupPanel.java:56
 msgid "Audio"
 msgstr ""
 
@@ -29,6 +30,7 @@ msgstr ""
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:183
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:116
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedPopupPanel.java:57
 msgid "Video"
 msgstr ""
 
@@ -569,7 +571,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:35
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:34
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:44
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadHeaderPopupMenu.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:33
@@ -964,7 +966,7 @@ msgid "Update the saved key"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:528
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:109
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:103
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:198
 msgid "Refresh"
 msgstr ""
@@ -2033,7 +2035,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:38
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:35
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:47
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:29
 msgid "Size"
@@ -2104,7 +2106,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ProgramTableFormat.java:33
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:43
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:42
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:41
 msgid "From"
 msgstr ""
@@ -2873,13 +2875,13 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/TorrentTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:43
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:45
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:44
 msgid "Files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/TorrentTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:40
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:46
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:45
 msgid "Trackers"
 msgstr ""
 
@@ -3045,40 +3047,34 @@ msgstr ""
 msgid "Add files to it"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:108
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:102
 msgid "Repeat Search"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:142
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:60
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:153
 msgid "My Files"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:169
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:150
 msgid "Close All Searches"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:170
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:151
 msgid "Close Search"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:152
 msgid "Close Other Searches"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:224
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:172
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:81
-msgid "Advanced Search"
-msgstr ""
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:568
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:517
 msgid "Find More Results"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:620
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:569
 msgid "Stop Search"
 msgstr ""
 
@@ -3287,19 +3283,19 @@ msgstr ""
 msgid "His&tory"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:49
 msgid "&Tools"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:62
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:61
 msgid "Advanced &Search"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:71
 msgid "&Advanced Tools..."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:105
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:103
 msgid "&What's New Search"
 msgstr ""
 
@@ -3729,7 +3725,7 @@ msgid "Address"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:61
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:192
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedPopupPanel.java:396
 msgid "Search"
 msgstr ""
 
@@ -3743,6 +3739,7 @@ msgid "Security"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:279
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/LibraryWarningDialog.java:197
 msgid "Advanced"
 msgstr ""
@@ -4657,16 +4654,16 @@ msgid ""
 "enable downloading programs via Tools > Options > Search > Configure..."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:117
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:131
 msgid "Search..."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:126
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:199
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:149
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:205
 msgid "Search P2P Network"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:196
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:202
 msgid "Search P2P Network and Friends"
 msgstr ""
 
@@ -4907,10 +4904,6 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedSearchPanel.java:83
-msgid "Search for the following category:"
-msgstr ""
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 msgid "Copy Link"
 msgstr ""
@@ -4975,15 +4968,15 @@ msgstr ""
 msgid "Show Similar Files"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:48
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:47
 msgid "Seeders"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:49
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:48
 msgid "Leechers"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:50
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:49
 msgid "Downloaded"
 msgstr ""
 
