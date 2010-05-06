@@ -148,6 +148,7 @@
 			<accessrule kind="nonaccessible" pattern="**"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger-1.0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot-core-3.0.jar" sourcepath="lib/sources/foxtrot-3.0.zip"/>
 	<classpathentry kind="lib" path="lib/jars/mp3spi-1.9.4.1.jar"/>
@@ -164,6 +165,5 @@
 	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar" sourcepath="lib/sources/fmj-source.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
