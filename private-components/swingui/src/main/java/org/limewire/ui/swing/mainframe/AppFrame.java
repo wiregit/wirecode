@@ -308,6 +308,7 @@ public class AppFrame extends SingleFrameApplication {
         glassPane.setVisible(true);
         setupWizardProvider.get().showDialog(getMainFrame());
         glassPane.setVisible(false);
+        glassPane.setBackgroundPainter(null);
         ui.showMainPanel();
     }
     
