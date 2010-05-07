@@ -28,6 +28,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.inject.LazySingleton;
 import org.limewire.libtorrent.callback.AlertCallback;
 import org.limewire.listener.EventListener;
@@ -82,7 +83,7 @@ public class LibTorrentSession implements TorrentManager {
     private final Lock lock = new ReentrantLock();
 
     private final List<ScheduledFuture<?>> torrentManagerTasks;
-
+    
     @Inject
     public LibTorrentSession(LibTorrentWrapper torrentWrapper,
             @Named("fastExecutor") ScheduledExecutorService fastExecutor,
@@ -561,6 +562,18 @@ public class LibTorrentSession implements TorrentManager {
         lock.lock();
         try {
             libTorrent.set_web_seed_proxy(proxySetting);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void queueTrackerScrapeRequest(String hexSha1Urn, URI trackerUri, ScrapeCallback callback) {
+        validateLibrary();
+        lock.lock();
+        try {
+            TrackerScrapeRequestCallback trc = new TrackerScrapeRequestCallback(callback);
+            libTorrent.queue_tracker_scrape_request(hexSha1Urn, trackerUri.toASCIIString(), trc);
         } finally {
             lock.unlock();
         }

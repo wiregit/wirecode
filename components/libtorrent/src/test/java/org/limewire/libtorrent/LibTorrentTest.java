@@ -2,6 +2,7 @@ package org.limewire.libtorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,9 +15,12 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
 import org.limewire.bittorrent.TorrentEventType;
 import org.limewire.bittorrent.TorrentParams;
+import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.TorrentState;
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
 public class LibTorrentTest extends TestCase {
@@ -71,6 +75,18 @@ public class LibTorrentTest extends TestCase {
         torrent.start();
         finishTorrentDownload(torrent);
         assertDownload("8055d620ba0c507c1af957b43648c99f", torrent.getTorrentDataFile(), 44425);
+    }
+    
+    public void testTrackerScraper() throws Exception {
+        for (int i = 0; i < 30; i++) {
+            BlockingScrapeCallback callback = new BlockingScrapeCallback();
+            long start = System.currentTimeMillis();
+            libtorrentSession.queueTrackerScrapeRequest("8241bdf1f1214014297f87c93ee58a57a983ccc4",
+                    URI.create("udp://tracker.openbittorrent.com:80/"), callback);
+            assertTrue(callback.latch.await(3, TimeUnit.SECONDS));
+            System.out.println(System.currentTimeMillis() - start);
+            System.out.println(callback);
+        }
     }
 
     /**
@@ -128,5 +144,31 @@ public class LibTorrentTest extends TestCase {
         tempDir.mkdirs();
         tempDir.deleteOnExit();
         return tempDir;
+    }
+    
+    private class BlockingScrapeCallback implements ScrapeCallback {
+        
+        private final CountDownLatch latch = new CountDownLatch(1);
+        
+        volatile String reason;
+
+        volatile TorrentScrapeData data;
+        
+        @Override
+        public void failure(String reason) {
+            this.reason = reason;
+            latch.countDown();
+        }
+
+        @Override
+        public void success(TorrentScrapeData data) {
+            this.data = data;
+            latch.countDown();
+        }
+
+        @Override
+        public String toString() {
+            return StringUtils.toStringBlacklist(this, latch);
+        }
     }
 }

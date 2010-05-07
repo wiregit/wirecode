@@ -583,4 +583,7 @@ class LibTorrentWrapper {
                 torrentTrackerPointers.length));
     }
 
+    public void queue_tracker_scrape_request(String sha1String, String trackerUri, TrackerScrapeRequestCallback callback) {
+        catchWrapperException(libTorrent.queue_tracker_scrape_request(sha1String, trackerUri, callback));
+    }
 }
