@@ -3,7 +3,6 @@ package org.limewire.ui.swing.upload.table;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,14 +17,12 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
-import org.limewire.ui.swing.library.table.ListMenuFactory;
 import org.limewire.ui.swing.search.BlockUserMenuFactory;
 import org.limewire.ui.swing.search.RemoteHostMenuFactory;
 import org.limewire.ui.swing.upload.UploadMediator;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /**
@@ -35,12 +32,10 @@ public class UploadPopupMenu extends JPopupMenu {
 
     private final UploadTable table;
     private final List<UploadItem> uploadItems;
-    private final Provider<List<File>> selectedFiles;
     private final UploadActionHandler actionHandler;
     private final LibraryManager libraryManager;
     private final RemoteHostMenuFactory browseMenuFactory;
     private final BlockUserMenuFactory blockUserMenuFactory;
-    private final ListMenuFactory listMenuFactory;
     
     private Collection<RemoteHost> remoteHosts;
     
@@ -48,20 +43,16 @@ public class UploadPopupMenu extends JPopupMenu {
     public UploadPopupMenu(
             @Assisted UploadTable table,
             @Assisted List<UploadItem> uploadItems,
-            @FinishedUploadSelected Provider<List<File>> selectedFiles,
             UploadActionHandler actionHandler,
             LibraryManager libraryManager,
             RemoteHostMenuFactory browseMenuFactory,
-            BlockUserMenuFactory blockUserMenuFactory,
-            ListMenuFactory listMenuFactory) {
+            BlockUserMenuFactory blockUserMenuFactory) {
         this.table = table;
         this.uploadItems = uploadItems;
-        this.selectedFiles = selectedFiles;
         this.actionHandler = actionHandler;
         this.libraryManager = libraryManager;
         this.browseMenuFactory = browseMenuFactory;
         this.blockUserMenuFactory = blockUserMenuFactory;
-        this.listMenuFactory = listMenuFactory;
         
         createMenu();
     }
@@ -133,16 +124,6 @@ public class UploadPopupMenu extends JPopupMenu {
             add(showInLibraryMenuItem).setEnabled(libraryManager.getLibraryManagedList().contains(uploadItem.getUrn()));
         }
         
-        if (done && !browseItem) {
-            addSeparator();
-
-            JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
-            add(addToListMenu);
-
-            JMenu showInListMenu = listMenuFactory.createShowInListMenu(selectedFiles, true);
-            add(showInListMenu);
-        }
-        
         addSeparator();
 
         JMenu browseMenu = browseMenuFactory.createBrowseMenu(getRemoteHosts());
@@ -195,15 +176,6 @@ public class UploadPopupMenu extends JPopupMenu {
             add(locateOnDiskMenuItem);
         }
         
-        if (done) {
-            if (getComponentCount() > 0) {
-                addSeparator();
-            }
-
-            JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
-            add(addToListMenu);
-        }
-            
         if (!browseItem) {
             if (getComponentCount() > 0) {
                 addSeparator();
@@ -217,7 +189,6 @@ public class UploadPopupMenu extends JPopupMenu {
      * Builds the menu for multiple upload items.
      */
     private void createMultipleItemMenu() {
-        boolean allBrowse = isAllBrowse();
         boolean allDone = isAllDone();
         boolean anyPausable = isAnyPausable();
         boolean anyResumable = isAnyResumable();
@@ -251,14 +222,6 @@ public class UploadPopupMenu extends JPopupMenu {
             addSeparator();
             
             add(createCancelMenuItem(new DefaultMenuListener()));
-            
-        } else if (!allBrowse) {
-            if (getComponentCount() > 0) {
-                addSeparator();
-            }
-            
-            JMenu addToListMenu = listMenuFactory.createAddToListMenu(selectedFiles);
-            add(addToListMenu);
         }
     }
     
@@ -326,18 +289,6 @@ public class UploadPopupMenu extends JPopupMenu {
             }
         }
         return remoteHosts;
-    }
-    
-    /**
-     * Returns true if all upload items are browse items.
-     */
-    private boolean isAllBrowse() {
-        for (UploadItem item : uploadItems) {
-            if (!UploadMediator.isBrowseHost(item)) {
-                return false;
-            }
-        }
-        return true;
     }
     
     /**
