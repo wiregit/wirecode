@@ -4,7 +4,6 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.upload.UploadItem;
-import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.transfer.TransferTitleRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -16,7 +15,6 @@ import org.limewire.ui.swing.util.I18n;
  */
 class UploadTitleRenderer extends TransferTitleRenderer {
 
-    @Resource private Icon friendBrowseHostIcon;
     @Resource private Icon p2pBrowseHostIcon;
     
     private final CategoryIconManager iconManager;
@@ -43,11 +41,7 @@ class UploadTitleRenderer extends TransferTitleRenderer {
 
         case BROWSE_HOST:
         case BROWSE_HOST_DONE:
-            if (uploadItem.getBrowseType() == BrowseType.FRIEND) {
-                return friendBrowseHostIcon;
-            } else {
-                return p2pBrowseHostIcon;
-            }
+            return p2pBrowseHostIcon;
 
         default:
             return iconManager.getIcon(uploadItem.getCategory());
