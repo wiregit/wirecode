@@ -30,11 +30,9 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeSplitPane;
-import org.limewire.ui.swing.components.PanelResizer;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.settings.SwingUiSettings;
-import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -72,8 +70,7 @@ public class LimeWireSwingUI extends JPanel {
             TopPanel topPanel,
             MainPanel mainPanel,
             StatusPanel statusPanel,
-            ProNagController proNagController, 
-            SharedFileCountPopupPanel sharedFileCountPopup,
+            ProNagController proNagController,
             MainDownloadPanel mainDownloadPanel,
             @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
             BottomPanel bottomPanel,
@@ -112,8 +109,6 @@ public class LimeWireSwingUI extends JPanel {
         
         layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
         layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(sharedFileCountPopup, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(sharedFileCountPopup));
         add(layeredPane, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
         

@@ -60,7 +60,6 @@ import org.limewire.ui.swing.library.table.AbstractLibraryFormat;
 import org.limewire.ui.swing.library.table.LibraryImageTable;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.table.TableColors;
@@ -197,7 +196,7 @@ public class LibraryPanel extends JPanel {
     }
     
     @Inject
-    void register(LibraryManager libraryManager, final PlayerMediator playerMediator) {        
+    void register(LibraryManager libraryManager) {        
         //Loads the Library after Component has been realized.
         final LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         SwingUtilities.invokeLater(new Runnable(){
@@ -285,24 +284,10 @@ public class LibraryPanel extends JPanel {
     }
     
     /**
-     * Returns the current list of playable file items.
-     */
-    public EventList<LocalFileItem> getPlayableList() {
-        return libraryTable.getPlayableList();
-    }
-    
-    /**
      * Returns the selected display category.
      */
     public Category getSelectedCategory() {
         return selectedCategory;
-    }
-    
-    /**
-     * Returns the selected library item.
-     */
-    public LibraryNavItem getSelectedNavItem() {
-        return libraryNavigatorPanel.getSelectedNavItem();
     }
     
     List<File> getSelectedFiles() {

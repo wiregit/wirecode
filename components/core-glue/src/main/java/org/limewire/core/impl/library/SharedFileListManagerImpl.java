@@ -3,7 +3,6 @@ package org.limewire.core.impl.library;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,9 +165,6 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         
     }
 
-    @InspectablePrimitive(value = "number of lists shared", category = DataCategory.USAGE)
-    private volatile long listsShared;
-        
     @Inject
     SharedFileListManagerImpl(FileCollectionManager collectionManager,
             CoreLocalFileItemFactory coreLocalFileItemFactory,
@@ -206,84 +202,11 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                 case COLLECTION_REMOVED:
                     collectionRemoved(event.getSource());
                     break;
-                case FRIEND_ADDED:
-                    friendAddedToCollection(event.getSource(), event.getFriendId());
-                    break;
-                case FRIEND_IDS_CHANGED:
-                    friendsSetInCollection(event.getSource(), event.getNewFriendIds());
-                    break;
-                case FRIEND_REMOVED:
-                    friendRemoved(event.getSource(), event.getFriendId());
-                    break;
-                case NAME_CHANGED:
-                    nameChanged(event.getSource());
-                    break;
                 }
             }
         });
     }
 
-    // we technically don't have to change anything here, but we want to
-    // make the list trigger an event to signify that something changed,
-    // so we get the index of where it used to be & reset it.
-    private void nameChanged(SharedFileCollection collection) {
-        setListInPlace(collection);
-    }
-    
-    /**
-     * Sets the SharedFileListImpl that holds this collection in place, allowing
-     * the model to trigger an update event.
-     */
-    private void setListInPlace(SharedFileCollection collection) {
-        sharedLists.getReadWriteLock().writeLock().lock();
-        try {
-            for (int i = 0; i < sharedLists.size(); i++) {
-                SharedFileListImpl impl = (SharedFileListImpl)sharedLists.get(i);
-                if (impl.getCoreCollection() == collection) {
-                    sharedLists.set(i, impl); // reset it to trigger event.
-                    break;
-                }
-            }
-        } finally {
-            sharedLists.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    private void friendRemoved(SharedFileCollection collection, String friendId) {
-        SharedFileListImpl list = getListForCollection(collection);
-        int oldSize = list.getFriendIds().size();
-        boolean removed = list.friendRemoved(friendId);
-        // If we removed the last friend, reset the list to trigger an update event.
-        if(oldSize == 1 && removed) {
-            setListInPlace(collection);
-        }
-    }
-
-    private void friendsSetInCollection(SharedFileCollection collection, Collection<String> newFriendIds) {
-        SharedFileListImpl list = getListForCollection(collection);
-        boolean wasEmpty = list.getFriendIds().isEmpty();
-        list.friendsSet(newFriendIds);
-        boolean isEmpty = newFriendIds.isEmpty();
-        // if it changed from empty => not empty, or not empty => empty, trigger an update.
-        if(wasEmpty != isEmpty) {
-            if (!isEmpty) {
-                listsShared++;    
-            }
-            setListInPlace(collection);
-        }
-    }
-
-    private void friendAddedToCollection(SharedFileCollection collection, String friendId) {
-        SharedFileListImpl list = getListForCollection(collection);
-        boolean wasEmpty = list.getFriendIds().isEmpty();
-        list.friendAdded(friendId);
-        // if it used to be, trigger an update
-        if(wasEmpty) {
-            listsShared++;
-            setListInPlace(collection);
-        }
-    }    
-    
     private void collectionAdded(SharedFileCollection collection) {
         SharedFileListImpl listImpl = new SharedFileListImpl(coreLocalFileItemFactory, collection);
         listImpl.friendsSet(collection.getFriendList());

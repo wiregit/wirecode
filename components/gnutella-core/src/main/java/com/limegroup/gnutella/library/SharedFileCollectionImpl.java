@@ -12,7 +12,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.URNSettings;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.StringUtils;
@@ -22,7 +21,6 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.hashing.AudioHashingUtils;
-import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
@@ -32,8 +30,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     private final int collectionId;    
     private final Provider<LibraryFileData> data;
-    private final HashTreeCache treeCache;    
-    private final EventBroadcaster<SharedFileCollectionChangeEvent> sharedBroadcaster;
+    private final HashTreeCache treeCache;
     private final List<String> defaultFriendIds;
     private final boolean publicCollection;
     private final CategoryManager categoryManager;
@@ -42,7 +39,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     @Inject
     public SharedFileCollectionImpl(Provider<LibraryFileData> data, LibraryImpl managedList, 
                                     SourcedEventMulticaster<FileViewChangeEvent, FileView> multicaster,
-                                    EventBroadcaster<SharedFileCollectionChangeEvent> sharedCollectionBroadcaster,
                                     CategoryManager categoryManager, UrnCache urnCache,
                                     @Assisted int id, HashTreeCache treeCache,
                                     @Assisted boolean publicCollection,
@@ -51,7 +47,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         this.collectionId = id;
         this.data = data;
         this.treeCache = treeCache;
-        this.sharedBroadcaster = sharedCollectionBroadcaster;
         this.publicCollection = publicCollection;
         this.categoryManager = categoryManager;
         this.urnCache = urnCache;
@@ -69,12 +64,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     
     public String getName() {
         return data.get().getNameForCollection(collectionId);
-    }
-    
-    public void setName(String name) {
-        if(data.get().setNameForCollection(collectionId, name)) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.NAME_CHANGED, this, name));
-        }
     }
     
     @Override

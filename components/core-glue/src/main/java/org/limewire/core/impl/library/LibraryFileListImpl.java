@@ -84,11 +84,6 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
 
     @Override
-    public LibraryState getState() {
-        return libraryState;
-    }
-
-    @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
     }

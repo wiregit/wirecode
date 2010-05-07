@@ -59,16 +59,6 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
         }
     }
 
-    @Override
-    public boolean isNameChangeAllowed() {
-        return coreCollection.getId() != 0; // TODO: Do better.
-    }
-
-    @Override
-    public void setCollectionName(String name) {
-        coreCollection.setName(name);
-    }
-
     boolean friendRemoved(String friendId) {
         return friendList.remove(friendId);
     }

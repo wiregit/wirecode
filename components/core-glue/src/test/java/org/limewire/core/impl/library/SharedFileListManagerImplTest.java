@@ -42,6 +42,5 @@ public class SharedFileListManagerImplTest extends LimeTestCase {
         assertEquals(Friend.P2P_FRIEND_ID, list.getFriendIds().get(0));
         assertEquals(0, list.size());
         assertEquals("Public Shared", list.getCollectionName());
-        assertFalse(list.isNameChangeAllowed());
     }
 }

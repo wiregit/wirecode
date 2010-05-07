@@ -134,15 +134,6 @@ class FileViewManagerImpl implements FileViewManager {
                 case COLLECTION_REMOVED:
                     collectionRemoved(event.getSource());
                     break;
-                case FRIEND_ADDED:
-                    friendAddedToCollection(event.getSource(), event.getFriendId());
-                    break;
-                case FRIEND_REMOVED:
-                    friendRemovedFromCollection(event.getSource(), event.getFriendId());
-                    break;
-                case FRIEND_IDS_CHANGED:
-                    friendIdsChangedInCollection(event.getSource(), event.getOldFriendIds(), event.getNewFriendIds());
-                    break;
                 }
             }
         });
@@ -259,154 +250,7 @@ class FileViewManagerImpl implements FileViewManager {
             }
         }
     }
-    
-    /**
-     * Notification that a collection is shared with another person.
-     * 
-     * This will add the collection as a backing view for the
-     * {@link MultiFileView} that exists for this id, if any view exists.
-     * 
-     * An event will be sent for each {@link FileDesc} that was added to the
-     * {@link MultiFileView}.
-     */
-    private void friendAddedToCollection(SharedFileCollection collection, String id) {
-        Map<FileView, List<FileDesc>> addedFiles = null;
         
-        rwLock.writeLock().lock();
-        try {
-            // make sure it's added to the 'all' view --
-            // if the all view already contained it, this will return
-            // an empty list.
-            List<FileDesc> added = allSharedFilesView.addNewBackingView(collection);
-            addedFiles = addToOrCreateMapOfList(addedFiles, allSharedFilesView, added);
-            
-            MultiFileView view = fileViewsPerFriend.get(id);
-            if(view != null) {
-                added = view.addNewBackingView(collection);
-                LOG.debugf("Friend {0} added to collection {1}, changing view {2}, added {3}", id, collection, view, added);
-                addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        if(addedFiles != null) {
-            for(Map.Entry<FileView, List<FileDesc>> entry : addedFiles.entrySet()) {
-                for(FileDesc fd : entry.getValue()) {
-                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_ADDED, fd));
-                }
-            }
-        }
-    }
-    
-    /**
-     * Notification that a collection is no longer shared with a person.
-     * 
-     * This will remove the collection as a backing view from the
-     * {@link MultiFileView} for that id, if any view exists.
-     * 
-     * An event will be sent for each {@link FileDesc} that was removed from the
-     * {@link MultiFileView}.
-     */
-    private void friendRemovedFromCollection(SharedFileCollection collection, String id) {
-        Map<FileView, List<FileDesc>> removedFiles = null;
-        
-        rwLock.writeLock().lock();
-        try {
-            // if there are no more friends this collection is shared with,
-            // remove it from the 'all' view.
-            if(collection.getFriendList().isEmpty()) {
-                List<FileDesc> removed = allSharedFilesView.removeBackingView(collection);
-                removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
-            }
-            
-            MultiFileView view = fileViewsPerFriend.get(id);
-            if(view != null) {
-                List<FileDesc> removed = view.removeBackingView(collection);
-                LOG.debugf("Friend {0} removed from collection {1}, changing view {2}, removed {2}", id, collection, view, removed);
-                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        if(removedFiles != null) {
-            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
-                for(FileDesc fd : entry.getValue()) {
-                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
-                }
-            }
-        }
-    }
-
-    /**
-     * Notification that a collection's set of shared friends changed.
-     * 
-     * This will add the collection as a backing view for the
-     * {@link MultiFileView} that exists for the new ids and remove the
-     * collection as a backing view for any old ids.
-     * 
-     * An event will be sent for each {@link FileDesc} that was added or removed from
-     * the views.
-     */
-    private void friendIdsChangedInCollection(SharedFileCollection collection, Collection<String> oldIds, Collection<String> newIds) {
-        Map<FileView, List<FileDesc>> addedFiles   = null;
-        Map<FileView, List<FileDesc>> removedFiles = null;
-        
-        rwLock.writeLock().lock();
-        try {
-            if(newIds.isEmpty()) { // if new is empty, must remove files from global list.
-                List<FileDesc> removed = allSharedFilesView.removeBackingView(collection);
-                removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
-            } else if(oldIds.isEmpty()) { // if old was empty, must add files to global list.
-                List<FileDesc> added = allSharedFilesView.addNewBackingView(collection);
-                addedFiles = addToOrCreateMapOfList(addedFiles, allSharedFilesView, added);
-            }
-            
-            // Add any ids that were added.
-            List<String> addedFriends = new ArrayList<String>(newIds);
-            addedFriends.removeAll(oldIds);
-            for(String id : addedFriends) {
-                MultiFileView view = fileViewsPerFriend.get(id);
-                if(view != null) {
-                    List<FileDesc> added = view.addNewBackingView(collection);
-                    LOG.debugf("Friend {0} added to collection {1}, changing view {2}, added {3}", id, collection, view, added);
-                    addedFiles = addToOrCreateMapOfList(addedFiles, view, added);
-                }
-            }
-            
-            // Remove any ids that were removed.
-            List<String> removedFriends = new ArrayList<String>(oldIds);
-            removedFriends.removeAll(newIds);
-            for(String id : removedFriends) {
-                MultiFileView view = fileViewsPerFriend.get(id);
-                if(view != null) {
-                    List<FileDesc> removed = view.removeBackingView(collection);
-                    LOG.debugf("Friend {0} removed from collection {1}, changing view {2}, removed {2}", id, collection, view, removed);
-                    removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
-                }
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        if(addedFiles != null) {
-            for(Map.Entry<FileView, List<FileDesc>> entry : addedFiles.entrySet()) {
-                for(FileDesc fd : entry.getValue()) {
-                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_ADDED, fd));
-                }
-            }
-        }
-        
-        if(removedFiles != null) {
-            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
-                for(FileDesc fd : entry.getValue()) {
-                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
-                }
-            }
-        }
-    }
-    
     /** Notification that the library was cleared, and we need to clean all our views. */
     private void clearAllViews() {
         List<FileView> clearedViews = new ArrayList<FileView>();
@@ -1162,7 +1006,4 @@ class FileViewManagerImpl implements FileViewManager {
             return ret;
         }
     }
-
-    
-    
 }

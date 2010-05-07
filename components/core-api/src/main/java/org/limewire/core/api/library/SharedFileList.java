@@ -11,16 +11,9 @@ public interface SharedFileList extends LocalFileList {
     /** Returns the name of this collection. */
     String getCollectionName();
     
-    /** Sets a new name for this collection. */
-    void setCollectionName(String name);
-    
-    /** Returns true if name changing is allowed for this collection. */
-    boolean isNameChangeAllowed();
-    
     /** Returns true if this is a public share list. */
     boolean isPublic();
     
     /** Returns a unique identifier for this list. */
     int getId();
-
 }

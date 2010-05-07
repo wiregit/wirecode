@@ -22,16 +22,6 @@ class LibraryDataImpl implements LibraryData {
     }
     
     @Override
-    public boolean isProgramManagingAllowed() {
-        return library.isProgramManagingAllowed();
-    }
-
-    @Override
-    public boolean isDirectoryAllowed(File folder) {
-        return library.isDirectoryAllowed(folder);
-    }
-
-    @Override
     public int peekPublicSharedListCount() {
         return library.peekPublicSharedListCount();
     }

@@ -16,8 +16,6 @@ import org.limewire.core.api.library.SharedFileListManager;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEventPublisher;
-import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import com.google.inject.Singleton;
 
@@ -45,16 +43,6 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         initializeMockGnutellaData();
         initializeMockFriendData();
         initializeFriends();
-    }
-
-    @Override
-    public ListEventPublisher getLibraryListEventPublisher() {
-        return allFileList.getModel().getPublisher();
-    }
-
-    @Override
-    public ReadWriteLock getReadWriteLock() {
-        return allFileList.getModel().getReadWriteLock();
     }
 
     private void initializeMockGnutellaData() {
@@ -156,16 +144,6 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         @Override
         public boolean isFileManageable(File f) {
             return true;
-        }
-
-        @Override
-        public boolean isProgramManagingAllowed() {
-            return false;
-        }
-
-        @Override
-        public boolean isDirectoryAllowed(File folder) {
-            return folder.isDirectory();
         }
 
         @Override

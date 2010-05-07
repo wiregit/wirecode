@@ -9,7 +9,7 @@ import org.limewire.util.StringUtils;
 public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileCollection> {
     
     public static enum Type {
-        COLLECTION_ADDED, COLLECTION_REMOVED, FRIEND_ADDED, FRIEND_REMOVED, FRIEND_IDS_CHANGED, NAME_CHANGED;
+        COLLECTION_ADDED, COLLECTION_REMOVED;
     }
     
     private final Type type;
@@ -29,26 +29,6 @@ public class SharedFileCollectionChangeEvent implements SourcedEvent<SharedFileC
         this.newName = null;
     }
     
-    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, String idOrName) {
-        assert type == Type.FRIEND_ADDED || type == Type.FRIEND_REMOVED || type == Type.NAME_CHANGED;
-        this.type = type;
-        this.list = list;
-        this.shareId = type == Type.NAME_CHANGED ? null : idOrName;
-        this.newIds = null;
-        this.oldIds = null;
-        this.newName = type == Type.NAME_CHANGED ? idOrName : null;
-    }
-    
-    public SharedFileCollectionChangeEvent(Type type, SharedFileCollection list, Collection<String> oldIds, Collection<String> newIds) {
-        assert type == Type.FRIEND_IDS_CHANGED;
-        this.type = type;
-        this.list = list;
-        this.shareId = null;
-        this.newIds = newIds;
-        this.oldIds = oldIds;
-        this.newName = null;
-    }
-
     public Type getType() {
         return type;
     }

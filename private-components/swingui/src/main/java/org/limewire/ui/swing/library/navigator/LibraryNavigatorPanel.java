@@ -66,17 +66,7 @@ public class LibraryNavigatorPanel extends JXPanel {
         table.getSelectionModel().addListSelectionListener(listener);
     }
     
-    public int getSelectedRow() {
-        return table.getSelectedRow();
-    }
-    
     public LibraryNavItem getSelectedNavItem() {
         return table.getSelectedItem();
     }
-
-    public int getPrivateListCount() {
-        return table.getPrivateSharedLibraryCount();
-    }
 }
-
-
