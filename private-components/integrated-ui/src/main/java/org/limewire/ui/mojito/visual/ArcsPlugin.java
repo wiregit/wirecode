@@ -2,12 +2,14 @@ package org.limewire.ui.mojito.visual;
 
 import javax.swing.JComponent;
 
-import org.limewire.mojito.Context;
 import org.limewire.mojito.visual.ArcsVisualizer;
+import org.limewire.mojito2.Context;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.ui.swing.plugin.SwingUiPlugin;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.Controller;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 class ArcsPlugin implements SwingUiPlugin {
 
@@ -27,13 +29,23 @@ class ArcsPlugin implements SwingUiPlugin {
             arcsVisualizer = null;
         }
 
-        Context context = (Context) dhtManager.getMojitoDHT();
+        Context context = null;
+        synchronized (dhtManager) {
+            Controller controller 
+                = dhtManager.getController();
+            MojitoDHT dht = controller.getMojitoDHT();
+            if (dht != null) {
+                context = dht.getContext();
+            }
+        }
+        
         if (context == null) {
             return null;
-        } else {
-            arcsVisualizer = new ArcsVisualizer(context, context.getLocalNodeID());
-            return arcsVisualizer;
         }
+        
+        arcsVisualizer = new ArcsVisualizer(
+                context, context.getLocalNodeID());
+        return arcsVisualizer;
     }
 
     @Override
@@ -45,7 +57,7 @@ class ArcsPlugin implements SwingUiPlugin {
 
     @Override
     public void stopPlugin() {
-        if(arcsVisualizer != null) {
+        if (arcsVisualizer != null) {
             arcsVisualizer.stopArcs();
         }
     }
