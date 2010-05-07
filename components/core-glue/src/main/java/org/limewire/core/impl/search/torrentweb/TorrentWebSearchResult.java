@@ -3,6 +3,7 @@ package org.limewire.core.impl.search.torrentweb;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -21,7 +22,11 @@ import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.feature.Feature;
 import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.friend.api.feature.ReferrerFeature;
 import org.limewire.listener.EventListener;
+import org.limewire.util.Base32;
+import org.limewire.util.StringUtils;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.URN;
 
@@ -92,7 +97,7 @@ public class TorrentWebSearchResult implements SearchResult {
         case TORRENT:
             return torrent;
         case REFERRER:
-            return referrer;
+            return getReferrer();
         }
         return null;
     }
@@ -126,6 +131,23 @@ public class TorrentWebSearchResult implements SearchResult {
         return torrentFile;
     }
 
+    private URI getReferrer() {
+        
+        if (referrer != null) {
+            return referrer;
+        }
+        
+        String sha1Base16 = torrent.getSha1();
+        String sha1Base32 = Base32.encode(StringUtils.fromHexString(sha1Base16));
+        String uriString = "http://www.google.com/#q=" + sha1Base16 + "+|+" + sha1Base32;
+        try {
+            return URIUtils.toURI(uriString);
+        } catch (URISyntaxException e) {
+            // Ignore
+        }
+        return null;
+    }
+    
     @Override
     public RemoteHost getSource() {
         return new RemoteHost() {
@@ -160,6 +182,12 @@ public class TorrentWebSearchResult implements SearchResult {
 
                     @Override
                     public Feature getFeature(URI id) {
+                        if (id.equals(ReferrerFeature.ID)) {
+                            URI referrerURI = getReferrer();
+                            if (referrerURI != null) {
+                                return new ReferrerFeature(referrerURI);
+                            }
+                        }
                         return null;
                     }
 
@@ -204,7 +232,22 @@ public class TorrentWebSearchResult implements SearchResult {
 
                             @Override
                             public Network getNetwork() {
-                                return null;
+                                return new Network() {
+                                    @Override
+                                    public String getCanonicalizedLocalID() {
+                                        return "";
+                                    }
+
+                                    @Override
+                                    public String getNetworkName() {
+                                        return "Torrent Web Search";
+                                    }
+
+                                    @Override
+                                    public Type getType() {
+                                        return Network.Type.WEBSEARCH;
+                                    }
+                                };
                             }
 
                             @Override
