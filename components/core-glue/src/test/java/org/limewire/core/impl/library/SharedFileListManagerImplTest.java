@@ -9,8 +9,6 @@ import org.limewire.core.impl.tests.CoreGlueTestUtils;
 import org.limewire.friend.api.Friend;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.inspection.InspectionException;
-import org.limewire.inspection.InspectionUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -46,36 +44,6 @@ public class SharedFileListManagerImplTest extends LimeTestCase {
         injector.getInstance(LifecycleManager.class).shutdown();
     }
     
-    public void testInspections() throws InspectionException{
-        final String friend1 = "friend1";
-        final String friend2 = "friend2";
-        final String friend3 = "friend2";
-        
-        listManager.createNewSharedFileList("List1");
-        listManager.createNewSharedFileList("List2");
-        listManager.createNewSharedFileList("List3");
-        listManager.createNewSharedFileList("List4");
-
-        listManager.getModel().get(1).addFriend(friend1);
-        listManager.getModel().get(2).addFriend(friend1);
-        listManager.getModel().get(3).addFriend(friend1);
-        
-        listManager.getModel().get(1).addFriend(friend2);
-        listManager.getModel().get(2).addFriend(friend2);
-        
-
-        listManager.getModel().get(3).addFriend(friend3);
-
-        //Inspections sometimes return Strings rather than Integers depending on how they are used.  
-        //Using toString() here so they can be evaluated consistently.
-        assertEquals("3", InspectionUtils.inspectValue("org.limewire.core.impl.library.SharedFileListManagerImpl$LazyInspectableContainer,multipleFriendLists", injector, true).toString());
-        assertEquals("3", InspectionUtils.inspectValue("org.limewire.core.impl.library.SharedFileListManagerImpl$LazyInspectableContainer,sharedListCount", injector, true).toString());
-        assertEquals("1", InspectionUtils.inspectValue("org.limewire.core.impl.library.SharedFileListManagerImpl$LazyInspectableContainer,unSharedListCount", injector, true).toString());
-        assertEquals("4", InspectionUtils.inspectValue("org.limewire.core.impl.library.SharedFileListManagerImpl$LazyInspectableContainer,numberOfLists", injector, true).toString());
-        assertEquals("2", InspectionUtils.inspectValue("org.limewire.core.impl.library.SharedFileListManagerImpl$LazyInspectableContainer,numberOfPeopleInPrivateList", injector, true).toString());
-                  
-    }
-    
     public void testContainsDefaultCollection() throws Exception {
         assertEquals(listManager.getModel().toString(), 1, listManager.getModel().size());
         SharedFileList list = listManager.getModel().get(0);
@@ -106,20 +74,6 @@ public class SharedFileListManagerImplTest extends LimeTestCase {
         assertEquals("List", collection.getName());
         
         assertTrue(list.isNameChangeAllowed());
-        
-        list.addFriend("friend1");
-        assertEquals(1, list.getFriendIds().size());
-        assertEquals("friend1", list.getFriendIds().get(0));
-        assertEquals(1, collection.getFriendList().size());
-        assertEquals("friend1", collection.getFriendList().get(0));
-        
-        list.removeFriend("not a friend");
-        assertEquals(1, list.getFriendIds().size());
-        assertEquals(1, collection.getFriendList().size());
-        
-        list.removeFriend("friend1");
-        assertEquals(0, list.getFriendIds().size());
-        assertEquals(0, collection.getFriendList().size());    
     }
     
     public void testNameChangeTriggersEvent() {

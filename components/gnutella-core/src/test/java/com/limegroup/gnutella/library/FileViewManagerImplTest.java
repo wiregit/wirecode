@@ -2,8 +2,6 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +26,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     private SharedFileCollection c1;
     private SharedFileCollection c2;
     private String id1 = "id1";
-    private String id2 = "id2";
     
     @Override
     protected void setUp() throws Exception {
@@ -47,7 +44,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     
     public void testCreateAfterExists() {
         c1.add(f1);
-        c1.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
@@ -56,38 +52,7 @@ public class FileViewManagerImplTest extends LimeTestCase {
         l.assertNoChanges();
     }
     
-    public void testFriendAdded() {
-        c1.add(f1);
-        FileView v = viewManager.getFileViewForId(id1);
-        Listener l = new Listener();
-        v.addListener(l);
-        c1.addFriend(id1);        
-        assertEquals(1, v.size());
-        assertEquals(fd1, v.iterator().next());
-        FileViewChangeEvent e = l.getEventAndClear();
-        assertEquals(fd1, e.getFileDesc());
-        assertEquals(f1, e.getFile());
-        assertEquals(Type.FILE_ADDED, e.getType());
-    }
-    
-    public void testFriendRemoved() {
-        c1.add(f1);
-        c1.addFriend(id1);
-        FileView v = viewManager.getFileViewForId(id1);
-        assertEquals(1, v.size());
-        assertEquals(fd1, v.iterator().next());
-        Listener l = new Listener();
-        v.addListener(l);
-        c1.removeFriend(id1);
-        assertEquals(0, v.size());
-        FileViewChangeEvent e = l.getEventAndClear();
-        assertEquals(fd1, e.getFileDesc());
-        assertEquals(f1, e.getFile());
-        assertEquals(Type.FILE_REMOVED, e.getType());
-    }
-
     public void testFileAdded() {
-        c1.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         Listener l = new Listener();
         v.addListener(l);
@@ -104,7 +69,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(0, v.size());
         c1.add(f1);
-        c1.addFriend(id1);
         assertEquals(1, v.size());
         
         Listener l = new Listener();
@@ -124,9 +88,7 @@ public class FileViewManagerImplTest extends LimeTestCase {
         v.addListener(l);        
         c1.add(f1);
         c2.add(f1);
-        c1.addFriend(id1);
         assertEquals(Type.FILE_ADDED, l.getEventAndClear().getType());
-        c2.addFriend(id1);
         l.assertNoChanges();
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next()); 
@@ -139,8 +101,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
         assertEquals(0, v.size());
         c1.add(f1);
         c2.add(f1);
-        c1.addFriend(id1);
-        c2.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(Type.FILE_ADDED, l.getEventAndClear().getType());
         
@@ -155,53 +115,8 @@ public class FileViewManagerImplTest extends LimeTestCase {
         assertEquals(Type.FILE_REMOVED, e.getType());
     }
     
-    public void testMultipleFriends() {
-        FileView v1 = viewManager.getFileViewForId(id1);
-        FileView v2 = viewManager.getFileViewForId(id2);
-        Listener l1 = new Listener();
-        Listener l2 = new Listener();
-        v1.addListener(l1);
-        v2.addListener(l2);
-        
-        c1.add(f1);
-        c1.addFriend(id1);
-        assertEquals(1, v1.size());
-        assertEquals(0, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        assertEquals(Type.FILE_ADDED, l1.getEventAndClear().getType());
-        l2.assertNoChanges();
-        
-        c2.add(f2);
-        c2.addFriend(id2);
-        assertEquals(1, v1.size());
-        assertEquals(1, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        assertEquals(fd2, v2.iterator().next());
-        l1.assertNoChanges();
-        assertEquals(Type.FILE_ADDED, l2.getEventAndClear().getType());
-        
-        c1.addFriend(id2);
-        assertEquals(1, v1.size());
-        assertEquals(2, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        Iterator<FileDesc> v2Iter = v2.iterator();
-        assertEquals(fd1, v2Iter.next());
-        assertEquals(fd2, v2Iter.next());
-        l1.assertNoChanges();
-        assertEquals(Type.FILE_ADDED, l2.getEventAndClear().getType());        
-        
-        c2.removeFriend(id2);
-        assertEquals(1, v1.size());
-        assertEquals(1, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        assertEquals(fd1, v2.iterator().next());      
-        l1.assertNoChanges();
-        assertEquals(Type.FILE_REMOVED, l2.getEventAndClear().getType());        
-    }
-    
     public void testClearLibrary() {
         c1.add(f1);
-        c1.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
@@ -215,7 +130,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     
     public void testClearCollection() {
         c1.add(f1);
-        c1.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
@@ -230,10 +144,8 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testClearCollectionIfDuplicated() {
         c1.add(f1);
         c1.add(f2);
-        c1.addFriend(id1);
         
         c2.add(f1);
-        c2.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(2, v.size());
         Iterator<FileDesc> vIter = v.iterator();
@@ -253,7 +165,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     
     public void testCollectionDeleted() {
         c1.add(f1);
-        c1.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
@@ -268,10 +179,8 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testCollectionDeletedIfDuplicated() {
         c1.add(f1);
         c1.add(f2);
-        c1.addFriend(id1);
         
         c2.add(f1);
-        c2.addFriend(id1);
         FileView v = viewManager.getFileViewForId(id1);
         assertEquals(2, v.size());
         Iterator<FileDesc> vIter = v.iterator();
@@ -289,52 +198,9 @@ public class FileViewManagerImplTest extends LimeTestCase {
         assertEquals(Type.FILE_REMOVED, e.getType());
     }
     
-    public void testFriendsSet() {
-        c1.add(f1);
-        
-        FileView v1 = viewManager.getFileViewForId(id1);
-        FileView v2 = viewManager.getFileViewForId(id2);
-        assertEquals(0, v1.size());
-        assertEquals(0, v2.size());
-        
-        Listener l1 = new Listener();
-        v1.addListener(l1);
-        Listener l2 = new Listener();
-        v2.addListener(l2);
-        
-        c1.setFriendList(Arrays.asList(id1));
-        assertEquals(1, v1.size());
-        assertEquals(0, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        assertEquals(Type.FILE_ADDED, l1.getEventAndClear().getType());
-        l2.assertNoChanges();
-        
-        c1.setFriendList(Arrays.asList(id1, id2));
-        assertEquals(1, v1.size());
-        assertEquals(1, v2.size());
-        assertEquals(fd1, v1.iterator().next());
-        assertEquals(fd1, v2.iterator().next());
-        l1.assertNoChanges();
-        assertEquals(Type.FILE_ADDED, l2.getEventAndClear().getType());
-
-        c1.setFriendList(Arrays.asList(id2));
-        assertEquals(0, v1.size());
-        assertEquals(1, v2.size());
-        assertEquals(fd1, v2.iterator().next());
-        assertEquals(Type.FILE_REMOVED, l1.getEventAndClear().getType());
-        l2.assertNoChanges();
-        
-        c1.setFriendList(Collections.<String>emptyList());
-        assertEquals(0, v1.size());
-        assertEquals(0, v2.size());
-        l1.assertNoChanges();
-        assertEquals(Type.FILE_REMOVED, l2.getEventAndClear().getType());
-    }
-    
     public void testFileChanged() throws Exception {
         FileView v = viewManager.getFileViewForId(id1);
         c1.add(f1);
-        c1.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
 
@@ -371,9 +237,7 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testFileChangedWithDuplicates() throws Exception {
         FileView v = viewManager.getFileViewForId(id1);
         c1.add(f1);
-        c1.addFriend(id1);
         c2.add(f1);
-        c2.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
 
@@ -426,7 +290,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
         try {
             FileManagerTestUtils.assertAdds(c1, copy1);
             copyFd1 = library.getFileDesc(copy1);
-            c1.addFriend(id1);
             assertEquals(1, v.size());
             assertEquals(copyFd1, v.iterator().next());
         } finally {
@@ -446,7 +309,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testFileRenamed() throws Exception {
         FileView v = viewManager.getFileViewForId(id1);
         c1.add(f1);
-        c1.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
 
@@ -475,10 +337,8 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testFileRenamesWithDuplicates() throws Exception {
         FileView v = viewManager.getFileViewForId(id1);
         c1.add(f1);
-        c1.addFriend(id1);
 
         c2.add(f1);
-        c2.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
 
@@ -508,7 +368,6 @@ public class FileViewManagerImplTest extends LimeTestCase {
     public void testRenameFails() throws Exception {
         FileView v = viewManager.getFileViewForId(id1);
         c1.add(f1);
-        c1.addFriend(id1);
         assertEquals(1, v.size());
         assertEquals(fd1, v.iterator().next());
 
@@ -560,4 +419,3 @@ public class FileViewManagerImplTest extends LimeTestCase {
         }
     }
 }
-

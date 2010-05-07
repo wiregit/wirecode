@@ -1,7 +1,5 @@
 package org.limewire.core.api.library;
 
-import java.util.List;
-
 import ca.odell.glazedlists.EventList;
 
 /** The core API analog to {@link com.limegroup.gnutella.library.SharedFileCollection}. */
@@ -9,15 +7,6 @@ public interface SharedFileList extends LocalFileList {
     
     /** Returns all friend IDs this list is shared with. */
     EventList<String> getFriendIds();
-    
-    /** Adds a new friend id to share this list with. */
-    void addFriend(String friendId);
-    
-    /** Removes a friend id from the list of friends this is shared with. */
-    void removeFriend(String friendId);
-    
-    /** Sets the current friend share list. */
-    void setFriendList(List<String> friendIdList);
     
     /** Returns the name of this collection. */
     String getCollectionName();

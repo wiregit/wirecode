@@ -27,21 +27,8 @@ public class GnutellaFileCollectionStub extends AbstractFileCollectionStub imple
     }
     
     @Override
-    public void addFriend(String id) {
-    }
-    
-    @Override
     public List<String> getFriendList() {
         return Collections.emptyList();
-    }
-    
-    @Override
-    public boolean removeFriend(String id) {
-        return false;
-    }
-    
-    @Override
-    public void setFriendList(List<String> ids) {
     }
     
     @Override

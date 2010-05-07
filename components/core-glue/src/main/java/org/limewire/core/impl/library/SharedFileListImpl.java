@@ -1,7 +1,6 @@
 package org.limewire.core.impl.library;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
@@ -46,11 +45,6 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     }
 
     @Override
-    public void addFriend(String friendId) {
-        coreCollection.addFriend(friendId);
-    }
-
-    @Override
     public EventList<String> getFriendIds() {
         return readOnlyFriendList;
     }
@@ -68,16 +62,6 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     @Override
     public boolean isNameChangeAllowed() {
         return coreCollection.getId() != 0; // TODO: Do better.
-    }
-
-    @Override
-    public void removeFriend(String friendId) {
-        coreCollection.removeFriend(friendId);
-    }
-    
-    @Override
-    public void setFriendList(List<String> friendIdList) {
-        coreCollection.setFriendList(friendIdList);
     }
 
     @Override

@@ -14,21 +14,8 @@ public interface SharedFileCollection extends FileCollection {
     /** Returns the current list of people this collection is shared with. */
     List<String> getFriendList();
     
-    /** Adds a new person to the list of people the collection is shared with. */
-    void addFriend(String friendId);
-    
-    /**
-     * Removes a person from the list of people this collection is shared with.
-     * Returns true if the person was removed.
-     */
-    boolean removeFriend(String friendId);
-    
-    /** Sets the new list of people this collection should be shared with. */
-    void setFriendList(List<String> friendIds);
-
     /**
      * Returns true if this is a public collection. 
      */
     boolean isPublic();
-
 }

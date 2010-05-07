@@ -26,9 +26,9 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
 
     private FileListAdapter allFileList;
 
-    private FriendFileListAdapter gnutellaList;
+    private FileListAdapter gnutellaList;
 
-    private FriendFileListAdapter friendList;
+    private FileListAdapter friendList;
 
     private LibraryData libraryData;
 
@@ -36,8 +36,8 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
 
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
-        gnutellaList = new FriendFileListAdapter();
-        friendList = new FriendFileListAdapter();
+        gnutellaList = new FileListAdapter();
+        friendList = new FileListAdapter();
         libraryData = new LibraryDataAdapter();
 
         friendMap = new HashMap<String, LocalFileList>();

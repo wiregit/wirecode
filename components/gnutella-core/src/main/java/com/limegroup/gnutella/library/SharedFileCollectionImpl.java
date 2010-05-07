@@ -25,7 +25,6 @@ import com.limegroup.gnutella.hashing.AudioHashingUtils;
 import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent.Type;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
-
 /**
  * A collection of FileDescs containing files that may be shared with one or more people.
  */
@@ -79,23 +78,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
     }
     
     @Override
-    public void addFriend(String id) {
-        if(data.get().addFriendToCollection(collectionId, id)) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_ADDED, this, id));
-        }
-    }
-    
-    @Override
-    public boolean removeFriend(String id) {
-        if(data.get().removeFriendFromCollection(collectionId, id)) {
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_REMOVED, this, id));
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-    @Override
     public List<String> getFriendList() {
         List<String> cached = data.get().getFriendsForCollection(collectionId);
         if(defaultFriendIds.isEmpty()) {
@@ -107,14 +89,6 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
             friends.addAll(defaultFriendIds);
             friends.addAll(cached);
             return friends;
-        }
-    }
-    
-    @Override
-    public void setFriendList(List<String> ids) {
-        List<String> oldIds = data.get().setFriendsForCollection(collectionId, ids);
-        if(oldIds != null) { // if it changed, broadcast the change.
-            sharedBroadcaster.broadcast(new SharedFileCollectionChangeEvent(Type.FRIEND_IDS_CHANGED, this, oldIds, ids));
         }
     }
     
