@@ -23,7 +23,6 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -35,7 +34,6 @@ import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.library.SharedFileCollection;
-import com.limegroup.gnutella.library.SharedFileCollectionChangeEvent;
 import com.limegroup.gnutella.library.SharedFiles;
 
 @EagerSingleton
@@ -175,7 +173,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         this.allSharedFilesView = allSharedFilesView;
     }
     
-    @Inject void register(ListenerSupport<SharedFileCollectionChangeEvent> support) {
+    @Inject void register() {
         allSharedFilesView.addListener(new EventListener<FileViewChangeEvent>() {
             public void handleEvent(FileViewChangeEvent event) {
                 switch(event.getType()) {
@@ -187,49 +185,13 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                 }
             }
         });
-        
-        for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
-            collectionAdded(collection);
-        }
-        
-        support.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
-            @Override
-            public void handleEvent(SharedFileCollectionChangeEvent event) {
-                switch(event.getType()) { 
-                case COLLECTION_ADDED:
-                    collectionAdded(event.getSource());
-                    break;
-                case COLLECTION_REMOVED:
-                    collectionRemoved(event.getSource());
-                    break;
-                }
-            }
-        });
+        collectionAdded(collectionManager.getSharedFileCollection());
     }
 
     private void collectionAdded(SharedFileCollection collection) {
         SharedFileListImpl listImpl = new SharedFileListImpl(coreLocalFileItemFactory, collection);
         listImpl.friendsSet(collection.getFriendList());
         sharedLists.add(listImpl);
-    }
-    
-    private void collectionRemoved(SharedFileCollection collection) {
-        sharedLists.remove(getListForCollection(collection));
-    }
-    
-    private SharedFileListImpl getListForCollection(SharedFileCollection collection) {
-       sharedLists.getReadWriteLock().readLock().lock();
-        try {
-            for (SharedFileList list : sharedLists) {
-                SharedFileListImpl impl = (SharedFileListImpl) list;
-                if (impl.getCoreCollection() == collection) {
-                    return impl;
-                }
-            }
-            return null;
-        } finally {
-            sharedLists.getReadWriteLock().readLock().unlock();
-        }
     }
     
     @Override

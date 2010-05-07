@@ -48,7 +48,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
  * operations.
  */
 @EagerSingleton
-class FileViewManagerImpl implements FileViewManager {
+class FileViewManagerImpl implements ListenerSupport<FileViewChangeEvent> {
     
     private static final Log LOG = LogFactory.getLog(FileViewManagerImpl.class);
     
@@ -84,12 +84,9 @@ class FileViewManagerImpl implements FileViewManager {
     }
     
     @Inject void register(ListenerSupport<FileViewChangeEvent> viewListeners,
-                          ListenerSupport<SharedFileCollectionChangeEvent> collectionListeners,
                           FileCollectionManager collectionManager,
                           ListenerSupport<FileDescChangeEvent> fileDescListeners) {
-        for(SharedFileCollection collection : collectionManager.getSharedFileCollections()) {
-            collectionAdded(collection);
-        }
+        collectionAdded(collectionManager.getSharedFileCollection());
         
         viewListeners.addListener(new EventListener<FileViewChangeEvent>() {
             @Override
@@ -121,22 +118,7 @@ class FileViewManagerImpl implements FileViewManager {
                     }
                 }
             }
-        });
-        
-        collectionListeners.addListener(new EventListener<SharedFileCollectionChangeEvent>() {
-            @Override
-            public void handleEvent(SharedFileCollectionChangeEvent event) {
-                LOG.debugf("Handling event {0}", event);
-                switch(event.getType()) {
-                case COLLECTION_ADDED:
-                    collectionAdded(event.getSource());
-                    break;
-                case COLLECTION_REMOVED:
-                    collectionRemoved(event.getSource());
-                    break;
-                }
-            }
-        });
+        });        
     }
     
     @Override
@@ -215,42 +197,6 @@ class FileViewManagerImpl implements FileViewManager {
         }
     }
     
-    /**
-     * Notification that a collection was removed. This will remove the
-     * collection as a backing view for any {@link MultiFileView}s that were
-     * mapped to by any share ids the collection is shared with.
-     * 
-     * An event will be sent for each {@link FileDesc} that was removed from
-     * each {@link MultiFileView}.
-     */
-    private void collectionRemoved(SharedFileCollection collection) {
-        Map<FileView, List<FileDesc>> removedFiles = null;
-        
-        rwLock.writeLock().lock();
-        try {
-            sharedCollections.remove(collection);
-            
-            List<FileDesc> removed = allSharedFilesView.removeBackingView(collection);
-            removedFiles = addToOrCreateMapOfList(removedFiles, allSharedFilesView, removed);
-            
-            for(MultiFileView view : fileViewsPerFriend.values()) {
-                removed = view.removeBackingView(collection);
-                LOG.debugf("Removed collection {0} from view {1}, added {2}", collection, view, removed);
-                removedFiles = addToOrCreateMapOfList(removedFiles, view, removed);
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }   
-        
-        if(removedFiles != null) {
-            for(Map.Entry<FileView, List<FileDesc>> entry : removedFiles.entrySet()) {
-                for(FileDesc fd : entry.getValue()) {
-                    multicaster.broadcast(new FileViewChangeEvent(entry.getKey(), Type.FILE_REMOVED, fd));
-                }
-            }
-        }
-    }
-        
     /** Notification that the library was cleared, and we need to clean all our views. */
     private void clearAllViews() {
         List<FileView> clearedViews = new ArrayList<FileView>();
@@ -508,8 +454,7 @@ class FileViewManagerImpl implements FileViewManager {
         }
     }
     
-    @Override
-    public FileView getFileViewForId(String id) {
+    private FileView getFileViewForId(String id) {
         MultiFileView view;
         rwLock.readLock().lock();
         try {
@@ -648,21 +593,6 @@ class FileViewManagerImpl implements FileViewManager {
             totalFileSize = 0;
         }
         
-        /**
-         * Removes a backing {@link FileView}. Not every FileDesc in the backing
-         * view will necessarily be removed. This is because the FileDesc may exist
-         * in another view that this is backed by.
-         * 
-         * @return A list of {@link FileDesc}s that were removed from this view.
-         */
-        List<FileDesc> removeBackingView(FileView view) {
-            if (backingViews.remove(view)) {
-                return validateItems();
-            } else {
-                return Collections.emptyList();
-            }
-        }
-
         /**
          * Adds a new backing {@link FileView}. Not every FileDesc in the backing
          * view will necessarily be added. This is because some FileDescs may

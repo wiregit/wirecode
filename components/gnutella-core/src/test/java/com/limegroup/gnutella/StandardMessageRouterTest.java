@@ -31,7 +31,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
@@ -219,7 +218,7 @@ public class StandardMessageRouterTest extends LimeTestCase {
                 OnDemandUnicaster onDemandUnicaster, HeadPongFactory headPongFactory,
                 PingReplyFactory pingReplyFactory, ConnectionManager connectionManager,
                 @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
-                FileViewManager fileManager, ContentManager contentManager, DHTManager dhtManager,
+                ContentManager contentManager, DHTManager dhtManager,
                 UploadManager uploadManager, DownloadManager downloadManager,
                 UDPService udpService, Provider<SearchResultHandler> searchResultHandler,
                 SocketsManager socketsManager, HostCatcher hostCatcher,
@@ -243,7 +242,7 @@ public class StandardMessageRouterTest extends LimeTestCase {
                 URNFilter urnFilter, SpamServices spamServices,
                 ActivationManager activationManager, QuerySettings querySettings) {
             super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory,
-                    pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager,
+                    pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster,
                     contentManager, dhtManager, uploadManager, downloadManager, udpService,
                     searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages,
                     messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices,

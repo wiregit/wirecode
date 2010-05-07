@@ -9,7 +9,7 @@ public class LibraryStubModule extends AbstractModule {
     protected void configure() {
         bind(FileManager.class).to(FileManagerStub.class);
         bind(FileCollectionManager.class).to(FileManagerStub.class);
-        bind(FileViewManager.class).to(FileManagerStub.class);
+        bind(FileManagerStub.class);
     }
     
     @Provides Library library(FileManagerStub stub) {

@@ -37,8 +37,6 @@ class FileManagerImpl implements FileManager, Service {
     private final Provider<LibraryFileData> fileData;
     private final Provider<LibraryConverter> libraryConverter;
     
-    private final FileCollectionManagerImpl fileCollectionManagerImpl;
-
     /**
      * Creates a new <tt>FileManager</tt> instance.
      */
@@ -46,12 +44,10 @@ class FileManagerImpl implements FileManager, Service {
     public FileManagerImpl(LibraryImpl managedFileList,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<LibraryFileData> libraryFileData,
-            Provider<LibraryConverter> libraryConverter,
-            FileCollectionManagerImpl collectionManager) {        
+            Provider<LibraryConverter> libraryConverter) {        
         this.backgroundExecutor = backgroundExecutor;
         this.library = managedFileList;
         this.fileData = libraryFileData;
-        this.fileCollectionManagerImpl = collectionManager;
         this.libraryConverter = libraryConverter;
     }
 
@@ -78,7 +74,6 @@ class FileManagerImpl implements FileManager, Service {
             converter.convert(fileData.get());
         }
         
-        fileCollectionManagerImpl.loadStoredCollections();
         library.loadManagedFiles();
         
         synchronized (this) {

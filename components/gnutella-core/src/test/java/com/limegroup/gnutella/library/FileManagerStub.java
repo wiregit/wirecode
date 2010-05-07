@@ -1,15 +1,13 @@
 package com.limegroup.gnutella.library;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FileManagerStub implements FileManager, FileCollectionManager, FileViewManager {
+public class FileManagerStub implements FileManager, FileCollectionManager, ListenerSupport<FileViewChangeEvent> {
 
     private LibraryStub managedStub;
     private IncompleteFileCollectionStub incompleteStub;
@@ -33,32 +31,12 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
     LibraryStub getLibrary() {
         return managedStub;
     }   
-
-    @Override
-    public SharedFileCollection createNewCollection(String name) {
-        throw new UnsupportedOperationException("not supported");
-    }
-    
-    @Override
-    public SharedFileCollection getCollectionById(int collectionId) {
-        throw new UnsupportedOperationException("not supported");
-    }
-    
-    @Override
-    public void removeCollectionById(int collectionId) {
-        throw new UnsupportedOperationException("not supported");
-    }
     
     @Override
     public void start() {}
     
     @Override
     public void stop() {}
-
-    @Override
-    public FileView getFileViewForId(String id) {
-        throw new UnsupportedOperationException();
-    }
 
     FileView getGnutellaFileView() {
         return gnutellaStub;
@@ -69,8 +47,8 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
     }
 
     @Override
-    public List<SharedFileCollection> getSharedFileCollections() {
-        return Collections.emptyList();
+    public SharedFileCollection getSharedFileCollection() {
+        return gnutellaStub;
     }
 
     @Override
@@ -80,8 +58,5 @@ public class FileManagerStub implements FileManager, FileCollectionManager, File
     @Override
     public boolean removeListener(EventListener<FileViewChangeEvent> listener) {
         return false;
-    }
-    
-    
+    }    
 }
-

@@ -70,7 +70,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
@@ -308,7 +307,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final ConnectionManager connectionManager;
     protected final ReplyHandler forMeReplyHandler;
     protected final QueryUnicaster queryUnicaster;
-    protected final FileViewManager fileManager;
     protected final ContentManager contentManager;
     protected final DHTManager dhtManager;
     protected final UploadManager uploadManager;
@@ -366,7 +364,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             ConnectionManager connectionManager,
             @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler,
             QueryUnicaster queryUnicaster,
-            FileViewManager fileManager,
             ContentManager contentManager,
             DHTManager dhtManager,
             UploadManager uploadManager,
@@ -411,7 +408,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.connectionManager = connectionManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.queryUnicaster = queryUnicaster;
-        this.fileManager = fileManager;
         this.contentManager = contentManager;
         this.dhtManager = dhtManager;
         this.uploadManager = uploadManager;

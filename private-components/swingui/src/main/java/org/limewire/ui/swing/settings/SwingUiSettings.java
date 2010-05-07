@@ -104,14 +104,14 @@ public final class SwingUiSettings extends LimeProps {
      */
     @InspectionPoint(value = "application width", category = DataCategory.USAGE)
     public static final IntSetting APP_WIDTH =
-        FACTORY.createIntSetting("APP_WIDTH_V5", 1024);
+        FACTORY.createIntSetting("APP_WIDTH_V5", 900);
 
     /**
      * The height that the application should be.
      */
     @InspectionPoint(value = "application height", category = DataCategory.USAGE)
     public static final IntSetting APP_HEIGHT =
-        FACTORY.createIntSetting("APP_HEIGHT_V5", 768);
+        FACTORY.createIntSetting("APP_HEIGHT_V5", 600);
 
     /**
      * The x position of the window for the next time the application

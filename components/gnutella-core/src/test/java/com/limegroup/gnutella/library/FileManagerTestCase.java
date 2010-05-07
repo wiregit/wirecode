@@ -43,7 +43,6 @@ public abstract class FileManagerTestCase extends LimeTestCase {
     // protected so that subclasses can
     // use these variables as well.
     @Inject protected Library library;
-    @Inject protected FileViewManager fileViewManager;
     @Inject @GnutellaFiles protected FileView gnutellaFileView;
     @Inject protected QRPUpdater qrpUpdater = null;
     protected Object loaded = new Object();

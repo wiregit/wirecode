@@ -34,7 +34,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.library.FileViewManager;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
@@ -105,7 +104,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
             HeadPongFactory headPongFactory, PingReplyFactory pingReplyFactory,
             ConnectionManager connectionManager, @Named("forMeReplyHandler")
             ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
-            FileViewManager fileManager, ContentManager contentManager,
+            ContentManager contentManager,
             DHTManager dhtManager, UploadManager uploadManager,
             DownloadManager downloadManager, UDPService udpService,
             Provider<SearchResultHandler> searchResultHandler,
@@ -140,7 +139,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
-                fileManager, contentManager, dhtManager, uploadManager,
+                contentManager, dhtManager, uploadManager,
                 downloadManager, udpService, searchResultHandler,
                 socketsManager, hostCatcher, queryReplyFactory, staticMessages,
                 messageDispatcher, multicastService, queryDispatcher,

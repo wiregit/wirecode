@@ -30,7 +30,7 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(CreationTimeCache.class);        
         
-        bind(FileViewManager.class).to(FileViewManagerImpl.class);
+        bind(FileViewManagerImpl.class);
         bind(FileCollectionManager.class).to(FileCollectionManagerImpl.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
@@ -46,11 +46,6 @@ public class LimeWireLibraryModule extends AbstractModule {
             new SourcedEventMulticasterImpl<FileViewChangeEvent, FileView>(context);
         bind(new TypeLiteral<SourcedEventMulticaster<FileViewChangeEvent, FileView>>(){}).toInstance(allFileCollectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<FileViewChangeEvent>>(){}).toInstance(allFileCollectionMulticaster);
-        
-        EventMulticaster<SharedFileCollectionChangeEvent> sharedAllFileCollectionMulticaster =
-            new EventMulticasterImpl<SharedFileCollectionChangeEvent>(context);
-        bind(new TypeLiteral<EventBroadcaster<SharedFileCollectionChangeEvent>>(){}).toInstance(sharedAllFileCollectionMulticaster);
-        bind(new TypeLiteral<ListenerSupport<SharedFileCollectionChangeEvent>>(){}).toInstance(sharedAllFileCollectionMulticaster);
         
         EventMulticaster<LibraryStatusEvent> managedListMulticaster =
             new EventMulticasterImpl<LibraryStatusEvent>();
@@ -82,7 +77,7 @@ public class LimeWireLibraryModule extends AbstractModule {
     }
    
     @Provides @GnutellaFiles FileCollection gnetFileCollection(FileCollectionManagerImpl manager) {
-        return manager.getGnutellaCollection();
+        return manager.getSharedFileCollection();
     }
 
     @Provides @GnutellaFiles FileView gnetFileView(FileViewManagerImpl manager) {
