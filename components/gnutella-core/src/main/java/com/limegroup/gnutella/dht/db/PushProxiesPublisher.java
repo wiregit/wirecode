@@ -23,9 +23,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 /**
  * The PushProxiesPublisher publishes Push Proxy information for 

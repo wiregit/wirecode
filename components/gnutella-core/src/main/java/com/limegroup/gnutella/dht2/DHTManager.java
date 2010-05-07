@@ -2,18 +2,28 @@ package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.lifecycle.Service;
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.util.EventUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -26,6 +36,8 @@ import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.filters.IPFilter;
 
 @Singleton
@@ -134,6 +146,12 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
             return null;
         }
     }
+    
+    /**
+     * List of event listeners for ConnectionLifeCycleEvents.
+     */
+    private final List<DHTEventListener> listeners 
+        = new CopyOnWriteArrayList<DHTEventListener>();
     
     private final NetworkManager networkManager;
     
@@ -296,6 +314,37 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         } else {
             
             controller.handleConnectionLifecycleEvent(evt);
+        }
+    }
+    
+    public synchronized DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return controller.put(key, value);
+    }
+    
+    public synchronized DHTFuture<ValueEntity> get(EntityKey key) {
+        return controller.get(key);
+    }
+    
+    public void addEventListener(DHTEventListener listener) {
+        listeners.add(Objects.nonNull(listener, "listener"));
+    }
+    
+    public void removeEventListener(DHTEventListener listener) {
+        listeners.remove(listener);
+    }
+    
+    void dispatchEvent(final DHTEvent evt) {
+        if (!listeners.isEmpty()) {
+            Runnable event = new Runnable() {
+                @Override
+                public void run() {
+                    for (DHTEventListener l : listeners) {
+                        l.handleDHTEvent(evt);
+                    }
+                }
+            };
+            
+            EventUtils.fireEvent(event);
         }
     }
 }

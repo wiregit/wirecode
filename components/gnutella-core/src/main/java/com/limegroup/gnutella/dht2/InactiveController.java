@@ -1,5 +1,13 @@
 package com.limegroup.gnutella.dht2;
 
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.storage.DHTValue;
+
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
@@ -31,5 +39,15 @@ public class InactiveController extends Controller {
 
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
+
+    @Override
+    public DHTFuture<ValueEntity> get(EntityKey key) {
+        return new DHTValueFuture<ValueEntity>(new UnsupportedOperationException());
+    }
+
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
     }
 }

@@ -13,7 +13,7 @@ import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
 
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 /**
  * An abstract implementation of DHTFutureAdapter to handle AltLocValues

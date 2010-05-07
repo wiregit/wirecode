@@ -5,6 +5,13 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -38,6 +45,16 @@ class PassiveController extends Controller {
 
     @Override
     public void close() throws IOException {
+    }
+    
+    @Override
+    public DHTFuture<ValueEntity> get(EntityKey key) {
+        return new DHTValueFuture<ValueEntity>(new UnsupportedOperationException());
+    }
+
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
     }
     
     @Override

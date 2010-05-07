@@ -21,8 +21,12 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
@@ -31,6 +35,7 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
 import org.limewire.mojito2.util.HostFilter;
@@ -247,6 +252,16 @@ class ActiveController extends AbstractController {
     
     private void addPassiveNode(SocketAddress address) {
         
+    }
+    
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return dht.put(key, value);
+    }
+    
+    @Override
+    public DHTFuture<ValueEntity> get(EntityKey key) {
+        return dht.get(key);
     }
     
     private void write() {

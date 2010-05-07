@@ -22,8 +22,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 /**
  * Searches for {@link PushEndpoint push endpoints} in the DHT.

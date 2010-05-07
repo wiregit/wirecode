@@ -29,8 +29,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 /**
  * Default implementation of {@link AltLocFinder}, uses the DHT to find
