@@ -28,24 +28,19 @@ public class LibraryNavigatorPanel extends JXPanel {
     
     @Inject
     public LibraryNavigatorPanel(LibraryNavigatorTable table, LibraryNavTableRenderer renderer,
-            LibraryNavTableEditor editor,
             SharedFileListManager sharedFileListManager, GhostDragGlassPane ghostGlassPane) {
-        super(new MigLayout("insets 0, gap 0, fillx", "[150!]", ""));
+        super(new MigLayout("insets 0, gap 0, fillx", "[100!]", ""));
         
         this.table = table;
+        table.getColumnModel().getColumn(0).setCellRenderer(renderer);
         
         GuiUtils.assignResources(this);
-        setBackground(backgroundColor);
-        
+        setBackground(backgroundColor);        
         setBorder(BorderFactory.createMatteBorder(0,0,0,1, borderColor));
         
         JPanel panel = new JPanel(new MigLayout("fill, gap 0, insets 0"));
         panel.setBackground(backgroundColor);
-        panel.add(table, "grow, wrap");
-        
-        table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-        table.getColumnModel().getColumn(0).setCellEditor(editor);
-        
+        panel.add(table, "grow, wrap");        
         add(panel, "growx, growy, wrap");
 
         initData();
