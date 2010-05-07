@@ -118,9 +118,7 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
          * Returns the VM capability name.
          */
         public byte[] getCapabilityName() {
-            byte[] copy = new byte[capabilityName.length];
-            System.arraycopy(capabilityName, 0, copy, 0, copy.length);
-            return copy;
+            return capabilityName.clone();
         }
         
         private static final DHTMode[] MODES;
