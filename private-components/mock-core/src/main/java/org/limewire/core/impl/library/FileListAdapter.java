@@ -15,7 +15,7 @@ import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.RemoteLibraryState;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -50,8 +50,8 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
     
     @Override
-    public RemoteLibraryState getState() {
-        return RemoteLibraryState.LOADED;
+    public LibraryState getState() {
+        return LibraryState.LOADED;
     }
     
     @Override

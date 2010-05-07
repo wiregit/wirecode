@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;
-import org.limewire.core.api.library.RemoteLibraryState;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.library.Library;
 class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     private final Library managedList;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
-    private volatile RemoteLibraryState libraryState = RemoteLibraryState.LOADING;
+    private volatile LibraryState libraryState = LibraryState.LOADING;
     
     @Inject
     LibraryFileListImpl(Library managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
@@ -37,12 +37,12 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
         this.managedList.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                RemoteLibraryState oldState = libraryState;
+                LibraryState oldState = libraryState;
                 if(evt.getPropertyName().equals("hasPending")) {
                     if(Boolean.TRUE.equals(evt.getNewValue())) {
-                        libraryState = RemoteLibraryState.LOADING;
+                        libraryState = LibraryState.LOADING;
                     } else {
-                        libraryState = RemoteLibraryState.LOADED;
+                        libraryState = LibraryState.LOADED;
                     }
                 }
                 changeSupport.firePropertyChange("state", oldState, libraryState);
@@ -84,7 +84,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
 
     @Override
-    public RemoteLibraryState getState() {
+    public LibraryState getState() {
         return libraryState;
     }
 
