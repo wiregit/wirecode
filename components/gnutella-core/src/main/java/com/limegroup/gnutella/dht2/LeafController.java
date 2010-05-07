@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.StoreEntity;
@@ -19,6 +20,11 @@ class LeafController extends Controller {
         super(DHTMode.PASSIVE_LEAF);
     }
 
+    @Override
+    public MojitoDHT getMojitoDHT() {
+        return null;
+    }
+    
     @Override
     public boolean isRunning() {
         return false;

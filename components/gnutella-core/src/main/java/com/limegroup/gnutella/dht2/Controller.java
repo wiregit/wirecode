@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
@@ -13,7 +14,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-abstract class Controller implements Closeable, ConnectionLifecycleListener {
+public abstract class Controller implements Closeable, ConnectionLifecycleListener {
 
     private final DHTMode mode;
     
@@ -28,6 +29,8 @@ abstract class Controller implements Closeable, ConnectionLifecycleListener {
     public boolean isMode(DHTMode other) {
         return mode == other;
     }
+    
+    public abstract MojitoDHT getMojitoDHT();
     
     public abstract boolean isRunning();
     

@@ -108,6 +108,11 @@ class ActiveController extends AbstractController {
         contactPusher = new ContactPusher(connectionManager);
     }
     
+    @Override
+    public MojitoDHT getMojitoDHT() {
+        return dht;
+    }
+    
     private Contact[] init(Context context) throws IOException {
         LocalContact contact = context.getLocalNode();
         contact.setVendor(DHTManager.VENDOR);

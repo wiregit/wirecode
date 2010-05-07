@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.StoreEntity;
@@ -27,6 +28,11 @@ class PassiveController extends Controller {
     
     public PassiveController() {
         super(DHTMode.PASSIVE);
+    }
+    
+    @Override
+    public MojitoDHT getMojitoDHT() {
+        return null;
     }
 
     @Override

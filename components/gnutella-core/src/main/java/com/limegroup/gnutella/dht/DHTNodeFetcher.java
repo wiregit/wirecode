@@ -27,7 +27,7 @@ import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -135,7 +135,8 @@ public class DHTNodeFetcher {
         //node we can exit the loop.
         boolean haveActive = false;
         for(ExtendedEndpoint ep : dhtHosts) {
-            if (!DHTMode.ACTIVE.equals(ep.getDHTMode())) {
+            
+            if (DHTMode.ACTIVE != ep.getDHTMode()) {
                 break;
             }
             

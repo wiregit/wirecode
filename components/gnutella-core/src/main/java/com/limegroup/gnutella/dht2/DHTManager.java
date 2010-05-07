@@ -263,6 +263,10 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         open = false;
         stop();
     }
+    
+    public synchronized Controller getController() {
+        return controller;
+    }
 
     public synchronized boolean isRunning() {
         return controller.isRunning();
