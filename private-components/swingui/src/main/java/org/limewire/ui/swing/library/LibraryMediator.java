@@ -98,22 +98,6 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
         item.select();
     }
     
-    /**
-     * Selects the specified SharedFileList in the library nav and starts editing on its name.
-     * @param sharedFileList can not be the public shared list
-     */
-    public void selectAndRenameSharedList(final SharedFileList sharedFileList) {
-        assert(!sharedFileList.isPublic());
-        showLibrary();
-        //allow library to show before selecting and editing or the list won't display properly
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                getComponent().editSharedListName(sharedFileList);
-            }
-        });
-    }
-
     public void selectInLibrary(final URN urn) {
         NavItem item = navigatorProvider.get().getNavItem(NavCategory.LIBRARY, NAME);
         item.select();

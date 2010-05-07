@@ -1,7 +1,5 @@
 package org.limewire.core.impl.library;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import junit.framework.Test;
 
 import org.limewire.core.api.library.SharedFileList;
@@ -10,21 +8,14 @@ import org.limewire.friend.api.Friend;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.library.FileCollectionManager;
-import com.limegroup.gnutella.library.SharedFileCollection;
 
 public class SharedFileListManagerImplTest extends LimeTestCase {
     
     @Inject private Injector injector;
     @Inject private SharedFileListManagerImpl listManager;
-    @Inject private FileCollectionManager collectionManager;
 
     public SharedFileListManagerImplTest(String name) {
         super(name);
@@ -53,56 +44,4 @@ public class SharedFileListManagerImplTest extends LimeTestCase {
         assertEquals("Public Shared", list.getCollectionName());
         assertFalse(list.isNameChangeAllowed());
     }
-    
-    public void testCreatingAndModifyingList() {
-        assertEquals(1, collectionManager.getSharedFileCollections().size());
-        
-        listManager.createNewSharedFileList("Test List");
-        assertEquals(2, collectionManager.getSharedFileCollections().size());
-        assertEquals(2, listManager.getModel().size());
-        
-        SharedFileList list = listManager.getModel().get(1);
-        assertEquals("Test List", list.getCollectionName());
-        assertEquals(0, list.getFriendIds().size());
-        
-        SharedFileCollection collection = collectionManager.getSharedFileCollections().get(1);
-        assertEquals("Test List", collection.getName());
-        assertEquals(0, collection.getFriendList().size());
-        
-        list.setCollectionName("List");
-        assertEquals("List", list.getCollectionName());
-        assertEquals("List", collection.getName());
-        
-        assertTrue(list.isNameChangeAllowed());
-    }
-    
-    public void testNameChangeTriggersEvent() {
-        EventList<SharedFileList> model = listManager.getModel();
-        listManager.createNewSharedFileList("Test List");
-        assertEquals(2, model.size());
-        
-        final SharedFileList list = model.get(1);
-        final AtomicBoolean triggered = new AtomicBoolean(false);
-        
-        ListEventListener<SharedFileList> listener = new ListEventListener<SharedFileList>() {
-            @Override
-            public void listChanged(ListEvent<SharedFileList> listChanges) {
-                triggered.set(true);
-                assertTrue(listChanges.next());
-                assertEquals(ListEvent.UPDATE, listChanges.getType());
-                assertEquals(1, listChanges.getIndex());
-                assertSame(list, listChanges.getSourceList().get(1));
-                assertFalse(listChanges.next());
-            }
-        };
-        model.addListEventListener(listener);
-        
-        assertEquals("Test List", list.getCollectionName());
-        list.setCollectionName("Another Name");
-        
-        assertTrue(triggered.get());
-        assertEquals("Another Name", list.getCollectionName());
-    }
-    
-    
 }

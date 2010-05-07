@@ -42,8 +42,6 @@ import com.limegroup.gnutella.library.SharedFiles;
 @EagerSingleton
 class SharedFileListManagerImpl implements SharedFileListManager {
     
-//    private static final Log LOG = LogFactory.getLog(ShareListManagerImpl.class);
-    
     private final FileCollectionManager collectionManager;    
     private final CoreLocalFileItemFactory coreLocalFileItemFactory;
     
@@ -168,14 +166,9 @@ class SharedFileListManagerImpl implements SharedFileListManager {
         
     }
 
-
-    @InspectablePrimitive(value = "number of lists created", category = DataCategory.USAGE)
-    private volatile long listsCreatedV2;
-    
     @InspectablePrimitive(value = "number of lists shared", category = DataCategory.USAGE)
     private volatile long listsShared;
-    
-    
+        
     @Inject
     SharedFileListManagerImpl(FileCollectionManager collectionManager,
             CoreLocalFileItemFactory coreLocalFileItemFactory,
@@ -332,25 +325,10 @@ class SharedFileListManagerImpl implements SharedFileListManager {
     }
 
     @Override
-    public int createNewSharedFileList(String name) {
-        listsCreatedV2++;
-        return collectionManager.createNewCollection(name).getId();        
-    }
-
-    @Override
     public EventList<SharedFileList> getModel() {
         return readOnlySharedLists;
     }
 
-    @Override
-    public void deleteSharedFileList(SharedFileList fileList) {
-        if(fileList instanceof SharedFileListImpl) {
-            collectionManager.removeCollectionById(((SharedFileListImpl)fileList).getCoreCollection().getId());
-        } else {
-            throw new IllegalStateException("invalid FileList: " + fileList);
-        }
-    }
-    
     @Override
     public void removeDocumentsFromPublicLists() {
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(false);

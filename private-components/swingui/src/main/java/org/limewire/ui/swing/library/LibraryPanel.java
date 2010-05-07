@@ -456,14 +456,6 @@ public class LibraryPanel extends JPanel {
     }
 
     /**
-     * Selects the specified SharedFileList in the library nav and starts editing on its name.
-     * @param sharedFileList can not be the public shared list
-     */
-    public void editSharedListName(SharedFileList sharedFileList) {
-        libraryNavigatorPanel.editSharedListName(sharedFileList);     
-    }
-    
-    /**
      * Listens for changes on the current list and updates the 
      * file count label.
      */

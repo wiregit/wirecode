@@ -33,21 +33,9 @@ public interface SharedFileListManager {
      * SharedFileLists}.
      */
     EventList<SharedFileList> getModel();
-
-    /**
-     * Creates a new {@link SharedFileList} of the appropriate name. The new
-     * list will be reflected in {@link #getModel()} once the core processes it.
-     * Returns the id of the new list
-     */
-    int createNewSharedFileList(String name);
-    
-    /** Deletes the SharedFileList with this name. */
-    void deleteSharedFileList(SharedFileList fileList);
-
     
     /**
      * Removes all documents from all public share lists, and turns off sharing documents with gnutella. 
      */
-    void removeDocumentsFromPublicLists();
- 
+    void removeDocumentsFromPublicLists(); 
 }

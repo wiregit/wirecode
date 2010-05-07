@@ -174,20 +174,10 @@ public class MockLibraryManager implements SharedFileListManager, LibraryManager
         }
     }
 
-    @Override
-    public int createNewSharedFileList(String name) {
-        return -1;
-    }
-
     private final BasicEventList<SharedFileList> model = new BasicEventList<SharedFileList>();
     @Override
     public EventList<SharedFileList> getModel() {
         return model;
-    }
-
-    @Override
-    public void deleteSharedFileList(SharedFileList list) {
-
     }
 
     @Override
