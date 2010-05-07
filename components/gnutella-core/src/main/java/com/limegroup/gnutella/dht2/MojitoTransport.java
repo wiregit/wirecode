@@ -15,7 +15,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
 
 class MojitoTransport extends AbstractTransport {
 
@@ -27,15 +26,10 @@ class MojitoTransport extends AbstractTransport {
     private final Provider<MessageRouter> messageRouter;
     
     public MojitoTransport(Provider<UDPService> udpService, 
-            Provider<MessageRouter> messageRouter, 
-            MessageFactory messageFactory) {
+            Provider<MessageRouter> messageRouter) {
         
         this.udpService = udpService;
         this.messageRouter = messageRouter;
-        
-        messageFactory.setParser(
-                (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
-                new MojitoMessageParser());
     }
     
     @Override

@@ -14,9 +14,9 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -55,6 +55,7 @@ class RequeryManager implements DHTEventListener {
     private final AltLocFinder altLocFinder;
     
     private final DHTManager dhtManager;
+    
     private final ActivationManager activationManager;
     
     /** The type of the last query this sent out. */
@@ -190,7 +191,7 @@ class RequeryManager implements DHTEventListener {
      */
     private boolean isDHTUp() {
         return DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-                && dhtManager.isMemberOfDHT();
+                && dhtManager.isReady();
     }
     
     /** True if another DHT query can be sent right now. */

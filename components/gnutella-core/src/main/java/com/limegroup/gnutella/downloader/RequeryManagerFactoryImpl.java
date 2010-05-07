@@ -7,8 +7,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 @Singleton
 public class RequeryManagerFactoryImpl implements RequeryManagerFactory {

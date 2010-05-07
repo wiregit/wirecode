@@ -24,5 +24,11 @@ abstract class Controller implements Closeable, ConnectionLifecycleListener {
     
     public abstract boolean isRunning();
     
+    public abstract boolean isReady();
+    
     public abstract void start() throws IOException;
+    
+    public void addressChanged() {
+        
+    }
 }

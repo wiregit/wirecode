@@ -28,8 +28,8 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Statistics;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
 
 @Singleton
@@ -506,16 +506,17 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         byte[] payload = new byte[3];
 
         // put version
-        int version = dhtManager.get().getVersion().shortValue();
+        int version = DHTManager.VERSION.shortValue();
 
         ByteUtils.short2beb((short) version, payload, 0);
-
-        if (dhtManager.get().isMemberOfDHT()) {
-            DHTMode mode = dhtManager.get().getDHTMode();
-            assert (mode != null);
+        
+        DHTManager manager = dhtManager.get();
+        synchronized (manager) {
+            DHTMode mode = DHTMode.INACTIVE;
+            if (manager.isReady()) {
+                mode = manager.getMode();
+            }
             payload[2] = mode.byteValue();
-        } else {
-            payload[2] = DHTMode.INACTIVE.byteValue();
         }
 
         // add it

@@ -7,7 +7,7 @@ import java.util.List;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 public interface PingReply extends Message {
 

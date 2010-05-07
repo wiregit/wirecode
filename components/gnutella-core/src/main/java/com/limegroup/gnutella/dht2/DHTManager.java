@@ -8,7 +8,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.lifecycle.Service;
 import org.limewire.mojito2.message.DefaultMessageFactory;
-import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -31,6 +33,10 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
 
     private static final Log LOG 
         = LogFactory.getLog(DHTManager.class);
+    
+    public static final Vendor VENDOR = ContextSettings.getVendor();
+    
+    public static final Version VERSION = ContextSettings.getVersion();
     
     /**
      * Defines the modes of a DHT Node (inactive, active, passive and passive leaf).
@@ -149,6 +155,7 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
     
     @Inject
     public DHTManager(NetworkManager networkManager,
+            com.limegroup.gnutella.messages.MessageFactory messageFactory,
             Provider<UDPService> udpService, 
             Provider<MessageRouter> messageRouter, 
             Provider<MACCalculatorRepositoryManager> calculator,
@@ -163,6 +170,10 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
         this.connectionServices = connectionServices;
+        
+        messageFactory.setParser(
+                (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
+                new MojitoMessageParser());
     }
     
     @Inject
@@ -236,11 +247,23 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         stop();
     }
     
+    public synchronized DHTMode getMode() {
+        return controller.getMode();
+    }
+    
+    public synchronized void addressChanged() {
+        controller.addressChanged();
+    }
+    
+    public synchronized boolean isReady() {
+        return controller.isReady();
+    }
+    
     private Controller createActive() throws IOException {
         MojitoTransport transport = new MojitoTransport(
                 udpService, messageRouter);
         
-        MessageFactory messageFactory 
+        DefaultMessageFactory messageFactory 
             = new DefaultMessageFactory(calculator.get());
         
         HostFilter hostFilter 

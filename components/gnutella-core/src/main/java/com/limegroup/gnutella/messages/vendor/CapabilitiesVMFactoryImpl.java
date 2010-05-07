@@ -9,8 +9,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -72,12 +72,15 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
         supported.put(CapabilitiesVM.INCOMING_TCP_BYTES, networkManager.get().acceptedIncomingConnection() ? 1 : 0);
         supported.put(CapabilitiesVM.FWT_SUPPORT_BYTES, networkManager.get().supportsFWTVersion());
         
-        if (dhtManager.get().isMemberOfDHT()) {
-            DHTMode mode = dhtManager.get().getDHTMode();
-            assert (mode != null);
-            supported.put(mode.getCapabilityName(), dhtManager.get().getVersion().shortValue());
+        DHTManager manager = dhtManager.get();
+        synchronized (manager) {
+            if (manager.isReady()) {
+                DHTMode mode = manager.getMode();
+                supported.put(mode.getCapabilityName(), 
+                        DHTManager.VERSION.shortValue());
+            }
         }
-
+        
         if (networkManager.get().isIncomingTLSEnabled()) {
             supported.put(CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
         }

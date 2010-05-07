@@ -28,7 +28,7 @@ import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.util.Utilities;
 
 /**

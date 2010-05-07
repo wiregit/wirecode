@@ -17,6 +17,11 @@ class LeafController extends Controller {
     }
     
     @Override
+    public boolean isReady() {
+        return false;
+    }
+    
+    @Override
     public void start() {
     }
 

@@ -31,7 +31,6 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
-import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
 import org.limewire.mojito2.util.HostFilter;
@@ -106,8 +105,8 @@ class ActiveController extends AbstractController {
     
     private Contact[] init(Context context) throws IOException {
         LocalContact contact = context.getLocalNode();
-        contact.setVendor(ContextSettings.getVendor());
-        contact.setVersion(ContextSettings.getVersion());
+        contact.setVendor(DHTManager.VENDOR);
+        contact.setVersion(DHTManager.VERSION);
         
         contact.setContactAddress(getExternalAddress());
         
@@ -144,6 +143,11 @@ class ActiveController extends AbstractController {
         return dht.isBound();
     }
     
+    @Override
+    public boolean isReady() {
+        return dht.isBound() && dht.isReady();
+    }
+
     @Override
     public void start() throws IOException {
         dht.bind(transport);
