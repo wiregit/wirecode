@@ -46,7 +46,7 @@ import org.limewire.setting.BooleanSetting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;

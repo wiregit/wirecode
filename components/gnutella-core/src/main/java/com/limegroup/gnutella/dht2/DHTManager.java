@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -39,6 +40,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 @Singleton
 public class DHTManager implements ConnectionLifecycleListener, Service, Closeable {
@@ -169,6 +171,8 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
     
     private volatile Controller controller = InactiveController.CONTROLLER;
     
+    private volatile boolean enabled = true;
+    
     private boolean open = true;
     
     @Inject
@@ -213,9 +217,6 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         start(DHTMode.INACTIVE);
     }
     
-    public synchronized boolean isRunning() {
-        return controller.isRunning();
-    }
     
     public synchronized boolean start(DHTMode mode) {
         if (!open) {
@@ -264,9 +265,30 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         open = false;
         stop();
     }
+
+    public synchronized boolean isRunning() {
+        return controller.isRunning();
+    }
+    
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public boolean isEnabled() {
+        if (!DHTSettings.DISABLE_DHT_NETWORK.getValue() 
+                && !DHTSettings.DISABLE_DHT_USER.getValue()
+                && enabled) {
+            return true;
+        }
+        return false;
+    }
     
     public synchronized DHTMode getMode() {
         return controller.getMode();
+    }
+    
+    public synchronized boolean isMode(DHTMode mode) {
+        return controller.isMode(mode);
     }
     
     public synchronized void addressChanged() {
@@ -317,6 +339,10 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         }
     }
     
+    public void handleDHTContactsMessage(DHTContactsMessage msg) {
+        
+    }
+    
     public synchronized DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return controller.put(key, value);
     }
@@ -325,6 +351,14 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         return controller.get(key);
     }
     
+    public void addActiveDHTNode(SocketAddress address) {
+        
+    }
+    
+    public void addPassiveDHTNode(SocketAddress address) {
+        
+    }
+
     public void addEventListener(DHTEventListener listener) {
         listeners.add(Objects.nonNull(listener, "listener"));
     }

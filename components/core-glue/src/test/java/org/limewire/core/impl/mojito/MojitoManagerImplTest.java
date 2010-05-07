@@ -11,10 +11,9 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 
-import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 public class MojitoManagerImplTest extends BaseTestCase {
 

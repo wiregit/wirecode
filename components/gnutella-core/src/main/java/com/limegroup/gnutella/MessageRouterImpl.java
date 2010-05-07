@@ -66,7 +66,7 @@ import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
