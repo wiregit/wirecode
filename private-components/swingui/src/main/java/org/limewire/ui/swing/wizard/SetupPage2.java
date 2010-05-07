@@ -123,17 +123,17 @@ public class SetupPage2 extends WizardPage {
         
         JPanel autoSharingPanel = new JPanel(new MigLayout("insets 0, gap 0, nogrid"));
 
-        autoSharingPanel.add(createAndDecorateHeader(I18n.tr("Files in your Public Shared list are shared with the world.")),
+        autoSharingPanel.add(createAndDecorateHeader(I18n.tr("Files in your Shared list are shared with the world.")),
                 "alignx center, wrap");
 
         if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox);
-            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."),
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Shared list."),
                     shareDownloadedFilesCheckBox));
             autoSharingPanel.add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("LimeWire will add files you download from P2P Users into your Public Shared list.")),
+            autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("LimeWire will add files you download from P2P Users to your Shared list.")),
                             "alignx center");
             autoSharingPanel.add(createAndDecorateHyperlink("http://www.limewire.com/client_redirect/?page=autoSharingMoreInfo"),
                     "wrap");
@@ -147,7 +147,7 @@ public class SetupPage2 extends WizardPage {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         
         JPanel modifyInfoPanel = new JPanel(new MigLayout("fill, insets 0, gap 0, nogrid"));
-        modifyInfoPanel.add(createAndDecorateHeader(I18n.tr("To see or modify files in your Public Shared list, go to")),
+        modifyInfoPanel.add(createAndDecorateHeader(I18n.tr("To see or modify files in your Shared list, go to")),
                 "alignx center, wrap");
 
         JLabel myFiles = new JLabel(I18n.tr("My Files"), sharingMyFilesIcon, JLabel.CENTER);
@@ -156,7 +156,7 @@ public class SetupPage2 extends WizardPage {
 
         modifyInfoPanel.add(myFiles, "alignx center");
         modifyInfoPanel.add(new JLabel(sharingArrowIcon), "aligny top, gaptop 17");
-        modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
+        modifyInfoPanel.add(new JLabel(I18n.tr("Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
 
         outerPanel.add(modifyInfoPanel, new GridBagConstraints());
         

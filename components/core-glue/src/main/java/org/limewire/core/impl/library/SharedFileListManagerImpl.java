@@ -102,16 +102,6 @@ class SharedFileListManagerImpl implements SharedFileListManager {
             }
         }; 
         
-        @InspectionPoint(value = "number of lists", category = DataCategory.USAGE)
-        private final Inspectable numberOfLists = new Inspectable() {
-            @Override
-            public Object inspect() {
-                //TODO: -1 for Public Shared
-                return getModel().size() - 1;
-            }
-        };           
-
-        
         @InspectionPoint(value = "number of files in public shared list", category = DataCategory.USAGE)
         private final Inspectable numberOfFilesV2 = new Inspectable() {
             @Override

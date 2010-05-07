@@ -75,7 +75,7 @@ public class LibraryNavItem {
         case LIBRARY:
             return I18n.tr("Library");
         case PUBLIC_SHARED:
-            return I18n.tr("Public Shared");
+            return I18n.tr("Shared");
         default:
             throw new IllegalStateException("unknown type: " + navType);
         }

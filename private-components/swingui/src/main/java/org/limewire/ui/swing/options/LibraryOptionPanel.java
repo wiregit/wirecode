@@ -149,7 +149,7 @@ public class LibraryOptionPanel extends OptionPanel {
             
             unsafeTypeOptionPanel = unsafeOptionPanelProvider.get();
             
-            shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Public Shared List")+"</html>");
+            shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Shared List")+"</html>");
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
@@ -177,14 +177,14 @@ public class LibraryOptionPanel extends OptionPanel {
             myFiles.setVerticalTextPosition(JLabel.BOTTOM);
             myFiles.setHorizontalTextPosition(JLabel.CENTER);
 
-            modifyInfoPanel.add(new JLabel(I18n.tr("To see or modify files in your Public Shared list, go to:")), 
+            modifyInfoPanel.add(new JLabel(I18n.tr("To see or modify files in your Shared list, go to:")), 
                     "gapbottom 10, wrap");
             
             modifyInfoPanel.add(myFiles);
             modifyInfoPanel.add(new JLabel(sharingArrowIcon), "aligny top, gaptop 17");
             
             
-            modifyInfoPanel.add(new JLabel(I18n.tr("Public Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
+            modifyInfoPanel.add(new JLabel(I18n.tr("Shared"), p2pSharedListIcon, JLabel.RIGHT), "aligny top, gaptop 15");
 
             add(modifyInfoPanel, "wrap");
         }

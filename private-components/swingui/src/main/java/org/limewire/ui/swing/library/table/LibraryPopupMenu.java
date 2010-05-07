@@ -21,6 +21,7 @@ public class LibraryPopupMenu extends JPopupMenu {
     private final Provider<RenameFileAction> renameFileAction;
     private final Provider<LocateFileAction> locateAction;
     private final Provider<RemoveFromListAction> removeFromListAction;
+    private final Provider<RemoveFromLibraryAction> removeFromLibraryAction;
     private final DeleteAction deleteAction;
     private final Provider<ViewFileInfoAction> fileInfoAction;
     
@@ -28,16 +29,20 @@ public class LibraryPopupMenu extends JPopupMenu {
     public LibraryPopupMenu(
             @LibrarySelected Provider<LocalFileList> selectedLocalFileList,
             @LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems,
-            Provider<RemoveFromListAction> removeFromListAction,
-            Provider<LaunchFileAction> launchAction, Provider<LocateFileAction> locateAction, 
+            Provider<LaunchFileAction> launchAction,
             Provider<RenameFileAction> renameFileAction,
-            DeleteAction deleteAction, Provider<ViewFileInfoAction> fileInfoAction) {
+            Provider<LocateFileAction> locateAction,
+            Provider<RemoveFromListAction> removeFromListAction,
+            Provider<RemoveFromLibraryAction> removeFromLibraryAction,
+            DeleteAction deleteAction,
+            Provider<ViewFileInfoAction> fileInfoAction) {
         this.selectedLocalFileList = selectedLocalFileList;
         this.selectedLocalFileItems = selectedLocalFileItems;
         this.launchAction = launchAction;
         this.renameFileAction = renameFileAction;
         this.locateAction = locateAction;
         this.removeFromListAction = removeFromListAction;
+        this.removeFromLibraryAction = removeFromLibraryAction;
         this.deleteAction = deleteAction;
         this.fileInfoAction = fileInfoAction;
         
@@ -48,7 +53,7 @@ public class LibraryPopupMenu extends JPopupMenu {
         if(selectedLocalFileList.get() instanceof LibraryFileList) {
             initLibrary();
         } else {
-            initPlayList();
+            initList();
         }
     }
     
@@ -60,34 +65,32 @@ public class LibraryPopupMenu extends JPopupMenu {
             addSeparator();            
             add(renameFileAction.get()).setEnabled(!localFileItem.get(0).isIncomplete());
             add(locateAction.get());
+            addSeparator();
+            add(removeFromLibraryAction.get());
             add(deleteAction);
             addSeparator();
             add(fileInfoAction.get());
         } else {
-            addSeparator();
+            add(removeFromLibraryAction.get());
             add(deleteAction);
         }
     }
     
-    private void initPlayList() {
+    private void initList() {
         List<LocalFileItem> localFileItem = new ArrayList<LocalFileItem>(selectedLocalFileItems.get());
         // if single selection
         if(localFileItem.size() == 1) {
             add(launchAction.get());
-            addSeparator();
-            
-            // remove from list
-            add(removeFromListAction.get());
-            addSeparator();
-            
+            addSeparator();            
             add(renameFileAction.get()).setEnabled(!localFileItem.get(0).isIncomplete());
             add(locateAction.get());
+            addSeparator();
+            add(removeFromListAction.get());
             add(deleteAction);
             addSeparator();
             add(fileInfoAction.get());
         } else {
             add(removeFromListAction.get());
-            addSeparator();
             add(deleteAction);
         }
     }
