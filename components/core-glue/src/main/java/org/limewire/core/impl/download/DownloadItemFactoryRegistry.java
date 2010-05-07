@@ -12,6 +12,12 @@ import org.limewire.core.api.search.SearchResult;
 
 import com.google.inject.Singleton;
 
+/**
+ * Registry class for all concrete download item factories.
+ * <p>
+ * A concrete factory should register itself and is then invoked by this class
+ * if a list of search results is being downloaded. 
+ */
 @Singleton
 public class DownloadItemFactoryRegistry implements DownloadItemFactory {
      
@@ -32,6 +38,9 @@ public class DownloadItemFactoryRegistry implements DownloadItemFactory {
         return null;
     }
     
+    /**
+     * Registers factory with this composite factory registry.
+     */
     public void register(DownloadItemFactory factory) {
         factories.put(factory.getClass(), factory);
     }

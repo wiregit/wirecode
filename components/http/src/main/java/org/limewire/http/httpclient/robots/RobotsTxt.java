@@ -1,7 +1,5 @@
 /* Robots.java
  *
- * $Id: RobotsTxt.java,v 1.1.2.1 2010-05-03 22:48:44 fberger Exp $
- *
  * Created Sep 1, 2005
  *
  * Copyright (C) 2005 Internet Archive.

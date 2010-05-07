@@ -39,6 +39,15 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
     private static final Log LOG = LogFactory.getLog(TorrentUriDatabaseStore.class);
     
     /**
+     * Maximum age of a torrent entry in store in milliseconds.
+     */
+    private static final long MAX_TORRENT_ENTRY_AGE = TimeUnit.DAYS.toMillis(90);
+    /**
+     * Maximum age of robots txt entry in milliseconds.
+     */
+    private static final long MAX_ROBOTS_ENTRY_AGE = TimeUnit.DAYS.toMillis(14); 
+    
+    /**
      * Invariant: once initialized <code>dbStore</code> will not become null.
      */
     private volatile DbStore dbStore = null;
@@ -292,7 +301,7 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
             }
         }
         
-        public void stop() {
+        public synchronized void stop() {
             LOG.debug("shutting db down");
             try {
                 Statement statement = connection.createStatement();
@@ -333,14 +342,14 @@ public class TorrentUriDatabaseStore implements TorrentUriStore, TorrentRobotsTx
         
         private void purgeOldEntries() {
             try {
-                long threeMonthsAgo = clock.now() - TimeUnit.DAYS.toMillis(90);
+                long threeMonthsAgo = clock.now() - MAX_TORRENT_ENTRY_AGE;
                 PreparedStatement statement = connection.prepareStatement("delete from torrent_uris where timestamp < ?");
                 statement.setLong(1, threeMonthsAgo);
                 statement.execute();
                 statement = connection.prepareStatement("delete from torrent_uris_by_host where timestamp < ?");
                 statement.setLong(1, threeMonthsAgo);
                 statement.execute();
-                long twoWeeksAgo = clock.now() - TimeUnit.DAYS.toMillis(14);
+                long twoWeeksAgo = clock.now() - MAX_ROBOTS_ENTRY_AGE;
                 statement = connection.prepareStatement("delete from torrent_robots_txt where timestamp < ?");
                 statement.setLong(1, twoWeeksAgo);
                 statement.execute();

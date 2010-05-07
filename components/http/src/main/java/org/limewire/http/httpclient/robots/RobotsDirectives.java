@@ -1,7 +1,5 @@
 /* RobotsDirectives.java
  *
- * $Id: RobotsDirectives.java,v 1.1.2.1 2010-05-03 22:48:44 fberger Exp $
- *
  * Created April 29, 2008
  *
  * Copyright (C) 2008 Internet Archive.

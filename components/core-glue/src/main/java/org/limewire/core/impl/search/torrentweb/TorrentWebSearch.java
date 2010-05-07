@@ -27,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.limewire.bittorrent.BTData;
 import org.limewire.bittorrent.Torrent;
-import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -36,8 +35,8 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.TorrentFactory;
-import org.limewire.core.impl.download.DownloadItemFactoryRegistry;
 import org.limewire.core.impl.download.DownloadItemFactory;
+import org.limewire.core.impl.download.DownloadItemFactoryRegistry;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -163,7 +162,7 @@ public class TorrentWebSearch implements Search {
     }
     
     private void handleTorrentResult(File torrentFile, URI uri, URI referrer) {
-        BTData torrentData = TorrentUtil.parseTorrentFile(torrentFile);
+        BTData torrentData = TorrentWebSearchUtils.parseTorrentFile(torrentFile);
         if (torrentData != null) {
             Torrent torrent = null;
             LimeXMLDocument xmlDocument = null;
@@ -179,7 +178,7 @@ public class TorrentWebSearch implements Search {
                         SearchResult result = new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent);
                         if (filter.allow(result, xmlDocument)) {
                             LOG.debugf("result accepted: {0}", torrent);
-                            searchListener.handleSearchResult(null, result);
+                            searchListener.handleSearchResult(this, result);
                         } else{
                             LOG.debugf("result rejected: {0}", torrent);
                         }
@@ -243,6 +242,10 @@ public class TorrentWebSearch implements Search {
         }
     }
     
+    /**
+     * Extracts all uris from <code>htmlFile</code> that are the targets of anchor
+     * elements and could be potential torrent uris.
+     */
     List<URI> extractTorrentUriCandidates(File htmlFile, URI referrer) throws IOException {
         HtmlCleaner cleaner = new HtmlCleaner();
         TagNode tagNode = cleaner.clean(htmlFile);

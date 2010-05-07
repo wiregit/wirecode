@@ -78,7 +78,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         candidates = uniquify(candidates);
         // remove known non torrent uris
         int size = candidates.size();
-        candidates = filter(candidates, new NotTorrenUriPredicate());
+        candidates = filter(candidates, new NotTorrentUriPredicate());
         LOG.debugf("removed non torrents: {0}, new size {1}", size - candidates.size(), candidates.size());
         // compute scores
         List<Tuple<URI, Integer>> scoredUris = transform(candidates, new TorrentUriLikelihoodFunction());
@@ -294,7 +294,7 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         }
     }
     
-    private class NotTorrenUriPredicate implements Predicate<URI> {
+    private class NotTorrentUriPredicate implements Predicate<URI> {
         @Override
         public boolean apply(URI uri) {
             return !torrentUriStore.isNotTorrentUri(uri);
