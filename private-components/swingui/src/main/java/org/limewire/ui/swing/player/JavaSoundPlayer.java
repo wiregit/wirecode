@@ -24,6 +24,8 @@ import javax.media.protocol.DataSource;
 
 import net.sf.fmj.utility.URLUtils;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -36,6 +38,8 @@ import com.google.inject.Provider;
  * the LWPlayer using the FMJ Player. 
  */
 public class JavaSoundPlayer implements Player {
+    
+    private static final Log LOG = LogFactory.getLog(JavaSoundPlayer.class);
     
     private static final String AUDIO_LENGTH_BYTES = "audio.length.bytes";
     private static final String AUDIO_TYPE = "audio.type";
@@ -74,16 +78,21 @@ public class JavaSoundPlayer implements Player {
 
     @Override
     public void setSource(DataSource source) throws IncompatibleSourceException {        
-        if (!source.getLocator().getProtocol().equals("file"))
+        if (!source.getLocator().getProtocol().equals("file")) {
+            LOG.debug("attempted to load non-file");
             throw new IncompatibleSourceException("Only file URLs supported: " + source);
+        }
 
         String path = URLUtils.extractValidPathFromFileUrl(source.getLocator().toExternalForm());
 
-        if(path == null)
+        if(path == null) {
+            LOG.debug("could not locate path of file");
             throw new IncompatibleSourceException("Cannot find file path");
+        }
         
         File file = new File(path);
         if(!isPlayable(file)) {
+            LOG.debug("unplayable file");
             throw new IncompatibleSourceException("Unplayable file type");
         }
         getPlayer().loadSong(new File(path));

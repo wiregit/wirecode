@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.limewire.inject.LazySingleton;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.OSUtils;
@@ -28,6 +30,8 @@ import com.google.inject.Provider;
 @LazySingleton
 class MediaPlayerFactoryImpl implements MediaPlayerFactory {
 
+    private static final Log LOG = LogFactory.getLog(MediaPlayerFactoryImpl.class);
+    
     private final Provider<AudioPlayer> player;
     
     private final List<String> handlers = new ArrayList<String>(2);
@@ -61,6 +65,8 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
         // attempt loading file with the next one
         for(String handle : handlers) {
             try {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("loading " + handle);
                 Class clazz = Class.forName(handle);
                 Player player = (Player)clazz.newInstance();
                 setupPlayer(player, file);
@@ -74,11 +80,16 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
         
         if(OSUtils.isWindows7()) {
             try { 
+                if(LOG.isDebugEnabled())
+                    LOG.debug("loading MediaFoundationPlayer");
                 Player player = createWindows7MFPlayer(file, parentComponent);
                 setupPlayer(player, file);
                 return player;
-            } catch (IncompatibleSourceException e) {}
+            } catch (IncompatibleSourceException e) {
+            }
         }
+        if(LOG.isDebugEnabled())
+            LOG.debug("Loading default java player");
         
         // default to the java sound player if all else fails
         handler = new JavaSoundPlayer(player);
