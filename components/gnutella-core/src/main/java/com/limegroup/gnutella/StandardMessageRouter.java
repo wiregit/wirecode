@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -259,8 +260,13 @@ public class StandardMessageRouter extends MessageRouterImpl {
         List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         
-        if (request.requestsDHTIPP() && dhtManager.isRunning()) {
-            dhthosts = dhtManager.getActiveDHTNodes(maxHosts);
+        if (request.requestsDHTIPP()) {
+            synchronized (dhtManager) {
+                if (dhtManager.isRunning()) {
+                    dhthosts = Arrays.asList(
+                            dhtManager.getActiveIpPort(maxHosts));
+                }
+            }
         }
         
         int numDHTHosts = dhthosts.size();

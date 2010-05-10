@@ -187,12 +187,16 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
                     onException();
                     break;
                 default:
-                    stop();
+                    onComplete();
                     break;
             }
         } catch (Throwable t) {
             uncaughtException(t);
         }
+    }
+    
+    private void onComplete() {
+        stop();
     }
     
     /**

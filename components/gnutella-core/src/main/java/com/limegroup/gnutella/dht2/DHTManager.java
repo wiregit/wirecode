@@ -3,12 +3,14 @@ package com.limegroup.gnutella.dht2;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -16,6 +18,7 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.DefaultMessageFactory;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.ContextSettings;
@@ -31,15 +34,17 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTEvent.Type;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 @Singleton
@@ -167,6 +172,12 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
     
     private final ConnectionServices connectionServices;
     
+    private final Provider<HostCatcher> hostCatcher;
+    
+    private final PingRequestFactory pingRequestFactory;
+    
+    private final Provider<UniqueHostPinger> uniqueHostPinger;
+    
     private volatile Controller controller = InactiveController.CONTROLLER;
     
     private volatile boolean enabled = true;
@@ -181,7 +192,10 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
             Provider<MACCalculatorRepositoryManager> calculator,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            Provider<HostCatcher> hostCatcher, 
+            PingRequestFactory pingRequestFactory,
+            Provider<UniqueHostPinger> uniqueHostPinger) {
         
         this.networkManager = networkManager;
         this.udpService = udpService;
@@ -190,6 +204,9 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
         this.connectionServices = connectionServices;
+        this.hostCatcher = hostCatcher;
+        this.pingRequestFactory = pingRequestFactory;
+        this.uniqueHostPinger = uniqueHostPinger;
         
         messageFactory.setParser(
                 (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
@@ -244,6 +261,8 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
             }
         
             controller.start();
+            dispatchEvent(new DHTEvent(Type.STARTING, controller));
+            
             return true;
         } catch (IOException err) {
             LOG.error("IOException", err);
@@ -255,6 +274,8 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
 
     public synchronized void stop() {
         IoUtils.close(controller);
+        
+        dispatchEvent(new DHTEvent(Type.STOPPED, controller));
         controller = InactiveController.CONTROLLER;
     }
     
@@ -311,8 +332,9 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
         HostFilter hostFilter 
             = new HostFilterDelegate(ipFilter);
         
-        return new ActiveController(networkManager, transport, 
-                connectionManager, messageFactory, connectionServices, 
+        return new ActiveController(this, networkManager, transport, 
+                connectionManager, hostCatcher, pingRequestFactory, 
+                uniqueHostPinger, messageFactory, connectionServices, 
                 hostFilter);
     }
     
@@ -322,6 +344,20 @@ public class DHTManager implements ConnectionLifecycleListener, Service, Closeab
     
     private Controller createLeaf() {
         return new LeafController();
+    }
+    
+    public synchronized Contact[] getActiveContacts(int max) {
+        return controller.getActiveContacts(max);
+    }
+    
+    public synchronized IpPort[] getActiveIpPort(int max) {
+        List<IpPort> ipp = new ArrayList<IpPort>();
+        
+        for (Contact contact : getActiveContacts(max)) {
+            ipp.add(new IpPortContact(contact));
+        }
+        
+        return ipp.toArray(new IpPort[0]);
     }
     
     @Override

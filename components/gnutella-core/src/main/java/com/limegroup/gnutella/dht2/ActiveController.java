@@ -38,6 +38,7 @@ import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
+import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
 import org.limewire.util.CommonUtils;
@@ -45,11 +46,14 @@ import org.limewire.util.CommonUtils;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.messages.PingRequestFactory;
 
 class ActiveController extends AbstractController {
     
@@ -60,6 +64,8 @@ class ActiveController extends AbstractController {
     
     private static final File ACTIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
+    
+    private final DHTManager manager;
     
     private final NetworkManager networkManager;
     
@@ -75,14 +81,19 @@ class ActiveController extends AbstractController {
     
     private Contact[] contacts = null;
     
-    public ActiveController(NetworkManager networkManager,
+    public ActiveController(DHTManager manager,
+            NetworkManager networkManager,
             Transport transport, 
             Provider<ConnectionManager> connectionManager,
+            Provider<HostCatcher> hostCatcher,
+            PingRequestFactory pingRequestFactory,
+            Provider<UniqueHostPinger> uniqueHostPinger,
             MessageFactory messageFactory, 
             ConnectionServices connectionServices,
             HostFilter filter) throws IOException {
         super(DHTMode.ACTIVE, connectionServices);
         
+        this.manager = manager;
         this.networkManager = networkManager;
         this.transport = transport;
         
@@ -103,7 +114,10 @@ class ActiveController extends AbstractController {
         
         dht = new MojitoDHT(context);
         
-        bootstrapManager = new BootstrapManager(dht);
+        bootstrapManager = new BootstrapManager(
+                dht, connectionServices, hostCatcher, 
+                pingRequestFactory, uniqueHostPinger);
+        
         contactPinger = new ContactPinger(dht);
         contactPusher = new ContactPusher(connectionManager);
     }
@@ -139,6 +153,14 @@ class ActiveController extends AbstractController {
         return null;
     }
     
+    @Override
+    public Contact[] getActiveContacts(int max) {
+        RouteTable routeTable = dht.getRouteTable();
+        Collection<Contact> contacts = ContactUtils.sort(
+                routeTable.getActiveContacts(), max + 1);
+        return contacts.toArray(new Contact[0]);
+    }
+
     private SocketAddress getExternalAddress() 
             throws UnknownHostException {
         InetAddress address = InetAddress.getByAddress(

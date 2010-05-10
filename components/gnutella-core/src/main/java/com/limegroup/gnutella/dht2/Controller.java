@@ -9,6 +9,7 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
@@ -45,4 +46,8 @@ public abstract class Controller implements Closeable, ConnectionLifecycleListen
     public abstract DHTFuture<StoreEntity> put(KUID key, DHTValue value);
     
     public abstract DHTFuture<ValueEntity> get(EntityKey key);
+    
+    public Contact[] getActiveContacts(int max) {
+        return new Contact[0];
+    }
 }
