@@ -95,7 +95,7 @@ public class JavaSoundPlayer implements Player {
             LOG.debug("unplayable file");
             throw new IncompatibleSourceException("Unplayable file type");
         }
-        getPlayer().loadSong(new File(path));
+        getPlayer().loadSong(file);
         
         bytesRead = 0;
     }

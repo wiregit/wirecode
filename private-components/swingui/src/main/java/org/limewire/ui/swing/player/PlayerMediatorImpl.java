@@ -49,6 +49,8 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.player.api.PlayerState;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -68,6 +70,8 @@ import com.lti.utils.OSUtils;
 @Singleton
 class PlayerMediatorImpl implements PlayerMediator {
 
+    private static final Log LOG = LogFactory.getLog(PlayerMediatorImpl.class);
+    
     private final VideoDisplayDirector displayDirector;
     private final List<PlayerMediatorListener> listenerList;
     private final CategoryManager categoryManager;
@@ -560,6 +564,8 @@ class PlayerMediatorImpl implements PlayerMediator {
             if (isInitializing()) {
                 cancel();
             }
+            if(LOG.isDebugEnabled())
+                LOG.debug("initializing player for: " + file);
 
             initializationWorker = new PlayerInitalizationWorker(currentMediaFile, time, isFullScreen, autoStart, isLaunchOnFailure, new PlayerCompleteCallback() {
                 @Override
@@ -587,6 +593,8 @@ class PlayerMediatorImpl implements PlayerMediator {
                       
                     startMediaPlayer(autoStart); 
                     initializationWorker = null;
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("player initialized");
                 }
             });
             initializationWorker.execute();
@@ -672,6 +680,8 @@ class PlayerMediatorImpl implements PlayerMediator {
                         videoPlayedInSessionByLW = true;
                     return player;
                 } catch (IncompatibleSourceException e) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("failed to obtain a player " + e);
                     if(isLaunchOnFailure && !canceled) {
                         NativeLaunchUtils.safeLaunchFile(mediaFile, categoryManager);
                     } else if(categoryManager.getCategoryForFile(mediaFile) == Category.AUDIO) {
