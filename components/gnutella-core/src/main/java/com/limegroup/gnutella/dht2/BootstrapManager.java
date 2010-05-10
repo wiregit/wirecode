@@ -24,10 +24,16 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.util.ExceptionUtils;
 
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.UniqueHostPinger;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+
 /**
  * 
  */
-class BootstrapManager implements Closeable {
+class BootstrapManager implements Closeable, NodeFetcher.Callback {
 
     private static final Log LOG 
         = LogFactory.getLog(BootstrapManager.class);
@@ -41,14 +47,25 @@ class BootstrapManager implements Closeable {
     
     private final MojitoDHT dht;
     
+    private final NodeFetcher nodeFetcher;
+    
     private boolean open = true;
     
     private DHTFuture<PingEntity> pingFuture = null;
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
-    public BootstrapManager(MojitoDHT dht) {
+    public BootstrapManager(MojitoDHT dht, 
+            ConnectionServices connectionServices,
+            Provider<HostCatcher> hostCatcher,
+            PingRequestFactory pingRequestFactory,
+            Provider<UniqueHostPinger> uniqueHostPinger) {
+        
         this.dht = dht;
+        
+        this.nodeFetcher = new NodeFetcher(this, 
+                connectionServices, hostCatcher, 
+                pingRequestFactory, uniqueHostPinger);
     }
     
     /**
@@ -86,6 +103,10 @@ class BootstrapManager implements Closeable {
      * 
      */
     public synchronized void stop() {
+        if (nodeFetcher != null) {
+            nodeFetcher.stop();
+        }
+        
         if (pingFuture != null) {
             pingFuture.cancel(true);
         }
@@ -100,6 +121,8 @@ class BootstrapManager implements Closeable {
      */
     public synchronized void close() {
         open = false;
+        
+        nodeFetcher.close();
         stop();
     }
     
@@ -119,6 +142,9 @@ class BootstrapManager implements Closeable {
                 case EXCEPTION:
                     onException();
                     break;
+                default:
+                    stop();
+                    break;
             }
         } catch (Throwable t) {
             ExceptionUtils.reportIfUnchecked(t);
@@ -130,6 +156,11 @@ class BootstrapManager implements Closeable {
      * 
      */
     private synchronized void onPong(PingEntity entity) {
+        // We got a PONG, stop the NodeFetcher!
+        if (nodeFetcher != null) {
+            nodeFetcher.stop();
+        }
+        
         Contact src = entity.getContact();
         
         bootFuture = dht.bootstrap(src);
@@ -155,6 +186,9 @@ class BootstrapManager implements Closeable {
                 case EXCEPTION:
                     onException();
                     break;
+                default:
+                    stop();
+                    break;
             }
         } catch (Throwable t) {
             uncaughtException(t);
@@ -179,6 +213,7 @@ class BootstrapManager implements Closeable {
     /**
      * 
      */
+    @Override
     public synchronized void addSocketAddress(SocketAddress address) {
         if (!open) {
             return;
@@ -210,6 +245,10 @@ class BootstrapManager implements Closeable {
         
         Iterator<SocketAddress> it = addresses.iterator();
         if (!it.hasNext()) {
+            if (nodeFetcher != null) {
+                nodeFetcher.start();
+            }
+            
             return;
         }
         
