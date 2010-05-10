@@ -1,9 +1,7 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht2;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.dht.db.LimeWireDHTDBModule;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
-import com.limegroup.gnutella.dht2.DHTManager;
 
 public class LimeWireDHTModule extends AbstractModule {
 
