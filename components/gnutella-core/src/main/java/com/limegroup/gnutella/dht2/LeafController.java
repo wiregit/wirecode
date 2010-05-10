@@ -9,10 +9,12 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 class LeafController extends AbstractController {
 
@@ -55,5 +57,12 @@ class LeafController extends AbstractController {
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
+    }
+
+    @Override
+    public void handleContactsMessage(DHTContactsMessage msg) {
+        for (Contact contact : msg.getContacts()) {
+            // Add contacts to RT
+        }
     }
 }

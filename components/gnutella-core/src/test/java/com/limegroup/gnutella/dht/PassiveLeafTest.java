@@ -186,7 +186,7 @@ public class PassiveLeafTest extends DHTTestCase {
                     Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 3000));
             DHTContactsMessage msg = new DHTContactsMessage(c);
-            manager.handleDHTContactsMessage(msg);
+            manager.handleContactsMessage(msg);
             Thread.sleep(250);
             
             // Check the RouteTable

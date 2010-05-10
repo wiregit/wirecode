@@ -69,7 +69,7 @@ public class DHTManagerStub implements DHTManagerImpl {
         return Version.ZERO;
     }
 
-    public void handleDHTContactsMessage(DHTContactsMessage msg) {
+    public void handleContactsMessage(DHTContactsMessage msg) {
     }
 
     public boolean isEnabled() {

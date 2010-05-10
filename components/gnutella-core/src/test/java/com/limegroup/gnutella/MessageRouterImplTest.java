@@ -1360,7 +1360,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         public void removeEventListener(DHTEventListener listener) {
         }
 
-        public void handleDHTContactsMessage(DHTContactsMessage msg) {
+        public void handleContactsMessage(DHTContactsMessage msg) {
         }
 
         public boolean isEnabled() {

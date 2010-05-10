@@ -169,7 +169,7 @@ class NodeFetcher implements Closeable {
             }
             
             haveActive = true;
-            callback.addAddress(ep.getInetSocketAddress());
+            callback.addActiveNode(ep.getInetSocketAddress());
         }
         
         if (haveActive) {
@@ -249,7 +249,7 @@ class NodeFetcher implements Closeable {
         }
         
         for (IpPort ipp : list) {
-            callback.addAddress(ipp.getInetSocketAddress());
+            callback.addActiveNode(ipp.getInetSocketAddress());
         }
     }
     
@@ -306,6 +306,6 @@ class NodeFetcher implements Closeable {
         /**
          * 
          */
-        public void addAddress(SocketAddress address);
+        public void addActiveNode(SocketAddress address);
     }
 }

@@ -148,11 +148,9 @@ class ActiveController extends AbstractController {
     }
     
     private Contact[] init(Context context) throws IOException {
-        LocalContact contact = context.getLocalNode();
-        contact.setVendor(DHTManager.VENDOR);
-        contact.setVersion(DHTManager.VERSION);
         
-        contact.setContactAddress(getExternalAddress());
+        LocalContact contact = context.getLocalNode();
+        updateLocalhost(context.getLocalNode());
         
         Handle handle = read();
         
@@ -171,6 +169,16 @@ class ActiveController extends AbstractController {
         }
         
         return null;
+    }
+    
+    /**
+     * 
+     */
+    private void updateLocalhost(LocalContact contact) throws IOException {
+        contact.setVendor(DHTManager.VENDOR);
+        contact.setVersion(DHTManager.VERSION);
+        contact.setContactAddress(getExternalAddress());        
+        contact.nextInstanceID();
     }
     
     @Override
@@ -232,7 +240,9 @@ class ActiveController extends AbstractController {
         IoUtils.close(bootstrapManager);
         IoUtils.close(dht);
         
-        write();
+        if (!collision.get()) {
+            write();
+        }
     }
     
     private void processRouteTableEvent(RouteTableEvent event) {
@@ -251,6 +261,16 @@ class ActiveController extends AbstractController {
     private boolean isLocalhost(Contact contact) {
         Context context = dht.getContext();
         return context.isLocalNode(contact);
+    }
+    
+    @Override
+    public void addressChanged() {
+        try {
+            LocalContact contact = dht.getLocalNode();
+            updateLocalhost(contact);
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
     }
 
     @Override
@@ -294,7 +314,7 @@ class ActiveController extends AbstractController {
         if (dht.isReady()) {
             contactPinger.addAddress(address);
         } else {
-            bootstrapManager.addAddress(address);
+            bootstrapManager.addActiveNode(address);
         }
     }
     

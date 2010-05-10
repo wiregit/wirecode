@@ -759,11 +759,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
                     if(mode.equals(DHTMode.ACTIVE)) {
                         SocketAddress address = new InetSocketAddress(
                                 endpoint.getAddress(), endpoint.getPort());
-                        manager.addActiveDHTNode(address);
+                        manager.addActiveNode(address);
                     } else if(mode.equals(DHTMode.PASSIVE)) {
                         SocketAddress address = new InetSocketAddress(
                                 endpoint.getAddress(), endpoint.getPort());
-                        manager.addPassiveDHTNode(address);
+                        manager.addPassiveNode(address);
                     }
                 }
             }

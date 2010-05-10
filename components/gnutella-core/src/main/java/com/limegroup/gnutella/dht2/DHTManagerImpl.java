@@ -290,8 +290,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     }
     
     @Override
-    public void handleDHTContactsMessage(DHTContactsMessage msg) {
-        
+    public synchronized void handleContactsMessage(DHTContactsMessage msg) {
+        controller.handleContactsMessage(msg);
     }
     
     @Override
@@ -310,12 +310,12 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     }
     
     @Override
-    public synchronized void addActiveDHTNode(SocketAddress address) {
+    public synchronized void addActiveNode(SocketAddress address) {
         controller.addActiveNode(address);
     }
     
     @Override
-    public synchronized void addPassiveDHTNode(SocketAddress address) {
+    public synchronized void addPassiveNode(SocketAddress address) {
         controller.addPassiveNode(address);
     }
 }

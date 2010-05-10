@@ -247,7 +247,7 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
      * 
      */
     @Override
-    public synchronized void addAddress(SocketAddress address) {
+    public synchronized void addActiveNode(SocketAddress address) {
         if (!open) {
             return;
         }

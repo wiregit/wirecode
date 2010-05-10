@@ -16,32 +16,80 @@ import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+/**
+ * 
+ */
 public interface Controller extends Closeable, ConnectionLifecycleListener {
 
+    /**
+     * 
+     */
     public DHTMode getMode();
     
+    /**
+     * 
+     */
     public boolean isMode(DHTMode other);
     
+    /**
+     * 
+     */
     public MojitoDHT getMojitoDHT();
     
+    /**
+     * 
+     */
     public boolean isRunning();
     
+    /**
+     * 
+     */
     public boolean isReady();
     
+    /**
+     * 
+     */
     public void start() throws IOException;
     
+    /**
+     * 
+     */
     public void addressChanged();
     
+    /**
+     * 
+     */
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
     
+    /**
+     * 
+     */
     public DHTFuture<ValueEntity> get(EntityKey key);
     
+    /**
+     * 
+     */
     public Contact[] getActiveContacts(int max);
     
+    /**
+     * 
+     */
     public void addActiveNode(SocketAddress address);
     
+    /**
+     * 
+     */
     public void addPassiveNode(SocketAddress address);
     
+    /**
+     * 
+     */
     public void handleCollision(CollisionException ex);
+    
+    /**
+     * 
+     */
+    public void handleContactsMessage(DHTContactsMessage msg);
 }

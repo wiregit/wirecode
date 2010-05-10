@@ -19,6 +19,9 @@ import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+/**
+ * 
+ */
 public interface DHTManager extends Closeable, ConnectionLifecycleListener {
 
     public static final Vendor VENDOR = ContextSettings.getVendor();
@@ -120,42 +123,98 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener {
         }
     }
     
+    /**
+     * 
+     */
     public boolean start(DHTMode mode);
 
+    /**
+     * 
+     */
     public void stop();
 
+    /**
+     * 
+     */
     public Controller getController();
 
+    /**
+     * 
+     */
     public boolean isRunning();
 
+    /**
+     * 
+     */
     public void setEnabled(boolean enabled);
 
+    /**
+     * 
+     */
     public boolean isEnabled();
 
+    /**
+     * 
+     */
     public DHTMode getMode();
 
+    /**
+     * 
+     */
     public boolean isMode(DHTMode mode);
 
+    /**
+     * 
+     */
     public void addressChanged();
 
+    /**
+     * 
+     */
     public boolean isReady();
 
+    /**
+     * 
+     */
     public Contact[] getActiveContacts(int max);
 
+    /**
+     * 
+     */
     public IpPort[] getActiveIpPort(int max);
 
-    public void handleDHTContactsMessage(DHTContactsMessage msg);
+    /**
+     * 
+     */
+    public void handleContactsMessage(DHTContactsMessage msg);
 
+    /**
+     * 
+     */
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
 
+    /**
+     * 
+     */
     public DHTFuture<ValueEntity> get(EntityKey key);
 
-    public void addActiveDHTNode(SocketAddress address);
+    /**
+     * 
+     */
+    public void addActiveNode(SocketAddress address);
 
-    public void addPassiveDHTNode(SocketAddress address);
+    /**
+     * 
+     */
+    public void addPassiveNode(SocketAddress address);
 
+    /**
+     * 
+     */
     public void addEventListener(DHTEventListener listener);
 
+    /**
+     * 
+     */
     public void removeEventListener(DHTEventListener listener);
-
 }
