@@ -701,7 +701,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager2 = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), new DownloadItemFactoryRegistry());
         CoreDownloadListManager coreDownloadListManager = coreDownloadListManager2;
         coreDownloadListManager.registerDownloadListener(listenerList);
 
