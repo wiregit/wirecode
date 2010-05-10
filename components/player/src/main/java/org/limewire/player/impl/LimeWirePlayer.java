@@ -401,8 +401,9 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         } catch (NullPointerException e) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("null pointer " + e);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("null pointer ", e);
+            }
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         }
