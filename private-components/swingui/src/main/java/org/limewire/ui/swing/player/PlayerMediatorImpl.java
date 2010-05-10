@@ -318,6 +318,9 @@ class PlayerMediatorImpl implements PlayerMediator {
         if (OSUtils.isMacOSX() && isFullScreen())
             return false;
 
+        int state = player.getState();
+        if(state == Controller.Unrealized || state == Controller.Realizing)
+            return false;
         return player.getGainControl() != null;
     }
 
