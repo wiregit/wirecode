@@ -33,7 +33,7 @@ public class NodeAssignerTest extends LimeTestCase {
     private Injector injector;
     private NodeAssigner nodeAssigner;
     private BandwidthTracker upTracker, downTracker;
-    private DHTManager dhtManager;
+    private DHTManagerImpl dhtManager;
     private Runnable assignerRunnable;
     private ConnectionServices connectionServices;
     private NetworkManager networkManager;
@@ -64,7 +64,7 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery = new Mockery();
         upTracker = mockery.mock(BandwidthTracker.class);
         downTracker = mockery.mock(BandwidthTracker.class);
-        dhtManager = mockery.mock(DHTManager.class);
+        dhtManager = mockery.mock(DHTManagerImpl.class);
         connectionServices = mockery.mock(ConnectionServices.class);
         networkManager = mockery.mock(NetworkManager.class);
         searchServices = mockery.mock(SearchServices.class);
@@ -85,7 +85,7 @@ public class NodeAssignerTest extends LimeTestCase {
             protected void configure() {
                 bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).toInstance(upTracker);
                 bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).toInstance(downTracker);
-                bind(DHTManager.class).toInstance(dhtManager);
+                bind(DHTManagerImpl.class).toInstance(dhtManager);
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(ConnectionServices.class).toInstance(connectionServices);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(ses);

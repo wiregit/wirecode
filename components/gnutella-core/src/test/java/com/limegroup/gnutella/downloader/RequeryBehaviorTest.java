@@ -73,7 +73,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         Module m = new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManager.class).toInstance(myDHTManager);
+                bind(DHTManagerImpl.class).toInstance(myDHTManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
                 bind(ActivationManager.class).toInstance(activationManager);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).to(MyExecutor.class);

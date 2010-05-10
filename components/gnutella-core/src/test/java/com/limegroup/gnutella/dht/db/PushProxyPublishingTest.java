@@ -42,7 +42,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
     
     private Injector injector;
 
-    private DHTManager dhtManager;
+    private DHTManagerImpl dhtManager;
 
     private List<MojitoDHT> dhts;
 
@@ -72,7 +72,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
             }
         });
-        dhtManager = injector.getInstance(DHTManager.class);
+        dhtManager = injector.getInstance(DHTManagerImpl.class);
         hostCatcher = injector.getInstance(HostCatcher.class);
         DHTTestUtils.setLocalIsPrivate(injector, false);
         

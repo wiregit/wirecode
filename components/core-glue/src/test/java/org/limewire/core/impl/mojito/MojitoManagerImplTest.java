@@ -11,9 +11,9 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
 
 public class MojitoManagerImplTest extends BaseTestCase {
 
@@ -23,7 +23,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
 
     public void testGetName() {
         Mockery context = new Mockery();
-        final DHTManager dhtManager = context.mock(DHTManager.class);
+        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
 
         MojitoManagerImpl managerImpl = new MojitoManagerImpl(dhtManager);
 
@@ -51,7 +51,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
 
     public void testIsRunning() {
         Mockery context = new Mockery();
-        final DHTManager dhtManager = context.mock(DHTManager.class);
+        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
 
         MojitoManagerImpl managerImpl = new MojitoManagerImpl(dhtManager);
 
@@ -85,7 +85,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
     public void testListenerInfrastructure() {
         Mockery context = new Mockery();
         
-        final DHTManager dhtManager = context.mock(DHTManager.class);
+        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
         final DHTController dhtController = context.mock(DHTController.class);
         
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
@@ -135,7 +135,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
         
-        final DHTManager dhtManager = context.mock(DHTManager.class);
+        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
         final PrintWriter dummyStream = context.mock(PrintWriter.class);
         
         final MojitoManagerImpl manager = new MojitoManagerImpl(dhtManager);

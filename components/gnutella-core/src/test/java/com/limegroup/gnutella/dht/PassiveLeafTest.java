@@ -161,7 +161,7 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafManager() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        DHTManager manager = new DHTManagerImpl(Executors.newSingleThreadExecutor(), injector.getInstance(DHTControllerFactory.class));
+        DHTManagerImpl manager = new DHTManagerImpl(Executors.newSingleThreadExecutor(), injector.getInstance(DHTControllerFactory.class));
         try {
             // Check initial state
             assertEquals(DHTMode.INACTIVE, manager.getDHTMode());

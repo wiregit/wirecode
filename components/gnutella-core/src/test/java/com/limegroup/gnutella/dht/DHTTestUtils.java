@@ -65,7 +65,7 @@ public class DHTTestUtils {
      * 
      * @throw {@link AssertionFailedError} if not bootstrapped.
      */
-    public static void waitForBootStrap(DHTManager dhtManager, int seconds) throws Exception {
+    public static void waitForBootStrap(DHTManagerImpl dhtManager, int seconds) throws Exception {
         final CountDownLatch bootStrapped = new CountDownLatch(1);
         dhtManager.addEventListener(new DHTEventListener() {
             public void handleDHTEvent(DHTEvent evt) {

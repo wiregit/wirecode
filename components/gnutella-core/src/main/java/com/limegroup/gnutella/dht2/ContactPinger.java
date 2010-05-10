@@ -51,7 +51,7 @@ class ContactPinger implements Closeable {
         this.unit = unit;
     }
     
-    public synchronized void addSocketAddress(SocketAddress address) {
+    public synchronized void addAddress(SocketAddress address) {
         Objects.nonNull(address, "address");
         
         if (open) {

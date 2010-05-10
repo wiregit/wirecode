@@ -24,7 +24,7 @@ public class DHTControllerStub implements DHTController {
     public void addActiveDHTNode(SocketAddress hostAddress) {
     }
     
-    public void addPassiveDHTNode(SocketAddress hostAddress) {
+    public void addPassiveNode(SocketAddress hostAddress) {
     }
 
     public List<IpPort> getActiveDHTNodes(int maxNodes) {

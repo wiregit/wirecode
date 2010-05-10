@@ -834,7 +834,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
-                bind(DHTManager.class).toInstance(testDHTManager);
+                bind(DHTManagerImpl.class).toInstance(testDHTManager);
             }
         });
         
@@ -1293,7 +1293,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
     }
     
-    private static class TestDHTManager implements DHTManager {
+    private static class TestDHTManager implements DHTManagerImpl {
 
         public List<IpPort> getActiveDHTNodes(int maxNodes){
             LinkedList<IpPort> ipps = new LinkedList<IpPort>();
@@ -1309,9 +1309,9 @@ public final class MessageRouterImplTest extends LimeTestCase {
             return ipps;
         }
 
-        public void addActiveDHTNode(SocketAddress hostAddress) {}
+        public void addActiveNode(SocketAddress hostAddress) {}
         
-        public void addPassiveDHTNode(SocketAddress hostAddress) {}
+        public void addPassiveNode(SocketAddress hostAddress) {}
 
         public void addressChanged() {}
         

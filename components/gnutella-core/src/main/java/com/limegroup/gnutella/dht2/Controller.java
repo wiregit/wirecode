@@ -2,11 +2,13 @@ package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.SocketAddress;
 
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
@@ -15,39 +17,31 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-public abstract class Controller implements Closeable, ConnectionLifecycleListener {
+public interface Controller extends Closeable, ConnectionLifecycleListener {
 
-    private final DHTMode mode;
+    public DHTMode getMode();
     
-    public Controller(DHTMode mode) {
-        this.mode = mode;
-    }
+    public boolean isMode(DHTMode other);
     
-    public DHTMode getMode() {
-        return mode;
-    }
+    public MojitoDHT getMojitoDHT();
     
-    public boolean isMode(DHTMode other) {
-        return mode == other;
-    }
+    public boolean isRunning();
     
-    public abstract MojitoDHT getMojitoDHT();
+    public boolean isReady();
     
-    public abstract boolean isRunning();
+    public void start() throws IOException;
     
-    public abstract boolean isReady();
+    public void addressChanged();
     
-    public abstract void start() throws IOException;
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
     
-    public void addressChanged() {
-        
-    }
+    public DHTFuture<ValueEntity> get(EntityKey key);
     
-    public abstract DHTFuture<StoreEntity> put(KUID key, DHTValue value);
+    public Contact[] getActiveContacts(int max);
     
-    public abstract DHTFuture<ValueEntity> get(EntityKey key);
+    public void addActiveNode(SocketAddress address);
     
-    public Contact[] getActiveContacts(int max) {
-        return new Contact[0];
-    }
+    public void addPassiveNode(SocketAddress address);
+    
+    public void handleCollision(CollisionException ex);
 }

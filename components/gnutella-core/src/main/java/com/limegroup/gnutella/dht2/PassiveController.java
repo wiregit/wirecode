@@ -18,7 +18,7 @@ import org.limewire.util.CommonUtils;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-class PassiveController extends Controller {
+class PassiveController extends AbstractController {
 
     private static final Log LOG 
         = LogFactory.getLog(PassiveController.class);

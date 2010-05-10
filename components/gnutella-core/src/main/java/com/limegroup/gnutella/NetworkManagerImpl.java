@@ -46,7 +46,7 @@ import org.limewire.setting.BooleanSetting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
@@ -59,7 +59,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
     private final Provider<UDPService> udpService;
     private final Provider<Acceptor> acceptor;
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final Provider<ConnectionManager> connectionManager;
     private final OutOfBandStatistics outOfBandStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
@@ -95,7 +95,7 @@ public class NetworkManagerImpl implements NetworkManager {
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
             Provider<Acceptor> acceptor,
-            Provider<DHTManager> dhtManager,
+            Provider<DHTManagerImpl> dhtManager,
             Provider<ConnectionManager> connectionManager,
             OutOfBandStatistics outOfBandStatistics,
             NetworkInstanceUtils networkInstanceUtils,

@@ -67,7 +67,7 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileViewManager;

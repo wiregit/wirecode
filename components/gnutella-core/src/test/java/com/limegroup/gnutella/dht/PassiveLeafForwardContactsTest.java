@@ -66,7 +66,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
 
     private ConnectionServices connectionServices;
 
-    private DHTManager dhtManager;
+    private DHTManagerImpl dhtManager;
     
     public PassiveLeafForwardContactsTest(String name) {
         super(name);
@@ -108,7 +108,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         connectionManager = injector.getInstance(ConnectionManager.class);
         
-        dhtManager = injector.getInstance(DHTManager.class);
+        dhtManager = injector.getInstance(DHTManagerImpl.class);
         // Start and bootstrap a bunch of DHT Nodes
         dhts = Collections.emptyList();
         dhts = MojitoUtils.createBootStrappedDHTs(2);

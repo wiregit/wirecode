@@ -80,7 +80,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             PrivilegedAccessor.setValue(controller, "dht", dht);
             
             for(int i = 0; i < 20; i++) {
-                controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
+                controller.addActiveNode(new InetSocketAddress("localhost", 2000+i));
             }
             Thread.sleep(500);
             
@@ -98,7 +98,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             controller.start();
             PrivilegedAccessor.setValue(controller, "dht", dht);
             for(int i = 0; i < 100; i++) {
-                controller.addActiveDHTNode(new InetSocketAddress("localhost", 2100+i));
+                controller.addActiveNode(new InetSocketAddress("localhost", 2100+i));
             }
             //see if the nodes were pinged
             Thread.sleep(500);

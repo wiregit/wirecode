@@ -65,14 +65,14 @@ public class RequeryManagerTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
            @Override
             protected void configure() {
-                bind(DHTManager.class).to(MyDHTManager.class);
+                bind(DHTManagerImpl.class).to(MyDHTManager.class);
                 bind(DownloadManager.class).toInstance(downloadManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
                 bind(ActivationManager.class).toInstance(activationManager);
             } 
         });
 
-        dhtManager = (MyDHTManager)injector.getInstance(DHTManager.class);    
+        dhtManager = (MyDHTManager)injector.getInstance(DHTManagerImpl.class);    
         altLocFinder = (MyAltLocFinder)injector.getInstance(AltLocFinder.class);
         requeryManagerFactory = injector.getInstance(RequeryManagerFactory.class);
         

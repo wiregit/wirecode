@@ -219,7 +219,7 @@ public class StandardMessageRouterTest extends LimeTestCase {
                 OnDemandUnicaster onDemandUnicaster, HeadPongFactory headPongFactory,
                 PingReplyFactory pingReplyFactory, ConnectionManager connectionManager,
                 @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
-                FileViewManager fileManager, ContentManager contentManager, DHTManager dhtManager,
+                FileViewManager fileManager, ContentManager contentManager, DHTManagerImpl dhtManager,
                 UploadManager uploadManager, DownloadManager downloadManager,
                 UDPService udpService, Provider<SearchResultHandler> searchResultHandler,
                 SocketsManager socketsManager, HostCatcher hostCatcher,

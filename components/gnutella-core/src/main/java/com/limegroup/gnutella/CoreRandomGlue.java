@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
@@ -32,7 +32,7 @@ class CoreRandomGlue {
 
     private final Library library;
     private final ConnectionManager connectionManager;
-    private final DHTManager dhtManager;
+    private final DHTManagerImpl dhtManager;
     private final PushProxiesPublisher pushProxiesPublisher;
     private final ConnectionServices connectionServices;
     private final DownloadManager downloadManager;
@@ -45,7 +45,7 @@ class CoreRandomGlue {
     
     @Inject
     CoreRandomGlue(Library library,
-            ConnectionManager connectionManager, DHTManager dhtManager,
+            ConnectionManager connectionManager, DHTManagerImpl dhtManager,
             PushProxiesPublisher pushProxiesPublisher,
             ConnectionServices connectionServices,
             DownloadManager downloadManager, 

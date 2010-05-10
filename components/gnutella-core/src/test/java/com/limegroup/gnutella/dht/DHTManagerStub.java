@@ -17,11 +17,11 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-public class DHTManagerStub implements DHTManager {
+public class DHTManagerStub implements DHTManagerImpl {
     
     public void addActiveDHTNode(SocketAddress hostAddress) {}
     
-    public void addPassiveDHTNode(SocketAddress hostAddress) {}
+    public void addPassiveNode(SocketAddress hostAddress) {}
 
     public void addressChanged() {}
 

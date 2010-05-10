@@ -222,7 +222,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         final MojitoDHT mojitoDHT = context.mock(MojitoDHT.class);
         final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
         final ScheduledFuture future = context.mock(ScheduledFuture.class);
-        final DHTManager dhtManager = context.mock(DHTManager.class);
+        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
         
         
         context.checking(new Expectations() {{

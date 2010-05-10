@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.Transport;
@@ -48,10 +50,12 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht2.BootstrapManager.CollisionCallback;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -64,6 +68,10 @@ class ActiveController extends AbstractController {
     
     private static final File ACTIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
+    
+    private final AtomicBoolean collision = new AtomicBoolean(false);
+    
+    private final ConnectionServices connectionServices;
     
     private final DHTManager manager;
     
@@ -82,6 +90,7 @@ class ActiveController extends AbstractController {
     private Contact[] contacts = null;
     
     public ActiveController(DHTManager manager,
+            CollisionCallback callback,
             NetworkManager networkManager,
             Transport transport, 
             Provider<ConnectionManager> connectionManager,
@@ -90,9 +99,11 @@ class ActiveController extends AbstractController {
             Provider<UniqueHostPinger> uniqueHostPinger,
             MessageFactory messageFactory, 
             ConnectionServices connectionServices,
-            HostFilter filter) throws IOException {
-        super(DHTMode.ACTIVE, connectionServices);
+            HostFilter filter,
+            Provider<UDPPinger> udpPinger) throws IOException {
+        super(DHTMode.ACTIVE);
         
+        this.connectionServices = connectionServices;
         this.manager = manager;
         this.networkManager = networkManager;
         this.transport = transport;
@@ -115,11 +126,20 @@ class ActiveController extends AbstractController {
         dht = new MojitoDHT(context);
         
         bootstrapManager = new BootstrapManager(
-                dht, connectionServices, hostCatcher, 
-                pingRequestFactory, uniqueHostPinger);
+                callback, dht, connectionServices, 
+                hostCatcher, pingRequestFactory, 
+                uniqueHostPinger, udpPinger);
         
         contactPinger = new ContactPinger(dht);
         contactPusher = new ContactPusher(connectionManager);
+    }
+    
+    @Override
+    public void handleCollision(CollisionException ex) {
+        super.handleCollision(ex);
+        
+        collision.set(true);
+        ACTIVE_FILE.delete();
     }
     
     @Override
@@ -269,16 +289,20 @@ class ActiveController extends AbstractController {
         } 
     }
     
-    private void addActiveNode(SocketAddress address) {
+    @Override
+    public void addActiveNode(SocketAddress address) {
         if (dht.isReady()) {
-            contactPinger.addSocketAddress(address);
+            contactPinger.addAddress(address);
         } else {
-            bootstrapManager.addSocketAddress(address);
+            bootstrapManager.addAddress(address);
         }
     }
     
-    private void addPassiveNode(SocketAddress address) {
-        
+    @Override
+    public void addPassiveNode(SocketAddress address) {
+        if (!dht.isReady()) {
+            bootstrapManager.addPassiveNode(address);
+        }
     }
     
     @Override

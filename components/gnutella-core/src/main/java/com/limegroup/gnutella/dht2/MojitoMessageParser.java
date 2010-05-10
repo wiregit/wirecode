@@ -6,7 +6,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 
-public class MojitoMessageParser implements MessageParser {
+class MojitoMessageParser implements MessageParser {
 
     @Override
     public Message parse(byte[] header, byte[] payload, 

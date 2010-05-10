@@ -1,13 +1,16 @@
 package com.limegroup.gnutella.dht2;
 
 import java.io.Closeable;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +19,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Provider;
@@ -24,6 +28,7 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
@@ -51,9 +56,14 @@ class NodeFetcher implements Closeable {
     
     private final Provider<UniqueHostPinger> uniqueHostPinger;
     
+    private final Provider<UDPPinger> udpPinger;
+    
     private final long frequency;
     
     private final TimeUnit unit;
+    
+    private final AtomicBoolean barrier 
+        = new AtomicBoolean(false);
     
     private ScheduledFuture<?> future = null;
     
@@ -63,9 +73,10 @@ class NodeFetcher implements Closeable {
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
-            Provider<UniqueHostPinger> uniqueHostPinger) {
+            Provider<UniqueHostPinger> uniqueHostPinger,
+            Provider<UDPPinger> udpPinger) {
         this(callback, connectionServices, hostCatcher, 
-                pingRequestFactory, uniqueHostPinger, 
+                pingRequestFactory, uniqueHostPinger, udpPinger,
                 DHTSettings.DHT_NODE_FETCHER_TIME.getValue(), 
                 TimeUnit.MILLISECONDS);
     }
@@ -75,6 +86,7 @@ class NodeFetcher implements Closeable {
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
             Provider<UniqueHostPinger> uniqueHostPinger,
+            Provider<UDPPinger> udpPinger,
             long frequency, TimeUnit unit) {
         
         this.callback = callback;
@@ -82,6 +94,7 @@ class NodeFetcher implements Closeable {
         this.hostCatcher = hostCatcher;
         this.pingRequestFactory = pingRequestFactory;
         this.uniqueHostPinger = uniqueHostPinger;
+        this.udpPinger = udpPinger;
         
         this.frequency = frequency;
         this.unit = unit;
@@ -156,10 +169,14 @@ class NodeFetcher implements Closeable {
             }
             
             haveActive = true;
-            callback.addSocketAddress(ep.getInetSocketAddress());
+            callback.addAddress(ep.getInetSocketAddress());
         }
         
         if (haveActive) {
+            return;
+        }
+        
+        if (barrier.get()) {
             return;
         }
         
@@ -175,6 +192,37 @@ class NodeFetcher implements Closeable {
             hostCatcher.get().sendMessageToAllHosts(m, 
                     messageCallback, messageCallback);
         }
+    }
+    
+    /**
+     * 
+     */
+    public boolean ping(SocketAddress address) {
+        synchronized (this) {
+            if (!open) {
+                return false;
+            }
+        }
+        
+        if (!connectionServices.isConnected()) {
+            return false;
+        }   
+        
+        IpPort ipp = new IpPortImpl((InetSocketAddress) address);
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Requesting DHT hosts from host " + address);
+        }
+        
+        if (!barrier.getAndSet(true)) {
+            Message m = pingRequestFactory.createUDPingWithDHTIPPRequest();
+            
+            udpPinger.get().rank(Arrays.asList(ipp), 
+                    new SingleMessageCallback(), null, m, -1);
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -201,7 +249,7 @@ class NodeFetcher implements Closeable {
         }
         
         for (IpPort ipp : list) {
-            callback.addSocketAddress(ipp.getInetSocketAddress());
+            callback.addAddress(ipp.getInetSocketAddress());
         }
     }
     
@@ -235,11 +283,29 @@ class NodeFetcher implements Closeable {
     /**
      * 
      */
+    private class SingleMessageCallback extends MessageCallback {
+
+        @Override
+        public void processMessage(Message m, ReplyHandler handler) {
+            barrier.set(false);
+            super.processMessage(m, handler);
+        }
+        
+        @Override
+        public void unregistered(byte[] guid) {
+            barrier.set(false);
+            super.unregistered(guid);
+        }
+    }
+    
+    /**
+     * 
+     */
     public static interface Callback {
         
         /**
          * 
          */
-        public void addSocketAddress(SocketAddress address);
+        public void addAddress(SocketAddress address);
     }
 }

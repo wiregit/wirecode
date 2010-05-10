@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht2;
 
+import static org.limewire.mojito2.util.ExceptionUtils.getCause;
+
 import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -19,14 +21,17 @@ import org.limewire.listener.EventListener;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
+import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -45,6 +50,8 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     private final Set<SocketAddress> addresses 
         = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
     
+    private final CollisionCallback callback;
+    
     private final MojitoDHT dht;
     
     private final NodeFetcher nodeFetcher;
@@ -55,17 +62,21 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
-    public BootstrapManager(MojitoDHT dht, 
+    public BootstrapManager(CollisionCallback callback,
+            MojitoDHT dht, 
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
-            Provider<UniqueHostPinger> uniqueHostPinger) {
+            Provider<UniqueHostPinger> uniqueHostPinger,
+            Provider<UDPPinger> udpPinger) {
         
+        this.callback = callback;
         this.dht = dht;
         
         this.nodeFetcher = new NodeFetcher(this, 
                 connectionServices, hostCatcher, 
-                pingRequestFactory, uniqueHostPinger);
+                pingRequestFactory, uniqueHostPinger,
+                udpPinger);
     }
     
     /**
@@ -140,7 +151,7 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
                     onPong(event.getResult());
                     break;
                 case EXCEPTION:
-                    onException();
+                    onException(event.getException());
                     break;
                 default:
                     stop();
@@ -184,7 +195,7 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         try {
             switch (event.getType()) {
                 case EXCEPTION:
-                    onException();
+                    onException(event.getException());
                     break;
                 default:
                     onComplete();
@@ -204,13 +215,31 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
      */
     private void uncaughtException(Throwable t) {
         ExceptionUtils.reportIfUnchecked(t);
-        onException();
+        onException(t);
     }
     
     /**
      * 
      */
-    private synchronized void onException() {
+    private synchronized void onException(Throwable t) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Failed to bootstrap", t);
+        }
+        
+        final CollisionException cause = getCause(t, CollisionException.class);
+        
+        if (cause != null) {
+            Runnable event = new Runnable() {
+                @Override
+                public void run() {
+                    callback.handleCollision(cause);
+                }
+            };
+            
+            EventUtils.fireEvent(event);
+            return;
+        }
+        
         tryBootstrap();
     }
     
@@ -218,13 +247,21 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
      * 
      */
     @Override
-    public synchronized void addSocketAddress(SocketAddress address) {
+    public synchronized void addAddress(SocketAddress address) {
         if (!open) {
             return;
         }
         
         addresses.add(address);
         tryBootstrap();
+    }
+    
+    public synchronized void addPassiveNode(SocketAddress address) {
+        if (!open) {
+            return;
+        }
+        
+        nodeFetcher.ping(address);
     }
     
     /**
@@ -299,5 +336,16 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         }
         
         return list.get((int)(list.size() * Math.random()));
+    }
+    
+    /**
+     *
+     */
+    public static interface CollisionCallback {
+        
+        /**
+         * 
+         */
+        public void handleCollision(CollisionException ex);
     }
 }

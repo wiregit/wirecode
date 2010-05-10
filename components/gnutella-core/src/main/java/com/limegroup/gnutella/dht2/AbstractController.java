@@ -1,16 +1,52 @@
 package com.limegroup.gnutella.dht2;
 
-import com.limegroup.gnutella.ConnectionServices;
+import java.net.SocketAddress;
+
+import org.limewire.mojito2.entity.CollisionException;
+import org.limewire.mojito2.routing.Contact;
+
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-abstract class AbstractController extends Controller {
-
-    protected final ConnectionServices connectionServices;
+abstract class AbstractController implements Controller {
     
-    public AbstractController(DHTMode mode, 
-            ConnectionServices connectionServices) {
-        super(mode);
+    private final DHTMode mode;
+    
+    public AbstractController(DHTMode mode) {
+        this.mode = mode;
+    }
+    
+    @Override
+    public DHTMode getMode() {
+        return mode;
+    }
+    
+    @Override
+    public boolean isMode(DHTMode other) {
+        return mode == other;
+    }
+    
+    @Override
+    public void addressChanged() {
         
-        this.connectionServices = connectionServices;
+    }
+    
+    @Override
+    public void addActiveNode(SocketAddress address) {
+        
+    }
+    
+    @Override
+    public void addPassiveNode(SocketAddress address) {
+        
+    }
+    
+    @Override
+    public Contact[] getActiveContacts(int max) {
+        return new Contact[0];
+    }
+    
+    @Override
+    public void handleCollision(CollisionException ex) {
+        
     }
 }

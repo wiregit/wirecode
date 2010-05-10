@@ -12,7 +12,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-class InactiveController extends Controller {
+class InactiveController extends AbstractController {
 
     public static final Controller CONTROLLER = new InactiveController();
     

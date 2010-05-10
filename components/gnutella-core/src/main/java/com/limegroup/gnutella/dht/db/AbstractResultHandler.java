@@ -61,15 +61,17 @@ abstract class AbstractResultHandler implements EventListener<FutureEvent<ValueE
     
     protected final DHTValueType valueType;
     
-    AbstractResultHandler(DHTManager dhtManager, KUID key, SearchListener listener, 
-            DHTValueType valueType) {
+    AbstractResultHandler(DHTManager dhtManager, KUID key, 
+            SearchListener listener, DHTValueType valueType) {
+        
+        if (listener == null) {
+            throw new NullPointerException("listener should not be null");
+        }
+        
         this.dhtManager = dhtManager;
         this.key = key;
         this.listener = listener;
         this.valueType = valueType;
-        if (listener == null) {
-            throw new NullPointerException("listener should not be null");
-        }
     }
     
     @Override
@@ -93,36 +95,33 @@ abstract class AbstractResultHandler implements EventListener<FutureEvent<ValueE
         }
         
         Result outcome = Result.NOT_FOUND;
+        for (DHTValueEntity entity : result.getEntities()) {
+            outcome = updateResult(outcome, handleDHTValueEntity(entity)); 
+        }
         
-        if (result.isSuccess()) {
-            for (DHTValueEntity entity : result.getEntities()) {
-                outcome = updateResult(outcome, handleDHTValueEntity(entity)); 
+        for (EntityKey entityKey : result.getEntityKeys()) {
+            if (!entityKey.getDHTValueType().equals(valueType)) {
+                continue;
             }
             
-            for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.getDHTValueType().equals(valueType)) {
-                    continue;
-                }
-                DHTFuture<ValueEntity> future = dhtManager.get(entityKey);
-                
-                if(future != null) {
-                    try {                        
-                        // TODO make this a non-blocking call
-                        ValueEntity resultFromKey = future.get();
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("result from second lookup: " + resultFromKey);
-                        }
-                        if (resultFromKey.isSuccess()) {
-                            for (DHTValueEntity entity : resultFromKey.getEntities()) {
-                                outcome = updateResult(outcome, handleDHTValueEntity(entity));
-                            }
-                        }
-                    } catch (ExecutionException e) {
-                        LOG.error("ExecutionException", e);
-                    } catch (InterruptedException e) {
-                        LOG.error("InterruptedException", e);
-                    } 
-                }
+            DHTFuture<ValueEntity> future = dhtManager.get(entityKey);
+            if (future != null) {
+                try {                        
+                    // TODO make this a non-blocking call
+                    ValueEntity resultFromKey = future.get();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("result from second lookup: " + resultFromKey);
+                    }
+                    
+                    for (DHTValueEntity entity : resultFromKey.getEntities()) {
+                        outcome = updateResult(outcome, handleDHTValueEntity(entity));
+                    }
+                    
+                } catch (ExecutionException e) {
+                    LOG.error("ExecutionException", e);
+                } catch (InterruptedException e) {
+                    LOG.error("InterruptedException", e);
+                } 
             }
         }
         

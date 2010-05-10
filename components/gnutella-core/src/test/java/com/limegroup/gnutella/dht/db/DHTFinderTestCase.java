@@ -28,7 +28,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
 
     
     protected Mockery context;
-    protected DHTManager dhtManager;
+    protected DHTManagerImpl dhtManager;
     protected List<MojitoDHT> dhts;
     protected MojitoDHT mojitoDHT;
     protected NetworkManagerStub networkManager;
@@ -47,7 +47,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
              
         context = new Mockery();
-        dhtManager = context.mock(DHTManager.class);
+        dhtManager = context.mock(DHTManagerImpl.class);
         
         networkManager = new NetworkManagerStub();
 
@@ -57,7 +57,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManager.class).toInstance(dhtManager);
+                bind(DHTManagerImpl.class).toInstance(dhtManager);
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(ConnectionManager.class).toInstance(connectionManager);
             }

@@ -85,7 +85,6 @@ import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
-import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTaskService;
@@ -240,7 +239,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(TLSManager.class).to(NetworkManagerImpl.class);
         bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).to(NetworkManagerImpl.class);
-        bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
         bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);
         bind(PushProxiesValueFactory.class).to(PushProxiesValueFactoryImpl.class);
         bind(HandshakeResponderFactory.class).to(HandshakeResponderFactoryImpl.class);
@@ -257,7 +255,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
-        bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
         bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
@@ -267,9 +264,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UploadServices.class).to(UploadServicesImpl.class);
         bind(ApplicationServices.class).to(ApplicationServicesImpl.class);
         bind(SpamServices.class).to(SpamServicesImpl.class);
-        bind(DHTControllerFacade.class).to(DHTControllerFacadeImpl.class);
-        bind(DHTBootstrapperFactory.class).to(DHTBootstrapperFactoryImpl.class);
-        bind(DHTNodeFetcherFactory.class).to(DHTNodeFetcherFactoryImpl.class);
         bind(UDPReplyHandlerFactory.class).to(UDPReplyHandlerFactoryImpl.class);
         bind(UDPReplyHandlerCache.class).to(UDPReplyHandlerCacheImpl.class);
         bind(SocketProcessor.class).to(Acceptor.class);

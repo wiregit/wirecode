@@ -5,17 +5,17 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
+import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -43,7 +43,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         Injector injector = LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManager.class).to(DHTManagerStub.class);
+                bind(DHTManagerImpl.class).to(DHTManagerStub.class);
             }            
         });
         factory = injector.getInstance(CapabilitiesVMFactory.class);

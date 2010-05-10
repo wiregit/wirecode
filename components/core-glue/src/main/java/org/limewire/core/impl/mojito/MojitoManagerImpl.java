@@ -11,9 +11,9 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.mojito2.MojitoDHT;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManager;
 
 /**
  * Live implementation of MojitoManager.
@@ -66,15 +66,6 @@ public class MojitoManagerImpl implements MojitoManager {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
-    }
-    
-    /**
-     * Returns the name of the DHT.
-     */
-    @Override
-    public String getName() {
-        MojitoDHT dht = manager.getMojitoDHT();
-        return (dht != null) ? dht.getName() : null;
     }
     
     /**

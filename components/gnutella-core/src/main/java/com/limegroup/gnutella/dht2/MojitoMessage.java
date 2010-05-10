@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 import com.limegroup.gnutella.messages.Message;
 
-public class MojitoMessage implements Message {
+class MojitoMessage implements Message {
 
     private static final int GUILD_LENGTH = 16;
     

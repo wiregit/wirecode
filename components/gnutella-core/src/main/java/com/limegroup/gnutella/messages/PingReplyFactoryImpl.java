@@ -28,6 +28,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Statistics;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -39,7 +40,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final Provider<Statistics> statistics;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<HostCatcher> hostCatcher;
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final LocalPongInfo localPongInfo;
     private final MACCalculatorRepositoryManager macCalculatorRepositoryManager;
     private final NetworkInstanceUtils networkInstanceUtils;
@@ -50,7 +51,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Provider<Statistics> statistics,
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
-            Provider<DHTManager> dhtManager,
+            Provider<DHTManagerImpl> dhtManager,
             LocalPongInfo localPongInfo,
             MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
             NetworkInstanceUtils networkInstanceUtils) {

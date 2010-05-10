@@ -37,7 +37,7 @@ import com.limegroup.gnutella.dht2.DHTEvent.Type;
  * {@link DHTSettings#PUSH_PROXY_STABLE_PUBLISHING_INTERVAL}.
  * <p>
  * Note: For this class to work it must be registered as a listener to
- * {@link DHTManager} before it fires events.
+ * {@link DHTManagerImpl} before it fires events.
  */
 @Singleton
 public class PushProxiesPublisher implements DHTEventListener {

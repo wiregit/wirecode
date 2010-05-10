@@ -14,7 +14,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-class LeafController extends Controller {
+class LeafController extends AbstractController {
 
     public LeafController() {
         super(DHTMode.PASSIVE_LEAF);
