@@ -35,7 +35,6 @@ import com.limegroup.gnutella.URN;
  */
 public class TorrentWebSearchResult implements SearchResult {
     
-    private final URI uri;
     private final URI referrer;
     private final URN urn;
     private final BTData torrentData;
@@ -43,8 +42,7 @@ public class TorrentWebSearchResult implements SearchResult {
     private final Torrent torrent;
 
     public TorrentWebSearchResult(BTData torrentData,
-            URI uri, URI referrer, File torrentFile, Torrent torrent) {
-        this.uri = uri;
+            URI referrer, File torrentFile, Torrent torrent) {
         this.referrer = referrer;
         this.torrentData = torrentData;
         this.torrentFile = torrentFile;

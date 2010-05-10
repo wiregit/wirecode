@@ -175,7 +175,7 @@ public class TorrentWebSearch implements Search {
                     }
                     torrent = torrentFactory.createTorrentFromXML(xmlDocument);
                     if (torrent != null) {
-                        SearchResult result = new TorrentWebSearchResult(torrentData, uri, referrer, torrentFile, torrent);
+                        SearchResult result = new TorrentWebSearchResult(torrentData, referrer, torrentFile, torrent);
                         if (filter.allow(result, xmlDocument)) {
                             LOG.debugf("result accepted: {0}", torrent);
                             searchListener.handleSearchResult(this, result);
