@@ -30,6 +30,8 @@ import net.sf.fmj.media.AbstractGainControl;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.LazySingleton;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -42,6 +44,8 @@ import org.limewire.player.api.PlayerState;
 @LazySingleton
 public class LimeWirePlayer implements Runnable, AudioPlayer {
    
+    private static final Log LOG = LogFactory.getLog(LimeWirePlayer.class);
+    
     /**
      * Sleep time is for when the song is loaded or paused but not playing.
      */
@@ -179,6 +183,8 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
 
     @Override
     public void loadSong(File songFile) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("loading " + songFile);
         loadSong(new AudioSourceImpl(songFile));        
     }
 
@@ -375,18 +381,28 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             notifyOpened(currentAudioFormat.getProperties());
             playerState = PLAYING;
         } catch (IllegalArgumentException e ) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("illegalArguement" + e);
             playerState = STOPPED;
             notifyEvent(NO_SOUND_DEVICE, -1);
         } catch (UnsupportedAudioFileException e) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("unsupported audio file" + e);
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         } catch (IOException e) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("ioexception " + e);
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         } catch (LineUnavailableException e) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("line unavailable" + e);
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         } catch (NullPointerException e) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("null pointer " + e);
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         }
