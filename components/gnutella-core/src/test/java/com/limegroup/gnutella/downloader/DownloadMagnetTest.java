@@ -27,9 +27,9 @@ import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValueImpl;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTManagerImpl.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

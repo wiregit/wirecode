@@ -24,8 +24,8 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 public class NodeAssignerTest extends LimeTestCase {
@@ -33,7 +33,7 @@ public class NodeAssignerTest extends LimeTestCase {
     private Injector injector;
     private NodeAssigner nodeAssigner;
     private BandwidthTracker upTracker, downTracker;
-    private DHTManagerImpl dhtManager;
+    private DHTManager dhtManager;
     private Runnable assignerRunnable;
     private ConnectionServices connectionServices;
     private NetworkManager networkManager;
@@ -64,7 +64,7 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery = new Mockery();
         upTracker = mockery.mock(BandwidthTracker.class);
         downTracker = mockery.mock(BandwidthTracker.class);
-        dhtManager = mockery.mock(DHTManagerImpl.class);
+        dhtManager = mockery.mock(DHTManager.class);
         connectionServices = mockery.mock(ConnectionServices.class);
         networkManager = mockery.mock(NetworkManager.class);
         searchServices = mockery.mock(SearchServices.class);
@@ -85,7 +85,7 @@ public class NodeAssignerTest extends LimeTestCase {
             protected void configure() {
                 bind(BandwidthTracker.class).annotatedWith(Names.named("uploadTracker")).toInstance(upTracker);
                 bind(BandwidthTracker.class).annotatedWith(Names.named("downloadTracker")).toInstance(downTracker);
-                bind(DHTManagerImpl.class).toInstance(dhtManager);
+                bind(DHTManager.class).toInstance(dhtManager);
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(ConnectionServices.class).toInstance(connectionServices);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(ses);
@@ -177,7 +177,7 @@ public class NodeAssignerTest extends LimeTestCase {
             will(returnValue(acceptedIncoming));
             atLeast(invocations).of(searchServices).getLastQueryTime();
             will(returnValue(lastQueryTime)); 
-            atLeast(invocations).of(dhtManager).getDHTMode();
+            atLeast(invocations).of(dhtManager).getMode();
             will(returnValue(currentMode));
             atLeast(invocations).of(dhtManager).isEnabled();
             will(returnValue(DHTEnabled));
@@ -436,7 +436,7 @@ public class NodeAssignerTest extends LimeTestCase {
             will(returnValue(System.currentTimeMillis()));
             
             
-            atLeast(invocations).of(dhtManager).getDHTMode();
+            atLeast(invocations).of(dhtManager).getMode();
             will(returnValue(currentDHTMode));
             atLeast(invocations).of(dhtManager).isEnabled();
             will(returnValue(enabled));

@@ -4,8 +4,6 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -15,9 +13,12 @@ import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-public class DHTManagerStub implements DHTManagerImpl {
+public class DHTManagerStub implements DHTManager {
     
     public void addActiveDHTNode(SocketAddress hostAddress) {}
     
@@ -33,7 +34,7 @@ public class DHTManagerStub implements DHTManagerImpl {
         return null;
     }
 
-    public DHTMode getDHTMode() {
+    public DHTMode getMode() {
         return DHTMode.ACTIVE;
     }
 

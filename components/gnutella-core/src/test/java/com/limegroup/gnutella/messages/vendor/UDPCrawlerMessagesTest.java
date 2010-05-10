@@ -49,7 +49,7 @@ import com.limegroup.gnutella.connection.CountingConnection;
 import com.limegroup.gnutella.connection.CountingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManagerStub;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -168,7 +168,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjectorNonEagerly(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManagerImpl.class).toInstance(new DHTManagerStub());
+                bind(DHTManager.class).toInstance(new DHTManagerStub());
             }
         });
         networkManager = injector.getInstance(NetworkManager.class);

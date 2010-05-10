@@ -8,7 +8,7 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 public class DHTControllerStub implements DHTController {
     

@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -219,7 +219,7 @@ public class StandardMessageRouterTest extends LimeTestCase {
                 OnDemandUnicaster onDemandUnicaster, HeadPongFactory headPongFactory,
                 PingReplyFactory pingReplyFactory, ConnectionManager connectionManager,
                 @Named("forMeReplyHandler") ReplyHandler forMeReplyHandler, QueryUnicaster queryUnicaster,
-                FileViewManager fileManager, ContentManager contentManager, DHTManagerImpl dhtManager,
+                FileViewManager fileManager, ContentManager contentManager, DHTManager dhtManager,
                 UploadManager uploadManager, DownloadManager downloadManager,
                 UDPService udpService, Provider<SearchResultHandler> searchResultHandler,
                 SocketsManager socketsManager, HostCatcher hostCatcher,

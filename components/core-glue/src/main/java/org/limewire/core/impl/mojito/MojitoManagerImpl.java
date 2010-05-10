@@ -11,6 +11,7 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.mojito2.MojitoDHT;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.dht2.Controller;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
@@ -89,7 +90,8 @@ public class MojitoManagerImpl implements MojitoManager {
         
         try {
             // Get DHT using manager.
-            MojitoDHT dht = manager.getMojitoDHT();
+            Controller controller = manager.getController();
+            MojitoDHT dht = controller.getMojitoDHT();
             if (dht == null) {
                 out.println("Mojito is not running");
                 return result;

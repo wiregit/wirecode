@@ -51,7 +51,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         
         DHTContactsMessage msg1 = new DHTContactsMessage(Arrays.asList(c1, c2));
         
-        assertEquals(2, msg1.getContacts().size());
+        assertEquals(2, msg1.getContacts().length);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         msg1.write(baos);
@@ -70,7 +70,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         DHTContactsMessage msg2 = (DHTContactsMessage)vendorMessageFactory.deriveVendorMessage(
                 guid, ttl, hops, payload, Message.Network.UDP);
         
-        assertEquals(2, msg2.getContacts().size());
+        assertEquals(2, msg2.getContacts().length);
         
         assertTrue(msg2.getContacts().contains(c1));
         assertTrue(msg2.getContacts().contains(c2));

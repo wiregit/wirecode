@@ -194,6 +194,9 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         
         try {
             switch (event.getType()) {
+                case SUCCESS:
+                    onSuccess();
+                    break;
                 case EXCEPTION:
                     onException(event.getException());
                     break;
@@ -206,6 +209,16 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         }
     }
     
+    /**
+     * 
+     */
+    private void onSuccess() {
+        onComplete();
+    }
+    
+    /**
+     * 
+     */
     private void onComplete() {
         stop();
     }
