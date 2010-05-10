@@ -16,7 +16,8 @@ import com.google.common.collect.ImmutableSet;
 public class ServicesAreEagerSingletonsTest extends BaseTestCase {
 
     private final static ImmutableSet<String> exceptions = ImmutableSet.of("org.limewire.lifecycle.ServiceRegistryImpl$ServiceHolder$AnnotatedService",
-            "org.limewire.ui.swing.dock.DockIconMacOSXImpl", "org.limewire.lifecycle.ServiceSchedulerImpl"); 
+            "org.limewire.ui.swing.dock.DockIconMacOSXImpl", "org.limewire.lifecycle.ServiceSchedulerImpl",
+            "org.limewire.core.impl.search.torrentweb.TorrentUriDatabaseStore"); 
     
     public void testAllServicesHaveEagerSingletonAnnotations() throws Throwable {
         Set<File> classFiles = LimeTestUtils.getAllClassFiles(this.getClass());

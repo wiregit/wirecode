@@ -436,7 +436,7 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createRemoteBooleanSetting("USE_TORRENT_WEB_SEARCH", true, "SearchSettings.useTorrentWebSearch");
     
     /**
-     * Whether torrent web search should be used or not.
+     * Torrent websearch uri.
      */
     public static final StringSetting TORRENT_WEB_SEARCH_URI_TEMPLATE =
         FACTORY.createRemoteStringSetting("TORRENT_WEB_SEARCH_URI_TEMPLATE", "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=small&safe=off&q={0}%20filetype%3Atorrent", "SearchSettings.torrentWebSearchURITemplate");
