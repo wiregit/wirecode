@@ -79,13 +79,13 @@ class FilterFactoryImpl implements FilterFactory {
 
         return new CompoundFilter(filters,
                 Collections.singletonList(whiteListUpdateUrnFilter.get()),
-                Collections.<ResultFilter>emptyList(),
-                Collections.<ResultFilter>emptyList());
+                Collections.<SearchResultFilter>emptyList(),
+                Collections.<SearchResultFilter>emptyList());
     }
     
     @Override
-    public ResultFilter createResultFilter() {
-        List<ResultFilter> filters = new ArrayList<ResultFilter>();
+    public SearchResultFilter createResultFilter() {
+        List<SearchResultFilter> filters = new ArrayList<SearchResultFilter>();
 
         filters.add(urnFilter.get());
         filters.add(keywordFilter.get());
@@ -96,6 +96,6 @@ class FilterFactoryImpl implements FilterFactory {
         return new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
                 filters,
-                Collections.<ResultFilter>emptyList());
+                Collections.<SearchResultFilter>emptyList());
     }
 }

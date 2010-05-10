@@ -31,7 +31,6 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.core.api.download.DownloadPiecesInfo.PieceState;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -93,7 +92,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
     private JLabel piecesCompletedLabel;
     private JLabel failedDownloadLabel;
     
-    public FileInfoPiecesPanel(FileInfoType type, final DownloadItem download) {
+    public FileInfoPiecesPanel(final DownloadItem download) {
         this.download = download;
         
         GuiUtils.assignResources(this);

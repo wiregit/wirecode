@@ -4,7 +4,7 @@ import org.limewire.core.api.search.SearchResult;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public interface ResultFilter {
+public interface SearchResultFilter {
 
     boolean allow(SearchResult result, LimeXMLDocument document);
     

@@ -77,7 +77,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
     
     @Override
     public FileInfoPanel createLimitsPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoLimitsPanel(type, propertiableFile, torrentSettings);
+        return new FileInfoLimitsPanel(propertiableFile, torrentSettings);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createTrackersPanel(FileInfoType type, PropertiableFile propertiableFile) {
-        return new FileInfoTrackersPanel(type, propertiableFile, tableDecorator.get());
+        return new FileInfoTrackersPanel(propertiableFile, tableDecorator.get());
     }
     
     @Override
@@ -102,7 +102,7 @@ public class FileInfoPanelFactoryImpl implements FileInfoPanelFactory {
 
     @Override
     public FileInfoPanel createPiecesPanel(FileInfoType type, DownloadItem propertiableFile) {
-        return new FileInfoPiecesPanel(type, propertiableFile);
+        return new FileInfoPiecesPanel(propertiableFile);
     }
     
 }

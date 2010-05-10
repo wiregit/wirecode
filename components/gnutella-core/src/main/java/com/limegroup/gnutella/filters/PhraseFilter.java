@@ -9,7 +9,7 @@ import org.limewire.core.api.search.SearchResult;
 import com.google.common.collect.ImmutableList;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
-import com.limegroup.gnutella.filters.response.ResultFilter;
+import com.limegroup.gnutella.filters.response.SearchResultFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -18,7 +18,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /** 
  * A filter that blocks queries and responses matching certain banned phrases.
  */
-public class PhraseFilter implements SpamFilter, ResponseFilter, ResultFilter {
+public class PhraseFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
     
     /** INVARIANT: strings in ban contain only lowercase */
     private final List<String> ban;

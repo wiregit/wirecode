@@ -4,6 +4,6 @@ public interface FilterFactory {
     
     ResponseFilter createResponseFilter();
     
-    ResultFilter createResultFilter();
+    SearchResultFilter createResultFilter();
 
 }

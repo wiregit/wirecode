@@ -50,7 +50,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.filters.response.FilterFactory;
-import com.limegroup.gnutella.filters.response.ResultFilter;
+import com.limegroup.gnutella.filters.response.SearchResultFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -91,7 +91,7 @@ public class TorrentWebSearch implements Search {
 
     private final TorrentFactory torrentFactory;
 
-    private final ResultFilter filter;
+    private final SearchResultFilter filter;
 
     private final TorrentRobotsTxt torrentRobotsTxt;
     

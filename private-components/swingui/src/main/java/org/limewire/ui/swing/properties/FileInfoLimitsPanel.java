@@ -14,10 +14,13 @@ import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.PropertiableFile;
-import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+/**
+ * File info panel for downloads and uploads which provides means for limiting bandwith and
+ *  related things on an individual level.
+ */
 public class FileInfoLimitsPanel implements FileInfoPanel {
     
     @Resource private Color foreground;
@@ -38,7 +41,7 @@ public class FileInfoLimitsPanel implements FileInfoPanel {
         component.add(torrentManagementPanel.getComponent(), "span, wrap");
     }
     
-    public FileInfoLimitsPanel(FileInfoType type, PropertiableFile propertiableFile, TorrentManagerSettings torrentSettings) {
+    public FileInfoLimitsPanel(PropertiableFile propertiableFile, TorrentManagerSettings torrentSettings) {
 
         this.torrentSettings = torrentSettings;
         this.propertiableFile = propertiableFile;

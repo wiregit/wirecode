@@ -17,7 +17,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
-class ProgramsFilter implements ResultFilter, ResponseFilter {
+class ProgramsFilter implements SearchResultFilter, ResponseFilter {
     
     private final CategoryManager categoryManager;
     

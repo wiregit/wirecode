@@ -4,14 +4,14 @@ import java.util.Set;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
-import com.limegroup.gnutella.filters.response.ResultFilter;
+import com.limegroup.gnutella.filters.response.SearchResultFilter;
 import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * A filter that checks query responses, query replies and individual URNs
  * against a URN blacklist.
  */
-public interface URNFilter extends SpamFilter, ResponseFilter, ResultFilter {
+public interface URNFilter extends SpamFilter, ResponseFilter, SearchResultFilter {
 
     /**
      * Reloads the blacklist in a different thread and informs the callback,

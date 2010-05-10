@@ -23,7 +23,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * 
  * If no black filter disallows the response, it will go through.
  */
-class CompoundFilter implements ResponseFilter, ResultFilter {
+class CompoundFilter implements ResponseFilter, SearchResultFilter {
     
     private static final Log LOG =
         LogFactory.getLog(CompoundFilter.class);
@@ -31,15 +31,20 @@ class CompoundFilter implements ResponseFilter, ResultFilter {
     private final List<ResponseFilter> blackListResponseFilters;    
     private final List<ResponseFilter> whiteListResponseFilters;
     
-    private final List<ResultFilter> blackListResultFilters;    
-    private final List<ResultFilter> whiteListResultFilters;
+    private final List<SearchResultFilter> blackListResultFilters;    
+    private final List<SearchResultFilter> whiteListResultFilters;
     
+    /**
+     * Builds a compound filter that contains black/white list response and search result filters.
+     *  The corresponding filter set will be used when matching against the coorisponding filter
+     *  requirements.  If only a specific filter set is needed use an empty set. 
+     */
     CompoundFilter(Collection<? extends ResponseFilter> blackListResponseFilters, Collection<? extends ResponseFilter> whiteListResponseFilters,
-            Collection<? extends ResultFilter> blackListResultFilters, Collection<? extends ResultFilter> whiteListResultFilters) {
+            Collection<? extends SearchResultFilter> blackListResultFilters, Collection<? extends SearchResultFilter> whiteListResultFilters) {
         this.blackListResponseFilters = new ArrayList<ResponseFilter>(blackListResponseFilters);
         this.whiteListResponseFilters = new ArrayList<ResponseFilter>(whiteListResponseFilters);
-        this.blackListResultFilters = new ArrayList<ResultFilter>(blackListResultFilters);
-        this.whiteListResultFilters = new ArrayList<ResultFilter>(whiteListResultFilters);
+        this.blackListResultFilters = new ArrayList<SearchResultFilter>(blackListResultFilters);
+        this.whiteListResultFilters = new ArrayList<SearchResultFilter>(whiteListResultFilters);
     }
     
     @Override
@@ -68,9 +73,9 @@ class CompoundFilter implements ResponseFilter, ResultFilter {
 
     @Override
     public boolean allow(SearchResult result, LimeXMLDocument document) {
-        for(ResultFilter blackFilter : blackListResultFilters) {
+        for(SearchResultFilter blackFilter : blackListResultFilters) {
             if(!blackFilter.allow(result, document)) {
-                for (ResultFilter whiteFilter : whiteListResultFilters) {
+                for (SearchResultFilter whiteFilter : whiteListResultFilters) {
                     if (whiteFilter.allow(result, document)) {
                         if(LOG.isTraceEnabled())
                             LOG.trace("Result whitelisted by " +

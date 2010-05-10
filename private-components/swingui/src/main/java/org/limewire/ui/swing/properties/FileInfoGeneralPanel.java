@@ -354,6 +354,11 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                     
                     referrer = result.getProperty(FilePropertyKey.REFERRER);
                     
+                    // Don't need to display table if we have a referrer
+                    if (referrer != null) {
+                        break;
+                    }
+                    
                     RemoteHost host = result.getSource();
                     Friend f = host.getFriendPresence().getFriend();
                     if (f.getName() != null || f.getRenderName() != null) {
@@ -368,7 +373,7 @@ public class FileInfoGeneralPanel implements FileInfoPanel {
                 // The referrer takes precedence since it indicates a torrent web search
                 if (referrer instanceof URI) {
                     URI referrerURI = (URI) referrer;
-                    component.add(new HyperlinkButton(new UrlAction(I18n.tr("Locate Download"), referrerURI.toASCIIString())), "gapbottom 15, span, wrap");
+                    component.add(new HyperlinkButton(new UrlAction(I18n.tr("Open Website"), referrerURI.toASCIIString())), "gapbottom 15, span, wrap");
                 } else if (model.getRowCount() != 0) {
                     component.add(new JScrollPane(table), "span, grow, wrap");
                 

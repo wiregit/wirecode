@@ -37,8 +37,8 @@ public class CompoundResponseFilterTest extends BaseTestCase {
         
         compoundFilter = new CompoundFilter(Collections.singleton(blackListFilter), 
                 Collections.singleton(whiteListFilter),
-                Collections.<ResultFilter>emptyList(),
-                Collections.<ResultFilter>emptyList());
+                Collections.<SearchResultFilter>emptyList(),
+                Collections.<SearchResultFilter>emptyList());
         
         context.checking(new Expectations() {{
             one(blackListFilter).allow(null, null);
@@ -57,8 +57,8 @@ public class CompoundResponseFilterTest extends BaseTestCase {
         
         compoundFilter = new CompoundFilter(Collections.singleton(blackListFilter), 
                 Collections.singleton(whiteListFilter),
-                Collections.<ResultFilter>emptyList(),
-                Collections.<ResultFilter>emptyList());
+                Collections.<SearchResultFilter>emptyList(),
+                Collections.<SearchResultFilter>emptyList());
         
         context.checking(new Expectations() {{
             one(blackListFilter).allow(null, null);
@@ -80,8 +80,8 @@ public class CompoundResponseFilterTest extends BaseTestCase {
         
         compoundFilter = new CompoundFilter(Arrays.asList(blackListFilter, blackListFilter2, blackListFilter3),
                 Collections.<ResponseFilter>emptyList(),
-                Collections.<ResultFilter>emptyList(), 
-                Collections.<ResultFilter>emptyList());        
+                Collections.<SearchResultFilter>emptyList(), 
+                Collections.<SearchResultFilter>emptyList());        
         
         context.checking(new Expectations() {{
             exactly(1).of(blackListFilter).allow(null, null);
@@ -110,8 +110,8 @@ public class CompoundResponseFilterTest extends BaseTestCase {
         
         compoundFilter = new CompoundFilter(Arrays.asList(blackListFilter, blackListFilter2, blackListFilter3),
                 Collections.<ResponseFilter>emptyList(),
-                Collections.<ResultFilter>emptyList(), 
-                Collections.<ResultFilter>emptyList());     
+                Collections.<SearchResultFilter>emptyList(), 
+                Collections.<SearchResultFilter>emptyList());     
         
         context.checking(new Expectations() {{
             exactly(1).of(blackListFilter).allow(reply1, null);

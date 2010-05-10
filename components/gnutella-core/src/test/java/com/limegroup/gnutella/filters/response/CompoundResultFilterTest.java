@@ -13,8 +13,8 @@ import org.limewire.util.BaseTestCase;
 public class CompoundResultFilterTest extends BaseTestCase {
 
     private Mockery context;
-    private ResultFilter blackListFilter;
-    private ResultFilter whiteListFilter;
+    private SearchResultFilter blackListFilter;
+    private SearchResultFilter whiteListFilter;
     private CompoundFilter compoundFilter;
 
     public CompoundResultFilterTest(String name) {
@@ -32,8 +32,8 @@ public class CompoundResultFilterTest extends BaseTestCase {
     
     public void testWhiteListFilterOverridesBlackListFilter() {
         
-        blackListFilter = context.mock(ResultFilter.class);
-        whiteListFilter = context.mock(ResultFilter.class);
+        blackListFilter = context.mock(SearchResultFilter.class);
+        whiteListFilter = context.mock(SearchResultFilter.class);
         
         compoundFilter = new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
@@ -47,14 +47,14 @@ public class CompoundResultFilterTest extends BaseTestCase {
             will(returnValue(true));
         }});
         
-        assertTrue(((ResultFilter)compoundFilter).allow(null, null));
+        assertTrue(((SearchResultFilter)compoundFilter).allow(null, null));
         context.assertIsSatisfied();
     }
 
     public void testWhiteListFilterIsIgnoredIfBlackListFilterAllowsResponse() {
         
-        blackListFilter = context.mock(ResultFilter.class);
-        whiteListFilter = context.mock(ResultFilter.class);
+        blackListFilter = context.mock(SearchResultFilter.class);
+        whiteListFilter = context.mock(SearchResultFilter.class);
         
         compoundFilter = new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
@@ -67,22 +67,22 @@ public class CompoundResultFilterTest extends BaseTestCase {
             never(whiteListFilter).allow(null, null);
         }});
         
-        assertTrue(((ResultFilter)compoundFilter).allow(null, null));
+        assertTrue(((SearchResultFilter)compoundFilter).allow(null, null));
         context.assertIsSatisfied();
     }
     
     public void testMultipleBlackListFilters() {
         
-        blackListFilter = context.mock(ResultFilter.class);
-        whiteListFilter = context.mock(ResultFilter.class);
+        blackListFilter = context.mock(SearchResultFilter.class);
+        whiteListFilter = context.mock(SearchResultFilter.class);
         
-        final ResultFilter blackListFilter2 = context.mock(ResultFilter.class);
-        final ResultFilter blackListFilter3 = context.mock(ResultFilter.class);
+        final SearchResultFilter blackListFilter2 = context.mock(SearchResultFilter.class);
+        final SearchResultFilter blackListFilter3 = context.mock(SearchResultFilter.class);
         
         compoundFilter = new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
                 Arrays.asList(blackListFilter, blackListFilter2, blackListFilter3), 
-                Collections.<ResultFilter>emptyList());        
+                Collections.<SearchResultFilter>emptyList());        
         
         context.checking(new Expectations() {{
             exactly(2).of(blackListFilter).allow(null, null);
@@ -98,24 +98,24 @@ public class CompoundResultFilterTest extends BaseTestCase {
             will(returnValue(false));
         }});
         
-        assertTrue(((ResultFilter)compoundFilter).allow(null, null));
-        assertFalse(((ResultFilter)compoundFilter).allow(null, null));
+        assertTrue(((SearchResultFilter)compoundFilter).allow(null, null));
+        assertFalse(((SearchResultFilter)compoundFilter).allow(null, null));
         
         context.assertIsSatisfied();
     }
     
     public void testMultipleBlackListFilterShortCircuit() {
         
-        blackListFilter = context.mock(ResultFilter.class);
-        whiteListFilter = context.mock(ResultFilter.class);
+        blackListFilter = context.mock(SearchResultFilter.class);
+        whiteListFilter = context.mock(SearchResultFilter.class);
         
-        final ResultFilter blackListFilter2 = context.mock(ResultFilter.class);
-        final ResultFilter blackListFilter3 = context.mock(ResultFilter.class);
+        final SearchResultFilter blackListFilter2 = context.mock(SearchResultFilter.class);
+        final SearchResultFilter blackListFilter3 = context.mock(SearchResultFilter.class);
         
         compoundFilter = new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
                 Arrays.asList(blackListFilter, blackListFilter2, blackListFilter3), 
-                Collections.<ResultFilter>emptyList());        
+                Collections.<SearchResultFilter>emptyList());        
         
         context.checking(new Expectations() {{
             exactly(1).of(blackListFilter).allow(null, null);
@@ -126,18 +126,18 @@ public class CompoundResultFilterTest extends BaseTestCase {
             
         }});
         
-        assertFalse(((ResultFilter)compoundFilter).allow(null, null));
+        assertFalse(((SearchResultFilter)compoundFilter).allow(null, null));
         
         context.assertIsSatisfied();
     }
     
     public void testMultipleBlackListFilterVariegated() {
         
-        blackListFilter = context.mock(ResultFilter.class);
-        whiteListFilter = context.mock(ResultFilter.class);
+        blackListFilter = context.mock(SearchResultFilter.class);
+        whiteListFilter = context.mock(SearchResultFilter.class);
         
-        final ResultFilter blackListFilter2 = context.mock(ResultFilter.class);
-        final ResultFilter blackListFilter3 = context.mock(ResultFilter.class);
+        final SearchResultFilter blackListFilter2 = context.mock(SearchResultFilter.class);
+        final SearchResultFilter blackListFilter3 = context.mock(SearchResultFilter.class);
         
         final SearchResult result1 = context.mock(SearchResult.class);
         final SearchResult result2 = context.mock(SearchResult.class);
@@ -145,7 +145,7 @@ public class CompoundResultFilterTest extends BaseTestCase {
         compoundFilter = new CompoundFilter(Collections.<ResponseFilter>emptyList(),
                 Collections.<ResponseFilter>emptyList(),
                 Arrays.asList(blackListFilter, blackListFilter2, blackListFilter3), 
-                Collections.<ResultFilter>emptyList());        
+                Collections.<SearchResultFilter>emptyList());        
         
         context.checking(new Expectations() {{
             exactly(1).of(blackListFilter).allow(result1, null);
