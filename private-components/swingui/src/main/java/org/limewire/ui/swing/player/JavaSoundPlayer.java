@@ -77,9 +77,11 @@ public class JavaSoundPlayer implements Player {
         if (!source.getLocator().getProtocol().equals("file"))
             throw new IncompatibleSourceException("Only file URLs supported: " + source);
 
-        String path = URLUtils.extractValidPathFromFileUrl(source
-                .getLocator().toExternalForm());
+        String path = URLUtils.extractValidPathFromFileUrl(source.getLocator().toExternalForm());
 
+        if(path == null)
+            throw new IncompatibleSourceException("Cannot find file path");
+        
         File file = new File(path);
         if(!isPlayable(file)) {
             throw new IncompatibleSourceException("Unplayable file type");
