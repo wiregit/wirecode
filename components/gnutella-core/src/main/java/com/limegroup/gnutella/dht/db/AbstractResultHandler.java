@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -12,6 +16,7 @@ import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.util.ExceptionUtils;
 
 import com.limegroup.gnutella.dht.DHTManager;
 
@@ -53,6 +58,8 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         }
     };
     
+    private final List<EntityKey> entityKeys = new ArrayList<EntityKey>();
+    
     protected final DHTManager dhtManager;
     
     protected final KUID key;
@@ -61,15 +68,19 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     
     protected final DHTValueType valueType;
     
-    AbstractResultHandler(DHTManager dhtManager, KUID key, SearchListener listener, 
-            DHTValueType valueType) {
+    private volatile Result outcome = Result.NOT_FOUND;
+    
+    AbstractResultHandler(DHTManager dhtManager, KUID key, 
+            SearchListener listener, DHTValueType valueType) {
+        
+        if (listener == null) {
+            throw new NullPointerException("listener should not be null");
+        }
+        
         this.dhtManager = dhtManager;
         this.key = key;
         this.listener = listener;
         this.valueType = valueType;
-        if (listener == null) {
-            throw new NullPointerException("listener should not be null");
-        }
     }
     
     @Override
@@ -92,44 +103,58 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
             LOG.debug("result: " + result);
         }
         
-        Result outcome = Result.NOT_FOUND;
+        outcome = Result.NOT_FOUND;
         
-        if (result.isSuccess()) {
-            for (DHTValueEntity entity : result.getEntities()) {
-                outcome = updateResult(outcome, handleDHTValueEntity(entity)); 
-            }
-            
-            for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.getDHTValueType().equals(valueType)) {
-                    continue;
+        try {
+            if (result.isSuccess()) {
+                for (DHTValueEntity entity : result.getEntities()) {
+                    outcome = updateResult(outcome, handleDHTValueEntity(entity)); 
                 }
-                DHTFuture<FindValueResult> future = dhtManager.get(entityKey);
-                if(future != null) {
-                    try {                        
-                        // TODO make this a non-blocking call
-                        FindValueResult resultFromKey = future.get();
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("result from second lookup: " + resultFromKey);
-                        }
-                        if (resultFromKey.isSuccess()) {
-                            for (DHTValueEntity entity : resultFromKey.getEntities()) {
+                
+                entityKeys.addAll(result.getEntityKeys());
+            }
+            doNext();
+            
+        } catch (Throwable t) {
+            uncaughtException(t);
+        }
+    }
+    
+    private void doNext() {
+        if (entityKeys.isEmpty()) {
+            if (outcome == Result.NOT_FOUND) {
+                listener.searchFailed();
+            }
+            return;
+        }
+        
+        EntityKey entityKey = entityKeys.remove(0);
+        DHTFuture<FindValueResult> future 
+            = dhtManager.get(entityKey);
+        
+        future.addFutureListener(new EventListener<FutureEvent<FindValueResult>>() {
+            @Override
+            public void handleEvent(FutureEvent<FindValueResult> event) {
+                try {
+                    if (event.getType() == Type.SUCCESS) {
+                        FindValueResult result = event.getResult();
+                        if (result.isSuccess()) {
+                            for (DHTValueEntity entity : result.getEntities()) {
                                 outcome = updateResult(outcome, handleDHTValueEntity(entity));
                             }
                         }
-                    } catch (ExecutionException e) {
-                        LOG.error("ExecutionException", e);
-                    } catch (InterruptedException e) {
-                        LOG.error("InterruptedException", e);
-                    } 
+                    }
+                    doNext();
+                } catch (Throwable t) {
+                    uncaughtException(t);
                 }
             }
-        }
-        
-        // only notify if we haven't found anything
-        if (outcome == Result.NOT_FOUND) {
-            LOG.debug("Not found");
-            listener.searchFailed();
-        }
+        });
+    }
+    
+    private void uncaughtException(Throwable t) {
+        ExceptionUtils.reportOrReturn(t);
+        listener.searchFailed();
     }
     
     /**
