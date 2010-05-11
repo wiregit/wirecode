@@ -18,6 +18,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 /**
  * A filter that checks query responses, query replies and individual URNs
@@ -132,6 +134,12 @@ class URNFilterImpl implements URNFilter {
                     if(isBlacklisted(u))
                         return true;
                 }
+                LimeXMLDocument doc = r.getDocument();
+                if(doc != null) {
+                    String infohash = doc.getValue(LimeXMLNames.TORRENT_INFO_HASH);
+                    if(infohash != null && isBlacklisted(infohash))
+                        return true;
+                }
             }
             return false;
         } catch(BadPacketException bpe) {
@@ -146,7 +154,15 @@ class URNFilterImpl implements URNFilter {
     public boolean isBlacklisted(URN urn) {
         if(blacklist == null || urn == null)
             return false;
-        if(blacklist.contains(urn.getNamespaceSpecificString())) {
+        return isBlacklisted(urn.getNamespaceSpecificString());
+    }
+
+    /**
+     * Returns true if the given string representation of a URN matches the
+     * blacklist.
+     */
+    private boolean isBlacklisted(String urn) {
+        if(blacklist.contains(urn)) {
             if(LOG.isDebugEnabled())
                 LOG.debug(urn + " is spam");
             return true;
