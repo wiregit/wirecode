@@ -38,6 +38,7 @@ javax.servlet.version=5.1.12
 jcip-annotations.version=
 jdic.version=
 jing.version=
+jl.version=
 jmdns.version=
 jmock.version=
 jmock-junit3.version=
