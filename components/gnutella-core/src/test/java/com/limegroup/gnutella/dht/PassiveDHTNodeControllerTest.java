@@ -1,42 +1,20 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.File;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.IpPort;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.util.MojitoUtils;
-import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.util.CollectionUtils;
-import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.util.EventDispatcher;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
-    private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub 
-        = new DHTEventDispatcherStub();
     private MojitoDHT bootstrapDHT;
-    private DHTControllerFactory dhtControllerFactory;
+    //private DHTControllerFactory dhtControllerFactory;
     private Injector injector;
     
     public PassiveDHTNodeControllerTest(String name) {
@@ -58,9 +36,11 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
         injector = LimeTestUtils.createInjector(new LimeWireIOTestModule());
-        dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
+        //dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
         
-        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
+        bootstrapDHT = startBootstrapDHT(
+                injector.getInstance(LifecycleManager.class));
+        fail("Fix Me!");
     }
     
     @Override
@@ -69,7 +49,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
 
     public void testNodesPersistence() throws Exception{
-        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
+        /*DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
         int numPersistedNodes = DHTSettings.MAX_PERSISTED_NODES.getValue();
         
@@ -104,7 +84,9 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             assertEquals(numPersistedNodes, context.getRouteTable().getActiveContacts().size());
         } finally {
             controller.stop();
-        }
+        }*/
+        
+        fail("Fix Me!");
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
@@ -117,7 +99,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //   There are 20 Nodes from Port 2000 to 20019
         //   Total: 22 Nodes
         
-        PassiveDHTNodeController controller = dhtControllerFactory.createPassiveDHTNodeController(
+        /*PassiveDHTNodeController controller = dhtControllerFactory.createPassiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
@@ -193,6 +175,8 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             for (MojitoDHT dht : dhts) {
                 dht.close();
             }
-        }
+        }*/
+        
+        fail("Fix Me!");
     }
 }

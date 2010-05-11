@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht;
 
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 public class DHTEventDispatcherStub implements EventDispatcher<DHTEvent, DHTEventListener>{

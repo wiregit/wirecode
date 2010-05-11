@@ -34,12 +34,13 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
+import com.limegroup.gnutella.dht2.NodeFetcher.NodeFetcherListener;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
  * 
  */
-class BootstrapManager implements Closeable, NodeFetcher.Callback {
+class BootstrapManager implements Closeable {
 
     private static final Log LOG 
         = LogFactory.getLog(BootstrapManager.class);
@@ -73,10 +74,16 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         
         this.dht = dht;
         
-        this.nodeFetcher = new NodeFetcher(this, 
-                connectionServices, hostCatcher, 
-                pingRequestFactory, uniqueHostPinger,
+        this.nodeFetcher = new NodeFetcher(connectionServices, 
+                hostCatcher, pingRequestFactory, uniqueHostPinger,
                 udpPinger);
+        
+        nodeFetcher.addNodeFetcherListener(new NodeFetcherListener() {
+            @Override
+            public void handleActiveNode(SocketAddress address) {
+                addActiveNode(address);
+            }
+        });
     }
     
     /**
@@ -254,7 +261,6 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     /**
      * 
      */
-    @Override
     public synchronized void addActiveNode(SocketAddress address) {
         if (!open) {
             return;
@@ -266,6 +272,10 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     
     public synchronized void addPassiveNode(SocketAddress address) {
         if (!open) {
+            return;
+        }
+        
+        if (dht.isReady() || dht.isBooting()) {
             return;
         }
         
@@ -346,10 +356,16 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         return list.get((int)(list.size() * Math.random()));
     }
     
+    /**
+     * 
+     */
     public void addBootstrapListener(BootstrapListener l) {
         listeners.add(l);
     }
     
+    /**
+     * 
+     */
     protected void fireReady() {
         Runnable event = new Runnable() {
             @Override
@@ -363,6 +379,9 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         EventUtils.fireEvent(event);
     }
     
+    /**
+     * 
+     */
     protected void fireCollision(final CollisionException ex) {
         Runnable event = new Runnable() {
             @Override

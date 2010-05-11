@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
@@ -34,7 +33,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.dht2.LeafRouteTable;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -73,7 +71,7 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testLookup() throws Exception {
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        /*final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         MojitoDHT passiveLeaf = null;
         List<MojitoDHT> dhts = Collections.emptyList();
@@ -131,13 +129,15 @@ public class PassiveLeafTest extends DHTTestCase {
             if (passiveLeaf != null) {
                 passiveLeaf.close();
             }
-        }
+        }*/
+        
+        fail("Fix Me!");
     }
     
     public void testPassiveLeafController() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        PassiveLeafController controller = injector.getInstance(
+        /*PassiveLeafController controller = injector.getInstance(
                 DHTControllerFactory.class).createPassiveLeafController(Vendor.UNKNOWN,
                 Version.ZERO, new DHTEventDispatcherStub());
         try {
@@ -162,15 +162,15 @@ public class PassiveLeafTest extends DHTTestCase {
             assertEquals(2, routeTable.size());
         } finally {
             controller.stop();
-        }
+        }*/
+        
+        fail("Fix Me!");
     }
     
     public void testPassiveLeafManager() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        DHTManager manager = new DHTManagerImpl(
-                Executors.newSingleThreadExecutor(), 
-                injector.getInstance(DHTControllerFactory.class));
+        DHTManager manager = injector.getInstance(DHTManager.class);
         
         try {
             // Check initial state

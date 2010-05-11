@@ -10,6 +10,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -31,7 +32,8 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.NodeFetcher;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -50,9 +52,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     private DHTBootstrapperStub dhtBootstrapper;
 
     private Injector injector;
-
-    private DHTNodeFetcherFactory dhtNodeFetcherFactory;
-
+    
     private MessageFactory messageFactory;
 
     private MojitoDHT bootstrapDHT;
@@ -87,16 +87,17 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(NodeFetcher.class);
             }            
         });
 
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
-
-        dhtNodeFetcherFactory = injector.getInstance(DHTNodeFetcherFactory.class);        
+        
         messageFactory = injector.getInstance(MessageFactory.class);
         
-        bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
+        bootstrapDHT = startBootstrapDHT(
+                injector.getInstance(LifecycleManager.class));
     }
 
     @Override
@@ -106,139 +107,157 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
     
     public void testRequestDHTHostsFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(dhtBootstrapper);
-        nodeFetcher.start();
-        //request hosts
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[0].getLocalPort());
-        nodeFetcher.requestDHTHosts(addr);
-        byte[] datagramBytes = new byte[1000];
-        DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
-        UDP_ACCESS[0].receive(pack);
-        InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = messageFactory.read(in, Network.TCP);
-        m.hop();
-        assertInstanceof(PingRequest.class, m);
-        PingRequest ping = (PingRequest)m;
-        assertTrue(ping.requestsDHTIPP());
-        
-        //should not send another request until we get the pong
-        nodeFetcher.requestDHTHosts(addr);
-        try{
+        NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
+        try {
+            nodeFetcher.start();
+            //request hosts
+            InetSocketAddress addr 
+                = new InetSocketAddress("127.0.0.1", 
+                        UDP_ACCESS[0].getLocalPort());
+            nodeFetcher.ping(addr);
+            
+            byte[] datagramBytes = new byte[1000];
+            DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
+            UDP_ACCESS[0].receive(pack);
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            Message m = messageFactory.read(in, Network.TCP);
+            m.hop();
+            assertInstanceof(PingRequest.class, m);
+            PingRequest ping = (PingRequest)m;
+            assertTrue(ping.requestsDHTIPP());
+            
+            //should not send another request until we get the pong
+            nodeFetcher.ping(addr);
+            try{
+                datagramBytes = new byte[1000];
+                pack = new DatagramPacket(datagramBytes, 1000);
+                UDP_ACCESS[0].receive(pack);
+                fail("Shouldn't have received a packet");
+            }catch(SocketTimeoutException ste) {}
+            
+            //send the pong now
+            IpPortImpl ipp = new IpPortImpl("213.0.0.1", 1111);
+            PingReply reply = injector.getInstance(PingReplyFactory.class).create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
+                    Arrays.asList(ipp));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            reply.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                    baos.toByteArray().length,
+                    new InetSocketAddress("localhost", injector.getInstance(NetworkManager.class).getPort()));
+            UDP_ACCESS[0].send(pack);
+            //test the processing
+            Thread.sleep(1000);
+            Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
+            assertTrue(hosts.iterator().hasNext());
+            assertEquals(ipp.getInetAddress(), ((InetSocketAddress)hosts.iterator().next()).getAddress());
+            
+            //now we should be able to send a ping again
             datagramBytes = new byte[1000];
             pack = new DatagramPacket(datagramBytes, 1000);
-            UDP_ACCESS[0].receive(pack);
-            fail("Shouldn't have received a packet");
-        }catch(SocketTimeoutException ste) {}
-        
-        //send the pong now
-        IpPortImpl ipp = new IpPortImpl("213.0.0.1", 1111);
-        PingReply reply = injector.getInstance(PingReplyFactory.class).create(ping.getGUID(), (byte)1, IpPort.EMPTY_LIST,
-                Arrays.asList(ipp));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        reply.write(baos);
-        pack = new DatagramPacket(baos.toByteArray(), 
-                baos.toByteArray().length,
-                new InetSocketAddress("localhost", injector.getInstance(NetworkManager.class).getPort()));
-        UDP_ACCESS[0].send(pack);
-        //test the processing
-        Thread.sleep(1000);
-        Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
-        assertTrue(hosts.iterator().hasNext());
-        assertEquals(ipp.getInetAddress(), ((InetSocketAddress)hosts.iterator().next()).getAddress());
-        
-        //now we should be able to send a ping again
-        datagramBytes = new byte[1000];
-        pack = new DatagramPacket(datagramBytes, 1000);
-        addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[1].getLocalPort());
-        nodeFetcher.requestDHTHosts(addr);
-        UDP_ACCESS[1].receive(pack);
-        in = new ByteArrayInputStream(pack.getData());
-        m = messageFactory.read(in, Network.TCP);
-        m.hop();
-        assertInstanceof(PingRequest.class, m);
-        ping = (PingRequest)m;
-        assertTrue(ping.requestsDHTIPP());
+            addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[1].getLocalPort());
+            nodeFetcher.ping(addr);
+            UDP_ACCESS[1].receive(pack);
+            in = new ByteArrayInputStream(pack.getData());
+            m = messageFactory.read(in, Network.TCP);
+            m.hop();
+            assertInstanceof(PingRequest.class, m);
+            ping = (PingRequest)m;
+            assertTrue(ping.requestsDHTIPP());
+        } finally {
+            nodeFetcher.close();
+        }
     }
     
     public void testRequestMultipleTimesFromSingleHost() throws Exception {
-        DHTNodeFetcher nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(dhtBootstrapper);
-//      try to send a ping, unregister it and send another ping
-        nodeFetcher.setPingExpireTime(100);
-        //wait: LISTEN_EXPIRE_TIME is not volatile and a wrong value may be read otherwise
-        Thread.sleep(1000);  
-        byte[] datagramBytes = new byte[1000];
-        DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
-        nodeFetcher.requestDHTHosts(addr);
-        Thread.sleep(500);
-        datagramBytes = new byte[1000];
-        pack = new DatagramPacket(datagramBytes, 1000);
-        addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
-        nodeFetcher.requestDHTHosts(addr);
-        UDP_ACCESS[2].receive(pack);
-        InputStream in = new ByteArrayInputStream(pack.getData());
-        Message m = messageFactory.read(in, Network.TCP);
-        m.hop();
-        assertInstanceof(PingRequest.class, m);
-        PingRequest ping = (PingRequest)m;
-        assertTrue(ping.requestsDHTIPP());
+        NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
         
+        try {
+            // try to send a ping, unregister it and send another ping
+            nodeFetcher.setExpireTime(100, TimeUnit.MILLISECONDS);
+            
+            //wait: LISTEN_EXPIRE_TIME is not volatile and a wrong value may be read otherwise
+            Thread.sleep(1000);  
+            byte[] datagramBytes = new byte[1000];
+            DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
+            nodeFetcher.ping(addr);
+            Thread.sleep(500);
+            datagramBytes = new byte[1000];
+            pack = new DatagramPacket(datagramBytes, 1000);
+            addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
+            nodeFetcher.ping(addr);
+            UDP_ACCESS[2].receive(pack);
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            Message m = messageFactory.read(in, Network.TCP);
+            m.hop();
+            assertInstanceof(PingRequest.class, m);
+            PingRequest ping = (PingRequest)m;
+            assertTrue(ping.requestsDHTIPP());
+        } finally {
+            nodeFetcher.close();
+        }
     }
     
     public void testAddHostCatcherActiveNodes() throws Exception {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(dhtBootstrapper);
-        
-        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
-        for(int i=0; i < UDP_ACCESS.length; i++) {
-            ExtendedEndpoint ep = new ExtendedEndpoint(
-                    "127.0.0.1",
-                    UDP_ACCESS[i].getLocalPort());
-            ep.setDHTVersion(0);
-            ep.setDHTMode(DHTMode.ACTIVE);
-            hostCatcher.add(ep, false);
+        NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
+        try {
+            HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
+            for(int i=0; i < UDP_ACCESS.length; i++) {
+                ExtendedEndpoint ep = new ExtendedEndpoint(
+                        "127.0.0.1",
+                        UDP_ACCESS[i].getLocalPort());
+                ep.setDHTVersion(0);
+                ep.setDHTMode(DHTMode.ACTIVE);
+                hostCatcher.add(ep, false);
+            }
+            
+            nodeFetcher.start();
+            Thread.sleep(500);
+            Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
+            assertEquals(UDP_ACCESS.length, hosts.size());
+        } finally {
+            nodeFetcher.close();
         }
-        
-        nodeFetcher.start();
-        Thread.sleep(500);
-        Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
-        assertEquals(UDP_ACCESS.length, hosts.size());
     }
     
     public void testRequestDHTHostsFromHostCatcher() throws Exception{
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
         dhtBootstrapper.setWaitingForNodes(true);
-        DHTNodeFetcher nodeFetcher = dhtNodeFetcherFactory.createNodeFetcher(dhtBootstrapper);
-        
-        HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
-        for(int i=0; i < UDP_ACCESS.length; i++) {
-            ExtendedEndpoint ep = new ExtendedEndpoint(
-                    "127.0.0.1",
-                    UDP_ACCESS[i].getLocalPort());
-            ep.setDHTVersion(0);
-            ep.setDHTMode(DHTMode.PASSIVE);
-            hostCatcher.add(ep, false);
-        }
-        nodeFetcher.start();
-        Thread.sleep(1000);
-        byte[] datagramBytes;
-        DatagramPacket pack;
-        InputStream in;
-        Message m;
-        PingRequest ping;
-        for(int i=0; i < UDP_ACCESS.length; i++) {
-          datagramBytes = new byte[1000];
-          pack = new DatagramPacket(datagramBytes, 1000);
-          UDP_ACCESS[i].receive(pack);
-          in = new ByteArrayInputStream(pack.getData());
-          m = messageFactory.read(in, Network.TCP);
-          m.hop();
-          assertInstanceof(PingRequest.class, m);
-          ping = (PingRequest)m;
-          assertTrue(ping.requestsDHTIPP());
+        NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
+        try {
+            HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
+            for(int i=0; i < UDP_ACCESS.length; i++) {
+                ExtendedEndpoint ep = new ExtendedEndpoint(
+                        "127.0.0.1",
+                        UDP_ACCESS[i].getLocalPort());
+                ep.setDHTVersion(0);
+                ep.setDHTMode(DHTMode.PASSIVE);
+                hostCatcher.add(ep, false);
+            }
+            nodeFetcher.start();
+            Thread.sleep(1000);
+            byte[] datagramBytes;
+            DatagramPacket pack;
+            InputStream in;
+            Message m;
+            PingRequest ping;
+            for(int i=0; i < UDP_ACCESS.length; i++) {
+                datagramBytes = new byte[1000];
+                pack = new DatagramPacket(datagramBytes, 1000);
+                UDP_ACCESS[i].receive(pack);
+                in = new ByteArrayInputStream(pack.getData());
+                m = messageFactory.read(in, Network.TCP);
+                m.hop();
+                assertInstanceof(PingRequest.class, m);
+                ping = (PingRequest)m;
+                assertTrue(ping.requestsDHTIPP());
+            }
+        } finally {
+            nodeFetcher.close();
         }
     }
     
