@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import org.limewire.io.IpPort;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
@@ -55,6 +56,11 @@ public class DHTManagerStub implements DHTManager {
 
     @Override
     public Controller getController() {
+        return null;
+    }
+    
+    @Override
+    public MojitoDHT getMojitoDHT() {
         return null;
     }
 

@@ -35,6 +35,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.LeafRouteTable;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
@@ -92,7 +93,7 @@ public class PassiveLeafTest extends DHTTestCase {
             passiveLeaf = MojitoFactory.createDHT("PassiveLeaf");
             ((Context)passiveLeaf).setBootstrapped(true);
             ((Context)passiveLeaf).setBucketRefresherDisabled(true);
-            RouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
+            RouteTable routeTable = new LeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
             passiveLeaf.setRouteTable(routeTable);
             passiveLeaf.bind(4000);
             passiveLeaf.start();
@@ -101,7 +102,7 @@ public class PassiveLeafTest extends DHTTestCase {
             try {
                 EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
                 ValueEntity r = passiveLeaf.get(lookupKey).get();
-                if (!r.getEntities().isEmpty()) {
+                if (r.getEntities().length != 0) {
                     fail("Should not have got DHTValue: " + r);
                 }
             } catch (ExecutionException err) {
@@ -117,7 +118,7 @@ public class PassiveLeafTest extends DHTTestCase {
             try {
                 EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
                 ValueEntity r = passiveLeaf.get(lookupKey).get();
-                if (r.getEntities().isEmpty()) {
+                if (r.getEntities().length == 0) {
                     fail("Should have found DHTValue");
                 }
             } catch (ExecutionException err) {
@@ -149,7 +150,7 @@ public class PassiveLeafTest extends DHTTestCase {
             
             RouteTable routeTable = dht.getRouteTable();
             assertEquals(1, routeTable.size());
-            assertTrue(routeTable instanceof PassiveLeafRouteTable);
+            assertTrue(routeTable instanceof LeafRouteTable);
             
             // Add a Contact
             Contact c = ContactFactory.createUnknownContact(

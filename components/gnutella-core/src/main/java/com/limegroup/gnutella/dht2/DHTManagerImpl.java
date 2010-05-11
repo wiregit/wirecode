@@ -12,6 +12,7 @@ import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.StoreEntity;
@@ -206,6 +207,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     @Override
     public synchronized Controller getController() {
         return controller;
+    }
+    
+    @Override
+    public synchronized MojitoDHT getMojitoDHT() {
+        return controller.getMojitoDHT();
     }
 
     @Override

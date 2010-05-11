@@ -17,7 +17,10 @@ import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht.DHTEvent.Type;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTEvent.Type;
 
 public class DHTTestUtils {
 
@@ -65,7 +68,7 @@ public class DHTTestUtils {
      * 
      * @throw {@link AssertionFailedError} if not bootstrapped.
      */
-    public static void waitForBootStrap(DHTManagerImpl dhtManager, int seconds) throws Exception {
+    public static void waitForBootStrap(DHTManager dhtManager, int seconds) throws Exception {
         final CountDownLatch bootStrapped = new CountDownLatch(1);
         dhtManager.addEventListener(new DHTEventListener() {
             public void handleDHTEvent(DHTEvent evt) {
@@ -74,7 +77,8 @@ public class DHTTestUtils {
                 }
             }
         });
-        if (!dhtManager.isBootstrapped()) {
+        
+        if (!dhtManager.isReady()) {
             AssertComparisons.assertTrue(bootStrapped.await(seconds, TimeUnit.SECONDS));
         }
     }

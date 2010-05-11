@@ -69,7 +69,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
 
     private ConnectionServices connectionServices;
 
-    private DHTManagerImpl dhtManager;
+    private DHTManager dhtManager;
     
     public PassiveLeafForwardContactsTest(String name) {
         super(name);
