@@ -83,7 +83,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
                 synchronized (DHTFutureTask.this) {
                     if (!isDone()) {
                         wasTimeout = true;
-                        setException(new TimeoutException());
+                        handleTimeout(timeout, unit);
                     }
                 }
             }
@@ -91,6 +91,15 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
         
         watchdog = WATCHDOG.schedule(task, timeout, unit);
         return true;
+    }
+    
+    /**
+     * Called in case of a timeout. The default implmenetation
+     * calls {@link #setException(Throwable)} with a {@link TimeoutException}
+     * as an argument.
+     */
+    protected void handleTimeout(long timeout, TimeUnit unit) {
+        setException(new TimeoutException(timeout + " " + unit));
     }
     
     @Override
