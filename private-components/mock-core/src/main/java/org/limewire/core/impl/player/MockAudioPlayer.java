@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
-import javax.media.GainControl;
-
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
@@ -99,9 +97,9 @@ public class MockAudioPlayer implements AudioPlayer{
     }
 
     @Override
-    public GainControl getGainControl() {
+    public float getVolume() {
         // TODO Auto-generated method stub
-        return null;
+        return 0;
     }
 
 }
