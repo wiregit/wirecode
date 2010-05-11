@@ -56,7 +56,7 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.BootstrapManager.CollisionCallback;
+import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -91,7 +91,6 @@ class ActiveController extends AbstractController {
     private Contact[] contacts = null;
     
     public ActiveController(DHTManager manager,
-            CollisionCallback callback,
             NetworkManager networkManager,
             Transport transport, 
             Provider<ConnectionManager> connectionManager,
@@ -127,25 +126,32 @@ class ActiveController extends AbstractController {
         dht = new DefaultMojitoDHT(context);
         
         bootstrapManager = new BootstrapManager(
-                callback, dht, connectionServices, 
+                dht, connectionServices, 
                 hostCatcher, pingRequestFactory, 
                 uniqueHostPinger, udpPinger);
+        
+        bootstrapManager.addBootstrapListener(new BootstrapListener() {
+            @Override
+            public void handleReady() {}
+            
+            @Override
+            public void handleCollision(CollisionException ex) {
+                collision.set(true);
+                ACTIVE_FILE.delete();
+            }
+        });
         
         contactPinger = new ContactPinger(dht);
         contactPusher = new ContactPusher(connectionManager);
     }
     
     @Override
-    public void handleCollision(CollisionException ex) {
-        super.handleCollision(ex);
-        
-        collision.set(true);
-        ACTIVE_FILE.delete();
-    }
-    
-    @Override
     public MojitoDHT getMojitoDHT() {
         return dht;
+    }
+    
+    public BootstrapManager getBootstrapManager() {
+        return bootstrapManager;
     }
     
     private Contact[] init(Context context) throws IOException {

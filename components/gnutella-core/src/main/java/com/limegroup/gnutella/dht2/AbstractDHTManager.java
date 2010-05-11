@@ -6,6 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.mojito2.util.EventUtils;
 import org.limewire.util.Objects;
 
+import com.limegroup.gnutella.dht2.DHTEvent.Type;
+
 /**
  * 
  */
@@ -27,10 +29,22 @@ abstract class AbstractDHTManager implements DHTManager {
         listeners.remove(listener);
     }
     
+    protected synchronized void fireStarting() {
+        dispatchEvent(new DHTEvent(Type.STARTING, getController()));
+    }
+    
+    protected synchronized void fireStopped() {
+        dispatchEvent(new DHTEvent(Type.STOPPED, getController()));
+    }
+    
+    protected synchronized void fireConnected() {
+        dispatchEvent(new DHTEvent(Type.CONNECTED, getController()));
+    }
+    
     /**
      * 
      */
-    void dispatchEvent(final DHTEvent evt) {
+    private void dispatchEvent(final DHTEvent evt) {
         if (!listeners.isEmpty()) {
             Runnable event = new Runnable() {
                 @Override

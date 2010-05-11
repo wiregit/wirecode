@@ -11,6 +11,7 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.MatchAndCopy;
 
+import com.limegroup.gnutella.dht2.Controller;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
@@ -52,7 +53,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
 
     public void testIsRunning() {
         Mockery context = new Mockery();
-        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
+        final DHTManager dhtManager = context.mock(DHTManager.class);
 
         MojitoManagerImpl managerImpl = new MojitoManagerImpl(dhtManager);
 
@@ -87,7 +88,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final DHTManager dhtManager = context.mock(DHTManager.class);
-        final DHTController dhtController = context.mock(DHTController.class);
+        final Controller dhtController = context.mock(Controller.class);
         
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
         final PropertyChangeListener listener2 = context.mock(PropertyChangeListener.class);
@@ -112,16 +113,19 @@ public class MojitoManagerImplTest extends BaseTestCase {
         manager.addPropertyChangeListener(listener2);
         
         // Fire an event
-        listenerCollector.getLastMatch().handleDHTEvent(new DHTEvent(dhtController, DHTEvent.Type.CONNECTED));
+        listenerCollector.getLastMatch().handleDHTEvent(
+                new DHTEvent(DHTEvent.Type.CONNECTED, dhtController));
         
         // Remove an external Listener
         manager.removePropertyChangeListener(listener2);
         
         // Fire another event that should not be bounced because caching
-        listenerCollector.getLastMatch().handleDHTEvent(new DHTEvent(dhtController, DHTEvent.Type.STOPPED));
+        listenerCollector.getLastMatch().handleDHTEvent(
+                new DHTEvent(DHTEvent.Type.STOPPED, dhtController));
         
         // Fire another event that should fire a property changed event
-        listenerCollector.getLastMatch().handleDHTEvent(new DHTEvent(dhtController, DHTEvent.Type.CONNECTED));
+        listenerCollector.getLastMatch().handleDHTEvent(
+                new DHTEvent(DHTEvent.Type.CONNECTED, dhtController));
         
         context.assertIsSatisfied();
     }

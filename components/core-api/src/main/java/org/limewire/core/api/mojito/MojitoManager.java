@@ -33,4 +33,8 @@ public interface MojitoManager {
      */
     public boolean handle(String command, PrintWriter out);
     
+    /**
+     * Returns the name of the DHT.
+     */
+    public String getName();
 }

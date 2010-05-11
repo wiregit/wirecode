@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -43,14 +44,15 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     private static final Log LOG 
         = LogFactory.getLog(BootstrapManager.class);
     
+    private final List<BootstrapListener> listeners 
+        = new CopyOnWriteArrayList<BootstrapListener>();
+    
     /**
      * A list of DHT bootstrap hosts coming from the Gnutella network. 
      * Limit size to 50 for now.
      */
     private final Set<SocketAddress> addresses 
         = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
-    
-    private final CollisionCallback callback;
     
     private final MojitoDHT dht;
     
@@ -62,15 +64,13 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
-    public BootstrapManager(CollisionCallback callback,
-            MojitoDHT dht, 
+    public BootstrapManager(MojitoDHT dht, 
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
             Provider<UniqueHostPinger> uniqueHostPinger,
             Provider<UDPPinger> udpPinger) {
         
-        this.callback = callback;
         this.dht = dht;
         
         this.nodeFetcher = new NodeFetcher(this, 
@@ -213,6 +213,7 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
      * 
      */
     private void onSuccess() {
+        fireReady();
         onComplete();
     }
     
@@ -239,17 +240,11 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
             LOG.debug("Failed to bootstrap", t);
         }
         
-        final CollisionException cause = getCause(t, CollisionException.class);
+        final CollisionException cause 
+            = getCause(t, CollisionException.class);
         
         if (cause != null) {
-            Runnable event = new Runnable() {
-                @Override
-                public void run() {
-                    callback.handleCollision(cause);
-                }
-            };
-            
-            EventUtils.fireEvent(event);
+            fireCollision(cause);
             return;
         }
         
@@ -351,10 +346,45 @@ class BootstrapManager implements Closeable, NodeFetcher.Callback {
         return list.get((int)(list.size() * Math.random()));
     }
     
+    public void addBootstrapListener(BootstrapListener l) {
+        listeners.add(l);
+    }
+    
+    protected void fireReady() {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleReady();
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
+    protected void fireCollision(final CollisionException ex) {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleCollision(ex);
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
     /**
-     *
+     * 
      */
-    public static interface CollisionCallback {
+    public static interface BootstrapListener {
+        
+        /**
+         * 
+         */
+        public void handleReady();
         
         /**
          * 

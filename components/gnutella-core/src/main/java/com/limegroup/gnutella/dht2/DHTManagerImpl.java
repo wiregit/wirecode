@@ -38,8 +38,7 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.BootstrapManager.CollisionCallback;
-import com.limegroup.gnutella.dht2.DHTEvent.Type;
+import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -49,18 +48,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
 
     private static final Log LOG 
         = LogFactory.getLog(DHTManagerImpl.class);
-    
-    private final CollisionCallback callback = new CollisionCallback() {
-        @Override
-        public void handleCollision(CollisionException ex) {
-            synchronized (DHTManagerImpl.this) {
-                DHTMode mode = controller.getMode();
-                controller.handleCollision(ex);
-                stop();
-                start(mode);
-            }
-        }
-    };
     
     private final NetworkManager networkManager;
     
@@ -169,7 +156,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
             }
         
             controller.start();
-            dispatchEvent(new DHTEvent(Type.STARTING, controller));
+            fireStarting();
             
             return true;
         } catch (IOException err) {
@@ -184,7 +171,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     public synchronized void stop() {
         IoUtils.close(controller);
         
-        dispatchEvent(new DHTEvent(Type.STOPPED, controller));
+        fireStopped();
         controller = InactiveController.CONTROLLER;
     }
     
@@ -260,10 +247,29 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         HostFilter hostFilter 
             = new HostFilterDelegate(ipFilter);
         
-        return new ActiveController(this, callback, networkManager, 
-                transport, connectionManager, hostCatcher, 
+        ActiveController controller = new ActiveController(this, 
+                networkManager, transport, connectionManager, hostCatcher, 
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
                 connectionServices, hostFilter, udpPinger);
+        
+        BootstrapManager bootstrapManager 
+            = controller.getBootstrapManager();
+        bootstrapManager.addBootstrapListener(new BootstrapListener() {
+            @Override
+            public void handleReady() {
+                fireConnected();
+            }
+            
+            @Override
+            public void handleCollision(CollisionException ex) {
+                synchronized (DHTManagerImpl.this) {
+                    stop();
+                    start(DHTMode.ACTIVE);
+                }
+            }
+        });
+        
+        return controller;
     }
     
     private Controller createPassive() {

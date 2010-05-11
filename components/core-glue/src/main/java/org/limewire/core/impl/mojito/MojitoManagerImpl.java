@@ -35,7 +35,13 @@ public class MojitoManagerImpl implements MojitoManager {
     public MojitoManagerImpl(DHTManager manager) {
         this.manager = manager;
     }
-
+    
+    @Override
+    public String getName() {
+        MojitoDHT dht = manager.getMojitoDHT();
+        return (dht != null) ? dht.getName() : null;
+    }
+    
     /**
      * Add listener to fire property change on DHT event.
      */
