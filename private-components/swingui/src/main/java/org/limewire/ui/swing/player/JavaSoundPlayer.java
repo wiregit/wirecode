@@ -159,9 +159,9 @@ public class JavaSoundPlayer implements Player {
     @Override
     public void deallocate() {
         audioProperties = null;
-        if(playerListener != null && audioPlayer != null)
-            audioPlayer.removeAudioPlayerListener(playerListener);
-        audioPlayer = null;
+//        if(playerListener != null && audioPlayer != null)
+//            audioPlayer.removeAudioPlayerListener(playerListener);
+//        audioPlayer = null;
     }
 
     @Override
