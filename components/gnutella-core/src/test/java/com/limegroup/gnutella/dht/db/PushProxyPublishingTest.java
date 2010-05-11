@@ -14,7 +14,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -28,9 +28,9 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.DHTTestUtils;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 
 /**
@@ -42,7 +42,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
     
     private Injector injector;
 
-    private DHTManagerImpl dhtManager;
+    private DHTManager dhtManager;
 
     private List<MojitoDHT> dhts;
 
@@ -72,7 +72,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
             }
         });
-        dhtManager = injector.getInstance(DHTManagerImpl.class);
+        dhtManager = injector.getInstance(DHTManager.class);
         hostCatcher = injector.getInstance(HostCatcher.class);
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
@@ -99,7 +99,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
     
     public void testPushProxiesArePublished() throws Exception {
         MojitoDHT dht = dhts.get(0);
-        assertTrue(dht.isBootstrapped());
+        assertTrue(dht.isReady());
         
         ExtendedEndpoint endpoint = new ExtendedEndpoint((InetSocketAddress)dht.getContactAddress());
         endpoint.setDHTMode(DHTMode.ACTIVE);

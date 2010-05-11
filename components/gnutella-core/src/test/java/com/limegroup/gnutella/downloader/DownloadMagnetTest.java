@@ -85,7 +85,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
              dhts = MojitoUtils.createBootStrappedDHTs(1);
 
              MojitoDHT node  = dhts.get(0);
-             assertTrue(node.isBootstrapped());
+             assertTrue(node.isReady());
              
              ExtendedEndpoint endpoint = new ExtendedEndpoint((InetSocketAddress)node.getContactAddress());
              endpoint.setDHTMode(DHTMode.ACTIVE);

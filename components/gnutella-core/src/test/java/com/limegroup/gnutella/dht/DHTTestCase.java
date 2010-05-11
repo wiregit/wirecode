@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RemoteContact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -27,14 +28,13 @@ public abstract class DHTTestCase extends LimeTestCase {
         super(name);
     }
     
-    protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
+    protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws IOException {
         assertFalse("bootstrap DHT already started", bootstrapped);
         bootstrapped = true;
         
         // setup bootstrap node
-        MojitoDHT bootstrapDHT = MojitoFactory.createDHT("bootstrapNode");
-        bootstrapDHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
-        bootstrapDHT.start();
+        MojitoDHT bootstrapDHT = MojitoFactory.createDHT(
+                "bootstrapNode", BOOTSTRAP_DHT_PORT);
         
         org.limewire.core.settings.NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);

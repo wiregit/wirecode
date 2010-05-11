@@ -5,9 +5,9 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.PingRequest;
 import org.limewire.mojito2.routing.Contact;

@@ -36,6 +36,7 @@ import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;

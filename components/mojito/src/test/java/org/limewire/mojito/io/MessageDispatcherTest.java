@@ -6,11 +6,11 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;

@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
@@ -15,6 +14,7 @@ import org.limewire.mojito2.Context;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.ValueEntity;

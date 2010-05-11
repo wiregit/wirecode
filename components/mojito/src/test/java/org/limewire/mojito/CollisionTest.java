@@ -30,6 +30,7 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.routing.Contact;

@@ -126,6 +126,16 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener {
     /**
      * 
      */
+    public Vendor getVendor();
+    
+    /**
+     * 
+     */
+    public Version getVersion();
+    
+    /**
+     * 
+     */
     public boolean start(DHTMode mode);
 
     /**

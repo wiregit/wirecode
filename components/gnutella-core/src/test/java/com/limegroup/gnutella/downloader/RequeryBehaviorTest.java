@@ -38,7 +38,7 @@ import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.dht2.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 public class RequeryBehaviorTest extends LimeTestCase {
@@ -73,7 +73,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         Module m = new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManagerImpl.class).toInstance(myDHTManager);
+                bind(DHTManager.class).toInstance(myDHTManager);
                 bind(AltLocFinder.class).to(MyAltLocFinder.class);
                 bind(ActivationManager.class).toInstance(activationManager);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).to(MyExecutor.class);

@@ -1,11 +1,8 @@
-package org.limewire.mojito;
+package org.limewire.mojito2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.limewire.mojito2.Context;
-import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.io.DatagramTransport;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.DefaultMessageFactory;
@@ -29,7 +26,7 @@ public class MojitoFactory {
         Context context = new Context(name, messageFactory, 
                 routeTable, database);
         
-        return new MojitoDHT(context);
+        return new DefaultMojitoDHT(context);
     }
     
     public static MojitoDHT createDHT(String name, int port) throws IOException {

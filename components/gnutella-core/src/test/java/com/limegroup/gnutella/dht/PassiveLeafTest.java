@@ -12,14 +12,14 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito2.Context;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
@@ -33,7 +33,9 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 public class PassiveLeafTest extends DHTTestCase {
@@ -79,9 +81,12 @@ public class PassiveLeafTest extends DHTTestCase {
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(
-											  DHTValueType.BINARY, Version.ZERO, StringUtils.toAsciiBytes("Hello World"));
-            StoreResult result = dhts.get(0).put(key, value).get();
-            assertEquals(k, result.getLocations().size());
+                    DHTValueType.BINARY, 
+                    Version.ZERO, 
+                    StringUtils.toAsciiBytes("Hello World"));
+            
+            StoreEntity result = dhts.get(0).put(key, value).get();
+            assertEquals(k, result.getContacts().length);
             
             // Create a passive leaf Node
             passiveLeaf = MojitoFactory.createDHT("PassiveLeaf");
@@ -95,7 +100,7 @@ public class PassiveLeafTest extends DHTTestCase {
             // Try to get the value which should fail
             try {
                 EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
-                FindValueResult r = passiveLeaf.get(lookupKey).get();
+                ValueEntity r = passiveLeaf.get(lookupKey).get();
                 if (!r.getEntities().isEmpty()) {
                     fail("Should not have got DHTValue: " + r);
                 }
@@ -111,7 +116,7 @@ public class PassiveLeafTest extends DHTTestCase {
             // Try again and it should work now
             try {
                 EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
-                FindValueResult r = passiveLeaf.get(lookupKey).get();
+                ValueEntity r = passiveLeaf.get(lookupKey).get();
                 if (r.getEntities().isEmpty()) {
                     fail("Should have found DHTValue");
                 }
@@ -131,14 +136,15 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafController() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        PassiveLeafController controller = injector.getInstance(DHTControllerFactory.class).createPassiveLeafController(Vendor.UNKNOWN,
+        PassiveLeafController controller = injector.getInstance(
+                DHTControllerFactory.class).createPassiveLeafController(Vendor.UNKNOWN,
                 Version.ZERO, new DHTEventDispatcherStub());
         try {
             controller.start();
             
             // Check initial state
             MojitoDHT dht = controller.getMojitoDHT();
-            assertTrue(dht.isBootstrapped());
+            assertTrue(dht.isReady());
             assertTrue(dht.isFirewalled());
             
             RouteTable routeTable = dht.getRouteTable();
@@ -161,25 +167,28 @@ public class PassiveLeafTest extends DHTTestCase {
     public void testPassiveLeafManager() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        DHTManagerImpl manager = new DHTManagerImpl(Executors.newSingleThreadExecutor(), injector.getInstance(DHTControllerFactory.class));
+        DHTManager manager = new DHTManagerImpl(
+                Executors.newSingleThreadExecutor(), 
+                injector.getInstance(DHTControllerFactory.class));
+        
         try {
             // Check initial state
-            assertEquals(DHTMode.INACTIVE, manager.getDHTMode());
+            assertEquals(DHTMode.INACTIVE, manager.getMode());
             
             // Start in passive mode
             manager.start(DHTMode.PASSIVE_LEAF);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE_LEAF, manager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE_LEAF, manager.getMode());
             
             // Stop and it should be in inital state again
             manager.stop();
             Thread.sleep(250);
-            assertEquals(DHTMode.INACTIVE, manager.getDHTMode());
+            assertEquals(DHTMode.INACTIVE, manager.getMode());
             
             // Start again
             manager.start(DHTMode.PASSIVE_LEAF);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE_LEAF, manager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE_LEAF, manager.getMode());
             
             // Add a Contact through handleDHTContactsMessage(Contact)
             Contact c = ContactFactory.createUnknownContact(

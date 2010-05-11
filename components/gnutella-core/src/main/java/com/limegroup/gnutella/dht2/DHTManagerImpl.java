@@ -18,6 +18,8 @@ import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.Vendor;
+import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
@@ -191,6 +193,16 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         stop();
     }
     
+    @Override
+    public Vendor getVendor() {
+        return VENDOR;
+    }
+
+    @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
     @Override
     public synchronized Controller getController() {
         return controller;

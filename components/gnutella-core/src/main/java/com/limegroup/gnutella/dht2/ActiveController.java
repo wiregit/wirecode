@@ -22,6 +22,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -123,7 +124,7 @@ class ActiveController extends AbstractController {
         KUID contactId = localhost.getNodeID();
         DHTSettings.DHT_NODE_ID.set(contactId.toHexString());
         
-        dht = new MojitoDHT(context);
+        dht = new DefaultMojitoDHT(context);
         
         bootstrapManager = new BootstrapManager(
                 callback, dht, connectionServices, 
@@ -266,7 +267,7 @@ class ActiveController extends AbstractController {
     @Override
     public void addressChanged() {
         try {
-            LocalContact contact = dht.getLocalNode();
+            LocalContact contact = (LocalContact)dht.getLocalNode();
             updateLocalhost(contact);
         } catch (IOException err) {
             LOG.error("IOException", err);

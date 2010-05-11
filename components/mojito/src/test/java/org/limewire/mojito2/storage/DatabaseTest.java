@@ -30,10 +30,10 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.message.DefaultMessageFactory;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;

@@ -1,90 +1,129 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.List;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.Controller;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 public class DHTManagerStub implements DHTManager {
-    
-    public void addActiveDHTNode(SocketAddress hostAddress) {}
-    
-    public void addPassiveNode(SocketAddress hostAddress) {}
 
-    public void addressChanged() {}
+    @Override
+    public void addActiveNode(SocketAddress address) {
+    }
 
-    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+    @Override
+    public void addEventListener(DHTEventListener listener) {
+    }
+
+    @Override
+    public void addPassiveNode(SocketAddress address) {
+    }
+
+    @Override
+    public void addressChanged() {
+    }
+
+    @Override
+    public DHTFuture<ValueEntity> get(EntityKey key) {
         return null;
     }
 
-    public MojitoDHT getMojitoDHT() {
+    @Override
+    public Contact[] getActiveContacts(int max) {
+        return new Contact[0];
+    }
+
+    @Override
+    public IpPort[] getActiveIpPort(int max) {
+        return new IpPort[0];
+    }
+
+    @Override
+    public Controller getController() {
         return null;
     }
 
+    @Override
     public DHTMode getMode() {
         return DHTMode.ACTIVE;
     }
 
-    public boolean isRunning() {return true;}
-
-    public boolean isWaitingForNodes() {return false;}
-    
-    public void addEventListener(DHTEventListener listener) {}
-
-    public void dispatchEvent(DHTEvent event) {}
-
-    public void removeEventListener(DHTEventListener listener) {}
-
-    public void start(DHTMode mode) {}
-
-    public void stop() {}
-
-    public boolean isBootstrapped() {
-        return true;
-    }
-
-    public boolean isMemberOfDHT() {
-        return isRunning() && isBootstrapped();
-    }
-    
-    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
-
+    @Override
     public Vendor getVendor() {
-        return Vendor.UNKNOWN;
-    }
-    
-    public Version getVersion() {
-        return Version.ZERO;
+        return VENDOR;
     }
 
+    @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
+    @Override
     public void handleContactsMessage(DHTContactsMessage msg) {
     }
 
+    @Override
     public boolean isEnabled() {
         return true;
     }
 
+    @Override
+    public boolean isMode(DHTMode mode) {
+        return getMode() == mode;
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return true;
+    }
+
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return null;
+    }
+
+    @Override
+    public void removeEventListener(DHTEventListener listener) {
+    }
+
+    @Override
     public void setEnabled(boolean enabled) {
     }
-    
-    public DHTFuture<FindValueResult> get(EntityKey eKey) {
-      return null;  
-    } 
-    
-    public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-        return null;
+
+    @Override
+    public boolean start(DHTMode mode) {
+        return false;
+    }
+
+    @Override
+    public void stop() {
+    }
+
+    @Override
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
+
+    @Override
+    public void close() throws IOException {
     }
 }

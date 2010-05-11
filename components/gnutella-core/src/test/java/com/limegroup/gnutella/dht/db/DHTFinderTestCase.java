@@ -9,7 +9,7 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.MojitoDHT;
 
@@ -19,16 +19,16 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.DHTTestUtils;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.util.MockUtils;
 
 public abstract class DHTFinderTestCase extends DHTTestCase {
 
     
     protected Mockery context;
-    protected DHTManagerImpl dhtManager;
+    protected DHTManager dhtManager;
     protected List<MojitoDHT> dhts;
     protected MojitoDHT mojitoDHT;
     protected NetworkManagerStub networkManager;
@@ -47,7 +47,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
              
         context = new Mockery();
-        dhtManager = context.mock(DHTManagerImpl.class);
+        dhtManager = context.mock(DHTManager.class);
         
         networkManager = new NetworkManagerStub();
 
@@ -57,7 +57,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
-                bind(DHTManagerImpl.class).toInstance(dhtManager);
+                bind(DHTManager.class).toInstance(dhtManager);
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(ConnectionManager.class).toInstance(connectionManager);
             }
@@ -81,7 +81,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
                 }                
             });
         }});
-        assertTrue(mojitoDHT.isBootstrapped());
+        assertTrue(mojitoDHT.isReady());
 
         // register necessary factories
         mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractAltLocValue.ALT_LOC, altLocValueFactory);

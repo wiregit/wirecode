@@ -11,6 +11,7 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;
@@ -36,7 +37,9 @@ import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -108,7 +111,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         connectionManager = injector.getInstance(ConnectionManager.class);
         
-        dhtManager = injector.getInstance(DHTManagerImpl.class);
+        dhtManager = injector.getInstance(DHTManager.class);
         // Start and bootstrap a bunch of DHT Nodes
         dhts = Collections.emptyList();
         dhts = MojitoUtils.createBootStrappedDHTs(2);
@@ -219,7 +222,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             long firstMsg = System.currentTimeMillis() + 58000;
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
@@ -241,8 +244,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
                     Message msg = out.receive(10000);
                     if (msg instanceof DHTContactsMessage) {
                         DHTContactsMessage message = (DHTContactsMessage)msg;
-                        assertEquals(10,message.getContacts().size());
-                        nodes.addAll(message.getContacts());
+                        assertEquals(10,message.getContacts().length);
+                        nodes.addAll(Arrays.asList(message.getContacts()));
                         break;
                     }
                 }
@@ -293,7 +296,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(350);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
@@ -356,7 +359,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();

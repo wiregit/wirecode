@@ -31,11 +31,10 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTControllerStub;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.NullDHTController;
-import com.limegroup.gnutella.dht.DHTEvent.Type;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTEvent.Type;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 public class PushProxiesPublisherTest extends LimeTestCase {
 
@@ -222,7 +221,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         final MojitoDHT mojitoDHT = context.mock(MojitoDHT.class);
         final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
         final ScheduledFuture future = context.mock(ScheduledFuture.class);
-        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
+        final DHTManager dhtManager = context.mock(DHTManager.class);
         
         
         context.checking(new Expectations() {{
