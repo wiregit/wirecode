@@ -403,6 +403,9 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
         } catch (NullPointerException e) {
             if(LOG.isErrorEnabled()) {
                 LOG.error("null pointer ", e);
+                StackTraceElement[] trace = e.getStackTrace();
+                for (int i=0; i < trace.length; i++)
+                    LOG.error("\tat " + trace[i]);
             }
             playerState = STOPPED;
             notifyEvent(EOM, -1);
