@@ -392,7 +392,10 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             notifyEvent(EOM, -1);
         } catch (IOException e) {
             if(LOG.isDebugEnabled())
-                LOG.debug("ioexception " + e);
+                LOG.error("ioexception " + e);
+            StackTraceElement[] trace = e.getStackTrace();
+            for (int i=0; i < trace.length; i++)
+                LOG.error("\tat " + trace[i]);
             playerState = STOPPED;
             notifyEvent(EOM, -1);
         } catch (LineUnavailableException e) {
