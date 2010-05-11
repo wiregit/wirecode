@@ -1,68 +1,62 @@
 package com.limegroup.gnutella.dht;
 
-import java.net.SocketAddress;
-import java.util.List;
+import java.io.IOException;
 
-import org.limewire.io.IpPort;
+import org.limewire.mojito2.EntityKey;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht2.AbstractController;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
-public class DHTControllerStub implements DHTController {
+public class DHTControllerStub extends AbstractController {
     
     private final MojitoDHT dht;
-
-    private final DHTMode mode;
     
     public DHTControllerStub(MojitoDHT dht, DHTMode mode) {
+        super(mode);
         this.dht = dht;
-        this.mode = mode;
     }
 
-    public void addActiveDHTNode(SocketAddress hostAddress) {
-    }
-    
-    public void addPassiveNode(SocketAddress hostAddress) {
-    }
-
-    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+    @Override
+    public DHTFuture<ValueEntity> get(EntityKey key) {
         return null;
     }
-    
+
+    @Override
     public MojitoDHT getMojitoDHT() {
         return dht;
     }
 
-    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    @Override
+    public boolean isReady() {
+        return dht.isReady();
     }
-    
+
+    @Override
     public boolean isRunning() {
         return false;
     }
 
-    public boolean isWaitingForNodes() {
-        return false;
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+        return null;
     }
 
-    public void sendUpdatedCapabilities() {
+    @Override
+    public void start() throws IOException {
     }
 
-    public void start() {
+    @Override
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
     }
 
-    public void stop() {
-    }
-
-	public boolean isBootstrapped() {
-		return dht.isBootstrapped();
-	}
-
-    public void addContact(Contact node) {
-    }
-
-    public DHTMode getDHTMode() {
-        return mode;
+    @Override
+    public void close() throws IOException {
     }
 }

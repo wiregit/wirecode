@@ -33,6 +33,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTControllerStub;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.InactiveController;
 import com.limegroup.gnutella.dht2.DHTEvent.Type;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
@@ -249,7 +250,9 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         
         pushProxiesPublisher = new PushProxiesPublisher(injector.getInstance(PushProxiesValueFactory.class), executorService, dhtManager);
 
-        pushProxiesPublisher.handleDHTEvent(new DHTEvent(new DHTControllerStub(mojitoDHT, DHTMode.PASSIVE), Type.CONNECTED));
+        pushProxiesPublisher.handleDHTEvent(new DHTEvent(
+                Type.CONNECTED, new DHTControllerStub(
+                        mojitoDHT, DHTMode.PASSIVE)));
         
         assertNotNull(publishingRunnable);
 
@@ -271,7 +274,8 @@ public class PushProxiesPublisherTest extends LimeTestCase {
             one(future).cancel(false);
         }});
         
-        pushProxiesPublisher.handleDHTEvent(new DHTEvent(new NullDHTController(), Type.STOPPED));
+        pushProxiesPublisher.handleDHTEvent(new DHTEvent(
+                Type.STOPPED, InactiveController.CONTROLLER));
         
         context.assertIsSatisfied();
     }

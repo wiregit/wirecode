@@ -8,7 +8,7 @@ import org.limewire.mojito2.routing.Contact;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-abstract class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
     
     private final DHTMode mode;
     

@@ -13,6 +13,7 @@ import org.limewire.util.MatchAndCopy;
 
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.DHTManagerImpl;
 
 public class MojitoManagerImplTest extends BaseTestCase {
@@ -23,7 +24,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
 
     public void testGetName() {
         Mockery context = new Mockery();
-        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
+        final DHTManager dhtManager = context.mock(DHTManager.class);
 
         MojitoManagerImpl managerImpl = new MojitoManagerImpl(dhtManager);
 
@@ -85,7 +86,7 @@ public class MojitoManagerImplTest extends BaseTestCase {
     public void testListenerInfrastructure() {
         Mockery context = new Mockery();
         
-        final DHTManagerImpl dhtManager = context.mock(DHTManagerImpl.class);
+        final DHTManager dhtManager = context.mock(DHTManager.class);
         final DHTController dhtController = context.mock(DHTController.class);
         
         final PropertyChangeListener listener1 = context.mock(PropertyChangeListener.class);
