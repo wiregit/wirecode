@@ -75,6 +75,22 @@ public class JavaSoundPlayer implements Player {
         }
         return audioPlayer;
     }
+    
+    public void setSource(File file) throws IncompatibleSourceException {
+        if(!isPlayable(file)) {
+            LOG.debug("unplayable file");
+            throw new IncompatibleSourceException("Unplayable file type");
+        }
+        try {
+            getPlayer().loadSong(file);
+        } catch(Exception e) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("failed to load file " + e);
+            throw new IncompatibleSourceException("failed to load javasoundplayer");
+        }
+        
+        bytesRead = 0;
+    }
 
     @Override
     public void setSource(DataSource source) throws IncompatibleSourceException {        
