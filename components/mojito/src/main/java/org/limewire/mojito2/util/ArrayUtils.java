@@ -20,6 +20,7 @@
 package org.limewire.mojito2.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 
 /**
@@ -221,5 +222,21 @@ public final class ArrayUtils {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the index of the given {@code element} in the
+     * {@code elements} array or -1 if it's not in the array.
+     */
+    public static <T> int indexOf(T[] elements, T element) {
+        return Arrays.asList(elements).indexOf(element);
+    }
+    
+    /**
+     * Returns {@code true} if the {@code elements} array contains
+     * the given {@code element}.
+     */
+    public static <T> boolean contains(T[] elements, T element) {
+        return Arrays.asList(elements).contains(element);
     }
 }

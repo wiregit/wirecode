@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 
 import junit.framework.Test;
 
@@ -13,6 +12,7 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.util.ArrayUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
@@ -49,7 +49,8 @@ public class DHTContactsMessageTest extends LimeTestCase {
                 Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), new InetSocketAddress("localhost", 3001));
         
-        DHTContactsMessage msg1 = new DHTContactsMessage(Arrays.asList(c1, c2));
+        DHTContactsMessage msg1 = new DHTContactsMessage(
+                new Contact[] { c1, c2 });
         
         assertEquals(2, msg1.getContacts().length);
         
@@ -72,7 +73,7 @@ public class DHTContactsMessageTest extends LimeTestCase {
         
         assertEquals(2, msg2.getContacts().length);
         
-        assertTrue(msg2.getContacts().contains(c1));
-        assertTrue(msg2.getContacts().contains(c2));
+        assertTrue(ArrayUtils.contains(msg2.getContacts(), c1));
+        assertTrue(ArrayUtils.contains(msg2.getContacts(), c2));
     }
 }

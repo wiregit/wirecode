@@ -40,7 +40,7 @@ public class DHTContactsMessage extends AbstractVendorMessage {
                 F_DHT_CONTACTS, version, payload, network);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-        MessageInputStream in = new MessageInputStream(bais,macManager);
+        MessageInputStream in = new MessageInputStream(bais, macManager);
         
         try {
             this.nodes = in.readContacts();
