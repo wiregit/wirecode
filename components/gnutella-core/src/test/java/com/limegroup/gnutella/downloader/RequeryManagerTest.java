@@ -26,6 +26,7 @@ import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.InactiveController;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -463,7 +464,8 @@ public class RequeryManagerTest extends LimeTestCase {
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
         }});
-        requeryManager.handleDHTEvent(new DHTEvent(new NullDHTController(), DHTEvent.Type.STOPPED));
+        requeryManager.handleDHTEvent(new DHTEvent(
+                DHTEvent.Type.STOPPED, InactiveController.CONTROLLER));
         assertFalse(requeryManager.isWaitingForResults());
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
@@ -502,7 +504,7 @@ public class RequeryManagerTest extends LimeTestCase {
         }
 
         @Override
-        public boolean isMemberOfDHT() {
+        public boolean isReady() {
             return on;
         }
 

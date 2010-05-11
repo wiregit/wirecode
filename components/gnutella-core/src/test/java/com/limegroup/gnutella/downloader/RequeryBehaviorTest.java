@@ -314,7 +314,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         }
 
         @Override
-        public boolean isMemberOfDHT() {
+        public boolean isReady() {
             return on;
         }
 
