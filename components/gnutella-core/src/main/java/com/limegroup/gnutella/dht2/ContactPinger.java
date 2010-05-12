@@ -13,12 +13,13 @@ import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.AddressPinger;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.util.Objects;
 
-class ContactPinger implements Closeable {
+public class ContactPinger implements Closeable {
 
     private static final ScheduledExecutorService EXECUTOR 
         = Executors.newSingleThreadScheduledExecutor(
@@ -27,7 +28,7 @@ class ContactPinger implements Closeable {
     private final Set<SocketAddress> addresses 
         = new FixedSizeLIFOSet<SocketAddress>(30, EjectionPolicy.FIFO);
     
-    private final MojitoDHT dht;
+    private final AddressPinger dht;
     
     private final long frequency;
     
@@ -39,11 +40,11 @@ class ContactPinger implements Closeable {
     
     private boolean open = true;
     
-    public ContactPinger(MojitoDHT dht) {
+    public ContactPinger(AddressPinger dht) {
         this(dht, DHTSettings.DHT_NODE_ADDER_DELAY.getValue(), TimeUnit.MILLISECONDS);
     }
     
-    public ContactPinger(MojitoDHT dht, 
+    public ContactPinger(AddressPinger dht, 
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
@@ -51,7 +52,7 @@ class ContactPinger implements Closeable {
         this.unit = unit;
     }
     
-    public synchronized void addAddress(SocketAddress address) {
+    public synchronized void addActiveNode(SocketAddress address) {
         Objects.nonNull(address, "address");
         
         if (open) {
@@ -86,7 +87,8 @@ class ContactPinger implements Closeable {
             pingFuture.cancel(true);
         }
         
-        pingFuture = dht.ping(address);
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        pingFuture = dht.ping(address, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override

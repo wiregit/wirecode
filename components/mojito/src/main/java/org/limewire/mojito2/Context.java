@@ -39,13 +39,11 @@ import org.limewire.mojito2.routing.BucketRefresher;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTable.ContactPinger;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.BucketRefresherSettings;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
-import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
@@ -209,16 +207,7 @@ public class Context extends AbstractDHT {
     
     @Override
     public void bind(Transport transport) throws IOException {
-        ContactPinger pinger = new ContactPinger() {
-            @Override
-            public DHTFuture<PingEntity> ping(Contact contact) {
-                long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-                return Context.this.ping(contact, 
-                        timeout, TimeUnit.MILLISECONDS);
-            }
-        };
-        
-        routeTable.bind(pinger);
+        routeTable.bind(this);
         messageDispatcher.bind(transport);
     }
 

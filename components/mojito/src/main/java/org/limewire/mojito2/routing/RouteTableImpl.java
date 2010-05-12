@@ -39,12 +39,14 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
+import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
@@ -921,7 +923,8 @@ public class RouteTableImpl implements RouteTable {
         
         DHTFuture<PingEntity> future = null;
         if (pinger != null) {
-            future = pinger.ping(node);
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            future = pinger.ping(node, timeout, TimeUnit.MILLISECONDS);
         }
         
         if (future != null) {

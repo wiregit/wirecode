@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.visual.RouteTableVisualizer;
+import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
@@ -23,7 +24,6 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.routing.RouteTable.ContactPinger;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
 import org.limewire.mojito2.util.NopTransport;
@@ -233,7 +233,8 @@ public class RouteTableVisualizerDemo {
     public void populateRouteTable(RouteTableImpl rt) {
         rt.bind(new ContactPinger() {
             @Override
-            public DHTFuture<PingEntity> ping(Contact contact) {
+            public DHTFuture<PingEntity> ping(Contact contact, 
+                    long timeout, TimeUnit unit) {
                 return new DHTValueFuture<PingEntity>(
                         new DefaultPingEntity(contact, 
                                 contact.getContactAddress(), 

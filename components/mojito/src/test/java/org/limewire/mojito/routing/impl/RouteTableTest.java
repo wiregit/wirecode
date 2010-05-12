@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
@@ -33,7 +34,6 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.routing.RouteTable.ContactPinger;
 import org.limewire.mojito2.routing.RouteTable.PurgeMode;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.KademliaSettings;
@@ -471,8 +471,8 @@ public class RouteTableTest extends MojitoTestCase {
         toPing.clear();
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
-        routeTable.bind(new RouteTable.ContactPinger() {
-            public DHTFuture<PingEntity> ping(Contact node) {
+        routeTable.bind(new ContactPinger() {
+            public DHTFuture<PingEntity> ping(Contact node, long timeout, TimeUnit unit) {
                 toPing.add(node);
                 return new DHTValueFuture<PingEntity>(new IllegalStateException());
             }
@@ -666,7 +666,7 @@ public class RouteTableTest extends MojitoTestCase {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.bind(new ContactPinger() {
             @Override
-            public DHTFuture<PingEntity> ping(Contact contact) {
+            public DHTFuture<PingEntity> ping(Contact contact, long timeout, TimeUnit unit) {
                 PingEntity entity = new DefaultPingEntity(contact, 
                         new InetSocketAddress("localhost", 3000), 
                         BigInteger.ONE, 

@@ -16,7 +16,6 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.routing.RouteTable.ContactPinger;
 import org.limewire.mojito2.util.DHTSizeEstimator;
 
 

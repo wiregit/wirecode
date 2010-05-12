@@ -29,7 +29,7 @@ import org.limewire.mojito2.util.HostFilter;
 /**
  * 
  */
-public interface DHT extends Closeable {
+public interface DHT extends ContactPinger, AddressPinger, Closeable {
 
     /**
      * 

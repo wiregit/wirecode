@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.collection.FixedSizeHashMap;
 import org.limewire.mojito2.routing.Bucket;

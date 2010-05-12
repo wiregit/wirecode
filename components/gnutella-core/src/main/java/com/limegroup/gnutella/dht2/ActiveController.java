@@ -319,7 +319,7 @@ class ActiveController extends AbstractController {
     @Override
     public void addActiveNode(SocketAddress address) {
         if (dht.isReady()) {
-            contactPinger.addAddress(address);
+            contactPinger.addActiveNode(address);
         } else {
             bootstrapManager.addActiveNode(address);
         }
