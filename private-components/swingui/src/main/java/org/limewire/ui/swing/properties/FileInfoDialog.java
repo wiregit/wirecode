@@ -182,7 +182,8 @@ public class FileInfoDialog extends LimeJDialog {
                             cards.put(tab, fileInfoFactory.createPiecesPanel(type, (DownloadItem)propertiableFile));    
                         } 
                         else {
-                            throw new IllegalStateException("Should not have a pieces tab for a non download");
+                            // TODO: Pieces should still be available in some cases for torrents..
+                            //        Need to overhaul file info.
                         }
                     } else {
                         throw new IllegalStateException("Unknown state:" + tab);
