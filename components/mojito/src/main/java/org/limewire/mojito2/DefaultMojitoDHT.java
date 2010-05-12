@@ -5,11 +5,17 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
@@ -37,6 +43,7 @@ import org.limewire.mojito2.storage.Storable;
 import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
+import org.limewire.util.ExceptionUtils;
 
 public class DefaultMojitoDHT implements MojitoDHT {
 
@@ -342,5 +349,127 @@ public class DefaultMojitoDHT implements MojitoDHT {
     public DHTFuture<ValueEntity> get(EntityKey key) {
         long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
         return dht.get(key, timeout, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        final Object lock = new Object();
+        
+        synchronized (lock) {
+            
+            final List<DHTFuture<ValueEntity>> futures 
+                = new ArrayList<DHTFuture<ValueEntity>>();
+            
+            long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+            AsyncProcess<ValueEntity[]> process = NopProcess.process();
+            final DHTFuture<ValueEntity[]> lookup = submit(process, 
+                    timeout, TimeUnit.MILLISECONDS);
+            
+            lookup.addFutureListener(new EventListener<FutureEvent<ValueEntity[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<ValueEntity[]> event) {
+                    synchronized (lock) {
+                        for (DHTFuture<?> future : futures) {
+                            future.cancel(true);
+                        }
+                    }
+                }
+            });
+            
+            final List<EntityKey> keys 
+                = new ArrayList<EntityKey>();
+            
+            final List<ValueEntity> entities 
+                = new ArrayList<ValueEntity>();
+            
+            final AtomicBoolean first = new AtomicBoolean(true);
+            
+            DHTFuture<ValueEntity> future = get(key);
+            futures.add(future);
+            
+            future.addFutureListener(new EventListener<FutureEvent<ValueEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<ValueEntity> event) {
+                    synchronized (lock) {
+                        try {
+                            if (!lookup.isDone()) {
+                                switch (event.getType()) {
+                                    case SUCCESS:
+                                        onSuccess(event.getResult());
+                                        break;
+                                    case EXCEPTION:
+                                        onException(event.getException());
+                                        break;
+                                    case CANCELLED:
+                                        onCancellation();
+                                        break;
+                                }
+                            }
+                        } catch (Throwable t) {
+                            onException(t);
+                            ExceptionUtils.reportIfUnchecked(t);
+                        }
+                    }
+                }
+                
+                private void onSuccess(ValueEntity entity) {
+                    entities.add(entity);
+                    
+                    if (first.getAndSet(false)) {
+                        EntityKey[] more 
+                            = entity.getEntityKeys();
+                        keys.addAll(Arrays.asList(more));
+                    }
+                    
+                    doNext();
+                }
+                
+                private void onException(Throwable t) {
+                    if (keys.isEmpty() && entities.isEmpty()) {
+                        lookup.setException(t);
+                    } else {
+                        doNext();
+                    }
+                }
+                
+                private void onCancellation() {
+                    lookup.cancel(true);
+                }
+                
+                private void doNext() {
+                    if (keys.isEmpty()) {
+                        ValueEntity[] values = entities.toArray(
+                                new ValueEntity[0]);
+                        lookup.setValue(values);
+                        return;
+                    }
+                    
+                    DHTFuture<ValueEntity> future 
+                        = get(keys.remove(0));
+                    futures.add(future);
+                    future.addFutureListener(this);
+                }
+            });
+            
+            return lookup;
+        }
+    }
+    
+    private static class NopProcess implements AsyncProcess<Object> {
+
+        private static final NopProcess NOP = new NopProcess();
+        
+        @SuppressWarnings("unchecked")
+        public static <V> AsyncProcess<V> process() {
+            return (AsyncProcess<V>)NOP;
+        }
+        
+        @Override
+        public void start(DHTFuture<Object> future) {
+        }
+
+        @Override
+        public void stop(DHTFuture<Object> future) {
+        }
     }
 }

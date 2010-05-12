@@ -540,36 +540,38 @@ public class Context extends AbstractDHT {
                             // The reference can be null if the FutureManager was
                             // unable to execute the STORE process. This can happen
                             // if the Context is being shutdown.
-                            if (futureRef.get() != null) {
+                            
+                            DHTFuture<StoreEntity> future = futureRef.get();
+                            if (future != null && !future.isDone()) {
                                 switch (event.getType()) {
                                     case SUCCESS:
-                                        handleNodeEntity(event.getResult());
+                                        onSuccess(event.getResult());
                                         break;
                                     case EXCEPTION:
-                                        handleException(event.getException());
+                                        onException(event.getException());
                                         break;
                                     default:
-                                        handleCancellation();
+                                        onCancellation();
                                         break;
                                 }
                             }
                         } catch (Throwable t) {
-                            handleException(t);
+                            onException(t);
                             ExceptionUtils.reportIfUnchecked(t);
                         }
                     }
                 }
                 
-                private void handleNodeEntity(NodeEntity entity) 
+                private void onSuccess(NodeEntity entity) 
                         throws IOException {
                     process.store(entity.getContacts());
                 }
                 
-                private void handleException(Throwable t) {
+                private void onException(Throwable t) {
                     futureRef.get().setException(t);
                 }
                 
-                private void handleCancellation() {
+                private void onCancellation() {
                     futureRef.get().cancel(true);
                 }
             });

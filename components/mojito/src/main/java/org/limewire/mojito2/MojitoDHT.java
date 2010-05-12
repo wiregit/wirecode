@@ -118,4 +118,9 @@ public interface MojitoDHT extends DHT {
      * 
      */
     public DHTFuture<ValueEntity> get(EntityKey key);
+    
+    /**
+     * 
+     */
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
 }
