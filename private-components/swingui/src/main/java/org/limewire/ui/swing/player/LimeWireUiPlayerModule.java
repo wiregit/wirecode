@@ -9,10 +9,10 @@ public class LimeWireUiPlayerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-       // if(OSUtils.isLinux())
+        if(OSUtils.isLinux())
             bind(PlayerMediator.class).to(AudioPlayerMediator.class);
-      //  else
-      //      bind(PlayerMediator.class).to(PlayerMediatorImpl.class);
+        else
+            bind(PlayerMediator.class).to(PlayerMediatorImpl.class);
         bind(VideoPanelFactory.class).toProvider(FactoryProvider.newFactory(VideoPanelFactory.class, VideoPanel.class));
         bind(MediaPlayerFactory.class).to(MediaPlayerFactoryImpl.class);
     }
