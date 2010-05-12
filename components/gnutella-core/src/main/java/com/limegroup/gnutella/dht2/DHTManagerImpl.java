@@ -38,7 +38,7 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
+import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -252,7 +252,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
                 connectionServices, hostFilter, udpPinger);
         
-        BootstrapManager bootstrapManager 
+        BootstrapWorker bootstrapManager 
             = controller.getBootstrapManager();
         bootstrapManager.addBootstrapListener(new BootstrapListener() {
             @Override

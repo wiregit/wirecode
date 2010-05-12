@@ -57,7 +57,7 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
+import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -87,7 +87,7 @@ public class ActiveController extends AbstractController {
     
     private final MojitoDHT dht;
     
-    private final BootstrapManager bootstrapManager;
+    private final BootstrapWorker bootstrapWorker;
     
     private Contact[] contacts = null;
     
@@ -127,12 +127,12 @@ public class ActiveController extends AbstractController {
         
         dht = new DefaultMojitoDHT(context);
         
-        bootstrapManager = new BootstrapManager(
+        bootstrapWorker = new BootstrapWorker(
                 dht, connectionServices, 
                 hostCatcher, pingRequestFactory, 
                 uniqueHostPinger, udpPinger);
         
-        bootstrapManager.addBootstrapListener(new BootstrapListener() {
+        bootstrapWorker.addBootstrapListener(new BootstrapListener() {
             @Override
             public void handleReady() {}
             
@@ -152,8 +152,8 @@ public class ActiveController extends AbstractController {
         return dht;
     }
     
-    public BootstrapManager getBootstrapManager() {
-        return bootstrapManager;
+    public BootstrapWorker getBootstrapManager() {
+        return bootstrapWorker;
     }
     
     private Contact[] init(Context context) throws IOException {
@@ -239,14 +239,14 @@ public class ActiveController extends AbstractController {
             this.contacts = null;
         }
         
-        bootstrapManager.start(contacts);
+        bootstrapWorker.start(contacts);
     }
     
     @Override
     public void close() {
         IoUtils.closeAll(contactSink, 
                 contactPusher, 
-                bootstrapManager, 
+                bootstrapWorker, 
                 dht);
         
         if (!collision.get()) {
@@ -323,14 +323,14 @@ public class ActiveController extends AbstractController {
         if (dht.isReady()) {
             contactSink.addActiveNode(address);
         } else {
-            bootstrapManager.addActiveNode(address);
+            bootstrapWorker.addActiveNode(address);
         }
     }
     
     @Override
     public void addPassiveNode(SocketAddress address) {
         if (!dht.isReady()) {
-            bootstrapManager.addPassiveNode(address);
+            bootstrapWorker.addPassiveNode(address);
         }
     }
     

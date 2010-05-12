@@ -31,9 +31,9 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht2.ActiveController;
-import com.limegroup.gnutella.dht2.BootstrapManager;
+import com.limegroup.gnutella.dht2.BootstrapWorker;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
+import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 public class ActiveControllerTest extends DHTTestCase {
@@ -157,7 +157,7 @@ public class ActiveControllerTest extends DHTTestCase {
                 MojitoDHT dht = controller.getMojitoDHT();
                 dht.setContactAddress(new InetSocketAddress("localhost", 5000));
                 
-                BootstrapManager manager 
+                BootstrapWorker manager 
                     = controller.getBootstrapManager();
                 
                 final CountDownLatch latch = new CountDownLatch(1);

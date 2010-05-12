@@ -40,10 +40,10 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 /**
  * 
  */
-public class BootstrapManager implements Closeable {
+public class BootstrapWorker implements Closeable {
 
     private static final Log LOG 
-        = LogFactory.getLog(BootstrapManager.class);
+        = LogFactory.getLog(BootstrapWorker.class);
     
     private final List<BootstrapListener> listeners 
         = new CopyOnWriteArrayList<BootstrapListener>();
@@ -65,7 +65,7 @@ public class BootstrapManager implements Closeable {
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
-    public BootstrapManager(MojitoDHT dht, 
+    public BootstrapWorker(MojitoDHT dht, 
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
@@ -87,7 +87,14 @@ public class BootstrapManager implements Closeable {
     }
     
     /**
-     * 
+     * Returns the {@link NodeFetcher}
+     */
+    public NodeFetcher getNodeFetcher() {
+        return nodeFetcher;
+    }
+    
+    /**
+     * Starts the bootstrapping process.
      */
     public synchronized void start(Contact... contacts) {
         if (!open) {
@@ -118,7 +125,7 @@ public class BootstrapManager implements Closeable {
     }
     
     /**
-     * 
+     * Stops the bootstrapping process
      */
     public synchronized void stop() {
         if (nodeFetcher != null) {
@@ -135,8 +142,9 @@ public class BootstrapManager implements Closeable {
     }
     
     /**
-     * 
+     * Stops and closes the {@link BootstrapWorker}
      */
+    @Override
     public synchronized void close() {
         open = false;
         
