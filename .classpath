@@ -165,7 +165,6 @@
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
-<classpathentry kind="lib" path="lib/jars/fmj-20091008-23.jar" sourcepath="lib/sources/fmj-source.zip"/>
-	<classpathentry kind="lib" path="lib/jars/zzaudioformats.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
