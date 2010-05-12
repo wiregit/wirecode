@@ -53,7 +53,7 @@ public class LibTorrentInfo extends Structure {
             for (int i = 0; i < entries.length; i++) {
                 LibTorrentAnnounceEntry entry = entries[i];
                 entry.read();
-                seeds_internal.add(entry.url);
+                seeds_internal.add(entry.uri);
             }
         }
     }

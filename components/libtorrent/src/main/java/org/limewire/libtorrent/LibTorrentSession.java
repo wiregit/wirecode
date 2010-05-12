@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.limewire.bittorrent.LimeWireTorrentProperties;
 import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.Torrent;
 import org.limewire.bittorrent.TorrentEvent;
@@ -138,19 +137,32 @@ public class LibTorrentSession implements TorrentManager {
             libTorrent.add_torrent(sha1, firstTrackerURI, torrentPath, saveDirectory,
                     fastResumePath);
             
+            // Flush and add the SECONDARY i={1,..,n} trackers again so if there were user changes, ie. 
+            //  when loading from a memento the new user tracker list will be used.
             if (trackerList != null) {
+                System.out.println("flushing trackers");
+                
+                LibTorrentAnnounceEntry[] trackers = libTorrent.get_trackers(sha1);
+               
+                // Remove the trackers that were automatically added by loading the torrent file
+                for ( int i=1 ; i<trackers.length ; i++ ) {
+                    LibTorrentAnnounceEntry tracker = trackers[i];
+                    System.out.println(tracker.uri);
+                    libTorrent.remove_tracker(sha1, tracker.uri, tracker.tier);
+                }
+                
+                // Add back for changes
                 for ( int i=1 ; i<trackerList.size() ; i++ ) {
-                    libTorrent.add_tracker(sha1, trackerList.get(i).toASCIIString(), i);
+                    URI trackerURI = trackerList.get(i);
+                    if (trackerURI != null) {
+                        libTorrent.add_tracker(sha1, trackerURI.toASCIIString(), i);
+                    }
                 }
             }
             
             updateStatus(torrent);
             torrents.put(sha1, torrent);
             torrent.addListener(torrentListener);
-            
-            torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_RATIO_LIMIT, params.getSeedRatioLimit());
-            torrent.setProperty(LimeWireTorrentProperties.MAX_SEED_TIME_RATIO_LIMIT, params.getTimeRatioLimit());
-            
             return torrent;
         } finally {
             lock.unlock();

@@ -11,7 +11,7 @@ import com.sun.jna.Structure;
 
 public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker {
 
-    public String url;
+    public String uri;
     public int tier;
 
     public LibTorrentAnnounceEntry() {
@@ -30,7 +30,7 @@ public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker
     @Override
     public URI getURI() {
         try {
-            return URIUtils.toURI(url);
+            return URIUtils.toURI(uri);
         } catch (URISyntaxException e) {
             return null;
         }
@@ -38,6 +38,6 @@ public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker
     
     @Override
     public String toString() {
-        return url;
+        return uri;
     }
 }
