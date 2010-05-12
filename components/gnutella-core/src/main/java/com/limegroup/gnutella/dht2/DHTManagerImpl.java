@@ -252,9 +252,9 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
                 connectionServices, hostFilter, udpPinger);
         
-        BootstrapWorker bootstrapManager 
-            = controller.getBootstrapManager();
-        bootstrapManager.addBootstrapListener(new BootstrapListener() {
+        BootstrapWorker worker 
+            = controller.getBootstrapWorker();
+        worker.addBootstrapListener(new BootstrapListener() {
             @Override
             public void handleReady() {
                 fireConnected();

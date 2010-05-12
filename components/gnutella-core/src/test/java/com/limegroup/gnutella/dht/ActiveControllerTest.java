@@ -157,11 +157,11 @@ public class ActiveControllerTest extends DHTTestCase {
                 MojitoDHT dht = controller.getMojitoDHT();
                 dht.setContactAddress(new InetSocketAddress("localhost", 5000));
                 
-                BootstrapWorker manager 
-                    = controller.getBootstrapManager();
+                BootstrapWorker worker 
+                    = controller.getBootstrapWorker();
                 
                 final CountDownLatch latch = new CountDownLatch(1);
-                manager.addBootstrapListener(new BootstrapListener() {
+                worker.addBootstrapListener(new BootstrapListener() {
                     @Override
                     public void handleReady() {
                         latch.countDown();

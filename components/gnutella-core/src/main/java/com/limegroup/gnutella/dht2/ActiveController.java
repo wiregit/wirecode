@@ -152,7 +152,7 @@ public class ActiveController extends AbstractController {
         return dht;
     }
     
-    public BootstrapWorker getBootstrapManager() {
+    public BootstrapWorker getBootstrapWorker() {
         return bootstrapWorker;
     }
     
