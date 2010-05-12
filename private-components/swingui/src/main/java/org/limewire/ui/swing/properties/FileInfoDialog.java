@@ -236,7 +236,12 @@ public class FileInfoDialog extends LimeJDialog {
 
             if (torrent.isEditable()) {
                 tabs.add(Tabs.TRANSFERS);
-                tabs.add(Tabs.PIECES);
+                
+                // TODO: Pieces should still be available in some cases for torrents..
+                //        Need to overhaul file info.
+                if (type == FileInfoType.DOWNLOADING_FILE) {
+                    tabs.add(Tabs.PIECES);
+                }
             }
         } else {
             if (type == FileInfoType.LOCAL_FILE) {
