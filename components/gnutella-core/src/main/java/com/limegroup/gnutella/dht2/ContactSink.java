@@ -19,7 +19,12 @@ import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.util.Objects;
 
-public class ContactPinger implements Closeable {
+/**
+ * The {@link ContactSink} receives {@link SocketAddress}es of active 
+ * DHT nodes from the Gnutella Network (or any other source) and tries
+ * to ping them.
+ */
+public class ContactSink implements Closeable {
 
     private static final ScheduledExecutorService EXECUTOR 
         = Executors.newSingleThreadScheduledExecutor(
@@ -28,7 +33,7 @@ public class ContactPinger implements Closeable {
     private final Set<SocketAddress> addresses 
         = new FixedSizeLIFOSet<SocketAddress>(30, EjectionPolicy.FIFO);
     
-    private final AddressPinger dht;
+    private final AddressPinger pinger;
     
     private final long frequency;
     
@@ -40,19 +45,35 @@ public class ContactPinger implements Closeable {
     
     private boolean open = true;
     
-    public ContactPinger(AddressPinger dht) {
-        this(dht, DHTSettings.DHT_NODE_ADDER_DELAY.getValue(), TimeUnit.MILLISECONDS);
+    /**
+     * Creates a {@link ContactSink} with the given {@link AddressPinger}.
+     */
+    public ContactSink(AddressPinger pinger) {
+        this(pinger, DHTSettings.DHT_NODE_ADDER_DELAY.getValue(), TimeUnit.MILLISECONDS);
     }
     
-    public ContactPinger(AddressPinger dht, 
+    /**
+     * Creates a {@link ContactSink} with the given {@link AddressPinger}.
+     */
+    public ContactSink(AddressPinger pinger, 
             long frequency, TimeUnit unit) {
         
-        this.dht = dht;
+        this.pinger = pinger;
         this.frequency = frequency;
         this.unit = unit;
     }
     
-    public synchronized void addActiveNode(SocketAddress address) {
+    /**
+     * Returns {@code true} if the {@link ContactSink} is active.
+     */
+    public synchronized boolean isRunning() {
+        return future != null && !future.isDone();
+    }
+    
+    /**
+     * Adds the given {@link SocketAddress} to the {@link ContactSink}.
+     */
+    public synchronized boolean addActiveNode(SocketAddress address) {
         Objects.nonNull(address, "address");
         
         if (open) {
@@ -69,9 +90,16 @@ public class ContactPinger implements Closeable {
                 future = EXECUTOR.scheduleWithFixedDelay(
                         task, frequency, frequency, unit);
             }
+            
+            return true;
         }
+        
+        return false;
     }
     
+    /**
+     * Sends a DHT ping to the next DHT node in the FIFO queue.
+     */
     private synchronized void ping() {
         if (addresses.isEmpty()) {
             future.cancel(true);
@@ -88,13 +116,16 @@ public class ContactPinger implements Closeable {
         }
         
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-        pingFuture = dht.ping(address, timeout, TimeUnit.MILLISECONDS);
+        pingFuture = pinger.ping(address, timeout, TimeUnit.MILLISECONDS);
     }
     
-    @Override
-    public synchronized void close() {
-        open = false;
-        
+    /**
+     * Stops the {@link ContactSink}.
+     * 
+     * <p>NOTE: The {@link ContactSink} will start automatically if
+     * {@link #addActiveNode(SocketAddress)} is being called!
+     */
+    public synchronized void stop() {
         if (future != null) {
             future.cancel(true);
         }
@@ -104,5 +135,14 @@ public class ContactPinger implements Closeable {
         }
         
         addresses.clear();
+    }
+    
+    /**
+     * Closes the {@link ContactSink}.
+     */
+    @Override
+    public synchronized void close() {
+        open = false;
+        stop();
     }
 }

@@ -82,7 +82,7 @@ class ActiveController extends AbstractController {
     
     private final ContactPusher contactPusher;
     
-    private final ContactPinger contactPinger;
+    private final ContactSink contactSink;
     
     private final MojitoDHT dht;
     
@@ -141,7 +141,7 @@ class ActiveController extends AbstractController {
             }
         });
         
-        contactPinger = new ContactPinger(dht);
+        contactSink = new ContactSink(dht);
         contactPusher = new ContactPusher(connectionManager);
     }
     
@@ -242,7 +242,7 @@ class ActiveController extends AbstractController {
     
     @Override
     public void close() {
-        IoUtils.close(contactPinger);
+        IoUtils.close(contactSink);
         IoUtils.close(contactPusher);
         IoUtils.close(bootstrapManager);
         IoUtils.close(dht);
@@ -319,7 +319,7 @@ class ActiveController extends AbstractController {
     @Override
     public void addActiveNode(SocketAddress address) {
         if (dht.isReady()) {
-            contactPinger.addActiveNode(address);
+            contactSink.addActiveNode(address);
         } else {
             bootstrapManager.addActiveNode(address);
         }

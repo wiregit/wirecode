@@ -13,16 +13,16 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.PingEntity;
 
-import com.limegroup.gnutella.dht2.ContactPinger;
+import com.limegroup.gnutella.dht2.ContactSink;
 
-public class AbstractDHTControllerTest extends DHTTestCase {
+public class ContactSinkTest extends DHTTestCase {
 
-    public AbstractDHTControllerTest(String name) {
+    public ContactSinkTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(AbstractDHTControllerTest.class);
+        return buildTestSuite(ContactSinkTest.class);
     }
     
     public static void main(String[] args) {
@@ -34,7 +34,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         final int count = 20;
         final CountDownLatch latch = new CountDownLatch(count);
         
-        AddressPinger foo = new AbstractAddressPinger() {
+        AddressPinger pinger = new AbstractAddressPinger() {
             @Override
             public DHTFuture<PingEntity> ping(SocketAddress address, 
                     long timeout, TimeUnit unit) {
@@ -44,10 +44,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             }
         };
         
-        ContactPinger pinger = new ContactPinger(foo, 1, TimeUnit.MILLISECONDS);
+        ContactSink sink = new ContactSink(pinger, 1, TimeUnit.NANOSECONDS);
         try {
             for (int i = 0; i < count; i++) {
-                pinger.addActiveNode(new InetSocketAddress("localhost", 2000+i));
+                sink.addActiveNode(new InetSocketAddress("localhost", 2000+i));
             }
             
             if (!latch.await(1L, TimeUnit.SECONDS)) {
@@ -55,7 +55,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             }
             
         } finally {
-            pinger.close();
+            sink.close();
         }
     }
 }
