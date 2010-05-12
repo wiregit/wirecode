@@ -191,12 +191,4 @@ public class ActiveControllerTest extends DHTTestCase {
             dhtBootstrapNode.close();
         }
     }
-    
-    private static class HostFilterStub implements HostFilter {
-        
-        @Override
-        public boolean allow(SocketAddress addr) {
-            return true;
-        }
-    }
 }

@@ -41,6 +41,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 @Singleton
@@ -71,6 +72,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     
     private final Provider<UDPPinger> udpPinger;
     
+    private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
+    
     private Controller controller = InactiveController.CONTROLLER;
     
     private volatile boolean enabled = true;
@@ -89,7 +92,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
             Provider<HostCatcher> hostCatcher, 
             PingRequestFactory pingRequestFactory,
             Provider<UniqueHostPinger> uniqueHostPinger,
-            Provider<UDPPinger> udpPinger) {
+            Provider<UDPPinger> udpPinger,
+            Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
         
         this.networkManager = networkManager;
         this.udpService = udpService;
@@ -102,10 +106,24 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         this.pingRequestFactory = pingRequestFactory;
         this.uniqueHostPinger = uniqueHostPinger;
         this.udpPinger = udpPinger;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
         
         messageFactory.setParser(
                 (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
                 new MojitoMessageParser());
+        
+        addEventListener(new DHTEventListener() {
+            @Override
+            public void handleDHTEvent(DHTEvent evt) {
+                switch (evt.getType()) {
+                    case CONNECTED:
+                    case STOPPED:
+                        DHTManagerImpl.this.capabilitiesVMFactory.get().updateCapabilities();
+                        DHTManagerImpl.this.connectionManager.get().sendUpdatedCapabilities();
+                        break;
+                }
+            }
+        });
     }
     
     @Inject

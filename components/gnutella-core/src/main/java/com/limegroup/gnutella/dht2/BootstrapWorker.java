@@ -29,6 +29,7 @@ import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
@@ -65,6 +66,7 @@ public class BootstrapWorker implements Closeable {
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
+    @Inject
     public BootstrapWorker(MojitoDHT dht, 
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
@@ -105,11 +107,18 @@ public class BootstrapWorker implements Closeable {
             return;
         }
         
-        if (contacts == null || contacts.length == 0) {
-            return;
+        if (pingFuture != null) {
+            pingFuture.cancel(true);
         }
         
-        stop();
+        if (bootFuture != null) {
+            bootFuture.cancel(true);
+        }
+        
+        if (contacts == null || contacts.length == 0) {
+            tryBootstrap();
+            return;
+        }
         
         Contact src = dht.getLocalNode();
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
