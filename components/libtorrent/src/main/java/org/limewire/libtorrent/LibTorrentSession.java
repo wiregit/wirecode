@@ -140,7 +140,7 @@ public class LibTorrentSession implements TorrentManager {
             // Flush and add the SECONDARY i={1,..,n} trackers again so if there were user changes, ie. 
             //  when loading from a memento the new user tracker list will be used.
             if (trackerList != null) {
-                System.out.println("flushing trackers");
+                LOG.debug("flushing trackers");
                 
                 LibTorrentAnnounceEntry[] trackers = libTorrent.get_trackers(sha1);
                
