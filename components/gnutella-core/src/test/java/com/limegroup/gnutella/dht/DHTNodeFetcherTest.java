@@ -9,13 +9,12 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
-import org.limewire.collection.FixedSizeLIFOSet;
-import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
@@ -34,6 +33,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht2.NodeFetcher;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht2.NodeFetcher.NodeFetcherListener;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -49,8 +49,6 @@ public class DHTNodeFetcherTest extends DHTTestCase {
      */
     private DatagramSocket[] UDP_ACCESS;
     
-    private DHTBootstrapperStub dhtBootstrapper;
-
     private Injector injector;
     
     private MessageFactory messageFactory;
@@ -74,7 +72,6 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
                 
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
-        dhtBootstrapper = new DHTBootstrapperStub();
         
         UDP_ACCESS = new DatagramSocket[10];
         for (int i = 0; i < UDP_ACCESS.length; i++) {
@@ -91,7 +88,8 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             }            
         });
 
-        ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector.getInstance(ConnectionManager.class);
+        ConnectionManagerStub connectionManager 
+            = (ConnectionManagerStub) injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
         
         messageFactory = injector.getInstance(MessageFactory.class);
@@ -133,7 +131,18 @@ public class DHTNodeFetcherTest extends DHTTestCase {
                 pack = new DatagramPacket(datagramBytes, 1000);
                 UDP_ACCESS[0].receive(pack);
                 fail("Shouldn't have received a packet");
-            }catch(SocketTimeoutException ste) {}
+            } catch(SocketTimeoutException ste) {}
+            
+            final AtomicReference<InetSocketAddress> addressRef 
+                = new AtomicReference<InetSocketAddress>();
+            final CountDownLatch latch = new CountDownLatch(1);
+            nodeFetcher.addNodeFetcherListener(new NodeFetcherListener() {
+                @Override
+                public void handleActiveNode(SocketAddress address) {
+                    addressRef.set((InetSocketAddress)address);
+                    latch.countDown();
+                }
+            });
             
             //send the pong now
             IpPortImpl ipp = new IpPortImpl("213.0.0.1", 1111);
@@ -145,11 +154,12 @@ public class DHTNodeFetcherTest extends DHTTestCase {
                     baos.toByteArray().length,
                     new InetSocketAddress("localhost", injector.getInstance(NetworkManager.class).getPort()));
             UDP_ACCESS[0].send(pack);
-            //test the processing
-            Thread.sleep(1000);
-            Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
-            assertTrue(hosts.iterator().hasNext());
-            assertEquals(ipp.getInetAddress(), ((InetSocketAddress)hosts.iterator().next()).getAddress());
+            
+            if (!latch.await(1, TimeUnit.SECONDS)) {
+                fail("Didn't receive an address!");
+            }
+            
+            assertEquals(ipp.getInetAddress(), addressRef.get().getAddress());
             
             //now we should be able to send a ping again
             datagramBytes = new byte[1000];
@@ -201,7 +211,6 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     public void testAddHostCatcherActiveNodes() throws Exception {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
-        dhtBootstrapper.setWaitingForNodes(true);
         NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
         try {
             HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
@@ -214,10 +223,19 @@ public class DHTNodeFetcherTest extends DHTTestCase {
                 hostCatcher.add(ep, false);
             }
             
+            final CountDownLatch latch = new CountDownLatch(UDP_ACCESS.length);
+            nodeFetcher.addNodeFetcherListener(new NodeFetcherListener() {
+                @Override
+                public void handleActiveNode(SocketAddress address) {
+                    latch.countDown();
+                }
+            });
+            
             nodeFetcher.start();
-            Thread.sleep(500);
-            Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
-            assertEquals(UDP_ACCESS.length, hosts.size());
+            
+            if (!latch.await(1L, TimeUnit.SECONDS)) {
+                fail("Did not receive all addresses!");
+            }
         } finally {
             nodeFetcher.close();
         }
@@ -226,7 +244,6 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     public void testRequestDHTHostsFromHostCatcher() throws Exception{
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
         
-        dhtBootstrapper.setWaitingForNodes(true);
         NodeFetcher nodeFetcher = injector.getInstance(NodeFetcher.class);
         try {
             HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
@@ -260,45 +277,4 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             nodeFetcher.close();
         }
     }
-    
-    private class DHTBootstrapperStub implements DHTBootstrapper {
-        
-        private boolean isWaitingForNodes;
-        
-        private Set<SocketAddress> bootstrapHosts;
-        
-        public DHTBootstrapperStub() {
-            bootstrapHosts = new FixedSizeLIFOSet<SocketAddress>(10, EjectionPolicy.FIFO);
-        }
-
-        public void addBootstrapHost(SocketAddress hostAddress) {
-            bootstrapHosts.add(hostAddress);
-        }
-
-        public void addPassiveNode(SocketAddress hostAddress) {
-        }
-
-        public void bootstrap() {
-        }
-
-//        public boolean isBootstrappingFromRT() {
-//            return false;
-//        }
-
-        public boolean isWaitingForNodes() {
-            return isWaitingForNodes;
-        }
-
-        public void stop() {
-        }
-        
-        public void setWaitingForNodes(boolean waiting) {
-            isWaitingForNodes = waiting;
-        }
-        
-        public Set<SocketAddress> getBootstrapHosts() {
-            return bootstrapHosts;
-        }
-    }
-
 }
