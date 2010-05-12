@@ -41,6 +41,7 @@ public class FilePropertyKeyUtils {
             case YEAR: return I18nMarker.marktr("Year");
             case TORRENT: return I18nMarker.marktr("Torrent");
             case USERAGENT: return I18nMarker.marktr("User Agent");
+            case REFERRER: return I18nMarker.marktr("Referrer");
             default: throw new IllegalArgumentException("Unknown SearchCategory/FileProperyKey combination");
         }
     }
