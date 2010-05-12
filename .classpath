@@ -133,7 +133,6 @@
 	<classpathentry kind="lib" path="lib/jars/jxlayer-4.0.jar" sourcepath="lib/sources/jxlayer-4.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/miglayout-3.7-swing.jar" sourcepath="lib/sources/miglayout-3.7-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.2.jar" sourcepath="lib/sources/swing-worker-src-1.2.zip"/>
-	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.0.10.jar" sourcepath="lib/sources/hsqldb-1.8.0.10-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/json-20070829.jar"/>
 	<classpathentry kind="lib" path="lib/jars/glazedlists-snapshot20090628_java15.jar" sourcepath="lib/sources/glazedlists-snapshot20090628-source_java15.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-1.0.jar" sourcepath="lib/sources/swingx-1.0-src.zip"/>
@@ -165,5 +164,6 @@
 	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar" sourcepath="lib/sources/fmj-source.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
+	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.1.2.jar" sourcepath="lib/sources/hsqldb-1.8.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
