@@ -40,7 +40,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 /**
  * 
  */
-class BootstrapManager implements Closeable {
+public class BootstrapManager implements Closeable {
 
     private static final Log LOG 
         = LogFactory.getLog(BootstrapManager.class);
@@ -320,6 +320,7 @@ class BootstrapManager implements Closeable {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
                 onPong(event);
+                
             }
         });
     }

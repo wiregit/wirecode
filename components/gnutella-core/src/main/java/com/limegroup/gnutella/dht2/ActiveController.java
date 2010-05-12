@@ -46,6 +46,7 @@ import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -60,14 +61,14 @@ import com.limegroup.gnutella.dht2.BootstrapManager.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
-class ActiveController extends AbstractController {
+public class ActiveController extends AbstractController {
     
     private static final Log LOG 
         = LogFactory.getLog(ActiveController.class);
     
     private static final String NAME = "MojitoDHT";
     
-    private static final File ACTIVE_FILE 
+    public static final File ACTIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
     private final AtomicBoolean collision = new AtomicBoolean(false);
@@ -90,6 +91,7 @@ class ActiveController extends AbstractController {
     
     private Contact[] contacts = null;
     
+    @Inject
     public ActiveController(DHTManager manager,
             NetworkManager networkManager,
             Transport transport, 
@@ -242,10 +244,10 @@ class ActiveController extends AbstractController {
     
     @Override
     public void close() {
-        IoUtils.close(contactSink);
-        IoUtils.close(contactPusher);
-        IoUtils.close(bootstrapManager);
-        IoUtils.close(dht);
+        IoUtils.closeAll(contactSink, 
+                contactPusher, 
+                bootstrapManager, 
+                dht);
         
         if (!collision.get()) {
             write();
