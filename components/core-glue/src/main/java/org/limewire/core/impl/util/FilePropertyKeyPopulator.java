@@ -284,6 +284,9 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.VIDEO_RATING;
             }
             break;
+        case TORRENT:
+            // torrent doesn't have user editable properties
+            return null;
         }
         return null;
     }

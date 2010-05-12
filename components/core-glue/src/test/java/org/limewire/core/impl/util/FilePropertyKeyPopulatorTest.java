@@ -236,6 +236,8 @@ public class FilePropertyKeyPopulatorTest extends BaseTestCase {
         assertEquals(LimeXMLNames.DOCUMENT_SCHEMA, FilePropertyKeyPopulator.getLimeXmlSchemaUri(Category.DOCUMENT));
         assertEquals(LimeXMLNames.APPLICATION_SCHEMA, FilePropertyKeyPopulator.getLimeXmlSchemaUri(Category.PROGRAM));
         assertEquals(LimeXMLNames.VIDEO_SCHEMA, FilePropertyKeyPopulator.getLimeXmlSchemaUri(Category.VIDEO));
+        assertEquals(LimeXMLNames.TORRENT_SCHEMA, FilePropertyKeyPopulator.getLimeXmlSchemaUri(Category.TORRENT));
+        
 
         try {
             FilePropertyKeyPopulator.getLimeXmlSchemaUri(Category.OTHER);
