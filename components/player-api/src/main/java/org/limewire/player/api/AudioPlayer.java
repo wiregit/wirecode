@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
+import javax.media.GainControl;
+
 
 /**
  * This interface defines the functionality of an AudioPlayer
@@ -74,7 +76,10 @@ public interface AudioPlayer {
      */
     public void setVolume(float value);
     
-    public float getVolume();
+    /**
+     * Returns the GainController used by this Player.
+     */
+    public GainControl getGainControl();
     
     /**
      * Adds a listener to the list of player listeners.

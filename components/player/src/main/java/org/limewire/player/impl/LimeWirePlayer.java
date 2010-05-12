@@ -19,9 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.GainChangeEvent;
+import javax.media.GainChangeListener;
+import javax.media.GainControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.SwingUtilities;
+
+import net.sf.fmj.media.AbstractGainControl;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.LazySingleton;
@@ -105,7 +110,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * The current volume of the player.
      */
-    private float volume = 0;
+    private GainControl gainControl;
 
     /**
      * Contains the Input and Output streams for the IO
@@ -135,13 +140,13 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
 
     public LimeWirePlayer() {
         songBuffer = new LoadSongBuffer();
-//        gainControl = new JavaGainControl();
-//        gainControl.addGainChangeListener(new GainChangeListener(){
-//            @Override
-//            public void gainChange(GainChangeEvent event) {
-//                setVolume = true;
-//            }
-//        });
+        gainControl = new JavaGainControl();
+        gainControl.addGainChangeListener(new GainChangeListener(){
+            @Override
+            public void gainChange(GainChangeEvent event) {
+                setVolume = true;
+            }
+        });
     }
 
     /**
@@ -263,15 +268,14 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      */
     public void setVolume(float fGain) {
         synchronized (volumeLock) {
-            volume = fGain;
+            // volume = fGain;
+            gainControl.setLevel(fGain);
             setVolume = true;
         }
     }
     
-    public float getVolume() {
-        synchronized (volumeLock) {
-            return volume;
-        }
+    public GainControl getGainControl() {
+        return gainControl;
     }
     
 //    public GainControl getGainControl() {
@@ -305,14 +309,15 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
                 try {
                     float vol = 0;
                     synchronized (volumeLock) {
-                        vol = volume;
+
+                        vol = gainControl.getLevel();
                         setVolume = false;
                     }
                     currentAudioFormat.setGain(vol);
-                    notifyEvent(GAIN, volume);
-                    
-                } catch (IOException e) { 
-                } 
+                    notifyEvent(GAIN, vol);
+
+                } catch (IOException e) {
+                }
             }
             // load a new song
             if( loadSong ){
@@ -623,5 +628,29 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     @Override
     public AudioSource getCurrentSong() {
         return currentSong;
+    }
+
+    private class JavaGainControl extends AbstractGainControl {
+        private static final float MAX = 1.0f;
+        private static final float MIN = 0.0f;
+        private float level = 0.0f;
+
+        public float getLevel() {
+            return level;
+        }
+
+        public float setLevel(final float level) {
+            if(level > MAX)
+                this.level = MAX;
+            else if(level < MIN)
+                this.level = MIN;
+            else
+                this.level = level;
+            
+            notifyListenersGainChangeEvent();
+            
+            return this.level;
+        }
+
     }
 }

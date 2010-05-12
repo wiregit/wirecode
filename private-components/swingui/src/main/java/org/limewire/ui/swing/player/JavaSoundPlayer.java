@@ -58,11 +58,9 @@ public class JavaSoundPlayer implements Player {
     
     /** Audio player component. */
     private AudioPlayer audioPlayer;
-    private JavaGainControl gainControl;
     
     public JavaSoundPlayer(Provider<AudioPlayer> audioPlayerProvider) {
         this.audioPlayerProvider = audioPlayerProvider;
-        gainControl = new JavaGainControl();
     }
     
     /**
@@ -132,7 +130,9 @@ public class JavaSoundPlayer implements Player {
 
     @Override
     public GainControl getGainControl() {
-        return gainControl;
+        if(audioPlayer != null)
+            return audioPlayer.getGainControl();
+        return null;
     }
 
     @Override
@@ -159,9 +159,9 @@ public class JavaSoundPlayer implements Player {
     @Override
     public void deallocate() {
         audioProperties = null;
-//        if(playerListener != null && audioPlayer != null)
-//            audioPlayer.removeAudioPlayerListener(playerListener);
-//        audioPlayer = null;
+        if(playerListener != null && audioPlayer != null)
+            audioPlayer.removeAudioPlayerListener(playerListener);
+        audioPlayer = null;
     }
 
     @Override
@@ -172,7 +172,7 @@ public class JavaSoundPlayer implements Player {
     @Override
     public Control[] getControls() {
         if(audioPlayer != null)
-            return new Control[]{gainControl};
+            return new Control[]{audioPlayer.getGainControl()};
         else
             return new Control[]{};
     }
@@ -310,39 +310,5 @@ public class JavaSoundPlayer implements Player {
                 state = Realized;
             }
         }
-    }
-    
-    private class JavaGainControl extends net.sf.fmj.media.AbstractGainControl {
-//        private static final float MAX = 1.0f;
-//        private static final float MIN = 0.0f;
-//        private float level = 0.0f;
-
-        
-        
-        public float getLevel() {
-            if(audioPlayer != null) {
-                return audioPlayer.getVolume();
-            } else {
-                return 0;
-            }
-        }
-
-        public float setLevel(final float level) {
-            if(audioPlayer != null) {
-                audioPlayer.setVolume(level);
-            }
-            return level;
-//            if(level > MAX)
-//                this.level = MAX;
-//            else if(level < MIN)
-//                this.level = MIN;
-//            else
-//                this.level = level;
-//            
-//            notifyListenersGainChangeEvent();
-//            
-//            return this.level;
-        }
-
     }
 }
