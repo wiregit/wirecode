@@ -2,6 +2,7 @@ package org.limewire.core.impl.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -13,6 +14,7 @@ import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 import org.limewire.bittorrent.TorrentIpFilter;
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 
 import com.google.inject.Inject;
 
@@ -153,5 +155,9 @@ public class MockTorrentManager implements TorrentManager {
     @Override
     public Torrent addTorrent(TorrentParams params) throws IOException {
         return null;
+    }
+
+    @Override
+    public void queueTrackerScrapeRequest(String hexSha1Urn, URI trackerUri, ScrapeCallback callback) {
     }
 }

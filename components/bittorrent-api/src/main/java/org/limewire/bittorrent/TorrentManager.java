@@ -2,8 +2,11 @@ package org.limewire.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
+
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 
 /**
  * The torrent manager allows for adding an removing torrents, as well as
@@ -172,4 +175,5 @@ public interface TorrentManager {
      */
     public void setTrackerProxy(ProxySetting proxy);
 
+    public void queueTrackerScrapeRequest(String hexSha1Urn, URI trackerUri, ScrapeCallback callback);
 }

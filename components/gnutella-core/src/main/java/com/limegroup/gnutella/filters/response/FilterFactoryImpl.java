@@ -14,7 +14,7 @@ import com.limegroup.gnutella.filters.PhraseFilter;
 import com.limegroup.gnutella.filters.URNFilter;
 
 @Singleton
-class ResponseFilterFactoryImpl implements ResponseFilterFactory {
+class FilterFactoryImpl implements FilterFactory {
 
     private final Provider<XMLDocFilter> xmlDocFilter;
     private final Provider<MandragoreWormFilter> wormFilter;
@@ -31,7 +31,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<NoExtensionFilter> noExtensionFilter;
 
     @Inject
-    public ResponseFilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
+    public FilterFactoryImpl(Provider<XMLDocFilter> xmlDocFilter,
             Provider<MandragoreWormFilter> wormFilter,
             Provider<ResponseQueryFilter> queryFilter,
             Provider<ProgramsFilter> programsFilter,
@@ -77,7 +77,25 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(phraseFilter.get());
         filters.add(noExtensionFilter.get());
 
-        return new CompoundResponseFilter(filters,
-                Collections.singletonList(whiteListUpdateUrnFilter.get()));
+        return new CompoundFilter(filters,
+                Collections.singletonList(whiteListUpdateUrnFilter.get()),
+                Collections.<SearchResultFilter>emptyList(),
+                Collections.<SearchResultFilter>emptyList());
+    }
+    
+    @Override
+    public SearchResultFilter createResultFilter() {
+        List<SearchResultFilter> filters = new ArrayList<SearchResultFilter>();
+
+        filters.add(urnFilter.get());
+        filters.add(keywordFilter.get());
+        filters.add(programsFilter.get());
+        filters.add(xmlDocFilter.get());
+        filters.add(phraseFilter.get());
+
+        return new CompoundFilter(Collections.<ResponseFilter>emptyList(),
+                Collections.<ResponseFilter>emptyList(),
+                filters,
+                Collections.<SearchResultFilter>emptyList());
     }
 }

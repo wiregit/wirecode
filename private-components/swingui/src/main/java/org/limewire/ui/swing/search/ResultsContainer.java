@@ -10,7 +10,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanelFactory;
-import org.limewire.ui.swing.settings.SwingUiSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -39,7 +38,7 @@ public class ResultsContainer extends JXPanel {
         // Create result panel.
         baseResultPanel = baseFactory.create(searchResultsModel);
         // set the default view type.
-        baseResultPanel.setViewType(SearchViewType.forId(SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue()));
+        baseResultPanel.setViewType(SearchViewType.getSearchViewType(searchResultsModel.getSearchCategory()));
         
         setLayout(new BorderLayout());
         

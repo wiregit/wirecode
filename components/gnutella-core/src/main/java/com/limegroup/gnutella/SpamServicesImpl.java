@@ -18,7 +18,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.URNFilter;
-import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
+import com.limegroup.gnutella.filters.response.FilterFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.search.SearchResultHandler;
 
@@ -32,7 +32,7 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
     private final Provider<URNFilter> urnFilter;
     private final SpamFilterFactory spamFilterFactory;
     private final Provider<SearchResultHandler> searchResultHandler;
-    private final ResponseFilterFactory responseFilterFactory;
+    private final FilterFactory responseFilterFactory;
     private volatile SpamFilter personalFilter;
     private final AtomicInteger filtersLoading;
 
@@ -41,7 +41,7 @@ public class SpamServicesImpl implements SpamServices, SpamFilter.LoadCallback {
             Provider<IPFilter> ipFilter, Provider<URNFilter> urnFilter,
             SpamFilterFactory spamFilterFactory,
             Provider<SearchResultHandler> searchResultHandler,
-            ResponseFilterFactory responseFilterFactory) {
+            FilterFactory responseFilterFactory) {
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
         this.urnFilter = urnFilter;

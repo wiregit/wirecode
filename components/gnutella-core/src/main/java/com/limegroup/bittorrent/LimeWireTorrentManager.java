@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,6 +25,7 @@ import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
 import org.limewire.bittorrent.TorrentParams;
 import org.limewire.bittorrent.TorrentStatus;
+import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.bittorrent.bencoding.Token;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -642,5 +644,11 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
         String fileName = btData.getName().concat(".torrent");
         File f = new File(SharingSettings.getSaveDirectory(), fileName);
         return f;
+    }
+
+    @Override
+    public void queueTrackerScrapeRequest(String hexSha1Urn, URI trackerUri, ScrapeCallback callback) {
+        setupTorrentManager();
+        torrentManager.get().queueTrackerScrapeRequest(hexSha1Urn, trackerUri, callback);
     }
 }

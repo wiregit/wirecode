@@ -27,7 +27,9 @@ public enum FilePropertyKey {
     LOCATION(false),
     YEAR(true),
     TORRENT(false),
-    USERAGENT(false);
+    USERAGENT(false),
+    /** URI to location where item was referenced, ie. the download page for torrent websearch */
+    REFERRER(false);
     
     private final static Collection<FilePropertyKey> indexableKeys = EnumSet.noneOf(FilePropertyKey.class); 
     private final static Collection<FilePropertyKey> editableKeys = EnumSet.noneOf(FilePropertyKey.class);

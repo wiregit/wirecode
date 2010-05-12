@@ -1,16 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
 import org.jmock.Mockery;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.GUID;
-import org.limewire.util.AssignParameterAction;
 import org.limewire.util.Clock;
 import org.limewire.util.ClockImpl;
 import org.limewire.util.SequencedExpectations;

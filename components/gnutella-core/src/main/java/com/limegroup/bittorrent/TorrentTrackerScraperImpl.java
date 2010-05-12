@@ -159,7 +159,7 @@ public class TorrentTrackerScraperImpl implements TorrentTrackerScraper {
                     }
 
 
-                    ScrapeData data = parseResponseMap(torrentsMap.entrySet().iterator().next().getValue());
+                    TorrentScrapeData data = parseResponseMap(torrentsMap.entrySet().iterator().next().getValue());
                     
                     if (data != null) {
                         callback.success(data);
@@ -195,7 +195,7 @@ public class TorrentTrackerScraperImpl implements TorrentTrackerScraper {
      *  
      * @return the scrape data parsed or null if the map was not well formed. 
      */
-    static ScrapeData parseResponseMap(Object data) {
+    static TorrentScrapeData parseResponseMap(Object data) {
         
         if (!(data instanceof Map<?,?>)) {
             return null;
@@ -219,41 +219,14 @@ public class TorrentTrackerScraperImpl implements TorrentTrackerScraper {
             return null;
         }
         
-        return new ScrapeData((Long)complete, 
+        return new TorrentScrapeData((Long)complete, 
                 (Long)incomplete, 
                 (Long)downloaded);
 
     }
 
-
-    private static class ScrapeData implements TorrentScrapeData {
-        private final long complete, incomplete, downloaded;
-
-        private ScrapeData(long complete, long incomplete, long downloaded) {
-            this.complete = complete;
-            this.incomplete = incomplete;
-            this.downloaded = downloaded;
-        }
-        public long getComplete() {
-            return complete;
-        }
-        public long getIncomplete() {
-            return incomplete;
-        }
-        public long getDownloaded() {
-            return downloaded;
-        }
-        @Override
-        public String toString() {
-            return "[TrackerScraper complete=" + complete 
-            + " incomplete=" + incomplete + 
-            " downloaded=" + downloaded + "]";
-        }
-    }
-
     private static boolean canHTTPScrape(URI trackerAnnounceUri) {
         String announceString = trackerAnnounceUri.toString();
-        
         return announceString.toLowerCase(Locale.US).startsWith("http") && announceString.indexOf(ANNOUNCE_PATH) > 0;
     }
     

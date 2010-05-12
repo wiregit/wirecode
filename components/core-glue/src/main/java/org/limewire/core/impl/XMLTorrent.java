@@ -495,5 +495,9 @@ public class XMLTorrent implements Torrent {
         }
     }
 
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
 
 }

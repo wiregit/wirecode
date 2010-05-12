@@ -17,6 +17,7 @@ import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
@@ -122,6 +123,13 @@ public final class SwingUiSettings extends LimeProps {
      */
     public static final IntSetting SEARCH_VIEW_TYPE_ID =
         FACTORY.createIntSetting("SEARCH_VIEW_TYPE_ID", -1);
+    
+    /**
+     * The view type used for torrent searches, by default the table
+     * view.
+     */
+    public static final IntSetting TORRENT_SEARCH_VIEW_TYPE_ID =
+        FACTORY.createIntSetting("TORRENT_SEARCH_VIEW_TYPE_ID", SearchViewType.TABLE.getId());
     
     @SuppressWarnings("unused")
     @InspectableContainer

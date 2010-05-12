@@ -165,5 +165,6 @@
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.1.2.jar" sourcepath="lib/sources/hsqldb-1.8.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/htmlcleaner-2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

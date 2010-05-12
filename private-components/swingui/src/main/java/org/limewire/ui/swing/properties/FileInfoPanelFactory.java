@@ -25,4 +25,6 @@ public interface FileInfoPanelFactory {
     public FileInfoBittorrentPanel createBittorentPanel(Torrent torrent);
     
     public FileInfoPanel createPiecesPanel(FileInfoType type, DownloadItem propertiableFile);
+
+    public FileInfoPanel createLimitsPanel(FileInfoType type, PropertiableFile propertiableFile);
 }

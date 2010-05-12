@@ -6,6 +6,6 @@ public class LimeWireFiltersResponseModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(ResponseFilterFactory.class).to(ResponseFilterFactoryImpl.class);
+        bind(FilterFactory.class).to(FilterFactoryImpl.class);
     }
 }

@@ -31,7 +31,6 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.components.decorators.TableDecorator;
 import org.limewire.ui.swing.library.table.RemoveButton;
-import org.limewire.ui.swing.properties.FileInfoDialog.FileInfoType;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;
 import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.table.TableRendererEditor;
@@ -49,7 +48,7 @@ public class FileInfoTrackersPanel implements FileInfoPanel {
     private List<TorrentTracker> trackerList = null;
     private StripedJXTable table;
     
-    public FileInfoTrackersPanel(FileInfoType type, PropertiableFile propertiableFile, TableDecorator tableDecorator) {
+    public FileInfoTrackersPanel(PropertiableFile propertiableFile, TableDecorator tableDecorator) {
         component = new JPanel(new MigLayout("fillx, gap 0, insets 7 7 20 7"));
         
         torrent = (Torrent)propertiableFile.getProperty(FilePropertyKey.TORRENT);

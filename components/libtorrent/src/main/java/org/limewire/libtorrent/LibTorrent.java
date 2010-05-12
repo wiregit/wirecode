@@ -321,4 +321,6 @@ interface LibTorrent extends Library {
      * Frees the data consumed for tracker data.
      */
     public WrapperStatus free_trackers(Pointer[] trackers, int numTrackers);
+    
+//    public WrapperStatus queue_tracker_scrape_request(String sha1, String trackerUri, TrackerScrapeRequestCallback callback);
 }

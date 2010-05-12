@@ -194,6 +194,8 @@ public class FilePropertyKeyPopulator {
             return LimeXMLNames.APPLICATION_SCHEMA;
         case VIDEO:
             return LimeXMLNames.VIDEO_SCHEMA;
+        case TORRENT:
+            return LimeXMLNames.TORRENT_SCHEMA;
         }
         throw new UnsupportedOperationException("Category: " + category + " is not supported.");
     }
@@ -282,6 +284,9 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.VIDEO_RATING;
             }
             break;
+        case TORRENT:
+            // torrent doesn't have user editable properties
+            return null;
         }
         return null;
     }

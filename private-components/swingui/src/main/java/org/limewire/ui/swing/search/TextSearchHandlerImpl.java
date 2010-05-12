@@ -223,7 +223,7 @@ class TextSearchHandlerImpl implements SearchHandler {
                 }
             }
 
-            @Override public void handleSponsoredResults(Search search, List<SponsoredResult> sponsoredResults) {}
+            @Override public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {}
             @Override public void searchStarted(Search search) {}
             @Override public void searchStopped(Search search) {}                
         });

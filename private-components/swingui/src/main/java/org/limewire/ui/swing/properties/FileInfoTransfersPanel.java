@@ -70,7 +70,6 @@ public class FileInfoTransfersPanel implements FileInfoPanel {
         
         Torrent localTorrent = (Torrent)file.getProperty(FilePropertyKey.TORRENT);
         if(localTorrent != null) {
-            assert(localTorrent.isEditable());
             torrent = localTorrent;
         }
         

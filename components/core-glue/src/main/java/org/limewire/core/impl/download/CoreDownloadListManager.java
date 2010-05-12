@@ -77,13 +77,15 @@ public class CoreDownloadListManager implements DownloadListManager {
     private static final int PERIOD = 1000;
     
     private Map<org.limewire.core.api.URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<org.limewire.core.api.URN, DownloadItem>());
+    private final DownloadItemFactoryRegistry downloadItemFactoryRegistry;
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
             RemoteFileDescFactory remoteFileDescFactory, SpamManager spamManager, 
             ItunesDownloadListenerFactory itunesDownloadListenerFactory, 
             TorrentDownloadListenerFactory torrentDownloadListenerFactory,
-            CoreDownloadItem.Factory coreDownloadItemFactory) {
+            CoreDownloadItem.Factory coreDownloadItemFactory,
+            DownloadItemFactoryRegistry downloadItemFactoryRegistry) {
 	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
@@ -91,6 +93,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
         this.torrentDownloadListenerFactory = torrentDownloadListenerFactory;
         this.coreDownloadItemFactory = coreDownloadItemFactory;
+        this.downloadItemFactoryRegistry = downloadItemFactoryRegistry;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -155,9 +158,15 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
             File saveFile, boolean overwrite) throws DownloadException {
+
+        // do it before spam marking, since those search results might not support spam marking
+        DownloadItem downloadItem = downloadItemFactoryRegistry.create(search, searchResults, saveFile, overwrite);
+        if (downloadItem != null) {
+            return downloadItem;
+        }
+
         // Train the spam filter even if the results weren't rated as spam
         spamManager.handleUserMarkedGood(searchResults);
-        
         
         RemoteFileDesc[] files;
         List<RemoteFileDesc> alts = new ArrayList<RemoteFileDesc>();

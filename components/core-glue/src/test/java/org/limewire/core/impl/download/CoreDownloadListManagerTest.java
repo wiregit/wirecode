@@ -87,7 +87,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
 
         final ScheduledExecutorService backgroundExecutor = context
                 .mock(ScheduledExecutorService.class);
@@ -285,7 +285,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -421,7 +421,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory, torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
 
         coreDownloadListManager.registerDownloadListener(listenerList);
 
@@ -479,7 +479,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final MagnetLinkImpl magnetLink = context.mock(MagnetLinkImpl.class);
@@ -570,7 +570,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -635,7 +635,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
 
         CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), null);
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);
@@ -699,9 +699,10 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
             }
         });
 
-        CoreDownloadListManager coreDownloadListManager = new CoreDownloadListManager(
+        CoreDownloadListManager coreDownloadListManager2 = new CoreDownloadListManager(
                 downloadManager, remoteFileDescFactory, spamManager,
-                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null));
+                itunesDownloadListenerFactory,  torrentDownloadListenerFactory, new CDIFactory(friendManager, null), new DownloadItemFactoryRegistry());
+        CoreDownloadListManager coreDownloadListManager = coreDownloadListManager2;
         coreDownloadListManager.registerDownloadListener(listenerList);
 
         final DownloadItem downloadItem = context.mock(DownloadItem.class);

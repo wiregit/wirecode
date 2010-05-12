@@ -84,7 +84,7 @@ import org.limewire.security.SecurityToken;
  */
 class StoreProcess implements DHTTask<StoreResult> {
     
-    private static final Log LOG = LogFactory.getLog(StoreProcess.class);
+    //private static final Log LOG = LogFactory.getLog(StoreProcess.class);
     
     private final Context context;
     
