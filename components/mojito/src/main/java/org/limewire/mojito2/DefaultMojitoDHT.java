@@ -346,6 +346,17 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
+    public DHTFuture<StoreEntity> remove(KUID key) {
+        return put(key, DHTValue.EMPTY_VALUE);
+    }
+    
+    @Override
+    public DHTFuture<NodeEntity> lookup(KUID lookupId) {
+        long timeout = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        return dht.lookup(lookupId, timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
     public DHTFuture<ValueEntity> get(EntityKey key) {
         long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
         return dht.get(key, timeout, TimeUnit.MILLISECONDS);

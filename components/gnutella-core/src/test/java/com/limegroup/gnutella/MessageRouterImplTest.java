@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,6 +38,9 @@ import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
@@ -63,11 +65,9 @@ import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.Controller;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -834,7 +834,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
-                bind(DHTManagerImpl.class).toInstance(testDHTManager);
+                bind(DHTManager.class).toInstance(testDHTManager);
             }
         });
         
@@ -1295,88 +1295,124 @@ public final class MessageRouterImplTest extends LimeTestCase {
     
     private static class TestDHTManager implements DHTManager {
 
-        public List<IpPort> getActiveDHTNodes(int maxNodes){
-            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
-            for(int i = 0; i < maxNodes; i++) {
+        @Override
+        public void close() throws IOException {
+        }
+
+        @Override
+        public void addActiveNode(SocketAddress address) {
+        }
+
+        @Override
+        public void addEventListener(DHTEventListener listener) {
+        }
+
+        @Override
+        public void addPassiveNode(SocketAddress address) {
+        }
+
+        @Override
+        public void addressChanged() {
+        }
+
+        @Override
+        public DHTFuture<ValueEntity> get(EntityKey key) {
+            return null;
+        }
+
+        @Override
+        public Contact[] getActiveContacts(int max) {
+            return null;
+        }
+
+        @Override
+        public IpPort[] getActiveIpPort(int max) {
+            List<IpPort> ipps = new ArrayList<IpPort>();
+            for(int i = 0; i < max; i++) {
                 IpPort ipp;
                 try {
                     ipp = new IpPortImpl("localhost", 3000+i);
-                    ipps.addFirst(ipp);
+                    ipps.add(0, ipp);
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
             }
-            return ipps;
+            return ipps.toArray(new IpPort[0]);
         }
 
-        public void addActiveNode(SocketAddress hostAddress) {}
-        
-        public void addPassiveNode(SocketAddress hostAddress) {}
-
-        public void addressChanged() {}
-        
-        public boolean isWaitingForNodes() {
-            return false;
+        @Override
+        public Controller getController() {
+            return null;
         }
 
-        public MojitoDHT getMojitoDHT() { return null; }
-
-        public DHTMode getDHTMode() { 
-            return DHTMode.INACTIVE; 
+        @Override
+        public DHTMode getMode() {
+            return DHTMode.INACTIVE;
         }
 
-        public boolean isRunning() { 
-            return true; 
+        @Override
+        public MojitoDHT getMojitoDHT() {
+            return null;
         }
 
-        public void stop() {}
-
-        public void start(DHTMode mode) {}
-        
-        public boolean isBootstrapped() {
-            return false;
-        }
-
-        public boolean isMemberOfDHT() {
-            return isRunning() && isBootstrapped();
-        }
-
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
-        
+        @Override
         public Vendor getVendor() {
             return Vendor.UNKNOWN;
         }
-        
+
+        @Override
         public Version getVersion() {
             return Version.ZERO;
         }
 
-        public void addEventListener(DHTEventListener listener) {
-        }
-
-        public void dispatchEvent(DHTEvent event) {
-        }
-
-        public void removeEventListener(DHTEventListener listener) {
-        }
-
+        @Override
         public void handleContactsMessage(DHTContactsMessage msg) {
         }
 
+        @Override
         public boolean isEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isMode(DHTMode mode) {
+            return getMode() == mode;
+        }
+
+        @Override
+        public boolean isReady() {
+            return false;
+        }
+
+        @Override
+        public boolean isRunning() {
             return true;
         }
 
+        @Override
+        public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+            return null;
+        }
+
+        @Override
+        public void removeEventListener(DHTEventListener listener) {
+        }
+
+        @Override
         public void setEnabled(boolean enabled) {
         }
-        
-        public DHTFuture<FindValueResult> get(EntityKey eKey) {
-            return null;
+
+        @Override
+        public boolean start(DHTMode mode) {
+            return false;
         }
-        
-        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-            return null;
+
+        @Override
+        public void stop() {
+        }
+
+        @Override
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         }
     }
-
 }

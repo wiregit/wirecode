@@ -5,11 +5,11 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import org.limewire.core.settings.ApplicationSettings;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import org.limewire.core.settings.ApplicationSettings;
+
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 /**
  * Unit tests for ExtendedEndpoint.

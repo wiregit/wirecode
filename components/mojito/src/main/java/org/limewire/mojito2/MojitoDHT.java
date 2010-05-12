@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
+import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
@@ -114,6 +115,16 @@ public interface MojitoDHT extends DHT {
      */
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
  
+    /**
+     * 
+     */
+    public DHTFuture<StoreEntity> remove(KUID key);
+    
+    /**
+     * 
+     */
+    public DHTFuture<NodeEntity> lookup(KUID lookupId);
+    
     /**
      * 
      */

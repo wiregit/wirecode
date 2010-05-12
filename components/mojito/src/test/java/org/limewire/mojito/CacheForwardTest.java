@@ -25,22 +25,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
-import org.limewire.mojito.util.UnitTestUtils;
-import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.BucketRefresherSettings;
 import org.limewire.mojito2.settings.DatabaseSettings;
@@ -51,7 +47,6 @@ import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.util.IoUtils;
-import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 
 @SuppressWarnings("null")
@@ -245,7 +240,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Change the instanceId and we'll asked to store the
             // value again!
-            nearest.getLocalNode().nextInstanceID();
+            ((LocalContact)nearest.getLocalNode()).nextInstanceID();
             bootstrap(nearest, dhts.values());
             
             // Give everybody time to figure out whether to forward
@@ -287,7 +282,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
             
-            middle.getLocalNode().nextInstanceID();
+            ((LocalContact)middle.getLocalNode()).nextInstanceID();
             bootstrap(middle, dhts.values());
             Thread.sleep(waitForNodes);
             
