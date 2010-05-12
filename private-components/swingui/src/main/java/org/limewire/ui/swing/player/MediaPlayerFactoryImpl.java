@@ -93,8 +93,8 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
         
         // default to the java sound player if all else fails
         handler = new JavaSoundPlayer(player);
-        ((JavaSoundPlayer)handler).setSource(file);
-//        setupPlayer(handler, file);
+//        ((JavaSoundPlayer)handler).setSource(file);
+        setupPlayer(handler, file);
         parentComponent.add(p);
         
         return handler;
