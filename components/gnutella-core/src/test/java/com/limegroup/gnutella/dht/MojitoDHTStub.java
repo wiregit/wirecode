@@ -307,6 +307,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
     
     private static <V> DHTFuture<V> createFuture() {
-        return new DHTValueFuture<V>(new UnsupportedOperationException());
+        return new DHTValueFuture<V>(
+                new UnsupportedOperationException());
     }
 }

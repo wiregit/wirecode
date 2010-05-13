@@ -52,9 +52,9 @@ public class BootstrapWorkerTest extends DHTTestCase {
         
         // Set up SIMPP hosts
         final String[] hosts = new String[] {
-            "1.0.0.3:100",
-            "2.0.0.3:200",
-            "3.0.0.3:300"
+            "www.limewire.org:1234",
+            "www.limewire.org:4321",
+            "www.limewire.org:1243",
         };
         
         DHTSettings.DHT_BOOTSTRAP_HOSTS.set(hosts);
@@ -90,10 +90,10 @@ public class BootstrapWorkerTest extends DHTTestCase {
         try {
             worker.start();
             
-            if (!latch.await(10, TimeUnit.SECONDS)) {
+            if (!latch.await(20, TimeUnit.SECONDS)) {
                 fail("Shouldn't have failed!");
             }
-        
+            
         } finally {
             worker.close();
         }
@@ -105,8 +105,6 @@ public class BootstrapWorkerTest extends DHTTestCase {
         InetSocketAddress isa = (InetSocketAddress)address;
         String element = isa.getHostName() + ":" + isa.getPort();
         
-        System.out.println(element + ": " + ArrayUtils.contains(addresses, element));
-         
         return ArrayUtils.contains(addresses, element);
     }
 }

@@ -3,6 +3,9 @@ package org.limewire.mojito2.concurrent;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.AsyncValueFuture;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito2.util.EventUtils;
 
 /**
  * 
@@ -42,5 +45,25 @@ public class DHTValueFuture<V> extends AsyncValueFuture<V> implements DHTFuture<
     @Override
     public boolean isTimeout() {
         return false;
+    }
+    
+    @Override
+    protected boolean isEventThread() {
+        return EventUtils.isEventThread();
+    }
+    
+    @Override
+    protected void fireOperationComplete(
+            final EventListener<FutureEvent<V>>[] listeners,
+            final FutureEvent<V> event) {
+        
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                DHTValueFuture.super.fireOperationComplete(listeners, event);
+            }
+        };
+        
+        EventUtils.fireEvent(task);
     }
 }

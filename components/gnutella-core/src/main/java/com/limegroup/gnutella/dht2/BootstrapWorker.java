@@ -123,6 +123,7 @@ public class BootstrapWorker implements Closeable {
         Contact src = dht.getLocalNode();
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
         
+        System.out.println("PING.1-IN");
         pingFuture = dht.ping(src, contacts, timeout, TimeUnit.MILLISECONDS);
         pingFuture.addFutureListener(
                 new EventListener<FutureEvent<PingEntity>>() {
@@ -131,6 +132,7 @@ public class BootstrapWorker implements Closeable {
                 onPong(event);
             }
         });
+        System.out.println("PING.1-OUT");
     }
     
     /**
@@ -155,8 +157,7 @@ public class BootstrapWorker implements Closeable {
      */
     @Override
     public synchronized void close() {
-        open = false;
-        
+        open = false; 
         nodeFetcher.close();
         stop();
     }
@@ -303,6 +304,9 @@ public class BootstrapWorker implements Closeable {
      * 
      */
     private synchronized void tryBootstrap() {
+        if (!open) {
+            return;
+        }
         
         if (dht.isBooting() || dht.isReady()) {
             return;
@@ -337,7 +341,6 @@ public class BootstrapWorker implements Closeable {
             @Override
             public void handleEvent(FutureEvent<PingEntity> event) {
                 onPong(event);
-                
             }
         });
     }
