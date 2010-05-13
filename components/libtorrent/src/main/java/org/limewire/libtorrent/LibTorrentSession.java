@@ -147,7 +147,6 @@ public class LibTorrentSession implements TorrentManager {
                 // Remove the trackers that were automatically added by loading the torrent file
                 for ( int i=1 ; i<trackers.length ; i++ ) {
                     LibTorrentAnnounceEntry tracker = trackers[i];
-                    System.out.println(tracker.uri);
                     libTorrent.remove_tracker(sha1, tracker.uri, tracker.tier);
                 }
                 
