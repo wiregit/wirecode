@@ -12,6 +12,8 @@ import org.limewire.security.SignatureVerifier;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+
 public class LWSCommandValidatorImpl implements LWSCommandValidator{
     
     private final static Log LOG = LogFactory.getLog(LWSCommandValidatorImpl.class);
@@ -22,6 +24,11 @@ public class LWSCommandValidatorImpl implements LWSCommandValidator{
     private final String lwsPublicKey;
     
     private final NetworkManager networkManager;
+    
+    @Inject
+    public LWSCommandValidatorImpl(NetworkManager networkManager){
+        this(LWSDispatcher.LWS_PUBLIC_KEY, networkManager);
+    }
     
     public LWSCommandValidatorImpl(String lwsPublicKey, NetworkManager networkManager){
         this.lwsPublicKey = lwsPublicKey;
@@ -36,8 +43,6 @@ public class LWSCommandValidatorImpl implements LWSCommandValidator{
     @Override
     public boolean verifySignedParameter(String param, String signatureBits){
         
-        if(param == null || signatureBits == null) return false;
-        
         PublicKey key = SignatureVerifier.readKey(lwsPublicKey, "DSA");
         SignatureVerifier signVerifier = new SignatureVerifier(StringUtils.toUTF8Bytes(param), Base32.decode(signatureBits), key, "DSA", "SHA1");
         return signVerifier.verifySignature();
@@ -47,7 +52,6 @@ public class LWSCommandValidatorImpl implements LWSCommandValidator{
     public boolean verifyBrowserIPAddresswithClientIP(String browserIPString){
         
         byte[] externalIPAddress = networkManager.getExternalAddress();
-        if(browserIPString == null || externalIPAddress == null ) return false;
         try{
             InetAddress a = InetAddress.getByName(browserIPString);
             byte[] bytes = a.getAddress();

@@ -6,11 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.nio.protocol.NHttpRequestHandler;
-import org.limewire.core.api.network.NetworkManager;
-import org.limewire.core.settings.LWSSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
-import org.limewire.lws.server.LWSCommandValidatorImpl;
+import org.limewire.lws.server.LWSCommandValidator;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
@@ -33,19 +31,14 @@ public final class LWSManagerImpl implements LWSManager {
     private boolean isConnected;
     
     @Inject
-    public LWSManagerImpl(LWSDispatcherFactory lwsDispatcherFactory, NetworkManager networkManager) {
-        this(lwsDispatcherFactory, networkManager, LWSSettings.LWS_PUBLIC_KEY.get());
-    }
-    
-    public LWSManagerImpl(LWSDispatcherFactory lwsDispatcherFactory, NetworkManager networkManager, String lwsPublicKey) {
-       
+    public LWSManagerImpl(LWSDispatcherFactory lwsDispatcherFactory, LWSCommandValidator verifier) {      
         this.dispatcher = lwsDispatcherFactory.createDispatcher(
                     new  AbstractReceivesCommandsFromDispatcher() {
                         public String receiveCommand(String cmd, Map<String, String> args) {
                             return LWSManagerImpl.this.dispatch(cmd, args);
                         }
                     },
-                    new LWSCommandValidatorImpl(lwsPublicKey, networkManager));
+                    verifier);
 
         //
         // remember when we're connected

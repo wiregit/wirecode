@@ -34,7 +34,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     private final static Log LOG = LogFactory.getLog(LWSDispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
     private LWSReceivesCommandsFromDispatcher commandReceiver;
-    private LWSCommandValidator commandVerifier;
     private final Executor handlerExecutor = ExecutorsHelper.newProcessingQueue("lws-handlers");
     
     /** Package protected for testing. */
@@ -162,8 +161,9 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     }
     
     
-    public final void handle(HttpRequest httpReq, final HttpResponse httpResp,
+    public final void handle(HttpRequest httpReq, final HttpResponse response,
             final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
+        
         final String request = httpReq.getRequestLine().getUri();
         final String command = getCommand(request);
         note("Have command {0} ", command);
@@ -174,8 +174,8 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             note("Handling PING");
             handlerExecutor.execute(new Runnable() {
                 public void run() {
-                    httpResp.setEntity(new NByteArrayEntity(PING_BYTES));
-                    trigger.submitResponse(httpResp);
+                    response.setEntity(new NByteArrayEntity(PING_BYTES));
+                    trigger.submitResponse(response);
                 }
             });
             notifyConnectionListeners(true);
@@ -187,9 +187,9 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Couldn't create a handler for " + command);
             }
-            String response = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
-            httpResp.setEntity(new NStringEntity(response));
-            trigger.submitResponse(httpResp);
+            String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
+            response.setEntity(new NStringEntity(str));
+            trigger.submitResponse(response);
             return;
         }
         if (LOG.isDebugEnabled())
@@ -200,8 +200,8 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
                     public void process(String input) {
                         try {
                             note("Have response {0}",input);
-                            httpResp.setEntity(new NStringEntity(input));
-                            trigger.submitResponse(httpResp);
+                            response.setEntity(new NStringEntity(input, "UTF-8"));
+                            trigger.submitResponse(response);
                             return;
                         } catch (UnsupportedEncodingException e) {
                             trigger.handleException(e);
@@ -246,21 +246,6 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      */
     final LWSReceivesCommandsFromDispatcher getCommandReceiver() {
         return commandReceiver;
-    }
-    
-    
-    /**
-     * Returns the {@link LWSCommandValidator} instance.
-     * 
-     * @return the {@link LWSCommandValidator} instance
-     */
-    public final LWSCommandValidator getCommandVerifier() {
-        return commandVerifier;
-    }
-
-
-    public final void setCommandVerifier(LWSCommandValidator commandVerifier) {
-        this.commandVerifier = commandVerifier;
     }
 
 
@@ -402,6 +387,8 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     protected abstract class HandlerWithCallback extends AbstractHandler {
 
         public final void handle(final Map<String, String> args, final StringCallback cb) {
+            
+            
             final String callback = args.get(LWSDispatcherSupport.Parameters.CALLBACK);
             if (callback == null) {
                 cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_CALLBACK_PARAMETER));
@@ -411,6 +398,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             // We want to make sure to check if the result is an error.  In which case
             // we want to wrap it in the error callback, rather than the normal one
             //
+            final String domId = args.get(LWSDispatcherSupport.Parameters.ID);
             handleRest(args, new StringCallback() {
 
                 public void process(String res) {
@@ -418,6 +406,9 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
                     if (LWSServerUtil.isError(res)) {
                         str = LWSDispatcherSupport.wrapCallback(Constants.ERROR_CALLBACK, res);
                     } else {
+                        if(domId != null){
+                            res = res + " " + domId;
+                        }
                         str = LWSDispatcherSupport.wrapCallback(callback, res);
                     }  
                     cb.process(str);
@@ -519,6 +510,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * remote server, but in the real system will be ignored.
          */
         String IP = "ip";
+        
+        /**
+         * Name of progressbarId
+         */
+        String ID = "id";
     
     }
 
@@ -574,11 +570,23 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
           
         String INVALID_DOWNLOAD = "invalid.download";
         
+        /**
+         * Error message if hash signature was found to be invalid
+         */       
         String INVALID_HASH_SIGNATURE = "invalid.hash_signature";
         
+        /**
+         * Error message if ip signature was found to be invalid
+         */
         String INVALID_IP_SIGNATURE = "invalid.ip_signature";
         
+        /**
+         * Error message if client external ip does not match browser ip in the 
+         * download request
+         */
         String BROWSER_CLIENT_IP_DONOT_MATCH = "browser_client_ip.donot_match";
+        
+        
     }
 
     /**
@@ -605,7 +613,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         /**
          * The callback in which error messages are wrapped.
          */
-        String ERROR_CALLBACK = "error";
+        String ERROR_CALLBACK = "NewDownload.error";
     
         /**
          * The string that separates arguments in the {@link Parameters#MSG}

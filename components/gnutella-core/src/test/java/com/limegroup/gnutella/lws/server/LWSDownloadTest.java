@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.lws.server;
 
 import java.io.File;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.limewire.lws.server.TestNetworkManagerImpl;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;
@@ -321,12 +318,10 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
     private void doDownloadTest(MutableString inId, Runnable r, boolean checkComplete, String fudge) {
 
         long length = constants.LENGTH;
-        
-        String downloadAuthString = getDownloadAuthenticationString("af8b74763ace4069df7020821bfb9c175af1208a", TestNetworkManagerImpl.getIPAddress());
 
         Map<String, String> args = new HashMap<String, String>();
         String id = constants.ID + fudge;
-        args.put("url", constants.URL  + fudge + "?" + downloadAuthString);
+        args.put("url", constants.URL  + fudge + "?" + constants.AUTH_PARAMETERS);
         args.put("file", (!fudge.equals("") ? "/" + fudge : "") + constants.FILE);
         args.put("id", id);
         args.put("length", String.valueOf(length));
@@ -335,9 +330,9 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         String downloaderIDAndProgressBarID = sendCommandToClient("Download", args);
         if (inId != null) {
             String[] parts = downloaderIDAndProgressBarID.split(" ");
-            assertEquals("Should have a downloader ID and progress bar ID", 2, parts.length);
+            assertEquals("Should have a downloader ID and progress bar ID", 3, parts.length);
             boolean found = false;
-            String downloaderID = parts[0];
+            String downloaderID = parts[1];
             for (StoreDownloader storeDownloader : getStoreDownloaders()) {
                 if (downloaderID.equals(String.valueOf(System.identityHashCode(storeDownloader)))) {
                     found = true;
@@ -345,7 +340,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
                 }
             }
             assertTrue("Should have found a store downloader for id " + downloaderID, found);
-            assertEquals("Should be the same as given", id, parts[1]);
+            assertEquals("Should be the same as given", id, parts[2]);
             inId.set(downloaderIDAndProgressBarID);
         }
 
@@ -397,9 +392,4 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         return res;
     }
     
-    private String getDownloadAuthenticationString(String hash, String browserIP){
-        String hashSignature = getSignedBytes(hash);
-        String browserIPSignature = getSignedBytes(browserIP);
-        return MessageFormat.format("hash={0}&signedHash={1}&browserIP={2}&signedBrowserIP={3}", hash, hashSignature, browserIP, browserIPSignature);
-    }
 }

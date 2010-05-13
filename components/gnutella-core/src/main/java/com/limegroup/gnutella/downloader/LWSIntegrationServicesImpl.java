@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,7 +37,6 @@ import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
 import com.limegroup.gnutella.lws.server.LWSUtil;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Tagged;
 
 
@@ -372,7 +370,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                     Downloader theDownloader = createDownloader(rfd, saveDir);
                     long idOfTheDownloader = System.identityHashCode(theDownloader);
                     downloaderIDs2progressBarIDs.put(String.valueOf(idOfTheDownloader), idOfTheProgressBarString.getValue());
-                    return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
+                    return "ok" + " " + idOfTheDownloader;
                 } catch (IOException e) {
                     // invalid url or other causes, fail silently
                 } catch (HttpException e) {
@@ -386,6 +384,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
                 return "invalid.download";
             }          
         });
+        /*
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
@@ -502,12 +501,14 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             }
            
         });
+        */
     }
     
     /**
      * A class to find a downloader, given an identity hashcode and take an
      * action. Returns the ID of the downloader upon which was taken action.
      */
+    /*
     private abstract class LWSManagerCommandResponseForDownloading extends LWSManagerCommandResponseHandlerWithCallback {
         
         private final LWSIntegrationServicesDelegate del;
@@ -547,11 +548,12 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             return res.get();
         }         
     }
-    
+    */
     /**
      * A class to find all the downloaders, given an identity hashcode and take an
      * action.  Returns the list of ids took action upon.
      */
+    /*
     private abstract class LWSManagerCommandResponseForDownloadingAll extends LWSManagerCommandResponseHandlerWithCallback {
         
         private final LWSIntegrationServicesDelegate del;
@@ -592,7 +594,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             return res.toString();
         }
     }     
-        
+    */    
     private String fileNameFromURL(String urlString) {
         int ilast = urlString.lastIndexOf("/");
         if (ilast == -1) {
@@ -652,11 +654,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
     }
     
     private void recordProgress(Downloader d, StringBuilder res, String id) {
-        String ratio = String.valueOf((float)d.getAmountRead() / (float)d.getContentLength());
+        // String ratio = String.valueOf((float)d.getAmountRead() / (float)d.getContentLength());
         String progressBarID = downloaderIDs2progressBarIDs.get(id);
         String stateName = downloadStateName.get(d.getState());
 
         res.append(id).append(" ").append(progressBarID).append(" ").
-            append(ratio).append(":").append(stateName).append("|");
+            append(stateName).append("|");
     }    
 }

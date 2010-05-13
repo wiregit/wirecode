@@ -1,30 +1,19 @@
 package com.limegroup.gnutella.lws.server;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.api.network.NetworkManager;
-import org.limewire.core.settings.LWSSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
+import org.limewire.lws.server.LWSCommandValidator;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.LocalServerImpl;
-import org.limewire.lws.server.RemoteServerImpl;
-import org.limewire.lws.server.TestNetworkManagerImpl;
-import org.limewire.net.SocketsManager;
-import org.limewire.util.Base32;
-import org.limewire.util.StringUtils;
+import org.limewire.lws.server.MockLWSCommandValidator;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -48,20 +37,12 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     protected final Log LOG = LogFactory.getLog(getClass());
     
     public final int LOCAL_PORT  = LocalServerImpl.PORT;
-    public final int REMOTE_PORT = RemoteServerImpl.PORT;
     
     protected final Map<String,String> EMPTY_ARGS = new HashMap<String,String>();
     
-    private RemoteServerImpl remoteServer;
-    private Thread remoteThread;
-    
     private CommandSender sender;
     private LWSManager lwsManager;
-    private LifecycleManager lifecycleManager;
-    
-    private KeyPair keyPair; 
-    
-        
+    private LifecycleManager lifecycleManager;        
 
     public AbstractCommunicationSupportWithNoLocalServer(String s) {
         super(s);
@@ -70,10 +51,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     // -------------------------------------------------------
     // Access
     // -------------------------------------------------------
-
-    protected final RemoteServerImpl getRemoteServer() {
-        return this.remoteServer;
-    }
     
     protected final CommandSender getCommandSender() {
         return this.sender;
@@ -108,10 +85,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
     /** Override with functionality <b>after</b> {@link #tearDown()}. */
     protected void afterTearDown() { }
-
-    protected final Thread getRemoteThread() {
-        return remoteThread;
-    }
     
     private Injector inj;    
 
@@ -122,26 +95,9 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
         beforeSetup();
         
-        // generate private-public key pair
-        KeyPairGenerator keyGen = null;
-        try {
-            keyGen = KeyPairGenerator.getInstance("DSA");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            random.setSeed(System.currentTimeMillis());
-            keyGen.initialize(1024, random);
-            keyPair = keyGen.generateKeyPair();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        PublicKey publicKey = keyPair.getPublic();
-        LWSSettings.LWS_PUBLIC_KEY.set(Base32.encode(publicKey.getEncoded()));
-        
-        inj = LimeTestUtils.createInjector(TestUtils.bind(NetworkManager.class).toInstances(new TestNetworkManagerImpl()));
-        remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT, keyPair);
+        inj = LimeTestUtils.createInjector(TestUtils.bind(LWSCommandValidator.class).toInstances(new MockLWSCommandValidator()));
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();
-        remoteThread = remoteServer.start();
         lwsManager = getInstance(LWSManager.class);
         sender = new CommandSender();
 
@@ -158,13 +114,8 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         beforeTearDown();
         
         lwsManager.clearHandlers();
-
-        remoteServer.shutDown();
         
         lifecycleManager.shutdown();
-                
-        keyPair = null;
-        remoteThread = null;
        
         afterTearDown();
         
@@ -253,24 +204,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      */
     protected final <T> T getInstance(Class<T> type) {
         return inj.getInstance(type);
-    }
-    
-    protected String getSignedBytes(String data){
-        
-        try{
-            PrivateKey priv = remoteServer.getPrivateKey();
-            Signature dsa = Signature.getInstance("SHA1withDSA"); 
-            dsa.initSign(priv);
-    
-            /* Update and sign the data */
-            dsa.update(StringUtils.toUTF8Bytes(data));
-            byte[] sig = dsa.sign();
-            return Base32.encode(sig);
-        }catch(Exception ex){
-            
-        }
-        
-        return null;
     }
    
 }

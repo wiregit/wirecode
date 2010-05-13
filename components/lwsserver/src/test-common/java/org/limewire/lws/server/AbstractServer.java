@@ -9,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.security.KeyPair;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,23 +36,20 @@ public abstract class AbstractServer implements Runnable  {
     private Thread runner;
     private ServerSocket serverSocket;
     
-    protected final KeyPair keyPair;
-    
 
     // --------------------------------------------------------
     // Interface
     // --------------------------------------------------------
 
-    public AbstractServer(int port, String name, LWSDispatcherSupport dispatcher, KeyPair keyPair) {
+    public AbstractServer(int port, String name, LWSDispatcherSupport dispatcher) {
         this.port = port;
         this.name = name;
         this.dispatcher = dispatcher;
-        this.keyPair = keyPair;
         LOG.debug(name + " on port " + port);
     }
     
-    public AbstractServer(int port, String name, KeyPair keyPair) {
-        this(port, name, null, keyPair);        
+    public AbstractServer(int port, String name) {
+        this(port, name, null);        
     }
     
     public final Thread start() {
@@ -378,7 +374,7 @@ public abstract class AbstractServer implements Runnable  {
      * Calls {@link #shutDown(long)} with <code>100</code>.
      */
     public final void shutDown() {
-        shutDown(100);
+        shutDown(1000);
     }
 
 }

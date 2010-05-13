@@ -16,7 +16,6 @@ import org.limewire.net.SocketsManager;
 public final class FakeJavascriptCodeInTheWebpage {
 
 	private final LocalServerDelegate toLocalServer;
-	private final LocalServerDelegate toRemoteServer;
 	
 	public interface Handler {
 
@@ -29,9 +28,8 @@ public final class FakeJavascriptCodeInTheWebpage {
 		void handle(String res);
 	}
 	
-	FakeJavascriptCodeInTheWebpage(SocketsManager socketsManager, LocalServerImpl local, RemoteServerImpl remote) {
+	FakeJavascriptCodeInTheWebpage(SocketsManager socketsManager, LocalServerImpl local) {
 		this.toLocalServer = new LocalServerDelegate(socketsManager, "localhost", local.getPort());
-        this.toRemoteServer = new LocalServerDelegate(socketsManager, "localhost", remote.getPort());
 	}
 	
 	protected final void sendLocalMsg(String msg, Map<String, String> args, final Handler h) {
@@ -40,14 +38,6 @@ public final class FakeJavascriptCodeInTheWebpage {
                 h.handle(removeHeaders(response));
             }
         }, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
-	}
-
-	protected final void sendRemoteMsg(String msg, Map<String, String> args, final Handler h) {
-        toRemoteServer.sendMessageToServer(msg, args, new StringCallback() {
-            public void process(String response) {
-                h.handle(removeHeaders(response));
-            }
-        }, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
 	}
 	
 	/**

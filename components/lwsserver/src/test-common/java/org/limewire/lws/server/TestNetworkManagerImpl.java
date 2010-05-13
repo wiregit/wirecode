@@ -1,11 +1,12 @@
 package org.limewire.lws.server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.limewire.core.impl.network.MockNetworkManagerImpl;
+import org.limewire.core.api.network.NetworkManager;
 
-public class TestNetworkManagerImpl extends MockNetworkManagerImpl{
+public class TestNetworkManagerImpl implements NetworkManager{
     
     @Override
     public byte[] getExternalAddress() {
@@ -14,6 +15,54 @@ public class TestNetworkManagerImpl extends MockNetworkManagerImpl{
         }catch(UnknownHostException ex){
             return null;
         }
+    }
+
+    @Override
+    public boolean addressChanged() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isIncomingTLSEnabled() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isOutgoingTLSEnabled() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void portChanged() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setIncomingTLSEnabled(boolean value) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setListeningPort(int port) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setOutgoingTLSEnabled(boolean value) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void validateTLS() {
+        // TODO Auto-generated method stub
+        
     }
     
     // Utility method for Test

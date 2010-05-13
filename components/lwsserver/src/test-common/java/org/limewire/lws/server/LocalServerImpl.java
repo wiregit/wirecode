@@ -1,10 +1,8 @@
 package org.limewire.lws.server;
 
-import java.security.KeyPair;
 import java.util.Map;
 
 import org.limewire.net.SocketsManager;
-import org.limewire.util.Base32;
 
 /**
  * Base class for local servers.
@@ -17,10 +15,11 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
     private final String lwsPublickey;
     
 
-    public LocalServerImpl(SocketsManager socketsManager, String host, int otherPort, KeyPair keyPair) {
-        super(PORT, "Local Server", keyPair);
-        lwsPublickey = Base32.encode(keyPair.getPublic().getEncoded());
-        LWSDispatcherImpl ssd = new LWSDispatcherImpl();       
+    public LocalServerImpl(SocketsManager socketsManager, String host, String lwsPublickey) {
+        super(PORT, "Local Server");
+        this.lwsPublickey = lwsPublickey;
+        LWSCommandValidator commandVerifier = new LWSCommandValidatorImpl(getLwsPublicKey(), new TestNetworkManagerImpl());
+        LWSDispatcherImpl ssd = new LWSDispatcherImpl(commandVerifier);       
         setDispatcher(ssd);
         
         ssd.setCommandReceiver(new AbstractReceivesCommandsFromDispatcher() {
@@ -29,8 +28,6 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
             }
             
         });
-        
-        ssd.setCommandVerifier(new LWSCommandValidatorImpl(getLwsPublicKey(), new TestNetworkManagerImpl()) );
     }
     
     /**

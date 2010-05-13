@@ -7,6 +7,7 @@ import junit.framework.Test;
 import junit.textui.TestRunner;
 
 import org.limewire.lws.server.LocalServerDelegate.URLConstructor;
+import org.limewire.service.ErrorService;
 
 public class ClientComTest extends AbstractCommunicationSupport {
     
@@ -36,6 +37,15 @@ public class ClientComTest extends AbstractCommunicationSupport {
     
     public void testGetDownloadProgress(){
         Map<String, String> args = new HashMap<String, String>();
+        
+        String browserIP = TestNetworkManagerImpl.getIPAddress();
+        args.put("browserIP", browserIP);
+        
+        try { 
+            String browserIPSignature = getSignedBytes(browserIP);
+            args.put("signedBrowserIP", browserIPSignature);
+        } catch(Exception ex){ ErrorService.error(ex, "Error generating signing request parameters"); }
+        
         args.put("callback", "DUMMY");
         getCode().sendLocalMsg(LWSDispatcherSupport.Commands.GET_DOWNLOAD_PROGRESS, args,
                 new FakeJavascriptCodeInTheWebpage.Handler() {
@@ -132,14 +142,17 @@ public class ClientComTest extends AbstractCommunicationSupport {
     //  
     private Map<String, String> getDownloadArgs(String hash, String browserIP){
         Map<String, String> downloadArgs = new HashMap<String, String>();
-        
-        String signedHash = getSignedBytes(hash);
-        String signedBrowserIP = getSignedBytes(browserIP);
-        
         downloadArgs.put("hash", hash);
-        downloadArgs.put("signedHash", signedHash);
         downloadArgs.put("browserIP", browserIP);
-        downloadArgs.put("signedBrowserIP", signedBrowserIP);     
+        
+        try{
+            String signedHash = getSignedBytes(hash);
+            String signedBrowserIP = getSignedBytes(browserIP);
+            downloadArgs.put("signedHash", signedHash);
+            downloadArgs.put("signedBrowserIP", signedBrowserIP);
+        }catch(Exception ex){
+            ErrorService.error(ex, "Error generating signing request parameters");
+        }
         return downloadArgs;
     }
     

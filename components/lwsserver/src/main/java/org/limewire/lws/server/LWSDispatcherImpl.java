@@ -16,8 +16,14 @@ import org.limewire.util.URIUtils;
  * 
  */
 public final class LWSDispatcherImpl extends LWSDispatcherSupport {
-
-
+    
+    private LWSCommandValidator verifier;
+    
+    public LWSDispatcherImpl(LWSCommandValidator commandVerifier){
+        this.verifier = commandVerifier;
+    }
+    
+    
     @Override
     protected final Handler[] createHandlers() {
         return new Handler[] {
@@ -72,6 +78,21 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                 return;
             }
             
+            String signedBrowserIP = args.get("signedBrowserIP");
+            String browserIP = args.get("browserIP");
+            
+            // verify browser and client are on same machine
+            if(LWSServerUtil.isEmpty(browserIP) && !verifier.verifyBrowserIPAddresswithClientIP(browserIP)){  
+                cb.process(LWSDispatcherSupport.Responses.BROWSER_CLIENT_IP_DONOT_MATCH);
+                return; 
+            }
+            
+            // verify browserIP signature
+            if(LWSServerUtil.isEmpty(signedBrowserIP) && !verifier.verifySignedParameter(browserIP, signedBrowserIP)){
+                cb.process(LWSDispatcherSupport.Responses.INVALID_IP_SIGNATURE);
+                return; 
+            }
+            
             String res = getCommandReceiver().receiveCommand(name(), args);
             cb.process(res);         
         }
@@ -86,7 +107,6 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
         protected void handleRest(Map<String, String> args, StringCallback cb) {
             
             LWSReceivesCommandsFromDispatcher receiver = getCommandReceiver();
-            LWSCommandValidator verifier = getCommandVerifier();
             
             if (receiver == null) {    
                 cb.process(LWSDispatcherSupport.Responses.NO_DISPATCHEE);
@@ -115,7 +135,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
             String browserIP = downloadArgs.get("browserIP");
             if(LWSServerUtil.isEmpty(signedHash) || LWSServerUtil.isEmpty(hash) ||
                     LWSServerUtil.isEmpty(signedBrowserIP) ||LWSServerUtil.isEmpty(browserIP) ){
-                cb.process(report(LWSDispatcherSupport.Responses.INVALID_DOWNLOAD));
+                cb.process(LWSDispatcherSupport.Responses.INVALID_DOWNLOAD);
                 return;
             }
              

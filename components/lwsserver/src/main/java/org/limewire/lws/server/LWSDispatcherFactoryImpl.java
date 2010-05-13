@@ -17,9 +17,8 @@ public class LWSDispatcherFactoryImpl implements LWSDispatcherFactory {
 
     public LWSDispatcher createDispatcher(LWSReceivesCommandsFromDispatcher recipient,
                                           LWSCommandValidator verifier) {
-        LWSDispatcherImpl s = new LWSDispatcherImpl();
+        LWSDispatcherImpl s = new LWSDispatcherImpl(verifier);
         s.setCommandReceiver(recipient);
-        s.setCommandVerifier(verifier);
         return s;
     }
 

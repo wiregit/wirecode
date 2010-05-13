@@ -22,14 +22,12 @@ import org.limewire.util.StringUtils;
 abstract class AbstractCommunicationSupport extends BaseTestCase {
     
     public final static int LOCAL_PORT  = LocalServerImpl.PORT;
-    public final static int REMOTE_PORT = RemoteServerImpl.PORT;
 
+    private KeyPair keyPair;
     private LocalServerImpl localServer;
-    private RemoteServerImpl remoteServer;
     private FakeJavascriptCodeInTheWebpage code;
     
     private Thread localThread;
-    private Thread remoteThread;
 
     public AbstractCommunicationSupport(String s) {
         super(s);
@@ -41,10 +39,6 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     
     protected final LocalServerImpl getLocalServer() {
         return this.localServer;
-    }
-
-    protected final RemoteServerImpl getRemoteServer() {
-        return this.remoteServer;
     }
 
     protected final FakeJavascriptCodeInTheWebpage getCode() {
@@ -141,34 +135,25 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         return localThread;
     }
 
-    protected final Thread getRemoteThread() {
-        return remoteThread;
-    }
-
     @Override
     protected final void setUp() throws Exception {
 
         beforeSetup();
         
         // generate private-public key pair
-        KeyPairGenerator keyGen = null;
-        KeyPair keyPair = null;
-        try {
-            keyGen = KeyPairGenerator.getInstance("DSA");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            random.setSeed(System.currentTimeMillis());
-            keyGen.initialize(1024, random);
-            keyPair = keyGen.generateKeyPair();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        KeyPairGenerator keyGen = null;      
+        keyGen = KeyPairGenerator.getInstance("DSA");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        random.setSeed(System.currentTimeMillis());
+        keyGen.initialize(1024, random);
+        keyPair = keyGen.generateKeyPair();
+        
+        String storePublicKey = Base32.encode(keyPair.getPublic().getEncoded());
         
         SocketsManager socketsManager = new SocketsManagerImpl();
-        localServer     = new LocalServerImpl(socketsManager, "localhost", REMOTE_PORT, keyPair);
-        remoteServer    = new RemoteServerImpl(socketsManager, LOCAL_PORT, keyPair);
+        localServer     = new LocalServerImpl(socketsManager, "localhost", storePublicKey);
         localThread     = localServer.start();
-        remoteThread    = remoteServer.start();
-        code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
+        code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer);
         
 
         afterSetup();
@@ -180,10 +165,8 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         beforeTearDown();
 
         stop(localServer);
-        stop(remoteServer);
 
         localThread = null;
-        remoteThread = null;
 
         afterTearDown();
     }   
@@ -205,50 +188,21 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         sb.append("}");
         return sb.toString();
     }
-    /*
-    private String sendMessageFromWebpageToClient(final String cmd, final Map<String, String> args) {
-        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
-        final String[] result = new String[1];
-        getCode().sendLocalMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
-            public void handle(final String res) {
-                result[0] = LWSServerUtil.removeCallback(res);
-            }
-        });
-        return result[0];
-    }
-
-    private String sendMessageFromClientToRemoteServer(final String cmd, final Map<String, String> args) {
-        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
-        final String[] result = new String[1];
-        getCode().sendRemoteMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
-            public void handle(final String res) {
-                result[0] = LWSServerUtil.removeCallback(res);
-            }
-        });
-        return result[0];
-    }
-    */
+    
     private void stop(final AbstractServer t) {
         if (t != null) {
           t.shutDown();
         }
     }
     
-    protected String getSignedBytes(String data){
-        
-        try{
-            PrivateKey priv = remoteServer.getPrivateKey();
-            Signature dsa = Signature.getInstance("SHA1withDSA"); 
-            dsa.initSign(priv);
-    
-            /* Update and sign the data */
-            dsa.update(StringUtils.toUTF8Bytes(data));
-            byte[] sig = dsa.sign();
-            return Base32.encode(sig);
-        }catch(Exception ex){
-            
-        }
-        
-        return null;
+    protected String getSignedBytes(String data) throws Exception{
+        PrivateKey priv = keyPair.getPrivate();
+        Signature dsa = Signature.getInstance("SHA1withDSA"); 
+        dsa.initSign(priv);
+
+        /* Update and sign the data */
+        dsa.update(StringUtils.toUTF8Bytes(data));
+        byte[] sig = dsa.sign();
+        return Base32.encode(sig);   
     }
 }
