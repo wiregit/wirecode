@@ -63,7 +63,7 @@ public class SetupWizard {
         if (!InstallSettings.ANONYMOUS_DATA_COLLECTION.getValue()) {
             return true;
         }
-        if (!InstallSettings.FILTER_OPTION.getValue()) {
+        if (!InstallSettings.CONTENT_FILTER_OPTION.getValue()) {
             return true;
         }
         if (!InstallSettings.START_STARTUP.getValue()) {

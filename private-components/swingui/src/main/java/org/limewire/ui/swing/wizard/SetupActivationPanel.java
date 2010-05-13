@@ -48,7 +48,6 @@ public class SetupActivationPanel extends JPanel {
     private JXButton okButton;
     
     private ActivationState state = null;
-    private ActivationError error = null;
     
     @Resource
     private Color errorColor;
@@ -156,7 +155,6 @@ public class SetupActivationPanel extends JPanel {
     
     private void setActivationState(ActivationState state, ActivationError error) {
         this.state = state;
-        this.error = error;
 
         okButton.setEnabled(true);
 
