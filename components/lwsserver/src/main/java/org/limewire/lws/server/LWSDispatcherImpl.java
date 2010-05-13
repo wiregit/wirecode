@@ -81,14 +81,15 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
             String signedBrowserIP = args.get("signedBrowserIP");
             String browserIP = args.get("browserIP");
             
+            
             // verify browser and client are on same machine
-            if(LWSServerUtil.isEmpty(browserIP) && !verifier.verifyBrowserIPAddresswithClientIP(browserIP)){  
+            if(LWSServerUtil.isEmpty(browserIP) || !verifier.verifyBrowserIPAddresswithClientIP(browserIP)){  
                 cb.process(LWSDispatcherSupport.Responses.BROWSER_CLIENT_IP_DONOT_MATCH);
                 return; 
             }
             
             // verify browserIP signature
-            if(LWSServerUtil.isEmpty(signedBrowserIP) && !verifier.verifySignedParameter(browserIP, signedBrowserIP)){
+            if(LWSServerUtil.isEmpty(signedBrowserIP) || !verifier.verifySignedParameter(browserIP, signedBrowserIP)){
                 cb.process(LWSDispatcherSupport.Responses.INVALID_IP_SIGNATURE);
                 return; 
             }
