@@ -60,4 +60,20 @@ public class TemplateHashTokenFactoryTest extends BaseTestCase {
         assertNotNull(t2);
         assertNotEquals(t1, t2);
     }
+
+    public void testWhitespaceInQueryIsCollapsed() {
+        Token t1 = factory.create("abc \t  \n def", "abc def ghi");
+        Token t2 = factory.create("abc def", "abc def ghi");
+        assertNotNull(t1);
+        assertNotNull(t2);
+        assertEquals(t1, t2);
+    }
+
+    public void testWhitespaceInFilenameIsCollapsed() {
+        Token t1 = factory.create("abc def", "abc  def \t\r\n ghi");
+        Token t2 = factory.create("abc def", "abc def ghi");
+        assertNotNull(t1);
+        assertNotNull(t2);
+        assertEquals(t1, t2);
+    }
 }
