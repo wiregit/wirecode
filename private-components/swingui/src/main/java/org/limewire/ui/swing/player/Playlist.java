@@ -2,6 +2,7 @@ package org.limewire.ui.swing.player;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.limewire.core.api.library.LocalFileItem;
@@ -181,7 +182,9 @@ class Playlist {
         if(playlist != null && playlist.size() > 0 && currentFileItem != null) {
             playlist.getReadWriteLock().readLock().lock();
             try {
-                shuffleList.addAll(playlist);
+                for (Iterator<LocalFileItem> iter = playlist.iterator(); iter.hasNext();) {
+                    shuffleList.add(iter.next());
+                }
             } finally {
                 playlist.getReadWriteLock().readLock().unlock();
             }
