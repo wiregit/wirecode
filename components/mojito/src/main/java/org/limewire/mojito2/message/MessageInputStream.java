@@ -288,6 +288,10 @@ public class MessageInputStream extends DataInputStream {
         int instanceId = readUnsignedByte();
         int flags = readUnsignedByte();
         
+        if (address == null) {
+            address = src;
+        }
+        
         return ContactFactory.createLiveContact(src, vendor, version, 
                 contactId, address, instanceId, flags);
     }

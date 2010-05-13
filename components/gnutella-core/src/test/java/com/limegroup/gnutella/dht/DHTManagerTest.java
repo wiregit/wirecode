@@ -1,16 +1,20 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.MojitoFactory;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht.DHTTestCase;
+import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
@@ -37,7 +41,12 @@ public class DHTManagerTest extends DHTTestCase {
     protected void setUp() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjectorAndStart();
+        
+        // Stop the NodeAssigner which tries to change the 
+        // DHTMode during our testing.
+        NodeAssigner assigner = injector.getInstance(NodeAssigner.class);
+        assigner.stop();
     }
     
     public void testInactive() throws IOException {
@@ -111,8 +120,11 @@ public class DHTManagerTest extends DHTTestCase {
         }
     }
     
-    public void testEvents() throws IOException, InterruptedException {
+    public void testEvents() throws IOException, 
+            InterruptedException, ExecutionException {
+        
         DHTManager manager = injector.getInstance(DHTManager.class);
+        
         try {
             
             final CountDownLatch starting = new CountDownLatch(1);
@@ -128,6 +140,29 @@ public class DHTManagerTest extends DHTTestCase {
             manager.start(DHTMode.ACTIVE);
             if (!starting.await(1, TimeUnit.SECONDS)) {
                 fail("Shouldn't have failed!");
+            }
+            
+            MojitoDHT dht = MojitoFactory.createDHT("DHT", 5000);
+            
+            try {
+                final CountDownLatch connected = new CountDownLatch(1);
+                manager.addEventListener(new DHTEventListener() {
+                    @Override
+                    public void handleDHTEvent(DHTEvent evt) {
+                        if (evt.getType() == Type.CONNECTED) {
+                            connected.countDown();
+                        }
+                    }
+                });
+                
+                manager.addActiveNode(new InetSocketAddress("localhost", 5000));
+                
+                if (!connected.await(10, TimeUnit.SECONDS)) {
+                    fail("Shouldn't have failed!");
+                }
+                
+            } finally {
+                dht.close();
             }
             
             final CountDownLatch stopped = new CountDownLatch(1);
