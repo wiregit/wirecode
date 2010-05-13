@@ -1,25 +1,25 @@
 package com.limegroup.gnutella.dht;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.mojito2.KUID;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTTestCase;
+import com.limegroup.gnutella.dht2.DHTEvent;
+import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht2.DHTEvent.Type;
+import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 
 public class DHTManagerTest extends DHTTestCase {
     
-    
     private Injector injector;
-    private DHTControllerFactory dhtControllerFactory;
 
     public DHTManagerTest(String name) {
         super(name);
@@ -38,109 +38,116 @@ public class DHTManagerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         injector = LimeTestUtils.createInjector();
-        dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }
-
-    public void testLimeDHTManager() throws Exception{
-        DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(true);
-        DHTSettings.PERSIST_DHT_DATABASE.setValue(true);
-        
-        TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor, dhtControllerFactory);
-        
+    
+    public void testInactive() throws IOException {
+        startMode(DHTMode.INACTIVE);
+    }
+    
+    public void testActive() throws IOException {
+        startMode(DHTMode.ACTIVE);
+    }
+    
+    public void testPassive() throws IOException {
+        startMode(DHTMode.PASSIVE);
+    }
+    
+    public void testPassiveLeaf() throws IOException {
+        startMode(DHTMode.PASSIVE_LEAF);
+    }
+    
+    private void startMode(DHTMode mode) throws IOException {
+        DHTManager manager = injector.getInstance(DHTManager.class);
         try {
             assertFalse(manager.isRunning());
-            assertFalse(manager.isBootstrapped());
-            assertFalse(manager.isWaitingForNodes());
-            assertEquals(0, manager.getActiveDHTNodes(10).size());
+            assertFalse(manager.isReady());
             
-            manager.start(DHTMode.ACTIVE);
-            assertEquals(1, executor.getRunners().size());
-            Thread.sleep(200);
-            assertTrue(manager.isRunning());
-            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
-            KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
+            boolean success = manager.start(mode);
+            assertTrue(success);
             
-            // Rry starting again
-            manager.start(DHTMode.ACTIVE);
-            Thread.sleep(200);
-            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            assertEquals(mode, manager.getMode());
+            assertTrue(manager.isMode(mode));
             
-            // Try switching mode
-            manager.start(DHTMode.PASSIVE);
-            Thread.sleep(200);
-            assertEquals(DHTMode.PASSIVE, manager.getDHTMode());
-            assertTrue(manager.isRunning());
-            KUID passiveLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
-            assertNotEquals(activeLocalNodeID, passiveLocalNodeID);
-            manager.start(DHTMode.PASSIVE);
-            Thread.sleep(200);
-            assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-            manager.addressChanged();
-            Thread.sleep(200);
-            assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            if (mode != DHTMode.INACTIVE) {
+                assertTrue(manager.isRunning());
+            }
             
-            // Try switching multiple times (does some Disk I/O)
-            manager.start(DHTMode.ACTIVE);
-            manager.start(DHTMode.PASSIVE);
-            manager.start(DHTMode.ACTIVE);
-            
-            // Give it enough time --> previous starts were offloaded to threadpool
-            Thread.sleep(10000);
-            
-            // We should be in active mode
-            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
-            
-            // The Node ID should be something else than passiveLocalNodeID
-            assertNotEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-            
-            // The Node ID should be (but it's not guaranteed) equals to activeLocalNodeID
-            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-        } finally {
             manager.stop();
+            
+            assertFalse(manager.isRunning());
+            assertFalse(manager.isReady());
+            assertEquals(DHTMode.INACTIVE, manager.getMode());
+            assertTrue(manager.isMode(DHTMode.INACTIVE));
+            
+        } finally {
+            manager.close();
         }
     }
     
-    public void testStopStartLimeDHTManager() throws Exception{
-        TestExecutor executor = new TestExecutor();
-        DHTManagerImpl manager = new DHTManagerImpl(executor, dhtControllerFactory);
+    public void testSwitchMode() throws IOException {
+        DHTManager manager = injector.getInstance(DHTManager.class);
         try {
-            manager.start(DHTMode.ACTIVE);
-            manager.stop();
-            Thread.sleep(200);
-            assertFalse(manager.isRunning());
-            manager.start(DHTMode.ACTIVE);
-            Thread.sleep(200);
-            assertTrue(manager.isRunning());
-            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
-            manager.start(DHTMode.PASSIVE);
-            Thread.sleep(200);
-            assertEquals(DHTMode.PASSIVE, manager.getDHTMode());
-            assertTrue(manager.isRunning());
-            manager.start(DHTMode.ACTIVE);
-            manager.start(DHTMode.PASSIVE);
-            manager.start(DHTMode.ACTIVE);
-            manager.stop();
-            assertFalse(manager.isRunning());
-            Thread.sleep(500);
-            assertFalse(manager.isRunning());
+            
+            boolean success = false;
+            
+            success = manager.start(DHTMode.INACTIVE);
+            assertTrue(success);
+            assertTrue(manager.isMode(DHTMode.INACTIVE));
+            
+            success = manager.start(DHTMode.ACTIVE);
+            assertTrue(success);
+            assertTrue(manager.isMode(DHTMode.ACTIVE));
+            
+            success = manager.start(DHTMode.PASSIVE);
+            assertTrue(success);
+            assertTrue(manager.isMode(DHTMode.PASSIVE));
+            
+            success = manager.start(DHTMode.PASSIVE_LEAF);
+            assertTrue(success);
+            assertTrue(manager.isMode(DHTMode.PASSIVE_LEAF));
+            
         } finally {
-            manager.stop();
+            manager.close();
         }
     }
     
-    private class TestExecutor implements Executor {
-        private List<Runnable> runners = new ArrayList<Runnable>();
-        private ExecutorService service = ExecutorsHelper.newProcessingQueue("DHT-TestExecutor");
-        
-        public List<Runnable> getRunners() {
-            return runners;
-        }
-
-        public void execute(Runnable command) {
-            runners.add(command);
-            service.execute(command);
+    public void testEvents() throws IOException, InterruptedException {
+        DHTManager manager = injector.getInstance(DHTManager.class);
+        try {
             
+            final CountDownLatch starting = new CountDownLatch(1);
+            manager.addEventListener(new DHTEventListener() {
+                @Override
+                public void handleDHTEvent(DHTEvent evt) {
+                    if (evt.getType() == Type.STARTING) {
+                        starting.countDown();
+                    }
+                }
+            });
+            
+            manager.start(DHTMode.ACTIVE);
+            if (!starting.await(1, TimeUnit.SECONDS)) {
+                fail("Shouldn't have failed!");
+            }
+            
+            final CountDownLatch stopped = new CountDownLatch(1);
+            manager.addEventListener(new DHTEventListener() {
+                @Override
+                public void handleDHTEvent(DHTEvent evt) {
+                    if (evt.getType() == Type.STOPPED) {
+                        stopped.countDown();
+                    }
+                }
+            });
+            
+            manager.stop();
+            
+            if (!stopped.await(1, TimeUnit.SECONDS)) {
+                fail("Shouldn't have failed!");
+            }
+            
+        } finally {
+            manager.close();
         }
     }
 }
