@@ -306,7 +306,8 @@ class PlayerMediatorImpl implements PlayerMediator {
 
     @Override
     public void setVolume(double value) {
-        if (player.getGainControl() != null) {
+        if ( player.getState() != Controller.Unrealized && player.getState() != Controller.Realizing && 
+                player.getGainControl() != null) {
             player.getGainControl().setLevel((float) value);
         }
     }
