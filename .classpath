@@ -167,5 +167,7 @@
 	<classpathentry kind="lib" path="lib/jars/mp3spi-1.9.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar"/>
+	<classpathentry kind="lib" path="lib/jars/hashes"/>
+	<classpathentry kind="lib" path="lib/jars/zzaudioformats.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
