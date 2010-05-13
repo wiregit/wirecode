@@ -1,21 +1,26 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.io.GUID;
+import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class ApplicationServicesImpl implements ApplicationServices {
-    
+   
     private final byte[] bittorrentGUID;
     private final byte[] limewireGUID;
     private final boolean newInstall;
     private final boolean newJavaVersion;
+    private volatile String askValue = "unknown";
     
     @Inject
     ApplicationServicesImpl() {
@@ -45,6 +50,19 @@ public class ApplicationServicesImpl implements ApplicationServices {
         String currentJavaVersion = System.getProperty("java.version");
         newJavaVersion = lastJavaVersion == null || !lastJavaVersion.equals(currentJavaVersion);
         InstallSettings.LAST_JAVA_VERSION_RUN.set(currentJavaVersion);
+    }
+    
+    @Inject
+    public void register(final AskInstallChecker checker, @Named("backgroundExecutor") ScheduledExecutorService executor) {
+        // we only use the AskValue when its a new install, so don't bother with
+        // disk IO if we aren't going to use it
+        if(isNewInstall() && OSUtils.isWindows()) {
+            executor.execute(new Runnable() {
+                public void run() {
+                    askValue = checker.readToolbarResult();               
+                }
+            });
+        }
     }
 
     /**
@@ -76,14 +94,6 @@ public class ApplicationServicesImpl implements ApplicationServices {
         return limewireGUID;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.ApplicationServices#setFullPower(boolean)
-     */
-    public void setFullPower(boolean newValue) {
-        // does nothing right now.
-       // FIXME implement throttle switching for uploads and downloads
-    }
-
     @Override
     public boolean isNewInstall() {
         return newInstall;
@@ -94,4 +104,8 @@ public class ApplicationServicesImpl implements ApplicationServices {
         return newJavaVersion;
     }
 
+    @Override
+    public String getAskValue() {
+        return askValue;
+    }
 }
