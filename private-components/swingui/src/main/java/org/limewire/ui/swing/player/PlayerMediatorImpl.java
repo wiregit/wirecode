@@ -568,7 +568,7 @@ class PlayerMediatorImpl implements PlayerMediator {
             if(LOG.isDebugEnabled())
                 LOG.debug("initializing player for: " + file);
 
-            initializationWorker = new PlayerInitalizationWorker(currentMediaFile, time, isFullScreen, autoStart, isLaunchOnFailure, new PlayerCompleteCallback() {
+            initializationWorker = new PlayerInitalizationWorker(file, time, isFullScreen, autoStart, isLaunchOnFailure, new PlayerCompleteCallback() {
                 @Override
                 public void complete(Player newPlayer, Time time, boolean autoStart) {
                     assert(SwingUtilities.isEventDispatchThread());
@@ -587,10 +587,10 @@ class PlayerMediatorImpl implements PlayerMediator {
 
                     player = newPlayer;
                
-                    if(!isAudioFile(currentMediaFile))
+                    if(!isAudioFile(file))
                         displayDirector.show();   
                     
-                    fireMediaChanged(currentMediaFile.getName()); 
+                    fireMediaChanged(file.getName()); 
                       
                     startMediaPlayer(autoStart); 
                     initializationWorker = null;

@@ -88,11 +88,8 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jogg.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jorbis.jar"/>
-	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/iTunes-0.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/AppFramework.jar" sourcepath="lib/sources/AppFramework-1.03-src.zip"/>
@@ -151,7 +148,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger-1.0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot-core-3.0.jar" sourcepath="lib/sources/foxtrot-3.0.zip"/>
-	<classpathentry kind="lib" path="lib/jars/mp3spi-1.9.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.15-M1-lw.jar" sourcepath="lib/sources/jacob-1.15-M1-lw_src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/osx/asm-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/cglib-2.2.jar"/>
@@ -162,10 +158,14 @@
 	<classpathentry kind="lib" path="lib/jars/jna-3.2.4.jar" sourcepath="lib/sources/jna-3.2.4-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jars/AnimatedTransitions-0.11.jar" sourcepath="lib/sources/AnimatedTransitions-0.11-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/TimingFramework-1.0.jar" sourcepath="lib/sources/TimingFramework-1.0-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar" sourcepath="lib/sources/fmj-source.zip"/>
 	<classpathentry kind="lib" path="lib/jars/tests/commons-math-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j-20100504.jar"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb-1.8.1.2.jar" sourcepath="lib/sources/hsqldb-1.8.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/htmlcleaner-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jl.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mp3spi-1.9.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tritonus.jar"/>
+	<classpathentry kind="lib" path="lib/jars/fmj-4-9-2010.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
