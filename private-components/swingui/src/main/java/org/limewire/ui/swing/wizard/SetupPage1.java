@@ -151,7 +151,7 @@ public class SetupPage1 extends WizardPage {
         
         //Content Filters
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(contentFilterCheckBox.isSelected());
-        InstallSettings.FILTER_OPTION.setValue(true);
+        InstallSettings.CONTENT_FILTER_OPTION.setValue(true);
     }
     
     /**

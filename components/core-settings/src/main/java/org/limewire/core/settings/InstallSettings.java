@@ -49,8 +49,8 @@ public final class InstallSettings extends LimeWireSettings {
         FACTORY.createBooleanSetting("FIREWALL_WARNING", false);
     
     /** Whether or not the filter question has been asked. */
-    public static final BooleanSetting FILTER_OPTION =
-        FACTORY.createBooleanSetting("FILTER_OPTION", false);
+    public static final BooleanSetting CONTENT_FILTER_OPTION =
+        FACTORY.createBooleanSetting("CONTENT_FILTER_OPTION", false);
     
     /** Whether Auto-Sharing question has been asked. */
     public static final BooleanSetting AUTO_SHARING_OPTION =
