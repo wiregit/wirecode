@@ -2,12 +2,12 @@ package org.limewire.ui.swing.update;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,6 +17,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.text.html.HTMLDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -29,13 +31,13 @@ import org.limewire.ui.swing.components.ImageViewPort;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.ResizeUtils;
 
 /**
  * Creates a panel to be displayed inside a Dialog for notification that a 
  * new version of LW is available.
  */
 public class UpdatePanel extends JPanel {
-
     
     @Resource
     private Icon backgroundIcon;
@@ -80,6 +82,7 @@ public class UpdatePanel extends JPanel {
         text = updateForeground(foregroundColor, text);
         pane.setText(text);
         pane.setCaretPosition(0);
+        setNativeFontRenderering(pane);
         
         return pane;
     }
@@ -94,20 +97,32 @@ public class UpdatePanel extends JPanel {
         pane.setText(text);
         pane.setCaretPosition(0);
         
+        setNativeFontRenderering(pane);
+        
+        int htmlHeight = pane.getPreferredSize().height;        
+        int padding = Math.max(15, (backgroundIcon.getIconHeight() - htmlHeight)/2);
         //must be false to view the background image
         pane.setOpaque(false);
         //shift the text so as to not paint over the image
-        pane.setMargin( new Insets(10,115,0,0));
+        pane.setMargin( new Insets(padding,140, 0,0));
         ImageViewPort imageViewPort = new ImageViewPort(((ImageIcon)backgroundIcon).getImage());
         imageViewPort.setView(pane);
         
         JScrollPane scroller = new JScrollPane();
         scroller.setViewport(imageViewPort);
-        scroller.setPreferredSize(new Dimension(355, 156));
+        ResizeUtils.forceSize(scroller, new Dimension(backgroundIcon.getIconWidth(), backgroundIcon.getIconHeight()));
         scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scroller.setBorder(BorderFactory.createEmptyBorder());
         return scroller;
+    }
+    
+    private void setNativeFontRenderering(JEditorPane pane) {
+        // add a CSS rule to force body tags to use the default label font
+        // instead of the value in javax.swing.text.html.default.csss
+        Font font = UIManager.getFont("Label.font");
+        String bodyRule = "body { font-family: " + font.getFamily() + "; " +
+                "font-size: " + 14 + "pt; }";
+        ((HTMLDocument)pane.getDocument()).getStyleSheet().addRule(bodyRule);
     }
     
     private JComponent createLeftButton(Action action) {
