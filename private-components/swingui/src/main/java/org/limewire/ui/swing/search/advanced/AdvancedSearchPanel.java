@@ -117,7 +117,7 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
         };
         AdvancedPanel panel = null;
         if(category == Category.AUDIO) {
-            panel =  new AdvancedAudioPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
+            panel = new AdvancedAudioPanel(friendAutoCompleterFactory, enterKeyAction);
         } else if(category == Category.VIDEO) {
             panel = new AdvancedVideoPanel(propertyDictionary, friendAutoCompleterFactory, enterKeyAction);
         } else if(category == Category.DOCUMENT) {

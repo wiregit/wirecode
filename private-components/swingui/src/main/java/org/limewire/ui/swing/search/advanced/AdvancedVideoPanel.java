@@ -13,7 +13,7 @@ class AdvancedVideoPanel extends AdvancedPanel {
     public AdvancedVideoPanel(PropertyDictionary dictionary, FriendAutoCompleterFactory friendAutoCompleterFactory, Action enterKeyAction) {
         super(SearchCategory.VIDEO, friendAutoCompleterFactory, enterKeyAction);
         addField(FilePropertyKey.TITLE);
-        addField(FilePropertyKey.GENRE, dictionary.getVideoGenres());
+        addField(FilePropertyKey.GENRE);
         addField(FilePropertyKey.YEAR);
         addField(FilePropertyKey.RATING, dictionary.getVideoRatings());
     }
