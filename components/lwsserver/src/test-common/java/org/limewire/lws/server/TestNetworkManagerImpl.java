@@ -19,49 +19,44 @@ public class TestNetworkManagerImpl implements NetworkManager{
 
     @Override
     public boolean addressChanged() {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
     @Override
     public boolean isIncomingTLSEnabled() {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
     @Override
     public boolean isOutgoingTLSEnabled() {
-        // TODO Auto-generated method stub
+
         return false;
     }
 
     @Override
     public void portChanged() {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void setIncomingTLSEnabled(boolean value) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void setListeningPort(int port) throws IOException {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void setOutgoingTLSEnabled(boolean value) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void validateTLS() {
-        // TODO Auto-generated method stub
         
     }
     

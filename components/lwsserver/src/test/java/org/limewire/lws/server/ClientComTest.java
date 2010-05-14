@@ -7,7 +7,6 @@ import junit.framework.Test;
 import junit.textui.TestRunner;
 
 import org.limewire.lws.server.LocalServerDelegate.URLConstructor;
-import org.limewire.service.ErrorService;
 
 public class ClientComTest extends AbstractCommunicationSupport {
     
@@ -35,17 +34,13 @@ public class ClientComTest extends AbstractCommunicationSupport {
         });
     } 
     
-    public void testGetDownloadProgress(){
+    public void testGetDownloadProgress() throws Exception{
         Map<String, String> args = new HashMap<String, String>();
         
         String browserIP = TestNetworkManagerImpl.getIPAddress();
         args.put("browserIP", browserIP);
-        
-        try { 
-            String browserIPSignature = getSignedBytes(browserIP);
-            args.put("signedBrowserIP", browserIPSignature);
-        } catch(Exception ex){ ErrorService.error(ex, "Error generating signing request parameters"); }
-        
+        String browserIPSignature = getSignedBytes(browserIP);
+        args.put("signedBrowserIP", browserIPSignature);       
         args.put("callback", "DUMMY");
         getCode().sendLocalMsg(LWSDispatcherSupport.Commands.GET_DOWNLOAD_PROGRESS, args,
                 new FakeJavascriptCodeInTheWebpage.Handler() {
@@ -55,7 +50,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
                 });
     }
     
-    public void testDownload(){
+    public void testDownload() throws Exception{
         
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
         String browserIP = TestNetworkManagerImpl.getIPAddress();
@@ -81,7 +76,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
                 errorHandler(LWSDispatcherSupport.ErrorCodes.MISSING_PARAMETER));
     }
     
-    public void testDownloadInvalidHashSignature(){
+    public void testDownloadInvalidHashSignature() throws Exception{
         
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
         String browserIP = TestNetworkManagerImpl.getIPAddress();
@@ -100,7 +95,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
             });
     }
     
-    public void testDownloadInvalidBrowserIPSignature(){
+    public void testDownloadInvalidBrowserIPSignature() throws Exception{
         
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
         String browserIP = TestNetworkManagerImpl.getIPAddress();
@@ -119,7 +114,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
         });     
     }
     
-    public void testDownloadInconsistentBrowserClientIP(){
+    public void testDownloadInconsistentBrowserClientIP() throws Exception{
         
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
         String browserIP = "10.0.0.1";
@@ -140,19 +135,16 @@ public class ClientComTest extends AbstractCommunicationSupport {
     //
     // Utility Methods.
     //  
-    private Map<String, String> getDownloadArgs(String hash, String browserIP){
+    private Map<String, String> getDownloadArgs(String hash, String browserIP) throws Exception{
         Map<String, String> downloadArgs = new HashMap<String, String>();
         downloadArgs.put("hash", hash);
         downloadArgs.put("browserIP", browserIP);
         
-        try{
-            String signedHash = getSignedBytes(hash);
-            String signedBrowserIP = getSignedBytes(browserIP);
-            downloadArgs.put("signedHash", signedHash);
-            downloadArgs.put("signedBrowserIP", signedBrowserIP);
-        }catch(Exception ex){
-            ErrorService.error(ex, "Error generating signing request parameters");
-        }
+        String signedHash = getSignedBytes(hash);
+        String signedBrowserIP = getSignedBytes(browserIP);
+        downloadArgs.put("signedHash", signedHash);
+        downloadArgs.put("signedBrowserIP", signedBrowserIP);
+        
         return downloadArgs;
     }
     
