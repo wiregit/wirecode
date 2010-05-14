@@ -366,6 +366,13 @@ public class Context extends AbstractDHT {
         return getContactAddress().equals(address);
     }
     
+    /**
+     * 
+     */
+    public BucketRefresher getBucketRefresher() {
+        return bucketRefresher;
+    }
+    
     @Override
     public boolean isFirewalled() {
         return getLocalNode().isFirewalled();

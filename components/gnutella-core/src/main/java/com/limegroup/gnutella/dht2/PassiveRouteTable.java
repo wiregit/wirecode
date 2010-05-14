@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht2;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,20 +7,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito2.AddressPinger;
 import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.RequestTimeoutException;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.ClassfulNetworkCounter;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.routing.RouteTableImpl;
+import org.limewire.mojito2.settings.NetworkSettings;
 
 /**
  * Passive Nodes (Ultrapeers) use this slightly extended version 
@@ -35,28 +39,40 @@ public class PassiveRouteTable implements RouteTable {
     private static final Log LOG = LogFactory.getLog(PassiveRouteTable.class);
     
     /**
-     * MojitoDHT instance
-     */
-    private final MojitoDHT dht;
-    
-    /**
      * The actual RouteTable
      */
-    private final RouteTable delegate;
+    private final RouteTable delegate = new RouteTableImpl();
     
     /**
      * The Map storing the leaf nodes connected to this ultrapeer. The mapping is
      * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>RemoteContact</tt>. 
      */
-    private final Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
+    private final Map<SocketAddress, KUID> leafDHTNodes 
+        = new HashMap<SocketAddress, KUID>();
     
-    public PassiveRouteTable(MojitoDHT dht) {
-        assert (dht.isFirewalled()); // Must be firewalled
+    private volatile AddressPinger pinger;
+    
+    private DHTFuture<PingEntity> ping(SocketAddress address) {
+        AddressPinger pinger = this.pinger;
         
-        this.dht = dht;
-        delegate = dht.getRouteTable();
+        DHTFuture<PingEntity> future = null;
+        if (pinger != null) {
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            future = pinger.ping(address, timeout, TimeUnit.MILLISECONDS);
+        }
+        
+        if (future != null) {
+            return future;
+        }
+        
+        RequestTimeoutException exception 
+            = new RequestTimeoutException(
+                null, address, 
+                0L, TimeUnit.MILLISECONDS);
+        
+        return new DHTValueFuture<PingEntity>(exception);
     }
-
+    
     /**
      * Adds a DHT leaf node to the DHT routing table, setting a very high timestamp
      * to make sure it always gets contacted first for the first hop of lookups, and 
@@ -66,13 +82,12 @@ public class PassiveRouteTable implements RouteTable {
      * @param host the IP address of the remote host as a string
      * @param port the listening port for the remote host
      */
-    public void addLeafDHTNode(String host, int port) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Pinging leaf: " + host + ": " + port);
+    public void addLeafNode(final SocketAddress address) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Pinging leaf: " + address);
         }
         
-        final InetSocketAddress addr = new InetSocketAddress(host, port);
-        DHTFuture<PingEntity> future = dht.ping(addr);
+        DHTFuture<PingEntity> future = ping(address);
         
         EventListener<FutureEvent<PingEntity>> listener 
                 = new EventListener<FutureEvent<PingEntity>>() {
@@ -80,22 +95,22 @@ public class PassiveRouteTable implements RouteTable {
             public void handleEvent(FutureEvent<PingEntity> event) {
                 switch (event.getType()) {
                     case SUCCESS:
-                        handleFutureSuccess(event.getResult());
+                        onSuccess(event.getResult());
                         break;
                     case EXCEPTION:
-                        handleExecutionException(event.getException());
+                        onException(event.getException());
                         break;
                 }
             }
 
-            private void handleFutureSuccess(PingEntity result) {
-                if(LOG.isDebugEnabled()) {
+            private void onSuccess(PingEntity result) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Ping succeeded to: " + result);
                 }
                 
                 Contact node = result.getContact();
                 synchronized (PassiveRouteTable.this) {
-                    KUID previous = leafDHTNodes.put(addr, node.getNodeID());
+                    KUID previous = leafDHTNodes.put(address, node.getNodeID());
                     
                     if (previous == null || !previous.equals(node.getNodeID())) {
                         // Add it as a priority Node
@@ -105,9 +120,9 @@ public class PassiveRouteTable implements RouteTable {
                 }
             }
 
-            private void handleExecutionException(ExecutionException e) {
+            private void onException(ExecutionException e) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Ping failed to: " + addr, e);
+                    LOG.debug("Ping failed to: " + address, e);
                 }
             }
         };
@@ -118,18 +133,17 @@ public class PassiveRouteTable implements RouteTable {
     /**
      * Removes this DHT leaf from our routing table and returns it.
      */
-    public synchronized SocketAddress removeLeafDHTNode(String host, int port) {
+    public synchronized SocketAddress removeLeafNode(SocketAddress address) {
         
-        SocketAddress addr = new InetSocketAddress(host, port);
-        KUID nodeId = leafDHTNodes.remove(addr);
+        KUID nodeId = leafDHTNodes.remove(address);
         if(nodeId != null) {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Removed leaf: " + host + ": " + port);
+                LOG.debug("Removed leaf: " + address);
             }
             
             removeAndReplaceWithMRSCachedContact(nodeId);
-            return addr;
+            return address;
         }
         return null;
     }
@@ -271,6 +285,7 @@ public class PassiveRouteTable implements RouteTable {
     @Override
     public synchronized void bind(ContactPinger pinger) {
         delegate.bind(pinger);
+        this.pinger = (AddressPinger)pinger;
     }
     
     @Override

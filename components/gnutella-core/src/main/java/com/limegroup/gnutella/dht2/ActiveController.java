@@ -66,7 +66,7 @@ public class ActiveController extends AbstractController {
     private static final Log LOG 
         = LogFactory.getLog(ActiveController.class);
     
-    private static final String NAME = "MojitoDHT";
+    private static final String NAME = "ACTIVE";
     
     public static final File ACTIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
@@ -266,11 +266,6 @@ public class ActiveController extends AbstractController {
                 break;
         }
     }
-
-    private boolean isLocalhost(Contact contact) {
-        Context context = dht.getContext();
-        return context.isLocalNode(contact);
-    }
     
     @Override
     public void addressChanged() {
@@ -320,7 +315,7 @@ public class ActiveController extends AbstractController {
     
     @Override
     public void addActiveNode(SocketAddress address) {
-        if (dht.isReady()) {
+        if (isReady()) {
             contactSink.addActiveNode(address);
         } else {
             bootstrapWorker.addActiveNode(address);

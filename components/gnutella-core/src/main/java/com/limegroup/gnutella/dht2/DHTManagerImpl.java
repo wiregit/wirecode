@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht2;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,8 +61,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     
     private final Provider<MACCalculatorRepositoryManager> calculator;
     
-    private final Provider<IPFilter> ipFilter;
-    
     private final ConnectionServices connectionServices;
     
     private final Provider<HostCatcher> hostCatcher;
@@ -73,6 +72,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     private final Provider<UDPPinger> udpPinger;
     
     private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
+    
+    private final HostFilter hostFilter;
     
     private Controller controller = InactiveController.CONTROLLER;
     
@@ -100,13 +101,14 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         this.messageRouter = messageRouter;
         this.calculator = calculator;
         this.connectionManager = connectionManager;
-        this.ipFilter = ipFilter;
         this.connectionServices = connectionServices;
         this.hostCatcher = hostCatcher;
         this.pingRequestFactory = pingRequestFactory;
         this.uniqueHostPinger = uniqueHostPinger;
         this.udpPinger = udpPinger;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
+        
+        this.hostFilter = new HostFilterDelegate(ipFilter);
         
         messageFactory.setParser(
                 (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
@@ -262,9 +264,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         DefaultMessageFactory messageFactory 
             = new DefaultMessageFactory(calculator.get());
         
-        HostFilter hostFilter 
-            = new HostFilterDelegate(ipFilter);
-        
         ActiveController controller = new ActiveController(this, 
                 networkManager, transport, connectionManager, hostCatcher, 
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
@@ -290,12 +289,47 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         return controller;
     }
     
-    private Controller createPassive() {
-        return new PassiveController();
+    private Controller createPassive() throws UnknownHostException {
+        MojitoTransport transport = new MojitoTransport(
+                udpService, messageRouter);
+        
+        DefaultMessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        PassiveController controller = new PassiveController(this, 
+                networkManager, transport, connectionManager, hostCatcher, 
+                pingRequestFactory, uniqueHostPinger, messageFactory, 
+                connectionServices, hostFilter, udpPinger);
+        
+        BootstrapWorker worker 
+            = controller.getBootstrapWorker();
+        worker.addBootstrapListener(new BootstrapListener() {
+            @Override
+            public void handleReady() {
+                fireConnected();
+            }
+            
+            @Override
+            public void handleCollision(CollisionException ex) {
+                synchronized (DHTManagerImpl.this) {
+                    stop();
+                    start(DHTMode.PASSIVE);
+                }
+            }
+        });
+        
+        return controller;
     }
     
-    private Controller createLeaf() {
-        return new LeafController();
+    private Controller createLeaf() throws UnknownHostException {
+        MojitoTransport transport = new MojitoTransport(
+                udpService, messageRouter);
+        
+        DefaultMessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        return new LeafController(transport, messageFactory, 
+                networkManager, hostFilter);
     }
     
     @Override

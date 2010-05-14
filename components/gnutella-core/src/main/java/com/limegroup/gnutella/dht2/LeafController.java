@@ -1,48 +1,120 @@
 package com.limegroup.gnutella.dht2;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
+import org.limewire.mojito2.io.BootstrapConfig;
+import org.limewire.mojito2.io.Transport;
+import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.LocalContact;
+import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito2.storage.Database;
+import org.limewire.mojito2.storage.DatabaseImpl;
+import org.limewire.mojito2.util.HostFilter;
+import org.limewire.mojito2.util.IoUtils;
 
+import com.google.inject.Inject;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 class LeafController extends AbstractController {
 
-    public LeafController() {
+    private static final String NAME = "LeafDHT";
+    
+    private final Transport transport;
+    
+    private final NetworkManager networkManager;
+    
+    private final RouteTable routeTable = new LeafRouteTable(
+            DHTManager.VENDOR, DHTManager.VERSION);
+    
+    private final MojitoDHT dht;
+    
+    @Inject
+    public LeafController(Transport transport, 
+            MessageFactory messageFactory,
+            NetworkManager networkManager,
+            HostFilter hostFilter) throws UnknownHostException {
         super(DHTMode.PASSIVE_LEAF);
+        
+        this.transport = transport;
+        this.networkManager = networkManager;
+        
+        Database database = new DatabaseImpl();
+        
+        Context context = new LeafContext(NAME, 
+                messageFactory, routeTable, database);
+        init(context);
+        
+        context.setHostFilter(hostFilter);
+        
+        dht = new DefaultMojitoDHT(context);
+    }
+    
+    private void init(Context context) throws UnknownHostException {
+        LocalContact localhost = context.getLocalNode();
+        updateLocalhost(localhost);
+        localhost.setFirewalled(true);
+    }
+    
+    private SocketAddress getExternalAddress() 
+            throws UnknownHostException {
+        InetAddress address = InetAddress.getByAddress(
+                networkManager.getAddress());
+        int port = networkManager.getPort();
+        
+        return new InetSocketAddress(address, port);
+    }
+    
+    private void updateLocalhost(LocalContact localhost) 
+            throws UnknownHostException {
+        localhost.setVendor(DHTManager.VENDOR);
+        localhost.setVersion(DHTManager.VERSION);
+        localhost.setContactAddress(getExternalAddress());        
+        localhost.nextInstanceID();
     }
 
     @Override
-    public MojitoDHT getMojitoDHT() {
-        return null;
-    }
-    
-    @Override
-    public boolean isRunning() {
-        return false;
-    }
-    
-    @Override
-    public boolean isReady() {
-        return false;
-    }
-    
-    @Override
-    public void start() {
+    public void start() throws IOException {
+        dht.bind(transport);
     }
 
     @Override
     public void close() throws IOException {
+        IoUtils.closeAll(dht);
+    }
+    
+    @Override
+    public MojitoDHT getMojitoDHT() {
+        return dht;
+    }
+    
+    @Override
+    public boolean isRunning() {
+        return dht.isBound();
+    }
+    
+    @Override
+    public boolean isReady() {
+        return dht.isReady();
     }
     
     @Override
@@ -51,18 +123,43 @@ class LeafController extends AbstractController {
     
     @Override
     public DHTFuture<ValueEntity> get(EntityKey key) {
-        return new DHTValueFuture<ValueEntity>(new UnsupportedOperationException());
+        return dht.get(key);
     }
 
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
-        return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
+        return dht.put(key, value);
     }
 
     @Override
     public void handleContactsMessage(DHTContactsMessage msg) {
         for (Contact contact : msg.getContacts()) {
-            // Add contacts to RT
+            routeTable.add(contact);
+        }
+    }
+    
+    private static class LeafContext extends Context {
+
+        public LeafContext(String name, MessageFactory messageFactory, 
+                RouteTable routeTable, Database database) {
+            super(name, messageFactory, routeTable, database);
+        }
+        
+        @Override
+        public boolean isBooting() {
+            return false;
+        }
+        
+        @Override
+        public boolean isReady() {
+            return isBound();
+        }
+
+        @Override
+        protected DHTFuture<BootstrapEntity> bootstrap(
+                BootstrapConfig config, long timeout, TimeUnit unit) {
+            return new DHTValueFuture<BootstrapEntity>(
+                    new UnsupportedOperationException());
         }
     }
 }

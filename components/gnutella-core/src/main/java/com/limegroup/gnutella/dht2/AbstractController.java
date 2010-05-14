@@ -2,6 +2,8 @@ package com.limegroup.gnutella.dht2;
 
 import java.net.SocketAddress;
 
+import org.limewire.mojito2.Context;
+import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.routing.Contact;
 
@@ -53,5 +55,18 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void handleContactsMessage(DHTContactsMessage msg) {
+    }
+    
+    /**
+     * 
+     */
+    protected boolean isLocalhost(Contact contact) {
+        MojitoDHT dht = getMojitoDHT();
+        if (dht == null) {
+            return false;
+        }
+        
+        Context context = dht.getContext();
+        return context.isLocalNode(contact);
     }
 }
