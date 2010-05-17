@@ -214,7 +214,10 @@ class PlayerMediatorImpl implements PlayerMediator {
 
     @Override
     public void pause() {
-        player.stop();
+        if(player instanceof JavaSoundPlayer)
+            ((JavaSoundPlayer)player).pause();
+        else
+            player.stop();
     }
 
     @Override

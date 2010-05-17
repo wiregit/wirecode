@@ -132,7 +132,13 @@ public class JavaSoundPlayer implements Player {
     @Override
     public void start() {
         state = Started;
-        audioPlayer.playSong();
+        PlayerState status = getPlayer().getStatus();
+        if (status != PlayerState.PAUSED) {
+            audioPlayer.stop();
+            audioPlayer.playSong();
+        } else {
+            audioPlayer.unpause();
+        }
     }
 
     @Override
@@ -173,10 +179,7 @@ public class JavaSoundPlayer implements Player {
     @Override
     public Time getMediaTime() {
         if ((audioProperties != null) && audioProperties.containsKey(AUDIO_LENGTH_BYTES) && audioProperties.containsKey("duration")) {
-            float byteslength = ((Integer) audioProperties.get(AUDIO_LENGTH_BYTES)).floatValue();
-            float progress = bytesRead / byteslength;
-            long currentTime = (long) ((((Long)audioProperties.get("duration"))/1000) * progress);
-            return new Time(currentTime);
+            return new Time(bytesRead);
         }
         return new Time(0);
     }
@@ -198,6 +201,11 @@ public class JavaSoundPlayer implements Player {
             return false;
         }
         return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
+    }
+    
+    public void pause() {
+        if(audioPlayer != null)
+            audioPlayer.pause();
     }
 
     @Override
@@ -264,8 +272,8 @@ public class JavaSoundPlayer implements Player {
         @Override
         public void songOpened(Map<String, Object> properties) {
             audioProperties = properties;
-            if(audioProperties != null && audioProperties.containsKey("duration")) {
-                duration = new Time(((Long)audioProperties.get("duration"))/1000);
+            if(audioProperties != null && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
+                duration = new Time((Integer)audioProperties.get(AUDIO_LENGTH_BYTES));
             } else {
                 duration = Time.TIME_UNKNOWN;
             }
@@ -290,6 +298,9 @@ public class JavaSoundPlayer implements Player {
                 }
             } else if(event.getState() == PlayerState.PLAYING) {
                 state = Started;
+                for(ControllerListener listener : listenerList) {
+                    listener.controllerUpdate(new StartEvent(JavaSoundPlayer.this, 0, 0, 0, null, null));
+                }
             } else {
                 state = Realized;
             }
