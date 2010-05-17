@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Set;
 
-import org.apache.http.HttpException;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -101,7 +100,7 @@ public interface RemoteFileDescFactory {
      * <b>This method can block if the size is <= 0.</b>
      */
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
-            throws IOException, URISyntaxException, HttpException, InterruptedException;
+            throws IOException, URISyntaxException;
 
     /**
      * Registers a {@link RemoteFileDescDeserializer} for a type. Type is the type

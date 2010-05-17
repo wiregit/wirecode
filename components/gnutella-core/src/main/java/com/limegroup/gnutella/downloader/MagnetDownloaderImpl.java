@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.DownloadException;
@@ -74,9 +74,15 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     
     private static final Log LOG = LogFactory.getLog(MagnetDownloaderImpl.class);
         
-	private MagnetOptions magnet;
+    private MagnetOptions magnet;
+    
+    /**
+     * Boolean to keep track of whether default urls were already tried. Ensures
+     * that they are only tried once per session.
+     */
+    private final AtomicBoolean triedDefaultUrls = new AtomicBoolean(false);
 
-	/**
+    /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
      * not provide alternate locations, issues a requery with <tt>textQuery</tt>
@@ -179,30 +185,27 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         // which were added to the ranker then
         SourceRanker ranker = getSourceRanker();
         boolean hasMore = ranker != null && ranker.hasMore();
-		if (!hasRFD() && !hasMore) {
-			MagnetOptions magnet = getMagnet();
-			String[] defaultURLs = magnet.getDefaultURLs();
-			
-			boolean foundSource = false;
-			long fileSize = magnet.getFileSize();
-			for (int i = 0; i < defaultURLs.length; i++) {
-				try {
-				    RemoteFileDesc rfd = createRemoteFileDesc(defaultURLs[i],
-													 getSaveFile().getName(), magnet.getSHA1Urn(), fileSize);
-				    // update size in case it was -1, to save HEAD requests
-				    // for the following urls
-				    fileSize = rfd.getSize();
-					initPropertiesMap(rfd);
-					addDownloadForced(rfd, true);
-				} catch (IOException e) {
-				    LOG.warn("error", e);
-				} catch (HttpException e) {
-				    LOG.warn("error", e);
-				} catch (URISyntaxException e) {
-				    LOG.warn("error", e);
-				} catch (InterruptedException e) {
-				    LOG.warn("error", e);
-				}
+        if (!hasRFD() && !hasMore && triedDefaultUrls.compareAndSet(false, true)) {
+            MagnetOptions magnet = getMagnet();
+            String[] defaultURLs = magnet.getDefaultURLs();
+            
+            boolean foundSource = false;
+            long fileSize = magnet.getFileSize();
+            for (int i = 0; i < defaultURLs.length; i++) {
+                try {
+                    RemoteFileDesc rfd = createRemoteFileDesc(defaultURLs[i],
+                                                     getSaveFile().getName(), magnet.getSHA1Urn(), fileSize);
+                    // update size in case it was -1, to save HEAD requests
+                    // for the following urls
+                    fileSize = rfd.getSize();
+                    initPropertiesMap(rfd);
+                    addDownloadForced(rfd, true);
+                    foundSource = true;
+                } catch (IOException e) {
+                    LOG.warn("error", e);
+                } catch (URISyntaxException e) {
+                    LOG.warn("error", e);
+                }
             }
         
 			// if all locations included in the magnet URI fail we can't do much
@@ -226,7 +229,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      */
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn, long fileSize)
-            throws IOException, HttpException, InterruptedException, URISyntaxException {
+            throws IOException, URISyntaxException {
         return remoteFileDescFactory.createUrlRemoteFileDesc(new URL(defaultURL), filename, urn, fileSize);
     } 
 

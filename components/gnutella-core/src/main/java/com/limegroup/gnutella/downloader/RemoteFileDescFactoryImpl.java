@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.http.Header;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpHead;
@@ -197,7 +196,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
-            throws IOException, URISyntaxException, HttpException, InterruptedException {
+            throws IOException, URISyntaxException{
         // Use the URL class to do a little parsing for us.
         int port = url.getPort();
         if (port < 0)
@@ -214,7 +213,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 url);
     }
 
-    private long contentLength(URI uri) throws HttpException, IOException, InterruptedException {
+    private long contentLength(URI uri) throws IOException {
         HttpHead head = new HttpHead(uri);
         head.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         HttpResponse response = null;
