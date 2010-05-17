@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht.db;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -27,8 +28,10 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.DHTTestUtils;
+import com.limegroup.gnutella.dht.NodeAssignerStub;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -65,11 +68,13 @@ public class PushProxyPublishingTest extends LimeTestCase {
         DHTTestUtils.setSettings(NetworkSettings.PORT.getValue());
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 500L);
         
-        injector = LimeTestUtils.createInjectorAndStart(new LimeWireIOTestModule(), new AbstractModule() {
+        injector = LimeTestUtils.createInjectorAndStart(
+                new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(NodeAssigner.class).to(NodeAssignerStub.class);
             }
         });
         dhtManager = injector.getInstance(DHTManager.class);
@@ -101,13 +106,14 @@ public class PushProxyPublishingTest extends LimeTestCase {
         MojitoDHT dht = dhts.get(0);
         assertTrue(dht.isReady());
         
-        ExtendedEndpoint endpoint = new ExtendedEndpoint((InetSocketAddress)dht.getContactAddress());
+        ExtendedEndpoint endpoint = new ExtendedEndpoint(
+                (InetSocketAddress)dht.getContactAddress());
         endpoint.setDHTMode(DHTMode.ACTIVE);
         endpoint.setDHTVersion(dhtManager.getVersion().shortValue());
         
         hostCatcher.add(endpoint, true);
         
-        DHTTestUtils.waitForBootStrap(dhtManager, 5);
+        DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
         
         // should have published after 3 secs with  a publishing interval of 1 sec
         Thread.sleep(3 * 1000);

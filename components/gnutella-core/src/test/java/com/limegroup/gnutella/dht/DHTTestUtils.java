@@ -68,7 +68,7 @@ public class DHTTestUtils {
      * 
      * @throw {@link AssertionFailedError} if not bootstrapped.
      */
-    public static void waitForBootStrap(DHTManager dhtManager, int seconds) throws Exception {
+    public static void waitForBootStrap(DHTManager dhtManager, long time, TimeUnit unit) throws Exception {
         final CountDownLatch bootStrapped = new CountDownLatch(1);
         dhtManager.addEventListener(new DHTEventListener() {
             public void handleDHTEvent(DHTEvent evt) {
@@ -79,7 +79,7 @@ public class DHTTestUtils {
         });
         
         if (!dhtManager.isReady()) {
-            AssertComparisons.assertTrue(bootStrapped.await(seconds, TimeUnit.SECONDS));
+            AssertComparisons.assertTrue(bootStrapped.await(time, unit));
         }
     }
 }

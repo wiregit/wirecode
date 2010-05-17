@@ -2,7 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import com.limegroup.gnutella.NodeAssigner;
 
-class NodeAssignerStub implements NodeAssigner {
+public class NodeAssignerStub implements NodeAssigner {
 
     @Override
     public boolean isTooGoodUltrapeerToPassUp() {

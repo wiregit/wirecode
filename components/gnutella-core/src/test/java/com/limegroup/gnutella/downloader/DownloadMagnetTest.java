@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -95,7 +96,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, PORTS[0], PORTS[0]);
              
-             DHTTestUtils.waitForBootStrap(dhtManager, 5);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
 
              Downloader downloader = downloadServices.download(magnet, true, saveDir, savedFileName);
              
@@ -125,7 +126,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, 5555 /* just a random different port */, PUSH_PROXY_PORT);
              
-             DHTTestUtils.waitForBootStrap(dhtManager, 5);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
 
              TestUploader uploader = injector.getInstance(TestUploader.class);
              uploader.start("push uploader");
