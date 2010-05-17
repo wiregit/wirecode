@@ -13,7 +13,6 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
-import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 
@@ -25,14 +24,12 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     private final URN urn;
     private final String fileName;
     private final Set<RemoteHost> remoteHosts;
-    private final List<GroupedSearchResultListener> resultListeners;
     private final List<SearchResult> searchResults;
     
     public MockGroupedSearchResult(URN urn, String fileName) {
         this.urn = urn;
         this.fileName = fileName;
         remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
-        resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
         searchResults = new CopyOnWriteArrayList<SearchResult>();
         
         addSearchResult(new TestSearchResult(urn.toString(), fileName));
@@ -42,7 +39,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
         this.urn = urn;
         this.fileName = fileName;
         remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
-        resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
         searchResults = new CopyOnWriteArrayList<SearchResult>();
         
         addSearchResult(new TestSearchResult(urn.toString(), fileName, properties));
@@ -51,10 +47,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     void addResult(URN urn, String fileName) {
         assert this.urn.equals(urn);
         addSearchResult(new TestSearchResult(urn.toString(), fileName));
-        
-        for (GroupedSearchResultListener listener : resultListeners) {
-            listener.sourceAdded();
-        }
     }
     
     private void addSearchResult(SearchResult result) {
@@ -66,16 +58,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     
     void setCategory(Category category) {
         ((TestSearchResult) searchResults.get(0)).setCategory(category);
-    }
-    
-    @Override
-    public void addResultListener(GroupedSearchResultListener listener) {
-        resultListeners.add(listener);
-    }
-
-    @Override
-    public void removeResultListener(GroupedSearchResultListener listener) {
-        resultListeners.add(listener);
     }
 
     @Override

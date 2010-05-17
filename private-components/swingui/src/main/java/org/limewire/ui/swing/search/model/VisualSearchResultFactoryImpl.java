@@ -31,7 +31,6 @@ public class VisualSearchResultFactoryImpl implements VisualSearchResultFactory 
     public VisualSearchResult create(GroupedSearchResult gsr, 
             VisualSearchResultStatusListener listener) {
         SearchResultAdapter vsr = new SearchResultAdapter(gsr, propertiableHeadings, listener);
-        vsr.initialize();
         return vsr;
     }
 }

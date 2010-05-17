@@ -151,8 +151,7 @@ class CoreSearchResultList implements SearchResultList {
                         GroupedSearchResultImpl gsr = (GroupedSearchResultImpl) groupedUrnResultList.get(idx);
                         gsr.addNewSource(result, searchDetails.getSearchQuery());
                         groupedUrnResultList.set(idx, gsr);
-                        // Notify listeners that result changed.
-                        gsr.notifyNewSource();
+                        newResults.add(gsr);
 
                     } else {
                         // URN not found so add new result at insertion point.
@@ -173,17 +172,17 @@ class CoreSearchResultList implements SearchResultList {
             lock.unlock();
         }
         
-        // Forward new results to list listeners.
+        // Forward added results to list listeners.
         if (newResults.size() > 0) {
-            notifyResultsCreated(newResults);
+            notifyResultsAdded(newResults);
         }
     }
     
     /**
-     * Forwards the specified collection of new results to all registered
+     * Forwards the specified collection of added results to all registered
      * listeners. 
      */
-    private void notifyResultsCreated(Collection<GroupedSearchResult> results) {
+    private void notifyResultsAdded(Collection<GroupedSearchResult> results) {
         listListeners.broadcast(results);
     }
     

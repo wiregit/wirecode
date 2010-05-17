@@ -12,7 +12,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
-import org.limewire.core.api.search.GroupedSearchResultListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
 import org.limewire.util.Objects;
@@ -25,7 +24,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
     private static final Comparator<Friend> FRIEND_COMPARATOR = new FriendComparator();
     private static final Comparator<RemoteHost> REMOTE_HOST_COMPARATOR = new RemoteHostComparator();
     
-    private final List<GroupedSearchResultListener> resultListeners;
     private final Set<RemoteHost> remoteHosts;
     
     private volatile List<SearchResult> coreResults;
@@ -37,7 +35,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
      * Constructs a GroupedSearchResult containing the specified search result.
      */
     public MockGroupedSearchResult(SearchResult searchResult, String query) {
-        this.resultListeners = new CopyOnWriteArrayList<GroupedSearchResultListener>();
         this.remoteHosts = new CopyOnWriteArraySet<RemoteHost>();
         
         addNewSource(searchResult, query);
@@ -86,26 +83,6 @@ class MockGroupedSearchResult implements GroupedSearchResult {
         }
     }
     
-    /**
-     * Notifies result listeners that new sources have been added.  This method
-     * is usually called by a background thread when sources are added.
-     */
-    void notifyNewSource() {
-        for (GroupedSearchResultListener listener : resultListeners) {
-            listener.sourceAdded();
-        }
-    }
-    
-    @Override
-    public void addResultListener(GroupedSearchResultListener listener) {
-        resultListeners.add(listener);
-    }
-
-    @Override
-    public void removeResultListener(GroupedSearchResultListener listener) {
-        resultListeners.remove(listener);
-    }
-
     @Override
     public String getFileName() {
         return coreResults.get(0).getFileName();

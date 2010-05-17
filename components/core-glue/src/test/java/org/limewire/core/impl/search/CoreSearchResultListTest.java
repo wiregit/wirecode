@@ -139,7 +139,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
         listener.reset();
         SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         resultList.addResult(result2);
-        assertEquals(0, listener.getCount());
+        assertEquals(1, listener.getCount());
     }
     
     /**
