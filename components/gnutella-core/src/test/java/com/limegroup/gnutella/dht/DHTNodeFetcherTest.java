@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -99,9 +100,17 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() throws IOException, InterruptedException {
         bootstrapDHT.close();
         NIOTestUtils.waitForNIO();
+        
+        for (DatagramSocket s : UDP_ACCESS) {
+            if (s != null) {
+                s.close();
+            }
+        }
+        
+        injector.getInstance(LifecycleManager.class).shutdown();
     }
     
     public void testRequestDHTHostsFromSingleHost() throws Exception {

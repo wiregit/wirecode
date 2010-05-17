@@ -25,8 +25,6 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.IoUtils;
-import org.limewire.setting.SettingsFactory;
-import org.limewire.setting.SettingsGroupManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -59,7 +57,6 @@ import com.limegroup.gnutella.util.EmptyResponder;
  */
 public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
-    
     private static final int PORT = 6667;
     
     private List<MojitoDHT> dhts;
@@ -87,8 +84,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         
-        Thread.sleep(5000);
-        
         doSettings();
         
         injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -100,7 +95,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
                 bind(BandwidthCollectorDriver.class).to(BandwidthCollectorStub.class);
             }            
         });
-
+        
         // start an instance of LimeWire in Ultrapeer mode
         injector.getInstance(LifecycleManager.class).start();
             
@@ -139,10 +134,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        ConnectionSettings.DISABLE_UPNP.setValue(true);
         
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                 new String[] {"*.*.*.*"});
@@ -202,7 +197,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             addPassiveLeafCapability();
            
             // Tell our Ultrapeer that we've PASSIVE_LEAF mode enabled
-            CapabilitiesVM vm = injector.getInstance(CapabilitiesVMFactory.class).getCapabilitiesVM();
+            CapabilitiesVM vm = injector.getInstance(
+                    CapabilitiesVMFactory.class).getCapabilitiesVM();
             assertEquals(0, vm.isPassiveLeafNode());
             out.send(vm);
             out.flush();
