@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.dht2;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
@@ -35,28 +32,25 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-class LeafController extends AbstractController {
+public class PassiveLeafController extends AbstractController {
 
     private static final String NAME = "LeafDHT";
     
     private final Transport transport;
     
-    private final NetworkManager networkManager;
-    
-    private final RouteTable routeTable = new LeafRouteTable(
+    private final RouteTable routeTable = new PassiveLeafRouteTable(
             DHTManager.VENDOR, DHTManager.VERSION);
     
     private final MojitoDHT dht;
     
     @Inject
-    public LeafController(Transport transport, 
+    public PassiveLeafController(Transport transport, 
             MessageFactory messageFactory,
             NetworkManager networkManager,
             HostFilter hostFilter) throws UnknownHostException {
-        super(DHTMode.PASSIVE_LEAF);
+        super(DHTMode.PASSIVE_LEAF, transport, networkManager);
         
         this.transport = transport;
-        this.networkManager = networkManager;
         
         Database database = new DatabaseImpl();
         
@@ -69,32 +63,15 @@ class LeafController extends AbstractController {
         dht = new DefaultMojitoDHT(context);
     }
     
-    private void init(Context context) throws UnknownHostException {
+    private void init(Context context) 
+            throws UnknownHostException {
         LocalContact localhost = context.getLocalNode();
-        updateLocalhost(localhost);
-        localhost.setFirewalled(true);
+        initLocalhost(localhost);
     }
     
-    private SocketAddress getExternalAddress() 
-            throws UnknownHostException {
-        InetAddress address = InetAddress.getByAddress(
-                networkManager.getAddress());
-        int port = networkManager.getPort();
-        
-        return new InetSocketAddress(address, port);
-    }
-    
-    private void updateLocalhost(LocalContact localhost) 
-            throws UnknownHostException {
-        localhost.setVendor(DHTManager.VENDOR);
-        localhost.setVersion(DHTManager.VERSION);
-        localhost.setContactAddress(getExternalAddress());        
-        localhost.nextInstanceID();
-    }
-
     @Override
     public void start() throws IOException {
-        dht.bind(transport);
+        super.start();
     }
 
     @Override

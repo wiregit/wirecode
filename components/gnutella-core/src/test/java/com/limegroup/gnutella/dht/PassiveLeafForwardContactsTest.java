@@ -180,6 +180,9 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         // There should be no connections
         assertEquals(0, connectionManager.getNumConnections());
 
+        NodeAssigner assigner = injector.getInstance(NodeAssigner.class);
+        assigner.stop();
+        
         // Connect a leaf Node to the Ultrapeer
         BlockingConnection out = createLeafConnection();
         try {
@@ -240,19 +243,20 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // And check what the leaf is receiving...
             Set<Contact> nodes = new HashSet<Contact>();
-                while(true) {
-                    Message msg = out.receive(10000);
-                    if (msg instanceof DHTContactsMessage) {
-                        DHTContactsMessage message = (DHTContactsMessage)msg;
-                        assertEquals(10,message.getContacts().length);
-                        nodes.addAll(Arrays.asList(message.getContacts()));
-                        break;
-                    }
+            while(true) {
+                Message msg = out.receive(10000);
+                if (msg instanceof DHTContactsMessage) {
+                    DHTContactsMessage message = (DHTContactsMessage)msg;
+                    assertEquals(10,message.getContacts().length);
+                    nodes.addAll(Arrays.asList(message.getContacts()));
+                    break;
                 }
+            }
             
             // the ultrapeer id should not be sent as ups are passive.
-            for (Contact c : nodes) 
+            for (Contact c : nodes) {
                 assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
+            }
             
         } finally {
             out.close();
@@ -382,7 +386,9 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     }
     
     private void addPassiveLeafCapability() {
-        CapabilitiesVMFactoryImplStub factory = (CapabilitiesVMFactoryImplStub) injector.getInstance(CapabilitiesVMFactory.class);
+        CapabilitiesVMFactoryImplStub factory 
+            = (CapabilitiesVMFactoryImplStub) injector.getInstance(
+                    CapabilitiesVMFactory.class);
         factory.addMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), 0);
     }
 
@@ -395,21 +401,5 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         BlockingConnection c = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
-    }
-    
-    private class NodeAssignerStub implements NodeAssigner{
-
-        public boolean isTooGoodUltrapeerToPassUp() {
-            return false;
-        }
-
-
-        public void start() {
-        }
-
-
-        public void stop() {
-        }
-        
     }
 }

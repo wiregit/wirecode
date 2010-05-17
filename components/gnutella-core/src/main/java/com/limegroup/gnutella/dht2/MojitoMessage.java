@@ -22,7 +22,7 @@ class MojitoMessage implements Message {
     private final byte[] message;
     
     public MojitoMessage(byte[] header, byte[] payload) {
-        this(merge(header, payload));
+        this(concat(header, payload));
     }
     
     public MojitoMessage(byte[] message) {
@@ -142,7 +142,7 @@ class MojitoMessage implements Message {
         return getPriority() - o.getPriority();
     }
     
-    private static byte[] merge(byte[] header, byte[] payload) {
+    private static byte[] concat(byte[] header, byte[] payload) {
         byte[] message = new byte[header.length + payload.length];
         
         System.arraycopy(header, 0, message, 0, header.length);

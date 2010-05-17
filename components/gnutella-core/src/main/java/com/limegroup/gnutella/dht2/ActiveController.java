@@ -8,10 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,8 +34,6 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
-import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -61,7 +57,7 @@ import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
-public class ActiveController extends AbstractController {
+public class ActiveController extends SimpleController {
     
     private static final Log LOG 
         = LogFactory.getLog(ActiveController.class);
@@ -73,13 +69,7 @@ public class ActiveController extends AbstractController {
     
     private final AtomicBoolean collision = new AtomicBoolean(false);
     
-    private final ConnectionServices connectionServices;
-    
     private final DHTManager manager;
-    
-    private final NetworkManager networkManager;
-    
-    private final Transport transport;
     
     private final ContactPusher contactPusher;
     
@@ -103,12 +93,10 @@ public class ActiveController extends AbstractController {
             ConnectionServices connectionServices,
             HostFilter filter,
             Provider<UDPPinger> udpPinger) throws IOException {
-        super(DHTMode.ACTIVE);
+        super(DHTMode.ACTIVE, transport, 
+                networkManager, connectionServices);
         
-        this.connectionServices = connectionServices;
         this.manager = manager;
-        this.networkManager = networkManager;
-        this.transport = transport;
         
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();
@@ -159,19 +147,19 @@ public class ActiveController extends AbstractController {
     private Contact[] init(Context context) throws IOException {
         
         LocalContact contact = context.getLocalNode();
-        updateLocalhost(context.getLocalNode());
+        initLocalhost(context.getLocalNode());
         
-        Handle handle = read();
+        RouteTable existing = read();
         
-        if (handle != null && handle.routeTable != null) {
+        if (existing != null) {
             // Take the KUID from the persisted RouteTable and
             // change override our KUID with it.
-            Contact other = handle.routeTable.getLocalNode();
+            Contact other = existing.getLocalNode();
             contact.setNodeID(other.getNodeID());
             
             // Take all Contacts and use 'em for bootstrapping
             Collection<Contact> contacts 
-                = handle.routeTable.getContacts();
+                = existing.getContacts();
             contacts.remove(other);
             
             return contacts.toArray(new Contact[0]);
@@ -180,31 +168,12 @@ public class ActiveController extends AbstractController {
         return null;
     }
     
-    /**
-     * 
-     */
-    private void updateLocalhost(LocalContact contact) throws IOException {
-        contact.setVendor(DHTManager.VENDOR);
-        contact.setVersion(DHTManager.VERSION);
-        contact.setContactAddress(getExternalAddress());        
-        contact.nextInstanceID();
-    }
-    
     @Override
     public Contact[] getActiveContacts(int max) {
         RouteTable routeTable = dht.getRouteTable();
         Collection<Contact> contacts = ContactUtils.sort(
                 routeTable.getActiveContacts(), max + 1);
         return contacts.toArray(new Contact[0]);
-    }
-
-    private SocketAddress getExternalAddress() 
-            throws UnknownHostException {
-        InetAddress address = InetAddress.getByAddress(
-                networkManager.getAddress());
-        int port = networkManager.getPort();
-        
-        return new InetSocketAddress(address, port);
     }
 
     @Override
@@ -219,19 +188,7 @@ public class ActiveController extends AbstractController {
 
     @Override
     public void start() throws IOException {
-        dht.bind(transport);
-        
-        // If we're an Ultrapeer we want to notify our firewalled
-        // leafs about every new Contact
-        if (connectionServices.isActiveSuperNode()) {
-            RouteTable routeTable = dht.getRouteTable();
-            routeTable.addRouteTableListener(new RouteTableListener() {
-                @Override
-                public void handleRouteTableEvent(RouteTableEvent event) {
-                    processRouteTableEvent(event);
-                }
-            });
-        }
+        super.start();
         
         Contact[] contacts = null;
         synchronized (this) {
@@ -243,40 +200,23 @@ public class ActiveController extends AbstractController {
     }
     
     @Override
-    public void close() {
+    public void close() throws IOException {
         IoUtils.closeAll(contactSink, 
                 contactPusher, 
-                bootstrapWorker, 
-                dht);
+                bootstrapWorker);
+        
+        super.close();
         
         if (!collision.get()) {
             write();
         }
     }
     
-    private void processRouteTableEvent(RouteTableEvent event) {
-        switch (event.getEventType()) {
-            case ADD_ACTIVE_CONTACT:
-            case ADD_CACHED_CONTACT:
-            case UPDATE_CONTACT:
-                Contact node = event.getContact();
-                if (isLocalhost(node)) {
-                    contactPusher.addContact(node);
-                }
-                break;
-        }
+    @Override
+    protected void addContact(Contact contact) {
+        contactPusher.addContact(contact);
     }
     
-    @Override
-    public void addressChanged() {
-        try {
-            LocalContact contact = (LocalContact)dht.getLocalNode();
-            updateLocalhost(contact);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         
@@ -368,7 +308,7 @@ public class ActiveController extends AbstractController {
         }
     }
     
-    private static Handle read() {
+    private static RouteTable read() {
         if (DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.getValue() 
                 && ACTIVE_FILE.exists() && ACTIVE_FILE.isFile()) {
             ObjectInputStream in = null;
@@ -405,7 +345,7 @@ public class ActiveController extends AbstractController {
                         }
                     }
                     
-                    return new Handle(routeTableVersion, routeTable, database);
+                    return routeTable;
                 }
             } catch (Throwable ignored) {
                 LOG.error("Throwable", ignored);
@@ -415,20 +355,5 @@ public class ActiveController extends AbstractController {
         }
         
         return null;
-    }
-    
-    private static class Handle {
-        
-        private final int version;
-        
-        private final RouteTable routeTable;
-        
-        private final Database database;
-        
-        public Handle(int version, RouteTable routeTable, Database database) {
-            this.version = version;
-            this.routeTable = routeTable;
-            this.database = database;
-        }
     }
 }

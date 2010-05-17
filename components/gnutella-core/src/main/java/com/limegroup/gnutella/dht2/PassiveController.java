@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -35,8 +34,6 @@ import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -59,7 +56,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
-public class PassiveController extends AbstractController {
+public class PassiveController extends SimpleController {
 
     private static final Log LOG 
         = LogFactory.getLog(PassiveController.class);
@@ -69,13 +66,7 @@ public class PassiveController extends AbstractController {
     public static final File PASSIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
     
-    private final ConnectionServices connectionServices;
-    
     private final DHTManager manager;
-    
-    private final NetworkManager networkManager;
-    
-    private final Transport transport;
     
     private final PassiveRouteTable routeTable 
         = new PassiveRouteTable();
@@ -100,12 +91,10 @@ public class PassiveController extends AbstractController {
             ConnectionServices connectionServices,
             HostFilter filter,
             Provider<UDPPinger> udpPinger) throws UnknownHostException {
-        super(DHTMode.PASSIVE);
+        super(DHTMode.PASSIVE, transport, 
+                networkManager, connectionServices);
         
-        this.connectionServices = connectionServices;
         this.manager = manager;
-        this.networkManager = networkManager;
-        this.transport = transport;
         
         Database database = new DatabaseImpl();
         Context context = new Context(NAME, 
@@ -126,19 +115,7 @@ public class PassiveController extends AbstractController {
     
     @Override
     public void start() throws IOException {
-        dht.bind(transport);
-        
-        // If we're an Ultrapeer we want to notify our firewalled
-        // leafs about every new Contact
-        if (connectionServices.isActiveSuperNode()) {
-            RouteTable routeTable = dht.getRouteTable();
-            routeTable.addRouteTableListener(new RouteTableListener() {
-                @Override
-                public void handleRouteTableEvent(RouteTableEvent event) {
-                    processRouteTableEvent(event);
-                }
-            });
-        }
+        super.start();
         
         Contact[] contacts = null;
         synchronized (this) {
@@ -152,9 +129,9 @@ public class PassiveController extends AbstractController {
     @Override
     public void close() throws IOException {
         IoUtils.closeAll(contactPusher, 
-                bootstrapWorker, 
-                dht);
+                bootstrapWorker);
         
+        super.close();
         write();
     }
     
@@ -173,50 +150,14 @@ public class PassiveController extends AbstractController {
     
     private Contact[] init(Context context) throws UnknownHostException {
         LocalContact localhost = context.getLocalNode();
-        updateLocalhost(localhost);
-        localhost.setFirewalled(true);
+        initLocalhost(localhost);
         
         return read();
     }
     
-    private SocketAddress getExternalAddress() 
-            throws UnknownHostException {
-        InetAddress address = InetAddress.getByAddress(
-                networkManager.getAddress());
-        int port = networkManager.getPort();
-        
-        return new InetSocketAddress(address, port);
-    }
-    
-    private void updateLocalhost(LocalContact localhost) 
-            throws UnknownHostException {
-        localhost.setVendor(DHTManager.VENDOR);
-        localhost.setVersion(DHTManager.VERSION);
-        localhost.setContactAddress(getExternalAddress());        
-        localhost.nextInstanceID();
-    }
-    
     @Override
-    public void addressChanged() {
-        try {
-            LocalContact contact = (LocalContact)dht.getLocalNode();
-            updateLocalhost(contact);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-    
-    private void processRouteTableEvent(RouteTableEvent event) {
-        switch (event.getEventType()) {
-            case ADD_ACTIVE_CONTACT:
-            case ADD_CACHED_CONTACT:
-            case UPDATE_CONTACT:
-                Contact node = event.getContact();
-                if (isLocalhost(node)) {
-                    contactPusher.addContact(node);
-                }
-                break;
-        }
+    protected void addContact(Contact contact) {
+        contactPusher.addContact(contact);
     }
     
     @Override

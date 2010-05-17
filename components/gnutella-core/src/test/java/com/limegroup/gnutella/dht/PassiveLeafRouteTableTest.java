@@ -17,7 +17,7 @@ import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.KademliaSettings;
 
-import com.limegroup.gnutella.dht2.LeafRouteTable;
+import com.limegroup.gnutella.dht2.PassiveLeafRouteTable;
 
 @SuppressWarnings("null")
 public class PassiveLeafRouteTableTest extends DHTTestCase {
@@ -40,8 +40,8 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
     public void testPassiveLeafRouteTable() {
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        LeafRouteTable routeTable 
-            = new LeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
+        PassiveLeafRouteTable routeTable 
+            = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
         
         List<Contact> list = new ArrayList<Contact>();
         for (int i = 0; i < 2*k; i++) {
@@ -112,8 +112,8 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
     
     public void testClassfulNetworkCounter() {
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        LeafRouteTable routeTable 
-            = new LeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
+        PassiveLeafRouteTable routeTable 
+            = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
         Bucket bucket = routeTable.getBucket(KUID.MINIMUM);
         
         // Fill the Bucket

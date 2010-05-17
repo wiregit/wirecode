@@ -75,11 +75,9 @@ public class PassiveControllerTest extends DHTTestCase {
                 bind(HostFilter.class).toInstance(new HostFilterStub());
                 bind(Transport.class).toInstance(transport);
                 bind(MessageFactory.class).to(DefaultMessageFactory.class);
+                bind(NodeAssigner.class).to(NodeAssignerStub.class);
             }
         });
-        
-        NodeAssigner assigner = injector.getInstance(NodeAssigner.class);
-        assigner.stop();
     }
     
     public void testIsPassiveMode() throws IOException {
@@ -90,6 +88,11 @@ public class PassiveControllerTest extends DHTTestCase {
             assertTrue(controller.isMode(DHTMode.PASSIVE));
             assertFalse(controller.isRunning());
             assertFalse(controller.isReady());
+            
+            MojitoDHT dht = controller.getMojitoDHT();
+            Contact localhost = dht.getLocalNode();
+            assertTrue(localhost.isFirewalled());
+            
         } finally {
             controller.close();
         }

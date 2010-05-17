@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.mojito2.ContactPinger;
 import org.limewire.mojito2.KUID;
@@ -19,18 +20,28 @@ import org.limewire.mojito2.routing.ContactFactory;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
+import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.util.CollectionUtils;
+import org.limewire.mojito2.util.EventUtils;
 
-public class LeafRouteTable implements RouteTable {
+public class PassiveLeafRouteTable implements RouteTable {
     
     private static final long serialVersionUID = 2378400850935282184L;
 
+    /**
+     * A list of RouteTableListeners.
+     */
+    private transient volatile List<RouteTableListener> listeners 
+        = new CopyOnWriteArrayList<RouteTableListener>();
+    
     private final Bucket bucket;
     
     private final Contact localNode;
     
-    public LeafRouteTable(Vendor vendor, Version version) {
+    public PassiveLeafRouteTable(Vendor vendor, Version version) {
         localNode = ContactFactory.createLocalContact(vendor, version, true);
         bucket = new BucketImpl(this, KademliaSettings.REPLICATION_PARAMETER.getValue());
     }
@@ -48,6 +59,7 @@ public class LeafRouteTable implements RouteTable {
         ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
         if (counter == null || counter.isOkayToAdd(node)) {
             bucket.addActiveContact(node);
+            fireActiveContactAdded(bucket, node);
         }
     }
 
@@ -56,11 +68,18 @@ public class LeafRouteTable implements RouteTable {
     }
 
     @Override
-    public void addRouteTableListener(RouteTableListener l) {
+    public synchronized void addRouteTableListener(RouteTableListener l) {
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<RouteTableListener>();
+        }
+        listeners.add(l);
     }
 
     @Override
-    public void removeRouteTableListener(RouteTableListener l) {
+    public synchronized void removeRouteTableListener(RouteTableListener l) {
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     @Override
@@ -164,6 +183,32 @@ public class LeafRouteTable implements RouteTable {
         buffer.append(getLocalNode()).append("\n");
         buffer.append(bucket);
         return buffer.toString();
+    }
+    
+    protected void fireActiveContactAdded(Bucket bucket, Contact node) {
+        fireRouteTableEvent(bucket, null, null, null, node, 
+                EventType.ADD_ACTIVE_CONTACT);
+    }
+    
+    protected void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
+            Contact existing, Contact node, EventType type) {
+        
+        if (listeners.isEmpty()) {
+            return;
+        }
+        
+        final RouteTableEvent event = new RouteTableEvent(
+                this, bucket, left, right, existing, node, type);
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                for (RouteTableListener listener : listeners) {
+                    listener.handleRouteTableEvent(event);
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(r);
     }
     
     private static class BucketImpl implements Bucket {

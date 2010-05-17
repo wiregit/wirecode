@@ -30,7 +30,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.dht.DHTControllerStub;
+import com.limegroup.gnutella.dht.ControllerStub;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.InactiveController;
@@ -251,8 +251,8 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         pushProxiesPublisher = new PushProxiesPublisher(injector.getInstance(PushProxiesValueFactory.class), executorService, dhtManager);
 
         pushProxiesPublisher.handleDHTEvent(new DHTEvent(
-                Type.CONNECTED, new DHTControllerStub(
-                        mojitoDHT, DHTMode.PASSIVE)));
+                Type.CONNECTED, new ControllerStub(
+                        DHTMode.PASSIVE, mojitoDHT)));
         
         assertNotNull(publishingRunnable);
 

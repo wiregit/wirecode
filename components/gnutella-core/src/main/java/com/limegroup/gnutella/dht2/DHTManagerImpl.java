@@ -328,7 +328,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         DefaultMessageFactory messageFactory 
             = new DefaultMessageFactory(calculator.get());
         
-        return new LeafController(transport, messageFactory, 
+        return new PassiveLeafController(transport, messageFactory, 
                 networkManager, hostFilter);
     }
     
