@@ -65,13 +65,12 @@ class LaunchFileAction extends AbstractAction {
             LocalFileItem fileItem = localFileItems.get(0);
             if(playerProvider.get().isPlayable(fileItem.getFile())) {
                 playerProvider.get().stop();
-                
                 if(categoryManager.getCategoryForFile(fileItem.getFile()) == Category.AUDIO) {
-                    playerProvider.get().setActivePlaylist(libraryMediator.get().getPlayableList());
                     playerProvider.get().play(fileItem);
+                    playerProvider.get().setActivePlaylist(libraryMediator.get().getPlayableList());
                 } else {
-                    playerProvider.get().setActivePlaylist(null); 
                     playerProvider.get().playOrLaunchNatively(fileItem.getFile());
+                    playerProvider.get().setActivePlaylist(null); 
                 }
             } else {
                 NativeLaunchUtils.safeLaunchFile(fileItem.getFile(), categoryManager);
