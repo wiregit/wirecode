@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
@@ -65,8 +67,15 @@ public abstract class AbstractResponseHandler<V extends Entity>
         synchronized (future) {
             synchronized (this) {
                 this.future = future;
-                this.startTime = System.currentTimeMillis();
                 
+                future.addFutureListener(new EventListener<FutureEvent<V>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<V> event) {
+                        doStop();
+                    }
+                });
+                
+                this.startTime = System.currentTimeMillis();
                 try {
                     start();
                 } catch (IOException err) {
@@ -76,10 +85,10 @@ public abstract class AbstractResponseHandler<V extends Entity>
         }
     }
     
-    //@Override
-    public final void stop(DHTFuture<V> future) {
-        Objects.nonNull(future, "future");
-        
+    /**
+     * 
+     */
+    private void doStop() {
         synchronized (future) {
             synchronized (this) {
                 stop();
@@ -96,7 +105,6 @@ public abstract class AbstractResponseHandler<V extends Entity>
      * 
      */
     protected synchronized void stop() {
-        
     }
     
     /**

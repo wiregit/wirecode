@@ -41,7 +41,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
 
     private long startTime;
     
-    private DHTFuture<BootstrapEntity> future = null;
+    private volatile DHTFuture<BootstrapEntity> future = null;
     
     private DHTFuture<PingEntity> pingFuture = null;
     
@@ -72,14 +72,16 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
         synchronized (future) {
             this.future = future;
             
+            future.addFutureListener(new EventListener<FutureEvent<BootstrapEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<BootstrapEntity> event) {
+                    stop();
+                }
+            });
+            
             startTime = System.currentTimeMillis();
             start();
         }
-    }
-
-    @Override
-    public void stop(DHTFuture<BootstrapEntity> future) {
-        stop();
     }
     
     private void start() {

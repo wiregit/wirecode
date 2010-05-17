@@ -13,11 +13,6 @@ public interface AsyncProcess<V> {
     public void start(DHTFuture<V> future);
     
     /**
-     * Stops the {@link AsyncProcess}
-     */
-    public void stop(DHTFuture<V> future);
-    
-    /**
      * A mix-in interface for {@link AsyncProcess}es.
      */
     public static interface Delay {

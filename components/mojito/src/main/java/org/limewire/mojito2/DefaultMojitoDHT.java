@@ -478,9 +478,5 @@ public class DefaultMojitoDHT implements MojitoDHT {
         @Override
         public void start(DHTFuture<Object> future) {
         }
-
-        @Override
-        public void stop(DHTFuture<Object> future) {
-        }
     }
 }

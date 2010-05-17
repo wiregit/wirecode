@@ -3,7 +3,6 @@ package com.limegroup.gnutella.dht;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -25,6 +24,9 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito2.util.IoUtils;
+import org.limewire.setting.SettingsFactory;
+import org.limewire.setting.SettingsGroupManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -38,7 +40,6 @@ import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
@@ -85,16 +86,18 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
+        
+        Thread.sleep(5000);
+        
         doSettings();
         
-        final NodeAssigner na = new NodeAssignerStub();
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);
-                bind(NodeAssigner.class).toInstance(na);
-                bind(BandwidthCollector.class).toInstance(new BandwidthCollectorStub());
-                bind(BandwidthCollectorDriver.class).toInstance(new BandwidthCollectorStub());
+                bind(NodeAssigner.class).to(NodeAssignerStub.class);
+                bind(BandwidthCollector.class).to(BandwidthCollectorStub.class);
+                bind(BandwidthCollectorDriver.class).to(BandwidthCollectorStub.class);
             }            
         });
 
@@ -112,12 +115,19 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         connectionManager = injector.getInstance(ConnectionManager.class);
         
         dhtManager = injector.getInstance(DHTManager.class);
+        
         // Start and bootstrap a bunch of DHT Nodes
-        dhts = Collections.emptyList();
         dhts = MojitoUtils.createBootStrappedDHTs(2);
     }
 
-    private void doSettings() {
+    @Override
+    protected void tearDown() throws Exception {
+        IoUtils.closeAll(dhts);
+        injector.getInstance(LifecycleManager.class).shutdown();
+    }
+    
+    private static void doSettings() {
+        
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -166,22 +176,9 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
-        dhts = null;
-        
-        injector.getInstance(LifecycleManager.class).shutdown();
-    }
-    
     public void testForwardContacts() throws Exception {
         // There should be no connections
         assertEquals(0, connectionManager.getNumConnections());
-
-        NodeAssigner assigner = injector.getInstance(NodeAssigner.class);
-        assigner.stop();
         
         // Connect a leaf Node to the Ultrapeer
         BlockingConnection out = createLeafConnection();
@@ -257,7 +254,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             for (Contact c : nodes) {
                 assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
             }
-            
         } finally {
             out.close();
         }
