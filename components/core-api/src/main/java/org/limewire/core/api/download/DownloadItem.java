@@ -37,7 +37,7 @@ public interface DownloadItem extends PropertiableFile {
 	public static enum ErrorState {
 	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem")),
 	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted")),
-	    INVALID(I18nMarker.marktr("The file is invalid")),
+	    INVALID(I18nMarker.marktr("The copyright holder has not authorized this file for sharing")),
 	    UNABLE_TO_CONNECT(I18nMarker.marktr("Trouble connecting to people")),
 	    
 	    /**

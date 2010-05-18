@@ -17,6 +17,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.malware.AntivirusUpdateType;
 import org.limewire.friend.api.Friend;
@@ -180,7 +181,11 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                     GuiUtils.formatUnitFromBytes(item.getTotalSize()));
              }
         case ERROR:         
-            return I18n.tr("Unable to download: ") + I18n.tr(item.getErrorState().getMessage());
+            if(item.getErrorState() == ErrorState.INVALID) {
+                return I18n.tr(item.getErrorState().getMessage());
+            } else {
+                return I18n.tr("Unable to download: ") + I18n.tr(item.getErrorState().getMessage());
+            }
         case PAUSED:
             // {0}: current size, {1} total size
             return I18n.tr("Paused - {0} of {1}", 
