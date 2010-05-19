@@ -22,6 +22,7 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NonNullJComboBox;
@@ -50,11 +51,12 @@ public class SearchOptionPanel extends OptionPanel {
     private final UnsafeTypeOptionPanel unsafeOptionPanel;    
     private final Provider<FilterKeywordOptionPanel> filterKeywordOptionPanelProvider;
     private final Provider<FilterFileExtensionsOptionPanel> filterFileExtensionsOptionPanelProvider;
-  
     
     private SearchBarPanel searchBarPanel;
     private FilteringPanel filteringPanel;
-    private JCheckBox groupSimilarResults;
+    
+    private final JCheckBox groupSimilarResults;
+    private final JCheckBox torrentWebSearchActivated;
     
     @Inject
     public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory,
@@ -73,12 +75,17 @@ public class SearchOptionPanel extends OptionPanel {
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
         
+        torrentWebSearchActivated = new JCheckBox(I18n.tr("Use web search to find additional torrent sources"));
+        torrentWebSearchActivated.setContentAreaFilled(false);
+                
         setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx, gap 4"));
         add(getSearchBarPanel(), "growx, wrap");
         add(getFilteringPanel(), "growx, wrap");
         
         add(groupSimilarResults);
         add(new LearnMoreButton("http://www.limewire.com/client_redirect/?page=groupSimilarResults", application), "wrap");
+        
+        add(torrentWebSearchActivated);
     }
 
     private OptionPanel getSearchBarPanel() {
@@ -92,6 +99,8 @@ public class SearchOptionPanel extends OptionPanel {
     @Override
     ApplyOptionResult applyOptions() {
         SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
+        SearchSettings.USE_TORRENT_WEB_SEARCH.setValue(torrentWebSearchActivated.isSelected());
+        
         ApplyOptionResult result = null;
         
         result = getSearchBarPanel().applyOptions();
@@ -105,7 +114,9 @@ public class SearchOptionPanel extends OptionPanel {
     boolean hasChanged() {
         return getSearchBarPanel().hasChanged()
         || getFilteringPanel().hasChanged()
-        || groupSimilarResults.isSelected() != SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue();
+        || groupSimilarResults.isSelected() != SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()
+        || torrentWebSearchActivated.isSelected() != SearchSettings.USE_TORRENT_WEB_SEARCH.getValue(); 
+        
     }
 
     @Override
@@ -114,6 +125,7 @@ public class SearchOptionPanel extends OptionPanel {
         getFilteringPanel().initOptions();
         
         groupSimilarResults.setSelected(SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
+        torrentWebSearchActivated.setSelected(SearchSettings.USE_TORRENT_WEB_SEARCH.getValue());
     }
 
     private class SearchBarPanel extends OptionPanel {
