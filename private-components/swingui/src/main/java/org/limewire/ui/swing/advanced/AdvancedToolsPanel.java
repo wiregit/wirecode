@@ -52,7 +52,6 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
     public enum TabId {
         CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other P2P clients")), 
         CONSOLE(I18n.tr("Console"), I18n.tr("View console messages")),
-        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing DHT messages")),
         INSPECTIONS("Inspections", "Inspections debug panel");
         
         private final String name;
@@ -82,8 +81,6 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
     private Icon connectionsIcon;
     @Resource
     private Icon consoleIcon;
-    @Resource
-    private Icon mojitoIcon;
     @Resource
     private Color tabTopColor;
     @Resource
@@ -119,7 +116,6 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
     public AdvancedToolsPanel(BarPainterFactory barPainterFactory, 
         Provider<ConnectionsPanel> connectionsPanel, 
         Provider<ConsolePanel> consolePanel,
-        Provider<MojitoPanel> mojitoPanel,
         InspectionsPanelFactory inspectionsPanelFactory,
         Application application) {
 
@@ -132,7 +128,6 @@ public class AdvancedToolsPanel extends JPanel implements Disposable {
         // Add tabs to dialog.
         addTab(TabId.CONNECTIONS, connectionsIcon, connectionsPanel);
         addTab(TabId.CONSOLE, consoleIcon, consolePanel);
-        addTab(TabId.MOJITO, mojitoIcon, mojitoPanel);
         
         if (application.isTestingVersion()) {
             addTab(TabId.INSPECTIONS, consoleIcon, inspectionsPanelFactory.getProvider());

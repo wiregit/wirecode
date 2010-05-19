@@ -84,8 +84,6 @@ public class CommandHandler {
             "id .+",
             "select .+",
             "nextid",
-            "rt_gui",
-            "arcs_gui",
             "test",
             "bootstrapped"
     };
@@ -384,20 +382,6 @@ public class CommandHandler {
             out.println("Starting " + dht.getName());
             dht.start();
         }
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static void rt_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("org.limewire.mojito.visual.RouteTableVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
-        show.invoke(null, dht);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static void arcs_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("org.limewire.mojito.visual.ArcsVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
-        show.invoke(null, dht);
     }
     
     public static void bootstrapped(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
