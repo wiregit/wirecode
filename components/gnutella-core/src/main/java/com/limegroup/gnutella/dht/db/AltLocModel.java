@@ -19,6 +19,8 @@ import org.limewire.mojito2.util.DatabaseUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
@@ -40,14 +42,23 @@ public class AltLocModel implements StorableModel {
     
     private final Map<KUID, Storable> values 
         = Collections.synchronizedMap(new HashMap<KUID, Storable>());
+
+    private final NetworkManager networkManager;
+    
+    private final ApplicationServices applicationServices;
     
     private final Provider<HashTreeCache> tigerTreeCache;
 
     private final FileView gnutellaFileView;
     
     @Inject
-    public AltLocModel(@GnutellaFiles FileView gnutellaFileView, 
+    public AltLocModel(NetworkManager networkManager, 
+            ApplicationServices applicationServices,
+            @GnutellaFiles FileView gnutellaFileView, 
             Provider<HashTreeCache> tigerTreeCache) {
+        
+        this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
         this.gnutellaFileView = gnutellaFileView;
         this.tigerTreeCache = tigerTreeCache;
     }
