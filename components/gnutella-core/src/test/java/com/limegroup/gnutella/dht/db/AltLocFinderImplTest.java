@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,6 +16,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
@@ -37,7 +40,11 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         altLocFinder = injector.getInstance(AltLocFinder.class);
     }
     
-    private URN publishDirectAltLoc(boolean publish) throws Exception {
+    private URN publishDirectAltLoc(boolean publish) throws IOException, 
+            InterruptedException, ExecutionException {
+        ApplicationServices applicationServices 
+            = injector.getInstance(ApplicationServices.class);
+        
         // set to non-firewalled, so created altloc value for self is not firewalled
         networkManager.setAcceptedIncomingConnection(true);
         // publish an alternate location in the DHT
@@ -117,12 +124,18 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         testAltLocListenerFirewalledLocations(false);
     }
     
-    private URN publishPushAltLoc(boolean publish) throws Exception {
+    private URN publishPushAltLoc(boolean publish) throws IOException, 
+            InterruptedException, ExecutionException {
+        
+        ApplicationServices applicationServices 
+            = injector.getInstance(ApplicationServices.class);
+        
         networkManager.setExternalAddress(new byte[] { 127, 0, 0, 1 });
         
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         AltLocValue2 value = new AltLocValue2.Self(
-                5555, new byte[MerkleTree.HASHSIZE]);
+                5555, new byte[MerkleTree.HASHSIZE], 
+                networkManager, applicationServices);
         
         assertTrue(value.isFirewalled());
         KUID kuid = KUIDUtils.toKUID(urn);
@@ -148,19 +161,40 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         
         DHTFuture<AlternateLocation[]> future 
             = altLocFinder.findAltLocs(urn);
-        listener.doneLatch.await(500, TimeUnit.MILLISECONDS);
-        listener.alternateLocationLatch.await(500, TimeUnit.MILLISECONDS);
 
+        final AtomicReference<AlternateLocation[]> locationsRef 
+            = new AtomicReference<AlternateLocation[]>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        future.addFutureListener(new EventListener<FutureEvent<AlternateLocation[]>>() {
+            @Override
+            public void handleEvent(FutureEvent<AlternateLocation[]> event) {
+                try {
+                    if (event.getType() == Type.SUCCESS) {
+                        locationsRef.set(event.getResult());
+                    }
+                } finally {
+                    latch.countDown();
+                }
+            }
+        });
+        
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail("Shouldn't have failed!");
+        }
+        
+        AlternateLocation[] locations = locationsRef.get();
+        
         // expected alternate location
         AlternateLocation expectedAltLoc 
             = alternateLocationFactory.createPushAltLoc(
                     pushEndpointFactory.createForSelf(), urn);
         
         if (successful) {
-            assertEquals(expectedAltLoc, listener.altLoc);
+            assertNotNull(locations);
+            assertEquals(1, locations.length);
+            assertEquals(expectedAltLoc, locations[0]);
         } else {
-            assertNull(listener.altLoc);
-            assertFalse(listener.success);
+            assertNull(locations);
         }
     }
 }
