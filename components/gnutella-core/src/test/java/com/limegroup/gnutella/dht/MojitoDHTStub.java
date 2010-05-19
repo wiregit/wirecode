@@ -28,10 +28,7 @@ import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
-import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.storage.Storable;
-import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.NopTransport;
 
@@ -145,11 +142,6 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public DHTFuture<StoreEntity> store(Storable storable) {
-        return createFuture();
-    }
-
-    @Override
     public void close() throws IOException {
     }
 
@@ -183,11 +175,6 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public DHTValueFactoryManager getDHTValueFactoryManager() {
-        return null;
-    }
-
-    @Override
     public HostFilter getHostFilter() {
         return null;
     }
@@ -214,11 +201,6 @@ public class MojitoDHTStub implements MojitoDHT {
 
     @Override
     public RouteTable getRouteTable() {
-        return null;
-    }
-
-    @Override
-    public StorableModelManager getStorableModelManager() {
         return null;
     }
 
@@ -281,9 +263,9 @@ public class MojitoDHTStub implements MojitoDHT {
     public DHTFuture<StoreEntity> put(DHTValueEntity value, long timeout, TimeUnit unit) {
         return createFuture();
     }
-
+    
     @Override
-    public DHTFuture<StoreEntity> put(Storable storable, long timeout, TimeUnit unit) {
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, long timeout, TimeUnit unit) {
         return createFuture();
     }
 

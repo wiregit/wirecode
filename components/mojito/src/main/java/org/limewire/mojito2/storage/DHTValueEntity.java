@@ -74,14 +74,6 @@ public class DHTValueEntity implements Serializable {
     private final int hashCode;
     
     /**
-     * Creates and returns a <code>DHTValueEntity</code> from a <code>Storable</code>.
-     */
-    public static DHTValueEntity createFromStorable(DHT dht, Storable storable) {
-        return new DHTValueEntity(dht.getLocalNode(), dht.getLocalNode(), 
-                storable.getPrimaryKey(), storable.getValue(), true);
-    }
-
-    /**
      * Creates and returns a <code>DHTValueEntity</code> for the given primary 
      * key and value.
      */
@@ -156,10 +148,6 @@ public class DHTValueEntity implements Serializable {
         return creationTime;
     }
     
-    /*public void handleStoreResult(StoreResult result) {
-        // DO NOTHING
-    }*/
-    
     /**
      * Returns <code>true</code> if this entity was sent by
      * the creator of the value. In other words
@@ -173,19 +161,11 @@ public class DHTValueEntity implements Serializable {
         return local;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hashCode;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -199,10 +179,6 @@ public class DHTValueEntity implements Serializable {
                     && secondaryKey.equals(other.getSecondaryKey());
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();

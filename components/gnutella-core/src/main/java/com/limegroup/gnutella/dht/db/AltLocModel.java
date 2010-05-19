@@ -13,8 +13,6 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.Storable;
-import org.limewire.mojito2.storage.StorableModel;
 import org.limewire.mojito2.util.CollectionUtils;
 import org.limewire.mojito2.util.DatabaseUtils;
 
@@ -43,20 +41,18 @@ public class AltLocModel implements StorableModel {
     private final Map<KUID, Storable> values 
         = Collections.synchronizedMap(new HashMap<KUID, Storable>());
     
-    private final AltLocValueFactory altLocValueFactory;
-
     private final Provider<HashTreeCache> tigerTreeCache;
 
     private final FileView gnutellaFileView;
     
     @Inject
-    public AltLocModel(AltLocValueFactory altLocValueFactory,
-            @GnutellaFiles FileView gnutellaFileView, Provider<HashTreeCache> tigerTreeCache) {
-        this.altLocValueFactory = altLocValueFactory;
+    public AltLocModel(@GnutellaFiles FileView gnutellaFileView, 
+            Provider<HashTreeCache> tigerTreeCache) {
         this.gnutellaFileView = gnutellaFileView;
         this.tigerTreeCache = tigerTreeCache;
     }
     
+    @Override
     public Collection<Storable> getStorables() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
             // Clear the mappings as they're no longer needed
@@ -83,8 +79,11 @@ public class AltLocModel implements StorableModel {
                             ttroot = hashTree.getRootHashBytes();
                         }
                         
-                        AltLocValue value = altLocValueFactory.createAltLocValueForSelf(fileSize, ttroot);
-                        values.put(primaryKey, new Storable(primaryKey, value));
+                        AltLocValue2 value = new AltLocValue2.Self(
+                                fileSize, ttroot, networkManager, applicationServices);
+                        
+                        values.put(primaryKey, new Storable(
+                                primaryKey, value.serialize()));
                     }
                 }
             } finally {
@@ -103,6 +102,9 @@ public class AltLocModel implements StorableModel {
                 // For each URN check if the FileDesc still exists
                 FileDesc fd = gnutellaFileView.getFileDesc(urn);
                 
+                long publishTime = storable.getPublishTime();
+                int locationCount = storable.getLocationCount();
+                
                 // If it doesn't then remove it from the values map and
                 // replace the entity value with the empty value
                 // which will effectively remove the key-value mapping 
@@ -115,8 +117,8 @@ public class AltLocModel implements StorableModel {
                     
                 // And if it does then check if it is rare and needs
                 // publishing.
-                } else if (fd.isRareFile() 
-                        && DatabaseUtils.isPublishingRequired(storable)) {
+                } else if (fd.isRareFile() && DatabaseUtils.isPublishingRequired(
+                        publishTime, locationCount)) {
                     toPublish.add(storable);
                 }
             }

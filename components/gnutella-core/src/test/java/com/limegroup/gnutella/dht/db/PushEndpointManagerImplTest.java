@@ -57,7 +57,7 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
         final IpPortSet proxies = new IpPortSet(new IpPortImpl("192.168.1.1:4545"));
         
         context.checking(new Expectations() {{
-            one(pushEndpointCache).getPushEndpoint(guid);
+            one(pushEndpointCache).findPushEndpoint(guid).get();
             will(returnValue(result));
             one(result).getProxies();
             will(returnValue(proxies));

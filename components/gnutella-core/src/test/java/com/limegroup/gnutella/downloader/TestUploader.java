@@ -33,6 +33,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.DebugRunnable;
@@ -53,7 +54,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.filters.AbstractIPFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.IPList;
@@ -1473,18 +1473,9 @@ public class TestUploader {
             }
 
             @Override
-            public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
+            public DHTFuture<PushEndpoint> findPushEndpoint(GUID guid) {
                 throw new IllegalStateException();
             }
-
-            @Override
-            public PushEndpoint getPushEndpoint(GUID guid) {
-                throw new IllegalStateException();
-            }
-            
         }
-
     }
-
-    
 }

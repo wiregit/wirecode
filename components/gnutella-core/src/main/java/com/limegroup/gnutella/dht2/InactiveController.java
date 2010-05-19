@@ -95,4 +95,9 @@ public class InactiveController implements Controller {
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
     }
+    
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return new DHTValueFuture<ValueEntity[]>(new UnsupportedOperationException());
+    }
 }

@@ -6,6 +6,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -13,6 +14,9 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 
@@ -20,6 +24,8 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
 
     private Mockery context;
 
+    private Injector injector;
+    
     public PushProxiesValueForSelfTest(String name) {
         super(name);
     }
@@ -31,11 +37,27 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
+        
+        final PushEndpointFactory pushEndpointFactory 
+            = context.mock(PushEndpointFactory.class);
+        
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(PushEndpointFactory.class).toInstance(pushEndpointFactory);
+            }            
+        });
+        
+        
     }
     
     public void testGetPushProxiesReturnsSelf() throws Exception {
-        NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-        final PushEndpointFactory pushEndpointFactory = context.mock(PushEndpointFactory.class);
+        NetworkManagerStub networkManagerStub 
+            = (NetworkManagerStub)injector.getInstance(NetworkManager.class)
+        ;
+        final PushEndpointFactory pushEndpointFactory 
+            = context.mock(PushEndpointFactory.class);
         final PushEndpoint selfEndpoint = context.mock(PushEndpoint.class);
         
         context.checking(new Expectations() {{
@@ -43,19 +65,26 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
             will(returnValue(selfEndpoint));
         }});
         
-        PushProxiesValueForSelf value = new PushProxiesValueForSelf(networkManagerStub, pushEndpointFactory, null);
+        PushProxiesValue2 value = injector.getInstance(
+                PushProxiesValue2.Self.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         
         Set<? extends IpPort> proxies = value.getPushProxies();
         assertEquals(1, proxies.size());
 
-        assertContains(proxies, new ConnectableImpl(NetworkUtils.ip2string(networkManagerStub.getAddress()), networkManagerStub.getPort(), networkManagerStub.isIncomingTLSEnabled()));
+        assertContains(proxies, new ConnectableImpl(
+                NetworkUtils.ip2string(
+                        networkManagerStub.getAddress()), 
+                        networkManagerStub.getPort(), 
+                        networkManagerStub.isIncomingTLSEnabled()));
         
         
         // let's go firewalled
         networkManagerStub.setAcceptedIncomingConnection(false);
-        final IpPortSet pushProxies = new IpPortSet(new ConnectableImpl("199.49.49.3", 45454, false), new ConnectableImpl("202.2.23.3", 1000, true));
+        final IpPortSet pushProxies = new IpPortSet(
+                new ConnectableImpl("199.49.49.3", 45454, false), 
+                new ConnectableImpl("202.2.23.3", 1000, true));
         
         context.checking(new Expectations() {{
             one(selfEndpoint).getProxies();

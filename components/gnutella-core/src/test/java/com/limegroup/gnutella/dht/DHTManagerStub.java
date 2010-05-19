@@ -43,6 +43,11 @@ public class DHTManagerStub implements DHTManager {
     public DHTFuture<ValueEntity> get(EntityKey key) {
         return null;
     }
+    
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return null;
+    }
 
     @Override
     public Contact[] getActiveContacts(int max) {

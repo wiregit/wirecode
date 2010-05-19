@@ -28,10 +28,8 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.DHTTestUtils;
-import com.limegroup.gnutella.dht.NodeAssignerStub;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
@@ -74,7 +72,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-                bind(NodeAssigner.class).to(NodeAssignerStub.class);
+                //bind(NodeAssigner.class).to(NodeAssignerStub.class);
             }
         });
         dhtManager = injector.getInstance(DHTManager.class);
@@ -85,7 +83,8 @@ public class PushProxyPublishingTest extends LimeTestCase {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setAddress(NetworkUtils.getLocalAddress().getAddress());
      
-        ((ConnectionManagerStub)injector.getInstance(ConnectionManager.class)).setConnected(true);
+        ((ConnectionManagerStub)injector.getInstance(
+                ConnectionManager.class)).setConnected(true);
         
         Acceptor acceptor = injector.getInstance(Acceptor.class);
         networkManagerStub.setPort(acceptor.getPort(false));
@@ -118,9 +117,12 @@ public class PushProxyPublishingTest extends LimeTestCase {
         // should have published after 3 secs with  a publishing interval of 1 sec
         Thread.sleep(3 * 1000);
         
-        DHTPushEndpointFinder finder = injector.getInstance(DHTPushEndpointFinder.class);
-        GUID guid = new GUID(injector.getInstance(ApplicationServices.class).getMyGUID());
-        PushEndpoint pushEndpoint = finder.getPushEndpoint(guid);
+        DHTPushEndpointFinder finder = injector.getInstance(
+                DHTPushEndpointFinder.class);
+        GUID guid = new GUID(injector.getInstance(
+                ApplicationServices.class).getMyGUID());
+        
+        PushEndpoint pushEndpoint = finder.findPushEndpoint(guid).get();
         assertNotNull(pushEndpoint);
         assertEquals(networkManagerStub.getPort(), pushEndpoint.getPort());
         assertEquals(guid.bytes(), pushEndpoint.getClientGUID());

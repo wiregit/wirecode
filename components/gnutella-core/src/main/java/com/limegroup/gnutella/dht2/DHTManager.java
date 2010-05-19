@@ -212,6 +212,11 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener {
     /**
      * 
      */
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    
+    /**
+     * 
+     */
     public void addActiveNode(SocketAddress address);
 
     /**

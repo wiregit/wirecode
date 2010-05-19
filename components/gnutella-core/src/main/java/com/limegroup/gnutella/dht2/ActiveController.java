@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
+import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -53,6 +55,7 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.db.ValuePublisher;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -77,6 +80,8 @@ public class ActiveController extends SimpleController {
     
     private final MojitoDHT dht;
     
+    private final ValuePublisher publisher;
+    
     private final BootstrapWorker bootstrapWorker;
     
     private Contact[] contacts = null;
@@ -93,8 +98,10 @@ public class ActiveController extends SimpleController {
             ConnectionServices connectionServices,
             HostFilter filter,
             Provider<UDPPinger> udpPinger) throws IOException {
-        super(DHTMode.ACTIVE, transport, 
-                networkManager, connectionServices);
+        super(DHTMode.ACTIVE, 
+                transport, 
+                networkManager, 
+                connectionServices);
         
         this.manager = manager;
         
@@ -120,9 +127,17 @@ public class ActiveController extends SimpleController {
                 hostCatcher, pingRequestFactory, 
                 uniqueHostPinger, udpPinger);
         
+        contactSink = new ContactSink(dht);
+        contactPusher = new ContactPusher(connectionManager);
+        publisher = new ValuePublisher(dht, 
+                DatabaseSettings.STORABLE_PUBLISHER_PERIOD.getValue(), 
+                TimeUnit.MILLISECONDS);
+        
         bootstrapWorker.addBootstrapListener(new BootstrapListener() {
             @Override
-            public void handleReady() {}
+            public void handleReady() {
+                publisher.start();
+            }
             
             @Override
             public void handleCollision(CollisionException ex) {
@@ -130,9 +145,6 @@ public class ActiveController extends SimpleController {
                 ACTIVE_FILE.delete();
             }
         });
-        
-        contactSink = new ContactSink(dht);
-        contactPusher = new ContactPusher(connectionManager);
     }
     
     @Override
@@ -203,6 +215,7 @@ public class ActiveController extends SimpleController {
     public void close() throws IOException {
         IoUtils.closeAll(contactSink, 
                 contactPusher, 
+                publisher,
                 bootstrapWorker);
         
         super.close();
@@ -279,6 +292,11 @@ public class ActiveController extends SimpleController {
         return dht.get(key);
     }
     
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return dht.getAll(key);
+    }
+
     private void write() {
         if (!DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.getValue()) {
             return;

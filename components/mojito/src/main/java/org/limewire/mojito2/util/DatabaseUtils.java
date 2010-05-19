@@ -31,7 +31,6 @@ import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.storage.Storable;
 
 
 /**
@@ -80,10 +79,6 @@ public class DatabaseUtils {
      */
     public static boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
         return System.currentTimeMillis() >= getExpirationTime(routeTable, entity);
-    }
-    
-    public static boolean isPublishingRequired(Storable storable) {
-        return isPublishingRequired(storable.getPublishTime(), storable.getLocationCount());
     }
     
     public static boolean isPublishingRequired(long publishingTime, int locationCount) {

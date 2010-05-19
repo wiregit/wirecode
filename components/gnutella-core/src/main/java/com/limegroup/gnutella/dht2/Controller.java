@@ -71,6 +71,11 @@ public interface Controller extends Closeable, ConnectionLifecycleListener {
     /**
      * 
      */
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    
+    /**
+     * 
+     */
     public Contact[] getActiveContacts(int max);
     
     /**

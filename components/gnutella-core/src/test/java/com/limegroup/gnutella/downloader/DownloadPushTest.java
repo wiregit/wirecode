@@ -463,8 +463,6 @@ public class DownloadPushTest extends DownloadTestCase {
         l.shutdown();
     }
     
-
-    
     /**
      * tests that bad push locs get removed
      */
@@ -515,7 +513,9 @@ public class DownloadPushTest extends DownloadTestCase {
         assertEquals(guid.bytes(), pcurrent.getPushAddress().getClientGUID());
         
         // Now get the PE from our cache and make sure no proxies exist & its demoted.
-        PushEndpoint pe = injector.getInstance(PushEndpointCache.class).getPushEndpoint(guid);
+        PushEndpoint pe = injector.getInstance(
+                PushEndpointCache.class).findPushEndpoint(guid).get();
+        
         assertTrue("pe: " + pe, pe.getProxies().isEmpty());
         assertTrue("pe: " + pe, badPushLoc.isDemoted());
         

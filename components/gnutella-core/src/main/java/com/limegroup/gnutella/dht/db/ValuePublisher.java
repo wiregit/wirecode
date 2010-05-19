@@ -1,8 +1,12 @@
-package org.limewire.mojito2.storage;
+package com.limegroup.gnutella.dht.db;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -17,19 +21,21 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito2.DHT;
+import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.settings.StoreSettings;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.util.EventUtils;
 
 /**
  * 
  */
-public class DatabasePublisher implements Closeable {
+public class ValuePublisher implements Closeable {
 
     private static final Log LOG 
-        = LogFactory.getLog(DatabasePublisher.class);
+        = LogFactory.getLog(ValuePublisher.class);
     
     @InspectablePrimitive(value = "The number of files that have been published")
     private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
@@ -37,6 +43,9 @@ public class DatabasePublisher implements Closeable {
     private static final ScheduledExecutorService EXECUTOR 
         = Executors.newSingleThreadScheduledExecutor(
             ExecutorsHelper.defaultThreadFactory("DatabasePublisherThread"));
+    
+    private final CopyOnWriteArrayList<StorableModel> models 
+        = new CopyOnWriteArrayList<StorableModel>();
     
     private final DHT dht;
     
@@ -70,20 +79,40 @@ public class DatabasePublisher implements Closeable {
     /**
      * 
      */
-    public DatabasePublisher(DHT dht, long frequency, TimeUnit unit) {
+    public ValuePublisher(DHT dht, long frequency, TimeUnit unit) {
         this(dht, new Config(), frequency, unit);
     }
     
     /**
      * 
      */
-    public DatabasePublisher(DHT dht, Config config,
+    public ValuePublisher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
         
         this.dht = dht;
         this.config = config;
         this.frequency = frequency;
         this.unit = unit;
+    }
+    
+    public void addStorable(StorableModel model) {
+        models.addIfAbsent(model);
+    }
+    
+    public void removeStorable(StorableModel model) {
+        models.remove(model);
+    }
+    
+    private Storable[] getStorables() {
+        List<Storable> storables = new ArrayList<Storable>();
+        
+        for (StorableModel model : models) {
+            Collection<Storable> elements 
+                = model.getStorables();
+            storables.addAll(elements);
+        }
+        
+        return storables.toArray(new Storable[0]);
     }
     
     public synchronized void start() {
@@ -135,8 +164,10 @@ public class DatabasePublisher implements Closeable {
             };
             
             long timeout = config.getStoreTimeoutInMillis();
-            storeTask = new StoreTask(dht, callback, 
-                    timeout, TimeUnit.MILLISECONDS);
+            
+            Storable[] storables = getStorables();
+            storeTask = new StoreTask(dht, storables,
+                    callback, timeout, TimeUnit.MILLISECONDS);
         }
     }
     
@@ -167,22 +198,15 @@ public class DatabasePublisher implements Closeable {
         
         private volatile DHTFuture<StoreEntity> future = null;
         
-        public StoreTask(DHT dht, Runnable callback, 
-                long timeout, TimeUnit unit) {
+        public StoreTask(DHT dht, Storable[] storables, 
+                Runnable callback, long timeout, TimeUnit unit) {
             
             this.dht = dht;
             this.callback = callback;
             this.timeout = timeout;
             this.unit = unit;
             
-            StorableModelManager modelManager 
-                = dht.getStorableModelManager();
-            
-            Collection<Storable> elements 
-                = modelManager.getStorables();
-            
-            storables = elements.iterator();
-            
+            this.storables = Arrays.asList(storables).iterator();
             doNext();
         }
         
@@ -204,7 +228,10 @@ public class DatabasePublisher implements Closeable {
             
             final Storable storable = storables.next();
             
-            future = dht.put(storable, timeout, unit);
+            KUID key = storable.getPrimaryKey();
+            DHTValue value = storable.getValue();
+            
+            future = dht.put(key, value, timeout, unit);
             future.addFutureListener(listener);
             
             future.addFutureListener(

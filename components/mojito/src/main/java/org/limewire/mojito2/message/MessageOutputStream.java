@@ -97,60 +97,60 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writePingRequest(PingRequest message) throws IOException {
+    public void writePingRequest(PingRequest message) throws IOException {
         // Do nothing
     }
     
-    private void writePingResponse(PingResponse message) throws IOException {
+    public void writePingResponse(PingResponse message) throws IOException {
         writeSocketAddress(message.getExternalAddress());
         writeBigInteger(message.getEstimatedSize());
     }
     
-    private void writeNodeRequest(NodeRequest message) throws IOException {
+    public void writeNodeRequest(NodeRequest message) throws IOException {
         writeKUID(message.getLookupId());
     }
     
-    private void writeNodeResponse(NodeResponse message) throws IOException {
+    public void writeNodeResponse(NodeResponse message) throws IOException {
         writeSecurityToken(message.getSecurityToken());
         writeContacts(message.getContacts());
     }
     
-    private void writeValueRequest(ValueRequest message) throws IOException {
+    public void writeValueRequest(ValueRequest message) throws IOException {
         writeKUID(message.getLookupId());
         
         writeKUIDs(message.getSecondaryKeys());
         writeValueType(message.getValueType());
     }
     
-    private void writeValueResponse(ValueResponse message) throws IOException {
+    public void writeValueResponse(ValueResponse message) throws IOException {
         writeFloat(message.getRequestLoad());
         writeValueEntities(message.getValueEntities());
         writeKUIDs(message.getSecondaryKeys());
     }
     
-    private void writeStoreRequest(StoreRequest message) throws IOException {
+    public void writeStoreRequest(StoreRequest message) throws IOException {
         writeSecurityToken(message.getSecurityToken());
         writeValueEntities(message.getValueEntities());
     }
     
-    private void writeStoreResponse(StoreResponse message) throws IOException {
+    public void writeStoreResponse(StoreResponse message) throws IOException {
         writeStoreStatusCodes(message.getStoreStatusCodes());
     }
     
-    private void writeValueEntities(DHTValueEntity[] values) throws IOException {
+    public void writeValueEntities(DHTValueEntity[] values) throws IOException {
         writeByte(values.length);
         for (DHTValueEntity value : values) {
             writeValueEntity(value);
         }
     }
     
-    private void writeValueEntity(DHTValueEntity value) throws IOException {
+    public void writeValueEntity(DHTValueEntity value) throws IOException {
         writeContact(value.getCreator());
         writeKUID(value.getPrimaryKey());
         writeValue(value.getValue());
     }
     
-    private void writeValue(DHTValue value) throws IOException {
+    public void writeValue(DHTValue value) throws IOException {
         writeValueType(value.getValueType());
         writeVersion(value.getVersion());
         
@@ -159,7 +159,7 @@ public class MessageOutputStream extends DataOutputStream {
         write(data);
     }
     
-    private void writeSocketAddress(SocketAddress address) throws IOException {
+    public void writeSocketAddress(SocketAddress address) throws IOException {
         if (address instanceof InetSocketAddress
                 && !((InetSocketAddress)address).isUnresolved()) {
             InetSocketAddress isa = (InetSocketAddress)address;
@@ -170,7 +170,7 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeInetAddress(InetAddress address) throws IOException {
+    public void writeInetAddress(InetAddress address) throws IOException {
         if (address != null) {
             byte[] addr = address.getAddress();
             writeByte(addr.length);
@@ -180,19 +180,19 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writePort(int port) throws IOException {
+    public void writePort(int port) throws IOException {
         writeShort(port);
     }
     
-    private void writeVendor(Vendor vendor) throws IOException {
+    public void writeVendor(Vendor vendor) throws IOException {
         writeInt(vendor.intValue());
     }
     
-    private void writeVersion(Version version) throws IOException {
+    public void writeVersion(Version version) throws IOException {
         writeShort(version.shortValue());
     }
     
-    private void writeStatusCode(StatusCode value) throws IOException {
+    public void writeStatusCode(StatusCode value) throws IOException {
         writeShort(value.shortValue());
         
         byte[] description = getBytes(value.getDescription());
@@ -200,22 +200,22 @@ public class MessageOutputStream extends DataOutputStream {
         write(description);
     }
     
-    private void writeMessageId(MessageID messageId) throws IOException {
+    public void writeMessageId(MessageID messageId) throws IOException {
         messageId.write(this);
     }
     
-    private void writeKUIDs(KUID[] kuids) throws IOException {
+    public void writeKUIDs(KUID[] kuids) throws IOException {
         writeByte(kuids.length);
         for (KUID kuid : kuids) {
             writeKUID(kuid);
         }
     }
     
-    private void writeKUID(KUID kuid) throws IOException {
+    public void writeKUID(KUID kuid) throws IOException {
         kuid.write(this);
     }
     
-    private void writeStoreStatusCodes(StoreStatusCode[] codes) throws IOException {
+    public void writeStoreStatusCodes(StoreStatusCode[] codes) throws IOException {
         writeByte(codes.length);
         
         for (StoreStatusCode code : codes) {
@@ -226,7 +226,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     
-    private void writeSecurityToken(SecurityToken securityToken) throws IOException {
+    public void writeSecurityToken(SecurityToken securityToken) throws IOException {
         if (securityToken != null) {
             assert (securityToken instanceof AddressSecurityToken);
             byte[] qk = securityToken.getBytes();
@@ -237,11 +237,11 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeOpCode(OpCode opcode) throws IOException {
+    public void writeOpCode(OpCode opcode) throws IOException {
         writeByte(opcode.byteValue());
     }
     
-    private void writeBigInteger(BigInteger value) throws IOException {
+    public void writeBigInteger(BigInteger value) throws IOException {
         byte[] data = value.toByteArray();
         if (data.length > KUID.LENGTH) {
             throw new IllegalArgumentException();
@@ -258,14 +258,14 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
-    private void writeContact(Contact contact) throws IOException {
+    public void writeContact(Contact contact) throws IOException {
         writeVendor(contact.getVendor());
         writeVersion(contact.getVersion());
         writeKUID(contact.getNodeID());
         writeSocketAddress(contact.getContactAddress());
     }
     
-    private void writeValueType(DHTValueType valueType) throws IOException {
+    public void writeValueType(DHTValueType valueType) throws IOException {
         writeInt(valueType.intValue());
     }
     

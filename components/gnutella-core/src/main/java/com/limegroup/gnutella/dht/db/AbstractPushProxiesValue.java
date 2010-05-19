@@ -24,7 +24,8 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     /**
      * DHTValueType for Push Proxies.
      */
-    public static final DHTValueType PUSH_PROXIES = DHTValueType.valueOf("Gnutella Push Proxy", "PROX");
+    public static final DHTValueType PUSH_PROXIES 
+        = DHTValueType.valueOf("Gnutella Push Proxy", "PROX");
     
     /**
      * Version of PushProxiesDHTValue.
@@ -49,14 +50,17 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         this.version = version;
     }
 
+    @Override
     public DHTValueType getValueType() {
         return PUSH_PROXIES;
     }
 
+    @Override
     public Version getVersion() {
         return version;
     }
 
+    @Override
     public int size() {
         return getValue().length;
     }

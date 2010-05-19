@@ -13,12 +13,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.nio.observer.Shutdownable;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -36,7 +40,6 @@ import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
@@ -125,7 +128,8 @@ public class RequeryBehaviorTest extends LimeTestCase {
         dhtQueryTime = System.currentTimeMillis() - dhtQueryTime;
         
         LOG.debug("dht query fails");
-        myAltFinder.listener.searchFailed();
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_GNET_RESULTS, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -185,8 +189,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
         // now tell them the dht query failed
         LOG.debug("dht query fails");
-        assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.searchFailed();
+        assertNotNull(myAltFinder.future);
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_GNET_RESULTS, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -263,8 +268,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
         // now tell them the dht query failed
         LOG.debug("dht query fails");
-        assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.searchFailed();
+        assertNotNull(myAltFinder.future);
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_USER, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -325,24 +331,28 @@ public class RequeryBehaviorTest extends LimeTestCase {
         }
     }
     
-    @Singleton
+    @Singleton    
     private static class MyAltLocFinder implements AltLocFinder {
-        private volatile SearchListener<AlternateLocation> listener;
         
-//        volatile boolean cancelled;
+        private volatile DHTFuture<AlternateLocation[]> future = null;
         
-        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
-            this.listener = listener;
-            return new Shutdownable() {
-                public void shutdown() {
-//                    cancelled = true;
+        private volatile boolean cancelled;
+        
+        @Override
+        public DHTFuture<AlternateLocation[]> findAltLocs(URN urn) {
+            future = new DHTValueFuture<AlternateLocation[]>();
+            future.addFutureListener(new EventListener<FutureEvent<AlternateLocation[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<AlternateLocation[]> event) {
+                    cancelled = event.getType() == Type.CANCELLED;
                 }
-            };
+            });
+            return future;
         }
-
-//        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
-//            return true;
-//        }
+        
+        public void failed() {
+            future.setException(new IllegalStateException("Shouldn't have called get()!"));
+        }
     }
     
     @Singleton

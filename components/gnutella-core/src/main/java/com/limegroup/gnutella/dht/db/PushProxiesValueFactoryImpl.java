@@ -21,39 +21,32 @@ import com.limegroup.gnutella.PushEndpointFactory;
 @Singleton
 public class PushProxiesValueFactoryImpl implements PushProxiesValueFactory {
 
-    private final NetworkManager networkManager;
-    private final PushEndpointFactory pushEndpointFactory;
     private final Provider<PushProxiesValue> lazySelf;
-    private final ApplicationServices applicationServices;
 
     @Inject
-    public PushProxiesValueFactoryImpl(NetworkManager networkManager,
-            PushEndpointFactory pushEndpointFactory, ApplicationServices applicationServices) {
-        this.networkManager = networkManager;
-        this.pushEndpointFactory = pushEndpointFactory;
-        this.applicationServices = applicationServices;
-
+    public PushProxiesValueFactoryImpl(final NetworkManager networkManager,
+            final PushEndpointFactory pushEndpointFactory, 
+            final ApplicationServices applicationServices) {
+        
         lazySelf = new AbstractLazySingletonProvider<PushProxiesValue>() {
             @Override
             protected PushProxiesValue createObject() {
                 return new PushProxiesValueForSelf(
-                        PushProxiesValueFactoryImpl.this.networkManager,
-                        PushProxiesValueFactoryImpl.this.pushEndpointFactory,
-                        PushProxiesValueFactoryImpl.this.applicationServices);
+                        networkManager,
+                        pushEndpointFactory,
+                        applicationServices);
             }
         };
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValueFactory#createDHTValue(org.limewire.mojito.db.DHTValueType, org.limewire.mojito.routing.Version, byte[])
-     */
+    @Override
     public PushProxiesValue createDHTValue(DHTValueType type, Version version,
             byte[] value) throws DHTValueException {
 
         return createFromData(version, value);
     }
 
-
+    @Override
     public PushProxiesValue createDHTValueForSelf() {
         return lazySelf.get();
     }

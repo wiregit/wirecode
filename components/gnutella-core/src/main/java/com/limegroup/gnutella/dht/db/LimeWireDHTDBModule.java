@@ -8,8 +8,13 @@ public class LimeWireDHTDBModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AltLocFinder.class).to(AltLocFinderImpl.class);
-        bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointManager")).to(PushEndpointManagerImpl.class);
-        bind(PushEndpointService.class).annotatedWith(Names.named("dhtPushEndpointFinder")).to(DHTPushEndpointFinder.class);
+        
+        bind(PushProxiesValue2.Self.class);
+        
+        bind(PushEndpointService.class).annotatedWith(
+                Names.named("pushEndpointManager")).to(PushEndpointManagerImpl.class);
+        
+        bind(PushEndpointService.class).annotatedWith(
+                Names.named("dhtPushEndpointFinder")).to(DHTPushEndpointFinder.class);
     }
-
 }

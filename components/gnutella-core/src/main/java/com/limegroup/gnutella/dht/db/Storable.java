@@ -17,10 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito2.storage;
+package com.limegroup.gnutella.dht.db;
 
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.entity.StoreEntity;
+import org.limewire.mojito2.storage.DHTValue;
 
 /**
  * A key-value pair ({@link KUID}, {@link DHTValue}) that can be stored in the DHT.

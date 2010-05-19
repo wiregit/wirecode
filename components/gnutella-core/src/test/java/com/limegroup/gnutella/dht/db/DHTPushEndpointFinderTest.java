@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.dht.db;
 
-import org.limewire.io.GUID;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.dht.util.KUIDUtils;
+import org.limewire.io.GUID;
 
 public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
 
@@ -25,7 +24,7 @@ public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
         pushEndpointFinder = injector.getInstance(DHTPushEndpointFinder.class);
     }
 
-    public void testGetPushEndPoint() throws Exception {
+    /*public void testGetPushEndPoint() throws Exception {
         // publish push proxy manually
         PushProxiesValue pushProxiesValue = pushProxiesValueFactory.createDHTValueForSelf();
         mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();
@@ -36,11 +35,17 @@ public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
         assertEquals(pushProxiesValue.getPushProxies(), pushEndpoint.getProxies());
         assertEquals(pushProxiesValue.getFeatures(), pushEndpoint.getFeatures());
         assertEquals(pushProxiesValue.getFwtVersion(), pushEndpoint.getFWTVersion());
-    }
+    }*/
     
-    public void testGetUnavailablePushEndpoint() throws Exception {
-        PushEndpoint result = pushEndpointFinder.getPushEndpoint(new GUID());
-        assertNull(result);
+    public void testGetUnavailablePushEndpoint() {
+        try {
+            pushEndpointFinder.findPushEndpoint(new GUID()).get();
+            fail("Should have failed!");
+        } catch (InterruptedException e) {
+            fail(e);
+        } catch (ExecutionException expected) {
+            expected.printStackTrace();
+        }
     }
     
 }

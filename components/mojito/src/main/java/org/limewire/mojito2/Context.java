@@ -45,11 +45,8 @@ import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
-import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseCleaner;
-import org.limewire.mojito2.storage.DatabasePublisher;
-import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.DHTSizeEstimator;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
@@ -82,23 +79,9 @@ public class Context extends AbstractDHT {
     /**
      * 
      */
-    private final DHTValueFactoryManager factoryManager 
-        = new DHTValueFactoryManager();
-    
-    /**
-     * 
-     */
     private final BucketRefresher bucketRefresher 
         = new BucketRefresher(this, 
                 BucketRefresherSettings.BUCKET_REFRESHER_DELAY.get(), 
-                TimeUnit.MILLISECONDS);
-    
-    /**
-     * 
-     */
-    private final DatabasePublisher databasePublisher 
-        = new DatabasePublisher(this, 
-                DatabaseSettings.STORABLE_PUBLISHER_PERIOD.get(), 
                 TimeUnit.MILLISECONDS);
     
     /**
@@ -131,12 +114,6 @@ public class Context extends AbstractDHT {
      * 
      */
     private final Database database;
-    
-    /**
-     * 
-     */
-    private final StorableModelManager modelManager 
-        = new StorableModelManager();
     
     /**
      * 
@@ -198,7 +175,6 @@ public class Context extends AbstractDHT {
             shutdown();
         }
         
-        databasePublisher.close();
         databaseCleaner.close();
         bucketRefresher.close();
         
@@ -217,7 +193,6 @@ public class Context extends AbstractDHT {
             shutdown();
         }
         
-        databasePublisher.stop();
         databaseCleaner.stop();
         bucketRefresher.stop();
         
@@ -304,19 +279,6 @@ public class Context extends AbstractDHT {
      */
     public MessageHelper getMessageHelper() {
         return messageHelper;
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public DHTValueFactoryManager getDHTValueFactoryManager() {
-        return factoryManager;
-    }
-    
-    @Override
-    public StorableModelManager getStorableModelManager() {
-        return modelManager;
     }
     
     @Override
@@ -420,7 +382,6 @@ public class Context extends AbstractDHT {
             @Override
             public void handleEvent(FutureEvent<BootstrapEntity> event) {
                 if (event.getType() == Type.SUCCESS) {
-                    databasePublisher.start();
                     databaseCleaner.start();
                     bucketRefresher.start();
                 }
@@ -608,12 +569,7 @@ public class Context extends AbstractDHT {
             = entity.getEstimatedSize();
         
         LocalContact localhost = (LocalContact)routeTable.getLocalNode();
-        boolean changed = localhost.setExternalAddress(externalAddress);
-        
-        if (changed) {
-            modelManager.handleContactChange(this);
-        }
-        
+        localhost.setExternalAddress(externalAddress);
         estimator.addEstimatedRemoteSize(estimatedSize);
     }
 }

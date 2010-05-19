@@ -37,10 +37,7 @@ import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.StoreSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
-import org.limewire.mojito2.storage.DHTValueFactoryManager;
 import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.storage.Storable;
-import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
@@ -129,17 +126,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
     public RouteTable getRouteTable() {
         return dht.getRouteTable();
     }
-
-    @Override
-    public DHTValueFactoryManager getDHTValueFactoryManager() {
-        return dht.getDHTValueFactoryManager();
-    }
     
-    @Override
-    public StorableModelManager getStorableModelManager() {
-        return dht.getStorableModelManager();
-    }
-
     @Override
     public boolean isBound() {
         return dht.isBound();
@@ -220,13 +207,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
             long timeout, TimeUnit unit) {
         return dht.ping(dst, timeout, unit);
     }
-
-    @Override
-    public DHTFuture<StoreEntity> put(Storable storable, 
-            long timeout, TimeUnit unit) {
-        return dht.put(storable, timeout, unit);
-    }
-
+    
     @Override
     public DHTFuture<StoreEntity> put(DHTValueEntity value, 
             long timeout, TimeUnit unit) {
@@ -333,18 +314,17 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> store(Storable storable) {
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         long timeout = StoreSettings.STORE_TIMEOUT.getValue();
-        return dht.put(storable, timeout, TimeUnit.MILLISECONDS);
+        return put(key, value, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
-        DHTValueEntity entity = DHTValueEntity.createFromValue(dht, key, value);
-        long timeout = StoreSettings.STORE_TIMEOUT.getValue();
-        return dht.put(entity, timeout, TimeUnit.MILLISECONDS);
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
+            long timeout, TimeUnit unit) {
+        return dht.put(key, value, timeout, unit);
     }
-    
+
     @Override
     public DHTFuture<StoreEntity> remove(KUID key) {
         return put(key, DHTValue.EMPTY_VALUE);

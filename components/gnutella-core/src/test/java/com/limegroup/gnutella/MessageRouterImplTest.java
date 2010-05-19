@@ -1414,5 +1414,10 @@ public final class MessageRouterImplTest extends LimeTestCase {
         @Override
         public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         }
+
+        @Override
+        public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+            return null;
+        }
     }
 }

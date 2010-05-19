@@ -13,7 +13,6 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.Storable;
 
 /**
  * 
@@ -104,11 +103,6 @@ public interface MojitoDHT extends DHT {
      * 
      */
     public DHTFuture<BootstrapEntity> bootstrap(Contact contact);
-    
-    /**
-     * 
-     */
-    public DHTFuture<StoreEntity> store(Storable storable);
     
     /**
      * 

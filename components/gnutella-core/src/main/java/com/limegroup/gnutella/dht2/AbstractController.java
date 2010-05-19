@@ -34,14 +34,17 @@ public abstract class AbstractController implements Controller {
     public AbstractController(DHTMode mode, 
             Transport transport,
             NetworkManager networkManager) {
+        
         this.mode = mode;
+        
         this.transport = transport;
         this.networkManager = networkManager;
     }
     
     @Override
     public void start() throws IOException {
-        getMojitoDHT().bind(transport);
+        MojitoDHT dht = getMojitoDHT();
+        dht.bind(transport);
     }
     
     @Override

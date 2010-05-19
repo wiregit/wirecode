@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,10 +20,11 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceScheduler;
+import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.DHTValueFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @EagerSingleton
@@ -142,12 +144,13 @@ class PushEndpointCacheImpl implements PushEndpointCache {
         return cached != null ? cached.createClone() : null;
     }
     
-    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
+    public DHTFuture<PushEndpoint> findPushEndpoint(GUID guid) {
         PushEndpoint pushEndpoint = getPushEndpoint(guid);
         if (pushEndpoint != null) {
-            listener.handleResult(pushEndpoint);
+            return new DHTValueFuture<PushEndpoint>(pushEndpoint);
         } else {
-            listener.searchFailed();
+            return new DHTValueFuture<PushEndpoint>(
+                    new NoSuchElementException());
         }
     }
 

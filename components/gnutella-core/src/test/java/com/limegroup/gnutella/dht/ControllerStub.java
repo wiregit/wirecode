@@ -68,6 +68,11 @@ public class ControllerStub implements Controller {
     public DHTFuture<ValueEntity> get(EntityKey key) {
         return null;
     }
+    
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return null;
+    }
 
     @Override
     public MojitoDHT getMojitoDHT() {

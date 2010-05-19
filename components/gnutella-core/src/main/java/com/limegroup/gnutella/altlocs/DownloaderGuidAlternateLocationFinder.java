@@ -5,9 +5,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito2.concurrent.DHTFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,7 +21,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -121,60 +123,66 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
         }
     }
     
-    void searchForPushEndpoints(URN sha1Urn, Set<URN> guidUrns) {
+    void searchForPushEndpoints(final URN sha1Urn, Set<URN> guidUrns) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Searching for guid urns: " + guidUrns);
         }
+        
+        EventListener<FutureEvent<PushEndpoint>> listener
+                = new EventListener<FutureEvent<PushEndpoint>>() {
+            @Override
+            public void handleEvent(FutureEvent<PushEndpoint> event) {
+                if (event.getType() == Type.SUCCESS){ 
+                    onSuccess(event.getResult());
+                }
+            }
+            
+            private void onSuccess(PushEndpoint endpoint) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("endpoint found: " + endpoint);
+                }
+                
+                IpPort ipPort = endpoint.getValidExternalAddress();
+                // if the external address is the same as the push proxy, it's a non-firewalled source
+                if (ipPort != null && endpoint.getProxies().size() == 1 
+                        && endpoint.getProxies().contains(ipPort)) {
+                    try {
+                        LOG.debug("creating direct altloc");
+                        AlternateLocation alternateLocation 
+                            = alternateLocationFactory.createDirectAltLoc(ipPort, sha1Urn);
+                        // adding to alt loc manager will notify the downloader 
+                        // of the new alternate location
+                        altLocManager.add(alternateLocation, 
+                                DownloaderGuidAlternateLocationFinder.this);
+                    } catch (IOException ie) {
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("error creating direct alt loc from " + ipPort, ie);
+                        }
+                    }
+                } else {
+                    LOG.debug("creating push altloc");
+                    AlternateLocation  alternateLocation 
+                        = alternateLocationFactory.createPushAltLoc(endpoint, sha1Urn);
+                    
+                    // adding to alt loc manager will notify the downloader 
+                    // of the new alternate location
+                    altLocManager.add(alternateLocation, 
+                            DownloaderGuidAlternateLocationFinder.this);
+                }
+            }
+        };
+        
         for (URN guidUrn : guidUrns) {
             try {
                 GUID guid = new GUID(guidUrn.getNamespaceSpecificString());
-                pushEndpointManager.findPushEndpoint(guid, new PushendpointHandler(sha1Urn));
+                DHTFuture<PushEndpoint> future 
+                    = pushEndpointManager.findPushEndpoint(guid);
+                future.addFutureListener(listener);
             } catch (IllegalArgumentException iae) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("invalid hex string of guid", iae);
                 }
             }
         }
-    }
-
-    private class PushendpointHandler implements SearchListener<PushEndpoint> {
-        
-        private final URN sha1;
-
-        public PushendpointHandler(URN sha1Urn) {
-            this.sha1 = sha1Urn;
-        }
-
-        public void handleResult(PushEndpoint result) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("endpoint found: " + result);
-            }
-            // TODO instantly create alternate locations for all sha1s that have the same guid urn as a source
-            
-            IpPort ipPort = result.getValidExternalAddress();
-            // if the external address is the same as the push proxy, it's a non-firewalled source
-            if (ipPort != null && result.getProxies().size() == 1 && result.getProxies().contains(ipPort)) {
-                try {
-                    LOG.debug("creating direct altloc");
-                    AlternateLocation alternateLocation = alternateLocationFactory.createDirectAltLoc(ipPort, sha1);
-                    // adding to alt loc manager will notify the downloader of the new alternate location
-                    altLocManager.add(alternateLocation, null);
-                } catch (IOException ie) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("error creating direct alt loc from " + ipPort, ie);
-                    }
-                }
-            } else {
-                LOG.debug("creating push altloc");
-                AlternateLocation  alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
-                // adding to alt loc manager will notify the downloader of the new alternate location
-                altLocManager.add(alternateLocation, null);
-            }
-        }
-
-        public void searchFailed() {
-            // ignoring unsuccessful searches
-        }
-        
     }
 }

@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.mojito2.concurrent.DHTFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -59,7 +60,7 @@ class PushEndpointManagerImpl implements PushEndpointService {
         return timeBetweenSearches;
     }
     
-    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
+    /*public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
         if (cachedPushEndpoint != null && !cachedPushEndpoint.getProxies().isEmpty()) {
@@ -88,6 +89,12 @@ class PushEndpointManagerImpl implements PushEndpointService {
                 }
             }
         }
+    }*/
+    
+    @Override
+    public DHTFuture<PushEndpoint> findPushEndpoint(GUID guid) {
+        // TODO Auto-generated method stub
+        return null;
     }
     
     void startSearch(GUID guid, final SearchListener<PushEndpoint> listener) {

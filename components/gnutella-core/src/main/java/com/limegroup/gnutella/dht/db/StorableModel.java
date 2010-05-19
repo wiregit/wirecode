@@ -17,23 +17,31 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito2.storage;
+package com.limegroup.gnutella.dht.db;
 
-import org.limewire.mojito.exceptions.DHTValueException;
-import org.limewire.mojito2.routing.Version;
+import java.util.Collection;
+
+import org.limewire.mojito2.entity.StoreEntity;
 
 /**
- * Defines a factory interface to create a <code>DHTValue</code>.
+ * Defines an interface for returning a {@link Storable} collection, storing the
+ * result of a store and for handling contact changes.
  */
-public interface DHTValueFactory<T extends DHTValue> {
+public interface StorableModel {
     
     /**
-     * Creates a <code>DHTValue</code>.
-     * 
-     * @param type the type of the value
-     * @param version the version of the value
-     * @param value the actual value
+     * Returns all <code>Storable</code>s that need to be published now.
      */
-    public T createDHTValue(DHTValueType type, 
-            Version version, byte[] value) throws DHTValueException;
+    public Collection<Storable> getStorables();
+    
+    /**
+     * Called for every successful STORE.
+     */
+    public void handleStoreResult(Storable value, StoreEntity result);
+    
+    /**
+     * Notifies the <code>StorableModel</code> that the local Contact's
+     * contact information changed (Node ID, external Address).
+     */
+    public void handleContactChange();
 }

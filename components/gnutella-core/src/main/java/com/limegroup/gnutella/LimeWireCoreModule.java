@@ -79,11 +79,7 @@ import com.limegroup.gnutella.bootstrap.LimeWireBootstrapModule;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
 import com.limegroup.gnutella.daap.DaapManager;
-import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht2.LimeWireDHTModule;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
@@ -240,7 +236,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(TLSManager.class).to(NetworkManagerImpl.class);
         bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).to(NetworkManagerImpl.class);
         bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);
-        bind(PushProxiesValueFactory.class).to(PushProxiesValueFactoryImpl.class);
+        
         bind(HandshakeResponderFactory.class).to(HandshakeResponderFactoryImpl.class);
         bind(HeadersFactory.class).to(HeadersFactoryImpl.class);
         bind(PushEndpointFactory.class).to(PushEndpointFactoryImpl.class);
@@ -249,7 +245,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HTTPUploadSessionManager.class).to(HTTPUploadManager.class);
         bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
         bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
-        bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
+        
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);

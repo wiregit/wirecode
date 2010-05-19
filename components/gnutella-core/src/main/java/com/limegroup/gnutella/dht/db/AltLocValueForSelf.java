@@ -19,6 +19,7 @@ class AltLocValueForSelf extends AbstractAltLocValue {
     private final byte[] ttroot;
     
     private final NetworkManager networkManager; 
+    
     private final ApplicationServices applicationServices;
     
     public AltLocValueForSelf(long fileSize, byte[] ttroot,
@@ -40,18 +41,12 @@ class AltLocValueForSelf extends AbstractAltLocValue {
         this.applicationServices = applicationServices;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValue()
-     */
+    @Override
     public byte[] getValue() {
         return AbstractAltLocValue.serialize(this);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#write(java.io.OutputStream)
-     */
+    @Override
     public void write(OutputStream out) throws IOException {
         out.write(getValue());
     }

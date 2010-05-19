@@ -46,7 +46,6 @@ import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.storage.StorableModelManager;
 import org.limewire.mojito2.util.CollectionUtils;
 
 /**
@@ -136,13 +135,6 @@ public class CommandHandler {
         StringBuilder buffer = new StringBuilder("\n");
         Database database = dht.getDatabase();
         buffer.append(database.toString());
-        out.println(buffer);
-    }
-    
-    public static void publisher(MojitoDHT dht, String[] args, PrintWriter out) {
-        StringBuilder buffer = new StringBuilder("\n");
-        StorableModelManager modelManager = dht.getStorableModelManager();
-        buffer.append(modelManager.toString());
         out.println(buffer);
     }
     

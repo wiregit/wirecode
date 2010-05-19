@@ -13,9 +13,9 @@ import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.BootstrapConfig;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.storage.Storable;
 
 /**
  * An abstract implementation of {@link DHT}.
@@ -75,13 +75,12 @@ public abstract class AbstractDHT implements DHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(Storable storable, 
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
             long timeout, TimeUnit unit) {
         
-        DHTValueEntity value = DHTValueEntity.createFromStorable(
-                this, storable);
-        
-        return put(value, timeout, unit);
+        DHTValueEntity entity = DHTValueEntity.createFromValue(
+                this, key, value);
+        return put(entity, timeout, unit);
     }
     
     @Override

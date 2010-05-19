@@ -14,7 +14,7 @@ import com.limegroup.gnutella.NetworkManager;
  * Factory to create {@link AltLocValue}s.
  */
 @Singleton
-public class AltLocValueFactoryImpl implements AltLocValueFactory {
+class AltLocValueFactoryImpl implements AltLocValueFactory {
     
     private final NetworkManager networkManager;
     private final ApplicationServices applicationServices;
@@ -26,23 +26,19 @@ public class AltLocValueFactoryImpl implements AltLocValueFactory {
         this.applicationServices = applicationServices;
     }
     
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.AltLocValueFactory#createDHTValue(org.limewire.mojito.db.DHTValueType, org.limewire.mojito.routing.Version, byte[])
-     */
+    @Override
     public AltLocValue createDHTValue(DHTValueType type, 
             Version version, byte[] value) throws DHTValueException {
         
         return createFromData(version, value);
     }
 
+    @Override
     public AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot) {
         return new AltLocValueForSelf(fileSize, ttroot, networkManager, applicationServices);
     }
-
-    /**
-     * Factory method to create AltLocValue.
-     */
+    
+    @Override
     public AltLocValue createFromData(Version version, byte[] data) throws DHTValueException {
         return new AltLocValueImpl(version, data);
     }

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
+import org.limewire.mojito2.concurrent.DHTFuture;
 
 import com.limegroup.gnutella.PushEndpoint;
 
@@ -16,12 +17,5 @@ public interface PushEndpointService {
      * @param listener could be null, but is strongly discouraged again since
      * this notifies of the outcome of the lookup
      */
-    void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener);
-    
-    /**
-     * Performs a blocking lookup of a push endpoint.
-     * 
-     * @return the found push endpoint or null
-     */
-    PushEndpoint getPushEndpoint(GUID guid);    
+    DHTFuture<PushEndpoint> findPushEndpoint(GUID guid);
 }

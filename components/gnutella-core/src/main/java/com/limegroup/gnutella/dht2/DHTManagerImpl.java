@@ -174,7 +174,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
                     controller = createLeaf();
                     break;
             }
-        
+            
             controller.start();
             fireStarting();
             
@@ -380,6 +380,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         return controller.get(key);
     }
     
+    @Override
+    public synchronized DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return controller.getAll(key);
+    }
+
     @Override
     public synchronized void addressChanged() {
         controller.addressChanged();

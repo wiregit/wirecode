@@ -12,6 +12,7 @@ import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -33,8 +34,6 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
     protected MojitoDHT mojitoDHT;
     protected NetworkManagerStub networkManager;
     protected Injector injector;
-    protected AltLocValueFactory altLocValueFactory;
-    protected PushProxiesValueFactory pushProxiesValueFactory;
     protected PushEndpointFactory pushEndpointFactory;
     protected AlternateLocationFactory alternateLocationFactory;
 
@@ -52,7 +51,8 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         networkManager = new NetworkManagerStub();
 
         // to have non-empty push proxies to send
-        final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
+        final ConnectionManager connectionManager 
+            = MockUtils.createConnectionManagerWithPushProxies(context);
         
         injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), new AbstractModule() {
             @Override
@@ -64,9 +64,7 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         });
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
-        altLocValueFactory = injector.getInstance(AltLocValueFactory.class);
         alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-        pushProxiesValueFactory = injector.getInstance(PushProxiesValueFactory.class);
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
         
@@ -82,17 +80,10 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
             });
         }});
         assertTrue(mojitoDHT.isReady());
-
-        // register necessary factories
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractAltLocValue.ALT_LOC, altLocValueFactory);
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractPushProxiesValue.PUSH_PROXIES, pushProxiesValueFactory);
     }
     
     @Override
     protected void tearDown() throws Exception {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
+        IoUtils.closeAll(dhts);
     }
-
 }

@@ -42,16 +42,15 @@ import com.limegroup.gnutella.dht2.DHTEvent.Type;
 @Singleton
 public class PushProxiesPublisher implements DHTEventListener {
     
-    private static final Log LOG = LogFactory.getLog(PushProxiesPublisher.class);
+    private static final Log LOG 
+        = LogFactory.getLog(PushProxiesPublisher.class);
     
-    private volatile PushProxiesValue lastSeenValue;
+    private volatile PushProxiesValue2 lastSeenValue;
     
-    private volatile PushProxiesValue lastPublishedValue;
+    private volatile PushProxiesValue2 lastPublishedValue;
     
     private volatile long lastPublishTime;
     
-    private final PushProxiesValueFactory pushProxiesValueFactory;
-
     private final ScheduledExecutorService backgroundExecutor;
 
     private volatile ScheduledFuture publishingFuture;
@@ -59,7 +58,8 @@ public class PushProxiesPublisher implements DHTEventListener {
     private final DHTManager dhtManager;
     
     @InspectionPoint("push-proxies-publish-reason")
-    private final InspectionHistogram<String> publishReasons = new InspectionHistogram<String>();
+    private final InspectionHistogram<String> publishReasons 
+        = new InspectionHistogram<String>();
     
     /**
      * @param dhtManager just needed to hold a lock on it when sending queries

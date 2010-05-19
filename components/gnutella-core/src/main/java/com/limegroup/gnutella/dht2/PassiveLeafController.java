@@ -48,7 +48,9 @@ public class PassiveLeafController extends AbstractController {
             MessageFactory messageFactory,
             NetworkManager networkManager,
             HostFilter hostFilter) throws UnknownHostException {
-        super(DHTMode.PASSIVE_LEAF, transport, networkManager);
+        super(DHTMode.PASSIVE_LEAF, 
+                transport, 
+                networkManager);
         
         this.transport = transport;
         
@@ -106,6 +108,11 @@ public class PassiveLeafController extends AbstractController {
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return dht.put(key, value);
+    }
+    
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+        return dht.getAll(key);
     }
 
     @Override

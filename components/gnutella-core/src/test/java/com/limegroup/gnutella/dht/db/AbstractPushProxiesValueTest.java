@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -38,9 +36,11 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
      * Ensures different impls with same values are considered equal
      */
     public void testEqualsObject() throws Exception {
-       final TestPushProxiesValue value = new TestPushProxiesValue();
+       final TestPushProxiesValue value 
+           = new TestPushProxiesValue();
        
-       final PushProxiesValue mockedValue = context.mock(PushProxiesValue.class);
+       final PushProxiesValue2 mockedValue 
+           = context.mock(PushProxiesValue2.class);
        
        context.checking(new Expectations() {{
            allowing(mockedValue).getTLSInfo();
@@ -62,7 +62,7 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
        context.assertIsSatisfied();
     }
     
-    private static class TestPushProxiesValue extends AbstractPushProxiesValue {
+    private static class TestPushProxiesValue extends PushProxiesValue2 {
 
         private GUID guid = new GUID();
         
@@ -73,38 +73,34 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
             proxies = new IpPortSet(new IpPortImpl("129.0.0.1", 9595));
         }
         
+        @Override
         public byte getFeatures() {
             return 1;
         }
 
+        @Override
         public int getFwtVersion() {
             return 5;
         }
 
+        @Override
         public byte[] getGUID() {
             return guid.bytes();
         }
 
+        @Override
         public int getPort() {
             return 6667;
         }
 
+        @Override
         public Set<? extends IpPort> getPushProxies() {
             return proxies;
         }
 
+        @Override
         public BitNumbers getTLSInfo() {
             return BitNumbers.EMPTY_BN;
         }
-
-        public byte[] getValue() {
-            return AbstractPushProxiesValue.serialize(this);
-        }
-
-        public void write(OutputStream out) throws IOException {
-            out.write(getValue());
-        }
-        
     }
-
 }
