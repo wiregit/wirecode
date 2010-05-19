@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.logging.Log;
@@ -50,12 +51,20 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     private String searchText;
     
     @Override
-    public void initializeWithSearch(String search) {
-        searchText = search;
-        if(searchText != null) {
-            searchHighlightUtil = new SearchHighlightUtil(search);
+    public void initializeWithSearch(String search, Map<FilePropertyKey, String> advSearch) {
+        
+        if(search == null && advSearch.isEmpty()) {
+            return;
         }
         
+        StringBuilder bldr = new StringBuilder();
+        if(search != null) bldr.append(search);
+        for(FilePropertyKey key : advSearch.keySet()){
+            bldr.append(" ").append(advSearch.get(key));
+        }
+        
+        searchText = bldr.toString().trim();
+        searchHighlightUtil = new SearchHighlightUtil(searchText);      
     }
 
     @Override

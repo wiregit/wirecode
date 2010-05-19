@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
+import java.util.Map;
+
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public interface ListViewRowHeightRule {
@@ -17,7 +20,7 @@ public interface ListViewRowHeightRule {
     }
     
     /** Initializes this rule with a search. */
-    void initializeWithSearch(String search);
+    void initializeWithSearch(String search, Map<FilePropertyKey, String> advSearch);
     
     /**
      * Determines which combination of heading, subheading, and metadata should display

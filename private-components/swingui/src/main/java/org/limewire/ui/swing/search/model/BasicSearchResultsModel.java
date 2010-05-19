@@ -15,6 +15,7 @@ import java.util.Random;
 import javax.swing.SwingUtilities;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
@@ -378,6 +379,11 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     @Override
     public String getSearchQuery() {
         return searchInfo.getSearchQuery();
+    }
+    
+    @Override
+    public Map<FilePropertyKey, String> getAdvSearchquery() {
+        return searchInfo.getAdvancedDetails();
     }
     
     @Override

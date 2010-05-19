@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.*;
+
+import java.util.Collections;
+
 import junit.framework.TestCase;
 
 import org.limewire.core.api.FilePropertyKey;
@@ -51,7 +54,7 @@ public class ListViewRowHeightRuleTest extends TestCase {
 
     private void assertStuff(BasicDownloadState state, String search, RowDisplayConfig config, boolean subHeadingEmpty, boolean metadataNull) {
         mock.setDownloadState(state);
-        rule.initializeWithSearch(search);
+        rule.initializeWithSearch(search, Collections.<FilePropertyKey, String>emptyMap());
         RowDisplayResult result = rule.getDisplayResult(mock);
         assertEquals(config, result.getConfig());
         assertEquals(subHeadingEmpty , result.getSubheading() == null || "".equals(result.getSubheading()));
@@ -73,7 +76,7 @@ public class ListViewRowHeightRuleTest extends TestCase {
         mock.setDownloadState(BasicDownloadState.NOT_STARTED);
         mock.setSubHeading("bar");
         mock.setDownloadState(BasicDownloadState.NOT_STARTED);
-        rule.initializeWithSearch("foo");
+        rule.initializeWithSearch("foo", Collections.<FilePropertyKey, String>emptyMap());
         RowDisplayResult result = rule.getDisplayResult(mock);
         //Only subheading is explicitly wrapped in HTML tags by the listviewrowheightrule.
         //The heading is wrapped in tags elsewhere later in the processing chain but subheading

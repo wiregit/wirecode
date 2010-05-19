@@ -18,7 +18,7 @@ class SearchHighlightUtil {
          String literalSearch = createLiteralSearch(Objects.nonNull(search, "search"));
          
          // Create pattern to match on word boundary, and match content.
-         Pattern pattern = Pattern.compile("\\b(" + literalSearch + ")", Pattern.CASE_INSENSITIVE);
+         Pattern pattern = Pattern.compile("\\b(" + literalSearch + ")\\b", Pattern.CASE_INSENSITIVE);
          matcher = pattern.matcher("");
     }
 
@@ -32,24 +32,9 @@ class SearchHighlightUtil {
         if (content == null) {
             return "";
         }
-        
         matcher.reset(content);
-        builderBuffer.setLength(0);
-        int index = 0;
-        while (matcher.find()) {
-            int startIndex = matcher.start();
-            builderBuffer.append(content.substring(index, startIndex));
-            String word = matcher.group();
-            builderBuffer.append("<b>").append(word).append("</b>");
-            index = matcher.end();
-            LOG.debugf("Start: {0} url: {1} end: {2}", startIndex, word, matcher.end());
-        }
+        return matcher.replaceAll("<b>$1</b>");
 
-        if (builderBuffer.length() > 0) {
-            builderBuffer.append(content.substring(index));
-            return builderBuffer.toString();
-        }
-        return content;
     }
     
     /**

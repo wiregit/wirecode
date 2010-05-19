@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.Map;
+
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchDetails.SearchType;
@@ -33,6 +36,12 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
      * Returns the query string for the search.
      */
     String getSearchQuery();
+    
+    /**
+     * Returns advance-search query strings for search 
+     * @return
+     */
+    Map<FilePropertyKey, String> getAdvSearchquery();
     
     /**
      * Returns the title string for the search.
