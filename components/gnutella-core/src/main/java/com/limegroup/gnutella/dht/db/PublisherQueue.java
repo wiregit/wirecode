@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,16 +16,20 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.util.MaxStack;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.dht2.DHTManager;
+
 /**
  * 
  */
+@Singleton
 public class PublisherQueue implements Closeable {
 
     private static final Log LOG 
@@ -47,29 +50,24 @@ public class PublisherQueue implements Closeable {
     
     private final MaxStack stack;
     
-    private final DHT dht;
-    
-    private final long timeout;
-    
-    private final TimeUnit unit;
+    private final DHTManager manager;
     
     private boolean open = true;
     
     /**
      * 
      */
-    public PublisherQueue(DHT dht, long timeout, TimeUnit unit) {
-        this (dht, ALPHA, timeout, unit);
+    @Inject
+    public PublisherQueue(DHTManager manager) {
+        this (manager, ALPHA);
     }
     
     /**
      * 
      */
-    public PublisherQueue(DHT dht, int alpha, long timeout, TimeUnit unit) {
-        this.dht = dht;
+    public PublisherQueue(DHTManager manager, int alpha) {
+        this.manager = manager;
         this.stack = new MaxStack(alpha);
-        this.timeout = timeout;
-        this.unit = unit;
     }
     
     @Override
@@ -160,8 +158,7 @@ public class PublisherQueue implements Closeable {
             KUID key = entry.getKey();
             DHTValue value = entry.getValue();
             
-            final DHTFuture<StoreEntity> future 
-                = dht.put(key, value, timeout, unit);
+            final DHTFuture<StoreEntity> future = manager.put(key, value);
             future.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
                 @Override
                 public void handleEvent(FutureEvent<StoreEntity> event) {
