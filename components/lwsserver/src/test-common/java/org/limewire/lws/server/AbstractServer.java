@@ -374,7 +374,7 @@ public abstract class AbstractServer implements Runnable  {
      * Calls {@link #shutDown(long)} with <code>100</code>.
      */
     public final void shutDown() {
-        shutDown(1000);
+        shutDown(100);
     }
 
 }
