@@ -59,7 +59,7 @@ class UrnValidatorImpl implements UrnValidator {
                    }
                    validationMulticaster.broadcast(new ValidationEvent(type, urn));
                }
-            }, 5000);
+            }, 10000);
         }
     }
 
