@@ -1,17 +1,20 @@
 package org.limewire.core.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Mojito DHT related settings.
  */
 public class DHTSettings extends LimeProps {
-
+    
     private DHTSettings() {}
     
     /**
@@ -254,14 +257,6 @@ public class DHTSettings extends LimeProps {
                 new String[]{"ups","atUpSet","<","cups","cUpSet","<","OR","NOT",
                 "lastup","rftSet",">","AND"}, 
                 "DHT.RareFileDefinition");
-    /**
-     * Whether or not AlternativeLocations should be published.
-     * <p>
-     * WARNING: DO NOT MANUALLY CHANGE THIS
-     */
-    public static final BooleanSetting PUBLISH_ALT_LOCS
-        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
-                false, "DHT.PublishAltLocs");
     
     /**
      * Whether or not DHT querying is enabled.
@@ -305,15 +300,6 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.EnablePassiveLeafMode");
     
     /**
-     * Whether or not PushProxies should be published.
-     * <p>
-     * WARNING: DO NOT MANUALLY CHANGE THIS.
-     */
-    public static final BooleanSetting PUBLISH_PUSH_PROXIES
-        = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
-                false, "DHT.PublishPushProxies");
-    
-    /**
      * Whether or not we query for PushProxies.
      */
     public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
@@ -331,10 +317,10 @@ public class DHTSettings extends LimeProps {
     /**
      * The time in milliseconds push proxies have to be stable before being published.
      */
-    public static final LongSetting PUSH_PROXY_STABLE_PUBLISHING_INTERVAL
-    = FACTORY.createRemoteLongSetting("PUSH_PROXY_STABLE_PUBLISHING_INTERVAL",
+    public static final TimeSetting PUSH_PROXY_STABLE_PUBLISHING_INTERVAL
+    = FACTORY.createRemoteTimeSetting("PUSH_PROXY_STABLE_PUBLISHING_INTERVAL",
             60L * 1000L, "DHT.pushProxyStablePublishingInterval",
-            10L * 1000L, Long.MAX_VALUE);
+            10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.
@@ -358,4 +344,46 @@ public class DHTSettings extends LimeProps {
     public static final BooleanSetting ALLOW_DHT_SECURE_MESSAGE
         = FACTORY.createRemoteBooleanSetting("ALLOW_DHT_SECURE_MESSAGE", 
                 false, "DHTSettings.allowDHTSecureMessage");
+    
+    /**
+     * Whether or not AlternativeLocations should be published.
+     * <p>
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final BooleanSetting PUBLISH_ALT_LOCS
+        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
+                false, "DHT.PublishAltLocs");
+    
+    /**
+     * 
+     */
+    public static final TimeSetting LOCATION_PUBLISHER_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("LOCATION_PUBLISHER_FREQUENCY", 30L*60L*1000L, 
+                "DHT.LocationPublisherFrequency", 3L*60L*1000L, 24L*60L*60L*1000L, 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    public static final TimeSetting PUBLISH_LOCATION_EVERY
+        = FACTORY.createRemoteTimeSetting("PUBLISH_LOCATION_EVERY", 30L*60L*1000L, 
+                "DHT.publishLocationEvery", 3L*60L*1000L, 24L*60L*60L*1000L, 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * Whether or not PushProxies should be published.
+     * <p>
+     * WARNING: DO NOT MANUALLY CHANGE THIS.
+     */
+    public static final BooleanSetting PUBLISH_PUSH_PROXIES
+        = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
+                false, "DHT.PublishPushProxies");
+    
+    /**
+     * 
+     */
+    public static final TimeSetting PROXY_PUBLISHER_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 30L*60L*1000L, 
+                "DHT.ProxyPublisherFrequency", 3L*60L*1000L, 24L*60L*60L*1000L, 
+                TimeUnit.MILLISECONDS);
 }

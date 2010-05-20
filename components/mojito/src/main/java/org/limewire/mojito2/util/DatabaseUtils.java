@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -87,7 +88,7 @@ public class DatabaseUtils {
         }
         
         long t = ((locationCount 
-                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
+                * DHTSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());
         
         // Do never republish more than every X minutes

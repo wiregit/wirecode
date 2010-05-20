@@ -154,6 +154,7 @@ public class PublisherQueue implements Closeable {
             }
             
             Entry<KUID, DHTValue> entry = it.next();
+            it.remove();
             
             KUID key = entry.getKey();
             DHTValue value = entry.getValue();
@@ -174,8 +175,6 @@ public class PublisherQueue implements Closeable {
             });
             
             futures.add(future);
-            
-            it.remove();
             stack.push();
         }
     }

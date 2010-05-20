@@ -22,7 +22,6 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -174,7 +173,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
             will(returnValue(proxies));
         }});
        
-        PrivilegedAccessor.setValue(DatabaseSettings.VALUE_REPUBLISH_INTERVAL, "value", 100);
+        PrivilegedAccessor.setValue(DHTSettings.VALUE_REPUBLISH_INTERVAL, "value", 100);
         
         PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
         assertNull("First value should be null, since not stable", value);

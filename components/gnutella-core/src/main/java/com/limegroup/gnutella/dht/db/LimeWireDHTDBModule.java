@@ -7,6 +7,10 @@ public class LimeWireDHTDBModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        
+        bind(PublisherQueue.class);
+        bind(AltLocPublisher.class);
+        
         bind(AltLocFinder.class).to(AltLocFinderImpl.class);
         
         bind(PushProxiesValue2.Self.class);

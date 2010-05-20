@@ -150,7 +150,7 @@ public abstract class PushProxiesValue2 implements SerializableValue {
     }
     
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         } else if (!(o instanceof PushProxiesValue2)) {

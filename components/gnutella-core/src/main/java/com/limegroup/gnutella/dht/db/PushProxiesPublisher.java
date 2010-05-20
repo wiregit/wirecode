@@ -16,7 +16,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.settings.DatabaseSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -137,7 +136,7 @@ public class PushProxiesPublisher implements DHTEventListener {
     }
     
     private boolean needsToBeRepublished() {
-        boolean needsRepublish = System.currentTimeMillis() - lastPublishTime >= DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue();
+        boolean needsRepublish = System.currentTimeMillis() - lastPublishTime >= DHTSettings.VALUE_REPUBLISH_INTERVAL.getValue();
         if (needsRepublish) {
             publishReasons.count("time");
         }
