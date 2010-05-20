@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.util.FileUtils;
 
@@ -811,6 +812,33 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         PasswordSetting result = 
             new PasswordSetting(DEFAULT_PROPS, PROPS, PasswordSetting.MD5, key, defaultValue);
         handleSettingInternal(result, null);
+        return result;
+    }
+    
+    /**
+     * Creates a new {@link TimeSetting} instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized TimeSetting createTimeSetting(
+            String key, long defaultValue, TimeUnit unit) {
+         TimeSetting result = new TimeSetting(DEFAULT_PROPS, PROPS, 
+                 key, defaultValue, unit);
+         handleSettingInternal(result, null);
+         return result;
+    }
+
+    /**
+     * Creates a new remote {@link TimeSetting} instance with the specified
+     * arguments.
+     */
+    public synchronized TimeSetting createRemoteTimeSetting(String key, 
+            long defaultValue, String remoteKey, long min, long max, TimeUnit unit) {
+        TimeSetting result = new TimeSetting(DEFAULT_PROPS, PROPS, 
+                key, defaultValue, min, max, unit);
+        handleSettingInternal(result, remoteKey);
         return result;
     }
     
