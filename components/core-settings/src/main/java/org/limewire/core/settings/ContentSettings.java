@@ -20,7 +20,7 @@ public class ContentSettings extends LimeProps {
      * Both this & the above must be on for management to be active.
      */
     public static final BooleanSetting USER_WANTS_MANAGEMENTS =
-        FACTORY.createBooleanSetting("CONTENT_USER_MANAGEMENT_ACTIVE", true);
+        FACTORY.createBooleanSetting("USER_WANTS_MANAGEMENTS", true);
     
     /**
      * Returns true if content management is active.
