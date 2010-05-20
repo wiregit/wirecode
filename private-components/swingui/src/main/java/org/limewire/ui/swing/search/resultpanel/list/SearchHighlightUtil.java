@@ -3,14 +3,10 @@ package org.limewire.ui.swing.search.resultpanel.list;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
 
 class SearchHighlightUtil {
-    private static final Log LOG = LogFactory.getLog(SearchHighlightUtil.class);
     
-    private final StringBuilder builderBuffer = new StringBuilder();
     private final Matcher matcher;
 
      SearchHighlightUtil(String search) {
