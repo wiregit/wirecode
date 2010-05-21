@@ -108,7 +108,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         this.udpPinger = udpPinger;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         
-        this.hostFilter = new HostFilterDelegate(ipFilter);
+        this.hostFilter = new DefaultHostFilter(ipFilter);
         
         messageFactory.setParser(
                 (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
@@ -190,9 +190,9 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     @Override
     public synchronized void stop() {
         IoUtils.close(controller);
+        controller = InactiveController.CONTROLLER;
         
         fireStopped();
-        controller = InactiveController.CONTROLLER;
     }
     
     @Override

@@ -55,6 +55,8 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.dht.db.ValuePublisher;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
@@ -80,7 +82,9 @@ public class ActiveController extends SimpleController {
     
     private final MojitoDHT dht;
     
-    private final ValuePublisher publisher;
+    private final AltLocPublisher locationPublisher;
+    
+    private final PushProxiesPublisher proxyPublisher;
     
     private final BootstrapWorker bootstrapWorker;
     
@@ -132,6 +136,10 @@ public class ActiveController extends SimpleController {
         publisher = new ValuePublisher(dht, 
                 DatabaseSettings.STORABLE_PUBLISHER_PERIOD.getValue(), 
                 TimeUnit.MILLISECONDS);
+        
+        locationPublisher = new AltLocPublisher(
+                queue, networkManager, applicationServices, 
+                gnutellaFileView, tigerTreeCache);
         
         bootstrapWorker.addBootstrapListener(new BootstrapListener() {
             @Override

@@ -64,7 +64,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
             
             KUID key = KUIDUtils.toKUID(guid);
             EntityKey lookupKey = EntityKey.createEntityKey(
-                    key, PushProxiesValue2.PUSH_PROXIES);
+                    key, IPushProxiesValue.PUSH_PROXIES);
             
             final DHTFuture<ValueEntity[]> lookup 
                 = dhtManager.getAll(lookupKey);
@@ -135,15 +135,15 @@ public class DHTPushEndpointFinder implements PushEndpointService {
                 DHTValue value = values.getValue();
                 
                 DHTValueType valueType = value.getValueType();
-                if (!valueType.equals(PushProxiesValue2.PUSH_PROXIES)) {
+                if (!valueType.equals(IPushProxiesValue.PUSH_PROXIES)) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Not a PushProxy: " + value);
                     }
                     continue;
                 }
                 
-                PushProxiesValue2 pushProxies 
-                    = new PushProxiesValue2.Impl(value);
+                IPushProxiesValue pushProxies 
+                    = new DefaultPushProxiesValue(value);
                 if (!Arrays.equals(guid, pushProxies.getGUID())) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Not for GUID: " + guid 

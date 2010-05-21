@@ -16,6 +16,7 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -65,12 +66,15 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
             will(returnValue(selfEndpoint));
         }});
         
-        PushProxiesValue value = injector.getInstance(
-                PushProxiesValue.Self.class);
+        ApplicationServices applicationServices = injector.getInstance(
+                ApplicationServices.class);
+        
+        IPushProxiesValue value2 = new DefaultPushProxiesValue(
+                networkManagerStub, applicationServices, pushEndpointFactory);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         
-        Set<? extends IpPort> proxies = value.getPushProxies();
+        Set<? extends IpPort> proxies = value2.getPushProxies();
         assertEquals(1, proxies.size());
 
         assertContains(proxies, new ConnectableImpl(
@@ -91,7 +95,7 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
             will(returnValue(pushProxies));
         }});
         
-        assertEquals(pushProxies, value.getPushProxies());
+        assertEquals(pushProxies, value2.getPushProxies());
         context.assertIsSatisfied();
     }
 

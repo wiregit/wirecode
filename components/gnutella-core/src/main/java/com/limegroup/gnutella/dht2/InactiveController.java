@@ -13,13 +13,15 @@ import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+@Singleton
 public class InactiveController implements Controller {
 
-    public static final Controller CONTROLLER = new InactiveController();
+    public static final InactiveController CONTROLLER = new InactiveController();
     
     private InactiveController() {
     }

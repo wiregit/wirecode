@@ -21,8 +21,8 @@ public class DHTEvent extends EventObject {
     
     private final Type type;
     
-    public DHTEvent(Type type, Controller controller) {
-        super(controller);
+    public DHTEvent(Type type, DHTManager manager) {
+        super(manager);
         this.type = type;
     }
     
@@ -30,8 +30,8 @@ public class DHTEvent extends EventObject {
         return type;
     }
     
-    public Controller getController() {
-        return (Controller)getSource();
+    public DHTManager getManager() {
+        return (DHTManager)getSource();
     }
     
     @Override

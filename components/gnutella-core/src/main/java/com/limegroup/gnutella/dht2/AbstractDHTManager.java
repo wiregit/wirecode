@@ -30,15 +30,15 @@ abstract class AbstractDHTManager implements DHTManager {
     }
     
     protected synchronized void fireStarting() {
-        dispatchEvent(new DHTEvent(Type.STARTING, getController()));
+        dispatchEvent(new DHTEvent(Type.STARTING, this));
     }
     
     protected synchronized void fireStopped() {
-        dispatchEvent(new DHTEvent(Type.STOPPED, getController()));
+        dispatchEvent(new DHTEvent(Type.STOPPED, this));
     }
     
     protected synchronized void fireConnected() {
-        dispatchEvent(new DHTEvent(Type.CONNECTED, getController()));
+        dispatchEvent(new DHTEvent(Type.CONNECTED, this));
     }
     
     /**

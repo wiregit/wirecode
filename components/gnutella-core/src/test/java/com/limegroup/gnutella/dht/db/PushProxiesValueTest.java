@@ -8,7 +8,6 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.mojito2.routing.Version;
 
 import com.limegroup.gnutella.dht.DHTTestCase;
 
@@ -36,8 +35,9 @@ public class PushProxiesValueTest extends DHTTestCase {
         proxies.add(new IpPortImpl("localhost", 4321));
         proxies.add(new IpPortImpl("localhost", 3333));
         
-        PushProxiesValue value1 = new PushProxiesValue.Impl(
-                Version.ZERO, guid, features, fwtVersion, port, proxies);
+        IPushProxiesValue value1 = new DefaultPushProxiesValue(
+                IPushProxiesValue.VERSION, guid, features, 
+                fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
         assertEquals(features, value1.getFeatures());
@@ -50,8 +50,8 @@ public class PushProxiesValueTest extends DHTTestCase {
                 value1.getPushProxies().iterator().next().getPort());
         
         // Serialize and de-serialize it again
-        PushProxiesValue value2 
-            = new PushProxiesValue.Impl(
+        IPushProxiesValue value2 
+            = new DefaultPushProxiesValue(
                     value1.serialize());
         
         // Should be equal

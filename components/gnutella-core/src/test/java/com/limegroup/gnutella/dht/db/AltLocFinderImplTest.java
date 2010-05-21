@@ -145,8 +145,8 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         
         
         // publish push proxy manually
-        PushProxiesValue pushProxiesValue 
-            = new PushProxiesValue.Self(networkManager, 
+        DefaultPushProxiesValue pushProxiesValue 
+            = new DefaultPushProxiesValue(networkManager, 
                     applicationServices, pushEndpointFactory);
         
         if (publish) {

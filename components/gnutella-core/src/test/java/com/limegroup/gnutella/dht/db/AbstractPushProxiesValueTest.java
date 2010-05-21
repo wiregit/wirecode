@@ -11,7 +11,6 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.mojito2.routing.Version;
 import org.limewire.util.BaseTestCase;
 
 
@@ -62,14 +61,14 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
        context.assertIsSatisfied();
     }
     
-    private static class TestPushProxiesValue extends PushProxiesValue {
+    private static class TestPushProxiesValue extends DefaultPushProxiesValue {
 
         private GUID guid = new GUID();
         
         private IpPortSet proxies;
         
         public TestPushProxiesValue() throws Exception {
-            super(Version.ZERO);
+            super(PushProxiesValue.VERSION);
             proxies = new IpPortSet(new IpPortImpl("129.0.0.1", 9595));
         }
         
