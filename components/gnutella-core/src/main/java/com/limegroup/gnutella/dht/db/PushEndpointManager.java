@@ -65,7 +65,7 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
     
     private final TimeUnit unit;
     
-    private ScheduledFuture<?> future = null;
+    private ScheduledFuture<?> purgeFuture = null;
     
     private boolean open = true;
     
@@ -92,56 +92,15 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
         this.unit = unit;
     }
     
-    /**
-     * Returns true if the {@link PushEndpointManager} is open.
-     */
-    public synchronized boolean isOpen() {
-        return open;
-    }
-    
-    /**
-     * Returns true if the {@link PushEndpointManager} is running.
-     */
-    public synchronized boolean isRunning() {
-        return open && future != null && !future.isDone();
-    }
-    
-    /**
-     * Starts the {@link PushEndpointManager}
-     */
-    public synchronized void start() {
-        if (!open) {
-            throw new IllegalStateException();
-        }
-        
-        if (isRunning()) {
-            return;
-        }
-        
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                purge();
-            }
-        };
-        
-        future = EXECUTOR.scheduleWithFixedDelay(
-                task, frequency, frequency, unit);
-    }
-    
-    /**
-     * Stops the {@link PushEndpointManager}
-     */
-    public synchronized void stop() {
-        if (future != null) {
-            future.cancel(true);
-        }
-    }
-    
     @Override
     public synchronized void close() {
         open = false;
-        stop();
+        
+        if (purgeFuture != null) {
+            purgeFuture.cancel(true);
+        }
+        
+        handles.clear();
     }
     
     @Override
@@ -157,6 +116,10 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
         }
         
         synchronized (this) {
+            if (!open) {
+                throw new IllegalStateException();
+            }
+            
             FutureHandle handle = handles.get(guid);
             if (handle != null) {
                 return handle.future;
@@ -165,8 +128,20 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
             DHTFuture<PushEndpoint> future 
                 = service.findPushEndpoint(guid);
             future.addFutureListener(listener);
-            
             handles.put(guid, new FutureHandle(future));
+            
+            if (purgeFuture == null || purgeFuture.isDone()) {
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        purge();
+                    }
+                };
+                
+                purgeFuture = EXECUTOR.scheduleWithFixedDelay(
+                        task, frequency, frequency, unit);
+            }
+            
             return future;
         }
     }
@@ -187,6 +162,10 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
                 handle.future.cancel(true);
                 it.remove();
             }
+        }
+        
+        if (handles.isEmpty()) {
+            purgeFuture.cancel(true);
         }
     }
     
