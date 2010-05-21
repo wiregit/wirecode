@@ -101,4 +101,10 @@ public interface ActivityCallback extends DownloadCallback
      */
     void handleDownloadException(DownloadAction downLoadAction, DownloadException e, boolean supportsNewSaveDir);
 
+    /**
+     * Asks the user whether to continue with a torrent if scanning the torrent file failed.
+     * @return true if the download should continue.
+     */
+    boolean promptAboutTorrentDownloadWithFailedScan();
+    
 }

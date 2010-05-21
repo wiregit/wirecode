@@ -289,4 +289,15 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
             return guiCallback.promptAboutTorrentWithBannedExtensions(torrent, bannedExtensions);
         return true;
     }
+    
+    /**
+     * Asks the user whether to continue with a torrent if scanning the torrent file failed.
+     * @return true if the download should continue.
+     */
+    @Override
+    public boolean promptAboutTorrentDownloadWithFailedScan() {
+        if (guiCallback != null)
+            return guiCallback.promptAboutTorrentDownloadWithFailedScan();
+        return true;
+    }
 }

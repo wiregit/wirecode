@@ -133,4 +133,26 @@ public class GuiCallbackImpl implements GuiCallback {
         });
         return result.get() == JOptionPane.YES_OPTION;
     }
+    
+    /**
+     * Asks the user whether to continue with a torrent download if the torrent file could not be scanned.
+     * @return true if the download should continue.
+     */
+    @Override
+    public boolean promptAboutTorrentDownloadWithFailedScan() {
+        String warning = I18n.tr("The torrent file download could not be virus scanned.");
+        String prompt = I18n.tr("Do you want to continue and download the torrent?");
+        final MultiLineLabel label = new MultiLineLabel(warning + "\n\n" + prompt, 400);
+        final String title = I18n.tr("Warning");
+        final AtomicInteger result = new AtomicInteger(JOptionPane.YES_OPTION);
+        SwingUtils.invokeNowOrWait(new Runnable() {
+            @Override
+            public void run() {
+                result.set(FocusJOptionPane.showConfirmDialog(
+                        GuiUtils.getMainFrame(), label, title,
+                        JOptionPane.YES_NO_OPTION));
+            }
+        });
+        return result.get() == JOptionPane.YES_OPTION;
+    }
 }

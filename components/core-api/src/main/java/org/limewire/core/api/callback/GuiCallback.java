@@ -54,4 +54,10 @@ public interface GuiCallback {
      */
     boolean promptAboutTorrentWithBannedExtensions(Torrent torrent,
             Set<String> bannedExtensions);
+
+    /**
+     * Asks the user whether to continue with a torrent download if the torrent file could not be scanned.
+     * @return true if the download should continue.
+     */
+    boolean promptAboutTorrentDownloadWithFailedScan();
 }

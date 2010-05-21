@@ -457,6 +457,11 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 return true;
             }
 
+            @Override
+            public boolean promptAboutTorrentDownloadWithFailedScan() {
+                return true;
+            }
+
         }, new CategoryManager() {
             @Override
             public Category getCategoryForExtension(String extension) {

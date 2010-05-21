@@ -59,12 +59,22 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
     @Override
     public void handleEvent(DownloadStateEvent event) {
         DownloadState downloadStatus = event.getType();
-        if (DownloadState.COMPLETE == downloadStatus) {
-            if (downloader instanceof BTTorrentFileDownloader) {
-                handleBTTorrentFileDownloader();
-            } else {
-                handleCoreDownloader();
+        
+        if (DownloadState.SCAN_FAILED == downloadStatus) {
+            if (!activityCallback.promptAboutTorrentDownloadWithFailedScan()) {
+                // Don't start downloading if the user said not to
+                return;
             }
+        } else if (DownloadState.COMPLETE != downloadStatus) {
+            // Don't need to kick off any torrents for other states since the
+            //  torrent file hasn't been recieved.
+            return;
+        }
+        
+        if (downloader instanceof BTTorrentFileDownloader) {
+            handleBTTorrentFileDownloader();
+        } else {
+            handleCoreDownloader();
         }
     }
 

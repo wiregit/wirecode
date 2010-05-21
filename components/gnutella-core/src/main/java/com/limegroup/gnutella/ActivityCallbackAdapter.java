@@ -117,4 +117,9 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent, Set<String> bannedExtensions) {
         return true;
     }
+
+    @Override
+    public boolean promptAboutTorrentDownloadWithFailedScan() {
+        return true;
+    }
 }
