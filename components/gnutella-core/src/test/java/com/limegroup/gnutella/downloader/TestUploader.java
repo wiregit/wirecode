@@ -33,7 +33,6 @@ import org.limewire.io.GUID;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.DebugRunnable;
@@ -1439,42 +1438,42 @@ public class TestUploader {
 
             @Override
             public PushEndpoint getCached(GUID guid) {
-                return null;
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void overwriteProxies(byte[] guid, String httpString) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void removePushProxy(byte[] bytes, IpPort pushProxy) {
-                throw new IllegalStateException();            
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void setAddr(byte[] guid, IpPort addr) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void setFWTVersionSupported(byte[] guid, int version) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
-            public DHTFuture<PushEndpoint> findPushEndpoint(GUID guid) {
-                throw new IllegalStateException();
+            public PushEndpoint getPushEndpoint(GUID guid) {
+                throw new UnsupportedOperationException();
             }
         }
     }

@@ -25,6 +25,7 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.DHTTestUtils;
+import com.limegroup.gnutella.dht.db.DefaultPushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.dht2.DHTManager;
@@ -143,7 +144,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
     }
     
     private void publishPushProxyForGuid(MojitoDHT dht, GUID guid, int proxyPort, int clientPort) throws Exception {
-        PushProxiesValue value = new PushProxiesValue.Impl(
+        PushProxiesValue value = new DefaultPushProxiesValue(
                 dht.getVersion(), guid.bytes(), (byte) 0, 
                 RUDPUtils.VERSION, clientPort, 
                 Collections.singleton(new IpPortImpl("127.0.0.1", proxyPort)));

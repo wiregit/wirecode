@@ -29,7 +29,6 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.InactiveController;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -469,7 +468,7 @@ public class RequeryManagerTest extends LimeTestCase {
             one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
         }});
         requeryManager.handleDHTEvent(new DHTEvent(
-                DHTEvent.Type.STOPPED, InactiveController.CONTROLLER));
+                DHTEvent.Type.STOPPED, dhtManager));
         assertFalse(requeryManager.isWaitingForResults());
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());

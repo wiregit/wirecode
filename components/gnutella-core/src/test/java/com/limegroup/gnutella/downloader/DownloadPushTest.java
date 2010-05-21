@@ -514,7 +514,7 @@ public class DownloadPushTest extends DownloadTestCase {
         
         // Now get the PE from our cache and make sure no proxies exist & its demoted.
         PushEndpoint pe = injector.getInstance(
-                PushEndpointCache.class).findPushEndpoint(guid).get();
+                PushEndpointCache.class).getPushEndpoint(guid);
         
         assertTrue("pe: " + pe, pe.getProxies().isEmpty());
         assertTrue("pe: " + pe, badPushLoc.isDemoted());
