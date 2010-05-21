@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.dht.db;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
@@ -30,6 +32,9 @@ public class AltLocPublisher extends Publisher {
     
     private static final String TIMESTAMP_KEY 
         = AltLocPublisher.class.getName() + ".TIMESTAMP_KEY";
+    
+    @InspectablePrimitive(value = "The number of values that have been published")
+    private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
     
     private final PublisherQueue queue;
     
@@ -118,7 +123,9 @@ public class AltLocPublisher extends Publisher {
                         ttroot, firewalled, supportsTLS);
                 
                 publish(primaryKey, value.serialize());
+                
                 setTimeStamp(fd);
+                PUBLISH_COUNT.incrementAndGet();
             }
         } finally {
             gnutellaFileView.getReadLock().unlock();

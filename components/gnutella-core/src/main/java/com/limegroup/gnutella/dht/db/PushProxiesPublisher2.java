@@ -2,8 +2,10 @@ package com.limegroup.gnutella.dht.db;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -28,6 +30,9 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 @Singleton
 public class PushProxiesPublisher2 extends Publisher {
 
+    @InspectablePrimitive(value = "The number of values that have been published")
+    private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
+    
     private final PublisherQueue queue;
     
     private final NetworkManager networkManager;
@@ -124,6 +129,7 @@ public class PushProxiesPublisher2 extends Publisher {
         
         publish(key, publishedValue.serialize());
         publishedTimeStamp = System.currentTimeMillis();
+        PUBLISH_COUNT.incrementAndGet();
     }
     
     /**
