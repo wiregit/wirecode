@@ -59,7 +59,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        PrivilegedAccessor.setValue(DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL, "value", 1000L);
+        PrivilegedAccessor.setValue(DHTSettings.PUBLISH_PROXIES_TIME, "value", 1000L);
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);

@@ -227,7 +227,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         context.checking(new Expectations() {{
             one(executorService).scheduleWithFixedDelay(with(any(Runnable.class)), 
                     with(any(Long.class)),
-                    with(equal(DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue())),
+                    with(equal(DHTSettings.PUBLISH_PROXIES_TIME.getValue())),
                     with(equal(TimeUnit.MILLISECONDS)));
             will(new CustomAction("save runnable and return future action") {
                 public Object invoke(Invocation invocation) throws Throwable {

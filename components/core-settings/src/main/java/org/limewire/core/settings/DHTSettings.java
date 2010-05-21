@@ -315,14 +315,6 @@ public class DHTSettings extends LimeProps {
                 10L * 1000L, Long.MAX_VALUE);
 
     /**
-     * The time in milliseconds push proxies have to be stable before being published.
-     */
-    public static final TimeSetting PUSH_PROXY_STABLE_PUBLISHING_INTERVAL
-    = FACTORY.createRemoteTimeSetting("PUSH_PROXY_STABLE_PUBLISHING_INTERVAL",
-            60L * 1000L, "DHT.pushProxyStablePublishingInterval",
-            10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-    
-    /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.
      * <p>
      * The setting is actually never read!
@@ -380,10 +372,28 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.PublishPushProxies");
     
     /**
-     * 
+     * The frequency at which the Push-Proxy publisher is running.
      */
     public static final TimeSetting PROXY_PUBLISHER_FREQUENCY
-        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 30L*60L*1000L, 
-                "DHT.ProxyPublisherFrequency", 3L*60L*1000L, 24L*60L*60L*1000L, 
+        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 2L*60L*1000L, 
+                "DHT.ProxyPublisherFrequency", 30L*1000L, 24L*60L*60L*1000L, 
                 TimeUnit.MILLISECONDS);
+    
+    /**
+     * The amount of time a Push-Proxy configuration must remain stable
+     * (i.e. not change) before it's considered to be published to the DHT.
+     */
+    public static final TimeSetting STABLE_PROXIES_TIME
+        = FACTORY.createRemoteTimeSetting("STABLE_PROXIES_TIME", 2L*60L*1000L, 
+                "DHT.StableProxiesTime", 60L*1000L, Long.MAX_VALUE, 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * The amount of time in which stable Push-Proxy configurations are 
+     * being re-published.
+     */
+    public static final TimeSetting PUBLISH_PROXIES_TIME
+        = FACTORY.createRemoteTimeSetting("PUBLISH_PROXIES_TIME",
+                30L * 60L * 1000L, "DHT.PublishProxiesTime",
+                10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 }

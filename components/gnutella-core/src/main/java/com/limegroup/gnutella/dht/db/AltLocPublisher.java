@@ -1,15 +1,11 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.Closeable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.storage.DHTValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,6 +13,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;
@@ -25,15 +22,11 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
- * 
+ * The {@link AltLocPublisher} publishes the localhost as an
+ * {@link AlternateLocation} to the DHT.
  */
 @Singleton
-public class AltLocPublisher implements Closeable {
-
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory(
-                "AltLocPublisherThread"));
+public class AltLocPublisher extends Publisher {
     
     private static final String TIMESTAMP_KEY 
         = AltLocPublisher.class.getName() + ".TIMESTAMP_KEY";
@@ -48,16 +41,8 @@ public class AltLocPublisher implements Closeable {
 
     private final FileView gnutellaFileView;
     
-    private final long frequency;
-    
-    private final TimeUnit unit;
-    
-    private boolean open = true;
-    
-    private ScheduledFuture<?> future;
-    
     /**
-     * 
+     * Creates a {@link AltLocPublisher}
      */
     @Inject
     public AltLocPublisher(PublisherQueue queue,
@@ -72,7 +57,7 @@ public class AltLocPublisher implements Closeable {
     }
     
     /**
-     * 
+     * Creates a {@link AltLocPublisher}
      */
     public AltLocPublisher(PublisherQueue queue,
             NetworkManager networkManager, 
@@ -80,50 +65,21 @@ public class AltLocPublisher implements Closeable {
             @GnutellaFiles FileView gnutellaFileView, 
             Provider<HashTreeCache> tigerTreeCache,
             long frequency, TimeUnit unit) {
+        super(frequency, unit);
         
         this.queue = queue;
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.gnutellaFileView = gnutellaFileView;
         this.tigerTreeCache = tigerTreeCache;
-        
-        this.frequency = frequency;
-        this.unit = unit;
     }
     
-    public synchronized void start() {
-        if (!open) {
-            throw new IllegalStateException();
-        }
-        
-        if (future != null && !future.isDone()) {
-            return;
-        }
-        
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                publish();
-            }
-        };
-        
-        future = EXECUTOR.scheduleWithFixedDelay(
-                task, frequency, frequency, unit);
-    }
-    
-    public synchronized void stop() {
-        if (future != null) {
-            future.cancel(true);
-        }
-    }
-
+    /**
+     * Tries to publish the localhost as an {@link AlternateLocation} 
+     * to the DHT
+     */
     @Override
-    public synchronized void close() {
-        open = false;
-        stop();
-    }
-    
-    private void publish() {
+    protected void publish() {
         if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
             return;
         }
@@ -161,7 +117,7 @@ public class AltLocPublisher implements Closeable {
                         Version.ZERO, guid, port, fileSize, 
                         ttroot, firewalled, supportsTLS);
                 
-                queue.put(primaryKey, value.serialize());
+                publish(primaryKey, value.serialize());
                 setTimeStamp(fd);
             }
         } finally {
@@ -169,15 +125,32 @@ public class AltLocPublisher implements Closeable {
         }
     }
     
+    /**
+     * Publishes the given {@link DHTValue} to the DHT
+     */
+    protected void publish(KUID key, DHTValue value) {
+        queue.put(key, value);
+    }
+    
+    /**
+     * Returns the {@link FileDesc}'s time stamp or 0L if it hasn't
+     * been published yet.
+     */
     private static long getTimeStamp(FileDesc fd) {
         Long timeStamp = (Long)fd.getClientProperty(TIMESTAMP_KEY);
         return timeStamp != null ? timeStamp : 0L;
     }
     
+    /**
+     * Sets the {@link FileDesc}'s time stamp to "now".
+     */
     private static void setTimeStamp(FileDesc fd) {
         fd.putClientProperty(TIMESTAMP_KEY, System.currentTimeMillis());
     }
     
+    /**
+     * Returns true if the {@link FileDesc} needs to be re-published.
+     */
     private static boolean isPublishRequired(FileDesc fd) {
         long time = System.currentTimeMillis() - getTimeStamp(fd);
         long every = DHTSettings.PUBLISH_LOCATION_EVERY.getTimeInMillis();

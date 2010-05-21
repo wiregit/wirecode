@@ -1,13 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.Closeable;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -15,6 +10,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito2.KUID;
+import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.net.address.StrictIpPortSet;
 
 import com.google.inject.Inject;
@@ -25,14 +21,13 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
+/**
+ * The {@link PushProxiesPublisher2} publishes the localhost's
+ * Push-Proxies to the DHT.
+ */
 @Singleton
-public class PushProxiesPublisher2 implements Closeable {
+public class PushProxiesPublisher2 extends Publisher {
 
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory(
-                "PushProxiesPublisherThread"));
-    
     private final PublisherQueue queue;
     
     private final NetworkManager networkManager;
@@ -41,18 +36,17 @@ public class PushProxiesPublisher2 implements Closeable {
     
     private final PushEndpointFactory pushEndpointFactory;
     
-    private final long frequency;
+    private volatile PushProxiesValue2 pendingValue = null;
     
-    private final TimeUnit unit;
+    private volatile PushProxiesValue2 publishedValue = null;
     
-    private boolean open = true;
+    private volatile long pendingTimeStamp = 0L;
     
-    private ScheduledFuture<?> future;
+    private volatile long publishedTimeStamp = 0L;
     
-    private volatile PushProxiesValue2 existing = null;
-    
-    private volatile long timeStamp = 0L;
-    
+    /**
+     * Creates a {@link PushProxiesPublisher2}
+     */
     @Inject
     public PushProxiesPublisher2(PublisherQueue queue, 
             NetworkManager networkManager,
@@ -63,54 +57,27 @@ public class PushProxiesPublisher2 implements Closeable {
                 TimeUnit.MILLISECONDS);
     }
     
+    /**
+     * Creates a {@link PushProxiesPublisher2}
+     */
     public PushProxiesPublisher2(PublisherQueue queue, 
             NetworkManager networkManager,
             ApplicationServices applicationServices,
             PushEndpointFactory pushEndpointFactory,
             long frequency, TimeUnit unit) {
+        super(frequency, unit);
         
         this.queue = queue;
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.pushEndpointFactory = pushEndpointFactory;
-        
-        this.frequency = frequency;
-        this.unit = unit;
     }
     
-    public synchronized void start() {
-        if (!open) {
-            throw new IllegalStateException();
-        }
-        
-        if (future != null && !future.isDone()) {
-            return;
-        }
-        
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                publish();
-            }
-        };
-        
-        future = EXECUTOR.scheduleWithFixedDelay(
-                task, frequency, frequency, unit);
-    }
-    
-    public synchronized void stop() {
-        if (future != null) {
-            future.cancel(true);
-        }
-    }
-    
+    /**
+     * Tries to publish the localhost's Push-Proxies to the DHT
+     */
     @Override
-    public synchronized void close() {
-        open = false;
-        stop();
-    }
-    
-    private void publish() {
+    protected void publish() {
         if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
             return;
         }
@@ -127,18 +94,48 @@ public class PushProxiesPublisher2 implements Closeable {
                 PushProxiesValue2.VERSION, guid, 
                 features, fwtVersion, port, proxies);
         
-        long time = System.currentTimeMillis() - timeStamp;
-        if (value.equals(existing) && time < DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getTimeInMillis()) {
+        // Check if the current value is equal to the pending-value.
+        // If *NOT* then replace the pending-value with the current
+        // value and reset the time stamp. The idea is to publish 
+        // only stable configurations to the DHT.
+        if (!value.equals(pendingValue)) {
+            pendingValue = value;
+            pendingTimeStamp = System.currentTimeMillis();
+        }
+        
+        // Check for how long the pending-value has been stable for.
+        // Do not publish if it's less than the given threshold!
+        long stableTime = System.currentTimeMillis() - pendingTimeStamp;
+        if (stableTime < DHTSettings.STABLE_PROXIES_TIME.getTimeInMillis()) {
             return;
         }
         
-        existing = value;
-        timeStamp = System.currentTimeMillis();
+        // Check the time since the last publishing and if it's less
+        // than the threshold and the value hasn't changed ever since
+        // then don't re-publish the value.
+        long publishTime = System.currentTimeMillis() - publishedTimeStamp;
+        if (publishTime < DHTSettings.PUBLISH_PROXIES_TIME.getTimeInMillis() 
+                && pendingValue.equals(publishedValue)) {
+            return;
+        }
         
         KUID key = KUIDUtils.toKUID(new GUID(guid));
-        queue.put(key, value.serialize());
+        publishedValue = pendingValue;
+        
+        publish(key, publishedValue.serialize());
+        publishedTimeStamp = System.currentTimeMillis();
     }
     
+    /**
+     * Publishes the given {@link DHTValue} to the DHT
+     */
+    protected void publish(KUID key, DHTValue value) {
+        queue.put(key, value);
+    }
+    
+    /**
+     * Extracts and returns localhost's Push-Proxies.
+     */
     private Set<? extends IpPort> getPushProxies(PushEndpoint endpoint) {
         if (networkManager.acceptedIncomingConnection()
                 && networkManager.isIpPortValid()) {

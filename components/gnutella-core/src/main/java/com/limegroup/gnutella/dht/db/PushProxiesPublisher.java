@@ -33,7 +33,7 @@ import com.limegroup.gnutella.dht2.DHTEvent.Type;
  * It implements {@link DHTEventListener} and starts publishing push proxies
  * once the DHT is bootstrapped. It only publishes stable configurations that 
  * have been stable for a certain amount of time specified by 
- * {@link DHTSettings#PUSH_PROXY_STABLE_PUBLISHING_INTERVAL}.
+ * {@link DHTSettings#PUBLISH_PROXIES_TIME}.
  * <p>
  * Note: For this class to work it must be registered as a listener to
  * {@link DHTManagerImpl} before it fires events.
@@ -203,7 +203,7 @@ public class PushProxiesPublisher implements DHTEventListener {
             if (publishingFuture != null) {
                 publishingFuture.cancel(false);
             }
-            long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
+            long interval = DHTSettings.PUBLISH_PROXIES_TIME.getValue();
             long initialDelay = (long)(Math.random() * interval);
             publishingFuture = backgroundExecutor.scheduleWithFixedDelay(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
