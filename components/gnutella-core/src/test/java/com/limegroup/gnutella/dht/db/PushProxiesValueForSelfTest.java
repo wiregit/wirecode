@@ -65,8 +65,8 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
             will(returnValue(selfEndpoint));
         }});
         
-        PushProxiesValue2 value = injector.getInstance(
-                PushProxiesValue2.Self.class);
+        PushProxiesValue value = injector.getInstance(
+                PushProxiesValue.Self.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         

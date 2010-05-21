@@ -39,8 +39,8 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
        final TestPushProxiesValue value 
            = new TestPushProxiesValue();
        
-       final PushProxiesValue2 mockedValue 
-           = context.mock(PushProxiesValue2.class);
+       final PushProxiesValue mockedValue 
+           = context.mock(PushProxiesValue.class);
        
        context.checking(new Expectations() {{
            allowing(mockedValue).getTLSInfo();
@@ -62,7 +62,7 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
        context.assertIsSatisfied();
     }
     
-    private static class TestPushProxiesValue extends PushProxiesValue2 {
+    private static class TestPushProxiesValue extends PushProxiesValue {
 
         private GUID guid = new GUID();
         

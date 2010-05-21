@@ -36,7 +36,7 @@ public class PushProxiesValueTest extends DHTTestCase {
         proxies.add(new IpPortImpl("localhost", 4321));
         proxies.add(new IpPortImpl("localhost", 3333));
         
-        PushProxiesValue2 value1 = new PushProxiesValue2.Impl(
+        PushProxiesValue value1 = new PushProxiesValue.Impl(
                 Version.ZERO, guid, features, fwtVersion, port, proxies);
         
         assertEquals(guid, value1.getGUID());
@@ -50,8 +50,8 @@ public class PushProxiesValueTest extends DHTTestCase {
                 value1.getPushProxies().iterator().next().getPort());
         
         // Serialize and de-serialize it again
-        PushProxiesValue2 value2 
-            = new PushProxiesValue2.Impl(
+        PushProxiesValue value2 
+            = new PushProxiesValue.Impl(
                     value1.serialize());
         
         // Should be equal

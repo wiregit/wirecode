@@ -24,11 +24,11 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
- * The {@link PushProxiesPublisher2} publishes the localhost's
+ * The {@link PushProxiesPublisher} publishes the localhost's
  * Push-Proxies to the DHT.
  */
 @Singleton
-public class PushProxiesPublisher2 extends Publisher {
+public class PushProxiesPublisher extends Publisher {
 
     @InspectablePrimitive(value = "The number of values that have been published")
     private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
@@ -50,10 +50,10 @@ public class PushProxiesPublisher2 extends Publisher {
     private volatile long publishedTimeStamp = 0L;
     
     /**
-     * Creates a {@link PushProxiesPublisher2}
+     * Creates a {@link PushProxiesPublisher}
      */
     @Inject
-    public PushProxiesPublisher2(PublisherQueue queue, 
+    public PushProxiesPublisher(PublisherQueue queue, 
             NetworkManager networkManager,
             ApplicationServices applicationServices,
             PushEndpointFactory pushEndpointFactory) {
@@ -63,9 +63,9 @@ public class PushProxiesPublisher2 extends Publisher {
     }
     
     /**
-     * Creates a {@link PushProxiesPublisher2}
+     * Creates a {@link PushProxiesPublisher}
      */
-    public PushProxiesPublisher2(PublisherQueue queue, 
+    public PushProxiesPublisher(PublisherQueue queue, 
             NetworkManager networkManager,
             ApplicationServices applicationServices,
             PushEndpointFactory pushEndpointFactory,
