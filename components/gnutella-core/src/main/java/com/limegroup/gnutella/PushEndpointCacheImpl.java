@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,8 +19,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceScheduler;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -135,25 +132,17 @@ class PushEndpointCacheImpl implements PushEndpointCache {
     		current.setFWTVersion(version);
     }
     
+    @Override
     public CachedPushEndpoint getCached(GUID guid) {
         return GUID_PROXY_MAP.get(guid);
     }
 
+    @Override
     public PushEndpoint getPushEndpoint(GUID guid) {
         CachedPushEndpoint cached = GUID_PROXY_MAP.get(guid);
         return cached != null ? cached.createClone() : null;
     }
     
-    public DHTFuture<PushEndpoint> findPushEndpoint(GUID guid) {
-        PushEndpoint pushEndpoint = getPushEndpoint(guid);
-        if (pushEndpoint != null) {
-            return new DHTValueFuture<PushEndpoint>(pushEndpoint);
-        } else {
-            return new DHTValueFuture<PushEndpoint>(
-                    new NoSuchElementException());
-        }
-    }
-
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Updating proxies for: " + guid + " with: " + pushEndpoint + ", valid: " + valid);

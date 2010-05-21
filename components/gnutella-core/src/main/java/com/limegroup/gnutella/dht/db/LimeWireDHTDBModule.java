@@ -11,11 +11,12 @@ public class LimeWireDHTDBModule extends AbstractModule {
         bind(PublisherQueue.class);
         bind(AltLocPublisher.class);
         bind(PushProxiesPublisher.class);
+        bind(PushEndpointService.class).to(PushEndpointManager.class);
         
         bind(AltLocFinder.class).to(AltLocFinderImpl.class);
         
         bind(PushEndpointService.class).annotatedWith(
-                Names.named("pushEndpointManager")).to(PushEndpointManagerImpl.class);
+                Names.named("pushEndpointManager")).to(PushEndpointManager.class);
         
         bind(PushEndpointService.class).annotatedWith(
                 Names.named("dhtPushEndpointFinder")).to(DHTPushEndpointFinder.class);

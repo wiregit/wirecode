@@ -2,8 +2,8 @@ package com.limegroup.gnutella.dht.db;
 
 import java.io.Closeable;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.ExecutorsHelper;
@@ -25,7 +25,7 @@ public abstract class Publisher implements Closeable {
     
     protected final TimeUnit unit;
     
-    private Future<?> future = null;
+    private ScheduledFuture<?> future = null;
     
     private boolean open = true;
     

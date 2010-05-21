@@ -10,6 +10,8 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.setting.TimeSetting;
 
+import com.limegroup.gnutella.PushEndpoint;
+
 /**
  * Mojito DHT related settings.
  */
@@ -307,14 +309,6 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.EnablePushProxyQueriesV2");
     
     /**
-     * Time between push proxy queries.
-     */
-    public static final LongSetting TIME_BETWEEN_PUSH_PROXY_QUERIES
-        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_PUSH_PROXY_QUERIES",
-                5L * 60L * 1000L, "DHT.TimeBetweenPushProxyQueries",
-                10L * 1000L, Long.MAX_VALUE);
-
-    /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.
      * <p>
      * The setting is actually never read!
@@ -395,5 +389,21 @@ public class DHTSettings extends LimeProps {
     public static final TimeSetting PUBLISH_PROXIES_TIME
         = FACTORY.createRemoteTimeSetting("PUBLISH_PROXIES_TIME",
                 30L * 60L * 1000L, "DHT.PublishProxiesTime",
+                10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    public static final TimeSetting PUSH_ENDPOINT_PURGE_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_PURGE_FREQUENCY", 2L*60L*1000L, 
+                "DHT.ProxyPublisherFrequency", 30L*1000L, 24L*60L*60L*1000L, 
+                TimeUnit.MILLISECONDS);
+    
+    /**
+     * The cache time for {@link PushEndpoint}s.
+     */
+    public static final TimeSetting PUSH_ENDPOINT_CACHE_TIME
+        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_CACHE_TIME",
+                5L * 60L * 1000L, "DHT.PushEndpointCacheTime",
                 10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 }
