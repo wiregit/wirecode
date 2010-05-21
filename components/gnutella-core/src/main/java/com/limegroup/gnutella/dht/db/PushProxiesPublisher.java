@@ -34,9 +34,9 @@ public class PushProxiesPublisher extends Publisher {
     
     private final PushEndpointFactory pushEndpointFactory;
     
-    private volatile IPushProxiesValue pendingValue = null;
+    private volatile PushProxiesValue pendingValue = null;
     
-    private volatile IPushProxiesValue publishedValue = null;
+    private volatile PushProxiesValue publishedValue = null;
     
     private volatile long pendingTimeStamp = 0L;
     
@@ -80,7 +80,7 @@ public class PushProxiesPublisher extends Publisher {
             return;
         }
         
-        IPushProxiesValue value = new DefaultPushProxiesValue(networkManager, 
+        PushProxiesValue value = new DefaultPushProxiesValue(networkManager, 
                 applicationServices, pushEndpointFactory);
         
         // Check if the current value is equal to the pending-value.

@@ -50,7 +50,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         // publish an alternate location in the DHT
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
-        AltLocValue2 value = new AltLocValue2.Self(
+        DefaultAltLocValue value = new DefaultAltLocValue(
                 5555, new byte[MerkleTree.HASHSIZE],
                 networkManager, applicationServices);
         
@@ -133,7 +133,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         networkManager.setExternalAddress(new byte[] { 127, 0, 0, 1 });
         
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        AltLocValue2 value = new AltLocValue2.Self(
+        DefaultAltLocValue value = new DefaultAltLocValue(
                 5555, new byte[MerkleTree.HASHSIZE], 
                 networkManager, applicationServices);
         

@@ -29,7 +29,7 @@ public class AltLocValueTest extends DHTTestCase {
         int port = 1234;
         boolean firewalled = true;
         
-        AltLocValue2 value1 = new AltLocValue2.Impl(Version.ZERO, 
+        DefaultAltLocValue value1 = new DefaultAltLocValue(Version.ZERO, 
                 guid, port, -1L, null, firewalled, false);
         
         assertEquals(guid, value1.getGUID());
@@ -37,7 +37,7 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(firewalled, value1.isFirewalled());
         
         // Serialize and de-serialize it gain
-        AltLocValue2 value2 = new AltLocValue2.Impl(
+        AltLocValue value2 = new DefaultAltLocValue(
                 value1.serialize());
         
         // Should be the same
@@ -58,8 +58,8 @@ public class AltLocValueTest extends DHTTestCase {
         Random random = new Random();
         random.nextBytes(ttroot);
         
-        AltLocValue2 value1 = new AltLocValue2.Impl(
-                AltLocValue2.VERSION_ONE, guid, port, 
+        DefaultAltLocValue value1 = new DefaultAltLocValue(
+                AltLocValue.VERSION_ONE, guid, port, 
                 fileSize, ttroot, firewalled, false);
         
         assertEquals(guid, value1.getGUID());
@@ -67,7 +67,7 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(firewalled, value1.isFirewalled());
         
         // Serialize and de-serialize it again
-        AltLocValue2 value2 = new AltLocValue2.Impl(
+        AltLocValue value2 = new DefaultAltLocValue(
                 value1.serialize());
         
         // Should be the same
@@ -79,7 +79,7 @@ public class AltLocValueTest extends DHTTestCase {
         
         // De-serialize it but do as if it's a Version 0 value!
         // The File size and TigerTree root hash should be missing!
-        AltLocValue2 value3 = new AltLocValue2.Impl(Version.ZERO, 
+        AltLocValue value3 = new DefaultAltLocValue(Version.ZERO, 
                 value1.serialize().getValue());
         
         // Should be the same

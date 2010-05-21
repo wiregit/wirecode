@@ -118,7 +118,7 @@ public class AltLocPublisher extends Publisher {
                     ttroot = hashTree.getRootHashBytes();
                 }
                 
-                AltLocValue2 value = new AltLocValue2.Impl(
+                DefaultAltLocValue value = new DefaultAltLocValue(
                         Version.ZERO, guid, port, fileSize, 
                         ttroot, firewalled, supportsTLS);
                 

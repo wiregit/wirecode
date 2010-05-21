@@ -69,7 +69,7 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
         ApplicationServices applicationServices = injector.getInstance(
                 ApplicationServices.class);
         
-        IPushProxiesValue value2 = new DefaultPushProxiesValue(
+        PushProxiesValue value2 = new DefaultPushProxiesValue(
                 networkManagerStub, applicationServices, pushEndpointFactory);
         
         networkManagerStub.setAcceptedIncomingConnection(true);

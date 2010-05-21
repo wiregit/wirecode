@@ -180,7 +180,7 @@ public class AltLocFinderImpl implements AltLocFinder {
         private void doLookup() {
             KUID key = KUIDUtils.toKUID(urn);
             EntityKey lookupKey = EntityKey.createEntityKey(
-                    key, AltLocValue2.ALT_LOC);
+                    key, AltLocValue.ALT_LOC);
             
             lookup = dhtManager.getAll(lookupKey);
             lookup.addFutureListener(new EventListener<FutureEvent<ValueEntity[]>>() {
@@ -224,15 +224,15 @@ public class AltLocFinderImpl implements AltLocFinder {
                     DHTValue value = values.getValue();
                     
                     DHTValueType valueType = value.getValueType();
-                    if (!valueType.equals(AltLocValue2.ALT_LOC)) {
+                    if (!valueType.equals(AltLocValue.ALT_LOC)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Not a PushProxy: " + value);
                         }
                         continue;
                     }
                     
-                    AltLocValue2 altLoc 
-                        = new AltLocValue2.Impl(value);
+                    AltLocValue altLoc 
+                        = new DefaultAltLocValue(value);
                     if (altLoc.isFirewalled()) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Location is Firewalled: " + altLoc);

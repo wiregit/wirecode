@@ -14,6 +14,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
 
 
+
 public class AbstractPushProxiesValueTest extends BaseTestCase {
 
     private Mockery context;
@@ -61,7 +62,7 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
        context.assertIsSatisfied();
     }
     
-    private static class TestPushProxiesValue extends DefaultPushProxiesValue {
+    private static class TestPushProxiesValue extends AbstractPushProxiesValue {
 
         private GUID guid = new GUID();
         
