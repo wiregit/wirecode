@@ -36,9 +36,6 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         // Start up the server
         server = new SimpleWebServer(constants);
         server.start();
-
-        // Reset and authenticate
-        doAuthenticate();
     }
 
     /**
@@ -324,7 +321,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
 
         Map<String, String> args = new HashMap<String, String>();
         String id = constants.ID + fudge;
-        args.put("url", constants.URL  + fudge);
+        args.put("url", constants.URL  + fudge + "?" + constants.AUTH_PARAMETERS);
         args.put("file", (!fudge.equals("") ? "/" + fudge : "") + constants.FILE);
         args.put("id", id);
         args.put("length", String.valueOf(length));
@@ -333,9 +330,9 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         String downloaderIDAndProgressBarID = sendCommandToClient("Download", args);
         if (inId != null) {
             String[] parts = downloaderIDAndProgressBarID.split(" ");
-            assertEquals("Should have a downloader ID and progress bar ID", 2, parts.length);
+            assertEquals("Should have a downloader ID and progress bar ID", 3, parts.length);
             boolean found = false;
-            String downloaderID = parts[0];
+            String downloaderID = parts[1];
             for (StoreDownloader storeDownloader : getStoreDownloaders()) {
                 if (downloaderID.equals(String.valueOf(System.identityHashCode(storeDownloader)))) {
                     found = true;
@@ -343,7 +340,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
                 }
             }
             assertTrue("Should have found a store downloader for id " + downloaderID, found);
-            assertEquals("Should be the same as given", id, parts[1]);
+            assertEquals("Should be the same as given", id, parts[2]);
             inId.set(downloaderIDAndProgressBarID);
         }
 
@@ -394,4 +391,5 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         sleepForASecond();
         return res;
     }
+    
 }

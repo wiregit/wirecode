@@ -1,12 +1,19 @@
 package org.limewire.lws.server;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
+import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.StringUtils;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -15,30 +22,12 @@ import org.limewire.util.BaseTestCase;
 abstract class AbstractCommunicationSupport extends BaseTestCase {
     
     public final static int LOCAL_PORT  = LocalServerImpl.PORT;
-    public final static int REMOTE_PORT = RemoteServerImpl.PORT;
-    
-    /**
-     * The number of times we'll try for a private key. Because we can't respond
-     * in the client on the same thread we received a request, we hand back the
-     * web page code the public key before giving it to the server. So it may
-     * have not arrived yet.
-     */
-    private final static int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
-    
-    /**
-     * Time to sleep between tries for the private key if we haven't gotten it
-     * yet.
-     */
-    private final static int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 1000;
 
+    private KeyPair keyPair;
     private LocalServerImpl localServer;
-    private RemoteServerImpl remoteServer;
     private FakeJavascriptCodeInTheWebpage code;
-    private String privateKey;
-    private String sharedKey;
     
     private Thread localThread;
-    private Thread remoteThread;    
 
     public AbstractCommunicationSupport(String s) {
         super(s);
@@ -50,10 +39,6 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     
     protected final LocalServerImpl getLocalServer() {
         return this.localServer;
-    }
-
-    protected final RemoteServerImpl getRemoteServer() {
-        return this.remoteServer;
     }
 
     protected final FakeJavascriptCodeInTheWebpage getCode() {
@@ -150,21 +135,25 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         return localThread;
     }
 
-    protected final Thread getRemoteThread() {
-        return remoteThread;
-    }
-
     @Override
     protected final void setUp() throws Exception {
 
         beforeSetup();
         
+        // generate private-public key pair
+        KeyPairGenerator keyGen = null;      
+        keyGen = KeyPairGenerator.getInstance("DSA");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        random.setSeed(System.currentTimeMillis());
+        keyGen.initialize(1024, random);
+        keyPair = keyGen.generateKeyPair();
+        
+        String storePublicKey = Base32.encode(keyPair.getPublic().getEncoded());
+        
         SocketsManager socketsManager = new SocketsManagerImpl();
-        localServer     = new LocalServerImpl(socketsManager, "localhost", REMOTE_PORT);
-        remoteServer    = new RemoteServerImpl(socketsManager, LOCAL_PORT);
+        localServer     = new LocalServerImpl(socketsManager, "localhost", storePublicKey);
         localThread     = localServer.start();
-        remoteThread    = remoteServer.start();
-        code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
+        code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer);
 
         afterSetup();
     }
@@ -175,117 +164,17 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         beforeTearDown();
 
         stop(localServer);
-        stop(remoteServer);
 
         localThread = null;
-        remoteThread = null;
 
         afterTearDown();
-    }    
-
-    // -------------------------------------------------------
-    // Convenience
-    // -------------------------------------------------------
-
-    protected final String doAuthenticate() {
-        return doAuthenticate(getPrivateKey());
-    }
-
-    protected final String doAuthenticate(final String privateKey) {
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, args);
-    }
-
-    protected final String getPrivateKey() {
-        if (privateKey == null) {
-            requestPrivateAndSharedKeys();
-        }
-        return privateKey;
-    }
+    }   
     
-    protected final String getSharedKey() {
-        if (sharedKey == null) {
-            requestPrivateAndSharedKeys();
-        }
-        return sharedKey;
-    }    
-    
-    protected final static class KeyPair {
-        
-        private final String publicKey;
-        private final String sharedKey;
-        private final boolean isValid;
-        
-        private KeyPair(String publicKey, String sharedKey, boolean isValid) {
-            this.publicKey = publicKey;
-            this.sharedKey = sharedKey;
-            this.isValid = isValid;
-        }
-        
-        protected final String getPublicKey() {
-            return publicKey;
-        }
-        
-        protected final String getSharedKey() {
-            return sharedKey;
-        }
-        
-        /**
-         * Returns whether this request was valid or not.
-         * 
-         * @return whether this request was valid or not.
-         */
-        protected final boolean isValid() {
-            return isValid;
-        }
-        
-        @Override
-        public final String toString() {
-            return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
-        }
-    }
 
-    protected final KeyPair getPublicAndSharedKeys() {
-        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
-        String parts[] = res.split(" ");
-        if (parts.length < 2) {
-            return new KeyPair(null, null, false);
-        }
-        return new KeyPair(parts[0], sharedKey = parts[1], true);
-    }
 
     // -----------------------------------------------------------
     // Private
     // -----------------------------------------------------------
-    
-    private void requestPrivateAndSharedKeys() {
-        KeyPair kp = getPublicAndSharedKeys();
-        String publicKey = kp.getPublicKey();
-        try {
-            Thread.sleep(100);
-        } catch (Exception e) {
-            //
-            // Not crucial, but would like to see the error
-            //
-            e.printStackTrace();
-        }
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
-        //
-        // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
-        // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
-        //
-        for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
-            privateKey = sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
-            if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
-            try {
-                Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }        
-    }      
     
     private String unwrap(String[] ss) {
         StringBuffer sb = new StringBuffer("{ ");
@@ -298,32 +187,21 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         sb.append("}");
         return sb.toString();
     }
-
-    private String sendMessageFromWebpageToClient(final String cmd, final Map<String, String> args) {
-        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
-        final String[] result = new String[1];
-        getCode().sendLocalMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
-            public void handle(final String res) {
-                result[0] = LWSServerUtil.removeCallback(res);
-            }
-        });
-        return result[0];
-    }
-
-    private String sendMessageFromClientToRemoteServer(final String cmd, final Map<String, String> args) {
-        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");
-        final String[] result = new String[1];
-        getCode().sendRemoteMsg(cmd, args, new FakeJavascriptCodeInTheWebpage.Handler() {
-            public void handle(final String res) {
-                result[0] = LWSServerUtil.removeCallback(res);
-            }
-        });
-        return result[0];
-    }
     
     private void stop(final AbstractServer t) {
         if (t != null) {
           t.shutDown();
         }
-    }    
+    }
+    
+    protected String getSignedBytes(String data) throws Exception{
+        PrivateKey priv = keyPair.getPrivate();
+        Signature dsa = Signature.getInstance("SHA1withDSA"); 
+        dsa.initSign(priv);
+
+        /* Update and sign the data */
+        dsa.update(StringUtils.toUTF8Bytes(data));
+        byte[] sig = dsa.sign();
+        return Base32.encode(sig);   
+    }
 }

@@ -134,53 +134,6 @@ public final class LWSServerUtil {
         return res.substring(istart + start.length(), iend);
     }
 
-    private static boolean isValidKey(final String key) {
-        if (key == null || key.equals("")) return false;
-        //
-        // No periods, this is an indication of an error
-        //
-        for (int i=0, I=key.length(); i<I; i++) {
-            if (key.charAt(i) == '.') return false;
-        }
-        return true;
-    }
-
-    /**
-     * Returns <tt>true</tt> if <tt>key</tt> is a valid public key,
-     * <tt>false</tt> otherwise.
-     * 
-     * @param key key in question
-     * @return <tt>true</tt> if <tt>key</tt> is a valid public key,
-     *         <tt>false</tt> otherwise
-     */
-    public static boolean isValidPublicKey(final String key) {
-        return isValidKey(key);
-    }
-
-    /**
-     * Returns <tt>true</tt> if <tt>key</tt> is a valid shared key,
-     * <tt>false</tt> otherwise.
-     * 
-     * @param key key in question
-     * @return <tt>true</tt> if <tt>key</tt> is a valid shared key,
-     *         <tt>false</tt> otherwise
-     */
-    public static boolean isValidSharedKey(final String key) {
-        return isValidKey(key);
-    }    
-
-    /**
-     * Returns <tt>true</tt> if <tt>key</tt> is a valid private key,
-     * <tt>false</tt> otherwise.
-     * 
-     * @param key key in question
-     * @return <tt>true</tt> if <tt>key</tt> is a valid private key,
-     *         <tt>false</tt> otherwise
-     */
-    public static boolean isValidPrivateKey(final String key) {
-        return isValidKey(key);
-    }
-
     /**
      * Returns the string IP address for the given address.
      * 
@@ -192,27 +145,6 @@ public final class LWSServerUtil {
             return null;
         byte[] bs = addr.getAddress();
         return NetworkUtils.ip2string(bs);
-    }
-
-    /**
-     * Generates a public or private key. <br>
-     * INVARIANT: {@link #isValidPublicKey(String)}({@link #generateKey()})
-     * <tt> == true</tt> and {@link #isValidPrivateKey(String)}({@link #generateKey()})
-     * <tt> == true</tt>
-     * 
-     * @return a public or private key
-     */
-    public static String generateKey() {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < LWSDispatcherSupport.Constants.KEY_LENGTH;) {
-            final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
-            final char c = (char) r;
-            if (c == ';')
-                continue;
-            sb.append(c);
-            i++;
-        }
-        return sb.toString();
     }
 
     /**

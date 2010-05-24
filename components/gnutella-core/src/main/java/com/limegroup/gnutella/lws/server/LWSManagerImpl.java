@@ -1,85 +1,44 @@
 package com.limegroup.gnutella.lws.server;
 
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.limewire.core.settings.LWSSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
+import org.limewire.lws.server.LWSCommandValidator;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
-import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
-import org.limewire.lws.server.LWSSenderOfMessagesToServer;
-import org.limewire.lws.server.StringCallback;
-import org.limewire.lws.server.LWSDispatcherSupport.Responses;
-import org.limewire.util.EncodingUtils;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
  * Encapsulates a {@link LWSDispatcher} and {@link LWSReceivesCommandsFromDispatcher}.
  */
 @EagerSingleton
-public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
-    
-    private final static Log LOG = LogFactory.getLog(LWSManagerImpl.class);
-    
-    /** The page for making commands to The LimeWire Store server. */
-    final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
-        = "/store/app/pages/client/ClientCom/command/";
+public final class LWSManagerImpl implements LWSManager {
         
     private final LWSDispatcher dispatcher;
     private final Map<String, LWSManagerCommandResponseHandler> commands2handlers = new HashMap<String, LWSManagerCommandResponseHandler>();
     
-    /** This is provided by {@link LWSSettings}. */
-    private final String hostNameAndPort;
     
-    private final HttpExecutor exe;
     private boolean isConnected;
     
     @Inject
-    public LWSManagerImpl(HttpExecutor exe) {
-        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
-    }    
-    
-    //todo @Inject
-    public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
-        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.get(), 
-             LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
-    }
-    
-    public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
-        this.exe = exe;
-        this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
+    public LWSManagerImpl(LWSDispatcherFactory lwsDispatcherFactory, LWSCommandValidator verifier) {      
+        this.dispatcher = lwsDispatcherFactory.createDispatcher(new AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
                 return LWSManagerImpl.this.dispatch(cmd, args);
-            }            
-        });
-        
-        // Construct the hostname and port to which we connect for authentication
-        // from remote settings
-        StringBuilder hostNameAndPortBuffer = new StringBuilder(host);
-        if (port > 0) hostNameAndPortBuffer.append(":").append(port);
-        this.hostNameAndPort = hostNameAndPortBuffer.toString();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("hostname and port: " + hostNameAndPort);
-        }
+            }
+        },
+        verifier);
+
         //
         // remember when we're connected
         //
@@ -141,56 +100,10 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     public final void clearHandlers() {
         commands2handlers.clear();
     }
-    
-    public final void sendMessageToServer(final String msg, 
-                                          final Map<String, String> args, 
-                                          final StringCallback cb) throws IOException {
-        String url = constructURL(msg, args);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("sending URL " + url);
-        }
-        final HttpGet get = new HttpGet(url);
-        
-        if(get.getURI().getHost() == null) {
-            LOG.error("null host!");
-            throw new IOException("null host!");
-        }
-        
-        get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
-        //
-        // we don't care what this response is, because we are
-        // always talking to the remote web server, so process it
-        // right away so we don't block
-        //
-        //
-        cb.process(Responses.OK);
-        HttpParams params = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(params, 1000);
-        HttpConnectionParams.setSoTimeout(params, 1000);
-        exe.execute(get, params);
-        
-    }
      
     // ---------------------------------------------------------------------------------
     // Private
     // ---------------------------------------------------------------------------------    
-    
-    private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuilder url = new StringBuilder("http");
-        if (LWSSettings.LWS_USE_SSL.getValue()) {
-            url.append("s");
-        }
-        url.append("://")
-           .append(hostNameAndPort)
-           .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
-        url.append(msg);
-        for (Map.Entry<String, String> e : args.entrySet()) {
-            url.append("/");
-            url.append(e.getKey()).append("/").append(EncodingUtils.encode(e.getValue()));
-        }
-        return url.toString();
-    }    
-  
     private String hash(String cmd) {
         return cmd.toLowerCase(Locale.US);
     }    

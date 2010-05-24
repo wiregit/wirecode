@@ -6,15 +6,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.LWSSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
+import org.limewire.lws.server.LWSCommandValidator;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.LocalServerImpl;
-import org.limewire.lws.server.RemoteServerImpl;
-import org.limewire.net.SocketsManager;
+import org.limewire.lws.server.MockLWSCommandValidator;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
@@ -37,45 +37,12 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     protected final Log LOG = LogFactory.getLog(getClass());
     
     public final int LOCAL_PORT  = LocalServerImpl.PORT;
-    public final int REMOTE_PORT = RemoteServerImpl.PORT;
     
     protected final Map<String,String> EMPTY_ARGS = new HashMap<String,String>();
     
-    /**
-     * The number of times we'll try for a private key. Because we can't respond
-     * in the client on the same thread we received a request, we hand back the
-     * web page code the public key before giving it to the server. So it may
-     * have not arrived yet.
-     */
-    private final int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
-    
-    /**
-     * Public key analogy for {@link #TIMES_TO_TRY_FOR_PRIVATE_KEY}
-     */
-    private final int TIMES_TO_TRY_FOR_PUBLIC_KEY = 3;
-    
-    /**
-     * Time to sleep between tries for the private key if we haven't gotten it
-     * yet.
-     */
-    private final int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 300;
-    
-    /**
-     * Public key analogy for {@link #SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES}
-     */    
-    private final int SLEEP_TIME_BETWEEN_PUBLIC_KEY_TRIES = 300;
-    
-    private RemoteServerImpl remoteServer;
-    private Thread remoteThread;
-    
     private CommandSender sender;
     private LWSManager lwsManager;
-    private LifecycleManager lifecycleManager;
-    
-    private String privateKey;
-    private String sharedKey;
-    
-        
+    private LifecycleManager lifecycleManager;        
 
     public AbstractCommunicationSupportWithNoLocalServer(String s) {
         super(s);
@@ -84,10 +51,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     // -------------------------------------------------------
     // Access
     // -------------------------------------------------------
-
-    protected final RemoteServerImpl getRemoteServer() {
-        return this.remoteServer;
-    }
     
     protected final CommandSender getCommandSender() {
         return this.sender;
@@ -122,10 +85,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
     /** Override with functionality <b>after</b> {@link #tearDown()}. */
     protected void afterTearDown() { }
-
-    protected final Thread getRemoteThread() {
-        return remoteThread;
-    }
     
     private Injector inj;    
 
@@ -135,15 +94,10 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         note("begin setUp");
 
         beforeSetup();
-
-        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.set("localhost");
-        LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        inj = LimeTestUtils.createInjector();
-        remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
+        inj = LimeTestUtils.createInjector(TestUtils.bind(LWSCommandValidator.class).toInstances(new MockLWSCommandValidator()));
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();
-        remoteThread = remoteServer.start();
         lwsManager = getInstance(LWSManager.class);
         sender = new CommandSender();
 
@@ -159,122 +113,30 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
         beforeTearDown();
         
-        doDetatch();
-
-        remoteServer.shutDown();
+        lwsManager.clearHandlers();
         
         lifecycleManager.shutdown();
-                
-        privateKey = null;
-        sharedKey = null;
-        remoteThread = null;
        
         afterTearDown();
         
         note("end tearDown");
     }    
     
-    protected final void doDetatch() {
-        getCommandSender().detach(getPrivateKey(), getSharedKey());
-        lwsManager.clearHandlers();
-    }
-
-    protected final String doAuthenticate() {
-        note("Authenticating");
-        return doAuthenticate(getPrivateKey(), getSharedKey());
-    }
 
     protected final void note(Object str) {
         LOG.debug(str);
     }
 
-    protected final String doAuthenticate(final String privateKey, final String sharedKey) {
-        Map<String, String> args = new HashMap<String, String>();
-        args.put("private", privateKey);
-        args.put("shared", sharedKey);
-        note("Authenticating with private key '" + privateKey + "' and shared key '" + sharedKey + "'");
-        return sendMessageFromWebpageToClient("Authenticate", args);        
-    }
     
     protected final String sendPing() {
         Map<String, String> args = new HashMap<String, String>();
         return sendMessageFromWebpageToClient("Ping", args);          
     }
-
-    protected final String getPrivateKey() {
-        if (privateKey == null) {
-            requestPrivateAndSharedKeys();
-        }
-        return privateKey;
-    }
-    
-    protected final String getSharedKey() {
-        if (sharedKey == null) {
-            requestPrivateAndSharedKeys();
-        }
-        return sharedKey;
-    }    
-    
-    protected final static class KeyPair {
-        
-        private final String publicKey;
-        private final String sharedKey;
-        private final boolean isValid;
-        
-        private KeyPair(String publicKey, String sharedKey, boolean isValid) {
-            this.publicKey = publicKey;
-            this.sharedKey = sharedKey;
-            this.isValid = isValid;
-        }
-        
-        protected final String getPublicKey() {
-            return publicKey;
-        }
-        
-        protected final String getSharedKey() {
-            return sharedKey;
-        }
-        
-        /**
-         * Returns whether this request was valid or not.
-         * 
-         * @return whether this request was valid or not.
-         */
-        protected final boolean isValid() {
-            return isValid;
-        }
-        
-        @Override
-        public final String toString() {
-            return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
-        }
-    }
-
-    protected final KeyPair getPublicAndSharedKeys() {
-        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
-        LOG.debug("have public and shared keys " + res);
-        String parts[] = res.split(" ");
-        if (parts.length < 2) {
-            return new KeyPair(null, null, false);
-        }
-        return new KeyPair(parts[0], sharedKey = parts[1], true);
-    }
-   
-
-    protected final String getPublicKey() {
-        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
-
-    }
     
     /**
      * Returns the response after calling
-     * {@link #sendMessageFromWebpageToClient(String, Map)} after adding the
-     * private and shared keys.
+     * {@link #sendMessageFromWebpageToClient(String, Map)}
      * <p>
-     * Also, the only generic command the client understands is <code>Msg</code>,
-     * with a argument of <code>command=</code><em>Command</em> where
-     * <em>Command</em> would be something like <code>Download</code> or
-     * <code>GetInfo</code>.
      * 
      * @param cmd Command to send
      * @param args arguments
@@ -282,19 +144,14 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      *        <code>dummy</code>. This is used as a convenience in testing
      *        handlers when we don't need to have an explicit callback function.
      * @return the response after calling
-     *         {@link #sendMessageFromWebpageToClient(String, Map)} after adding
-     *         the private and shared keys.
+     *         {@link #sendMessageFromWebpageToClient(String, Map)}
      */
     protected final String sendCommandToClient(String cmd, Map<String, String> args,
             boolean includeDummyCallback) {
-        Map<String, String> newArgs = new HashMap<String, String>(args);
-        newArgs.put("command", cmd);
-        newArgs.put("private", getPrivateKey());
-        newArgs.put("shared", getSharedKey());
         if (includeDummyCallback) {
-            newArgs.put("callback", "dummy");
+            args.put("callback", "dummy");
         }
-        return sendMessageFromWebpageToClient("Msg", newArgs);
+        return sendMessageFromWebpageToClient(cmd, args);
     }
 
     /**
@@ -348,47 +205,4 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     protected final <T> T getInstance(Class<T> type) {
         return inj.getInstance(type);
     }
-
-
-    // -----------------------------------------------------------
-    // Private
-    // -----------------------------------------------------------
-    
-    private void requestPrivateAndSharedKeys() {
-        //
-        // We'll try this a few times to make up for the race condition that exists and in unavoidable
-        //
-        String publicKey = null;
-        for (int i=0; i<TIMES_TO_TRY_FOR_PUBLIC_KEY; i++) {
-            KeyPair kp = getPublicAndSharedKeys();
-            publicKey = kp.getPublicKey();
-            if (publicKey != null) break;
-            try {
-                Thread.sleep(SLEEP_TIME_BETWEEN_PUBLIC_KEY_TRIES);
-            } catch (Exception e) {
-                //
-                // Not crucial, but would like to see the error
-                //
-                e.printStackTrace();
-            }
-        }
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
-        
-        String ip = "127.0.0.1";
-        //
-        // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
-        // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
-        //
-        for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
-            privateKey = remoteServer.lookupPrivateKey(publicKey, ip);
-            if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
-            try {
-                Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }        
-    }     
-   
 }

@@ -37,6 +37,12 @@ public interface LocalServer {
      * @param msg message to report
      * @return reponse back to code after reporting <code>msg</code>
      */
-    String report(String msg);    
+    String report(String msg);
+    
+    /**
+     * Returns the generated public key.
+     * @return
+     */
+    String getLwsPublicKey();
 
 }
