@@ -55,6 +55,8 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
            will(returnValue(value.getFwtVersion()));
            allowing(mockedValue).getPort();
            will(returnValue(value.getPort()));
+           allowing(mockedValue).getVersion();
+           will(returnValue(PushProxiesValue.VERSION));
        }});
            
        assertTrue(value.equals(mockedValue));
