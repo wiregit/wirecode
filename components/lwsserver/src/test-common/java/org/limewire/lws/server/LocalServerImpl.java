@@ -18,7 +18,7 @@ public final class LocalServerImpl extends AbstractServer implements LocalServer
     public LocalServerImpl(SocketsManager socketsManager, String host, String lwsPublickey) {
         super(PORT, "Local Server");
         this.lwsPublickey = lwsPublickey;
-        LWSCommandValidator commandVerifier = new LWSCommandValidatorImpl(getLwsPublicKey(), new TestNetworkManagerImpl());
+        LWSCommandValidator commandVerifier = new LWSCommandValidatorImpl(getLwsPublicKey(), new MockLWSNetworkAdapterImpl());
         LWSDispatcherImpl ssd = new LWSDispatcherImpl(commandVerifier);       
         setDispatcher(ssd);
         

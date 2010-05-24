@@ -40,6 +40,7 @@ import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.lws.server.LWSNetworkAdapter;
 import org.limewire.lws.server.LimeWireLWSModule;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -249,6 +250,7 @@ public class LimeWireCoreModule extends AbstractModule {
         }        
 
         bind(HttpClientInstanceUtils.class).to(LimeWireInfo.class);
+        bind(LWSNetworkAdapter.class).to(LWSNetworkAdapterImpl.class);
         bind(ActivationSettingsController.class).to(ActivationSettingsImpl.class);
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);

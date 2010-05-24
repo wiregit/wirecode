@@ -37,7 +37,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
     public void testGetDownloadProgress() throws Exception {
         Map<String, String> args = new HashMap<String, String>();
         
-        String browserIP = TestNetworkManagerImpl.getIPAddress();
+        String browserIP = MockLWSNetworkAdapterImpl.getIPAddress();
         args.put("browserIP", browserIP);
         String browserIPSignature = getSignedBytes(browserIP);
         args.put("signedBrowserIP", browserIPSignature);       
@@ -52,7 +52,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
     
     public void testDownload() throws Exception {
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
-        String browserIP = TestNetworkManagerImpl.getIPAddress();
+        String browserIP = MockLWSNetworkAdapterImpl.getIPAddress();
         Map<String, String> downloadArgs = getDownloadArgs(hash, browserIP);
         String url = getDownloadURL(downloadArgs);
         
@@ -77,7 +77,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
     
     public void testDownloadInvalidHashSignature() throws Exception {
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
-        String browserIP = TestNetworkManagerImpl.getIPAddress();
+        String browserIP = MockLWSNetworkAdapterImpl.getIPAddress();
         Map<String, String> downloadArgs = getDownloadArgs(hash, browserIP);
         downloadArgs.put("signedHash", "SDFJFDGKL34543JFKLDJGJGKLDFJGKLGDFJFLKJRTKLWEKLJ4KRTJ34KRTJDFKVJKJR3KL4JKLJ34KRJ34KLRJKQL");        
         String url = getDownloadURL(downloadArgs);
@@ -95,7 +95,7 @@ public class ClientComTest extends AbstractCommunicationSupport {
     
     public void testDownloadInvalidBrowserIPSignature() throws Exception {
         String hash = "af8b74763ace4069df7020821bfb9c175af1208a";
-        String browserIP = TestNetworkManagerImpl.getIPAddress();
+        String browserIP = MockLWSNetworkAdapterImpl.getIPAddress();
         Map<String, String> downloadArgs = getDownloadArgs(hash, browserIP);
         downloadArgs.put("signedBrowserIP", "SDFJFDGKL34543JFKLDJGJGKLDFJGKLGDFJFLKJRTKLWEKLJ4KRTJ34KRTJDFKVJKJR3KL4JKLJ34KRJ34KLRJKQL");
         String url = getDownloadURL(downloadArgs);

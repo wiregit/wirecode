@@ -13,7 +13,6 @@
         <dependency org="org.limewire" name="net" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="nio" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="http" rev="latest.integration" conf="compile,runtime"/>
-		<dependency org="org.limewire" name="core-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="security" rev="latest.integration" conf="compile,runtime"/>
 
         <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>

@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.api.network.NetworkManager;
 import org.limewire.security.SignatureVerifier;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
@@ -23,16 +22,16 @@ class LWSCommandValidatorImpl implements LWSCommandValidator{
      */
     private final String lwsPublicKey;
     
-    private final NetworkManager networkManager;
+    private final LWSNetworkAdapter networkAdapter;
     
     @Inject
-    public LWSCommandValidatorImpl(NetworkManager networkManager) {
-        this(LWSDispatcher.LWS_PUBLIC_KEY, networkManager);
+    public LWSCommandValidatorImpl(LWSNetworkAdapter networkAdapter) {
+        this(LWSDispatcher.LWS_PUBLIC_KEY, networkAdapter);
     }
     
-    public LWSCommandValidatorImpl(String lwsPublicKey, NetworkManager networkManager) {
+    public LWSCommandValidatorImpl(String lwsPublicKey, LWSNetworkAdapter networkAdapter) {
         this.lwsPublicKey = lwsPublicKey;
-        this.networkManager = networkManager;
+        this.networkAdapter = networkAdapter;
     }
     
     /**
@@ -49,7 +48,7 @@ class LWSCommandValidatorImpl implements LWSCommandValidator{
      
     @Override
     public boolean verifyBrowserIPAddresswithClientIP(String browserIPString) {
-        byte[] externalIPAddress = networkManager.getExternalAddress();
+        byte[] externalIPAddress = networkAdapter.getExternalAddress();
         try {
             InetAddress browserAddress = InetAddress.getByName(browserIPString);
             byte[] bytes = browserAddress.getAddress();
