@@ -27,15 +27,14 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int ALBUM_INDEX = 3;
     public static final int LENGTH_INDEX = 4;
     public static final int QUALITY_INDEX = 5;
-    static final int BITRATE_INDEX = 6;
-    static final int GENRE_INDEX = 7;
-    static final int TRACK_INDEX = 8;
-    static final int YEAR_INDEX = 9;
-    static final int NAME_INDEX = 10;
-    static final int EXTENSION_INDEX = 11;
-    public static final int SIZE_INDEX = 12;
-    static final int DESCRIPTION_INDEX = 13;
-    static final int IS_SPAM_INDEX = 14;
+    static final int GENRE_INDEX = 6;
+    static final int TRACK_INDEX = 7;
+    static final int YEAR_INDEX = 8;
+    static final int NAME_INDEX = 9;
+    static final int EXTENSION_INDEX = 10;
+    public static final int SIZE_INDEX = 11;
+    static final int DESCRIPTION_INDEX = 12;
+    static final int IS_SPAM_INDEX = 13;
     
     public AudioTableFormat() {
         super("CLASSIC_SEARCH_AUDIO_TABLE", TITLE_INDEX, FROM_INDEX, IS_SPAM_INDEX, new ColumnStateInfo[] {
@@ -44,8 +43,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(ARTIST_INDEX, "CLASSIC_SEARCH_AUDIO_ARTIST", I18n.tr("Artist"), 174, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "CLASSIC_SEARCH_AUDIO_ALBUM", I18n.tr("Album"), 157, true, true), 
                 new ColumnStateInfo(LENGTH_INDEX, "CLASSIC_SEARCH_AUDIO_LENGTH", I18n.tr("Length"), 64, true, true), 
-                new ColumnStateInfo(QUALITY_INDEX, "CLASSIC_SEARCH_AUDIO_QUALITY", I18n.tr("Quality"), 105, true, true), 
-                new ColumnStateInfo(BITRATE_INDEX, "CLASSIC_SEARCH_AUDIO_BITRATE", I18n.tr("Bitrate"), 55, false, true), 
+                new ColumnStateInfo(QUALITY_INDEX, "CLASSIC_SEARCH_AUDIO_QUALITY", I18n.tr("Bitrate"), 105, true, true),
                 new ColumnStateInfo(GENRE_INDEX, "CLASSIC_SEARCH_AUDIO_GENRE", I18n.tr("Genre"), 80, false, true),
                 new ColumnStateInfo(TRACK_INDEX, "CLASSIC_SEARCH_AUDIO_TRACK", I18n.tr("Track"), 60, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "CLASSIC_SEARCH_AUDIO_YEAR", I18n.tr("Year"), 60, false, true), 
@@ -61,7 +59,6 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Class getColumnClass(int column) {
         switch(column) {
         case TITLE_INDEX: return Component.class;
-        case BITRATE_INDEX: return Integer.class;
         case TRACK_INDEX: return Integer.class;
         case FROM_INDEX: return VisualSearchResult.class;
         }
@@ -89,7 +86,6 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case ALBUM_INDEX: return vsr.getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return vsr.getProperty(FilePropertyKey.LENGTH);
             case QUALITY_INDEX: return vsr;
-            case BITRATE_INDEX: return vsr.getProperty(FilePropertyKey.BITRATE);
             case GENRE_INDEX: return vsr.getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return vsr.getProperty(FilePropertyKey.TRACK_NUMBER);
             case YEAR_INDEX: return vsr.getProperty(FilePropertyKey.YEAR);

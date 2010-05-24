@@ -60,7 +60,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         switch (propertiable.getCategory()) {
         case AUDIO: {
             String albumTitle = propertiable.getPropertyString(FilePropertyKey.ALBUM);
-            Long qualityScore = (Long)propertiable.getProperty(FilePropertyKey.QUALITY);
+            Long bitRate = (Long)propertiable.getProperty(FilePropertyKey.BITRATE);
             Long length = (Long)propertiable.getProperty(FilePropertyKey.LENGTH);
 
             boolean insertHyphen = false;
@@ -69,14 +69,14 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
                 insertHyphen = true;
             }
 
-            if (qualityScore != null) {
+            if (bitRate != null) {
                 if (insertHyphen) {
                     subheading += " - ";
                 }
-                subheading += GuiUtils.toQualityString(qualityScore);
-                Long bitRate = (Long)propertiable.getProperty(FilePropertyKey.BITRATE);
-                if (bitRate != null) {
-                    subheading += " (" + bitRate+ ")";
+                subheading += bitRate;
+                                Long qualityScore = (Long)propertiable.getProperty(FilePropertyKey.QUALITY);
+                                if (qualityScore != null) {
+                                    subheading += "(" + GuiUtils.toQualityString(qualityScore) + ")";
                 }
                 insertHyphen = true;
             }

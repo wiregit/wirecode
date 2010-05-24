@@ -41,7 +41,7 @@ public class QualityRenderer extends DefaultLimeTableCellRenderer {
                     text = "";
                 else {
                     Number num = ((Number)result.getProperty(FilePropertyKey.QUALITY));
-                    text = GuiUtils.toQualityStringShort(num.longValue()) + getQualityDetails(result); 
+                    text = getQualityDetails(result) + "(" + GuiUtils.toQualityStringShort(num.longValue()) + ")";  
                 }
             }
         } else if(value instanceof LocalFileItem) {
@@ -50,7 +50,7 @@ public class QualityRenderer extends DefaultLimeTableCellRenderer {
                 text = "";
             else {
                 Number num = ((Number)item.getProperty(FilePropertyKey.QUALITY));
-                text = GuiUtils.toQualityStringShort(num.longValue()) + getQualityDetails(item); 
+                text = getQualityDetails(item) + "(" + GuiUtils.toQualityStringShort(num.longValue()) + ")"; 
             }
         } else {
             text = "";
@@ -64,7 +64,7 @@ public class QualityRenderer extends DefaultLimeTableCellRenderer {
         if (propertiable.getCategory() == Category.AUDIO){
             Object bitRate = propertiable.getProperty(FilePropertyKey.BITRATE);
             if (bitRate != null) {
-                return " (" + bitRate + ")";
+                return "" + bitRate;
             }
         }
         return "";
