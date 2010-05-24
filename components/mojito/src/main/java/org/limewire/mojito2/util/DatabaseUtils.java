@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
@@ -80,24 +79,6 @@ public class DatabaseUtils {
      */
     public static boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
         return System.currentTimeMillis() >= getExpirationTime(routeTable, entity);
-    }
-    
-    public static boolean isPublishingRequired(long publishingTime, int locationCount) {
-        if (publishingTime <= 0L || locationCount <= 0) {
-            return true;
-        }
-        
-        long t = ((locationCount 
-                * DHTSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
-                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
-        
-        // Do never republish more than every X minutes
-        long nextPublishTime = Math.max(t, 
-                DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
-        
-        long time = publishingTime + nextPublishTime;
-        
-        return System.currentTimeMillis() >= time;
     }
 
     public static boolean isDHTValueType(DHTValueType valueType, DHTValueEntity entity) {

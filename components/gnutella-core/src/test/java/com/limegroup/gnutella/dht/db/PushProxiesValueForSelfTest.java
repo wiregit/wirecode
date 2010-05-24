@@ -49,8 +49,6 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
                 bind(PushEndpointFactory.class).toInstance(pushEndpointFactory);
             }            
         });
-        
-        
     }
     
     public void testGetPushProxiesReturnsSelf() throws Exception {

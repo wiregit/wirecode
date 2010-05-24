@@ -101,12 +101,12 @@ public class DHTManagerStub implements DHTManager {
 
     @Override
     public boolean isReady() {
-        return true;
+        return isRunning();
     }
 
     @Override
     public boolean isRunning() {
-        return true;
+        return !isMode(DHTMode.INACTIVE);
     }
 
     @Override

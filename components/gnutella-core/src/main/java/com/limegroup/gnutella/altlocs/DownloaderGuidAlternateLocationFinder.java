@@ -36,9 +36,11 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
  * for them. 
  */
 @Singleton
-public class DownloaderGuidAlternateLocationFinder implements EventListener<DownloadManagerEvent> {
+public class DownloaderGuidAlternateLocationFinder 
+        implements EventListener<DownloadManagerEvent> {
 
-    private static final Log LOG = LogFactory.getLog(DownloaderGuidAlternateLocationFinder.class);
+    private static final Log LOG 
+        = LogFactory.getLog(DownloaderGuidAlternateLocationFinder.class);
     
     private final PushEndpointService pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
@@ -47,7 +49,9 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
     /**
      * Package access for testing.
      */
-    final EventListener<DownloadStateEvent> downloadStatusListener = new EventListener<DownloadStateEvent>() { 
+    final EventListener<DownloadStateEvent> downloadStatusListener 
+            = new EventListener<DownloadStateEvent>() { 
+        @Override
         public void handleEvent(DownloadStateEvent event) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("per download event received: " + event);
@@ -57,7 +61,8 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
     };
     
     @Inject
-    public DownloaderGuidAlternateLocationFinder(@Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
+    public DownloaderGuidAlternateLocationFinder(
+            @Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
             AlternateLocationFactory alternateLocationFactory,
             AltLocManager altLocManager) {
         this.pushEndpointManager = pushEndpointManager;
@@ -65,6 +70,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
         this.altLocManager = altLocManager;
     }
 
+    @Override
     public void handleEvent(DownloadManagerEvent event) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("event received: " + event);
@@ -133,41 +139,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
             @Override
             public void handleEvent(FutureEvent<PushEndpoint> event) {
                 if (event.getType() == Type.SUCCESS){ 
-                    onSuccess(event.getResult());
-                }
-            }
-            
-            private void onSuccess(PushEndpoint endpoint) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("endpoint found: " + endpoint);
-                }
-                
-                IpPort ipPort = endpoint.getValidExternalAddress();
-                // if the external address is the same as the push proxy, it's a non-firewalled source
-                if (ipPort != null && endpoint.getProxies().size() == 1 
-                        && endpoint.getProxies().contains(ipPort)) {
-                    try {
-                        LOG.debug("creating direct altloc");
-                        AlternateLocation alternateLocation 
-                            = alternateLocationFactory.createDirectAltLoc(ipPort, sha1Urn);
-                        // adding to alt loc manager will notify the downloader 
-                        // of the new alternate location
-                        altLocManager.add(alternateLocation, 
-                                DownloaderGuidAlternateLocationFinder.this);
-                    } catch (IOException ie) {
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error("error creating direct alt loc from " + ipPort, ie);
-                        }
-                    }
-                } else {
-                    LOG.debug("creating push altloc");
-                    AlternateLocation  alternateLocation 
-                        = alternateLocationFactory.createPushAltLoc(endpoint, sha1Urn);
-                    
-                    // adding to alt loc manager will notify the downloader 
-                    // of the new alternate location
-                    altLocManager.add(alternateLocation, 
-                            DownloaderGuidAlternateLocationFinder.this);
+                    onSuccess(sha1Urn, event.getResult());
                 }
             }
         };
@@ -178,11 +150,54 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
                 DHTFuture<PushEndpoint> future 
                     = pushEndpointManager.findPushEndpoint(guid);
                 future.addFutureListener(listener);
+                
             } catch (IllegalArgumentException iae) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("invalid hex string of guid", iae);
                 }
             }
         }
+    }
+    
+    /**
+     * 
+     */
+    protected void onSuccess(URN sha1Urn, PushEndpoint endpoint) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("endpoint found: " + endpoint);
+        }
+        
+        IpPort ipPort = endpoint.getValidExternalAddress();
+        Set<? extends IpPort> proxies = endpoint.getProxies();
+        try {
+        // if the external address is the same as the push proxy, it's a non-firewalled source
+        if (ipPort != null && proxies.size() == 1 
+                && proxies.contains(ipPort)) {
+            
+            try {
+                LOG.debug("creating direct altloc");
+                AlternateLocation alternateLocation 
+                    = alternateLocationFactory.createDirectAltLoc(ipPort, sha1Urn);
+                // adding to alt loc manager will notify the downloader 
+                // of the new alternate location
+                altLocManager.add(alternateLocation, 
+                        DownloaderGuidAlternateLocationFinder.this);
+            } catch (IOException ie) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("error creating direct alt loc from " + ipPort, ie);
+                }
+            }
+        } else {
+            
+            LOG.debug("creating push altloc");
+            AlternateLocation alternateLocation 
+                = alternateLocationFactory.createPushAltLoc(endpoint, sha1Urn);
+            
+            // adding to alt loc manager will notify the downloader 
+            // of the new alternate location
+            altLocManager.add(alternateLocation, 
+                    DownloaderGuidAlternateLocationFinder.this);
+        }
+        } catch (Exception err) {}
     }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,16 +33,8 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.SecureMessageVerifier;
@@ -58,15 +49,13 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht2.Controller;
-import com.limegroup.gnutella.dht2.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -92,7 +81,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
-import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
@@ -1293,38 +1281,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
     }
     
-    private static class TestDHTManager implements DHTManager {
-
-        @Override
-        public void close() throws IOException {
-        }
-
-        @Override
-        public void addActiveNode(SocketAddress address) {
-        }
-
-        @Override
-        public void addEventListener(DHTEventListener listener) {
-        }
-
-        @Override
-        public void addPassiveNode(SocketAddress address) {
-        }
-
-        @Override
-        public void addressChanged() {
-        }
-
-        @Override
-        public DHTFuture<ValueEntity> get(EntityKey key) {
-            return null;
-        }
-
-        @Override
-        public Contact[] getActiveContacts(int max) {
-            return null;
-        }
-
+    private static class TestDHTManager extends DHTManagerStub {
+        
         @Override
         public IpPort[] getActiveIpPort(int max) {
             List<IpPort> ipps = new ArrayList<IpPort>();
@@ -1341,20 +1299,10 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
 
         @Override
-        public Controller getController() {
-            return null;
-        }
-
-        @Override
         public DHTMode getMode() {
             return DHTMode.INACTIVE;
         }
-
-        @Override
-        public MojitoDHT getMojitoDHT() {
-            return null;
-        }
-
+        
         @Override
         public Vendor getVendor() {
             return Vendor.UNKNOWN;
@@ -1366,17 +1314,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
 
         @Override
-        public void handleContactsMessage(DHTContactsMessage msg) {
-        }
-
-        @Override
         public boolean isEnabled() {
             return false;
-        }
-
-        @Override
-        public boolean isMode(DHTMode mode) {
-            return getMode() == mode;
         }
 
         @Override
@@ -1387,37 +1326,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
         @Override
         public boolean isRunning() {
             return true;
-        }
-
-        @Override
-        public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
-            return null;
-        }
-
-        @Override
-        public void removeEventListener(DHTEventListener listener) {
-        }
-
-        @Override
-        public void setEnabled(boolean enabled) {
-        }
-
-        @Override
-        public boolean start(DHTMode mode) {
-            return false;
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        }
-
-        @Override
-        public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
-            return null;
         }
     }
 }

@@ -126,6 +126,5 @@ public class PushProxyPublishingTest extends LimeTestCase {
         assertNotNull(pushEndpoint);
         assertEquals(networkManagerStub.getPort(), pushEndpoint.getPort());
         assertEquals(guid.bytes(), pushEndpoint.getClientGUID());
-        
     }
 }
