@@ -17,6 +17,7 @@ import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht2.Controller;
+import com.limegroup.gnutella.dht2.DHTEvent;
 import com.limegroup.gnutella.dht2.DHTEventListener;
 import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -136,5 +137,9 @@ public class DHTManagerStub implements DHTManager {
 
     @Override
     public void close() throws IOException {
+    }
+
+    @Override
+    public void dispatchEvent(DHTEvent event) {
     }
 }

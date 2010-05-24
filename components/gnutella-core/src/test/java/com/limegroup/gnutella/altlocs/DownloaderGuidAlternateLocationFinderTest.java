@@ -37,7 +37,8 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         // commented out since magnet search is not performed on add right now
         // use magnet without sha1 so we can just check if 
 //        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
-        final DownloaderGuidAlternateLocationFinder endpointFinder = new DownloaderGuidAlternateLocationFinder(null, null, null);
+        final DownloaderGuidAlternateLocationFinder endpointFinder 
+            = new DownloaderGuidAlternateLocationFinder(null, null, null);
         
         context.checking(new Expectations() {{
             // commented out since magnet search is not performed on add right now
@@ -66,8 +67,9 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
         final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
         
-        final DownloaderGuidAlternateLocationFinder endpointFinder = 
-            new DownloaderGuidAlternateLocationFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
+        final DownloaderGuidAlternateLocationFinder endpointFinder 
+            = new DownloaderGuidAlternateLocationFinder(
+                pushEndpointManager, alternateLocationFactory, altLocManager);
         
         final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();

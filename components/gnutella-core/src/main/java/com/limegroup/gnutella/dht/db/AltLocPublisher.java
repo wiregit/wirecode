@@ -46,6 +46,8 @@ public class AltLocPublisher extends Publisher {
 
     private final FileView gnutellaFileView;
     
+    private volatile long publishTime = -1L;
+    
     /**
      * Creates a {@link AltLocPublisher}
      */
@@ -80,6 +82,32 @@ public class AltLocPublisher extends Publisher {
     }
     
     /**
+     * 
+     */
+    public void setPublishTime(long time, TimeUnit unit) {
+        publishTime = unit.toMillis(time);
+    }
+    
+    /**
+     * 
+     */
+    public long getPublishTime(TimeUnit unit) {
+        long publishTime = this.publishTime;
+        if (publishTime != -1L) {
+            return unit.convert(publishTime, TimeUnit.MILLISECONDS);
+        }
+        
+        return DHTSettings.PUBLISH_LOCATION_EVERY.getTime(unit);
+    }
+    
+    /**
+     * 
+     */
+    public long getPublishTimeInMillis() {
+        return getPublishTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
      * Tries to publish the localhost as an {@link AlternateLocation} 
      * to the DHT
      */
@@ -93,6 +121,8 @@ public class AltLocPublisher extends Publisher {
         int port = networkManager.getPort();
         boolean firewalled = !networkManager.acceptedIncomingConnection();
         boolean supportsTLS = networkManager.isIncomingTLSEnabled();
+        
+        HashTreeCache cache = tigerTreeCache.get();
         
         gnutellaFileView.getReadLock().lock();
         try {
@@ -112,7 +142,7 @@ public class AltLocPublisher extends Publisher {
                 KUID primaryKey = KUIDUtils.toKUID(urn);
                 
                 long fileSize = fd.getFileSize();
-                HashTree hashTree = tigerTreeCache.get().getHashTree(urn);
+                HashTree hashTree = cache.getHashTree(urn);
                 byte[] ttroot = null;
                 if (hashTree != null) {
                     ttroot = hashTree.getRootHashBytes();
@@ -158,9 +188,8 @@ public class AltLocPublisher extends Publisher {
     /**
      * Returns true if the {@link FileDesc} needs to be re-published.
      */
-    private static boolean isPublishRequired(FileDesc fd) {
+    private boolean isPublishRequired(FileDesc fd) {
         long time = System.currentTimeMillis() - getTimeStamp(fd);
-        long every = DHTSettings.PUBLISH_LOCATION_EVERY.getTimeInMillis();
-        return time >= every;
+        return time >= getPublishTimeInMillis();
     }
 }

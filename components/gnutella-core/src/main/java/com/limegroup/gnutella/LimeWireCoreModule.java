@@ -79,7 +79,6 @@ import com.limegroup.gnutella.bootstrap.LimeWireBootstrapModule;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
 import com.limegroup.gnutella.daap.DaapManager;
-import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht2.LimeWireDHTModule;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
@@ -269,7 +268,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
         bind(PushEndpointCache.class).to(PushEndpointCacheImpl.class);
-        bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointCache")).to(PushEndpointCacheImpl.class);
         bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
         bind(MessageFactory.class).to(MessageFactoryImpl.class);
         bind(MessageParserBinder.class).to(MessageParserBinderImpl.class);

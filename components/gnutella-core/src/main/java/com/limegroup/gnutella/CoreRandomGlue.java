@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.LibraryUtils;
@@ -32,8 +32,7 @@ class CoreRandomGlue {
 
     private final Library library;
     private final ConnectionManager connectionManager;
-    private final DHTManagerImpl dhtManager;
-    private final PushProxiesPublisher pushProxiesPublisher;
+    private final DHTManager dhtManager;
     private final ConnectionServices connectionServices;
     private final DownloadManager downloadManager;
     private final DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder;
@@ -45,8 +44,8 @@ class CoreRandomGlue {
     
     @Inject
     CoreRandomGlue(Library library,
-            ConnectionManager connectionManager, DHTManagerImpl dhtManager,
-            PushProxiesPublisher pushProxiesPublisher,
+            ConnectionManager connectionManager, 
+            DHTManager dhtManager,
             ConnectionServices connectionServices,
             DownloadManager downloadManager, 
             DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder,
@@ -59,7 +58,6 @@ class CoreRandomGlue {
         this.library = library;
         this.connectionManager = connectionManager;
         this.dhtManager = dhtManager;
-        this.pushProxiesPublisher = pushProxiesPublisher;
         this.connectionServices = connectionServices;
         this.downloadManager = downloadManager;
         this.downloaderGuidAlternateLocationFinder = downloaderGuidAlternateLocationFinder;
@@ -78,7 +76,6 @@ class CoreRandomGlue {
                 library.addListener(altLocManager);
                 
                 connectionManager.addEventListener(dhtManager);
-                dhtManager.addEventListener(pushProxiesPublisher);
                 downloadManager.addListener(downloaderGuidAlternateLocationFinder);
             }
             

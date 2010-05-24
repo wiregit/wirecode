@@ -114,18 +114,18 @@ public class MojitoManagerImplTest extends BaseTestCase {
         
         // Fire an event
         listenerCollector.getLastMatch().handleDHTEvent(
-                new DHTEvent(DHTEvent.Type.CONNECTED, dhtController));
+                new DHTEvent(DHTEvent.Type.CONNECTED, dhtManager));
         
         // Remove an external Listener
         manager.removePropertyChangeListener(listener2);
         
         // Fire another event that should not be bounced because caching
         listenerCollector.getLastMatch().handleDHTEvent(
-                new DHTEvent(DHTEvent.Type.STOPPED, dhtController));
+                new DHTEvent(DHTEvent.Type.STOPPED, dhtManager));
         
         // Fire another event that should fire a property changed event
         listenerCollector.getLastMatch().handleDHTEvent(
-                new DHTEvent(DHTEvent.Type.CONNECTED, dhtController));
+                new DHTEvent(DHTEvent.Type.CONNECTED, dhtManager));
         
         context.assertIsSatisfied();
     }

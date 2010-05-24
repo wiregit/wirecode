@@ -44,7 +44,8 @@ abstract class AbstractDHTManager implements DHTManager {
     /**
      * 
      */
-    private void dispatchEvent(final DHTEvent evt) {
+    @Override
+    public void dispatchEvent(final DHTEvent evt) {
         if (!listeners.isEmpty()) {
             Runnable event = new Runnable() {
                 @Override

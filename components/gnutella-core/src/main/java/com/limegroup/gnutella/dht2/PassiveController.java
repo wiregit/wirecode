@@ -14,7 +14,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +27,6 @@ import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.Transport;
@@ -36,7 +34,6 @@ import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -56,8 +53,6 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.db.ValuePublisher;
-import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -81,8 +76,6 @@ public class PassiveController extends SimpleController {
     private final BootstrapWorker bootstrapWorker;
     
     private final ContactPusher contactPusher;
-    
-    private final ValuePublisher publisher;
     
     private volatile Contact[] contacts = null;
     
@@ -120,20 +113,6 @@ public class PassiveController extends SimpleController {
                 uniqueHostPinger, udpPinger);
         
         contactPusher = new ContactPusher(connectionManager);
-        publisher = new ValuePublisher(dht, 
-                DatabaseSettings.STORABLE_PUBLISHER_PERIOD.getValue(), 
-                TimeUnit.MILLISECONDS);
-        
-        bootstrapWorker.addBootstrapListener(new BootstrapListener() {
-            @Override
-            public void handleReady() {
-                publisher.start();
-            }
-            
-            @Override
-            public void handleCollision(CollisionException ex) {
-            }
-        });
     }
     
     @Override
@@ -152,7 +131,6 @@ public class PassiveController extends SimpleController {
     @Override
     public void close() throws IOException {
         IoUtils.closeAll(contactPusher, 
-                publisher,
                 bootstrapWorker);
         
         super.close();

@@ -38,6 +38,20 @@ public abstract class Publisher implements Closeable {
     }
     
     /**
+     * Returns the publishing frequency in the given {@link TimeUnit}.
+     */
+    public long getFrequency(TimeUnit unit) {
+        return unit.convert(frequency, this.unit);
+    }
+    
+    /**
+     * Returns the publishing frequency in milliseconds.
+     */
+    public long getFrequencyInMillis() {
+        return getFrequency(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
      * Returns true if the {@link Publisher} is open.
      */
     public synchronized boolean isOpen() {

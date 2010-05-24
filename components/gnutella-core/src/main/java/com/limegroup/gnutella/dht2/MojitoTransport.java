@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito2.io.AbstractTransport;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -25,6 +26,7 @@ class MojitoTransport extends AbstractTransport {
     
     private final Provider<MessageRouter> messageRouter;
     
+    @Inject
     public MojitoTransport(Provider<UDPService> udpService, 
             Provider<MessageRouter> messageRouter) {
         

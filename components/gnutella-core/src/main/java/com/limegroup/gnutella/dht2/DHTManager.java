@@ -19,11 +19,13 @@ import org.limewire.mojito2.storage.DHTValue;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
+import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
  * 
  */
-public interface DHTManager extends Closeable, ConnectionLifecycleListener {
+public interface DHTManager extends Closeable, ConnectionLifecycleListener, 
+        EventDispatcher<DHTEvent, DHTEventListener> {
 
     public static final Vendor VENDOR = ContextSettings.getVendor();
 

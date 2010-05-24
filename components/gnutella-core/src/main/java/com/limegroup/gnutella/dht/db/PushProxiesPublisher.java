@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GUID;
+import org.limewire.io.IpPortSet;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.storage.DHTValue;
 
@@ -26,6 +27,8 @@ public class PushProxiesPublisher extends Publisher {
     @InspectablePrimitive(value = "The number of values that have been published")
     private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
     
+    private static final int PROXY_THRESHOLD = 2;
+    
     private final PublisherQueue queue;
     
     private final NetworkManager networkManager;
@@ -33,6 +36,10 @@ public class PushProxiesPublisher extends Publisher {
     private final ApplicationServices applicationServices;
     
     private final PushEndpointFactory pushEndpointFactory;
+    
+    private volatile long stableTime = -1L;
+    
+    private volatile long publishTime = -1L;
     
     private volatile PushProxiesValue pendingValue = null;
     
@@ -72,6 +79,79 @@ public class PushProxiesPublisher extends Publisher {
     }
     
     /**
+     * Sets the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT.
+     */
+    public void setStableProxiesTime(long time, TimeUnit unit) {
+        stableTime = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT in the given {@link TimeUnit}.
+     */
+    public long getStableProxiesTime(TimeUnit unit) {
+        long stableTime = this.stableTime;
+        if (stableTime != -1L) {
+            return unit.convert(stableTime, TimeUnit.MILLISECONDS);
+        }
+        
+        return DHTSettings.STABLE_PROXIES_TIME.getTime(unit);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT in milliseconds.
+     */
+    public long getStableProxiesTimeInMillis() {
+        return getStableProxiesTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Sets the time a {@link PushProxiesValue} needs to be re-published.
+     */
+    public void setPublishProxiesTime(long time, TimeUnit unit) {
+        publishTime = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} needs to be
+     * re-published in the given {@link TimeUnit}.
+     */
+    public long getPublishProxiesTime(TimeUnit unit) {
+        long publishTime = this.publishTime;
+        if (publishTime != -1L) {
+            return unit.convert(publishTime, TimeUnit.MILLISECONDS);
+        }
+        
+        return DHTSettings.PUBLISH_PROXIES_TIME.getTime(unit);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} needs to be
+     * re-published in milliseconds.
+     */
+    public long getPublishProxiesTimeInMillis() {
+        return getPublishProxiesTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the currently pending {@link PushProxiesValue} or 
+     * {@code null} if no value is pending for publication.
+     */
+    public PushProxiesValue getPendingValue() {
+        return pendingValue;
+    }
+    
+    /**
+     * Returns the currently published {@link PushProxiesValue} or 
+     * {@code null} if no value has been published.
+     */
+    public PushProxiesValue getPublishedValue() {
+        return publishedValue;
+    }
+    
+    /**
      * Tries to publish the localhost's Push-Proxies to the DHT
      */
     @Override
@@ -87,7 +167,7 @@ public class PushProxiesPublisher extends Publisher {
         // If *NOT* then replace the pending-value with the current
         // value and reset the time stamp. The idea is to publish 
         // only stable configurations to the DHT.
-        if (!value.equals(pendingValue)) {
+        if (hasChangedTooMuch(value, pendingValue)) {
             pendingValue = value;
             pendingTimeStamp = System.currentTimeMillis();
         }
@@ -95,7 +175,7 @@ public class PushProxiesPublisher extends Publisher {
         // Check for how long the pending-value has been stable for.
         // Do not publish if it's less than the given threshold!
         long stableTime = System.currentTimeMillis() - pendingTimeStamp;
-        if (stableTime < DHTSettings.STABLE_PROXIES_TIME.getTimeInMillis()) {
+        if (stableTime < getStableProxiesTimeInMillis()) {
             return;
         }
         
@@ -103,7 +183,7 @@ public class PushProxiesPublisher extends Publisher {
         // than the threshold and the value hasn't changed ever since
         // then don't re-publish the value.
         long publishTime = System.currentTimeMillis() - publishedTimeStamp;
-        if (publishTime < DHTSettings.PUBLISH_PROXIES_TIME.getTimeInMillis() 
+        if (publishTime < getPublishProxiesTimeInMillis() 
                 && pendingValue.equals(publishedValue)) {
             return;
         }
@@ -114,6 +194,33 @@ public class PushProxiesPublisher extends Publisher {
         publish(key, publishedValue.serialize());
         publishedTimeStamp = System.currentTimeMillis();
         PUBLISH_COUNT.incrementAndGet();
+    }
+    
+    /**
+     * Returns {@code true} if the current value differs too much
+     * from the pending value and needs to be replaced.
+     */
+    static boolean hasChangedTooMuch(PushProxiesValue value, 
+            PushProxiesValue pendingValue) {
+        
+        // Publish if first call
+        if (pendingValue == null) {
+            return true;
+        }
+        
+        // Publish if fwt capabilities have changed
+        if (value.getFwtVersion() != pendingValue.getFwtVersion()) {
+            return true;
+        }
+        
+        IpPortSet old = new IpPortSet(pendingValue.getPushProxies());
+        old.retainAll(value.getPushProxies());
+        
+        if (old.size() < PROXY_THRESHOLD) {
+            return true;
+        }
+        
+        return false;
     }
     
     /**

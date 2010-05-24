@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -35,7 +34,6 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTableImpl;
-import org.limewire.mojito2.settings.DatabaseSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseImpl;
@@ -55,9 +53,6 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.db.AltLocPublisher;
-import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
-import com.limegroup.gnutella.dht.db.ValuePublisher;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -81,10 +76,6 @@ public class ActiveController extends SimpleController {
     private final ContactSink contactSink;
     
     private final MojitoDHT dht;
-    
-    private final AltLocPublisher locationPublisher;
-    
-    private final PushProxiesPublisher proxyPublisher;
     
     private final BootstrapWorker bootstrapWorker;
     
@@ -133,18 +124,9 @@ public class ActiveController extends SimpleController {
         
         contactSink = new ContactSink(dht);
         contactPusher = new ContactPusher(connectionManager);
-        publisher = new ValuePublisher(dht, 
-                DatabaseSettings.STORABLE_PUBLISHER_PERIOD.getValue(), 
-                TimeUnit.MILLISECONDS);
-        
-        locationPublisher = new AltLocPublisher(
-                queue, networkManager, applicationServices, 
-                gnutellaFileView, tigerTreeCache);
-        
         bootstrapWorker.addBootstrapListener(new BootstrapListener() {
             @Override
             public void handleReady() {
-                publisher.start();
             }
             
             @Override
@@ -223,7 +205,6 @@ public class ActiveController extends SimpleController {
     public void close() throws IOException {
         IoUtils.closeAll(contactSink, 
                 contactPusher, 
-                publisher,
                 bootstrapWorker);
         
         super.close();

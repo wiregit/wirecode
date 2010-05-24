@@ -46,6 +46,8 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(-1L, value2.getFileSize());
         assertEquals(null, value2.getRootHash());
         assertEquals(value1.isFirewalled(), value2.isFirewalled());
+        
+        assertEquals(value1, value2);
     }
     
     public void testSerializationVersionOne() throws Exception {
@@ -76,6 +78,7 @@ public class AltLocValueTest extends DHTTestCase {
         assertEquals(value1.getFileSize(), value2.getFileSize());
         assertEquals(value1.getRootHash(), value2.getRootHash());
         assertEquals(value1.isFirewalled(), value2.isFirewalled());
+        assertEquals(value1, value2);
         
         // De-serialize it but do as if it's a Version 0 value!
         // The File size and TigerTree root hash should be missing!

@@ -64,5 +64,7 @@ public class PushProxiesValueTest extends DHTTestCase {
                 value2.getPushProxies().iterator().next().getInetAddress());
         assertEquals(value1.getPushProxies().iterator().next().getPort(), 
                 value2.getPushProxies().iterator().next().getPort());
+        
+        assertEquals(value1, value2);
     }
 }

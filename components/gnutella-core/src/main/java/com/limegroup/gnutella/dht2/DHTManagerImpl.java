@@ -30,20 +30,29 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.PublisherQueue;
+import com.limegroup.gnutella.dht.db.DefaultPublisherQueue;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 @Singleton
 public class DHTManagerImpl extends AbstractDHTManager implements Service {
@@ -75,6 +84,12 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     
     private final HostFilter hostFilter;
     
+    private final PublisherQueue queue = new DefaultPublisherQueue(this);
+    
+    private final AltLocPublisher altLocPublisher;
+    
+    private final PushProxiesPublisher pushProxiesPublisher;
+    
     private Controller controller = InactiveController.CONTROLLER;
     
     private volatile boolean enabled = true;
@@ -94,7 +109,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
             PingRequestFactory pingRequestFactory,
             Provider<UniqueHostPinger> uniqueHostPinger,
             Provider<UDPPinger> udpPinger,
-            Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
+            Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
+            ApplicationServices applicationServices,
+            PushEndpointFactory pushEndpointFactory,
+            @GnutellaFiles FileView gnutellaFileView, 
+            Provider<HashTreeCache> tigerTreeCache) {
         
         this.networkManager = networkManager;
         this.udpService = udpService;
@@ -110,9 +129,10 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         
         this.hostFilter = new DefaultHostFilter(ipFilter);
         
-        messageFactory.setParser(
-                (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
-                new MojitoMessageParser());
+        this.pushProxiesPublisher = new PushProxiesPublisher(
+                queue, networkManager, applicationServices, pushEndpointFactory);
+        this.altLocPublisher = new AltLocPublisher(queue, networkManager, 
+                applicationServices, gnutellaFileView, tigerTreeCache);
         
         addEventListener(new DHTEventListener() {
             @Override
@@ -126,6 +146,10 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
                 }
             }
         });
+        
+        messageFactory.setParser(
+                (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
+                new MojitoMessageParser());
     }
     
     @Inject
@@ -186,12 +210,15 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         
         return false;
     }
-
+    
     @Override
     public synchronized void stop() {
+        queue.stop();
+        altLocPublisher.stop();
+        pushProxiesPublisher.stop();
+        
         IoUtils.close(controller);
         controller = InactiveController.CONTROLLER;
-        
         fireStopped();
     }
     
@@ -199,6 +226,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     public synchronized void close() {
         open = false;
         stop();
+        
+        IoUtils.closeAll(
+                queue, 
+                altLocPublisher, 
+                pushProxiesPublisher);
     }
     
     @Override
@@ -256,6 +288,22 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         return controller.isReady();
     }
     
+    /**
+     * 
+     */
+    private synchronized void onReady() {
+        queue.start();
+        altLocPublisher.start();
+        pushProxiesPublisher.start();
+        
+        fireConnected();
+    }
+    
+    private synchronized void onCollision(DHTMode mode) {
+        stop();
+        start(mode);
+    }
+    
     private Controller createActive() throws IOException {
         
         MojitoTransport transport = new MojitoTransport(
@@ -274,15 +322,12 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         worker.addBootstrapListener(new BootstrapListener() {
             @Override
             public void handleReady() {
-                fireConnected();
+                onReady();
             }
             
             @Override
             public void handleCollision(CollisionException ex) {
-                synchronized (DHTManagerImpl.this) {
-                    stop();
-                    start(DHTMode.ACTIVE);
-                }
+                onCollision(DHTMode.ACTIVE);
             }
         });
         
@@ -306,15 +351,12 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         worker.addBootstrapListener(new BootstrapListener() {
             @Override
             public void handleReady() {
-                fireConnected();
+                onReady();
             }
             
             @Override
             public void handleCollision(CollisionException ex) {
-                synchronized (DHTManagerImpl.this) {
-                    stop();
-                    start(DHTMode.PASSIVE);
-                }
+                onCollision(DHTMode.PASSIVE);
             }
         });
         
