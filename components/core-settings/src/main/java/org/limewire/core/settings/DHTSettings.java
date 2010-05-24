@@ -392,11 +392,11 @@ public class DHTSettings extends LimeProps {
                 10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
-     * 
+     * The frequency at which cached {@link PushEndpoint}s are being purged.
      */
     public static final TimeSetting PUSH_ENDPOINT_PURGE_FREQUENCY
         = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_PURGE_FREQUENCY", 2L*60L*1000L, 
-                "DHT.ProxyPublisherFrequency", 30L*1000L, 24L*60L*60L*1000L, 
+                "DHT.PushEndpointPurgeFrequency", 30L*1000L, 24L*60L*60L*1000L, 
                 TimeUnit.MILLISECONDS);
     
     /**

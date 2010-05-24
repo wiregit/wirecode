@@ -6,13 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IdentityHashSet;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
@@ -36,11 +33,6 @@ public class PublisherQueue implements Closeable {
         = LogFactory.getLog(PublisherQueue.class);
     
     private static final int ALPHA = 4;
-    
-    private static final ExecutorService EXECUTOR 
-        = Executors.newSingleThreadExecutor(
-            ExecutorsHelper.defaultThreadFactory(
-                "PublisherQueueThread"));
     
     private final Map<KUID, DHTValue> values 
         = new LinkedHashMap<KUID, DHTValue>();
@@ -121,24 +113,6 @@ public class PublisherQueue implements Closeable {
      * 
      */
     private synchronized void doNext(final int count) {
-        if (!open) {
-            return;
-        }
-        
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                process(count);
-            }
-        };
-        
-        EXECUTOR.execute(task);
-    }
-    
-    /**
-     * 
-     */
-    private synchronized void process(int count) {
         if (!open) {
             return;
         }

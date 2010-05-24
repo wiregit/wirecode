@@ -42,15 +42,7 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
             = new EventListener<FutureEvent<PushEndpoint>>() {
         @Override
         public void handleEvent(FutureEvent<PushEndpoint> event) {
-            if (event.getType() == Type.SUCCESS) {
-                PushEndpoint endpoint = event.getResult();
-                endpoint.updateProxies(true);
-                
-                IpPort externalAddress = endpoint.getValidExternalAddress();
-                if (externalAddress != null) {
-                    cache.setAddr(endpoint.getClientGUID(), externalAddress);
-                }
-            }
+            handlePushEndpoint(event);
         }
     };
 
@@ -61,13 +53,14 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
     
     private final PushEndpointService service;
     
-    private final long frequency;
-    
-    private final TimeUnit unit;
+    private volatile long frequency;
     
     private ScheduledFuture<?> purgeFuture = null;
     
     private boolean open = true;
+    
+    private volatile long cacheTime 
+        = DHTSettings.PUSH_ENDPOINT_CACHE_TIME.getTimeInMillis();
     
     /**
      * Creates a {@link PushEndpointManager}
@@ -84,12 +77,11 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
      * Creates a {@link PushEndpointManager}
      */
     public PushEndpointManager(PushEndpointCache cache, 
-            @Named("dhtPushEndpointFinder") PushEndpointService service,
+            PushEndpointService service,
             long frequency, TimeUnit unit) {
         this.cache = cache;
         this.service = service;
-        this.frequency = frequency;
-        this.unit = unit;
+        this.frequency = unit.toMillis(frequency);
     }
     
     @Override
@@ -101,6 +93,62 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
         }
         
         handles.clear();
+    }
+    
+    /**
+     * Sets the purge frequency in the given {@link TimeUnit}.
+     */
+    public void setPurgeFrequency(long time, TimeUnit unit) {
+        frequency = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the purge frequency in the given {@link TimeUnit}.
+     */
+    public long getPurgeFrequency(TimeUnit unit) {
+        return unit.convert(frequency, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the purge frequency in milliseconds.
+     */
+    public long getPurgeFrequencyInMillis() {
+        return getPurgeFrequency(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Sets the current cache time in the given {@link TimeUnit}.
+     */
+    public void setCacheTime(long time, TimeUnit unit) {
+        cacheTime = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the current cache time in the given {@link TimeUnit}.
+     */
+    public long getCacheTime(TimeUnit unit) {
+        return unit.convert(cacheTime, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the current cache time in milliseconds
+     */
+    public long getCacheTimeInMillis() {
+        return getCacheTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the number of cached {@link PushEndpoint}s
+     */
+    public synchronized int size() {
+        return handles.size();
+    }
+    
+    /**
+     * Returns {@code true} if there are no cached {@link PushEndpoint}s.
+     */
+    public synchronized boolean isEmpty() {
+        return handles.isEmpty();
     }
     
     @Override
@@ -138,8 +186,9 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
                     }
                 };
                 
+                long frequency = this.frequency;
                 purgeFuture = EXECUTOR.scheduleWithFixedDelay(
-                        task, frequency, frequency, unit);
+                        task, frequency, frequency, TimeUnit.MILLISECONDS);
             }
             
             return future;
@@ -147,11 +196,25 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
     }
     
     /**
-     * 
+     * A callback method that is being called for each {@link PushEndpoint}
+     * {@link DHTFuture} that completes.
+     */
+    protected void handlePushEndpoint(FutureEvent<PushEndpoint> event) {
+        if (event.getType() == Type.SUCCESS) {
+            PushEndpoint endpoint = event.getResult();
+            endpoint.updateProxies(true);
+            
+            IpPort externalAddress = endpoint.getValidExternalAddress();
+            if (externalAddress != null) {
+                cache.setAddr(endpoint.getClientGUID(), externalAddress);
+            }
+        }
+    }
+    
+    /**
+     * Removes all expired values from the cache
      */
     private synchronized void purge() {
-        long cacheTime = DHTSettings.PUSH_ENDPOINT_CACHE_TIME.getValue();
-        
         for (Iterator<FutureHandle> it 
                     = handles.values().iterator(); it.hasNext(); ) {
             
@@ -164,13 +227,24 @@ public class PushEndpointManager implements Closeable, PushEndpointService {
             }
         }
         
-        if (handles.isEmpty()) {
+        boolean done = handles.isEmpty();
+        
+        if (done) {
             purgeFuture.cancel(true);
         }
+        
+        purged(done);
     }
     
     /**
-     * 
+     * Called by the purge {@link Thread} after each purge.
+     */
+    protected synchronized void purged(boolean done) {
+    }
+    
+    /**
+     * A handle that hold the creation time and the cached 
+     * {@link PushEndpoint} {@link DHTFuture}.
      */
     private static class FutureHandle {
         
