@@ -191,18 +191,6 @@ public class DHTSettings extends LimeProps {
                 1L, TimeUnit.HOURS); 
     
     /**
-     * The maximum amount of time for which we will ping the network for DHT nodes.
-     */
-    // Was DHT.MaxNodeFetcherTime
-    @Deprecated
-    public static final TimeSetting MAX_DHT_NODE_FETCHER_TIME 
-        = FACTORY.createRemoteTimeSetting("MAX_DHT_NODE_FETCHER_TIME", 
-                30L, TimeUnit.SECONDS,
-                "DHT.MaxNodeFetcherTime", 
-                0L, TimeUnit.MILLISECONDS,
-                5L, TimeUnit.MINUTES);
-    
-    /**
      * Setting for the delay between DHT random node adder runs.
      */
     // Was DHT.DHTNodeAdderDelay
