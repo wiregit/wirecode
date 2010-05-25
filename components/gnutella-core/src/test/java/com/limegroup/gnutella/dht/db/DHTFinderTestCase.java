@@ -54,7 +54,8 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         final ConnectionManager connectionManager 
             = MockUtils.createConnectionManagerWithPushProxies(context);
         
-        injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), new AbstractModule() {
+        injector = LimeTestUtils.createInjectorNonEagerly(
+                new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(DHTManager.class).toInstance(dhtManager);
@@ -64,8 +65,10 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         });
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
-        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        alternateLocationFactory 
+            = injector.getInstance(AlternateLocationFactory.class);
+        pushEndpointFactory 
+            = injector.getInstance(PushEndpointFactory.class);
         
         
         dhts = MojitoUtils.createBootStrappedDHTs(1);
@@ -78,6 +81,17 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
                     return mojitoDHT.get((EntityKey)invocation.getParameter(0));
                 }                
             });
+            
+            allowing(dhtManager).getAll(with(any(EntityKey.class)));
+            will(new CustomAction("Mojito Get-All") {
+                @Override
+                public Object invoke(Invocation invocation) throws Throwable {
+                    return mojitoDHT.getAll((EntityKey)invocation.getParameter(0));
+                }
+            });
+            
+            allowing(dhtManager).getMojitoDHT();
+            will(returnValue(mojitoDHT));
         }});
         assertTrue(mojitoDHT.isReady());
     }
