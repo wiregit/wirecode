@@ -53,18 +53,32 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
     
     public void testGetPushProxiesReturnsSelf() throws Exception {
         NetworkManagerStub networkManagerStub 
-            = (NetworkManagerStub)injector.getInstance(NetworkManager.class)
-        ;
+            = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        
+        ApplicationServices applicationServices = injector.getInstance(
+                ApplicationServices.class);
+        
         final PushEndpointFactory pushEndpointFactory 
             = context.mock(PushEndpointFactory.class);
-        final PushEndpoint selfEndpoint = context.mock(PushEndpoint.class);
+        
+        final PushEndpoint selfEndpoint 
+            = context.mock(PushEndpoint.class);
+        
+        IpPort result = new ConnectableImpl(
+                NetworkUtils.ip2string(
+                    networkManagerStub.getAddress()), 
+                    networkManagerStub.getPort(), 
+                    networkManagerStub.isIncomingTLSEnabled());
+        
+        final IpPortSet expected 
+            = new IpPortSet(result);
         
         context.checking(new Expectations() {{
             allowing(pushEndpointFactory).createForSelf();
             will(returnValue(selfEndpoint));
             
             allowing(selfEndpoint).getFeatures();
-            will(returnValue(0));
+            will(returnValue((byte)0));
             
             allowing(selfEndpoint).getFWTVersion();
             will(returnValue(0));
@@ -73,39 +87,34 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
             will(returnValue(0));
             
             allowing(selfEndpoint).getProxies();
-            will(returnValue(0));
+            will(returnValue(expected));
         }});
         
-        ApplicationServices applicationServices = injector.getInstance(
-                ApplicationServices.class);
-        
+        // *NOT* Firewalled !!!
+        networkManagerStub.setAcceptedIncomingConnection(true);
         PushProxiesValue value2 = new DefaultPushProxiesValue(
                 networkManagerStub, applicationServices, pushEndpointFactory);
         
-        networkManagerStub.setAcceptedIncomingConnection(true);
-        
         Set<? extends IpPort> proxies = value2.getPushProxies();
         assertEquals(1, proxies.size());
-
-        assertContains(proxies, new ConnectableImpl(
-                NetworkUtils.ip2string(
-                        networkManagerStub.getAddress()), 
-                        networkManagerStub.getPort(), 
-                        networkManagerStub.isIncomingTLSEnabled()));
+        assertContains(proxies, result);
         
+        context.assertIsSatisfied();
         
-        // let's go firewalled
+        // Firewalled !!!
         networkManagerStub.setAcceptedIncomingConnection(false);
-        final IpPortSet pushProxies = new IpPortSet(
+        
+        // Replace the expected IpPorts
+        expected.clear();
+        expected.addAll(new IpPortSet(
                 new ConnectableImpl("199.49.49.3", 45454, false), 
-                new ConnectableImpl("202.2.23.3", 1000, true));
+                new ConnectableImpl("202.2.23.3", 1000, true)));
         
-        context.checking(new Expectations() {{
-            one(selfEndpoint).getProxies();
-            will(returnValue(pushProxies));
-        }});
+        PushProxiesValue value3 = new DefaultPushProxiesValue(
+                networkManagerStub, applicationServices, pushEndpointFactory);
         
-        assertEquals(pushProxies, value2.getPushProxies());
+        assertEquals(expected, value3.getPushProxies());
+        
         context.assertIsSatisfied();
     }
 
