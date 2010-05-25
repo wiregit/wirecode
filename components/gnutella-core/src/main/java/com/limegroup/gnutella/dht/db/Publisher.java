@@ -85,7 +85,7 @@ public abstract class Publisher implements Closeable {
         };
         
         future = EXECUTOR.scheduleWithFixedDelay(
-                task, frequency, frequency, unit);
+                task, 0L, frequency, unit);
     }
     
     /**
