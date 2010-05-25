@@ -129,6 +129,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
      */
     static Set<? extends IpPort> getPushProxies(
             NetworkManager networkManager, PushEndpoint endpoint) {
+        
         if (networkManager.acceptedIncomingConnection()
                 && networkManager.isIpPortValid()) {
             return new StrictIpPortSet<Connectable>(new ConnectableImpl(
