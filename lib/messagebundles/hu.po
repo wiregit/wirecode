@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-17 11:30-0400\n"
+"POT-Creation-Date: 2010-05-24 11:30-0400\n"
 "PO-Revision-Date: 2010-05-16 11:36+0000\n"
 "Last-Translator: fergekolferol <ferge.kolferol@gmail.com>\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-05-18 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-05-25 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:69
@@ -110,8 +110,8 @@ msgid "The file is corrupted"
 msgstr "A fájl sérült"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The file is invalid"
-msgstr "A fájl érvénytelen"
+msgid "The copyright holder has not authorized this file for sharing"
+msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "Trouble connecting to people"
@@ -1108,7 +1108,6 @@ msgstr "Mentett Licenc kulcs szerkesztése"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CancelSharingAction.java:17
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:59
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/LocationDialog.java:95
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:228
@@ -1366,7 +1365,7 @@ msgstr "További bellítások"
 
 #. * String for connecting status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:30
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:151
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:152
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:117
 msgid "Connecting..."
 msgstr "Kapcsolódás..."
@@ -1497,6 +1496,7 @@ msgstr "Betöltés..."
 
 #. Display as modal dialog.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:86
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:146
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:239
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:58
 msgid "Warning"
@@ -1521,6 +1521,14 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:124
 #, java-format
 msgid "Warning: {0}"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:143
+msgid "The torrent file download could not be virus scanned."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
+msgid "Do you want to continue and download the torrent?"
 msgstr ""
 
 #. lower case since hyperlink
@@ -1597,12 +1605,12 @@ msgid "Block User {0}"
 msgstr "Felhasználó tiltása {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:175
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:237
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:242
 msgid "nobody"
 msgstr "senki"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:195
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:267
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:272
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:124
 #, java-format
 msgid "{0} Person"
@@ -1634,8 +1642,8 @@ msgid "Web Search"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:209
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:239
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:269
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:244
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:274
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:126
 #, java-format
 msgid "{0} P2P User"
@@ -1958,24 +1966,24 @@ msgstr "Letöltés megszakítása"
 msgid "Remove download"
 msgstr "Letöltés eltávolítása"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:65
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:56
 msgid "Info"
 msgstr "Infó"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:141
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:142
 msgid "Resuming"
 msgstr "Folytatás"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:144
 msgid "Cancelled"
 msgstr "Megszakítva"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:146
 msgid "Finishing..."
 msgstr "Befejezés…"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:147
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:148
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:559
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPanel.java:107
@@ -1984,98 +1992,98 @@ msgid "Done"
 msgstr "Kész"
 
 #. {0}: 1 person, 2 people, etc
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:154
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:155
 #, java-format
 msgid "Connecting to {0}"
 msgstr "Kapcsolódás: {0}-hoz"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:162
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:119
 #, java-format
 msgid "{0} of {1} ({2})"
 msgstr "{0} a {1}-ból  ({2})"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:166
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:167
 #, java-format
 msgid "{0} of {1} ({2}) from {3}"
 msgstr "{0} a {1}-ból ({2}) {3}-tól"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:176
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:177
 msgid "Error downloading torrent"
 msgstr "Hiba a torrent letöltése közben"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:178
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:179
 #, java-format
 msgid "Stalled - {0} of {1}"
 msgstr "Leállt - {0} a {1}-ból/-ből"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:187
 msgid "Unable to download: "
 msgstr "Nem lehet letölteni: "
 
 #. {0}: current size, {1} total size
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:186
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:191
 #, java-format
 msgid "Paused - {0} of {1}"
 msgstr "Megállítva - {0} a {1}-ból"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:194
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:199
 #, java-format
 msgid "Waiting - Next in line"
 msgid_plural "Waiting - {0} in line"
 msgstr[0] "Várakozás - következő a sorban"
 msgstr[1] "Várakozás - {0}. a sorban"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:198
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:203
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:137
 msgid "File deleted - Dangerous file"
 msgstr "Fájl törölve - Veszályes fájl"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:200
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:205
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:127
 msgid "Scanning for viruses - Powered by AVG"
 msgstr "Vírusok keresése - Powered by AVG"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:202
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:207
 msgid "Scanning preview - Powered by AVG"
 msgstr "Vizsgálat előnézete - Powered by AVG"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:204
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:209
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:132
 msgid "File deleted - Threat detected by AVG"
 msgstr "Fájl tölve - Az AVG vírust talált"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:206
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:211
 msgid "Done, but unable to scan for viruses"
 msgstr "Kész, de nem a vírusellenőrzött"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:210
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:215
 msgid "Evaluating..."
 msgstr "Értékelés..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:212
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:217
 msgid "Applying update..."
 msgstr "Alkalmazás frissítése..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:221
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:226
 msgid "Looking for file..."
 msgstr "Fájl keresése"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:223
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:228
 #, java-format
 msgid "Looking for file ({0} left)"
 msgstr "Fájl keresése ({0} van hátra)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:229
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:234
 msgid "Store"
 msgstr "Tárol"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:245
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:250
 msgid "1 P2P User"
 msgstr "1 P2P Felhasználó"
 
 #. just friends
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:272
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:277
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:128
 #, java-format
 msgid "{0} Friend"
@@ -2084,7 +2092,7 @@ msgstr[0] "{0} Barát"
 msgstr[1] "{0} Barátok"
 
 #. if(queueTime == DownloadItem.UNKNOWN_TIME){
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:279
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:284
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:129
 msgid "Waiting..."
 msgstr "Várakozás…"
@@ -2819,7 +2827,6 @@ msgstr "Fájlnév"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:76
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:72
 msgid "Delete from Disk"
 msgstr "Törlés a merevlemezről"
 
@@ -2836,7 +2843,6 @@ msgstr[0] "Fájl áthelyezése a lomtárba?"
 msgstr[1] "Fájlok áthelyezése a lomtárba?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:65
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:58
 msgid "Move to Recycle Bin"
 msgstr "Áthelyezés a lomtárba"
 
@@ -2853,7 +2859,6 @@ msgstr[0] "Fájl áthelyezése a kukába?"
 msgstr[1] "Fájlok áthelyezése a kukába?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeleteAction.java:71
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:65
 msgid "Move to Trash"
 msgstr "Áthelyezés a kukába"
 
@@ -2869,17 +2874,21 @@ msgid_plural "Delete these files from disk?"
 msgstr[0] "Fájl törlése a merevlemezről?"
 msgstr[1] "Fájlok törlése a merevlemezről?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:50
-msgid "Remove from Library"
-msgstr "Eltávolítás a könyvtárból"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:58
+msgid "&Remove from Library"
+msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
+msgid "&Cancel"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:62
 msgid "Move File to the Recycle Bin or Remove from Library"
 msgid_plural "Move Files to the Recycle Bin or Remove from Library"
 msgstr[0] "Fájl áthelyezése a lomtárba vagy eltávolítása a könyvtárból"
 msgstr[1] "Fájlok áthelyezése a lomtárba vagy eltávolításuk a könyvtárból"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:64
 msgid ""
 "Do you want to move this file to the Recycle Bin or just remove it from the "
 "Library?"
@@ -2893,13 +2902,17 @@ msgstr[1] ""
 "Szeretné áthelyezni ezeket a fájlokat a lomtárba, vagy csak távolítsa el azt "
 "a könyvtárból?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:66
+msgid "&Move to Recycle Bin"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:69
 msgid "Move File to the Trash or Remove from Library"
 msgid_plural "Move Files to the Trash or Remove from Library"
 msgstr[0] "Fájl áthelyezése a kukába vagy eltávolítása a könyvtárból"
 msgstr[1] "Fájlok áthelyezése a kukába vagy eltávolításuk a könyvtárból"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:63
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:71
 msgid ""
 "Do you want to move this file to the Trash or just remove it from the "
 "Library?"
@@ -2913,13 +2926,17 @@ msgstr[1] ""
 "Szeretné ezeket a fájlokat áthelyezni a kukába, vagy csak távolítsa el azt a "
 "könyvtárból?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:68
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:73
+msgid "&Move to Trash"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:76
 msgid "Delete File or Remove from Library"
 msgid_plural "Delete Files or Remove from Library"
 msgstr[0] "Fájl törlése vagy eltávolítás a könyvtárból"
 msgstr[1] "Fájlok törlése vagy eltávolítás a könyvtárból"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:70
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:78
 msgid ""
 "Do you want to delete this file from disk or just remove it from the Library?"
 msgid_plural ""
@@ -2930,6 +2947,10 @@ msgstr[0] ""
 msgstr[1] ""
 "Szeretné törölni ezeket a fájlokat a lemezről, vagy csak távolítsa el azt a "
 "könyvtárból?"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:80
+msgid "&Delete from Disk"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:408
 msgid "This file is still processing."
@@ -3749,7 +3770,7 @@ msgstr "iTunes konfiguráláció"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:106
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:204
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:261
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:273
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:253
 msgid "Configure..."
@@ -3779,12 +3800,12 @@ msgstr ""
 "listához"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:203
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:260
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:272
 msgid "Unsafe File Sharing"
 msgstr "Nem biztonságos fájlmegosztás"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:204
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:261
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:273
 msgid "Configure unsafe file sharing settings"
 msgstr "Nem biztonságos fájlmegosztás beállítása"
 
@@ -3879,7 +3900,7 @@ msgid "Show popup system notifications"
 msgstr "Felugró ablakos értesítések mutatása"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:175
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:232
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:244
 msgid "Reset"
 msgstr "Visszaállítás"
 
@@ -4038,35 +4059,39 @@ msgstr "Port:"
 msgid "Enable Authentication"
 msgstr "Hitelesítés engedélyezése."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:73
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:75
 msgid "Group similar search results together"
 msgstr "Hasonló keresési eredmények csoportosítása"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:130
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:78
+msgid "Use web search to find additional torrent sources"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:142
 msgid "Search Bar"
 msgstr "Keresősáv"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:146
 msgid "By default, search for"
 msgstr "Alapértelmezettként keresés a következők után:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:153
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:165
 msgid "Suggest smart searches"
 msgstr "Az okos keresés támogatása"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:156
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:168
 msgid "Remember my recent searches"
 msgstr "Emlékezz a keresési előzményekre"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:171
 msgid "Clear Now"
 msgstr "Tisztít most"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:230
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:242
 msgid "Do you want to reset the Spam Filter?"
 msgstr "Szeretné újraindítani a Spam szűrőt?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:231
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:243
 msgid ""
 "This will clear all the files marked as spam. Doing this may result in more "
 "spam in search results."
@@ -4074,62 +4099,62 @@ msgstr ""
 "Ezzel törli az összes spamnek jelölt fájlt. Ennek az lesz az eredménye, hogy "
 "több spam lesz a keresési eredmények között."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:257
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:269
 msgid "Search Filtering"
 msgstr "Keresés szűrése"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:269
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:281
 msgid ""
 "Don't let me download or upload files copyright owners request not be shared."
 msgstr ""
 "Ne engedj letölteni vagy feltölteni olyan fájlokat, melyek megosztásához a "
 "jogtulajdonos nem járult hozzá."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:272
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:284
 msgid "Don't show adult content in search results"
 msgstr "Ne mutass felnőtt tartalmakat a keresési eredményekben"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:276
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:288
 msgid "Filter Keywords"
 msgstr "Kulcsszavak szűrése"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:277
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:289
 msgid "Filter Keywords..."
 msgstr "Kulcsszavak szűrése..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:278
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:290
 msgid ""
 "Restrict files with certain words from being displayed in search results"
 msgstr "Fájlok szűkítése bizonyos szavakkal a keresési eredményekből"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:281
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:293
 msgid "Filter File Extensions"
 msgstr "Fájlkiterjesztések szűrése"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:282
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:294
 msgid "Filter File Extensions..."
 msgstr "Fájlkiterjesztések szűrése..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:283
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:295
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
 msgstr ""
 "Bizonyos kiterjesztésű fájlok megjelenítésének tiltása a keresési "
 "eredményekben"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:285
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:297
 msgid "Reset Spam Filter"
 msgstr "Spam szűrő újraindítása"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:285
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:297
 msgid "Reset Spam Filter..."
 msgstr "Spam szűrő újraindítása..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:285
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:297
 msgid "Reset the Spam filter by clearing all files marked as spam"
 msgstr "Spam szűrő újraindítása, az összes spam-nek jelölt fálj törlése."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:287
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:299
 msgid "Change the ability to search for Programs"
 msgstr "Keresési képesség változtatása programokkal"
 
@@ -5479,16 +5504,16 @@ msgstr "Kilépés az átvitelek után"
 msgid "Exit"
 msgstr "Kilépés"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:148
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:163
 msgid "Update Now"
 msgstr "Frissítés most"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:151
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:187
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:166
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:202
 msgid "Visit http://www.limewire.com to update!"
 msgstr "A frissítéshez látogass el a http://www.limewire.com oldalra!"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:176
 msgid ""
 "LimeWire needs to be restarted to install the update. If you choose not to "
 "update now, LimeWire will update automatically when you close. Would you "
@@ -5498,11 +5523,11 @@ msgstr ""
 "szeretnél frissíteni, a LimeWire a leállása előtt fog frissíteni. Szeretnéd "
 "most telepíteni a frissítést?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:162
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:177
 msgid "Update Ready"
 msgstr "Frissítés kész"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:184
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:199
 msgid "Update Later"
 msgstr "Frissítés később"
 
