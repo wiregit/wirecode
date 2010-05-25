@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.spam;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +20,7 @@ public class TemplateHashTokenFactory {
     private static final String REPLACEMENT_STRING = "****";
 
     private final SHA1 sha1 = new SHA1();
+    private final Pattern whitespace = Pattern.compile("\\s+");
 
     /**
      * If the filename contains the query (trimmed and ignoring case), replaces
@@ -27,8 +29,8 @@ public class TemplateHashTokenFactory {
      * the resulting template. Otherwise returns null.
      */
     public TemplateHashToken create(String query, String filename) {
-        query = query.trim().toLowerCase(Locale.US);
-        filename = filename.trim().toLowerCase(Locale.US);
+        query = normalize(query);
+        filename = normalize(filename);
         if(filename.contains(query)) {
             String template = filename.replace(query, REPLACEMENT_STRING);
             template = template.replaceFirst("^[0-9\\s]*", "");
@@ -38,6 +40,13 @@ public class TemplateHashTokenFactory {
         }
         LOG.debug("Did not create template");
         return null;
+    }
+
+    private String normalize(String s) {
+        s = s.trim();
+        s = s.toLowerCase(Locale.US);
+        s = whitespace.matcher(s).replaceAll(" ");
+        return s;
     }
 
     /**
