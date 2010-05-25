@@ -62,6 +62,18 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
         context.checking(new Expectations() {{
             allowing(pushEndpointFactory).createForSelf();
             will(returnValue(selfEndpoint));
+            
+            allowing(selfEndpoint).getFeatures();
+            will(returnValue(0));
+            
+            allowing(selfEndpoint).getFWTVersion();
+            will(returnValue(0));
+            
+            allowing(selfEndpoint).getPort();
+            will(returnValue(0));
+            
+            allowing(selfEndpoint).getProxies();
+            will(returnValue(0));
         }});
         
         ApplicationServices applicationServices = injector.getInstance(

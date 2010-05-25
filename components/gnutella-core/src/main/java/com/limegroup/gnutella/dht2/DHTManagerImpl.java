@@ -42,8 +42,8 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
-import com.limegroup.gnutella.dht.db.PublisherQueue;
 import com.limegroup.gnutella.dht.db.DefaultPublisherQueue;
+import com.limegroup.gnutella.dht.db.PublisherQueue;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -286,6 +286,20 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     @Override
     public synchronized boolean isReady() {
         return controller.isReady();
+    }
+    
+    /**
+     * Returns the {@link AltLocPublisher}
+     */
+    public AltLocPublisher getAltLocPublisher() {
+        return altLocPublisher;
+    }
+    
+    /**
+     * Returns the {@link PushProxiesPublisher}
+     */
+    public PushProxiesPublisher getPushProxiesPublisher() {
+        return pushProxiesPublisher;
     }
     
     /**
