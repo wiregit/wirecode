@@ -39,6 +39,7 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -315,9 +316,9 @@ public class TransferOptionPanel extends OptionPanel {
         }
 
         public void setAVGCheckBoxVisible() {
-            boolean value = virusEngine.isSupported();
-            useAntivirusCheckBox.setVisible(value);
-            buyAntivirusButton.setVisible(!value);
+            boolean supported = virusEngine.isSupported();
+            useAntivirusCheckBox.setVisible(supported);
+            buyAntivirusButton.setVisible(!supported && OSUtils.isAVGCompatibleWindows());
         }
 
         @Override
