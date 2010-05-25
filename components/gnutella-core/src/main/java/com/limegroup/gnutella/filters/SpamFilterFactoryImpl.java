@@ -86,6 +86,10 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
         //5. Hostile IP addresses.
         buf.add(hostileFilter.get());
 
+        //6. Query replies with suspicious GUIDs.
+        if (FilterSettings.CLIENT_GUID_FILTER.getValue())
+            buf.add(new ClientGuidFilter());
+        
         return compose(buf);
     }
 

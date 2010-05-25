@@ -220,4 +220,9 @@ public class FilterSettings extends LimeProps {
      */
     public static final LongSetting NEXT_URN_BLACKLIST_UPDATE =
         FACTORY.createLongSetting("NEXT_URN_BLACKLIST_UPDATE", 0L);
+
+    /** Whether to enable the ClientGuidFilter. */
+    public static final BooleanSetting CLIENT_GUID_FILTER =
+        FACTORY.createRemoteBooleanSetting("CLIENT_GUID_FILTER", true,
+        "FilterSettings.clientGuidFilter");
 }
