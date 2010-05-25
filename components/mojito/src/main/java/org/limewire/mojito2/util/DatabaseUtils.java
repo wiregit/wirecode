@@ -50,7 +50,7 @@ public class DatabaseUtils {
         Collection<Contact> nodes = routeTable.select(primaryKey, k, SelectMode.ALL);
         
         long creationTime = entity.getCreationTime();
-        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getTimeInMillis();
         
         // If there are less than k Nodes or the local Node is member
         // of the k-closest Nodes then use the default expiration time

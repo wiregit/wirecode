@@ -228,7 +228,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
         Contact localhost = getLocalNode();
         Contact[] dst = getActiveContacts();
         
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue() * dst.length;
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis() * dst.length;
         return ping(localhost, dst, timeout, TimeUnit.MILLISECONDS);
     }
 
@@ -276,7 +276,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
     
     @Override
     public DHTFuture<PingEntity> ping(SocketAddress addr) {
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         return ping(addr, timeout, TimeUnit.MILLISECONDS);
     }
     
@@ -286,7 +286,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
         Contact src = ContactUtils.createCollisionPingSender(
                 dht.getLocalNode());
         
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         return ping(src, new Contact[] { dst }, 
                 timeout, TimeUnit.MILLISECONDS);
     }
@@ -303,19 +303,19 @@ public class DefaultMojitoDHT implements MojitoDHT {
     
     @Override
     public DHTFuture<BootstrapEntity> bootstrap(SocketAddress addr) {
-        long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
+        long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getTimeInMillis();
         return bootstrap(addr, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
     public DHTFuture<BootstrapEntity> bootstrap(Contact contact) {
-        long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
+        long timeout = BootstrapSettings.BOOTSTRAP_TIMEOUT.getTimeInMillis();
         return bootstrap(contact, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
-        long timeout = StoreSettings.STORE_TIMEOUT.getValue();
+        long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
         return put(key, value, timeout, TimeUnit.MILLISECONDS);
     }
     
@@ -332,13 +332,13 @@ public class DefaultMojitoDHT implements MojitoDHT {
     
     @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId) {
-        long timeout = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        long timeout = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getTimeInMillis();
         return dht.lookup(lookupId, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
     public DHTFuture<ValueEntity> get(EntityKey key) {
-        long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+        long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
         return dht.get(key, timeout, TimeUnit.MILLISECONDS);
     }
 
@@ -351,7 +351,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
             final List<DHTFuture<ValueEntity>> futures 
                 = new ArrayList<DHTFuture<ValueEntity>>();
             
-            long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+            long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
             AsyncProcess<ValueEntity[]> process = NopProcess.process();
             final DHTFuture<ValueEntity[]> lookup = submit(process, 
                     timeout, TimeUnit.MILLISECONDS);

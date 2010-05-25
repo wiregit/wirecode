@@ -81,7 +81,7 @@ public class Context extends AbstractDHT {
      */
     private final BucketRefresher bucketRefresher 
         = new BucketRefresher(this, 
-                BucketRefresherSettings.BUCKET_REFRESHER_DELAY.get(), 
+                BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getTimeInMillis(), 
                 TimeUnit.MILLISECONDS);
     
     /**
@@ -144,7 +144,7 @@ public class Context extends AbstractDHT {
         
         this.databaseCleaner = new DatabaseCleaner(
                 routeTable, database, 
-                DatabaseSettings.DATABASE_CLEANER_PERIOD.get(), 
+                DatabaseSettings.DATABASE_CLEANER_PERIOD.getTimeInMillis(), 
                 TimeUnit.MILLISECONDS);
         
         this.messageHelper = new MessageHelper(this, messageFactory);
@@ -185,6 +185,8 @@ public class Context extends AbstractDHT {
     public void bind(Transport transport) throws IOException {
         routeTable.bind(this);
         messageDispatcher.bind(transport);
+        
+        databaseCleaner.start();
     }
 
     @Override
@@ -382,7 +384,6 @@ public class Context extends AbstractDHT {
             @Override
             public void handleEvent(FutureEvent<BootstrapEntity> event) {
                 if (event.getType() == Type.SUCCESS) {
-                    databaseCleaner.start();
                     bucketRefresher.start();
                 }
             }

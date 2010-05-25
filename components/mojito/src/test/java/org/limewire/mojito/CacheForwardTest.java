@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
@@ -91,8 +92,8 @@ public class CacheForwardTest extends MojitoTestCase {
         final long BOOTSTRAP_TIME = 10 * 1000; 
         
         //ContextSettings.SEND_SHUTDOWN_MESSAGE.setValue(false);
-        BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.setValue(BUCKET_REFRESH);
-        BucketRefresherSettings.BUCKET_REFRESHER_DELAY.setValue(BOOTSTRAP_TIME);        
+        BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.setTime(BUCKET_REFRESH, TimeUnit.MILLISECONDS);
+        BucketRefresherSettings.BUCKET_REFRESHER_DELAY.setTime(BOOTSTRAP_TIME, TimeUnit.MILLISECONDS);        
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(false);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

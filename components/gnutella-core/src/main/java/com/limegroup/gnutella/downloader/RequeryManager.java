@@ -210,8 +210,9 @@ class RequeryManager implements DHTEventListener {
         lastQuerySent = System.currentTimeMillis();
         lastQueryType = QueryType.DHT;
         numDHTQueries++;
-        requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
-                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
+        requeryListener.lookupStarted(QueryType.DHT, 
+                Math.max(TIME_BETWEEN_REQUERIES, 
+                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis()));
       
         URN sha1Urn = requeryListener.getSHA1Urn();
         if (sha1Urn != null) {

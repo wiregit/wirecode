@@ -19,13 +19,15 @@
  
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.util.ArrayUtils;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Miscellaneous context settings.
@@ -45,16 +47,22 @@ public class ContextSettings extends MojitoProps {
     /**
      * The time interval to compute the locally estimated Network size.
      */
-    public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
-        = FACTORY.createRemoteLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L*1000L,
-                "Mojito.EstimateNetworkSizeEvery", 1000L, 5L*60L*1000L);
+    public static final TimeSetting ESTIMATE_NETWORK_SIZE_EVERY
+        = FACTORY.createRemoteTimeSetting("ESTIMATE_NETWORK_SIZE_EVERY", 
+                1L, TimeUnit.MINUTES,
+                "Mojito.EstimateNetworkSizeEvery", 
+                1L, TimeUnit.SECONDS,
+                5L, TimeUnit.MINUTES);
     
     /**
      * The time interval in which the estimated Network size can be updated.
      */
-    public static final LongSetting UPDATE_NETWORK_SIZE_EVERY
-        = FACTORY.createRemoteLongSetting("UPDATE_NETWORK_SIZE_EVERY", 5L*1000L,
-                "Mojito.UpdateNetworkSizeEvery", 5L*1000L, 5L*60L*1000L);
+    public static final TimeSetting UPDATE_NETWORK_SIZE_EVERY
+        = FACTORY.createRemoteTimeSetting("UPDATE_NETWORK_SIZE_EVERY", 
+                5L, TimeUnit.SECONDS,
+                "Mojito.UpdateNetworkSizeEvery", 
+                5L, TimeUnit.SECONDS,
+                5L, TimeUnit.MINUTES);
     
     /**
      * The maximum number of locally estimated Network sizes to
@@ -99,12 +107,6 @@ public class ContextSettings extends MojitoProps {
      */
     public static final StringSetting MASTER_KEY
         = FACTORY.createStringSetting("MASTER_KEY", "public.key");
-    
-    /**
-     * The maximum time to wait on an Object.
-     */
-    public static final LongSetting WAIT_ON_LOCK
-        = FACTORY.createLongSetting("WAIT_ON_LOCK", 3L*60L*1000L);
     
     /**
      * Whether or not assertion is enabled for collision pings.
@@ -152,12 +154,4 @@ public class ContextSettings extends MojitoProps {
      */
     public static final BooleanSetting THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED
         = FACTORY.createBooleanSetting("THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED", true);
-    
-    /**
-     * Returns the lock timeout.
-     */
-    public static long getWaitOnLock(long timeout) {
-        return Math.max((long)(timeout * 1.5f), 
-                ContextSettings.WAIT_ON_LOCK.getValue());
-    }
 }

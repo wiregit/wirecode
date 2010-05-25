@@ -62,7 +62,8 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         DHTValueEntity value = DHTValueEntity.createFromRemote(creator, creator, valueId, 
 															   new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
         
-        long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        long expectedExpiresAt = value.getCreationTime() 
+            + DatabaseSettings.VALUE_EXPIRATION_TIME.getTimeInMillis();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));
         
         for (int i = 0; i < 4; i++) {

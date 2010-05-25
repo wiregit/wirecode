@@ -76,7 +76,7 @@ public class AltLocFinderImpl implements AltLocFinder {
         AlternateLocationProcess process 
             = new AlternateLocationProcess(urn);
         
-        long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
+        long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
         return dhtManager.getMojitoDHT().submit(process, 
                 timeout, TimeUnit.MILLISECONDS);
     }

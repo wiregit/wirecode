@@ -21,13 +21,13 @@ public class BootstrapConfig {
     private volatile int alpha = ALPHA;
     
     private volatile long pingTimeout 
-        = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
     
     private volatile long lookupTimeout 
-        = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+        = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getTimeInMillis();
     
     private volatile long refreshTimeout 
-        = BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue();
+        = BootstrapSettings.BOOTSTRAP_TIMEOUT.getTimeInMillis();
     
     private final SocketAddress address;
     

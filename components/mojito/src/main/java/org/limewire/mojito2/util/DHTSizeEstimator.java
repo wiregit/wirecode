@@ -84,7 +84,7 @@ public class DHTSizeEstimator {
     public synchronized BigInteger getEstimatedSize(RouteTable routeTable) {
         if (routeTable != null && 
                 (System.currentTimeMillis() - localEstimateTime) 
-                    >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
+                    >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
             
             SelectMode mode = SelectMode.ALL;
             if (ContextSettings.ESTIMATE_WITH_LIVE_NODES_ONLY.getValue()) {
@@ -144,8 +144,8 @@ public class DHTSizeEstimator {
      * estimate the DHT size.
      */
     public synchronized void updateSize(Collection<? extends Contact> nodes) {
-        if ((System.currentTimeMillis() - updateEstimatedSizeTime) 
-                >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getValue()) {
+        long time = System.currentTimeMillis() - updateEstimatedSizeTime;
+        if (time >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
 
             if (nodes.size() >= MIN_NODE_COUNT) {
                 estimatedSize = computeSize(nodes);

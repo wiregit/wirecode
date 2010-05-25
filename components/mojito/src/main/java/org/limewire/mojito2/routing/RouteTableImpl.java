@@ -321,7 +321,7 @@ public class RouteTableImpl implements RouteTable {
             // have a node alive in the replacement cache. Don't do this too often!
             long delay = System.currentTimeMillis() - bucket.getTimeStamp();
             if (bucket.containsCachedContact(node.getNodeID())
-                    && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getValue())) {
+                    && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getTimeInMillis())) {
                 pingLeastRecentlySeenNode(bucket);
             }
             touchBucket(bucket);
@@ -923,7 +923,7 @@ public class RouteTableImpl implements RouteTable {
         
         DHTFuture<PingEntity> future = null;
         if (pinger != null) {
-            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
             future = pinger.ping(node, timeout, TimeUnit.MILLISECONDS);
         }
         

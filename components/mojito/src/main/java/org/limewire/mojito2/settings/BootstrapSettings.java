@@ -19,9 +19,11 @@
 
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Settings for the bootstrapping process.
@@ -31,21 +33,15 @@ public class BootstrapSettings extends MojitoProps {
     private BootstrapSettings() {}
     
     /**
-     * The maximum number of bootstrap failures before bootstrapping 
-     * is given up.
-     */
-    @Deprecated
-    public static final IntSetting MAX_BOOTSTRAP_FAILURES
-        = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
-
-    
-    /**
      * The maximum amount of time the bootstrapping process can take
      * before it's interrupted.
      */
-    public static final LongSetting BOOTSTRAP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-                8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
+    public static final TimeSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("BOOTSTRAP_TIMEOUT", 
+                8L, TimeUnit.MINUTES,
+                "Mojito.BootstrapTimeout", 
+                1L, TimeUnit.MINUTES, 
+                30L, TimeUnit.MINUTES);
     
     /**
      * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
@@ -61,43 +57,4 @@ public class BootstrapSettings extends MojitoProps {
     public static final IntSetting BOOTSTRAP_WORKERS =
         FACTORY.createRemoteIntSetting("BOOSTRAP_WORKERS", 1, 
                 "Mojito.BooststrapWorkers", 1, 5);
-    
-    /**
-     * Enabled or disables the second part of the bootstrapping process that
-     * does a full Bucket refresh to fill up the RouteTable.
-     */
-    //public static final BooleanSetting REFRESH_ALL_BUCKETS
-    //    = FACTORY.createRemoteBooleanSetting("REFRESH_ALL_BUCKETS", 
-    //            true, "Mojito.RefreshAllBuckets");
-    
-    /**
-     * Setting for how many Buckets should be refreshed at most
-     * during bootstrapping. Ideally we want to refresh them all
-     * but it takes too long and leads to bootstrap failures if
-     * there's a big number of Buckets.
-     */
-    //public static final IntSetting MAX_BUCKETS_TO_REFRESH
-    //    = FACTORY.createRemoteIntSetting("MAX_BUCKETS_TO_REFRESH", 
-    //            10, "Mojito.MaxBucketsToRefresh", 0, Integer.MAX_VALUE);
-    
-    /**
-     * Returns the lock timeout for the BootstrapProcess.
-     */
-    public static long getWaitOnLock(boolean hasInitialNode) {
-        long waitOnLock = 0L;
-        
-        // 1) Ping Nodes to find initial bootstrap Node
-        if (!hasInitialNode) {
-            waitOnLock += PingSettings.getWaitOnLock();
-        }
-        
-        // 2) Do a lookup for your own Node ID
-        waitOnLock += LookupSettings.getWaitOnLock(true);
-        
-        // 3) Refresh all Buckets
-        waitOnLock += ContextSettings.getWaitOnLock(
-                BootstrapSettings.BOOTSTRAP_TIMEOUT.getValue());
-        
-        return waitOnLock;
-    }
 }

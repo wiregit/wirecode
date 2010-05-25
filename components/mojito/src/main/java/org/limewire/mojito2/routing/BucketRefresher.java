@@ -4,13 +4,10 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito2.DHT;
@@ -25,15 +22,12 @@ import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.util.EventUtils;
+import org.limewire.mojito2.util.SchedulingUtils;
 
 /**
  * 
  */
 public class BucketRefresher implements Closeable {
-    
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("BucketRefresherThread"));
     
     private final DHT dht;
     
@@ -51,30 +45,21 @@ public class BucketRefresher implements Closeable {
     private final AtomicBoolean active 
         = new AtomicBoolean(false);
     
-    /**
-     * 
-     */
     private PingTask pingTask = null;
     
-    /**
-     * 
-     */
     private LookupTask lookupTask = null;
     
-    /**
-     * 
-     */
     private boolean open = true;
     
     /**
-     * 
+     * Creates a {@link BucketRefresher}
      */
     public BucketRefresher(DHT dht, long frequency, TimeUnit unit) {
         this(dht, new Config(), frequency, unit);
     }
     
     /**
-     * 
+     * Creates a {@link BucketRefresher}
      */
     public BucketRefresher(DHT dht, Config config,
             long frequency, TimeUnit unit) {
@@ -86,7 +71,7 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * Starts the {@link BucketRefresher}
      */
     public synchronized void start() {
         
@@ -108,12 +93,12 @@ public class BucketRefresher implements Closeable {
         };
         
         active.set(false);
-        future = EXECUTOR.scheduleWithFixedDelay(
+        future = SchedulingUtils.scheduleWithFixedDelay(
                 task, frequency, frequency, unit);
     }
     
     /**
-     * 
+     * Stops the {@link BucketRefresher}
      */
     public synchronized void stop() {
         if (future != null) {
@@ -144,6 +129,9 @@ public class BucketRefresher implements Closeable {
         }
     }
     
+    /**
+     * Sends a bunch of PINGs and calls {@link #lookup()} when done.
+     */
     private synchronized void ping() {
         
         Runnable callback = new Runnable() {
@@ -158,6 +146,9 @@ public class BucketRefresher implements Closeable {
                 timeout, TimeUnit.MILLISECONDS);
     }
     
+    /**
+     * 
+     */
     private synchronized void lookup() {
         Runnable callback = new Runnable() {
             @Override
@@ -201,6 +192,9 @@ public class BucketRefresher implements Closeable {
         }
     }
     
+    /**
+     * 
+     */
     private static class PingTask extends AbstractTask {
         
         private final EventListener<FutureEvent<PingEntity>> listener 
@@ -224,7 +218,7 @@ public class BucketRefresher implements Closeable {
             
             List<Contact> contacts = new ArrayList<Contact>();
             
-            long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getValue();
+            long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getTimeInMillis();
             
             if (0L < pingNearest) {
                 Contact localhost = dht.getLocalNode();
@@ -278,6 +272,9 @@ public class BucketRefresher implements Closeable {
         }
     }
     
+    /**
+     * 
+     */
     private static class LookupTask extends AbstractTask {
         
         private final EventListener<FutureEvent<NodeEntity>> listener 
@@ -337,10 +334,10 @@ public class BucketRefresher implements Closeable {
     public static class Config {
 
         private volatile long pingTimeout 
-            = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         
         private volatile long lookupTimeout 
-            = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
+            = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getTimeInMillis();
         
         public Config() {
             

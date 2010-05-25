@@ -1,21 +1,20 @@
 package org.limewire.mojito2.storage;
 
 import java.io.Closeable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.routing.RouteTable;
+import org.limewire.mojito2.util.SchedulingUtils;
 
 /**
- * 
+ * The {@link DatabaseCleaner} is responsible for removing expired 
+ * {@link DHTValue}s from the {@link Database}.
  */
 public class DatabaseCleaner implements Closeable {
 
@@ -24,10 +23,6 @@ public class DatabaseCleaner implements Closeable {
     
     @InspectablePrimitive(value = "Expired Value Count")
     private static final AtomicInteger EXPIRED_COUNT = new AtomicInteger();
-    
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("DatabaseCleanerThread"));
     
     private final EvictorManager evictorManager = new EvictorManager();
     
@@ -44,7 +39,7 @@ public class DatabaseCleaner implements Closeable {
     private boolean open = true;
     
     /**
-     * 
+     * Creates a {@link DatabaseCleaner}.
      */
     public DatabaseCleaner(RouteTable routeTable, 
             Database database, long frequency, TimeUnit unit) {
@@ -55,10 +50,16 @@ public class DatabaseCleaner implements Closeable {
         this.unit = unit;
     }
     
+    /**
+     * Returns the {@link EvictorManager}.
+     */
     public EvictorManager getEvictorManager() {
         return evictorManager;
     }
     
+    /**
+     * Starts the {@link DatabaseCleaner}
+     */
     public synchronized void start() {
         if (!open) {
             throw new IllegalStateException();
@@ -75,10 +76,13 @@ public class DatabaseCleaner implements Closeable {
             }
         };
         
-        future = EXECUTOR.scheduleWithFixedDelay(
+        future = SchedulingUtils.scheduleWithFixedDelay(
                 task, frequency, frequency, unit);
     }
     
+    /**
+     * Stops the {@link DatabaseCleaner}
+     */
     public synchronized void stop() {
         if (future != null) {
             future.cancel(true);

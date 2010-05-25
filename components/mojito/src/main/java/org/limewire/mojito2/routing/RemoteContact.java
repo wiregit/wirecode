@@ -242,7 +242,7 @@ public class RemoteContact implements Contact {
     
     public long getAdaptativeTimeout(long defaultValue, TimeUnit unit) {
         //for now, based on failures and previous round trip time
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         
         if (0 < rtt && isAlive()) {
             // Should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.DEFAULT_TIMEOUT

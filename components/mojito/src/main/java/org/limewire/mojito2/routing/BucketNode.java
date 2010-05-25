@@ -386,8 +386,8 @@ class BucketNode implements Bucket {
     }
     
     public boolean isRefreshRequired() {
-        if ((System.currentTimeMillis() - getTimeStamp()) 
-                >= RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue()) {
+        long time = System.currentTimeMillis() - getTimeStamp();
+        if (time >= RouteTableSettings.BUCKET_REFRESH_PERIOD.getTimeInMillis()) {
             return true;
         }
         return false;

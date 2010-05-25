@@ -19,10 +19,12 @@
  
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Setting for Kademlia lookups.
@@ -48,16 +50,22 @@ public class LookupSettings extends MojitoProps {
     /**
      * The FIND_NODE lookup timeout.
      */
-    public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 
-                90L*1000L, "Mojito.FindNodeLookupTimeout", 10L*1000L, 5L*60L*1000L);
+    public static final TimeSetting FIND_NODE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("FIND_NODE_LOOKUP_TIMEOUT", 
+                90L, TimeUnit.SECONDS,
+                "Mojito.FindNodeLookupTimeout", 
+                10L, TimeUnit.SECONDS, 
+                5L, TimeUnit.MINUTES);
 
     /**
      * The FIND_VALUE lookup timeout.
      */
-    public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
-                90L*1000L, "Mojito.FindValueLookupTimeout", 10L*1000L, 5L*60L*1000L);
+    public static final TimeSetting FIND_VALUE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
+                90L, TimeUnit.SECONDS,
+                "Mojito.FindValueLookupTimeout", 
+                10L, TimeUnit.SECONDS,
+                5L, TimeUnit.MINUTES);
 
     /**
      * Whether or not a value lookup is exhaustive.
@@ -96,23 +104,4 @@ public class LookupSettings extends MojitoProps {
     public static final FloatSetting CONTACTS_SCRUBBER_REQUIRED_RATIO
         = FACTORY.createRemoteFloatSetting("CONTACTS_SCRUBBER_REQUIRED_RATIO", 
                 0.0f, "Mojito.ContactsScrubberRequiredRatio", 0.0f, 1.0f);
-    
-    /**
-     * Returns the lock timeout for a lookup process.
-     * 
-     * @param findNode whether it's a FIND_NODE or FIND_VALUE operation
-     */
-    public static long getWaitOnLock(boolean findNode) {
-        long waitOnLock = 0L;
-        
-        if (findNode) {
-            waitOnLock += ContextSettings.getWaitOnLock(
-                    LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue());
-        } else {
-            waitOnLock += ContextSettings.getWaitOnLock(
-                    LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue());
-        }
-        
-        return waitOnLock;
-    }
 }

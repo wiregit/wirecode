@@ -1,5 +1,7 @@
 package org.limewire.mojito;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.MojitoProps;
@@ -35,11 +37,7 @@ public abstract class MojitoTestCase extends BaseTestCase {
         
         // We're working on the loopback. Everything should be done
         // in less than 500ms
-        NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
-        
-        // Nothing should take longer than 1.5 seconds. If we start seeing
-        // LockTimeoutExceptions on the loopback then check this Setting!
-        ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        NetworkSettings.DEFAULT_TIMEOUT.setTime(500, TimeUnit.MILLISECONDS);
     }
     
     @Override

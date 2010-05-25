@@ -492,7 +492,8 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     private long dhtQueryLength() {
-        return Math.max(RequeryManager.TIME_BETWEEN_REQUERIES, LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue());
+        return Math.max(RequeryManager.TIME_BETWEEN_REQUERIES, 
+                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis());
     }
     
     @Singleton

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -164,11 +165,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         // We're working on the loopback. Everything should be done
         // in less than 500ms
-        NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
-        
-        // Nothing should take longer than 1.5 seconds. If we start seeing
-        // LockTimeoutExceptions on the loopback then check this Setting!
-        ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        NetworkSettings.DEFAULT_TIMEOUT.setTime(500, TimeUnit.MILLISECONDS);
     }
 
     public void testForwardContacts() throws Exception {

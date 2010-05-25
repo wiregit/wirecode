@@ -19,8 +19,10 @@
 
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Settings for the BucketRefresher.
@@ -40,15 +42,21 @@ public class BucketRefresherSettings extends MojitoProps {
     /**
      * The delay of the BucketRefresher.
      */
-    public static final LongSetting BUCKET_REFRESHER_DELAY
-        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_DELAY", 1L*60L*1000L, 
-                "Mojito.BucketRefresherDelay", 10L*1000L, 2L*60L*60L*1000L);
+    public static final TimeSetting BUCKET_REFRESHER_DELAY
+        = FACTORY.createRemoteTimeSetting("BUCKET_REFRESHER_DELAY", 
+                1L, TimeUnit.MINUTES,
+                "Mojito.BucketRefresherDelay", 
+                10L, TimeUnit.SECONDS, 
+                2L, TimeUnit.HOURS);
 
     /**
      * Whether or not to ping all k-closest Nodes. Default is off (0L) and
      * it shouldn't be set to anything lower than say 5 minutes.
      */
-    public static final LongSetting BUCKET_REFRESHER_PING_NEAREST
-        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_PING_NEAREST", 0L, 
-                "Mojito.BucketRefresherPingNearest", 0L, 24L*60L*60L*1000L);
+    public static final TimeSetting BUCKET_REFRESHER_PING_NEAREST
+        = FACTORY.createRemoteTimeSetting("BUCKET_REFRESHER_PING_NEAREST", 
+                0L, TimeUnit.MILLISECONDS,
+                "Mojito.BucketRefresherPingNearest", 
+                0L, TimeUnit.MILLISECONDS,
+                1L, TimeUnit.DAYS);
 }

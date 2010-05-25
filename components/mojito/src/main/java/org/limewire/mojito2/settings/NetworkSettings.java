@@ -19,9 +19,12 @@
  
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Miscellaneous Network settings.
@@ -34,9 +37,12 @@ public final class NetworkSettings extends MojitoProps {
      * The amount of time we're waiting for a response
      * before giving up.
      */
-    public static final LongSetting DEFAULT_TIMEOUT
-        = FACTORY.createRemoteLongSetting("DEFAULT_TIMEOUT", 
-                10L*1000L, "Mojito.DefaultTimeout", 10L, 30L*1000L);
+    public static final TimeSetting DEFAULT_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("DEFAULT_TIMEOUT", 
+                10L, TimeUnit.SECONDS,
+                "Mojito.DefaultTimeout", 
+                10L, TimeUnit.MILLISECONDS,
+                30L, TimeUnit.SECONDS);
     
     /**
      * A multiplication factor for the RTT.
@@ -65,12 +71,6 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final IntSetting MAX_MESSAGE_SIZE
         = FACTORY.createIntSetting("MAX_MESSAGE_SIZE", 1492);
-    
-    /**
-     * The cleanup rate for Receipts.
-     */
-    public static final LongSetting CLEANUP_RECEIPTS_DELAY
-        = FACTORY.createLongSetting("CLEANUP_RECEIPTS_DELAY", 50L);
     
     /**
      * The buffer size for incoming messages.

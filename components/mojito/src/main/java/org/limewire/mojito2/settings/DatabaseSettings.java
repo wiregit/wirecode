@@ -19,10 +19,12 @@
  
 package org.limewire.mojito2.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Settings for the Database, DHTValue and for the DHTValueManager.
@@ -48,16 +50,22 @@ public final class DatabaseSettings extends MojitoProps {
     /**
      * The time after a non-local value expires.
      */
-    public static final LongSetting VALUE_EXPIRATION_TIME
-        = FACTORY.createRemoteLongSetting("VALUE_EXPIRATION_TIME", 60L*60L*1000L, 
-                "Mojito.ValueExpirationTime", 30L*60L*1000L, 24L*60L*60L*1000L);
+    public static final TimeSetting VALUE_EXPIRATION_TIME
+        = FACTORY.createRemoteTimeSetting("VALUE_EXPIRATION_TIME", 
+                1L, TimeUnit.HOURS, 
+                "Mojito.ValueExpirationTime", 
+                30L, TimeUnit.MINUTES, 
+                1L, TimeUnit.DAYS);
     
     /**
      * The period of the DatabaseCleaner.
      */
-    public static final LongSetting DATABASE_CLEANER_PERIOD
-        = FACTORY.createRemoteLongSetting("DATABASE_CLEANER_PERIOD", 5L*60L*1000L, 
-                "Mojito.DatabaseCleanerPeriod", 5L*60L*1000L, 60L*60L*1000L);
+    public static final TimeSetting DATABASE_CLEANER_PERIOD
+        = FACTORY.createRemoteTimeSetting("DATABASE_CLEANER_PERIOD", 
+                5L, TimeUnit.MINUTES,
+                "Mojito.DatabaseCleanerPeriod", 
+                5L, TimeUnit.MINUTES,
+                1L, TimeUnit.HOURS);
     
     /**
      * The *alpha* factor for the Exponentially Moving Average (EMA) 
