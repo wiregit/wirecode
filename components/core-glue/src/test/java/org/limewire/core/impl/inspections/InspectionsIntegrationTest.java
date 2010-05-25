@@ -95,8 +95,8 @@ public class InspectionsIntegrationTest extends LimeTestCase {
     
     private void initSettings() {
         InspectionsSettings.PUSH_INSPECTIONS_ON.set(1f);
-        InspectionsSettings.INSPECTION_SPEC_REQUEST_URL.set("http://localhost:8123/request");
-        InspectionsSettings.INSPECTION_SPEC_SUBMIT_URL.set("http://localhost:8123/submit");
+        InspectionsSettings.INSPECTION_SPEC_REQUEST_URL.set("http://localhost:8124/request");
+        InspectionsSettings.INSPECTION_SPEC_SUBMIT_URL.set("http://localhost:8124/submit");
         InspectionsSettings.INSPECTION_SPEC_MINIMUM_INTERVAL.set(0);
     }
 
@@ -635,7 +635,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
                               String s, java.lang.String s1,
                               org.mortbay.util.Resource resource) throws java.io.IOException {
                 String path = httpRequest.getURI().getPath();
-                String urlRedirect = "http://localhost:8123" + path + "?" + httpRequest.getQuery();
+                String urlRedirect = "http://localhost:8124" + path + "?" + httpRequest.getQuery();
                 httpResponse.sendRedirect(urlRedirect);
                 httpResponse.commit();
                 httpRequest.setHandled(true);
@@ -644,7 +644,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
 
         HttpServer redirectingServer = new HttpServer();
         SocketListener listener = new SocketListener();
-        listener.setPort(8124);
+        listener.setPort(8125);
         listener.setMinThreads(1);
         redirectingServer.addListener(listener);
         HttpContext context = redirectingServer.addContext("");
@@ -698,7 +698,7 @@ public class InspectionsIntegrationTest extends LimeTestCase {
         void startServer(ServerResultNotifier serverResultNotifier) throws Exception {
             this.serverResultNotifier = serverResultNotifier;
             SocketListener listener = new SocketListener();
-            listener.setPort(8123);
+            listener.setPort(8124);
             listener.setMinThreads(1);
             server.addListener(listener);
 
