@@ -344,17 +344,19 @@ public class DHTSettings extends LimeProps {
      * 
      */
     public static final TimeSetting LOCATION_PUBLISHER_FREQUENCY
-        = FACTORY.createRemoteTimeSetting("LOCATION_PUBLISHER_FREQUENCY", 30L*60L*1000L, 
-                "DHT.LocationPublisherFrequency", 3L*60L*1000L, 24L*60L*60L*1000L, 
-                TimeUnit.MILLISECONDS);
+        = FACTORY.createRemoteTimeSetting("LOCATION_PUBLISHER_FREQUENCY", 
+                30L, TimeUnit.MINUTES,
+                "DHT.LocationPublisherFrequency", 
+                3L, TimeUnit.MINUTES, 1L, TimeUnit.DAYS);
     
     /**
      * 
      */
     public static final TimeSetting PUBLISH_LOCATION_EVERY
-        = FACTORY.createRemoteTimeSetting("PUBLISH_LOCATION_EVERY", 30L*60L*1000L, 
-                "DHT.publishLocationEvery", 3L*60L*1000L, 24L*60L*60L*1000L, 
-                TimeUnit.MILLISECONDS);
+        = FACTORY.createRemoteTimeSetting("PUBLISH_LOCATION_EVERY", 
+                30L, TimeUnit.MINUTES,
+                "DHT.publishLocationEvery", 
+                3L, TimeUnit.MINUTES, 1L, TimeUnit.DAYS);
     
     /**
      * Whether or not PushProxies should be published.
@@ -369,18 +371,20 @@ public class DHTSettings extends LimeProps {
      * The frequency at which the Push-Proxy publisher is running.
      */
     public static final TimeSetting PROXY_PUBLISHER_FREQUENCY
-        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 2L*60L*1000L, 
-                "DHT.ProxyPublisherFrequency", 30L*1000L, 24L*60L*60L*1000L, 
-                TimeUnit.MILLISECONDS);
+        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 
+                2L, TimeUnit.MINUTES,
+                "DHT.ProxyPublisherFrequency", 
+                30L, TimeUnit.SECONDS, 1L, TimeUnit.DAYS);
     
     /**
      * The amount of time a Push-Proxy configuration must remain stable
      * (i.e. not change) before it's considered to be published to the DHT.
      */
     public static final TimeSetting STABLE_PROXIES_TIME
-        = FACTORY.createRemoteTimeSetting("STABLE_PROXIES_TIME", 2L*60L*1000L, 
-                "DHT.StableProxiesTime", 60L*1000L, Long.MAX_VALUE, 
-                TimeUnit.MILLISECONDS);
+        = FACTORY.createRemoteTimeSetting("STABLE_PROXIES_TIME", 
+                2L, TimeUnit.MINUTES,
+                "DHT.StableProxiesTime", 
+                1L, TimeUnit.MINUTES, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
      * The amount of time in which stable Push-Proxy configurations are 
@@ -388,22 +392,26 @@ public class DHTSettings extends LimeProps {
      */
     public static final TimeSetting PUBLISH_PROXIES_TIME
         = FACTORY.createRemoteTimeSetting("PUBLISH_PROXIES_TIME",
-                30L * 60L * 1000L, "DHT.PublishProxiesTime",
-                10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                30L, TimeUnit.MINUTES, 
+                "DHT.PublishProxiesTime",
+                10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
      * The frequency at which cached {@link PushEndpoint}s are being purged.
      */
     public static final TimeSetting PUSH_ENDPOINT_PURGE_FREQUENCY
-        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_PURGE_FREQUENCY", 2L*60L*1000L, 
-                "DHT.PushEndpointPurgeFrequency", 30L*1000L, 24L*60L*60L*1000L, 
-                TimeUnit.MILLISECONDS);
+        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_PURGE_FREQUENCY", 
+                2L, TimeUnit.MINUTES,
+                "DHT.PushEndpointPurgeFrequency", 
+                30L, TimeUnit.SECONDS, 
+                1L, TimeUnit.DAYS);
     
     /**
      * The cache time for {@link PushEndpoint}s.
      */
     public static final TimeSetting PUSH_ENDPOINT_CACHE_TIME
         = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_CACHE_TIME",
-                5L * 60L * 1000L, "DHT.PushEndpointCacheTime",
-                10L * 1000L, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                5L, TimeUnit.MINUTES, 
+                "DHT.PushEndpointCacheTime",
+                10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 }

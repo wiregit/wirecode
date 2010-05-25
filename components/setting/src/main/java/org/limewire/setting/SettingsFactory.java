@@ -831,13 +831,24 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
     }
 
     /**
-     * Creates a new remote {@link TimeSetting} instance with the specified
-     * arguments.
+     * Creates a new remote {@link TimeSetting} instance with the 
+     * specified arguments.
      */
     public synchronized TimeSetting createRemoteTimeSetting(String key, 
             long defaultValue, String remoteKey, long min, long max, TimeUnit unit) {
+        return createRemoteTimeSetting(key, defaultValue, unit, 
+                remoteKey, min, unit, max, unit);
+    }
+    
+    /**
+     * Creates a new remote {@link TimeSetting} instance with the 
+     * specified arguments.
+     */
+    public synchronized TimeSetting createRemoteTimeSetting(String key, 
+            long defaultValue, TimeUnit defaultUnit, 
+            String remoteKey, long min, TimeUnit minUnit, long max, TimeUnit maxUnit) {
         TimeSetting result = new TimeSetting(DEFAULT_PROPS, PROPS, 
-                key, defaultValue, min, max, unit);
+                key, defaultValue, defaultUnit, min, minUnit, max, maxUnit);
         handleSettingInternal(result, remoteKey);
         return result;
     }

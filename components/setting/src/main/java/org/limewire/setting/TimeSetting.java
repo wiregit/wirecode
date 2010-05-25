@@ -11,10 +11,13 @@ public class TimeSetting extends LongSetting {
     /**
      * Creates a {@link TimeSetting} with the given arguments.
      */
-    public TimeSetting(Properties defaultProps, Properties props, 
-            String key, long defaultLong, long min, long max, TimeUnit unit) {
-        super(defaultProps, props, key, unit.toMillis(defaultLong), 
-                unit.toMillis(min), unit.toMillis(max));
+    public TimeSetting(Properties defaultProps, 
+            Properties props, String key, 
+            long defaultLong, TimeUnit defaultUnit, 
+            long min, TimeUnit minUnit, 
+            long max, TimeUnit maxUnit) {
+        super(defaultProps, props, key, defaultUnit.toMillis(defaultLong), 
+                minUnit.toMillis(min), maxUnit.toMillis(max));
     }
 
     /**
