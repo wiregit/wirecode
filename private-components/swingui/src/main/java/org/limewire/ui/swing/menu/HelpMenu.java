@@ -68,14 +68,14 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
 
         if (application.isTestingVersion()) {
             addSeparator();
-            add(new AbstractAction("Error Test") {
+            add(new AbstractAction(I18n.tr("Error Test")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     throw new RuntimeException("Test Error");
                 }
             });
 
-            add(new AbstractAction("Tray Test") {
+            add(new AbstractAction(I18n.tr("Tray Test")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (new Random().nextBoolean()) {

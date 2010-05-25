@@ -6,6 +6,7 @@ import java.util.List;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.StringUtils;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -59,7 +60,7 @@ class SharedFileListImpl extends LocalFileListImpl implements SharedFileList {
     public String getCollectionName() {
         // TODO: do better.
         if(coreCollection.getId() == 0) {
-            return "Public Shared"; // TODO: i18n?
+            return I18n.tr("Public Shared");
         } else {
             return coreCollection.getName();
         }

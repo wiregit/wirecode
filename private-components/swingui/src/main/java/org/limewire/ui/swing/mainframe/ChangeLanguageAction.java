@@ -7,11 +7,12 @@ import javax.swing.ActionMap;
 import org.jdesktop.application.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.util.I18n;
 
 public class ChangeLanguageAction extends AbstractAction {
     public ChangeLanguageAction() {
         // Always English
-        super("C&hange Language...");
+        super(I18n.tr("C&hange Language..."));
     }
         
     @Override

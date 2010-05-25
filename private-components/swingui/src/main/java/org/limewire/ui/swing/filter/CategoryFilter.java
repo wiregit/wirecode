@@ -268,12 +268,13 @@ class CategoryFilter<E extends FilterableItem> extends AbstractFilter<E> {
                     index, isSelected, cellHasFocus);
             
             if (renderer instanceof JLabel) {
+                Category category = (Category) value;
                 // Get count for category.
-                int count = uniqueList.getCount((Category) value);
+                int count = uniqueList.getCount(category);
 
                 // Display count in cell.
                 StringBuilder buf = new StringBuilder();
-                buf.append(value.toString()).append(" (").append(count).append(")");
+                buf.append( I18n.tr(category.getPluralName()) ).append(" (").append(count).append(")");
                 ((JLabel) renderer).setText(buf.toString());
 
                 // Set appearance.

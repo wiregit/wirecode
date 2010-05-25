@@ -25,7 +25,7 @@ public class CreateListAction extends AbstractAction {
     public CreateListAction(Provider<SharedFileListManager> shareManager,
             Provider<LibraryNavigatorTable> navTable,
             Provider<LibraryNavigatorPanel> libraryNavigatorPanel) {
-        super("Create New List");
+        super(I18n.tr("Create New List"));
         
         this.shareManager = shareManager;
         this.navTable = navTable;
