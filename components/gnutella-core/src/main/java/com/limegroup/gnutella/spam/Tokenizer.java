@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
@@ -24,6 +25,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
 /**
@@ -87,7 +89,7 @@ public class Tokenizer {
      */
     public Set<Token> getTokens(RemoteFileDesc[] descs) {
         Set<Token> set = new HashSet<Token>();
-        for (RemoteFileDesc desc : descs)
+        for(RemoteFileDesc desc : descs)
             tokenize(desc, set);
         return set;
     }
@@ -99,7 +101,7 @@ public class Tokenizer {
      * @param set the set to which the tokens should be added
      */
     private void tokenize(RemoteFileDesc desc, Set<Token> set) {
-        if (LOG.isDebugEnabled()) {
+        if(LOG.isDebugEnabled()) {
             String addr = desc.getAddress().getAddressDescription();
             LOG.debug("Tokenizing result from " + addr);
         }
@@ -115,21 +117,25 @@ public class Tokenizer {
         }
         getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
         String ext = FileUtils.getFileExtension(name);
-        if (!ext.equals(""))
+        if(!ext.equals(""))
             set.add(new FileExtensionToken(ext));
-        LimeXMLDocument xml = desc.getXMLDocument();
-        if (xml != null)
-            getKeywordTokens(xml, set);
+        LimeXMLDocument doc = desc.getXMLDocument();
+        if(doc != null) {
+            getKeywordTokens(doc, set);
+            String infohash = doc.getValue(LimeXMLNames.TORRENT_INFO_HASH);
+            if(infohash != null)
+                set.add(new UrnToken("urn:sha1:" + infohash));
+        }
         URN urn = desc.getSHA1Urn();
-        if (urn != null)
+        if(urn != null)
             set.add(new UrnToken(urn.toString()));
         set.add(new SizeToken(desc.getSize()));
         set.add(new ApproximateSizeToken(desc.getSize()));
         // Ignore friend addresses and private addresses such as 192.168.x.x
         Address address = desc.getAddress();
-        if (address instanceof Connectable) {
-            Connectable connectable = (Connectable) address;
-            if (!networkInstanceUtils.isPrivateAddress(connectable.getInetAddress()))
+        if(address instanceof Connectable) {
+            Connectable connectable = (Connectable)address;
+            if(!networkInstanceUtils.isPrivateAddress(connectable.getInetAddress()))
                 set.add(new AddressToken(connectable.getAddress()));
         }
         set.add(new ClientGUIDToken(Base32.encode(desc.getClientGUID())));
@@ -164,10 +170,22 @@ public class Tokenizer {
                 // URNs
                 for (URN urn : r.getUrns())
                     set.add(new UrnToken(urn.toString()));
+                LimeXMLDocument doc = r.getDocument();
+                if(doc != null) {
+                    String infohash = doc.getValue(LimeXMLNames.TORRENT_INFO_HASH);
+                    if(infohash != null)
+                        set.add(new UrnToken("urn:sha1:" + infohash));
+                }
                 // File sizes
                 long size = r.getSize();
                 set.add(new SizeToken(size));
                 set.add(new ApproximateSizeToken(size));
+                // Alt-loc addresses, unless private
+                for(IpPort ipp : r.getLocations()) {
+                    ip = ipp.getInetAddress().getHostAddress();
+                    if(!networkInstanceUtils.isPrivateAddress(ip))
+                        set.add(new AddressToken(ip));
+                }
             }
         } catch (BadPacketException ignored) {}
         return set;
@@ -182,15 +200,15 @@ public class Tokenizer {
      * @return a set of Tokens, may be empty
      */
     public Set<Token> getTokens(QueryRequest qr) {
-        if (LOG.isDebugEnabled())
+        if(LOG.isDebugEnabled())
             LOG.debug("Tokenizing " + qr);
         Set<Token> set = new HashSet<Token>();
         getKeywordTokens(qr.getQuery(), set);
         LimeXMLDocument xml = qr.getRichQuery();
-        if (xml != null)
+        if(xml != null)
             getKeywordTokens(xml, set);
         Set<URN> urns = qr.getQueryUrns();
-        for (URN urn : urns)
+        for(URN urn : urns)
             set.add(new UrnToken(urn.toString()));
         return set;
     }
@@ -202,7 +220,7 @@ public class Tokenizer {
      * @param set the set to which the tokens should be added
      */
     private void getKeywordTokens(LimeXMLDocument doc, Set<Token> set) {
-        for (Map.Entry<String, String> entry : doc.getNameValueSet()) {
+        for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
             String name = entry.getKey().toString();
             String value = entry.getValue().toString();
             getXMLKeywords(name, value, set);
@@ -221,8 +239,8 @@ public class Tokenizer {
         name = extractSimpleFieldName(name);
         name.toLowerCase(Locale.US);
         value.toLowerCase(Locale.US);
-        for (String keyword : QueryUtils.extractKeywords(value, false)) {
-            if (keyword.length() > MAX_KEYWORD_LENGTH)
+        for(String keyword : QueryUtils.extractKeywords(value, false)) {
+            if(keyword.length() > MAX_KEYWORD_LENGTH)
                 keyword = keyword.substring(0, MAX_KEYWORD_LENGTH);
             set.add(new XMLKeywordToken(name, keyword));
         }
@@ -249,8 +267,8 @@ public class Tokenizer {
      */
     private void getKeywordTokens(String str, Set<Token> set) {
         str.toLowerCase(Locale.US);
-        for (String keyword : QueryUtils.extractKeywords(str, false)) {
-            if (keyword.length() > MAX_KEYWORD_LENGTH)
+        for(String keyword : QueryUtils.extractKeywords(str, false)) {
+            if(keyword.length() > MAX_KEYWORD_LENGTH)
                 keyword = keyword.substring(0, MAX_KEYWORD_LENGTH);
             set.add(new KeywordToken(keyword));
         }

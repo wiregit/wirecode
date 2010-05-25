@@ -19,6 +19,8 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class URNFilterTest extends LimeTestCase {
 
@@ -115,6 +117,8 @@ public class URNFilterTest extends LimeTestCase {
             will(returnValue(new Response[] {response}));
             one(response).getUrns();
             will(returnValue(goodURNs));
+            one(response).getDocument();
+            will(returnValue(null));
         }});
         assertFalse(urnFilter.allow(queryReply));
         assertTrue(urnFilter.allow(queryReply));
@@ -139,12 +143,45 @@ public class URNFilterTest extends LimeTestCase {
             will(returnValue(new Response[] {response}));
             one(response).getUrns();
             will(returnValue(goodURNs));
+            one(response).getDocument();
+            will(returnValue(null));
         }});
         assertTrue(urnFilter.isBlacklisted(queryReply));
         assertFalse(urnFilter.isBlacklisted(queryReply));
         context.assertIsSatisfied();        
     }
 
+    public void testInfohashesCanBeBlacklisted() throws Exception {
+        final Set<URN> goodURNs = new HashSet<URN>();
+        goodURNs.add(URN.createSHA1Urn("urn:sha1:" + good));
+        final Response response = context.mock(Response.class);
+        final QueryReply queryReply = context.mock(QueryReply.class);
+        final LimeXMLDocument doc = context.mock(LimeXMLDocument.class);
+        context.checking(new Expectations() {{
+            // The first reply should be rejected but not passed to the spam mgr
+            one(queryReply).getResultsArray();
+            will(returnValue(new Response[] {response}));
+            one(response).getUrns();
+            will(returnValue(goodURNs));
+            one(response).getDocument();
+            will(returnValue(doc));
+            one(doc).getValue(LimeXMLNames.TORRENT_INFO_HASH);
+            will(returnValue(badLocal));
+            // The second reply should be accepted
+            one(queryReply).getResultsArray();
+            will(returnValue(new Response[] {response}));
+            one(response).getUrns();
+            will(returnValue(goodURNs));
+            one(response).getDocument();
+            will(returnValue(doc));
+            one(doc).getValue(LimeXMLNames.TORRENT_INFO_HASH);
+            will(returnValue(good));
+        }});
+        assertTrue(urnFilter.isBlacklisted(queryReply));
+        assertFalse(urnFilter.isBlacklisted(queryReply));
+        context.assertIsSatisfied();        
+    }
+        
     public void testIsBlacklistedURN() throws Exception {
         URN badURN = URN.createSHA1Urn("urn:sha1:" + badLocal);
         URN goodURN = URN.createSHA1Urn("urn:sha1:" + good);
