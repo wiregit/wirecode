@@ -381,7 +381,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         if (!isUltrapeer || !DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
             
             // Make sure that the node has had the time to try to connect as an ultrapeer
-            assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L) 
+            assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L) 
                     > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
                     
             final long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
@@ -473,8 +473,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private boolean isPassiveDHTCapable() {
         long averageTime = getAverageTime();
         return ULTRAPEER_OS
-        && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()
-                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
+        && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -485,8 +485,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         long averageTime = getAverageTime();
         
         return ULTRAPEER_OS
-                && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
-                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getTimeInMillis()
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -500,7 +500,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             LOG.trace("not hardcore capable");
             return false;
         }
-        if (averageTime < DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()) {
+        if (averageTime < DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("not long enough average uptime: " + averageTime);
             }
@@ -508,7 +508,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         long currentUptime = getCurrentUptime();
-        if (currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L)) {
+        if (currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("not long enough current uptime: " + currentUptime);
             }

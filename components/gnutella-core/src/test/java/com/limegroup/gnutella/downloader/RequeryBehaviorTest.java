@@ -69,7 +69,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
-      DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
+      DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setTime(31, TimeUnit.SECONDS);
         RequeryManager.TIME_BETWEEN_REQUERIES = 5000;
         
         myDHTManager = new MyDHTManager();

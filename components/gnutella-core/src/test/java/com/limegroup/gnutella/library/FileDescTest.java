@@ -16,9 +16,6 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescFactory;
-import com.limegroup.gnutella.library.UrnCache;
 
 
 /**
@@ -110,7 +107,7 @@ public final class FileDescTest extends org.limewire.gnutella.tests.LimeTestCase
         assertLessThanOrEquals(DHTSettings.RARE_FILE_COMPLETED_UPLOADS.getValue(), fd.getCompletedUploads());
         
         long delta = System.currentTimeMillis() - fd.getLastAttemptedUploadTime();
-        assertLessThan(DHTSettings.RARE_FILE_TIME.getValue(), delta);
+        assertLessThan(DHTSettings.RARE_FILE_TIME.getTimeInMillis(), delta);
         
         assertFalse(fd.isRareFile());
         

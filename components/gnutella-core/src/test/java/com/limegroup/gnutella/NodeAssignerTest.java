@@ -351,7 +351,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         
         // pretend some time passed - the uptime counter in NodeAssigner is very hacky
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
@@ -366,7 +366,7 @@ public class NodeAssignerTest extends LimeTestCase {
             one(networkManager).canReceiveSolicited();
             will(returnValue(true));
             atLeast(1).of(cManager).getCurrentAverageUptime();
-            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1));
+            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis() + 1));
         }});
         
         // will not get promoted
@@ -386,7 +386,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertFalse(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
         
         // pretend some time passed - the uptime counter in NodeAssigner is very hacky
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
@@ -401,7 +401,7 @@ public class NodeAssignerTest extends LimeTestCase {
             one(networkManager).canReceiveSolicited();
             will(returnValue(true));
             atLeast(1).of(cManager).getCurrentAverageUptime();
-            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue() + 1));
+            will(returnValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis() + 1));
         }});
         
         // will get promoted
@@ -459,13 +459,13 @@ public class NodeAssignerTest extends LimeTestCase {
     public void testAssignsActiveDHT() throws Exception {
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, true, 
-                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -478,13 +478,13 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testAssignsPassiveDHTIfUltrapeer() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, true, 
-                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 true, false));
         
         mockery.checking(new Expectations(){{
@@ -497,13 +497,13 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testAssignsPassiveLeaf() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, false, // can't receive unsolicited 
-                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -521,7 +521,7 @@ public class NodeAssignerTest extends LimeTestCase {
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, true, 
-                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -534,7 +534,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testDoesNotAssignLowAverageUptime() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
 
 
@@ -554,13 +554,13 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testDoesNotAssignActiveIfNotHardcore() throws Exception {
         // not accepted incoming previously therefore not hardcore
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, true, 
-                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -573,13 +573,13 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testPassiveLeafDoesNotNeedHardCore() throws Exception {
       // not accepted incoming previously therefore not hardcore
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, false, // can't receive unsolicited 
-                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -593,13 +593,13 @@ public class NodeAssignerTest extends LimeTestCase {
     public void testDoesNotAssignDHTIfDisabled() throws Exception {
         
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 false, true, true, 
-                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -612,13 +612,13 @@ public class NodeAssignerTest extends LimeTestCase {
     
     public void testStopsDHTWhenDisabled() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.ACTIVE, 
                 false, true, true, 
-                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{
@@ -632,13 +632,13 @@ public class NodeAssignerTest extends LimeTestCase {
     public void testDoesNotAssignPassiveIfDisabled() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(false);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, true, 
-                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 true, false));
         
         mockery.checking(new Expectations(){{
@@ -652,13 +652,13 @@ public class NodeAssignerTest extends LimeTestCase {
     public void testDoesNotAssignPassiveLeafIfDisabled() throws Exception {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(false);
-        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue();
+        long startTime = System.currentTimeMillis() - DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getTimeInMillis();
         PrivilegedAccessor.setValue(nodeAssigner,"startTime", new Long(startTime));
         
         mockery.checking(buildBandwdithExpectations(true));
         mockery.checking(buildDHTExpectations(DHTMode.INACTIVE, 
                 true, true, false, // can't receive unsolicited 
-                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()+1, 
+                DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getTimeInMillis()+1, 
                 false, false));
         
         mockery.checking(new Expectations(){{

@@ -82,7 +82,7 @@ public class NodeFetcher implements Closeable {
             Provider<UDPPinger> udpPinger) {
         this(connectionServices, hostCatcher, 
                 pingRequestFactory, uniqueHostPinger, udpPinger,
-                DHTSettings.DHT_NODE_FETCHER_TIME.getValue(), 
+                DHTSettings.DHT_NODE_FETCHER_TIME.getTimeInMillis(), 
                 TimeUnit.MILLISECONDS);
     }
     

@@ -201,7 +201,7 @@ class RequeryManager implements DHTEventListener {
         return numDHTQueries == 0 || 
         (numDHTQueries < DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
                 && System.currentTimeMillis() - lastQuerySent >= 
-                    DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()
+                    DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getTimeInMillis()
         );
     }
     

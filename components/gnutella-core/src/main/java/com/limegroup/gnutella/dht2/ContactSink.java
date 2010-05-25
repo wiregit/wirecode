@@ -49,7 +49,8 @@ public class ContactSink implements Closeable {
      * Creates a {@link ContactSink} with the given {@link AddressPinger}.
      */
     public ContactSink(AddressPinger pinger) {
-        this(pinger, DHTSettings.DHT_NODE_ADDER_DELAY.getValue(), TimeUnit.MILLISECONDS);
+        this(pinger, DHTSettings.DHT_NODE_ADDER_DELAY.getTimeInMillis(), 
+                TimeUnit.MILLISECONDS);
     }
     
     /**

@@ -346,7 +346,7 @@ public class ActiveController extends SimpleController {
                     // The Database depends on the RouteTable!
                     if (routeTable != null) {
                         long maxElaspedTime 
-                            = DHTSettings.MAX_ELAPSED_TIME_SINCE_LAST_CONTACT.getValue();
+                            = DHTSettings.MAX_ELAPSED_TIME_SINCE_LAST_CONTACT.getTimeInMillis();
                         if (maxElaspedTime < Long.MAX_VALUE) {
                             routeTable.purge(maxElaspedTime);
                         }
