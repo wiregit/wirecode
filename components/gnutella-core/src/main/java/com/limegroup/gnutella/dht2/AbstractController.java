@@ -137,9 +137,14 @@ public abstract class AbstractController implements Controller {
      */
     protected SocketAddress getExternalAddress() 
             throws UnknownHostException {
+        
         InetAddress address = InetAddress.getByAddress(
-                networkManager.getAddress());
-        int port = networkManager.getPort();
+                networkManager.getExternalAddress());
+        int port = networkManager.getNonForcedPort();
+        
+        if (address.isAnyLocalAddress()) {
+            address = InetAddress.getLocalHost();
+        }
         
         return new InetSocketAddress(address, port);
     }
