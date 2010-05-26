@@ -64,6 +64,11 @@ public class RestUtilsTest extends BaseTestCase {
         testStr = "find%3Falpha%3D1%26beta%3D2%2B3";
         expected = "find?alpha=1&beta=2+3";
         assertEquals(expected, RestUtils.percentDecode(testStr));
+        
+        // Verify plus sign unchanged in decoded signature.
+        testStr = "ozpkOJpFG+DnBl4IX4vHUJgWRUo%3D";
+        expected = "ozpkOJpFG+DnBl4IX4vHUJgWRUo=";
+        assertEquals(expected, RestUtils.percentDecode(testStr));
     }
 
     /** Tests method to perform percent encoding. */

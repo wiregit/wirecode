@@ -84,7 +84,9 @@ public abstract class RestUtils {
      */
     public static String percentDecode(String s) {
         try {
-            return URLDecoder.decode(s, ENCODING);
+            // Decode string.  Plus sign should remain unchanged instead of 
+            // decoded into space char.
+            return URLDecoder.decode(s.replace("+", "%2B"), ENCODING);
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
