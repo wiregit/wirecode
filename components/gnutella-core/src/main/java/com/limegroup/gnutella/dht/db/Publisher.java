@@ -1,25 +1,15 @@
 package com.limegroup.gnutella.dht.db;
 
 import java.io.Closeable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.mojito2.util.SchedulingUtils;
 
 /**
  * 
  */
 public abstract class Publisher implements Closeable {
-
-    /**
-     * 
-     */
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory(
-                "PublisherThread"));
     
     protected final long frequency;
     
@@ -84,7 +74,7 @@ public abstract class Publisher implements Closeable {
             }
         };
         
-        future = EXECUTOR.scheduleWithFixedDelay(
+        future = SchedulingUtils.scheduleWithFixedDelay(
                 task, 0L, frequency, unit);
     }
     

@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,13 +14,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito2.util.EventUtils;
+import org.limewire.mojito2.util.SchedulingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,13 +41,11 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
  */
 public class NodeFetcher implements Closeable {
 
-    private static final Log LOG = LogFactory.getLog(NodeFetcher.class);
+    private static final Log LOG 
+        = LogFactory.getLog(NodeFetcher.class);
     
-    private static ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("NodeFetcherThread"));
-    
-    private final List<NodeFetcherListener> listeners = new CopyOnWriteArrayList<NodeFetcherListener>();
+    private final List<NodeFetcherListener> listeners 
+        = new CopyOnWriteArrayList<NodeFetcherListener>();
     
     private final ConnectionServices connectionServices;
     
@@ -86,7 +82,7 @@ public class NodeFetcher implements Closeable {
                 TimeUnit.MILLISECONDS);
     }
     
-    private NodeFetcher(ConnectionServices connectionServices,
+    public NodeFetcher(ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
             PingRequestFactory pingRequestFactory,
             Provider<UniqueHostPinger> uniqueHostPinger,
@@ -155,7 +151,7 @@ public class NodeFetcher implements Closeable {
         };
         
         long delay = (long)(frequency * Math.random());
-        future = EXECUTOR.scheduleWithFixedDelay(
+        future = SchedulingUtils.scheduleWithFixedDelay(
                 task, delay, frequency, unit);
     }
     
