@@ -106,7 +106,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
         serverController = new ServerController();
         comm = injector.getInstance(ActivationCommunicator.class);
         settingsStub = (ActivationSettingStub)injector.getInstance(ActivationSettingsController.class);
-        settingsStub.setActivationHost("http://127.0.0.1:8123/activate");
+        settingsStub.setActivationHost("http://127.0.0.1:5813/activate");
     }
     
     @Override
@@ -247,7 +247,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
     // test 404 file not found exception
     //
     public void test404ErrorResponse() throws Exception {
-        settingsStub.setActivationHost("http://127.0.0.1:8123/invalid");
+        settingsStub.setActivationHost("http://127.0.0.1:5813/invalid");
         serverController.setReturnJsonTemplate("dfgdfgd");
         serverController.startServer();
         try {
@@ -299,7 +299,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
             Class.forName(LimeWireHttpClientModule.class.getName()), null, "CONNECTION_TIMEOUT");
         final int timeout = ((Integer)accessor.getOriginalValue()) + 2000;
         
-        settingsStub.setActivationHost("http://" + unreachableIpAddress + ":8123/sfsdfs");
+        settingsStub.setActivationHost("http://" + unreachableIpAddress + ":5813/sfsdfs");
         Callable<ActivationResponse> contactUnreachableServer = new Callable<ActivationResponse>() {
             @Override
             public ActivationResponse call() throws Exception {
@@ -342,7 +342,7 @@ public class ActivationCommunicatorTest extends BaseTestCase {
 
         void startServer(HttpHandler handler) throws Exception {
             SocketListener listener = new SocketListener();
-            listener.setPort(8123);
+            listener.setPort(5813);
             listener.setMinThreads(1);
             server.addListener(listener);
             HttpContext context = server.addContext("");
