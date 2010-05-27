@@ -43,7 +43,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             dht = MojitoFactory.createDHT("Test", 5000);
             
-            Context context = dht.getContext();
+            Context context = (Context)dht;
             MessageHelper helper = context.getMessageHelper();
             MessageFactory factory = context.getMessageFactory();
             MessageDispatcher dispatcher = context.getMessageDispatcher();

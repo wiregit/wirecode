@@ -18,6 +18,6 @@ public class UnitTestUtils {
     }
     
     public static void setState(MojitoDHT dht, State state) {
-        ((DefaultDHT)dht.getContext()).setState(state);
+        ((DefaultDHT)dht).setState(state);
     }
 }

@@ -19,7 +19,6 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -75,7 +74,7 @@ public class ActiveController extends SimpleController {
     
     private final ContactSink contactSink;
     
-    private final MojitoDHT dht;
+    private final DefaultMojitoDHT dht;
     
     private final BootstrapWorker bootstrapWorker;
     
@@ -103,19 +102,16 @@ public class ActiveController extends SimpleController {
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();
         
-        DefaultDHT context = new DefaultDHT(NAME, 
+        dht = new DefaultMojitoDHT(NAME, 
                 messageFactory, routeTable, database);
         
-        contacts = init(context);
-        
-        context.setHostFilter(filter);
+        dht.setHostFilter(filter);
+        contacts = init(dht);
         
         // Memorize the localhost's KUID
-        Contact localhost = context.getLocalNode();
+        Contact localhost = dht.getLocalNode();
         KUID contactId = localhost.getNodeID();
         DHTSettings.DHT_NODE_ID.set(contactId.toHexString());
-        
-        dht = new DefaultMojitoDHT(context);
         
         bootstrapWorker = new BootstrapWorker(
                 dht, connectionServices, 
@@ -146,7 +142,7 @@ public class ActiveController extends SimpleController {
         return bootstrapWorker;
     }
     
-    private Contact[] init(DefaultDHT context) throws IOException {
+    private Contact[] init(DefaultMojitoDHT context) throws IOException {
         
         LocalContact contact = context.getLocalNode();
         initLocalhost(context.getLocalNode());

@@ -1,7 +1,6 @@
 package org.limewire.mojito2;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -14,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito2.concurrent.AsyncProcess;
@@ -29,36 +30,37 @@ import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.io.SecurityTokenResponseHandler;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
+import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.BootstrapSettings;
+import org.limewire.mojito2.settings.ContextSettings;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.StoreSettings;
 import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.util.ContactUtils;
-import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
 
 /**
  * 
  */
-public class DefaultMojitoDHT implements MojitoDHT {
-
-    private final DHT dht;
+public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     
-    public DefaultMojitoDHT(DHT dht) {
-        this.dht = dht;
-    }
+    private static final Log LOG 
+        = LogFactory.getLog(DefaultMojitoDHT.class);
     
-    @Override
-    public DefaultDHT getContext() {
-        return (DefaultDHT)dht;
+    public DefaultMojitoDHT(String name, 
+            MessageFactory messageFactory, 
+            RouteTable routeTable,
+            Database database) {
+        super(name, messageFactory, routeTable, database);
     }
     
     @Override
@@ -70,97 +72,10 @@ public class DefaultMojitoDHT implements MojitoDHT {
     public Version getVersion() {
         return getLocalNode().getVersion();
     }
-
-    @Override
-    public void bind(Transport transport) throws IOException {
-        dht.bind(transport);
-    }
-
-    @Override
-    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
-            long timeout, TimeUnit unit) {
-        return dht.bootstrap(dst, timeout, unit);
-    }
     
-    @Override
-    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
-            long timeout, TimeUnit unit) {
-        return dht.bootstrap(dst, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<ValueEntity> get(KUID lookupId, long timeout, TimeUnit unit) {
-        return dht.get(lookupId, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<ValueEntity> get(EntityKey key, long timeout, TimeUnit unit) {
-        return dht.get(key, timeout, unit);
-    }
-
-    @Override
-    public Database getDatabase() {
-        return dht.getDatabase();
-    }
-
-    @Override
-    public HostFilter getHostFilter() {
-        return dht.getHostFilter();
-    }
-
-    @Override
-    public LocalContact getLocalNode() {
-        return (LocalContact)dht.getLocalNode();
-    }
-
-    @Override
-    public MessageDispatcher getMessageDispatcher() {
-        return dht.getMessageDispatcher();
-    }
-
-    @Override
-    public MessageFactory getMessageFactory() {
-        return dht.getMessageFactory();
-    }
-
-    @Override
-    public String getName() {
-        return dht.getName();
-    }
-
-    @Override
-    public RouteTable getRouteTable() {
-        return dht.getRouteTable();
-    }
-    
-    @Override
-    public boolean isBound() {
-        return dht.isBound();
-    }
-
-    @Override
-    public boolean isFirewalled() {
-        return dht.isFirewalled();
-    }
-    
-    @Override
-    public boolean isReady() {
-        return dht.isReady();
-    }
-
-    @Override
-    public boolean isBooting() {
-        return dht.isBooting();
-    }
-
     @Override
     public KUID getLocalNodeID() {
         return getLocalNode().getNodeID();
-    }
-    
-    @Override
-    public SocketAddress getContactAddress() {
-        return getLocalNode().getContactAddress();
     }
     
     @Override
@@ -179,47 +94,10 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
-            long timeout, TimeUnit unit) {
-        return dht.lookup(lookupId, timeout, unit);
+    public boolean isLocalNode(Contact contact) {
+        return getLocalNode().equals(contact);
     }
 
-    @Override
-    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
-            Contact[] dst, long timeout, TimeUnit unit) {
-        return dht.lookup(lookupId, dst, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<PingEntity> ping(String address, int port, 
-            long timeout, TimeUnit unit) {
-        return dht.ping(address, port, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<PingEntity> ping(InetAddress address, 
-            int port, long timeout, TimeUnit unit) {
-        return dht.ping(address, port, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<PingEntity> ping(SocketAddress dst, 
-            long timeout, TimeUnit unit) {
-        return dht.ping(dst, timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<PingEntity> ping(Contact dst, 
-            long timeout, TimeUnit unit) {
-        return dht.ping(dst, timeout, unit);
-    }
-    
-    @Override
-    public DHTFuture<StoreEntity> put(DHTValueEntity value, 
-            long timeout, TimeUnit unit) {
-        return dht.put(value, timeout, unit);
-    }
-    
     private Contact[] getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
         Collection<Contact> active = getRouteTable().getActiveContacts();
@@ -237,39 +115,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis() * dst.length;
         return ping(localhost, dst, timeout, TimeUnit.MILLISECONDS);
     }
-
-    @Override
-    public void setHostFilter(HostFilter hostFilter) {
-        dht.setHostFilter(hostFilter);
-    }
-
-    @Override
-    public BigInteger size() {
-        return dht.size();
-    }
-
-    @Override
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
-            long timeout, TimeUnit unit) {
-        return dht.submit(process, timeout, unit);
-    }
-
-    @Override
-    public Transport unbind() {
-        return dht.unbind();
-    }
-
-    @Override
-    public void close() throws IOException {
-        dht.close();
-    }
     
-    @Override
-    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst, 
-            long timeout, TimeUnit unit) {
-        return dht.ping(src, dst, timeout, unit);
-    }
-
     @Override
     public DHTFuture<PingEntity> ping(String address, int port) {
         return ping(new InetSocketAddress(address, port));
@@ -287,10 +133,15 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
+    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst) {
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
+        return ping(src, dst, timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
     public DHTFuture<PingEntity> collisionPing(Contact dst) {
         
-        Contact src = ContactUtils.createCollisionPingSender(
-                dht.getLocalNode());
+        Contact src = ContactUtils.createCollisionPingSender(getLocalNode());
         
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         return ping(src, new Contact[] { dst }, 
@@ -326,12 +177,6 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
-            long timeout, TimeUnit unit) {
-        return dht.put(key, value, timeout, unit);
-    }
-
-    @Override
     public DHTFuture<StoreEntity> remove(KUID key) {
         return put(key, DHTValue.EMPTY_VALUE);
     }
@@ -339,13 +184,13 @@ public class DefaultMojitoDHT implements MojitoDHT {
     @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId) {
         long timeout = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getTimeInMillis();
-        return dht.lookup(lookupId, timeout, TimeUnit.MILLISECONDS);
+        return lookup(lookupId, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
     public DHTFuture<ValueEntity> get(EntityKey key) {
         long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
-        return dht.get(key, timeout, TimeUnit.MILLISECONDS);
+        return get(key, timeout, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -458,9 +303,86 @@ public class DefaultMojitoDHT implements MojitoDHT {
         
         KUID lookupId = KUID.createRandomID();
         AsyncProcess<SecurityTokenEntity> process 
-            = new SecurityTokenResponseHandler((Context)dht, 
+            = new SecurityTokenResponseHandler(this, 
                     dst, lookupId, timeout, unit);
         
         return submit(process, timeout, unit);
+    }
+    
+    @Override
+    public void close() {
+        if (isBound()) {
+            try {
+                shutdown(0, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException err) {
+                LOG.error("InterruptedException", err);
+            }
+        }
+        
+        super.close();
+    }
+    
+    @Override
+    public Transport unbind() {
+        if (isBound()) {
+            try {
+                shutdown(0, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException err) {
+                LOG.error("InterruptedException", err);
+            }
+        }
+        
+        return super.unbind();
+    }
+    
+    private boolean shutdown(long timeout, TimeUnit unit) 
+            throws InterruptedException {
+        if (isFirewalled() 
+                || !ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
+            return false;
+        }
+        
+        MessageFactory messageFactory = getMessageFactory();
+        
+        // Shutdown the local Node
+        Contact localhost = getLocalNode();
+        localhost.shutdown(true);
+        
+        Contact shutdown = new LocalContact(
+                localhost.getVendor(), 
+                localhost.getVersion(),
+                localhost.getNodeID(), 
+                localhost.getInstanceID(), 
+                Contact.SHUTDOWN_FLAG);
+        
+        
+        // We're nice guys and send shutdown messages to the 2*k-closest
+        // Nodes which should help to reduce the overall latency.
+        int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
+        int count = m*KademliaSettings.K;
+        
+        RouteTable routeTable = getRouteTable();
+        Collection<Contact> contacts = routeTable.select(
+                localhost.getNodeID(), count, SelectMode.ALIVE);
+        
+        MessageDispatcher messageDispatcher = getMessageDispatcher();
+        
+        for (Contact contact : contacts) {
+            if (!contact.equals(localhost)) {
+                // We are not interested in the responses as we're going
+                // to shutdown. Send pings without a response handler.
+                RequestMessage request = messageFactory.createPingRequest(
+                        shutdown, contact.getContactAddress());
+                
+                try {
+                    messageDispatcher.send(null, contact, request, 
+                            -1L, TimeUnit.MILLISECONDS);
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
+                }
+            }
+        }
+        
+        return true;
     }
 }

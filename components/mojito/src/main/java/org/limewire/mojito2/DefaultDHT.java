@@ -3,12 +3,9 @@ package org.limewire.mojito2;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
@@ -32,16 +29,12 @@ import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.io.ValueResponseHandler;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.message.MessageHelper;
-import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.routing.BucketRefresher;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.BucketRefresherSettings;
-import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.DatabaseSettings;
-import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.storage.DatabaseCleaner;
@@ -54,8 +47,6 @@ import org.limewire.util.Objects;
  * 
  */
 public class DefaultDHT extends AbstractDHT implements Context {
-    
-    private static final Log LOG = LogFactory.getLog(DefaultDHT.class);
     
     /**
      * 
@@ -196,10 +187,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
         
         estimator.clear();
         
-        if (isBound()) {
-            shutdown();
-        }
-        
         databaseCleaner.close();
         bucketRefresher.close();
         
@@ -216,58 +203,10 @@ public class DefaultDHT extends AbstractDHT implements Context {
 
     @Override
     public Transport unbind() {
-        if (isBound()) {
-            shutdown();
-        }
-        
         databaseCleaner.stop();
         bucketRefresher.stop();
         
         return messageDispatcher.unbind();
-    }
-    
-    private void shutdown() {
-        if (isFirewalled() || !ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
-            return;
-        }
-        
-        MessageFactory messageFactory = getMessageFactory();
-        
-        // Shutdown the local Node
-        Contact localhost = getLocalNode();
-        localhost.shutdown(true);
-        
-        Contact shutdown = new LocalContact(
-                localhost.getVendor(), 
-                localhost.getVersion(),
-                localhost.getNodeID(), 
-                localhost.getInstanceID(), 
-                Contact.SHUTDOWN_FLAG);
-        
-        
-        // We're nice guys and send shutdown messages to the 2*k-closest
-        // Nodes which should help to reduce the overall latency.
-        int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
-        int count = m*KademliaSettings.K;
-        
-        Collection<Contact> contacts = routeTable.select(
-                localhost.getNodeID(), count, SelectMode.ALIVE);
-        
-        for (Contact contact : contacts) {
-            if (!contact.equals(localhost)) {
-                // We are not interested in the responses as we're going
-                // to shutdown. Send pings without a response handler.
-                RequestMessage request = messageFactory.createPingRequest(
-                        shutdown, contact.getContactAddress());
-                
-                try {
-                    messageDispatcher.send(null, contact, request, 
-                            -1L, TimeUnit.MILLISECONDS);
-                } catch (IOException err) {
-                    LOG.error("IOException", err);
-                }
-            }
-        }
     }
     
     @Override

@@ -38,7 +38,7 @@ public class ContextTest extends MojitoTestCase {
     }
     
     public void testUnbindWithoutBind() throws IOException {
-        DHT dht = MojitoFactory.createDHT("DHT-0");
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
         
         try {
             dht.unbind();
@@ -48,7 +48,7 @@ public class ContextTest extends MojitoTestCase {
     }
     
     public void testBind() throws IOException {
-        DHT dht = MojitoFactory.createDHT("DHT-0");
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
         
         try {
             MojitoFactory.bind(dht, 2000);
@@ -58,7 +58,7 @@ public class ContextTest extends MojitoTestCase {
     }
     
     public void testUnbind() throws IOException {
-        DHT dht = MojitoFactory.createDHT("DHT-0");
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
         Transport transport = null;
         
         try {
@@ -72,7 +72,7 @@ public class ContextTest extends MojitoTestCase {
     }
     
     public void testCloseWithoutBind() throws IOException {
-        DHT dht = MojitoFactory.createDHT("DHT-0");
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
         dht.close();
     }
     
@@ -114,7 +114,7 @@ public class ContextTest extends MojitoTestCase {
             // Shutdown a random MojitoDHT instance
             Random generator = new Random();
             int index = generator.nextInt(dhts.size() / 2) + KademliaSettings.K;
-            DHT down = dhts.get(index);
+            MojitoDHT down = dhts.get(index);
             down.close();
             
             // Give everybody a bit time to process the 

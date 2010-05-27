@@ -41,7 +41,7 @@ public class PassiveLeafController extends AbstractController {
     private final RouteTable routeTable = new PassiveLeafRouteTable(
             DHTManager.VENDOR, DHTManager.VERSION);
     
-    private final MojitoDHT dht;
+    private final DefaultMojitoDHT dht;
     
     @Inject
     public PassiveLeafController(Transport transport, 
@@ -56,13 +56,10 @@ public class PassiveLeafController extends AbstractController {
         
         Database database = new DatabaseImpl();
         
-        DefaultDHT context = new LeafContext(NAME, 
+        dht = new LeafContext(NAME, 
                 messageFactory, routeTable, database);
-        init(context);
-        
-        context.setHostFilter(hostFilter);
-        
-        dht = new DefaultMojitoDHT(context);
+        dht.setHostFilter(hostFilter);
+        init(dht);
     }
     
     private void init(DefaultDHT context) 
@@ -122,7 +119,7 @@ public class PassiveLeafController extends AbstractController {
         }
     }
     
-    private static class LeafContext extends DefaultDHT {
+    private static class LeafContext extends DefaultMojitoDHT {
 
         public LeafContext(String name, MessageFactory messageFactory, 
                 RouteTable routeTable, Database database) {

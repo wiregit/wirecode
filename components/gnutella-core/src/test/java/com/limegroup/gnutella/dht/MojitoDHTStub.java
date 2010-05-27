@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -24,6 +23,7 @@ import org.limewire.mojito2.io.MessageDispatcher;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.routing.LocalContact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
@@ -34,6 +34,16 @@ import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.NopTransport;
 
 public class MojitoDHTStub implements MojitoDHT {
+
+    @Override
+    public boolean isLocalNode(Contact contact) {
+        return false;
+    }
+
+    @Override
+    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst) {
+        return createFuture();
+    }
 
     @Override
     public DHTFuture<BootstrapEntity> bootstrap(Contact contact) {
@@ -77,11 +87,6 @@ public class MojitoDHTStub implements MojitoDHT {
 
     @Override
     public SocketAddress getContactAddress() {
-        return null;
-    }
-
-    @Override
-    public DefaultDHT getContext() {
         return null;
     }
 
@@ -181,7 +186,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public Contact getLocalNode() {
+    public LocalContact getLocalNode() {
         return null;
     }
 
