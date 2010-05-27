@@ -18,6 +18,10 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+/**
+ * An implementation of {@link Controller} that is inactive 
+ * (i.e. it does nothing).
+ */
 @Singleton
 public class InactiveController implements Controller {
 

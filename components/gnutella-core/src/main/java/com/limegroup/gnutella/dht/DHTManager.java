@@ -237,7 +237,7 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
     public void removeEventListener(DHTEventListener listener);
     
     /**
-     * 
+     * Equivalent to {@link #getController()#getMojitoDHT()}
      */
     public MojitoDHT getMojitoDHT();
 }

@@ -5,11 +5,12 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.DHT;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * A helper class to easily go back and forth 
- * from the DHT's RemoteContact to Gnutella's IpPort.
+ * A helper class to easily go back and forth from the {@link DHT}'s 
+ * {@link Contact} to Gnutella's {@link IpPort}.
  */
 public class IpPortContact implements IpPort {
     
