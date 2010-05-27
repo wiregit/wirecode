@@ -40,7 +40,7 @@ class MojitoMessage implements Message {
 
     @Override
     public byte getFunc() {
-        return org.limewire.mojito2.message.Message.F_DHT_MESSAGE;
+        return org.limewire.mojito.message.Message.F_DHT_MESSAGE;
     }
 
     @Override

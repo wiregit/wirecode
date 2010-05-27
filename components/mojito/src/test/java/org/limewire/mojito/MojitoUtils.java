@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.settings.KademliaSettings;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.IoUtils;
 
 public class MojitoUtils {
 

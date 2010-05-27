@@ -9,10 +9,10 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.LimeWireIOTestModule;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

@@ -9,7 +9,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.mojito2.KUID;
+import org.limewire.mojito.KUID;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.util.KUIDUtils;

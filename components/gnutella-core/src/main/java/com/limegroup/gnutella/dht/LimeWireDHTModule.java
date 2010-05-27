@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.dht;
 
-import org.limewire.mojito2.util.HostFilter;
+import org.limewire.mojito.util.HostFilter;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.dht.db.LimeWireDHTDBModule;

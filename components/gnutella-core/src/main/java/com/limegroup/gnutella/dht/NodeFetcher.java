@@ -19,8 +19,8 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito2.util.EventUtils;
-import org.limewire.mojito2.util.SchedulingUtils;
+import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito.util.SchedulingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

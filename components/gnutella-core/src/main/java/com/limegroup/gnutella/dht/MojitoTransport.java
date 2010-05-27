@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito2.io.AbstractTransport;
+import org.limewire.mojito.io.AbstractTransport;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

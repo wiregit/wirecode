@@ -11,18 +11,18 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTableImpl;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValueEntity;
-import org.limewire.mojito2.storage.DHTValueImpl;
-import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.storage.DatabaseImpl;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.util.StringUtils;
 
 public class SerializeTest extends MojitoTestCase {

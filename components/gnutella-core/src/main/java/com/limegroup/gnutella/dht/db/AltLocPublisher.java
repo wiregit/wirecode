@@ -5,9 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

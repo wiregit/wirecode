@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IP;
-import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito.routing.Contact;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -45,9 +45,9 @@ public abstract class AbstractIPFilter implements IPFilter {
             else
                 return ALLOWED;
         }
-        else if (m instanceof org.limewire.mojito2.message.Message){
-            org.limewire.mojito2.message.Message message 
-                = (org.limewire.mojito2.message.Message)m;
+        else if (m instanceof org.limewire.mojito.message.Message){
+            org.limewire.mojito.message.Message message 
+                = (org.limewire.mojito.message.Message)m;
             
             Contact src = message.getContact();
             InetSocketAddress addr = 

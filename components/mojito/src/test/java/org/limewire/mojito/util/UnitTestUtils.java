@@ -1,8 +1,8 @@
 package org.limewire.mojito.util;
 
-import org.limewire.mojito2.DefaultDHT;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.BootstrapManager.State;
+import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.BootstrapManager.State;
 
 public class UnitTestUtils {
     

@@ -7,11 +7,11 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.mojito2.AbstractAddressPinger;
-import org.limewire.mojito2.AddressPinger;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
-import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito.AbstractAddressPinger;
+import org.limewire.mojito.AddressPinger;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.PingEntity;
 
 
 public class ContactSinkTest extends DHTTestCase {

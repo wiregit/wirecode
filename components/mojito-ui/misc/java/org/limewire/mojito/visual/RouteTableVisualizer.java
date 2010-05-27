@@ -14,6 +14,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.visual.components.BinaryEdge;
 import org.limewire.mojito.visual.components.BinaryEdge.EdgeType;
 import org.limewire.mojito.visual.graph.BucketGraph;
@@ -23,9 +26,6 @@ import org.limewire.mojito.visual.helper.RouteTableGraphMousePlugin;
 import org.limewire.mojito.visual.helper.RouteTableToolTipFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexPaintFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexShapeFunction;
-import org.limewire.mojito2.DefaultDHT;
-import org.limewire.mojito2.routing.Bucket;
-import org.limewire.mojito2.routing.RouteTable;
 
 import edu.uci.ics.jung.graph.ArchetypeEdge;
 import edu.uci.ics.jung.graph.ArchetypeVertex;

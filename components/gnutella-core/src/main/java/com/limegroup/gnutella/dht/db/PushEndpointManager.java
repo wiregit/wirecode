@@ -18,8 +18,8 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

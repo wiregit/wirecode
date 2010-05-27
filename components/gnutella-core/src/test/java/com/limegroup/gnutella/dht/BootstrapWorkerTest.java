@@ -11,10 +11,10 @@ import junit.framework.Test;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.util.ArrayUtils;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.util.ArrayUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

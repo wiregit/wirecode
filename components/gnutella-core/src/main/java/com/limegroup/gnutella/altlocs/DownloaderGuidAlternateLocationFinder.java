@@ -10,7 +10,7 @@ import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -12,11 +12,11 @@ import org.limewire.collection.IdentityHashSet;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.util.MaxStack;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.util.MaxStack;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.dht.DHTManager;

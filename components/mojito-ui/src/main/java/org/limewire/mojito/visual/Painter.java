@@ -7,16 +7,16 @@ import java.awt.Stroke;
 import java.math.BigDecimal;
 import java.net.SocketAddress;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.message.Message;
-import org.limewire.mojito2.message.NodeRequest;
-import org.limewire.mojito2.message.NodeResponse;
-import org.limewire.mojito2.message.PingRequest;
-import org.limewire.mojito2.message.PingResponse;
-import org.limewire.mojito2.message.StoreRequest;
-import org.limewire.mojito2.message.StoreResponse;
-import org.limewire.mojito2.message.ValueRequest;
-import org.limewire.mojito2.message.ValueResponse;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.NodeRequest;
+import org.limewire.mojito.message.NodeResponse;
+import org.limewire.mojito.message.PingRequest;
+import org.limewire.mojito.message.PingResponse;
+import org.limewire.mojito.message.StoreRequest;
+import org.limewire.mojito.message.StoreResponse;
+import org.limewire.mojito.message.ValueRequest;
+import org.limewire.mojito.message.ValueResponse;
 
 /**<p>
  * Draws graphical representations of the DHT. <code>Painter</code> creates 

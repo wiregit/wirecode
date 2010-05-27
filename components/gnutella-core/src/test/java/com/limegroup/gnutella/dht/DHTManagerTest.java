@@ -10,8 +10,8 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.NodeAssigner;

@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito2.util.SchedulingUtils;
+import org.limewire.mojito.util.SchedulingUtils;
 
 /**
  * 

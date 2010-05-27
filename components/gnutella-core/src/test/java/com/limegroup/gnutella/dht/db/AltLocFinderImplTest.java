@@ -13,8 +13,8 @@ import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.URN;

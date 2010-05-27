@@ -6,21 +6,21 @@ import java.util.Arrays;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.Bucket;
-import org.limewire.mojito2.routing.ClassfulNetworkCounter;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.RemoteContact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTableImpl;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.routing.Contact.State;
-import org.limewire.mojito2.settings.ContextSettings;
-import org.limewire.mojito2.settings.KademliaSettings;
-import org.limewire.mojito2.settings.RouteTableSettings;
+import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RemoteContact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.Contact.State;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
 
 
 public class BucketNodeTest extends MojitoTestCase {

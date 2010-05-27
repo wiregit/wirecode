@@ -13,19 +13,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.AddressPinger;
-import org.limewire.mojito2.ContactPinger;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
-import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.entity.RequestTimeoutException;
-import org.limewire.mojito2.routing.Bucket;
-import org.limewire.mojito2.routing.ClassfulNetworkCounter;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTableImpl;
-import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito.AddressPinger;
+import org.limewire.mojito.ContactPinger;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.RequestTimeoutException;
+import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.settings.NetworkSettings;
 
 /**
  * Passive Nodes (Ultrapeers) use this slightly extended version 

@@ -8,8 +8,8 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.settings.LookupSettings;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.settings.LookupSettings;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;

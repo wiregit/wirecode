@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
-import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFuture;
 
 import com.limegroup.gnutella.PushEndpoint;
 

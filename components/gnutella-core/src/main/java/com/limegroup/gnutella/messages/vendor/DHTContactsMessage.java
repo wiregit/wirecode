@@ -5,9 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.limewire.io.IOUtils;
-import org.limewire.mojito2.message.MessageInputStream;
-import org.limewire.mojito2.message.MessageOutputStream;
-import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito.message.MessageInputStream;
+import org.limewire.mojito.message.MessageOutputStream;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.limegroup.gnutella.messages.BadPacketException;

@@ -21,8 +21,8 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;

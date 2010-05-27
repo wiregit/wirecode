@@ -15,9 +15,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.message.Message;
-import org.limewire.mojito2.message.RequestMessage;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.RequestMessage;
 
 /**
  * Imagine the local Node's ID is at 1/3rd of the available

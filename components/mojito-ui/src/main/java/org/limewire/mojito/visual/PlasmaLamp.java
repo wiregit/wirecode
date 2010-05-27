@@ -14,9 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.message.Message;
-import org.limewire.mojito2.message.RequestMessage;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.RequestMessage;
 
 /**
  * This looks a bit like a 2D Plasma Lamp (also known as

@@ -13,10 +13,10 @@ import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito2.AddressPinger;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito.AddressPinger;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.Objects;
 
 /**

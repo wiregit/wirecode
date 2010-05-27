@@ -28,16 +28,16 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.entity.CollisionException;
-import org.limewire.mojito2.io.Transport;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.settings.ContextSettings;
-import org.limewire.mojito2.settings.NetworkSettings;
-import org.limewire.mojito2.settings.RouteTableSettings;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.entity.CollisionException;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 
 

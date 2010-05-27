@@ -11,20 +11,20 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.CollisionException;
-import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.message.DefaultMessageFactory;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.util.HostFilter;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.CollisionException;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.message.DefaultMessageFactory;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Inject;
@@ -148,7 +148,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         });
         
         messageFactory.setParser(
-                (byte) org.limewire.mojito2.message.Message.F_DHT_MESSAGE, 
+                (byte) org.limewire.mojito.message.Message.F_DHT_MESSAGE, 
                 new MojitoMessageParser());
     }
     

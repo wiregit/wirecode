@@ -20,12 +20,12 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.settings.ContextSettings;
-import org.limewire.mojito2.settings.NetworkSettings;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

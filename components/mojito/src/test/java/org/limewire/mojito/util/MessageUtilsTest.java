@@ -5,15 +5,15 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.DHT;
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.message.MessageFactory;
-import org.limewire.mojito2.message.PingRequest;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.util.ContactUtils;
-import org.limewire.mojito2.util.MessageUtils;
-import org.limewire.mojito2.util.NopTransport;
+import org.limewire.mojito.message.MessageFactory;
+import org.limewire.mojito.message.PingRequest;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.MessageUtils;
+import org.limewire.mojito.util.NopTransport;
 
 public class MessageUtilsTest extends MojitoTestCase {
     

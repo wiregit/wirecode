@@ -9,15 +9,15 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito2.DHT;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.io.Transport;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.settings.ContextSettings;
-import org.limewire.mojito2.settings.KademliaSettings;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.DHT;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.IoUtils;
 
 public class ContextTest extends MojitoTestCase {
     

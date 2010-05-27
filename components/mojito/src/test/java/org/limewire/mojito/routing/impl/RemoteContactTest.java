@@ -5,14 +5,14 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.RemoteContact;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.settings.NetworkSettings;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RemoteContact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.NetworkSettings;
 
 public class RemoteContactTest extends MojitoTestCase {
     

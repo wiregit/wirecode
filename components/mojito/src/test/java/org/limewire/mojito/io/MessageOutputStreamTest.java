@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito2.message.MessageOutputStream;
+import org.limewire.mojito.message.MessageOutputStream;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 

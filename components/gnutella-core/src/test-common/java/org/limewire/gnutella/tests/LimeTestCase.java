@@ -14,7 +14,7 @@ import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
-import org.limewire.mojito2.settings.MojitoProps;
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;

@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.DHTValueImpl;
-import org.limewire.mojito2.util.ArrayUtils;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.util.ByteUtils;
 
 public abstract class AbstractAltLocValue implements AltLocValue {

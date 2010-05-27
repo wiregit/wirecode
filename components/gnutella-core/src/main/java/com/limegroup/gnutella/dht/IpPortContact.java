@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito.routing.Contact;
 
 /**
  * A helper class to easily go back and forth 

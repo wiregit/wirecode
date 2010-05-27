@@ -12,9 +12,9 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
-import org.limewire.mojito2.settings.LookupSettings;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;

@@ -2,8 +2,8 @@ package com.limegroup.gnutella.dht.db;
 
 import java.io.Closeable;
 
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.storage.DHTValue;
 
 /**
  * 

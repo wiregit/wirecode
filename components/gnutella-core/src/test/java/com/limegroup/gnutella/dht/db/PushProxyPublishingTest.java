@@ -14,9 +14,9 @@ import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;

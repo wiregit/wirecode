@@ -2,16 +2,16 @@ package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
-import org.limewire.mojito2.entity.CollisionException;
-import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.CollisionException;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.storage.DHTValue;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.dht.db;
 
-import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito.storage.DHTValue;
 
 public interface SerializableValue {
 

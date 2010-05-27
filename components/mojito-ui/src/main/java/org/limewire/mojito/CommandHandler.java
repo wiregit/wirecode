@@ -29,24 +29,24 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
-import org.limewire.mojito2.DefaultDHT;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.entity.BootstrapEntity;
-import org.limewire.mojito2.entity.NodeEntity;
-import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.entity.StoreEntity;
-import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.routing.LocalContact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.routing.RouteTable.SelectMode;
-import org.limewire.mojito2.settings.LookupSettings;
-import org.limewire.mojito2.storage.DHTValueImpl;
-import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.storage.Database;
-import org.limewire.mojito2.util.CollectionUtils;
+import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.SelectMode;
+import org.limewire.mojito.settings.LookupSettings;
+import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.util.CollectionUtils;
 
 /**
  * Executes various features of the Mojito DHT. <code>CommandHandler</code>

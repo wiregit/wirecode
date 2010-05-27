@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.limewire.io.GUID;
-import org.limewire.mojito2.KUID;
+import org.limewire.mojito.KUID;
 
 import com.limegroup.gnutella.URN;
 

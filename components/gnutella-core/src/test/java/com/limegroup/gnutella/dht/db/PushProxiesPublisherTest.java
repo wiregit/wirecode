@@ -13,8 +13,8 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.storage.DHTValue;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.storage.DHTValue;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;

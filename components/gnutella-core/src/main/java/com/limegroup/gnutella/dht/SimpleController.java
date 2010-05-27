@@ -2,12 +2,12 @@ package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.io.Transport;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.NetworkManager;

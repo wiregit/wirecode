@@ -14,7 +14,7 @@ import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.SessionInfo;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.mojito2.settings.MojitoProps;
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.setting.Setting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.util.CommonUtils;

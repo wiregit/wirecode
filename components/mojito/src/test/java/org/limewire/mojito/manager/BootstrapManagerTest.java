@@ -11,26 +11,26 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.entity.BootstrapEntity;
-import org.limewire.mojito2.entity.PingEntity;
-import org.limewire.mojito2.io.MessageDispatcherAdapter;
-import org.limewire.mojito2.message.Message;
-import org.limewire.mojito2.message.NodeRequest;
-import org.limewire.mojito2.message.PingRequest;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.settings.NetworkSettings;
-import org.limewire.mojito2.util.HostFilter;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.io.MessageDispatcherAdapter;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.NodeRequest;
+import org.limewire.mojito.message.PingRequest;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManagerTest extends MojitoTestCase {

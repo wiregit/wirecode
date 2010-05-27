@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito.routing.Contact;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;

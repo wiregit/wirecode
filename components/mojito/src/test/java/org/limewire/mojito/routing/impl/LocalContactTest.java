@@ -6,10 +6,10 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.LocalContact;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 
 public class LocalContactTest extends MojitoTestCase {

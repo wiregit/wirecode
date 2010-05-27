@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValueType;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValueType;
 
 /**
  * 

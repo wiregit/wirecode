@@ -5,9 +5,9 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.message.DefaultMessageID;
-import org.limewire.mojito2.message.MessageID;
-import org.limewire.mojito2.message.DefaultMessageID.MessageSecurityToken;
+import org.limewire.mojito.message.DefaultMessageID;
+import org.limewire.mojito.message.MessageID;
+import org.limewire.mojito.message.DefaultMessageID.MessageSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;

@@ -7,19 +7,19 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
-import org.limewire.mojito2.EntityKey;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.DHTValueEntity;
-import org.limewire.mojito2.storage.DHTValueImpl;
-import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 

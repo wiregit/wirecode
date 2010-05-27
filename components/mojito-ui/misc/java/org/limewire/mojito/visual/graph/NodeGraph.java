@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.visual.RouteTableGraphCallback;
 import org.limewire.mojito.visual.components.BinaryEdge;
 import org.limewire.mojito.visual.components.ContactVertex;
 import org.limewire.mojito.visual.components.InteriorNodeVertex;
 import org.limewire.mojito.visual.components.BinaryEdge.EdgeType;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.routing.Bucket;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.RouteTable;
-import org.limewire.mojito2.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito2.routing.RouteTable.RouteTableEvent.EventType;
 
 
 import edu.uci.ics.jung.graph.ArchetypeVertex;

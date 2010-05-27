@@ -6,9 +6,9 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.DHTValueType;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.DHTValueType;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.ApplicationServices;

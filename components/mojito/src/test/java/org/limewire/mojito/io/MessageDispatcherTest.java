@@ -6,20 +6,20 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.Context;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito2.Context;
-import org.limewire.mojito2.KUID;
-import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.MojitoFactory;
-import org.limewire.mojito2.io.MessageDispatcher;
-import org.limewire.mojito2.message.MessageFactory;
-import org.limewire.mojito2.message.MessageHelper;
-import org.limewire.mojito2.message.RequestMessage;
-import org.limewire.mojito2.routing.Contact;
-import org.limewire.mojito2.routing.ContactFactory;
-import org.limewire.mojito2.routing.Vendor;
-import org.limewire.mojito2.routing.Version;
-import org.limewire.mojito2.util.IoUtils;
+import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.message.MessageFactory;
+import org.limewire.mojito.message.MessageHelper;
+import org.limewire.mojito.message.RequestMessage;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.IoUtils;
 
 
 public class MessageDispatcherTest extends MojitoTestCase {
