@@ -7,7 +7,6 @@ import java.util.concurrent.TimeoutException;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.MojitoFactory;
