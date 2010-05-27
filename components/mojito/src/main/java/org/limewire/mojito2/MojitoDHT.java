@@ -1,7 +1,6 @@
 package org.limewire.mojito2;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -16,11 +15,9 @@ import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.LocalContact;
-import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
-import org.limewire.mojito2.storage.Database;
 
 /**
  * 
@@ -77,46 +74,6 @@ public interface MojitoDHT extends DHT {
      * 
      */
     public void bind(Transport transport) throws IOException;
-    
-    /**
-     * 
-     */
-    public boolean isBound();
-    
-    /**
-     * 
-     */
-    public Transport unbind();
-    
-    /**
-     * 
-     */
-    public RouteTable getRouteTable();
-    
-    /**
-     * 
-     */
-    public Database getDatabase();
-    
-    /**
-     * 
-     */
-    public BigInteger size();
-    
-    /**
-     * 
-     */
-    public boolean isFirewalled();
-    
-    /**
-     * 
-     */
-    public boolean isReady();
-
-    /**
-     * 
-     */
-    public boolean isBooting();
     
     /**
      * 

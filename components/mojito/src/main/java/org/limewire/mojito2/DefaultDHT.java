@@ -16,8 +16,6 @@ import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.io.BootstrapConfig;
-import org.limewire.mojito2.io.BootstrapProcess;
 import org.limewire.mojito2.io.DefaultMessageDispatcher;
 import org.limewire.mojito2.io.DefaultStoreForward;
 import org.limewire.mojito2.io.MessageDispatcher;
@@ -41,32 +39,11 @@ import org.limewire.mojito2.storage.DatabaseCleaner;
 import org.limewire.mojito2.util.DHTSizeEstimator;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
-import org.limewire.util.Objects;
 
 /**
  * 
  */
 public class DefaultDHT extends AbstractDHT implements Context {
-    
-    /**
-     * 
-     */
-    public static enum State {
-        /**
-         * The initial state
-         */
-        INIT,
-        
-        /**
-         * The node is booting
-         */
-        BOOTING,
-        
-        /**
-         * The node is ready
-         */
-        READY;
-    }
     
     /**
      * 
@@ -80,12 +57,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
             }
         }
     };
-    
-    /**
-     * 
-     */
-    private final AtomicReference<State> state 
-        = new AtomicReference<State>(State.INIT);
     
     /**
      * 
@@ -104,12 +75,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
      * 
      */
     private final DatabaseCleaner databaseCleaner;
-    
-    /**
-     * 
-     */
-    private volatile DHTFuture<BootstrapEntity> bootstrap = null;
-    
     
     /**
      * 
@@ -140,11 +105,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
      * 
      */
     private volatile HostFilter hostFilter = null;
-    
-    /**
-     * 
-     */
-    private boolean open = true;
     
     /**
      * 
@@ -180,10 +140,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
     @Override
     public void close() {
         super.close();
-        
-        synchronized (this) {
-            open = false;
-        }
         
         estimator.clear();
         
@@ -280,7 +236,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     /**
-     * 
+     * Returns the {@link BucketRefresher}
      */
     public BucketRefresher getBucketRefresher() {
         return bucketRefresher;
@@ -302,48 +258,10 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    public synchronized boolean isBooting() {
-        return open && state.get() == State.BOOTING;
-    }
-    
-    @Override
-    public synchronized boolean isReady() {
-        return open && state.get() == State.READY;
-    }
-    
-    /**
-     * Sets the bootstrapping {@link State} of this node
-     */
-    public synchronized void setState(State s) {
-        state.set(Objects.nonNull(s, "state"));
-    }
-    
-    @Override
-    protected synchronized DHTFuture<BootstrapEntity> bootstrap(
-            BootstrapConfig config, long timeout, TimeUnit unit) {
-        
-        // There can be only one bootstrap process active!
-        if (bootstrap != null) {
-            bootstrap.cancel(true);
-        }
-        
-        AsyncProcess<BootstrapEntity> process 
-            = new BootstrapProcess(this, config, timeout, unit);
-        bootstrap = submit(process, timeout, unit);
-        
-        bootstrap.addFutureListener(
-                new EventListener<FutureEvent<BootstrapEntity>>() {
-            @Override
-            public void handleEvent(FutureEvent<BootstrapEntity> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    state.set(State.READY);
-                    bucketRefresher.start();
-                }
-            }
-        });
-        
-        state.compareAndSet(State.INIT, State.BOOTING);
-        return bootstrap;
+    protected void bootstrapped(BootstrapEntity entity) {
+        // We start the BucketRefresher as soon as our
+        // not is done with bootstrapping.
+        bucketRefresher.start();
     }
     
     @Override

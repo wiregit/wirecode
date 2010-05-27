@@ -80,17 +80,17 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
     public void setHostFilter(HostFilter hostFilter);
     
     /**
-     * 
+     * Binds the {@link DHT} to the given {@link Transport}.
      */
     public void bind(Transport transport) throws IOException;
     
     /**
-     * 
+     * Unbinds the {@link DHT} from the {@link Transport} and returns it.
      */
     public Transport unbind();
     
     /**
-     * 
+     * Returns {@code true} if the {@link DHT} is bound to a {@link Transport}
      */
     public boolean isBound();
     

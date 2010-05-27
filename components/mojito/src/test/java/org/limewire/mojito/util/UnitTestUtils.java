@@ -2,7 +2,7 @@ package org.limewire.mojito.util;
 
 import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.DefaultDHT.State;
+import org.limewire.mojito2.BootstrapManager.State;
 
 public class UnitTestUtils {
     
@@ -18,6 +18,6 @@ public class UnitTestUtils {
     }
     
     public static void setState(MojitoDHT dht, State state) {
-        ((DefaultDHT)dht).setState(state);
+        ((DefaultDHT)dht).getBootstrapManager().setState(state);
     }
 }

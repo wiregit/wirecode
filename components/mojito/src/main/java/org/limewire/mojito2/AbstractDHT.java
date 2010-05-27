@@ -5,6 +5,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
@@ -25,11 +28,36 @@ public abstract class AbstractDHT implements DHT {
     /**
      * The {@link FutureManager} that manages all {@link DHTFuture}s.
      */
-    private final FutureManager futureManager = new FutureManager();
+    private final FutureManager futureManager 
+        = new FutureManager();
+    
+    /**
+     * The {@link BootstrapManager}.
+     */
+    private final BootstrapManager bootstrapManager 
+        = new BootstrapManager(this);
     
     @Override
     public void close() {
+        bootstrapManager.close();
         futureManager.close();
+    }
+    
+    @Override
+    public boolean isBooting() {
+        return bootstrapManager.isBooting();
+    }
+    
+    @Override
+    public boolean isReady() {
+        return bootstrapManager.isReady();
+    }
+    
+    /**
+     * Returns the {@link BootstrapManager}
+     */
+    public BootstrapManager getBootstrapManager() {
+        return bootstrapManager;
     }
     
     @Override
@@ -49,8 +77,29 @@ public abstract class AbstractDHT implements DHT {
     /**
      * 
      */
-    protected abstract DHTFuture<BootstrapEntity> bootstrap(
-            BootstrapConfig config, long timeout, TimeUnit unit);
+    protected DHTFuture<BootstrapEntity> bootstrap(
+            BootstrapConfig config, long timeout, TimeUnit unit) {
+        DHTFuture<BootstrapEntity> future 
+            = bootstrapManager.bootstrap(config, timeout, unit);
+        
+        future.addFutureListener(
+                new EventListener<FutureEvent<BootstrapEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<BootstrapEntity> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    bootstrapped(event.getResult());
+                }
+            }
+        });
+        
+        return future;
+    }
+    
+    /**
+     * 
+     */
+    protected void bootstrapped(BootstrapEntity entity) {
+    }
     
     @Override
     public DHTFuture<PingEntity> ping(InetAddress address, int port, 
