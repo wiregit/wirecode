@@ -429,7 +429,7 @@ public class SettingTest extends BaseTestCase {
                 "TIME_SETTING", 10L, TimeUnit.SECONDS);
         
         // TimeSetting is internally a LongSetting that
-        // hold the time in milliseconds.
+        // holds the time in milliseconds.
         assertEquals(10L*1000L, setting1.getValue());
         assertEquals(10L, setting1.getTime(TimeUnit.SECONDS));
         assertEquals(10L*1000L, setting1.getTimeInMillis());
