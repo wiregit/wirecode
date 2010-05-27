@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.URNFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.helpers.UrnHelper;

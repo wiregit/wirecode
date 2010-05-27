@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import org.limewire.mojito2.util.HostFilter;
 

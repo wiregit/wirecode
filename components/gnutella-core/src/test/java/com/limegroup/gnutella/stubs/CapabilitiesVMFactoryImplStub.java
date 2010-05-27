@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactoryImpl;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;

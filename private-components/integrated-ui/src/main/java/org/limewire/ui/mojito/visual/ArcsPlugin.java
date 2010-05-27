@@ -9,8 +9,8 @@ import org.limewire.mojito2.MojitoDHT;
 import org.limewire.ui.swing.plugin.SwingUiPlugin;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.dht2.Controller;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht.Controller;
+import com.limegroup.gnutella.dht.DHTManager;
 
 class ArcsPlugin implements SwingUiPlugin {
 

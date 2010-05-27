@@ -9,7 +9,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.ApplicationSettings;
 
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
  * Unit tests for ExtendedEndpoint.

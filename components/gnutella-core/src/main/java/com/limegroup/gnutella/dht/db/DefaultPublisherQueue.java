@@ -19,7 +19,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.util.MaxStack;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht.DHTManager;
 
 /**
  * 

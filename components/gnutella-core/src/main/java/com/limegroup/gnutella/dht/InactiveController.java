@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 
@@ -15,7 +15,7 @@ import org.limewire.mojito2.storage.DHTValue;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 @Singleton

@@ -19,8 +19,8 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.dht2.DHTManagerImpl;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton

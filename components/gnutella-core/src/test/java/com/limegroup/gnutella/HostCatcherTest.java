@@ -33,7 +33,7 @@ import org.limewire.util.StringUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;

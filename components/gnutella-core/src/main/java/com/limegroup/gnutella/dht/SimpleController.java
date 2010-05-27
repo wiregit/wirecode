@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import org.limewire.mojito2.routing.RouteTable.RouteTableListener;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
  * 

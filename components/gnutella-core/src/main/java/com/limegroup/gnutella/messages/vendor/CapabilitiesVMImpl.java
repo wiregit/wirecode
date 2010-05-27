@@ -12,7 +12,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.Message;

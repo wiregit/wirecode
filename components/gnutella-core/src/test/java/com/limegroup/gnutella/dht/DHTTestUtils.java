@@ -17,10 +17,7 @@ import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht2.DHTEvent;
-import com.limegroup.gnutella.dht2.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTEvent.Type;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 
 public class DHTTestUtils {
 

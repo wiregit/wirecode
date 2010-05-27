@@ -20,9 +20,9 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.DHTTestUtils;
-import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.util.MockUtils;
 
 public abstract class DHTFinderTestCase extends DHTTestCase {

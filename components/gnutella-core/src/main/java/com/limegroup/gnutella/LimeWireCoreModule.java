@@ -79,7 +79,7 @@ import com.limegroup.gnutella.bootstrap.LimeWireBootstrapModule;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
 import com.limegroup.gnutella.daap.DaapManager;
-import com.limegroup.gnutella.dht2.LimeWireDHTModule;
+import com.limegroup.gnutella.dht.LimeWireDHTModule;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTaskService;

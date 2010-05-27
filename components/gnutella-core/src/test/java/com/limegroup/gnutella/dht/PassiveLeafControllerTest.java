@@ -41,9 +41,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.PassiveLeafController;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 public class PassiveLeafControllerTest extends DHTTestCase {
 

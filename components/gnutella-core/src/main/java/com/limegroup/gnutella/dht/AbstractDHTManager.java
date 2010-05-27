@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.mojito2.util.EventUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.dht2.DHTEvent.Type;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 
 /**
  * 

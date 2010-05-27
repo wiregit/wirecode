@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -18,7 +18,6 @@ import org.limewire.mojito2.util.ArrayUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.dht2.BootstrapWorker;
 
 public class BootstrapWorkerTest extends DHTTestCase {
     

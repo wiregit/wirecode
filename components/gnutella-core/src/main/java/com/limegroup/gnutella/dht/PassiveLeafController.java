@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -30,7 +30,7 @@ import org.limewire.mojito2.util.IoUtils;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 public class PassiveLeafController extends AbstractController {

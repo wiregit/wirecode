@@ -15,11 +15,8 @@ import org.limewire.mojito2.MojitoFactory;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.dht2.DHTEvent;
-import com.limegroup.gnutella.dht2.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTEvent.Type;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 public class DHTManagerTest extends DHTTestCase {
     

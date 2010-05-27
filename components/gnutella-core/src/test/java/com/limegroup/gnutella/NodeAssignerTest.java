@@ -24,8 +24,8 @@ import org.limewire.util.PrivilegedAccessor;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.dht2.DHTManager;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 public class NodeAssignerTest extends LimeTestCase {

@@ -14,7 +14,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
  * An endpoint with additional history information used to prioritize

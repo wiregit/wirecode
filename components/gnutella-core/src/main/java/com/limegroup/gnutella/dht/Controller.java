@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 /**

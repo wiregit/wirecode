@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.Closeable;
 import java.net.InetSocketAddress;
@@ -32,7 +32,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UniqueHostPinger;
-import com.limegroup.gnutella.dht2.NodeFetcher.NodeFetcherListener;
+import com.limegroup.gnutella.dht.NodeFetcher.NodeFetcherListener;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**

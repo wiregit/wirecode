@@ -14,8 +14,7 @@ import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.storage.DHTValue;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht2.Controller;
-import com.limegroup.gnutella.dht2.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 public class ControllerStub implements Controller {

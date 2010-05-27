@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht2;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -41,11 +41,11 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
 import com.limegroup.gnutella.dht.db.DefaultPublisherQueue;
 import com.limegroup.gnutella.dht.db.PublisherQueue;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
-import com.limegroup.gnutella.dht2.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.library.GnutellaFiles;

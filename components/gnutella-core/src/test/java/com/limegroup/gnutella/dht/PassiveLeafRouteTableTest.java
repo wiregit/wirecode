@@ -17,7 +17,6 @@ import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
 import org.limewire.mojito2.settings.KademliaSettings;
 
-import com.limegroup.gnutella.dht2.PassiveLeafRouteTable;
 
 @SuppressWarnings("null")
 public class PassiveLeafRouteTableTest extends DHTTestCase {

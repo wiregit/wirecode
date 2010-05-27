@@ -13,7 +13,6 @@ import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.PingEntity;
 
-import com.limegroup.gnutella.dht2.ContactSink;
 
 public class ContactSinkTest extends DHTTestCase {
 

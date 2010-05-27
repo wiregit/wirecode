@@ -24,11 +24,11 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LegacyProActivationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht2.DHTEvent;
-import com.limegroup.gnutella.dht2.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManager;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
 

@@ -11,10 +11,10 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.mojito2.MojitoDHT;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.dht2.Controller;
-import com.limegroup.gnutella.dht2.DHTEvent;
-import com.limegroup.gnutella.dht2.DHTEventListener;
-import com.limegroup.gnutella.dht2.DHTManager;
+import com.limegroup.gnutella.dht.Controller;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
 
 /**
  * Live implementation of MojitoManager.
