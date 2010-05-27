@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito2.concurrent.DefaultThreadFactory;
 
 /**
- * 
+ * An utility class to create {@link ScheduledThreadPoolExecutor}s and
+ * schedule {@link Runnable}s on an internal {@link ScheduledExecutorService}.
  */
 public class SchedulingUtils {
 
@@ -22,14 +23,14 @@ public class SchedulingUtils {
     private SchedulingUtils() {}
     
     /**
-     * 
+     * Creates and returns a {@link ScheduledThreadPoolExecutor}
      */
     public static ScheduledThreadPoolExecutor newSingleThreadScheduledExecutor(String name) {
         return newSingleThreadScheduledExecutor(new DefaultThreadFactory(name));
     }
     
     /**
-     * 
+     * Creates and returns a {@link ScheduledThreadPoolExecutor}
      */
     public static ScheduledThreadPoolExecutor newSingleThreadScheduledExecutor(
             ThreadFactory factory) {
@@ -37,7 +38,7 @@ public class SchedulingUtils {
     }
     
     /**
-     * 
+     * Creates and returns a {@link ScheduledThreadPoolExecutor}
      */
     public static ScheduledThreadPoolExecutor newScheduledThreadPool(
             int corePoolSize, ThreadFactory factory) {
@@ -67,6 +68,9 @@ public class SchedulingUtils {
         return executor;
     }
     
+    /**
+     * Schedules the given {@link Runnable}
+     */
     public static ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, 
             long initialDelay, long delay, TimeUnit unit) {
         return SCHEDULED_EXECUTOR.scheduleWithFixedDelay(

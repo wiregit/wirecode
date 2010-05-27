@@ -16,21 +16,21 @@ import org.limewire.util.Objects;
 public class BootstrapManager implements Closeable {
     
     /**
-     * 
+     * The {@link State} of the {@link BootstrapManager}.
      */
     public static enum State {
         /**
-         * The initial state
+         * The initial state (i.e. not ready).
          */
         INIT,
         
         /**
-         * The node is booting
+         * The {@link DHT} is booting
          */
         BOOTING,
         
         /**
-         * The node is ready
+         * The {@link DHT} is ready
          */
         READY;
     }
@@ -47,25 +47,42 @@ public class BootstrapManager implements Closeable {
         this.dht = dht;
     }
     
+    /**
+     * Changes the internal {@link State} to the given value.
+     */
     public synchronized void setState(State state) {
         this.state = Objects.nonNull(state, "state");
     }
     
+    /**
+     * Returns {@code true} if the {@link DHT} is booting
+     */
     public synchronized boolean isBooting() {
         if (!open) {
             return false;
+        }
+        
+        if (state == State.BOOTING) {
+            return true;
         }
         
         if (future != null && !future.isDone()) {
             return true;
         }
         
-        return state == State.BOOTING;
+        return false;
     }
     
+    /**
+     * Returns {@code true} if the {@link DHT} is ready
+     */
     public synchronized boolean isReady() {
         if (!open) {
             return false;
+        }
+        
+        if (state == State.READY) {
+            return true;
         }
         
         if (future != null && future.isDone()
@@ -73,7 +90,7 @@ public class BootstrapManager implements Closeable {
             return true;
         }
         
-        return state == State.READY;
+        return false;
     }
     
     @Override
@@ -85,6 +102,9 @@ public class BootstrapManager implements Closeable {
         }
     }
     
+    /**
+     * Starts the bootstrap process.
+     */
     public synchronized DHTFuture<BootstrapEntity> bootstrap(
             BootstrapConfig config, long timeout, TimeUnit unit) {
         

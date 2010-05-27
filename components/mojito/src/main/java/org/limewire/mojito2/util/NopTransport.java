@@ -5,6 +5,9 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito2.io.Transport;
 
+/**
+ * An implementation of {@link Transport} that does nothing.
+ */
 public class NopTransport implements Transport {
 
     public static final Transport NOP = new NopTransport();

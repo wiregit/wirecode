@@ -54,7 +54,8 @@ public final class ContactUtils {
     private static final Log LOG = LogFactory.getLog(ContactUtils.class);
     
     @Inject
-    private static volatile NetworkInstanceUtils networkInstanceUtils = new SimpleNetworkInstanceUtils();
+    private static volatile NetworkInstanceUtils networkInstanceUtils 
+        = new SimpleNetworkInstanceUtils();
     
     public static void setNetworkInstanceUtils(NetworkInstanceUtils networkInstanceUtils) {
         ContactUtils.networkInstanceUtils = networkInstanceUtils;
@@ -77,7 +78,8 @@ public final class ContactUtils {
      * A Comparator that orders a Collection of Contacts from
      * most recently seen to least recently seen.
      */
-    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR = new Comparator<Contact>() {
+    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR 
+            = new Comparator<Contact>() {
         public int compare(Contact a, Contact b) {
             // Note: There's a minus sign to change the order from
             // 'small to big' to 'big to small' values
@@ -92,7 +94,8 @@ public final class ContactUtils {
      * Contacts is ordered by least recently failed to most recently
      * failed.
      */
-    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR = new Comparator<Contact>() {
+    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR 
+            = new Comparator<Contact>() {
         public int compare(Contact a, Contact b) {
             // If neither a nor b has failed then use the standard
             // most recently seen (MRS) Comparator
