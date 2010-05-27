@@ -326,7 +326,7 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         DefaultMessageFactory messageFactory 
             = new DefaultMessageFactory(calculator.get());
         
-        ActiveController controller = new ActiveController(this, 
+        ActiveController controller = new ActiveController( 
                 networkManager, transport, connectionManager, hostCatcher, 
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
                 connectionServices, hostFilter, udpPinger);
@@ -355,8 +355,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         DefaultMessageFactory messageFactory 
             = new DefaultMessageFactory(calculator.get());
         
-        PassiveController controller = new PassiveController(this, 
-                networkManager, transport, connectionManager, hostCatcher, 
+        PassiveController controller = new PassiveController(networkManager, 
+                transport, connectionManager, hostCatcher, 
                 pingRequestFactory, uniqueHostPinger, messageFactory, 
                 connectionServices, hostFilter, udpPinger);
         

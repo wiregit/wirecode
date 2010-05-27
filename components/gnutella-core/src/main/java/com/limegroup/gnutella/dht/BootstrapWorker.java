@@ -119,8 +119,6 @@ public class BootstrapWorker implements Closeable {
         }
         
         Contact src = dht.getLocalNode();
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
-        
         pingFuture = dht.ping(src, contacts);
         pingFuture.addFutureListener(
                 new EventListener<FutureEvent<PingEntity>>() {

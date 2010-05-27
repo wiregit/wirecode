@@ -154,7 +154,7 @@ public class RemoteContactTest extends MojitoTestCase {
                 0, Contact.DEFAULT_FLAG);
         
         assertEquals(-1L, node1.getRoundTripTime());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis(), 
                 node1.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         node1.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
@@ -170,12 +170,12 @@ public class RemoteContactTest extends MojitoTestCase {
                 new InetSocketAddress("localhost", 2048));
         
         assertEquals(-1L, node2.getRoundTripTime());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis(), 
                 node2.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
         assertFalse(node2.isAlive());
-        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getValue(), 
+        assertEquals(NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis(), 
                 node2.getAdaptativeTimeout(-1, TimeUnit.MILLISECONDS));
         
         ((RemoteContact)node2).alive();

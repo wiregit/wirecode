@@ -173,7 +173,7 @@ public class CollisionTest extends MojitoTestCase {
             // Bootstrap the replacement Contact
             replacement.bootstrap("localhost", PORT).get();
             
-            Thread.sleep(5L * NetworkSettings.DEFAULT_TIMEOUT.getValue());
+            Thread.sleep(5L * NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis());
             
             nodes = bootstrap.getRouteTable().getContacts();
             map = new HashMap<KUID, SocketAddress>();

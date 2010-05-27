@@ -4,19 +4,17 @@ import java.io.Closeable;
 import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.AddressPinger;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.SchedulingUtils;
 import org.limewire.util.Objects;
 
 /**
@@ -25,10 +23,6 @@ import org.limewire.util.Objects;
  * to ping them.
  */
 public class ContactSink implements Closeable {
-
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("ContactPingerThread"));
     
     private final Set<SocketAddress> addresses 
         = new FixedSizeLIFOSet<SocketAddress>(30, EjectionPolicy.FIFO);
@@ -88,7 +82,7 @@ public class ContactSink implements Closeable {
                     }
                 };
                 
-                future = EXECUTOR.scheduleWithFixedDelay(
+                future = SchedulingUtils.scheduleWithFixedDelay(
                         task, frequency, frequency, unit);
             }
             
@@ -116,7 +110,7 @@ public class ContactSink implements Closeable {
             pingFuture.cancel(true);
         }
         
-        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+        long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         pingFuture = pinger.ping(address, timeout, TimeUnit.MILLISECONDS);
     }
     

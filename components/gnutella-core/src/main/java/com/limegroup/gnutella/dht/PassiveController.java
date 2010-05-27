@@ -65,8 +65,6 @@ public class PassiveController extends SimpleController {
     public static final File PASSIVE_FILE 
         = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
     
-    private final DHTManager manager;
-    
     private final PassiveRouteTable routeTable 
         = new PassiveRouteTable();
     
@@ -79,8 +77,7 @@ public class PassiveController extends SimpleController {
     private volatile Contact[] contacts = null;
     
     @Inject
-    public PassiveController(DHTManager manager,
-            NetworkManager networkManager,
+    public PassiveController(NetworkManager networkManager,
             Transport transport, 
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
@@ -94,8 +91,6 @@ public class PassiveController extends SimpleController {
                 transport, 
                 networkManager, 
                 connectionServices);
-        
-        this.manager = manager;
         
         Database database = new DatabaseImpl();
         

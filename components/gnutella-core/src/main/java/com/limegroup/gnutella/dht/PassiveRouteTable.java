@@ -57,7 +57,7 @@ public class PassiveRouteTable implements RouteTable {
         
         DHTFuture<PingEntity> future = null;
         if (pinger != null) {
-            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getValue();
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
             future = pinger.ping(address, timeout, TimeUnit.MILLISECONDS);
         }
         

@@ -9,7 +9,7 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 
 /**
- * 
+ * An abstract implementation of {@link DHTManager}
  */
 abstract class AbstractDHTManager implements DHTManager {
 
@@ -29,21 +29,27 @@ abstract class AbstractDHTManager implements DHTManager {
         listeners.remove(listener);
     }
     
-    protected synchronized void fireStarting() {
+    /**
+     * Fires a start event
+     */
+    protected void fireStarting() {
         dispatchEvent(new DHTEvent(Type.STARTING, this));
     }
     
-    protected synchronized void fireStopped() {
+    /**
+     * Fires a stopped event
+     */
+    protected void fireStopped() {
         dispatchEvent(new DHTEvent(Type.STOPPED, this));
     }
     
-    protected synchronized void fireConnected() {
+    /**
+     * Fires a connected event
+     */
+    protected void fireConnected() {
         dispatchEvent(new DHTEvent(Type.CONNECTED, this));
     }
     
-    /**
-     * 
-     */
     @Override
     public void dispatchEvent(final DHTEvent evt) {
         if (!listeners.isEmpty()) {

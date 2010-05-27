@@ -68,8 +68,6 @@ public class ActiveController extends SimpleController {
     
     private final AtomicBoolean collision = new AtomicBoolean(false);
     
-    private final DHTManager manager;
-    
     private final ContactPusher contactPusher;
     
     private final ContactSink contactSink;
@@ -81,8 +79,7 @@ public class ActiveController extends SimpleController {
     private Contact[] contacts = null;
     
     @Inject
-    public ActiveController(DHTManager manager,
-            NetworkManager networkManager,
+    public ActiveController(NetworkManager networkManager,
             Transport transport, 
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
@@ -96,8 +93,6 @@ public class ActiveController extends SimpleController {
                 transport, 
                 networkManager, 
                 connectionServices);
-        
-        this.manager = manager;
         
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();

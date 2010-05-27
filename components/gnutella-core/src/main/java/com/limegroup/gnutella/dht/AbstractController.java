@@ -19,7 +19,10 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-public abstract class AbstractController implements Controller {
+/**
+ * An abstract implementation of {@link Controller}.
+ */
+abstract class AbstractController implements Controller {
     
     private static final Log LOG 
         = LogFactory.getLog(AbstractController.class);
