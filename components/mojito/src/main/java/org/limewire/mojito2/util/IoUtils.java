@@ -22,7 +22,7 @@ public class IoUtils {
         boolean success = true;
         if (closeables != null) {
             for (Closeable closeable : closeables) {
-                success |= close(closeable);
+                success &= close(closeable);
             }
         }
         return success;
@@ -32,7 +32,7 @@ public class IoUtils {
         boolean success = true;
         if (closeables != null) {
             for (Closeable closeable : closeables) {
-                success |= close(closeable);
+                success &= close(closeable);
             }
         }
         return success;
