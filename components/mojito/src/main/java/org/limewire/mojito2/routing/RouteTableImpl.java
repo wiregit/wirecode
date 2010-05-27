@@ -50,8 +50,8 @@ import org.limewire.mojito2.settings.NetworkSettings;
 import org.limewire.mojito2.settings.RouteTableSettings;
 import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.EventUtils;
-import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ExceptionUtils;
 
 
 /**

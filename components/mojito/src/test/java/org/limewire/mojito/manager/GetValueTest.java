@@ -19,8 +19,8 @@ import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.IoUtils;
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 
 public class GetValueTest extends MojitoTestCase {

@@ -13,8 +13,8 @@ import org.limewire.mojito2.MojitoFactory;
 import org.limewire.mojito2.entity.PingEntity;
 import org.limewire.mojito2.settings.ContextSettings;
 import org.limewire.mojito2.settings.NetworkSettings;
-import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.IoUtils;
+import org.limewire.util.ExceptionUtils;
 
 public class PingRequestHandlerTest extends MojitoTestCase {
     

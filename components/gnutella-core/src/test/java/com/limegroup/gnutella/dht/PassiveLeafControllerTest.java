@@ -32,9 +32,9 @@ import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
-import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;

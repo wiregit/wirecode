@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.dht2;
 
-import static org.limewire.mojito2.util.ExceptionUtils.getCause;
-
 import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -10,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -265,7 +262,7 @@ public class BootstrapWorker implements Closeable {
         }
         
         final CollisionException cause 
-            = getCause(t, CollisionException.class);
+            = ExceptionUtils.getCause(t, CollisionException.class);
         
         if (cause != null) {
             fireCollision(cause);

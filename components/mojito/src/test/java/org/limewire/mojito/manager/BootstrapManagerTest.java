@@ -29,9 +29,9 @@ import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.Vendor;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.settings.NetworkSettings;
-import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.mojito2.util.IoUtils;
+import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManagerTest extends MojitoTestCase {
     
