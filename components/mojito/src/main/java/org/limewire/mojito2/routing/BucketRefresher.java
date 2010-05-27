@@ -225,7 +225,7 @@ public class BucketRefresher implements Closeable {
                 RouteTable routeTable = dht.getRouteTable();
                 Collection<Contact> nodes = routeTable.select(
                         localhost.getNodeID(),
-                        KademliaSettings.REPLICATION_PARAMETER.getValue(), 
+                        KademliaSettings.K, 
                         SelectMode.ALL);
                 
                 

@@ -28,11 +28,6 @@ import org.limewire.mojito2.util.HostFilter;
  * 
  */
 public interface DHT extends ContactPinger, AddressPinger, Closeable {
-
-    /**
-     * 
-     */
-    public static final int K = 20;
     
     /**
      * 

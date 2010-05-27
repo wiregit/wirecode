@@ -2,7 +2,6 @@ package org.limewire.mojito2.io;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
@@ -22,13 +21,13 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
     public NodeResponseHandler(Context context, 
             KUID lookupId, 
             long timeout, TimeUnit unit) {
-        super(context, lookupId, timeout, unit);
+        super(Type.FIND_NODE, context, lookupId, timeout, unit);
     }
     
     public NodeResponseHandler(Context context, 
             KUID lookupId, Contact[] contacts, 
             long timeout, TimeUnit unit) {
-        super(context, lookupId, contacts, timeout, unit);
+        super(context, Type.FIND_NODE, lookupId, contacts, timeout, unit);
     }
     
     @Override

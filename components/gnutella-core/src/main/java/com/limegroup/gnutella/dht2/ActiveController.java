@@ -19,7 +19,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -103,7 +103,7 @@ public class ActiveController extends SimpleController {
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();
         
-        Context context = new Context(NAME, 
+        DefaultDHT context = new DefaultDHT(NAME, 
                 messageFactory, routeTable, database);
         
         contacts = init(context);
@@ -146,7 +146,7 @@ public class ActiveController extends SimpleController {
         return bootstrapWorker;
     }
     
-    private Contact[] init(Context context) throws IOException {
+    private Contact[] init(DefaultDHT context) throws IOException {
         
         LocalContact contact = context.getLocalNode();
         initLocalhost(context.getLocalNode());

@@ -15,10 +15,9 @@ import org.limewire.util.Objects;
  * 
  */
 public class BootstrapConfig {
-
-    private static final int ALPHA = 4;
     
-    private volatile int alpha = ALPHA;
+    private volatile int alpha 
+        = BootstrapSettings.BOOTSTRAP_WORKERS.getValue();
     
     private volatile long pingTimeout 
         = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();

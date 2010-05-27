@@ -46,7 +46,8 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
     public ValueResponseHandler(Context context, 
             EntityKey lookupKey, 
             long timeout, TimeUnit unit) {
-        super(context, lookupKey.getPrimaryKey(), timeout, unit);
+        super(Type.FIND_VALUE, context, 
+                lookupKey.getPrimaryKey(), timeout, unit);
         this.lookupKey = lookupKey;
     }
 

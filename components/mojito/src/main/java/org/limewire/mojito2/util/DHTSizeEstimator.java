@@ -93,7 +93,7 @@ public class DHTSizeEstimator {
             
             KUID localNodeId = routeTable.getLocalNode().getNodeID();
             Collection<Contact> nodes = routeTable.select(localNodeId, 
-                    KademliaSettings.REPLICATION_PARAMETER.getValue(), mode);
+                    KademliaSettings.K, mode);
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();

@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito2.Context;
-import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.StatusCode;
 import org.limewire.mojito2.entity.DefaultStoreEntity;
@@ -25,6 +24,8 @@ import org.limewire.mojito2.message.StoreRequest;
 import org.limewire.mojito2.message.StoreResponse;
 import org.limewire.mojito2.message.StoreStatusCode;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.KademliaSettings;
+import org.limewire.mojito2.settings.StoreSettings;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.Database;
 import org.limewire.mojito2.util.ContactUtils;
@@ -36,14 +37,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     private static final Log LOG 
         = LogFactory.getLog(StoreResponseHandler.class);
     
-    private static final int PARALLELISM = 4;
-    
     private final Entry<Contact, SecurityToken>[] contacts;
     
     private final DHTValueEntity entity;
     
     private final MaxStack processCounter 
-        = new MaxStack(PARALLELISM);
+        = new MaxStack(StoreSettings.PARALLEL_STORES.getValue());
     
     private final List<StoreProcess> processes 
         = new ArrayList<StoreProcess>();
@@ -115,7 +114,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
                     break;
                 }
                 
-                if ((DHT.K - complete.get() - 1) < processCounter.poll()) {
+                if ((KademliaSettings.K - complete.get() - 1) < processCounter.poll()) {
                     break;
                 }
                 

@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.MojitoDHT;
 import org.limewire.mojito2.entity.CollisionException;
 import org.limewire.mojito2.io.Transport;
@@ -95,7 +95,7 @@ public abstract class AbstractController implements Controller {
             return false;
         }
         
-        Context context = dht.getContext();
+        DefaultDHT context = dht.getContext();
         return context.isLocalNode(contact);
     }
     

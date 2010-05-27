@@ -23,7 +23,7 @@ import org.limewire.mojito.visual.helper.RouteTableGraphMousePlugin;
 import org.limewire.mojito.visual.helper.RouteTableToolTipFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexPaintFunction;
 import org.limewire.mojito.visual.helper.RouteTableVertexShapeFunction;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.routing.Bucket;
 import org.limewire.mojito2.routing.RouteTable;
 
@@ -69,7 +69,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
         return viz;
     }
     
-    public static RouteTableVisualizer show(final Context context) {
+    public static RouteTableVisualizer show(final DefaultDHT context) {
         RouteTableVisualizer viz = new RouteTableVisualizer(context);
         createAndShowFrame(viz, context.getName());
         return viz;
@@ -97,7 +97,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
         });
     }
     
-    public RouteTableVisualizer(Context dht) {
+    public RouteTableVisualizer(DefaultDHT dht) {
         this(dht.getRouteTable());
     }
     

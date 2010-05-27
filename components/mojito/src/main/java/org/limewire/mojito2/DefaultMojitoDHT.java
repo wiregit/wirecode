@@ -18,12 +18,15 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
+import org.limewire.mojito2.concurrent.NopAsyncProcess;
 import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.MessageDispatcher;
+import org.limewire.mojito2.io.SecurityTokenResponseHandler;
 import org.limewire.mojito2.io.Transport;
 import org.limewire.mojito2.message.MessageFactory;
 import org.limewire.mojito2.routing.Contact;
@@ -42,6 +45,9 @@ import org.limewire.mojito2.util.ContactUtils;
 import org.limewire.mojito2.util.HostFilter;
 import org.limewire.util.ExceptionUtils;
 
+/**
+ * 
+ */
 public class DefaultMojitoDHT implements MojitoDHT {
 
     private final DHT dht;
@@ -51,8 +57,8 @@ public class DefaultMojitoDHT implements MojitoDHT {
     }
     
     @Override
-    public Context getContext() {
-        return (Context)dht;
+    public DefaultDHT getContext() {
+        return (DefaultDHT)dht;
     }
     
     @Override
@@ -352,7 +358,7 @@ public class DefaultMojitoDHT implements MojitoDHT {
                 = new ArrayList<DHTFuture<ValueEntity>>();
             
             long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
-            AsyncProcess<ValueEntity[]> process = NopProcess.process();
+            AsyncProcess<ValueEntity[]> process = NopAsyncProcess.process();
             final DHTFuture<ValueEntity[]> lookup = submit(process, 
                     timeout, TimeUnit.MILLISECONDS);
             
@@ -445,18 +451,16 @@ public class DefaultMojitoDHT implements MojitoDHT {
             return lookup;
         }
     }
-    
-    private static class NopProcess implements AsyncProcess<Object> {
 
-        private static final NopProcess NOP = new NopProcess();
+    @Override
+    public DHTFuture<SecurityTokenEntity> getSecurityToken(Contact dst, 
+            long timeout, TimeUnit unit) {
         
-        @SuppressWarnings("unchecked")
-        public static <V> AsyncProcess<V> process() {
-            return (AsyncProcess<V>)NOP;
-        }
+        KUID lookupId = KUID.createRandomID();
+        AsyncProcess<SecurityTokenEntity> process 
+            = new SecurityTokenResponseHandler((Context)dht, 
+                    dst, lookupId, timeout, unit);
         
-        @Override
-        public void start(DHTFuture<Object> future) {
-        }
+        return submit(process, timeout, unit);
     }
 }

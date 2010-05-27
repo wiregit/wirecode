@@ -32,8 +32,7 @@ public class MojitoUtils {
             throw new IllegalArgumentException("factor=" + factor);
         }
         
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        int count = k * factor;
+        int count = KademliaSettings.K * factor;
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         

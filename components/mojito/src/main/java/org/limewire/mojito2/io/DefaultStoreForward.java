@@ -79,11 +79,11 @@ public class DefaultStoreForward implements StoreForward {
                 
                 // Store forward only if we're bootstrapped
                 if (provider != null && provider.isBootstrapped()) {
-                    int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
                     //of the k closest to the new joining node.
-                    Collection<Contact> nodes = routeTable.select(nodeId, 2*k, SelectMode.ALL);
+                    Collection<Contact> nodes = routeTable.select(
+                            nodeId, 2*KademliaSettings.K, SelectMode.ALL);
                     
                     // Are we one of the K nearest Nodes to the contact?
                     if (containsNodeID(nodes, getLocalNodeID())) {
@@ -176,10 +176,9 @@ public class DefaultStoreForward implements StoreForward {
         // TODO: maybe relax this a little bit: what if we're not the closest 
         // and the closest is stale?
         
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
         List<Contact> nodes = CollectionUtils.toList(
-                routeTable.select(valueId, k, SelectMode.ALL));
+                routeTable.select(valueId, 
+                        KademliaSettings.K, SelectMode.ALL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         
@@ -252,7 +251,7 @@ public class DefaultStoreForward implements StoreForward {
         //    
         // #4 The new Node is nearer to the given valueId then
             //    the furthest away Node (we).
-        } else if (nodes.size() >= k 
+        } else if (nodes.size() >= KademliaSettings.K 
                 && isLocalNode(furthest) 
                 && (existing == null || existing.isDead())) {
             

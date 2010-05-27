@@ -66,13 +66,7 @@ public class LookupSettings extends MojitoProps {
                 "Mojito.FindValueLookupTimeout", 
                 10L, TimeUnit.SECONDS,
                 5L, TimeUnit.MINUTES);
-
-    /**
-     * Whether or not a value lookup is exhaustive.
-     */
-    public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
-        = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
-
+    
     /**
      * The number of parallel FIND_VALUE lookups.
      */
@@ -104,4 +98,37 @@ public class LookupSettings extends MojitoProps {
     public static final FloatSetting CONTACTS_SCRUBBER_REQUIRED_RATIO
         = FACTORY.createRemoteFloatSetting("CONTACTS_SCRUBBER_REQUIRED_RATIO", 
                 0.0f, "Mojito.ContactsScrubberRequiredRatio", 0.0f, 1.0f);
+    
+    /**
+     * Whether or not a lookup is exhaustive.
+     */
+    public static final BooleanSetting EXHAUSTIVE
+        = FACTORY.createBooleanSetting("EXHAUSTIVE", false);
+    
+    /**
+     * 
+     */
+    public static final BooleanSetting RANDOMIZE
+        = FACTORY.createRemoteBooleanSetting("RANDOMIZE", 
+                false, "Mojito.Randomize");
+    
+    /**
+     * 
+     */
+    public static final TimeSetting BOOST_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("BOOST_FREQUENCY", 
+                0L, TimeUnit.MILLISECONDS, /* 0 = disabled! */
+                "Mojito.BoostLookupFrequency", 
+                0L, TimeUnit.MILLISECONDS,
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    public static final TimeSetting BOOST_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("BOOST_TIMEOUT", 
+                5L, TimeUnit.SECONDS, 
+                "Mojito.BoostLookupTimeout", 
+                0L, TimeUnit.MILLISECONDS,
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 }

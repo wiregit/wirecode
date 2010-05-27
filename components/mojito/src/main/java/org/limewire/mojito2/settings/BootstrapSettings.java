@@ -21,7 +21,6 @@ package org.limewire.mojito2.settings;
 
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.TimeSetting;
 
@@ -44,17 +43,9 @@ public class BootstrapSettings extends MojitoProps {
                 30L, TimeUnit.MINUTES);
     
     /**
-     * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
-     * is good enough to say it's bootstrapped.
-     */
-    public static final FloatSetting IS_BOOTSTRAPPED_RATIO
-        = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
-                0.5f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
-    
-    /**
      * Number of bootstrap workers to spawn.
      */
     public static final IntSetting BOOTSTRAP_WORKERS =
-        FACTORY.createRemoteIntSetting("BOOSTRAP_WORKERS", 1, 
-                "Mojito.BooststrapWorkers", 1, 5);
+        FACTORY.createRemoteIntSetting("BOOSTRAP_WORKERS", 4, 
+                "Mojito.BooststrapWorkers", 1, 20);
 }

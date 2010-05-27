@@ -29,7 +29,7 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -119,11 +119,11 @@ public class CommandHandler {
     }
     
     public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) {
-        boolean current = LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
-        LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
-                !LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        boolean current = LookupSettings.EXHAUSTIVE.getValue();
+        LookupSettings.EXHAUSTIVE.setValue(
+                !LookupSettings.EXHAUSTIVE.getValue());
         
-        out.println("Exhaustive: " + current + " -> " + LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        out.println("Exhaustive: " + current + " -> " + LookupSettings.EXHAUSTIVE.getValue());
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) {
@@ -298,25 +298,25 @@ public class CommandHandler {
         KUID nodeId = KUID.createWithHexString(args[1]);
         out.println("Selecting: " + nodeId);
         
-        RouteTable routeTable = ((Context)dht).getRouteTable();
+        RouteTable routeTable = ((DefaultDHT)dht).getRouteTable();
         out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, SelectMode.ALL)));
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        ((Context)dht).getLocalNode().nextInstanceID();
+        ((DefaultDHT)dht).getLocalNode().nextInstanceID();
     }
     
     @SuppressWarnings("unchecked")
     public static void rt_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("org.limewire.mojito.visual.RouteTableVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
+        Method show = clazz.getDeclaredMethod("show", DefaultDHT.class);
         show.invoke(null, dht);
     }
     
     @SuppressWarnings("unchecked")
     public static void arcs_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("org.limewire.mojito.visual.ArcsVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
+        Method show = clazz.getDeclaredMethod("show", DefaultDHT.class);
         show.invoke(null, dht);
     }
 }

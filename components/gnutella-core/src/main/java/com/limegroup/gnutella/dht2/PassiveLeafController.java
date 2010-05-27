@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -56,7 +56,7 @@ public class PassiveLeafController extends AbstractController {
         
         Database database = new DatabaseImpl();
         
-        Context context = new LeafContext(NAME, 
+        DefaultDHT context = new LeafContext(NAME, 
                 messageFactory, routeTable, database);
         init(context);
         
@@ -65,7 +65,7 @@ public class PassiveLeafController extends AbstractController {
         dht = new DefaultMojitoDHT(context);
     }
     
-    private void init(Context context) 
+    private void init(DefaultDHT context) 
             throws UnknownHostException {
         LocalContact localhost = context.getLocalNode();
         initLocalhost(localhost);
@@ -122,7 +122,7 @@ public class PassiveLeafController extends AbstractController {
         }
     }
     
-    private static class LeafContext extends Context {
+    private static class LeafContext extends DefaultDHT {
 
         public LeafContext(String name, MessageFactory messageFactory, 
                 RouteTable routeTable, Database database) {

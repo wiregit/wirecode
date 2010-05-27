@@ -378,7 +378,7 @@ class BucketNode implements Bucket {
     }
    
     public int getMaxActiveSize() {
-        return KademliaSettings.REPLICATION_PARAMETER.getValue();
+        return KademliaSettings.K;
     }
     
     public int getCacheSize() {

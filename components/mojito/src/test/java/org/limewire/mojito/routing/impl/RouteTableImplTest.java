@@ -51,7 +51,7 @@ public class RouteTableImplTest extends MojitoTestCase {
             // fill the local bucked with replication_parameter - 2 other nodes, local node is already in there
             // last one should trigger the split
             boolean wasActiveFull = false;
-            for (int i = 0; i < KademliaSettings.REPLICATION_PARAMETER.getValue() - 2; i++) {
+            for (int i = 0; i < KademliaSettings.K - 2; i++) {
                 // use different class c networks
                 String address = MessageFormat.format("129.168.{0}.1", i);
                 try {

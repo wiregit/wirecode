@@ -1,50 +1,23 @@
 package org.limewire.mojito.util;
 
-import java.lang.reflect.Field;
-
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.MojitoDHT;
-import org.limewire.mojito2.concurrent.DHTFuture;
-import org.limewire.mojito2.concurrent.DHTValueFuture;
-import org.limewire.mojito2.entity.BootstrapEntity;
-
+import org.limewire.mojito2.DefaultDHT.State;
 
 public class UnitTestUtils {
     
     private UnitTestUtils() {
-        
     }
     
-    public static void setBooting(MojitoDHT dht, boolean booting) 
-            throws SecurityException, NoSuchFieldException, 
-                IllegalArgumentException, IllegalAccessException {
-        
-        Field field = Context.class.getDeclaredField("bootstrap");
-        field.setAccessible(true);
-        
-        DHTFuture<BootstrapEntity> future = null;
-        if (booting) {
-            future = new DHTValueFuture<BootstrapEntity>();
-        }
-        
-        Context context = dht.getContext();
-        field.set(context, future);
+    public static void setBooting(MojitoDHT dht, boolean booting) {
+        setState(dht, booting ? State.BOOTING : State.INIT);
     }
     
-    public static void setReady(MojitoDHT dht, boolean ready) 
-            throws SecurityException, NoSuchFieldException, 
-                IllegalArgumentException, IllegalAccessException {
-        
-        Field field = Context.class.getDeclaredField("bootstrap");
-        field.setAccessible(true);
-        
-        DHTFuture<BootstrapEntity> future = null;
-        if (ready) {
-            future = new DHTValueFuture<BootstrapEntity>(
-                    (BootstrapEntity)null);
-        }
-        
-        Context context = dht.getContext();
-        field.set(context, future);
+    public static void setReady(MojitoDHT dht, boolean ready) {
+        setState(dht, ready ? State.READY : State.INIT);
+    }
+    
+    public static void setState(MojitoDHT dht, State state) {
+        ((DefaultDHT)dht.getContext()).setState(state);
     }
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.visual.RouteTableVisualizer;
 import org.limewire.mojito2.ContactPinger;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
@@ -216,7 +216,7 @@ public class RouteTableVisualizerDemo {
         RouteTable routeTable = new RouteTableImpl();
         Database database = new DatabaseImpl();
         
-        Context dht = new Context("DEMO", messageFactory, 
+        DefaultDHT dht = new DefaultDHT("DEMO", messageFactory, 
                 routeTable, database);
         
         try {

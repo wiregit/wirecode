@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.io.MessageDispatcherListener;
 import org.limewire.mojito2.message.DefaultNodeRequest;
@@ -48,11 +48,11 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private static final float FONT_SIZE = 24f;
     
-    private final Context context;
+    private final DefaultDHT context;
 
     private Timer timer;
     
-    public static ArcsVisualizer show(final Context context) {
+    public static ArcsVisualizer show(final DefaultDHT context) {
         final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -98,7 +98,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private final List<Painter> painters = new ArrayList<Painter>();
     
-    public ArcsVisualizer(Context context, KUID nodeId) {
+    public ArcsVisualizer(DefaultDHT context, KUID nodeId) {
         this.context = context;
         addPainter(new SnowMan(nodeId));
         addPainter(new PlasmaLamp(nodeId));

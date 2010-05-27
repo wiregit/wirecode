@@ -7,6 +7,7 @@ import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.io.LookupResponseHandler.State;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.security.SecurityToken;
 
 public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
@@ -43,7 +44,7 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     @Override
     public Entry<Contact, SecurityToken>[] getClosest() {
         Entry<Contact, SecurityToken>[] dst 
-            = new Entry[Math.min(DHT.K, contacts.length)];
+            = new Entry[Math.min(KademliaSettings.K, contacts.length)];
         System.arraycopy(contacts, 0, dst, 0, dst.length);
         return dst;
     }

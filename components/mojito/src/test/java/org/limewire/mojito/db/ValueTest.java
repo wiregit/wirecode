@@ -10,7 +10,6 @@ import junit.framework.Test;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
-import org.limewire.mojito2.Context;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -71,10 +70,8 @@ public class ValueTest extends MojitoTestCase {
             assertFalse(dht2.isBooting());
             
             // Get the SecurityToken...
-            Context context1 = dht1.getContext();
-            
             DHTFuture<SecurityTokenEntity> future 
-                = context1.getSecurityToken(dht2.getLocalNode(), 
+                = dht1.getSecurityToken(dht2.getLocalNode(), 
                     500, TimeUnit.MILLISECONDS);
             
             SecurityTokenEntity entity = future.get();

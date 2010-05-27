@@ -16,6 +16,7 @@ import org.limewire.mojito2.message.PingResponse;
 import org.limewire.mojito2.message.RequestMessage;
 import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.routing.Contact;
+import org.limewire.mojito2.settings.PingSettings;
 import org.limewire.mojito2.util.EntryImpl;
 import org.limewire.mojito2.util.MaxStack;
 
@@ -24,12 +25,9 @@ import org.limewire.mojito2.util.MaxStack;
  * first successful ping.
  */
 public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
-
-    //private static final Log LOG = LogFactory.getLog(PingResponseHandler2.class);
     
-    private static final int ALPHA = 4;
-    
-    private final MaxStack stack = new MaxStack(ALPHA);
+    private final MaxStack stack = new MaxStack(
+            PingSettings.PARALLEL_PINGS.getValue());
     
     private final Pinger pinger;
     

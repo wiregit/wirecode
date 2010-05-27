@@ -46,15 +46,16 @@ public class DatabaseUtils {
     public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
         KUID primaryKey = entity.getPrimaryKey();
         
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        Collection<Contact> nodes = routeTable.select(primaryKey, k, SelectMode.ALL);
+        Collection<Contact> nodes = routeTable.select(primaryKey, 
+                KademliaSettings.K, SelectMode.ALL);
         
         long creationTime = entity.getCreationTime();
         long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getTimeInMillis();
         
         // If there are less than k Nodes or the local Node is member
         // of the k-closest Nodes then use the default expiration time
-        if (nodes.size() < k || nodes.contains(routeTable.getLocalNode())) {
+        if (nodes.size() < KademliaSettings.K 
+                || nodes.contains(routeTable.getLocalNode())) {
             return creationTime + expirationTime;
             
         // The value expires inversely proportional otherwise by using

@@ -81,8 +81,7 @@ public class ContextTest extends MojitoTestCase {
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
         int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        int expected = m*k;
+        int expected = m*KademliaSettings.K;
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         
@@ -100,8 +99,9 @@ public class ContextTest extends MojitoTestCase {
                     dhts.get(0).ping("localhost", port).get();
                     
                     // make sure after the first k nodes bootstrap the rest have at least k nodes in the rt
-                    if (i > k) {
-                        assertGreaterThanOrEquals(k, dht.getRouteTable().getContacts().size());
+                    if (i > KademliaSettings.K) {
+                        assertGreaterThanOrEquals(KademliaSettings.K, 
+                                dht.getRouteTable().getContacts().size());
                     }
                 }
                 
@@ -113,7 +113,7 @@ public class ContextTest extends MojitoTestCase {
             
             // Shutdown a random MojitoDHT instance
             Random generator = new Random();
-            int index = generator.nextInt(dhts.size() / 2) + k;
+            int index = generator.nextInt(dhts.size() / 2) + KademliaSettings.K;
             DHT down = dhts.get(index);
             down.close();
             

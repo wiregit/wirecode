@@ -155,9 +155,9 @@ public class BucketNodeTest extends MojitoTestCase {
         
         Contact leastRecentlySeen = null;
         Contact mostRecentlySeen = null;
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        assertGreaterThan(0, k);
-        for (int i = 0; i < k; i++) {
+        
+        assertGreaterThan(0, KademliaSettings.K);
+        for (int i = 0; i < KademliaSettings.K; i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -172,7 +172,7 @@ public class BucketNodeTest extends MojitoTestCase {
             mostRecentlySeen = node;
             bucket.addActiveContact(node);
         }
-        assertEquals(k, bucket.getActiveSize());
+        assertEquals(KademliaSettings.K, bucket.getActiveSize());
         
         // Test initial State
         assertSame(leastRecentlySeen, bucket.getLeastRecentlySeenActiveContact());

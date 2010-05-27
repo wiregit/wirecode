@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -17,6 +17,7 @@ import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.io.MessageDispatcher;
@@ -80,7 +81,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public Context getContext() {
+    public DefaultDHT getContext() {
         return null;
     }
 
@@ -266,6 +267,12 @@ public class MojitoDHTStub implements MojitoDHT {
     
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value, long timeout, TimeUnit unit) {
+        return createFuture();
+    }
+    
+    @Override
+    public DHTFuture<SecurityTokenEntity> getSecurityToken(Contact dst, 
+            long timeout, TimeUnit unit) {
         return createFuture();
     }
 

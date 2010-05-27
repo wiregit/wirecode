@@ -21,7 +21,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito2.Context;
+import org.limewire.mojito2.DefaultDHT;
 import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -99,7 +99,7 @@ public class PassiveController extends SimpleController {
         this.manager = manager;
         
         Database database = new DatabaseImpl();
-        Context context = new Context(NAME, 
+        DefaultDHT context = new DefaultDHT(NAME, 
                 messageFactory, routeTable, database);
         
         contacts = init(context);
@@ -150,7 +150,7 @@ public class PassiveController extends SimpleController {
         return routeTable;
     }
     
-    private Contact[] init(Context context) throws UnknownHostException {
+    private Contact[] init(DefaultDHT context) throws UnknownHostException {
         LocalContact localhost = context.getLocalNode();
         initLocalhost(localhost);
         

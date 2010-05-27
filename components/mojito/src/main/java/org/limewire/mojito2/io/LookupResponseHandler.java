@@ -15,14 +15,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito2.Context;
-import org.limewire.mojito2.DHT;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.ManagedRunnable;
 import org.limewire.mojito2.entity.LookupEntity;
@@ -30,23 +26,20 @@ import org.limewire.mojito2.message.ResponseMessage;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.routing.RouteTable;
 import org.limewire.mojito2.routing.RouteTable.SelectMode;
+import org.limewire.mojito2.settings.KademliaSettings;
 import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.util.ContactsScrubber;
 import org.limewire.mojito2.util.MaxStack;
+import org.limewire.mojito2.util.SchedulingUtils;
 import org.limewire.security.SecurityToken;
 
 public abstract class LookupResponseHandler<V extends LookupEntity> 
         extends AbstractResponseHandler<V> {
     
-    private static final ScheduledExecutorService EXECUTOR
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("LookupThread"));
-    
-    private static final long BOOST_FREQUENCY = 1000L;
-    
-    private static final int ALPHA = 4;
-    
-    private volatile long boostFrequency = BOOST_FREQUENCY;
+    protected static enum Type {
+        FIND_NODE,
+        FIND_VALUE;
+    }
     
     protected final KUID lookupId;
     
@@ -54,16 +47,12 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     
     private final MaxStack lookupCounter;
     
-    private volatile long boostTimeout = 3000L;
-    
-    private volatile int alpha = ALPHA;
-    
     private volatile long startTime = -1L;
     
     private volatile ScheduledFuture<?> boostFuture = null;
     
-    public LookupResponseHandler(Context context, 
-            KUID lookupId, 
+    public LookupResponseHandler(Type type, 
+            Context context, KUID lookupId,
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
@@ -71,15 +60,17 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         RouteTable routeTable = context.getRouteTable();
         Collection<Contact> contacts 
-            = routeTable.select(lookupId, DHT.K, SelectMode.ALL);
+            = routeTable.select(lookupId, 
+                    KademliaSettings.K, SelectMode.ALL);
         
         lookupManager = new LookupManager(context, 
                 lookupId, contacts.toArray(new Contact[0]));
-        lookupCounter = new MaxStack(alpha);
+        
+        lookupCounter = createStack(type);
     }
     
     public LookupResponseHandler(Context context, 
-            KUID lookupId, 
+            Type type, KUID lookupId,
             Contact[] contacts,
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
@@ -88,12 +79,13 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         lookupManager = new LookupManager(context, 
                 lookupId, contacts);
-        lookupCounter = new MaxStack(alpha);
+        
+        lookupCounter = createStack(type);
     }
 
     @Override
     protected synchronized void start() throws IOException {
-        long boostFrequency = this.boostFrequency;
+        long boostFrequency = LookupSettings.BOOST_FREQUENCY.getTimeInMillis();
         
         if (0L < boostFrequency) {
             Runnable task = new ManagedRunnable() {
@@ -103,7 +95,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 }
             };
             
-            boostFuture = EXECUTOR.scheduleWithFixedDelay(task, 
+            boostFuture = SchedulingUtils.scheduleWithFixedDelay(task, 
                     boostFrequency, boostFrequency, TimeUnit.MILLISECONDS);
         }
         
@@ -115,6 +107,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         if (boostFuture != null) {
             boostFuture.cancel(true);
         }
+        
+        super.stop();
     }
 
     /**
@@ -122,7 +116,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
      */
     private synchronized void boost() throws IOException {
         if (lookupManager.hasNext(true)) {
-            long boostTimeout = this.boostTimeout;
+            long boostTimeout = LookupSettings.BOOST_TIMEOUT.getTimeInMillis();
             if (getLastResponseTime(TimeUnit.MILLISECONDS) >= boostTimeout) {
                 try {
                     Contact contact = lookupManager.next();
@@ -264,11 +258,11 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 time, TimeUnit.MILLISECONDS);
     }
     
-    private static class LookupManager {
+    private class LookupManager {
         
-        private static boolean EXHAUSTIVE = false;
+        private final boolean RANDOMIZE = LookupSettings.RANDOMIZE.getValue();
         
-        private static boolean RANDOMIZE = false;
+        private final boolean EXHAUSTIVE = LookupSettings.EXHAUSTIVE.getValue();
         
         private final Context context;
         
@@ -382,14 +376,6 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return responses.entrySet().toArray(new Entry[0]);
         }
         
-        /*@SuppressWarnings("unchecked")
-        public Entry<Contact, SecurityToken>[] getClosest() {
-            Contact last = closest.last();
-            Map<Contact, SecurityToken> contacts 
-                = responses.headMap(last, true);
-            return contacts.entrySet().toArray(new Entry[0]);
-        }*/
-        
         public Contact[] getCollisions() {
             return collisions.toArray(new Contact[0]);
         }
@@ -413,7 +399,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 responses.put(contact, securityToken);
                 closest.add(contact);
                 
-                if (closest.size() > DHT.K) {
+                if (closest.size() > KademliaSettings.K) {
                     closest.pollLast();
                 }
                 
@@ -451,7 +437,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         public boolean hasNext(boolean force) {
             if (!query.isEmpty()) {
                 Contact contact = query.first();
-                if (force || closest.size() < DHT.K
+                if (force || closest.size() < KademliaSettings.K
                         || isCloserThanClosest(contact)
                         || EXHAUSTIVE) {
                     return true;
@@ -470,7 +456,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                     for (Contact c : query) {
                         contacts.add(c);
                         
-                        if (contacts.size() >= DHT.K) {
+                        if (contacts.size() >= KademliaSettings.K) {
                             break;
                         }
                     }
@@ -568,5 +554,22 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         public long getTimeInMillis() {
             return getTime(TimeUnit.MILLISECONDS);
         }
+    }
+    
+    /**
+     * 
+     */
+    public static MaxStack createStack(Type type) {
+        int alpha = -1;
+        switch (type) {
+            case FIND_NODE:
+                alpha = LookupSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
+                break;
+            case FIND_VALUE:
+                alpha = LookupSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
+                break;
+        }
+        
+        return new MaxStack(alpha);
     }
 }

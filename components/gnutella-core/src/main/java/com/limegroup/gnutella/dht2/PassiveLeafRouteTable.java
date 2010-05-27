@@ -43,7 +43,7 @@ public class PassiveLeafRouteTable implements RouteTable {
     
     public PassiveLeafRouteTable(Vendor vendor, Version version) {
         localNode = ContactFactory.createLocalContact(vendor, version, true);
-        bucket = new BucketImpl(this, KademliaSettings.REPLICATION_PARAMETER.getValue());
+        bucket = new BucketImpl(this, KademliaSettings.K);
     }
     
     @Override

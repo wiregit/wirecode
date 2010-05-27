@@ -29,7 +29,6 @@ import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueType;
 import org.limewire.security.SecurityToken;
 
-
 /**
  * The {@link MessageHelper} class simplifies the construction of 
  * {@link Message}s.
@@ -40,7 +39,8 @@ public class MessageHelper {
 
     protected final MessageFactory factory;
 
-    public MessageHelper(Context context, MessageFactory factory) {
+    public MessageHelper(Context context, 
+            MessageFactory factory) {
         this.context = context;
         this.factory = factory;
     }

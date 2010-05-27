@@ -23,7 +23,7 @@ public class MojitoFactory {
         DatabaseImpl database = new DatabaseImpl();
         RouteTable routeTable = new RouteTableImpl();
         
-        Context context = new Context(name, messageFactory, 
+        DefaultDHT context = new DefaultDHT(name, messageFactory, 
                 routeTable, database);
         
         return new DefaultMojitoDHT(context);

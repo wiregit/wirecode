@@ -110,8 +110,6 @@ public class PassiveLeafControllerTest extends DHTTestCase {
         
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
         PassiveLeafController controller 
             = injector.getInstance(PassiveLeafController.class);
         try {
@@ -128,7 +126,7 @@ public class PassiveLeafControllerTest extends DHTTestCase {
                         StringUtils.toAsciiBytes("Hello World"));
                 
                 StoreEntity result = dhts.get(0).put(key, value).get();
-                assertEquals(k, result.getContacts().length);
+                assertEquals(KademliaSettings.K, result.getContacts().length);
                 
                 EntityKey lookupKey = EntityKey.createEntityKey(
                         key, DHTValueType.ANY);

@@ -95,7 +95,6 @@ public class CacheForwardTest extends MojitoTestCase {
         BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.setTime(BUCKET_REFRESH, TimeUnit.MILLISECONDS);
         BucketRefresherSettings.BUCKET_REFRESHER_DELAY.setTime(BOOTSTRAP_TIME, TimeUnit.MILLISECONDS);        
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(false);
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
         KUID valueId = KUID.createRandomID();
@@ -103,7 +102,7 @@ public class CacheForwardTest extends MojitoTestCase {
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         MojitoDHT first = null;
         try {
-            for (int i = 0; i < 3*k; i++) {
+            for (int i = 0; i < 3*KademliaSettings.K; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, PORT+i);
                 
                 if (i > 0) {
@@ -160,7 +159,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 evt = creator.put(valueId, value).get();
             }
             
-            assertEquals(k, evt.getContacts().length);
+            assertEquals(KademliaSettings.K, evt.getContacts().length);
             
             // Give everybody time to process the store request
             Thread.sleep(waitForNodes);
@@ -265,7 +264,7 @@ public class CacheForwardTest extends MojitoTestCase {
             MojitoDHT middle = null;
             int index = 0;
             for (Contact node : evt.getContacts()) {
-                if (index == k/2) {
+                if (index == KademliaSettings.K/2) {
                     middle = dhts.get(node.getNodeID());
                     break;
                 }
@@ -314,7 +313,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 }
             }
             
-            assertEquals(k + 1, count);
+            assertEquals(KademliaSettings.K + 1, count);
             
         } finally {
             IoUtils.closeAll(dhts.values());

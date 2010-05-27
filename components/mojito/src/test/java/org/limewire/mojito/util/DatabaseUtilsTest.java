@@ -43,7 +43,7 @@ public class DatabaseUtilsTest extends MojitoTestCase {
     }
     
     public void testExpirationTime() {
-        assertEquals(20, KademliaSettings.REPLICATION_PARAMETER.getValue());
+        assertEquals(20, KademliaSettings.K);
         
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         

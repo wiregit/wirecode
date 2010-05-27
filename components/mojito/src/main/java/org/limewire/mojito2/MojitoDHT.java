@@ -2,11 +2,13 @@ package org.limewire.mojito2;
 
 import java.net.InetAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
 import org.limewire.mojito2.entity.NodeEntity;
 import org.limewire.mojito2.entity.PingEntity;
+import org.limewire.mojito2.entity.SecurityTokenEntity;
 import org.limewire.mojito2.entity.StoreEntity;
 import org.limewire.mojito2.entity.ValueEntity;
 import org.limewire.mojito2.routing.Contact;
@@ -128,4 +130,10 @@ public interface MojitoDHT extends DHT {
      * 
      */
     public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    
+    /**
+     * 
+     */
+    public DHTFuture<SecurityTokenEntity> getSecurityToken(
+            Contact dst, long timeout, TimeUnit unit);
 }

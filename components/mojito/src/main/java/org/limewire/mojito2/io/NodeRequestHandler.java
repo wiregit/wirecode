@@ -83,7 +83,7 @@ public class NodeRequestHandler extends AbstractRequestHandler {
             if (context.isFirewalled()) {
                 nodes = ContactUtils.sort(
                             routeTable.getContacts(), 
-                            KademliaSettings.REPLICATION_PARAMETER.getValue());
+                            KademliaSettings.K);
                 
                 // If the external port is not set then make sure
                 // we're not in the list!
@@ -93,8 +93,7 @@ public class NodeRequestHandler extends AbstractRequestHandler {
                 
             } else {
                 nodes = routeTable.select(lookupId, 
-                            KademliaSettings.REPLICATION_PARAMETER.getValue(), 
-                            SelectMode.ALIVE);
+                            KademliaSettings.K, SelectMode.ALIVE);
             }
         }
         

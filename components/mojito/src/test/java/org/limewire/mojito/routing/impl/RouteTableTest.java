@@ -884,17 +884,15 @@ public class RouteTableTest extends MojitoTestCase {
     }
     
     public void testNetworkClass() {
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
         // Make sure the cache has the same max size as the Buckets.
         // It'd make counting harder otherwise...!
-        RouteTableSettings.MAX_CACHE_SIZE.setValue(k);
+        RouteTableSettings.MAX_CACHE_SIZE.setValue(KademliaSettings.K);
         
         // Accept any IP address
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
         
         RouteTable routeTable1 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -904,13 +902,15 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         // There should be exactly k Contacts in the Bucket
-        assertEquals(k, routeTable1.size());
-        assertEquals(k, routeTable1.getActiveContacts().size());
+        assertEquals(KademliaSettings.K, routeTable1.size());
+        assertEquals(KademliaSettings.K, 
+                routeTable1.getActiveContacts().size());
+        
         assertEquals(0, routeTable1.getCachedContacts().size());
         
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.0f);
         RouteTable routeTable2 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -929,7 +929,7 @@ public class RouteTableTest extends MojitoTestCase {
         // Allow 50% to be from the same Network
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.5f);
         RouteTable routeTable3 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -940,8 +940,9 @@ public class RouteTableTest extends MojitoTestCase {
         
         // 50% of them should be in the Bucket and the rest NOT in the
         // replacement cache since the bucket is splitable
-        assertEquals(k/2+1, routeTable3.size());
-        assertEquals(k/2+1, routeTable3.getActiveContacts().size());
+        assertEquals(KademliaSettings.K/2+1, routeTable3.size());
+        assertEquals(KademliaSettings.K/2+1, 
+                routeTable3.getActiveContacts().size());
         assertEquals(0, routeTable3.getCachedContacts().size());
         
         // Add a Contact from a different Class C Network
@@ -956,8 +957,8 @@ public class RouteTableTest extends MojitoTestCase {
                 Contact.DEFAULT_FLAG);
         
         routeTable3.add(node);
-        assertEquals(k/2+1+1, routeTable3.size());
-        assertEquals(k/2+1+1, routeTable3.getActiveContacts().size());
+        assertEquals(KademliaSettings.K/2+1+1, routeTable3.size());
+        assertEquals(KademliaSettings.K/2+1+1, routeTable3.getActiveContacts().size());
         assertEquals(0, routeTable3.getCachedContacts().size());
         
         Bucket bucket = routeTable3.getBucket(node.getNodeID());
