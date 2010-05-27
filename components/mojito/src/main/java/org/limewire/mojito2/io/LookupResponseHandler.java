@@ -69,8 +69,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         lookupCounter = createStack(type);
     }
     
-    public LookupResponseHandler(Context context, 
-            Type type, KUID lookupId,
+    public LookupResponseHandler(Type type, 
+            Context context, KUID lookupId,
             Contact[] contacts,
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);

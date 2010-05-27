@@ -9,6 +9,7 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
@@ -18,6 +19,7 @@ import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueEntity;
 import org.limewire.mojito2.storage.DHTValueImpl;
 import org.limewire.mojito2.storage.DHTValueType;
+import org.limewire.mojito2.util.ExceptionUtils;
 import org.limewire.mojito2.util.IoUtils;
 import org.limewire.util.StringUtils;
 
@@ -85,16 +87,15 @@ public class GetValueTest extends MojitoTestCase {
                 fail(err);
             }
             
-            // Test is failing because get() is throwing a NoSuchValueException
-            // instead of returning a DHTValueEntity-Array with no elements.
-            // Need to think what's better!
             try {
                 EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.LIME);
-                ValueEntity result = dhts.get(1).get(lookupKey).get();
-                DHTValueEntity[] entities = result.getEntities();
-                assertEquals("Got " + entities, 0, entities.length);
-            } catch (Exception err) {
-                fail(err);
+                dhts.get(1).get(lookupKey).get();
+                fail("Should have failed!");
+            } catch (ExecutionException err) {
+                if (!ExceptionUtils.isCausedBy(
+                        err, NoSuchValueException.class)) {
+                    fail(err);
+                }
             }
             
         } finally {

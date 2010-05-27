@@ -15,7 +15,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito2.routing.Version;
 import org.limewire.mojito2.storage.DHTValue;
 import org.limewire.mojito2.storage.DHTValueType;
@@ -87,7 +86,7 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
             
             this.guid = ggep.getBytes(CLIENT_ID);
             if (guid.length != 16) {
-                throw new DHTValueException("Illegal GUID length: " + guid.length);
+                throw new BadValueException("Illegal GUID length: " + guid.length);
             }
             
             // Ideally this would be changed to getByte and getByte would be added,
@@ -99,7 +98,7 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
             byte[] portBytes = ggep.getBytes(PORT);
             this.port = ByteUtils.beb2short(portBytes, 0) & 0xFFFF;
             if (!NetworkUtils.isValidPort(port)) {
-                throw new DHTValueException("Illegal port: " + port);
+                throw new BadValueException("Illegal port: " + port);
             }
             
             BitNumbers tlsInfo = BitNumbers.EMPTY_BN;
@@ -126,7 +125,7 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
                 int port = in.readUnsignedShort();
                 
                 if (!NetworkUtils.isValidPort(port)) {
-                    throw new DHTValueException("Illegal port: " + port);
+                    throw new BadValueException("Illegal port: " + port);
                 }
                 
                 IpPort proxy = new IpPortImpl(InetAddress.getByAddress(addr), port);

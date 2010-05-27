@@ -76,7 +76,7 @@ public class BucketRefresher implements Closeable {
     public synchronized void start() {
         
         if (!open) {
-            throw new IllegalStateException();
+            return;
         }
         
         if (future != null && !future.isDone()) {

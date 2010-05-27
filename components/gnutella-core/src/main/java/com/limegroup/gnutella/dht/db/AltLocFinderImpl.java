@@ -18,12 +18,12 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.concurrent.AsyncProcess;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.entity.ValueEntity;
-import org.limewire.mojito2.io.ValueResponseHandler.NoSuchValueException;
 import org.limewire.mojito2.routing.Contact;
 import org.limewire.mojito2.settings.LookupSettings;
 import org.limewire.mojito2.storage.DHTValue;
@@ -121,7 +121,7 @@ public class AltLocFinderImpl implements AltLocFinder {
                 = this.locations.toArray(new AlternateLocation[0]);
             
             if (locations.length == 0) {
-                future.setException(new NoSuchValueException(null));
+                future.setException(new NoSuchValueException());
                 return;
             }
             

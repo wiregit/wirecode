@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito.exceptions.NoSuchNodeException;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.entity.DefaultNodeEntity;
@@ -27,7 +28,7 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
     public NodeResponseHandler(Context context, 
             KUID lookupId, Contact[] contacts, 
             long timeout, TimeUnit unit) {
-        super(context, Type.FIND_NODE, lookupId, contacts, timeout, unit);
+        super(Type.FIND_NODE, context, lookupId, contacts, timeout, unit);
     }
     
     @Override
@@ -36,7 +37,7 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
             = state.getContacts();
         
         if (contacts.length == 0) {
-            setException(new NoSuchNodeException(state));
+            setException(new DefaultNoSuchNodeException(state));
         } else {
             setValue(new DefaultNodeEntity(state));
         }
@@ -69,11 +70,11 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
         processContacts(src, securityToken, contacts, time, unit);
     }
     
-    private static class NoSuchNodeException extends IOException {
+    private static class DefaultNoSuchNodeException extends NoSuchNodeException {
         
         private final State state;
         
-        public NoSuchNodeException(State state) {
+        public DefaultNoSuchNodeException(State state) {
             this.state = state;
         }
         

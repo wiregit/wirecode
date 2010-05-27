@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito2.Context;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
@@ -71,7 +72,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
     @Override
     protected void complete(State state) {
         if (entities.isEmpty() && entityKeys.isEmpty()) {
-            setException(new NoSuchValueException(state));
+            setException(new DefaultNoSuchValueException(state));
         } else {
             setValue(new DefaultValueEntity(lookupKey, 
                     this.entities.toArray(new DHTValueEntity[0]), 
@@ -152,11 +153,11 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
         }
     }
     
-    public static class NoSuchValueException extends IOException {
+    public static class DefaultNoSuchValueException extends NoSuchValueException {
         
         private final State state;
         
-        public NoSuchValueException(State state) {
+        public DefaultNoSuchValueException(State state) {
             this.state = state;
         }
         
