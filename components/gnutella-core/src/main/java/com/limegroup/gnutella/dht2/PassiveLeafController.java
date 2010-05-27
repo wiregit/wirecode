@@ -9,6 +9,7 @@ import org.limewire.mojito2.DefaultMojitoDHT;
 import org.limewire.mojito2.EntityKey;
 import org.limewire.mojito2.KUID;
 import org.limewire.mojito2.MojitoDHT;
+import org.limewire.mojito2.BootstrapManager.State;
 import org.limewire.mojito2.concurrent.DHTFuture;
 import org.limewire.mojito2.concurrent.DHTValueFuture;
 import org.limewire.mojito2.entity.BootstrapEntity;
@@ -124,18 +125,11 @@ public class PassiveLeafController extends AbstractController {
         public LeafContext(String name, MessageFactory messageFactory, 
                 RouteTable routeTable, Database database) {
             super(name, messageFactory, routeTable, database);
+            
+            // Passive-Leafs are out of the box ready!
+            getBootstrapManager().setState(State.READY);
         }
         
-        @Override
-        public boolean isBooting() {
-            return false;
-        }
-        
-        @Override
-        public boolean isReady() {
-            return isBound();
-        }
-
         @Override
         protected DHTFuture<BootstrapEntity> bootstrap(
                 BootstrapConfig config, long timeout, TimeUnit unit) {

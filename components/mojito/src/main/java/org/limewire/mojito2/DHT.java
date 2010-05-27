@@ -30,52 +30,52 @@ import org.limewire.mojito2.util.HostFilter;
 public interface DHT extends ContactPinger, AddressPinger, Closeable {
     
     /**
-     * 
+     * Returns the name of the {@link DHT} instance.
      */
     public String getName();
     
     /**
-     * 
+     * Returns the size of the {@link DHT}
      */
     public BigInteger size();
     
     /**
-     * 
+     * Returns {@code true} if the DHT is firewalled
      */
     public boolean isFirewalled();
     
     /**
-     * 
+     * Returns the localhost {@link Contact}
      */
     public Contact getLocalNode();
     
     /**
-     * 
+     * Returns the {@link RouteTable}.
      */
     public RouteTable getRouteTable();
     
     /**
-     * 
+     * Returns the {@link Database}.
      */
     public Database getDatabase();
     
     /**
-     * 
+     * Returns the {@link MessageDispatcher}.
      */
     public MessageDispatcher getMessageDispatcher();
     
     /**
-     * 
+     * Returns the {@link MessageFactory}.
      */
     public MessageFactory getMessageFactory();
     
     /**
-     * 
+     * Returns the {@link HostFilter}.
      */
     public HostFilter getHostFilter();
     
     /**
-     * 
+     * Sets the {@link HostFilter}.
      */
     public void setHostFilter(HostFilter hostFilter);
     
