@@ -29,7 +29,7 @@ class ConversationPanel {
     private final ConversationPaneFactory conversationFactory;
     private final JPanel component;
     /**  Map of friendId's to the conversation pane. */
-    private final Map<String, Conversation> chats;
+    private final Map<String, ConversationPane> chats;
     
     /** 
       * Used to coordinate removal from friends list when chat is no longer needed. 
@@ -66,7 +66,7 @@ class ConversationPanel {
         this.conversationFactory = conversationFactory;
         this.chatModel = chatModel;
         component = new JPanel(new BorderLayout());
-        this.chats = new HashMap<String, Conversation>();
+        this.chats = new HashMap<String, ConversationPane>();
         this.messageListenerManager = messageListenerManager;
         this.chatStateListenerManager = chatStateListenerManager;
         this.friendListenerManager = friendListenerManager;
@@ -146,10 +146,11 @@ class ConversationPanel {
      * Displays the conversation with the given ChatFriend.
      */
     public void displayConverstaion(ChatFriend chatFriend) {
-        Conversation chatPane = chats.get(chatFriend.getID());
+        ConversationPane chatPane = chats.get(chatFriend.getID());
         selectedConversation = chatFriend;
         selectedConversation.setHasUnviewedMessages(false);
         setConversationPanel(chatPane.asComponent());
+        chatPane.handleDisplay();
     }
     
     /**
@@ -214,5 +215,7 @@ class ConversationPanel {
         selectedConversation = chatFriend;
         selectedConversation.setHasUnviewedMessages(false);
         setConversationPanel(chatPane);
+        
+        chatPane.handleDisplay();
     }
 }
