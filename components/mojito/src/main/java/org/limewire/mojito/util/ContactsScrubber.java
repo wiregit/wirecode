@@ -157,7 +157,7 @@ public class ContactsScrubber {
         }
         
         boolean valid = true;
-        if (requiredRatio > 0f) {
+        if (0f < requiredRatio) {
             int total = scrubbed.size() + collisions.size();
             if (containsLocal) {
                 total++;
@@ -189,7 +189,7 @@ public class ContactsScrubber {
         
         private final Contact[] collisions;
         
-        private boolean valid;
+        private final boolean valid;
         
         private Scrubbed(Contact[] contacts, 
                 Contact[] scrubbed, 
@@ -199,6 +199,7 @@ public class ContactsScrubber {
             this.contacts = contacts;
             this.scrubbed = scrubbed;
             this.collisions = collisions;
+            this.valid = valid;
         }
 
         /**
