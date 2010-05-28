@@ -15,7 +15,7 @@ import org.mozilla.interfaces.nsIWebNavigation;
  * nsIWebBrowserChrome-based browsers.
  */
 class MozillaKeyListener extends KeyAdapter {
-
+    
     /**
      * nsIWebNavigation, like most Mozilla classes, is not thread-safe and must
      * only be set and used from the Mozilla Thread
@@ -71,7 +71,14 @@ class MozillaKeyListener extends KeyAdapter {
                         nav.reload(nsIWebNavigation.LOAD_FLAGS_NONE);
                     }
                 }); 
+            }  else if (mozKeyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                MozillaExecutor.mozAsyncExec(new Runnable() {
+                    public void run() {
+                        nav.stop(nsIWebNavigation.STOP_ALL);
+                    }
+                }); 
             }
+            
         }
     }
     
