@@ -268,6 +268,11 @@ public class ActiveController extends SimpleController {
     }
     
     @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return dht.enqueue(key, value);
+    }
+
+    @Override
     public DHTFuture<ValueEntity> get(EntityKey key) {
         return dht.get(key);
     }

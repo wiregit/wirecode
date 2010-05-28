@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
@@ -29,7 +30,7 @@ public class PushProxiesPublisher extends Publisher {
     
     private static final int PROXY_THRESHOLD = 2;
     
-    private final PublisherQueue queue;
+    private final DHTManager manager;
     
     private final NetworkManager networkManager;
     
@@ -53,11 +54,11 @@ public class PushProxiesPublisher extends Publisher {
      * Creates a {@link PushProxiesPublisher}
      */
     @Inject
-    public PushProxiesPublisher(PublisherQueue queue, 
+    public PushProxiesPublisher(DHTManager manager, 
             NetworkManager networkManager,
             ApplicationServices applicationServices,
             PushEndpointFactory pushEndpointFactory) {
-        this(queue, networkManager, applicationServices, pushEndpointFactory,
+        this(manager, networkManager, applicationServices, pushEndpointFactory,
                 DHTSettings.PROXY_PUBLISHER_FREQUENCY.getTimeInMillis(), 
                 TimeUnit.MILLISECONDS);
     }
@@ -65,14 +66,14 @@ public class PushProxiesPublisher extends Publisher {
     /**
      * Creates a {@link PushProxiesPublisher}
      */
-    public PushProxiesPublisher(PublisherQueue queue, 
+    public PushProxiesPublisher(DHTManager manager, 
             NetworkManager networkManager,
             ApplicationServices applicationServices,
             PushEndpointFactory pushEndpointFactory,
             long frequency, TimeUnit unit) {
         super(frequency, unit);
         
-        this.queue = queue;
+        this.manager = manager;
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.pushEndpointFactory = pushEndpointFactory;
@@ -227,6 +228,6 @@ public class PushProxiesPublisher extends Publisher {
      * Publishes the given {@link DHTValue} to the DHT
      */
     protected void publish(KUID key, DHTValue value) {
-        queue.put(key, value);
+        manager.enqueue(key, value);
     }
 }

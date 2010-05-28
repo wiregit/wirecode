@@ -103,6 +103,11 @@ public class InactiveController implements Controller {
     }
     
     @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return new DHTValueFuture<StoreEntity>(new UnsupportedOperationException());
+    }
+    
+    @Override
     public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
         return new DHTValueFuture<ValueEntity[]>(new UnsupportedOperationException());
     }

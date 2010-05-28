@@ -209,6 +209,11 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
     /**
      * 
      */
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
+    
+    /**
+     * 
+     */
     public DHTFuture<ValueEntity> get(EntityKey key);
 
     /**

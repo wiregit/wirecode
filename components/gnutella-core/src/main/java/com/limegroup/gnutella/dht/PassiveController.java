@@ -176,6 +176,11 @@ public class PassiveController extends SimpleController {
     }
     
     @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return dht.enqueue(key, value);
+    }
+    
+    @Override
     public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
         return dht.getAll(key);
     }

@@ -16,6 +16,7 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;
@@ -36,7 +37,7 @@ public class AltLocPublisher extends Publisher {
     @InspectablePrimitive(value = "The number of values that have been published")
     private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
     
-    private final PublisherQueue queue;
+    private final DHTManager manager;
     
     private final NetworkManager networkManager;
     
@@ -52,12 +53,12 @@ public class AltLocPublisher extends Publisher {
      * Creates a {@link AltLocPublisher}
      */
     @Inject
-    public AltLocPublisher(PublisherQueue queue,
+    public AltLocPublisher(DHTManager manager,
             NetworkManager networkManager, 
             ApplicationServices applicationServices,
             @GnutellaFiles FileView gnutellaFileView, 
             Provider<HashTreeCache> tigerTreeCache) {
-        this (queue, networkManager, applicationServices, 
+        this (manager, networkManager, applicationServices, 
                 gnutellaFileView, tigerTreeCache, 
                 DHTSettings.LOCATION_PUBLISHER_FREQUENCY.getTimeInMillis(),
                 TimeUnit.MILLISECONDS);
@@ -66,7 +67,7 @@ public class AltLocPublisher extends Publisher {
     /**
      * Creates a {@link AltLocPublisher}
      */
-    public AltLocPublisher(PublisherQueue queue,
+    public AltLocPublisher(DHTManager manager,
             NetworkManager networkManager, 
             ApplicationServices applicationServices,
             @GnutellaFiles FileView gnutellaFileView, 
@@ -74,7 +75,7 @@ public class AltLocPublisher extends Publisher {
             long frequency, TimeUnit unit) {
         super(frequency, unit);
         
-        this.queue = queue;
+        this.manager = manager;
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.gnutellaFileView = gnutellaFileView;
@@ -166,7 +167,7 @@ public class AltLocPublisher extends Publisher {
      * Publishes the given {@link DHTValue} to the DHT
      */
     protected void publish(KUID key, DHTValue value) {
-        queue.put(key, value);
+        manager.enqueue(key, value);
     }
     
     /**

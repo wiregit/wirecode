@@ -92,6 +92,11 @@ public class ControllerStub implements Controller {
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return null;
     }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return null;
+    }
 
     @Override
     public void start() throws IOException {

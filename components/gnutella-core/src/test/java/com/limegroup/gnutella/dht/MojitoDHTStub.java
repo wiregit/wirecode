@@ -128,6 +128,11 @@ public class MojitoDHTStub implements MojitoDHT {
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return createFuture();
     }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return createFuture();
+    }
 
     @Override
     public DHTFuture<StoreEntity> remove(KUID key) {

@@ -91,7 +91,7 @@ public class PassiveLeafController extends AbstractController {
     
     @Override
     public boolean isReady() {
-        return dht.isReady();
+        return isRunning() && dht.isReady();
     }
     
     @Override
@@ -106,6 +106,11 @@ public class PassiveLeafController extends AbstractController {
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return dht.put(key, value);
+    }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return dht.enqueue(key, value);
     }
     
     @Override

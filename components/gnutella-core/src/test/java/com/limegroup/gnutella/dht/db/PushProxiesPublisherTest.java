@@ -22,6 +22,8 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 
 public class PushProxiesPublisherTest extends BaseTestCase {
     
@@ -49,7 +51,7 @@ public class PushProxiesPublisherTest extends BaseTestCase {
     }
     
     public void testSimplePublish() throws InterruptedException {
-        PublisherQueue queue = new PublisherQueueStub();
+        DHTManager manager = new DHTManagerStub();
         NetworkManager networkManager 
             = injector.getInstance(NetworkManager.class);
         ApplicationServices applicationServices
@@ -59,7 +61,7 @@ public class PushProxiesPublisherTest extends BaseTestCase {
         
         final CountDownLatch latch = new CountDownLatch(1);
         PushProxiesPublisher publisher 
-            = new PushProxiesPublisher(queue, 
+            = new PushProxiesPublisher(manager, 
                     networkManager, applicationServices, 
                     pushEndpointFactory, 
                     5L, TimeUnit.MILLISECONDS) {

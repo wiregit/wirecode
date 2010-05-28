@@ -109,6 +109,11 @@ public class DHTManagerStub implements DHTManager {
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
         return null;
     }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return null;
+    }
 
     @Override
     public void removeEventListener(DHTEventListener listener) {

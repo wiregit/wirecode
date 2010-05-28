@@ -70,6 +70,11 @@ public interface Controller extends Closeable, ConnectionLifecycleListener {
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
     
     /**
+     * Stores the given Key-Value pair in the {@link DHT}.
+     */
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
+    
+    /**
      * Retrieves a value from the {@link DHT}.
      */
     public DHTFuture<ValueEntity> get(EntityKey key);

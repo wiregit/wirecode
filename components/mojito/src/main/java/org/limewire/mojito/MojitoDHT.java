@@ -129,6 +129,11 @@ public interface MojitoDHT extends DHT {
      * 
      */
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
+    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
  
     /**
      * 

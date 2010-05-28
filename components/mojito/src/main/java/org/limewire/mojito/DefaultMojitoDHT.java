@@ -177,6 +177,12 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     }
     
     @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
+        return enqueue(key, value, timeout, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
     public DHTFuture<StoreEntity> remove(KUID key) {
         return put(key, DHTValue.EMPTY_VALUE);
     }

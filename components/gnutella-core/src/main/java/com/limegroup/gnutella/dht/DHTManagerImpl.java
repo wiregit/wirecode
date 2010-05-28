@@ -43,8 +43,6 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
-import com.limegroup.gnutella.dht.db.DefaultPublisherQueue;
-import com.limegroup.gnutella.dht.db.PublisherQueue;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileView;
@@ -83,8 +81,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
     
     private final HostFilter hostFilter;
-    
-    private final PublisherQueue queue = new DefaultPublisherQueue(this);
     
     private final AltLocPublisher altLocPublisher;
     
@@ -130,8 +126,8 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         this.hostFilter = new DefaultHostFilter(ipFilter);
         
         this.pushProxiesPublisher = new PushProxiesPublisher(
-                queue, networkManager, applicationServices, pushEndpointFactory);
-        this.altLocPublisher = new AltLocPublisher(queue, networkManager, 
+                this, networkManager, applicationServices, pushEndpointFactory);
+        this.altLocPublisher = new AltLocPublisher(this, networkManager, 
                 applicationServices, gnutellaFileView, tigerTreeCache);
         
         addEventListener(new DHTEventListener() {
@@ -213,7 +209,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     
     @Override
     public synchronized void stop() {
-        queue.stop();
         altLocPublisher.stop();
         pushProxiesPublisher.stop();
         
@@ -228,7 +223,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         stop();
         
         IoUtils.closeAll(
-                queue, 
                 altLocPublisher, 
                 pushProxiesPublisher);
     }
@@ -306,7 +300,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
      * 
      */
     private synchronized void onReady() {
-        queue.start();
         altLocPublisher.start();
         pushProxiesPublisher.start();
         
@@ -431,6 +424,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
         return controller.put(key, value);
     }
     
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+        return controller.enqueue(key, value);
+    }
+
     @Override
     public synchronized DHTFuture<ValueEntity> get(EntityKey key) {
         return controller.get(key);
