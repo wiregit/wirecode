@@ -124,15 +124,6 @@ public abstract class AbstractDHT implements DHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
-            long timeout, TimeUnit unit) {
-        
-        DHTValueEntity entity = DHTValueEntity.createFromValue(
-                this, key, value);
-        return put(entity, timeout, unit);
-    }
-    
-    @Override
     public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
             long timeout, TimeUnit unit) {
         return futureManager.submit(process, timeout, unit);

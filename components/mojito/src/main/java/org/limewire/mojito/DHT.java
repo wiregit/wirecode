@@ -19,7 +19,6 @@ import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.HostFilter;
 
@@ -149,12 +148,6 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
      * 
      */
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
-    public DHTFuture<StoreEntity> put(DHTValueEntity value, 
             long timeout, TimeUnit unit);
     
     /**

@@ -3,6 +3,8 @@ package org.limewire.mojito;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,6 +16,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.SecurityTokenEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.DefaultMessageDispatcher;
@@ -21,6 +24,7 @@ import org.limewire.mojito.io.DefaultStoreForward;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.NodeResponseHandler;
 import org.limewire.mojito.io.PingResponseHandler;
+import org.limewire.mojito.io.SecurityTokenResponseHandler;
 import org.limewire.mojito.io.StoreForward;
 import org.limewire.mojito.io.StoreResponseHandler;
 import org.limewire.mojito.io.Transport;
@@ -33,11 +37,16 @@ import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.settings.StoreSettings;
+import org.limewire.mojito.storage.DHTValue;
 import org.limewire.mojito.storage.DHTValueEntity;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseCleaner;
 import org.limewire.mojito.util.DHTSizeEstimator;
+import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.security.SecurityToken;
 import org.limewire.util.ExceptionUtils;
 
 /**
@@ -125,8 +134,23 @@ public class DefaultDHT extends AbstractDHT implements Context {
         
         this.messageHelper = new MessageHelper(this, messageFactory);
         
-        StoreForward storeForward 
-            = new DefaultStoreForward(routeTable, database);
+        DefaultStoreForward.Provider provider 
+                = new DefaultStoreForward.Provider() {
+
+            @Override
+            public boolean isReady() {
+                return DefaultDHT.this.isReady();
+            }
+
+            @Override
+            public void store(Contact dst, SecurityToken securityToken,
+                    Collection<? extends DHTValueEntity> values) {
+                DefaultDHT.this.store(dst, securityToken, values);
+            }
+        };
+        
+        StoreForward storeForward = new DefaultStoreForward(
+                routeTable, database, provider);
         
         this.messageDispatcher = new DefaultMessageDispatcher(
                 this, messageFactory, storeForward);
@@ -338,7 +362,15 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(DHTValueEntity value, 
+    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
+            long timeout, TimeUnit unit) {
+        
+        DHTValueEntity entity = DHTValueEntity.createFromValue(
+                this, key, value);
+        return put(entity, timeout, unit);
+    }
+    
+    private DHTFuture<StoreEntity> put(DHTValueEntity value, 
             long timeout, TimeUnit unit) {
         
         // The store operation is a composition of two DHT operations.
@@ -419,6 +451,57 @@ public class DefaultDHT extends AbstractDHT implements Context {
             
             return store;
         }
+    }
+    
+    /**
+     * Stores the given {@link DHTValueEntity}ies.
+     */
+    @SuppressWarnings("unchecked")
+    private void store(final Contact dst, final SecurityToken securityToken, 
+            final Collection<? extends DHTValueEntity> values) {
+        
+        if (securityToken == null) {
+            long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
+            DHTFuture<SecurityTokenEntity> future 
+                = getSecurityToken(dst, timeout, TimeUnit.MILLISECONDS);
+            future.addFutureListener(
+                    new EventListener<FutureEvent<SecurityTokenEntity>>() {
+                @Override
+                public void handleEvent(FutureEvent<SecurityTokenEntity> event) {
+                    if (event.getType() == Type.SUCCESS) {
+                        SecurityTokenEntity entity = event.getResult();
+                        SecurityToken securityToken = entity.getSecurityToken();
+                        store(dst, securityToken, values);
+                    }
+                }
+            });
+            return;
+        }
+        
+        Entry<Contact, SecurityToken>[] entry = new Entry[] { 
+            new EntryImpl<Contact, SecurityToken>(dst, securityToken) 
+        };
+        
+        long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
+        for (DHTValueEntity entity : values) {
+            StoreResponseHandler process = new StoreResponseHandler(
+                    this, entry, entity, timeout, TimeUnit.MILLISECONDS);
+            submit(process, timeout, TimeUnit.MILLISECONDS);
+        }
+    }
+    
+    /**
+     * Retrieves the {@link Contact}'s {@link SecurityToken}.
+     */
+    protected DHTFuture<SecurityTokenEntity> getSecurityToken(
+            Contact dst, long timeout, TimeUnit unit) {
+        
+        KUID lookupId = KUID.createRandomID();
+        AsyncProcess<SecurityTokenEntity> process 
+            = new SecurityTokenResponseHandler(this, 
+                    dst, lookupId, timeout, unit);
+        
+        return submit(process, timeout, unit);
     }
 
     /**

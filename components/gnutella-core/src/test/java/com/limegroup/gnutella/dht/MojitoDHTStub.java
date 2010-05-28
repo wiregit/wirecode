@@ -28,7 +28,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.NopTransport;
@@ -263,11 +262,6 @@ public class MojitoDHTStub implements MojitoDHT {
     @Override
     public DHTFuture<PingEntity> ping(String address, int port, long timeout, TimeUnit unit) {
         return ping(new InetSocketAddress(address, port), timeout, unit);
-    }
-
-    @Override
-    public DHTFuture<StoreEntity> put(DHTValueEntity value, long timeout, TimeUnit unit) {
-        return createFuture();
     }
     
     @Override

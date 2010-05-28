@@ -49,11 +49,13 @@ public class DefaultStoreForward implements StoreForward {
     
     private final Database database;
     
-    private final Provider provider = null;
+    private final Provider provider;
     
-    public DefaultStoreForward(RouteTable routeTable, Database database) {
+    public DefaultStoreForward(RouteTable routeTable, 
+            Database database, Provider provider) {
         this.routeTable = routeTable;
         this.database = database;
+        this.provider = provider;
     }
     
     private boolean isLocalNode(Contact contact) {
@@ -78,7 +80,7 @@ public class DefaultStoreForward implements StoreForward {
                     || existing.getInstanceID() != node.getInstanceID()) {
                 
                 // Store forward only if we're bootstrapped
-                if (provider != null && provider.isBootstrapped()) {
+                if (provider != null && provider.isReady()) {
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
                     //of the k closest to the new joining node.
@@ -273,11 +275,20 @@ public class DefaultStoreForward implements StoreForward {
         return Operation.NOTHING;
     }
     
-    private static interface Provider {
+    /**
+     * 
+     */
+    public static interface Provider {
         
-        public boolean isBootstrapped();
+        /**
+         * 
+         */
+        public boolean isReady();
         
-        public void store(Contact contact, SecurityToken securityToken, 
+        /**
+         * 
+         */
+        public void store(Contact dst, SecurityToken securityToken, 
                 Collection<? extends DHTValueEntity> values);
     }
 }
