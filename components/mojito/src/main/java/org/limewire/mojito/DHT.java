@@ -3,7 +3,6 @@ package org.limewire.mojito;
 import java.io.Closeable;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -114,30 +113,6 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
      * 
      */
     public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
-    public DHTFuture<PingEntity> ping(String address, int port, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
-    public DHTFuture<PingEntity> ping(InetAddress address, int port, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
-    public DHTFuture<PingEntity> ping(SocketAddress dst, 
-            long timeout, TimeUnit unit);
-    
-    /**
-     * 
-     */
-    public DHTFuture<PingEntity> ping(Contact dst, 
             long timeout, TimeUnit unit);
     
     /**

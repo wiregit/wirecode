@@ -233,11 +233,11 @@ public class RouteTableVisualizerDemo {
     public void populateRouteTable(RouteTableImpl rt) {
         rt.bind(new ContactPinger() {
             @Override
-            public DHTFuture<PingEntity> ping(Contact contact, 
+            public DHTFuture<PingEntity> ping(Contact dst, 
                     long timeout, TimeUnit unit) {
                 return new DHTValueFuture<PingEntity>(
-                        new DefaultPingEntity(contact, 
-                                contact.getContactAddress(), 
+                        new DefaultPingEntity(dst, 
+                                dst.getContactAddress(), 
                                 BigInteger.ONE, 
                                 0, TimeUnit.MILLISECONDS));
             }

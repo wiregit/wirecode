@@ -666,8 +666,8 @@ public class RouteTableTest extends MojitoTestCase {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.bind(new ContactPinger() {
             @Override
-            public DHTFuture<PingEntity> ping(Contact contact, long timeout, TimeUnit unit) {
-                PingEntity entity = new DefaultPingEntity(contact, 
+            public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
+                PingEntity entity = new DefaultPingEntity(dst, 
                         new InetSocketAddress("localhost", 3000), 
                         BigInteger.ONE, 
                         0L, TimeUnit.MILLISECONDS);

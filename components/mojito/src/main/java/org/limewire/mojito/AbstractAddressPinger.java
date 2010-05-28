@@ -7,6 +7,9 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.PingEntity;
 
+/**
+ * An abstract implementation of of {@link AddressPinger}.
+ */
 public abstract class AbstractAddressPinger implements AddressPinger {
 
     @Override
