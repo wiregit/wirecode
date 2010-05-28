@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.util;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -40,42 +41,24 @@ public class ContactsScrubber {
     
     private static final Log LOG = LogFactory.getLog(ContactsScrubber.class);
     
-    private final Contact[] contacts;
+    private ContactsScrubber() {}
     
-    private final Contact[] scrubbed;
-    
-    private final Contact[] collisions;
-    
-    private final boolean isValidResponse;
-    
-    /**
-     * Creates and returns a ContactsScrubber for the given arguments.
-     */
-    public static ContactsScrubber scrub(Context context, Contact src, 
+    public static Scrubbed scrub(Context context, Contact src, 
             Contact[] contacts, float requiredRatio) {
-        
-        if (contacts.length == 0) {
-            throw new IllegalArgumentException();
-        }
-        
-        return new ContactsScrubber(context, src, contacts, requiredRatio);
+        return scrub(context.getLocalNode(), src, contacts, requiredRatio);
     }
     
-    private ContactsScrubber(Context context, Contact src, 
+    public static Scrubbed scrub(Contact localhost, Contact src, 
             Contact[] contacts, float requiredRatio) {
         
         assert (0 < contacts.length);
         assert (requiredRatio >= 0f && requiredRatio <= 1f);
-        
-        this.contacts = contacts;
         
         Map<KUID, Contact> scrubbed 
             = new LinkedHashMap<KUID, Contact>(contacts.length);
         
         Set<Contact> collisions 
             = new LinkedHashSet<Contact>(1);
-        
-        Contact localNode = context.getLocalNode();
         
         SameClassFilter filter = new SameClassFilter(src);
         
@@ -104,7 +87,7 @@ public class ContactsScrubber {
             
             // Make sure we're not mixing IPv4 and IPv6 addresses.
             // See RouteTableImpl.add() for more Info!
-            if (!ContactUtils.isSameAddressSpace(localNode, contact)) {
+            if (!ContactUtils.isSameAddressSpace(localhost, contact)) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info(contact + " is from a different IP address space than local Node");
                 }
@@ -150,9 +133,9 @@ public class ContactsScrubber {
             }
             
             // Check if the Node collides with the local Node
-            if (ContactUtils.isCollision(context, contact)) {
+            if (ContactUtils.isCollision(localhost, contact)) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(contact + " seems to collide with " + context.getLocalNode());
+                    LOG.info(contact + " seems to collide with " + localhost);
                 }
                 
                 collisions.add(contact);
@@ -160,7 +143,7 @@ public class ContactsScrubber {
             }
             
             // Check if it's the local Node
-            if (ContactUtils.isLocalContact(context, contact)) {
+            if (ContactUtils.isLocalContact(localhost, contact)) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Skipping local Node");
                 }
@@ -173,9 +156,7 @@ public class ContactsScrubber {
             scrubbed.put(contact.getNodeID(), contact);
         }
         
-        this.scrubbed = scrubbed.values().toArray(new Contact[0]);
-        this.collisions = collisions.toArray(new Contact[0]);
-        
+        boolean valid = true;
         if (requiredRatio > 0f) {
             int total = scrubbed.size() + collisions.size();
             if (containsLocal) {
@@ -183,38 +164,70 @@ public class ContactsScrubber {
             }
             
             float ratio = (float)total / contacts.length;
-            this.isValidResponse = (ratio >= requiredRatio);
-        } else {
-            this.isValidResponse = true;
+            valid = (ratio >= requiredRatio);
         }
+        
+        return new Scrubbed(contacts, toArray(scrubbed), toArray(collisions), valid);
+    }
+    
+    private static Contact[] toArray(Map<?, ? extends Contact> m) {
+        return toArray(m.values());
+    }
+    
+    private static Contact[] toArray(Collection<? extends Contact> c) {
+        return c.toArray(new Contact[0]);
     }
     
     /**
      * 
      */
-    public Contact[] getContacts() {
-        return contacts;
-    }
-    
-    /**
-     * 
-     */
-    public Contact[] getScrubbed() {
-        return scrubbed;
-    }
-    
-    /**
-     * 
-     */
-    public Contact[] getCollisions() {
-        return collisions;
-    }
-    
-    /**
-     * Returns true if the response contains any or rather the 
-     * response itself can be considered as valid.
-     */
-    public boolean isValidResponse() {
-        return isValidResponse;
+    public static class Scrubbed {
+        
+        private final Contact[] contacts;
+        
+        private final Contact[] scrubbed;
+        
+        private final Contact[] collisions;
+        
+        private boolean valid;
+        
+        private Scrubbed(Contact[] contacts, 
+                Contact[] scrubbed, 
+                Contact[] collisions,
+                boolean valid) {
+            
+            this.contacts = contacts;
+            this.scrubbed = scrubbed;
+            this.collisions = collisions;
+        }
+
+        /**
+         * Returns all {@link Contact}s.
+         */
+        public Contact[] getContacts() {
+            return contacts;
+        }
+
+        /**
+         * Returns scrubbed {@link Contact}s.
+         */
+        public Contact[] getScrubbed() {
+            return scrubbed;
+        }
+
+        /**
+         * Returns {@link Contact}s that collide with the 
+         * localhost {@link Contact}.
+         */
+        public Contact[] getCollisions() {
+            return collisions;
+        }
+
+        /**
+         * Returns {@code true} if the scrubbed {@link Contact}s are valid.
+         */
+        public boolean isValid() {
+            return valid;
+        }
     }
 }

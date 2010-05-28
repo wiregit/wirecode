@@ -31,6 +31,7 @@ import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.util.ContactsScrubber;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.SchedulingUtils;
+import org.limewire.mojito.util.ContactsScrubber.Scrubbed;
 import org.limewire.security.SecurityToken;
 
 public abstract class LookupResponseHandler<V extends LookupEntity> 
@@ -332,10 +333,10 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 return true;
             }
             
-            ContactsScrubber scrubber = ContactsScrubber.scrub(
-                    context, src, contacts, 
+            Scrubbed scrubbed = ContactsScrubber.scrub(context, src, contacts, 
                     LookupSettings.CONTACTS_SCRUBBER_REQUIRED_RATIO.getValue());
-            if (!scrubber.isValidResponse()) {
+            
+            if (!scrubbed.isValid()) {
                 return false;
             }
             
@@ -347,13 +348,13 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             RouteTable routeTable = context.getRouteTable();
             int hop = currentHop + 1;
             
-            for (Contact contact : scrubber.getScrubbed()) {
+            for (Contact contact : scrubbed.getScrubbed()) {
                 if (addToQuery(contact, hop)) {
                     routeTable.add(contact);
                 }
             }
             
-            for (Contact collision : scrubber.getCollisions()) {
+            for (Contact collision : scrubbed.getCollisions()) {
                 collisions.add(collision);
             }
             

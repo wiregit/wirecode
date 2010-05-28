@@ -35,7 +35,6 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
-import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -257,12 +256,13 @@ public final class ContactUtils {
     }
     
     /**
-     * Returns true if the given Contact has the same Node ID as the
-     * local Node but a different IP Address.
+     * Returns {@code true} if both have the same {@link KUID} -AND-
+     * {@link SocketAddress} as returned by {@link Contact#getContactAddress()}.
      */
-    public static boolean isCollision(Context context, Contact node) {
-        if (context.isLocalNodeID(node.getNodeID())
-                && !context.isLocalContactAddress(node.getContactAddress())) {
+    public static boolean isCollision(Contact localhost, Contact other) {
+        if (localhost.getNodeID().equals(other.getNodeID())
+                && localhost.getContactAddress().equals(
+                        other.getContactAddress())) {
             return true;
         }
         
@@ -270,12 +270,12 @@ public final class ContactUtils {
     }
     
     /**
-     * Returns true if the given Contact has the same Node ID or the
-     * same IP Address as the local Node.
+     * Returns {@code true} if the both {@link Contact}s have the same
+     * {@link KUID} -OR- {@link SocketAddress} as returned by 
+     * {@link Contact#getContactAddress()}.
      */
-    public static boolean isLocalContact(Context context, Contact node) {
-        
-        if (context.isLocalNodeID(node.getNodeID())) {
+    public static boolean isLocalContact(Contact localhost, Contact other) {
+        if (localhost.getNodeID().equals(other.getNodeID())) {
             return true;
         }
         
@@ -288,10 +288,9 @@ public final class ContactUtils {
         // Node ID but same IPP). So what happens now is that
         // we're sending a lookup to that Node which is the same
         // as sending the lookup to ourself (loopback).
-        if (context.isLocalContactAddress(node.getContactAddress())) {
+        if (localhost.getContactAddress().equals(other.getContactAddress())) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(node + " has the same Contact addess as we do " 
-                        + context.getLocalNode());
+                LOG.warn(other + " has the same Contact addess as we do " + localhost);
             }
             
             return true;
