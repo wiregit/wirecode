@@ -99,7 +99,7 @@ public class DHTValueEntity implements Serializable {
         this.creator = creator;
         this.sender = sender;
         this.primaryKey = primaryKey;
-        this.secondaryKey = creator.getNodeID();
+        this.secondaryKey = creator.getContactId();
         this.value = value;
         this.local = local;
         

@@ -123,7 +123,7 @@ public class ActiveControllerTest extends DHTTestCase {
         controller = injector.getInstance(ActiveController.class);
         try {
             MojitoDHT dht = controller.getMojitoDHT();
-            assertEquals(localhost.getNodeID(), dht.getLocalNodeID());
+            assertEquals(localhost.getContactId(), dht.getLocalNodeID());
             
             Contact[] others = (Contact[])PrivilegedAccessor.getValue(
                     controller, "contacts");

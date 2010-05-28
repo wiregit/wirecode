@@ -71,15 +71,15 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
             Contact c = list.get(i);
             
             if (i < KademliaSettings.K) {
-                assertNull(routeTable.get(c.getNodeID()));
+                assertNull(routeTable.get(c.getContactId()));
             } else {
-                assertEquals(c, routeTable.get(c.getNodeID()));
+                assertEquals(c, routeTable.get(c.getContactId()));
             }
         }
         
         // Test the actual LRU property. Touch the k+1 th element
         // which should move it to the end of the List
-        routeTable.get(list.get(KademliaSettings.K+1).getNodeID());
+        routeTable.get(list.get(KademliaSettings.K+1).getContactId());
         selected = routeTable.select(KUID.createRandomID(), 
                 KademliaSettings.K, SelectMode.ALL);
         
@@ -105,9 +105,9 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         
         // The first element should be gone now and the (previous) 
         // last element should be still there
-        assertEquals(c, routeTable.get(c.getNodeID()));
-        assertNull(routeTable.get(first.getNodeID()));
-        assertEquals(last, routeTable.get(last.getNodeID()));
+        assertEquals(c, routeTable.get(c.getContactId()));
+        assertNull(routeTable.get(first.getContactId()));
+        assertEquals(last, routeTable.get(last.getContactId()));
     }
     
     public void testClassfulNetworkCounter() {

@@ -62,7 +62,7 @@ public class DatabaseUtils {
         // the xor distance
         } else {
             KUID valueBucketId = routeTable.getBucket(primaryKey).getBucketID();
-            KUID localBucketId = routeTable.getBucket(routeTable.getLocalNode().getNodeID()).getBucketID();
+            KUID localBucketId = routeTable.getBucket(routeTable.getLocalNode().getContactId()).getBucketID();
             KUID xor = localBucketId.xor(valueBucketId);
             
             int lowestSetBit = xor.toBigInteger().getLowestSetBit();

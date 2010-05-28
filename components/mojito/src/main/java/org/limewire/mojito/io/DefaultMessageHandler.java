@@ -69,7 +69,7 @@ public class DefaultMessageHandler implements ResponseHandler {
     }
     
     private KUID getLocalNodeID() {
-        return routeTable.getLocalNode().getNodeID();
+        return routeTable.getLocalNode().getContactId();
     }
     
     /**
@@ -88,7 +88,7 @@ public class DefaultMessageHandler implements ResponseHandler {
             synchronized (routeTable) {
                 // Make sure there's an existing Contact in the RouteTable.
                 // Otherwise don't bother!
-                Contact existing = routeTable.get(node.getNodeID());
+                Contact existing = routeTable.get(node.getContactId());
                 if (node.equals(existing)) {
                     
                     // Update the new Contact in the RouteTable and 
@@ -121,7 +121,7 @@ public class DefaultMessageHandler implements ResponseHandler {
             return;
         }
         
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         if (isLocalNodeID(nodeId)) {
             
             // This is expected if there's a Node ID collision

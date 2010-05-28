@@ -110,9 +110,9 @@ public class PassiveRouteTable implements RouteTable {
                 
                 Contact node = result.getContact();
                 synchronized (PassiveRouteTable.this) {
-                    KUID previous = leafDHTNodes.put(address, node.getNodeID());
+                    KUID previous = leafDHTNodes.put(address, node.getContactId());
                     
-                    if (previous == null || !previous.equals(node.getNodeID())) {
+                    if (previous == null || !previous.equals(node.getContactId())) {
                         // Add it as a priority Node
                         node.setTimeStamp(Contact.PRIORITY_CONTACT);
                         add(node);
@@ -164,7 +164,7 @@ public class PassiveRouteTable implements RouteTable {
                 
                 Contact mrs = null;
                 while((mrs = bucket.getMostRecentlySeenCachedContact()) != null) {
-                    removed = bucket.removeCachedContact(mrs.getNodeID());
+                    removed = bucket.removeCachedContact(mrs.getContactId());
                     assert (removed == true);
                     
                     if (counter == null || counter.isOkayToAdd(mrs)) {

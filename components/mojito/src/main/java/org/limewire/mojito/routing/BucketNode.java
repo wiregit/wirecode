@@ -111,7 +111,7 @@ class BucketNode implements Bucket {
         checkNodeID(node);
         assert (isActiveFull() == false);
         
-        Contact existing = nodeTrie.put(node.getNodeID(), node);
+        Contact existing = nodeTrie.put(node.getContactId(), node);
         assert (existing == null);
         
         if(node.isAlive()) {
@@ -129,14 +129,14 @@ class BucketNode implements Bucket {
         }
         
         if (!isCacheFull()) {
-            Contact existing = cache.put(node.getNodeID(), node);
+            Contact existing = cache.put(node.getContactId(), node);
             assert (existing == null);
         } else {
             Contact lrs = getLeastRecentlySeenCachedContact();
             if (!lrs.isAlive() || (!lrs.hasBeenRecentlyAlive() && node.isAlive())) {
-                Contact c = cache.remove(lrs.getNodeID());
+                Contact c = cache.remove(lrs.getContactId());
                 assert (c == lrs);
-                cache.put(node.getNodeID(), node);
+                cache.put(node.getContactId(), node);
                 return c;
             }
         }
@@ -147,7 +147,7 @@ class BucketNode implements Bucket {
     public Contact updateContact(Contact node) {
         checkNodeID(node);
         
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         if (containsActiveContact(nodeId)) {
             Contact current = nodeTrie.put(nodeId, node);
             assert (current != null);
@@ -172,7 +172,7 @@ class BucketNode implements Bucket {
             return;
         }
         
-        int bitIndex = bucketId.bitIndex(node.getNodeID());
+        int bitIndex = bucketId.bitIndex(node.getContactId());
         if (bitIndex < 0) {
             return;
         }
@@ -259,13 +259,13 @@ class BucketNode implements Bucket {
     }
     
     public boolean isInSmallestSubtree() {
-        int commonPrefixLength = routeTable.getLocalNode().getNodeID().getCommonPrefixLength(bucketId);
-        int localNodeDepth = routeTable.getBucket(routeTable.getLocalNode().getNodeID()).getDepth();
+        int commonPrefixLength = routeTable.getLocalNode().getContactId().getCommonPrefixLength(bucketId);
+        int localNodeDepth = routeTable.getBucket(routeTable.getLocalNode().getContactId()).getDepth();
         return (localNodeDepth - 1) == commonPrefixLength;
     }
     
     public boolean isTooDeep() {
-        int commonPrefixLength = routeTable.getLocalNode().getNodeID().getCommonPrefixLength(bucketId);        
+        int commonPrefixLength = routeTable.getLocalNode().getContactId().getCommonPrefixLength(bucketId);        
         return (depth - commonPrefixLength) >= RouteTableSettings.DEPTH_LIMIT.getValue();
     }
 
@@ -322,10 +322,10 @@ class BucketNode implements Bucket {
             for(int i = contacts.size()-1; i>=0 && !isActiveFull(); i--) {
                 Contact node = contacts.get(i);
                 if(node.isAlive()) {
-                    nodeTrie.put(node.getNodeID(), node);
+                    nodeTrie.put(node.getContactId(), node);
                 }
                 
-                boolean removed = removeCachedContact(node.getNodeID());
+                boolean removed = removeCachedContact(node.getContactId());
                 assert (removed);
             }
         }
@@ -357,7 +357,7 @@ class BucketNode implements Bucket {
         Bucket right = new BucketNode(routeTable, bucketId.set(depth), depth+1);
         
         for (Contact node : getActiveContacts()) {
-            KUID nodeId = node.getNodeID();
+            KUID nodeId = node.getContactId();
             if (!nodeId.isBitSet(depth)) {
                 left.addActiveContact(node);
             } else {

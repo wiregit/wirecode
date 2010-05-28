@@ -140,7 +140,7 @@ public class ContextTest extends MojitoTestCase {
                             flag = true;
                         }
                         
-                        if (node.getNodeID().equals(down.getLocalNode().getNodeID())) {
+                        if (node.getContactId().equals(down.getLocalNode().getContactId())) {
                             locationCounter++;
                         }
                     }

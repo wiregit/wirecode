@@ -306,7 +306,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             
             RouteTable routeTable = context.getRouteTable();
             Contact localhost = routeTable.getLocalNode();
-            KUID contactId = localhost.getNodeID();
+            KUID contactId = localhost.getContactId();
             
             history.put(contactId, 0);
             
@@ -316,7 +316,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 for (Contact contact : contacts) {
                     addToQuery(contact, 1);
                     
-                    init.add(contact.getNodeID());
+                    init.add(contact.getContactId());
                 }
             }
         }
@@ -404,7 +404,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                     closest.pollLast();
                 }
                 
-                KUID contactId = contact.getNodeID();
+                KUID contactId = contact.getContactId();
                 currentHop = history.get(contactId);
                 return true;
             }
@@ -412,7 +412,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         }
         
         private boolean addToQuery(Contact contact, int hop) {
-            KUID contactId = contact.getNodeID();
+            KUID contactId = contact.getContactId();
             if (!history.containsKey(contactId)) {
                 history.put(contactId, hop);
                 query.add(contact);
@@ -424,8 +424,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         private boolean isCloserThanClosest(Contact other) {
             if (!closest.isEmpty()) {
                 Contact contact = closest.last();
-                KUID contactId = contact.getNodeID();
-                KUID otherId = other.getNodeID();
+                KUID contactId = contact.getContactId();
+                KUID otherId = other.getContactId();
                 return otherId.isNearerTo(lookupId, contactId);
             }
             return true;
@@ -487,7 +487,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         @Override
         public int compare(Contact o1, Contact o2) {
-            return o1.getNodeID().xor(key).compareTo(o2.getNodeID().xor(key));
+            return o1.getContactId().xor(key).compareTo(o2.getContactId().xor(key));
         }
     }
     

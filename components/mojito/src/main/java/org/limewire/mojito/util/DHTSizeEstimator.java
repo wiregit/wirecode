@@ -91,7 +91,7 @@ public class DHTSizeEstimator {
                 mode = SelectMode.ALIVE;
             }
             
-            KUID localNodeId = routeTable.getLocalNode().getNodeID();
+            KUID localNodeId = routeTable.getLocalNode().getContactId();
             Collection<Contact> nodes = routeTable.select(localNodeId, 
                     KademliaSettings.K, mode);
             
@@ -179,13 +179,13 @@ public class DHTSizeEstimator {
         BigInteger sum2 = BigInteger.ZERO;
         
         // The algorithm works relative to the ID space.
-        KUID nearestId = contacts.next().getNodeID();
+        KUID nearestId = contacts.next().getContactId();
         
         // We start 1 because the nearest Node is the 0th item!
         for (int i = 1; contacts.hasNext(); i++) {
             Contact node = contacts.next();
 
-            BigInteger distance = nearestId.xor(node.getNodeID()).toBigInteger();
+            BigInteger distance = nearestId.xor(node.getContactId()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);
 
             sum1 = sum1.add(j.multiply(distance));

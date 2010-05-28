@@ -104,7 +104,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
         
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         SocketAddress src = node.getContactAddress();
         
         if (context.isLocalContactAddress(src)

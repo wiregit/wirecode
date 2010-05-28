@@ -12,12 +12,9 @@ import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.BootstrapConfig;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
 import org.limewire.mojito.storage.DHTValueType;
 
 /**

@@ -179,15 +179,12 @@ class StoreManager implements Closeable {
         private final Set<FutureHandle> active 
             = new IdentityHashSet<FutureHandle>();
         
-        private boolean open = true;
-        
         public Queue(int concurrency) {
             this.concurrency = concurrency;
         }
         
         @Override
         public synchronized void close() {
-            open = false;
             clear();
         }
         

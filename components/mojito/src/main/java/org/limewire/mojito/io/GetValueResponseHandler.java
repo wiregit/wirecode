@@ -42,7 +42,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         KUID secondaryKey = lookupKey.getSecondaryKey();
         DHTValueType valueType = lookupKey.getDHTValueType();
         
-        KUID contactId = node.getNodeID();
+        KUID contactId = node.getContactId();
         SocketAddress addr = node.getContactAddress();
         
         MessageHelper messageHelper = context.getMessageHelper();

@@ -75,7 +75,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     
     @Override
     public KUID getLocalNodeID() {
-        return getLocalNode().getNodeID();
+        return getLocalNode().getContactId();
     }
     
     @Override
@@ -357,8 +357,8 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
         Contact shutdown = new LocalContact(
                 localhost.getVendor(), 
                 localhost.getVersion(),
-                localhost.getNodeID(), 
-                localhost.getInstanceID(), 
+                localhost.getContactId(), 
+                localhost.getInstanceId(), 
                 Contact.SHUTDOWN_FLAG);
         
         
@@ -369,7 +369,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
         
         RouteTable routeTable = getRouteTable();
         Collection<Contact> contacts = routeTable.select(
-                localhost.getNodeID(), count, SelectMode.ALIVE);
+                localhost.getContactId(), count, SelectMode.ALIVE);
         
         MessageDispatcher messageDispatcher = getMessageDispatcher();
         

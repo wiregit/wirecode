@@ -82,7 +82,7 @@ public class RequestHandle {
         }
         
         Contact contact = response.getContact();
-        KUID otherId = contact.getNodeID();
+        KUID otherId = contact.getContactId();
         
         return contactId.equals(otherId);
     }

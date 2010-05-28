@@ -58,7 +58,7 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         assertEquals(16, routeTable.size());
         
         Contact creator = routeTable.getLocalNode();
-        KUID valueId = creator.getNodeID().invert();
+        KUID valueId = creator.getContactId().invert();
         DHTValueEntity value = DHTValueEntity.createFromRemote(creator, creator, valueId, 
 															   new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
         

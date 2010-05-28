@@ -154,7 +154,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         }
         
         // Check if the other Node has the same ID as we do
-        if (context.isLocalNodeID(src.getNodeID()) 
+        if (context.isLocalNodeID(src.getContactId()) 
                 && !isCollisionPing()) {
             
             // If so check if this was a Node ID collision
@@ -321,7 +321,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
             
             Contact dst = contacts[index++];
             
-            KUID contactId = dst.getNodeID();
+            KUID contactId = dst.getContactId();
             SocketAddress addr = dst.getContactAddress();
             
             Context context = handler.getContext();

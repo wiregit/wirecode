@@ -214,7 +214,7 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
      */
     private void doLookup(Contact contact) {
         Contact localhost = dht.getLocalNode();
-        KUID lookupId = localhost.getNodeID();
+        KUID lookupId = localhost.getContactId();
         
         long timeout = config.getLookupTimeoutInMillis();
         lookupFuture = dht.lookup(lookupId, 

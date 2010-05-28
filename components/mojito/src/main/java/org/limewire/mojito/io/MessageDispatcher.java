@@ -181,7 +181,7 @@ public abstract class MessageDispatcher implements Callback, Closeable {
      */
     public void send(Contact dst, ResponseMessage response) throws IOException {
         
-        KUID contactId = dst.getNodeID();
+        KUID contactId = dst.getContactId();
         SocketAddress address = dst.getContactAddress();
         
         if (isLocalhost(contactId, address, response)) {
@@ -205,7 +205,7 @@ public abstract class MessageDispatcher implements Callback, Closeable {
     public void send(ResponseHandler callback, Contact dst, 
             RequestMessage request, long timeout, TimeUnit unit) 
                 throws IOException {
-        KUID contactId = dst.getNodeID();
+        KUID contactId = dst.getContactId();
         SocketAddress address = dst.getContactAddress();
         
         send(callback, contactId, address, request, timeout, unit);

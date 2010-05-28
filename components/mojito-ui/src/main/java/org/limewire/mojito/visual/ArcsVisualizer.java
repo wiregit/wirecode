@@ -223,7 +223,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     @Override
     public void messageReceived(Message message) {
         Contact contact = message.getContact();
-        KUID contactId = contact.getNodeID();
+        KUID contactId = contact.getContactId();
         SocketAddress src = contact.getContactAddress();
         
         synchronized (lock) {

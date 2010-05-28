@@ -51,7 +51,7 @@ public class PingRequestHandler extends AbstractRequestHandler {
      */
     private boolean isBooting(PingRequest message) {
         Contact localhost = context.getLocalNode();
-        KUID contactId = localhost.getNodeID();
+        KUID contactId = localhost.getContactId();
         
         boolean collisionPing = MessageUtils.isCollisionPingRequest(contactId, message);
         return context.isBooting() && !collisionPing;

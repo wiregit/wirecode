@@ -110,7 +110,7 @@ public class BucketGraph extends RouteTableGraph {
     }
     
     private BucketVertex createBucketVertex(Bucket bucket, InteriorNodeVertex predecessor, EdgeType type) {
-        boolean isLocalBucket = bucket.contains(routeTable.getLocalNode().getNodeID());
+        boolean isLocalBucket = bucket.contains(routeTable.getLocalNode().getContactId());
         BucketVertex bv = new BucketVertex(bucket, isLocalBucket);
         tree.addVertex(bv);
         tree.addEdge(new BinaryEdge(predecessor, bv, type));

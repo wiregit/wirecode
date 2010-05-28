@@ -63,12 +63,12 @@ public class DefaultStoreForward implements StoreForward {
     }
     
     private KUID getLocalNodeID() {
-        return routeTable.getLocalNode().getNodeID();
+        return routeTable.getLocalNode().getContactId();
     }
     
     @Override
     public void process(Contact node, Message message) {
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         
         if (StoreSettings.STORE_FORWARD_ENABLED.getValue()) {
             // Only do store forward if it is a new node in our routing table 
@@ -77,7 +77,7 @@ public class DefaultStoreForward implements StoreForward {
             
             if (existing == null
                     || existing.isDead()
-                    || existing.getInstanceID() != node.getInstanceID()) {
+                    || existing.getInstanceId() != node.getInstanceId()) {
                 
                 // Store forward only if we're bootstrapped
                 if (provider != null && provider.isReady()) {
@@ -158,7 +158,7 @@ public class DefaultStoreForward implements StoreForward {
      */
     private static boolean containsNodeID(Collection<Contact> nodes, KUID id) {
         for (Contact node : nodes) {
-            if (id.equals(node.getNodeID())) {
+            if (id.equals(node.getContactId())) {
                 return true;
             }
         }
@@ -217,8 +217,8 @@ public class DefaultStoreForward implements StoreForward {
                         && nodes.size() > 1
                         && isLocalNode(nodes.get(1)))) {
             
-            KUID nodeId = node.getNodeID();
-            KUID furthestId = furthest.getNodeID();
+            KUID nodeId = node.getContactId();
+            KUID furthestId = furthest.getContactId();
             
             // #3 The other Node must be equal to the furthest Node
             //    or better
@@ -257,8 +257,8 @@ public class DefaultStoreForward implements StoreForward {
                 && isLocalNode(furthest) 
                 && (existing == null || existing.isDead())) {
             
-            KUID nodeId = node.getNodeID();
-            KUID furthestId = furthest.getNodeID();
+            KUID nodeId = node.getContactId();
+            KUID furthestId = furthest.getContactId();
                 
             if (nodeId.isNearerTo(valueId, furthestId)) {
 //                sb.append("CONDITION C").append("\n");

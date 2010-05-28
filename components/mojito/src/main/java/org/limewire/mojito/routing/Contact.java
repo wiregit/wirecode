@@ -101,7 +101,7 @@ public interface Contact extends Serializable {
     /**
      * Returns the Node ID of this Contact.
      */
-    public KUID getNodeID();
+    public KUID getContactId();
     
     /**
      * Returns the contact address. Use the contact
@@ -130,7 +130,7 @@ public interface Contact extends Serializable {
     /**
      * Returns the instance ID of this Contact.
      */
-    public int getInstanceID();
+    public int getInstanceId();
     
     /**
      * Returns the flags of this Contact.

@@ -227,7 +227,7 @@ public class RouteTableImpl implements RouteTable {
         
         consecutiveFailures = 0;
         
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         Bucket bucket = bucketTrie.select(nodeId);
         Contact existing = bucket.get(nodeId);
         
@@ -257,7 +257,7 @@ public class RouteTableImpl implements RouteTable {
      * there are a few side conditions.
      */
     protected synchronized void updateContactInBucket(Bucket bucket, Contact existing, Contact node) {
-        assert (existing.getNodeID().equals(node.getNodeID()));
+        assert (existing.getContactId().equals(node.getContactId()));
         
         if (isLocalNode(existing)) {
             // The other Node collides with our Node ID! Do nothing,
@@ -320,7 +320,7 @@ public class RouteTableImpl implements RouteTable {
             // a good time to ping least recently seen node if we know we
             // have a node alive in the replacement cache. Don't do this too often!
             long delay = System.currentTimeMillis() - bucket.getTimeStamp();
-            if (bucket.containsCachedContact(node.getNodeID())
+            if (bucket.containsCachedContact(node.getContactId())
                     && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getTimeInMillis())) {
                 pingLeastRecentlySeenNode(bucket);
             }
@@ -378,7 +378,7 @@ public class RouteTableImpl implements RouteTable {
                     return;
                 }
                 
-                KUID nodeId = existing.getNodeID();
+                KUID nodeId = existing.getContactId();
                 SocketAddress address = existing.getContactAddress();
                 
                 if (LOG.isInfoEnabled()) {
@@ -456,7 +456,7 @@ public class RouteTableImpl implements RouteTable {
         // 2. New node part of the smallest subtree to the local node
         // 3. current_depth mod symbol_size != 0
         
-        boolean containsLocalNode = bucket.contains(getLocalNode().getNodeID());
+        boolean containsLocalNode = bucket.contains(getLocalNode().getContactId());
         
         if (containsLocalNode
                 || bucket.isInSmallestSubtree()
@@ -531,7 +531,7 @@ public class RouteTableImpl implements RouteTable {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);
                 }
                 
-                boolean  removed = bucket.removeActiveContact(leastRecentlySeen.getNodeID());
+                boolean  removed = bucket.removeActiveContact(leastRecentlySeen.getContactId());
                 assert (removed == true);
                 
                 bucket.addActiveContact(node);
@@ -561,7 +561,7 @@ public class RouteTableImpl implements RouteTable {
         }
         
         // This should never happen -- who knows?!!
-        if(nodeId.equals(getLocalNode().getNodeID())) {
+        if(nodeId.equals(getLocalNode().getContactId())) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot handle local Node's errors: " 
                         + ContactUtils.toString(nodeId, address));
@@ -610,7 +610,7 @@ public class RouteTableImpl implements RouteTable {
                     
                     Contact mrs = null;
                     while((mrs = bucket.getMostRecentlySeenCachedContact()) != null) {
-                        boolean removed = bucket.removeCachedContact(mrs.getNodeID());
+                        boolean removed = bucket.removeCachedContact(mrs.getContactId());
                         assert (removed == true);
                         
                         if (isOkayToAdd(bucket, mrs)) {
@@ -674,7 +674,7 @@ public class RouteTableImpl implements RouteTable {
      * Removes the given Contact from the RouteTable.
      */
     protected synchronized boolean remove(Contact node) {
-        return remove(node.getNodeID());
+        return remove(node.getContactId());
     }
     
     /**
@@ -851,7 +851,7 @@ public class RouteTableImpl implements RouteTable {
      * @see com.limegroup.mojito.routing.RouteTable#getRefreshIDs(boolean)
      */
     public synchronized Collection<KUID> getRefreshIDs(final boolean bootstrapping) {
-        final KUID nodeId = getLocalNode().getNodeID();
+        final KUID nodeId = getLocalNode().getContactId();
         final List<KUID> randomIds = new ArrayList<KUID>();
         
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
@@ -860,7 +860,7 @@ public class RouteTableImpl implements RouteTable {
                 
                 // Don't refresh the local Bucket if we're bootstrapping
                 // since phase one takes already care of it.
-                if (bootstrapping && bucket.contains(getLocalNode().getNodeID())) {
+                if (bootstrapping && bucket.contains(getLocalNode().getContactId())) {
                     return SelectStatus.CONTINUE;
                 }
 
@@ -933,11 +933,11 @@ public class RouteTableImpl implements RouteTable {
         
         // --- ELSE ---
         
-        handleFailure(node.getNodeID(), node.getContactAddress());
+        handleFailure(node.getContactId(), node.getContactAddress());
         
         RequestTimeoutException exception 
             = new RequestTimeoutException(
-                node.getNodeID(), 
+                node.getContactId(), 
                 node.getContactAddress(), 
                 0L, TimeUnit.MILLISECONDS);
         

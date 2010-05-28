@@ -77,7 +77,7 @@ public class NodeGraph extends RouteTableGraph {
             if(cmpNode.equals(node)) {
                 continue;
             }
-            int commonPrefix = node.getNodeID().bitIndex(cmpNode.getNodeID());
+            int commonPrefix = node.getContactId().bitIndex(cmpNode.getContactId());
             if(commonPrefix > longestPrefix) {
                 longestPrefix = commonPrefix;
             }
@@ -86,7 +86,7 @@ public class NodeGraph extends RouteTableGraph {
     }
     
     private void removeNode(Contact node) {
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
         
         InteriorNodeVertex vertex = (InteriorNodeVertex)root;
         Vertex child;
@@ -126,7 +126,7 @@ public class NodeGraph extends RouteTableGraph {
     
     private void createVertexForNode(Contact node, int depth) {
         InteriorNodeVertex vertex = (InteriorNodeVertex)root;
-        KUID nodeId = node.getNodeID();
+        KUID nodeId = node.getContactId();
 
         Vertex child;
         EdgeType type;
@@ -158,7 +158,7 @@ public class NodeGraph extends RouteTableGraph {
                     return;
                 }
                 ContactVertex cv = (ContactVertex)child;
-                int commonPrefix = node.getNodeID().bitIndex(cv.getNode().getNodeID());
+                int commonPrefix = node.getContactId().bitIndex(cv.getNode().getContactId());
                 
                 if(i > commonPrefix) {
                     throw new IllegalStateException("Existing contact vertex " +

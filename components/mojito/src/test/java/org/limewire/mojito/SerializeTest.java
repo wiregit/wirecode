@@ -65,7 +65,7 @@ public class SerializeTest extends MojitoTestCase {
         assertNotSame(routeTable1, routeTable2);
         assertEquals(101, routeTable2.getContacts().size());
         for (Contact node : routeTable1.getContacts()) {
-            Contact other = routeTable2.get(node.getNodeID());
+            Contact other = routeTable2.get(node.getContactId());
             assertNotNull(other);
             assertEquals(node, other);
             assertNotSame(node, other);

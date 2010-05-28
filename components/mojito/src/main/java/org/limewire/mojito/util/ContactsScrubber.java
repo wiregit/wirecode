@@ -153,7 +153,7 @@ public class ContactsScrubber {
             
             // All tests passed! Add the Contact to our Set
             // of filtered Contacts!
-            scrubbed.put(contact.getNodeID(), contact);
+            scrubbed.put(contact.getContactId(), contact);
         }
         
         boolean valid = true;

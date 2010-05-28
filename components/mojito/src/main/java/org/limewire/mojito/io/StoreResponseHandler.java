@@ -302,7 +302,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         @Override
         public boolean store() throws IOException {
             
-            KUID contactId = dst.getNodeID();
+            KUID contactId = dst.getContactId();
             SocketAddress addr = dst.getContactAddress();
             
             
@@ -328,13 +328,13 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         private final int hashCode;
         
         public ProcessKey(StoreProcess process) {
-            this(process.dst.getNodeID(), 
+            this(process.dst.getContactId(), 
                     process.entity.getPrimaryKey(), 
                     process.entity.getSecondaryKey());
         }
         
         public ProcessKey(Contact src, StoreStatusCode code) {
-            this(src.getNodeID(), code.getPrimaryKey(), 
+            this(src.getContactId(), code.getPrimaryKey(), 
                     code.getSecondaryKey());
         }
         

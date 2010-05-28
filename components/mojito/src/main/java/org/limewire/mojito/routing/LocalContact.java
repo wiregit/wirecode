@@ -114,11 +114,11 @@ public class LocalContact implements Contact {
         this.nodeId = nodeId;
     }
     
-    public KUID getNodeID() {
+    public KUID getContactId() {
         return nodeId;
     }
     
-    public int getInstanceID() {
+    public int getInstanceId() {
         return instanceId;
     }
     
@@ -388,7 +388,7 @@ public class LocalContact implements Contact {
             return false;
         }
         
-        return nodeId.equals(((Contact)o).getNodeID());
+        return nodeId.equals(((Contact)o).getContactId());
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -404,8 +404,8 @@ public class LocalContact implements Contact {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))
-            .append(", instanceId=").append(getInstanceID())
+        buffer.append(ContactUtils.toString(getContactId(), getContactAddress()))
+            .append(", instanceId=").append(getInstanceId())
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();

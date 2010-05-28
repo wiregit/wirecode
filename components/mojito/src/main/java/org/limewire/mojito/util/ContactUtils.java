@@ -252,7 +252,7 @@ public final class ContactUtils {
      * Returns true if both Contacts have the same Node ID.
      */
     public static boolean isSameNodeID(Contact node1, Contact node2) {
-        return node1.getNodeID().equals(node2.getNodeID());
+        return node1.getContactId().equals(node2.getContactId());
     }
     
     /**
@@ -260,7 +260,7 @@ public final class ContactUtils {
      * {@link SocketAddress} as returned by {@link Contact#getContactAddress()}.
      */
     public static boolean isCollision(Contact localhost, Contact other) {
-        if (localhost.getNodeID().equals(other.getNodeID())
+        if (localhost.getContactId().equals(other.getContactId())
                 && localhost.getContactAddress().equals(
                         other.getContactAddress())) {
             return true;
@@ -275,7 +275,7 @@ public final class ContactUtils {
      * {@link Contact#getContactAddress()}.
      */
     public static boolean isLocalContact(Contact localhost, Contact other) {
-        if (localhost.getNodeID().equals(other.getNodeID())) {
+        if (localhost.getContactId().equals(other.getContactId())) {
             return true;
         }
         
@@ -325,7 +325,7 @@ public final class ContactUtils {
         // (with the inverted Node ID of course).
         Vendor vendor = localNode.getVendor();
         Version version = localNode.getVersion();
-        KUID nodeId = localNode.getNodeID().invert();
+        KUID nodeId = localNode.getContactId().invert();
         SocketAddress addr = localNode.getContactAddress();
         Contact sender = ContactFactory.createLiveContact(
                 addr, vendor, version, nodeId, addr, 0, Contact.FIREWALLED_FLAG);
@@ -344,7 +344,7 @@ public final class ContactUtils {
         
         // See createCollisionPingSender(...)
         KUID expectedSenderId = localNodeId.invert();
-        return expectedSenderId.equals(sender.getNodeID());
+        return expectedSenderId.equals(sender.getContactId());
     }
     
     /**

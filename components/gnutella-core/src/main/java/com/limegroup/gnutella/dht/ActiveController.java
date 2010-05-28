@@ -105,7 +105,7 @@ public class ActiveController extends SimpleController {
         
         // Memorize the localhost's KUID
         Contact localhost = dht.getLocalNode();
-        KUID contactId = localhost.getNodeID();
+        KUID contactId = localhost.getContactId();
         DHTSettings.DHT_NODE_ID.set(contactId.toHexString());
         
         bootstrapWorker = new BootstrapWorker(
@@ -148,7 +148,7 @@ public class ActiveController extends SimpleController {
             // Take the KUID from the persisted RouteTable and
             // change override our KUID with it.
             Contact other = existing.getLocalNode();
-            contact.setNodeID(other.getNodeID());
+            contact.setNodeID(other.getContactId());
             
             // Take all Contacts and use 'em for bootstrapping
             Collection<Contact> contacts 

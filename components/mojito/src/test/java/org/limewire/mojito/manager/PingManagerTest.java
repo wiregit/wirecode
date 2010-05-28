@@ -63,8 +63,8 @@ public class PingManagerTest extends MojitoTestCase {
                         "localhost", 2000, 
                         1L, TimeUnit.SECONDS);
                 PingEntity entity = future.get();
-                assertEquals(dht1.getLocalNode().getNodeID(), 
-                        entity.getContact().getNodeID());
+                assertEquals(dht1.getLocalNode().getContactId(), 
+                        entity.getContact().getContactId());
             } catch (ExecutionException e) {
                 fail(e);
             }

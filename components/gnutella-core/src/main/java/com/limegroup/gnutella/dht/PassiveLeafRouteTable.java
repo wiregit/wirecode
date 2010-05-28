@@ -89,7 +89,7 @@ public class PassiveLeafRouteTable implements RouteTable {
 
     @Override
     public synchronized Contact get(KUID nodeId) {
-        if (nodeId.equals(localNode.getNodeID())) {
+        if (nodeId.equals(localNode.getContactId())) {
             return localNode;
         }
         
@@ -260,12 +260,12 @@ public class PassiveLeafRouteTable implements RouteTable {
 
         @Override
         public Contact updateContact(Contact node) {
-            Contact existing = map.remove(node.getNodeID());
+            Contact existing = map.remove(node.getContactId());
             if (existing != null) {
                 getClassfulNetworkCounter().decrementAndGet(existing);
             }
             
-            Contact previous = map.put(node.getNodeID(), node);
+            Contact previous = map.put(node.getContactId(), node);
             assert (previous == null);
             getClassfulNetworkCounter().incrementAndGet(node);
             

@@ -47,7 +47,7 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
     protected void lookup(Contact dst, KUID lookupId, 
             long timeout, TimeUnit unit) throws IOException {
         
-        KUID contactId = dst.getNodeID();
+        KUID contactId = dst.getContactId();
         SocketAddress addr = dst.getContactAddress();
         
         MessageHelper messageHelper = context.getMessageHelper();

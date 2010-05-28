@@ -33,7 +33,7 @@ public class SecurityTokenResponseHandler
 
     @Override
     protected void start() throws IOException {
-        KUID contactId = contact.getNodeID();
+        KUID contactId = contact.getContactId();
         SocketAddress addr = contact.getContactAddress();
         
         MessageHelper messageHelper = context.getMessageHelper();

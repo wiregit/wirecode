@@ -166,7 +166,7 @@ public class RemoteContact implements Contact {
     }
     
     public void updateWithExistingContact(Contact existing) {
-        if (!nodeId.equals(existing.getNodeID())) {
+        if (!nodeId.equals(existing.getContactId())) {
             throw new IllegalArgumentException("Node IDs do not match: " + this + " vs. " + existing);
         }
         
@@ -189,11 +189,11 @@ public class RemoteContact implements Contact {
         return version;
     }
 
-    public KUID getNodeID() {
+    public KUID getContactId() {
         return nodeId;
     }
     
-    public int getInstanceID() {
+    public int getInstanceId() {
         return instanceId;
     }
     
@@ -351,7 +351,7 @@ public class RemoteContact implements Contact {
         }
         
         Contact c = (Contact)o;
-        return nodeId.equals(c.getNodeID())
+        return nodeId.equals(c.getContactId())
                 && contactAddress.equals(c.getContactAddress());
     }
     
@@ -367,10 +367,10 @@ public class RemoteContact implements Contact {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))
+        buffer.append(ContactUtils.toString(getContactId(), getContactAddress()))
             .append(", rtt=").append(getRoundTripTime())
             .append(", failures=").append(getFailures())
-            .append(", instanceId=").append(getInstanceID())
+            .append(", instanceId=").append(getInstanceId())
             .append(", state=").append(isShutdown() ? "DOWN" : getState())
             .append(", firewalled=").append(isFirewalled());
         

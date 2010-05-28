@@ -244,7 +244,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     
     @Override
     public KUID getLocalNodeID() {
-        return getLocalNode().getNodeID();
+        return getLocalNode().getContactId();
     }
     
     @Override

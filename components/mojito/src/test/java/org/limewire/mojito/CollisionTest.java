@@ -102,7 +102,7 @@ public class CollisionTest extends MojitoTestCase {
                 
                 Contact cause = ex.getContact();
                 
-                assertEquals(original.getLocalNodeID(), cause.getNodeID());
+                assertEquals(original.getLocalNodeID(), cause.getContactId());
                 assertEquals(original.getContactAddress(), cause.getContactAddress());
             }
             
@@ -113,7 +113,7 @@ public class CollisionTest extends MojitoTestCase {
             // all tests on the Map rather than the actual List of Contacts!
             Map<KUID, SocketAddress> map = new HashMap<KUID, SocketAddress>();
             for (Contact node : nodes) {
-                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
+                assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
             assertContains(map.keySet(), bootstrap.getLocalNodeID());
@@ -159,7 +159,7 @@ public class CollisionTest extends MojitoTestCase {
             // all tests on the Map rather than the actual List of Contacts!
             Map<KUID, SocketAddress> map = new HashMap<KUID, SocketAddress>();
             for (Contact node : nodes) {
-                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
+                assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
             assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), original.getLocalNodeID());
@@ -178,7 +178,7 @@ public class CollisionTest extends MojitoTestCase {
             nodes = bootstrap.getRouteTable().getContacts();
             map = new HashMap<KUID, SocketAddress>();
             for (Contact node : nodes) {
-                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
+                assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
             assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), replacement.getLocalNodeID());

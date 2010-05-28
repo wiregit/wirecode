@@ -30,6 +30,6 @@ public class ContactVertex extends RouteTableVertex<Contact>{
 
     @Override
     public String toString() {
-        return contact.getNodeID().toBinString().substring(0, depth);
+        return contact.getContactId().toBinString().substring(0, depth);
     }
 }

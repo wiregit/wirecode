@@ -59,9 +59,9 @@ public class MessageOutputStream extends DataOutputStream {
         writeOpCode(opcode); // 0
         writeVendor(src.getVendor()); // 1-3
         writeVersion(src.getVersion()); // 4-5
-        writeKUID(src.getNodeID()); // 6-25
+        writeKUID(src.getContactId()); // 6-25
         writeSocketAddress(src.getContactAddress()); // 26-33
-        writeByte(src.getInstanceID()); // 34
+        writeByte(src.getInstanceId()); // 34
         writeByte(src.getFlags()); // 35
         
         // The length of the extended header.
@@ -261,7 +261,7 @@ public class MessageOutputStream extends DataOutputStream {
     public void writeContact(Contact contact) throws IOException {
         writeVendor(contact.getVendor());
         writeVersion(contact.getVersion());
-        writeKUID(contact.getNodeID());
+        writeKUID(contact.getContactId());
         writeSocketAddress(contact.getContactAddress());
     }
     

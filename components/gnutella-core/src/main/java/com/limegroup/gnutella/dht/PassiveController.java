@@ -328,7 +328,7 @@ public class PassiveController extends SimpleController {
                     
                     KUID localNodeID = getMojitoDHT().getLocalNodeID();
                     for(Contact node : contacts) {
-                        if(!node.getNodeID().equals(localNodeID)) {
+                        if(!node.getContactId().equals(localNodeID)) {
                             oos.writeObject(node);
                         }
                     }

@@ -59,7 +59,7 @@ public class BucketNodeTest extends MojitoTestCase {
     }
     
     public void testPurge() {
-        Bucket bucket = routeTable.getBucket(localNode.getNodeID());
+        Bucket bucket = routeTable.getBucket(localNode.getContactId());
         
         //try purging bucket with only local node
         bucket.purge();
@@ -101,7 +101,7 @@ public class BucketNodeTest extends MojitoTestCase {
     }
     
     public void testTouchBucket() throws Exception{
-    	Bucket bucket = routeTable.getBucket(localNode.getNodeID());
+    	Bucket bucket = routeTable.getBucket(localNode.getContactId());
     	
     	long now = System.currentTimeMillis();
     	assertEquals(0, bucket.getTimeStamp());
@@ -224,7 +224,7 @@ public class BucketNodeTest extends MojitoTestCase {
         try {
             RouteTableSettings.DEPTH_LIMIT.setValue(4);
             RouteTableImpl routeTable = new RouteTableImpl();
-            KUID localNodeId = routeTable.getLocalNode().getNodeID();
+            KUID localNodeId = routeTable.getLocalNode().getContactId();
             byte firstByte = 0;
             byte bytes[] = new byte[20];
             for(int i = 0; i < 256; i++){           
@@ -306,7 +306,7 @@ public class BucketNodeTest extends MojitoTestCase {
         RouteTableImpl routeTable = new RouteTableImpl();
         Contact localNode = routeTable.getLocalNode(); 
         int firstBit;
-        if (localNode.getNodeID().isBitSet(0)) {
+        if (localNode.getContactId().isBitSet(0)) {
             firstBit = 0;
         } else {
             firstBit = 128;
@@ -331,7 +331,7 @@ public class BucketNodeTest extends MojitoTestCase {
         }
         
         for (Bucket bucket : routeTable.getBuckets()) {
-            if (bucket.contains(localNode.getNodeID())) {
+            if (bucket.contains(localNode.getContactId())) {
                 assertFalse(bucket.isInSmallestSubtree());
             } else {
                 assertTrue(bucket.isInSmallestSubtree());

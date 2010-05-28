@@ -56,7 +56,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
     protected void lookup(Contact dst, KUID key, 
             long timeout, TimeUnit unit) throws IOException {
         
-        KUID contactId = dst.getNodeID();
+        KUID contactId = dst.getContactId();
         SocketAddress addr = dst.getContactAddress();
         
         KUID[] noKeys = new KUID[0];

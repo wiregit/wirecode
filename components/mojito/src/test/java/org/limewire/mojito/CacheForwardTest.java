@@ -145,14 +145,14 @@ public class CacheForwardTest extends MojitoTestCase {
             boolean waiting = true;
             KUID rootsID = TrieUtils.select(trie, valueId, 1).get(0);
             for (Contact c : evt.getContacts()){
-                if (c.getNodeID().equals(rootsID)){
+                if (c.getContactId().equals(rootsID)){
                     waiting = false;
                     break;
                 }
             }
             if (waiting) {
                 for (Contact c: evt.getContacts()) {
-                    MojitoDHT dht = dhts.get(c.getNodeID());
+                    MojitoDHT dht = dhts.get(c.getContactId());
                     dht.getDatabase().clear();
                 }
                 Thread.sleep(BOOTSTRAP_TIME);
@@ -167,14 +167,14 @@ public class CacheForwardTest extends MojitoTestCase {
             // And check the initial state
             MojitoDHT closest = null;
             for (Contact remote : evt.getContacts()) {
-                MojitoDHT dht = dhts.get(remote.getNodeID());
+                MojitoDHT dht = dhts.get(remote.getContactId());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
                 for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                     assertEquals(valueId, dhtValue.getPrimaryKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
-                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getContactId());
                 }
                 
                 if (closest == null) {
@@ -198,7 +198,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(1, nearest.getDatabase().getValueCount());
             
             for (Contact remote : evt.getContacts()) {
-                MojitoDHT dht = dhts.get(remote.getNodeID());
+                MojitoDHT dht = dhts.get(remote.getContactId());
 
                 assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
@@ -206,7 +206,7 @@ public class CacheForwardTest extends MojitoTestCase {
                     assertEquals(valueId, dhtValue.getPrimaryKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
-                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getContactId());
                 }
             }
             
@@ -220,7 +220,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The closest Node send us the value!
-                assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getContactId());
             }
             
             // Clear the Database but don't change the instanceId!
@@ -255,7 +255,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The closest Node send us the value!
-                assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getContactId());
             }
             
             // Pick a Node from the middle of the k-closest Nodes,
@@ -265,7 +265,7 @@ public class CacheForwardTest extends MojitoTestCase {
             int index = 0;
             for (Contact node : evt.getContacts()) {
                 if (index == KademliaSettings.K/2) {
-                    middle = dhts.get(node.getNodeID());
+                    middle = dhts.get(node.getContactId());
                     break;
                 }
                 
@@ -294,7 +294,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The nearest Node send us the value
-                assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getContactId());
             }
             
             // Check the final state. k + 1 Nodes should have the value!
@@ -307,7 +307,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // If the creator is a member of the k-closest Nodes then
             // make sure we're counting it as well
             for (Contact node : evt.getContacts()) {
-                if (node.getNodeID().equals(creator.getLocalNodeID())) {
+                if (node.getContactId().equals(creator.getLocalNodeID())) {
                     count++;
                     break;
                 }
