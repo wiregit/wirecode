@@ -153,6 +153,12 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
     /**
      * 
      */
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * 
+     */
     public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
             long timeout, TimeUnit unit);
 }

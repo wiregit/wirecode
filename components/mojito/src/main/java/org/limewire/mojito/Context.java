@@ -2,7 +2,10 @@ package org.limewire.mojito;
 
 import java.math.BigInteger;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.message.MessageHelper;
@@ -100,4 +103,10 @@ public interface Context {
      * 
      */
     public BigInteger size();
+    
+    /**
+     * 
+     */
+    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+            long timeout, TimeUnit unit);
 }

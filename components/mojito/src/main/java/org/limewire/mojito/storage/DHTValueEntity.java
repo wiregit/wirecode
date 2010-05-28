@@ -21,7 +21,7 @@ package org.limewire.mojito.storage;
 
 import java.io.Serializable;
 
-import org.limewire.mojito.DHT;
+import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
@@ -77,8 +77,8 @@ public class DHTValueEntity implements Serializable {
      * Creates and returns a <code>DHTValueEntity</code> for the given primary 
      * key and value.
      */
-    public static DHTValueEntity createFromValue(DHT dht, KUID primaryKey, DHTValue value) {
-        return new DHTValueEntity(dht.getLocalNode(), dht.getLocalNode(), 
+    public static DHTValueEntity createFromValue(Context context, KUID primaryKey, DHTValue value) {
+        return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
                 primaryKey, value, true);
     }
     

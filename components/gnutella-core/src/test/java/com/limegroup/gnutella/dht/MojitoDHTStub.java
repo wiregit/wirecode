@@ -270,6 +270,11 @@ public class MojitoDHTStub implements MojitoDHT {
     }
     
     @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, long timeout, TimeUnit unit) {
+        return createFuture();
+    }
+
+    @Override
     public DHTFuture<SecurityTokenEntity> getSecurityToken(Contact dst, 
             long timeout, TimeUnit unit) {
         return createFuture();

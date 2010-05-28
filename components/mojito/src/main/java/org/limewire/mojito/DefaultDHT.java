@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
@@ -26,7 +24,6 @@ import org.limewire.mojito.io.NodeResponseHandler;
 import org.limewire.mojito.io.PingResponseHandler;
 import org.limewire.mojito.io.SecurityTokenResponseHandler;
 import org.limewire.mojito.io.StoreForward;
-import org.limewire.mojito.io.StoreResponseHandler;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.io.ValueResponseHandler;
 import org.limewire.mojito.message.MessageFactory;
@@ -44,10 +41,8 @@ import org.limewire.mojito.storage.DHTValueEntity;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseCleaner;
 import org.limewire.mojito.util.DHTSizeEstimator;
-import org.limewire.mojito.util.EntryImpl;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.ExceptionUtils;
 
 /**
  * 
@@ -79,6 +74,12 @@ public class DefaultDHT extends AbstractDHT implements Context {
         = new BucketRefresher(this, 
                 BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getTimeInMillis(), 
                 TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    private final StoreManager storeManager = new StoreManager(this, 
+            StoreSettings.PARALLEL_STORES.getValue());
     
     /**
      * 
@@ -169,6 +170,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         
         databaseCleaner.close();
         bucketRefresher.close();
+        storeManager.close();
         
         messageDispatcher.close();
     }
@@ -183,6 +185,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
 
     @Override
     public Transport unbind() {
+        storeManager.clear();
         databaseCleaner.stop();
         bucketRefresher.stop();
         
@@ -364,99 +367,18 @@ public class DefaultDHT extends AbstractDHT implements Context {
     @Override
     public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
             long timeout, TimeUnit unit) {
-        
-        DHTValueEntity entity = DHTValueEntity.createFromValue(
-                this, key, value);
-        return put(entity, timeout, unit);
+        return storeManager.put(key, value, timeout, unit);
     }
     
-    private DHTFuture<StoreEntity> put(DHTValueEntity value, 
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, 
             long timeout, TimeUnit unit) {
-        
-        // The store operation is a composition of two DHT operations.
-        // In the first step we're doing a FIND_NODE lookup to find
-        // the K-closest nodes to a given key. In the second step we're
-        // performing a STORE operation on the K-closest nodes we found.
-        
-        final Object lock = new Object();
-        
-        synchronized (lock) {
-            
-            // The DHTFuture for the STORE operation. We initialize it 
-            // at the very end of this block of code.
-            final AtomicReference<DHTFuture<StoreEntity>> futureRef 
-                = new AtomicReference<DHTFuture<StoreEntity>>();
-            
-            final StoreResponseHandler process 
-                = new StoreResponseHandler(this, value, timeout, unit);
-            
-            KUID lookupId = value.getPrimaryKey();
-            final DHTFuture<NodeEntity> lookup 
-                = lookup(lookupId, timeout, unit);
-            
-            lookup.addFutureListener(new EventListener<FutureEvent<NodeEntity>>() {
-                @Override
-                public void handleEvent(FutureEvent<NodeEntity> event) {
-                    synchronized (lock) {
-                        try {
-                            // The reference can be null if the FutureManager was
-                            // unable to execute the STORE process. This can happen
-                            // if the Context is being shutdown.
-                            
-                            DHTFuture<StoreEntity> future = futureRef.get();
-                            if (future != null && !future.isDone()) {
-                                switch (event.getType()) {
-                                    case SUCCESS:
-                                        onSuccess(event.getResult());
-                                        break;
-                                    case EXCEPTION:
-                                        onException(event.getException());
-                                        break;
-                                    default:
-                                        onCancellation();
-                                        break;
-                                }
-                            }
-                        } catch (Throwable t) {
-                            onException(t);
-                            ExceptionUtils.reportIfUnchecked(t);
-                        }
-                    }
-                }
-                
-                private void onSuccess(NodeEntity entity) 
-                        throws IOException {
-                    process.store(entity.getContacts());
-                }
-                
-                private void onException(Throwable t) {
-                    futureRef.get().setException(t);
-                }
-                
-                private void onCancellation() {
-                    futureRef.get().cancel(true);
-                }
-            });
-            
-            DHTFuture<StoreEntity> store 
-                = submit(process, timeout, unit);
-            futureRef.set(store);
-            
-            store.addFutureListener(new EventListener<FutureEvent<StoreEntity>>() {
-                @Override
-                public void handleEvent(FutureEvent<StoreEntity> event) {
-                    lookup.cancel(true);
-                }
-            });
-            
-            return store;
-        }
+        return storeManager.enqueue(key, value, timeout, unit);
     }
-    
+
     /**
      * Stores the given {@link DHTValueEntity}ies.
      */
-    @SuppressWarnings("unchecked")
     private void store(final Contact dst, final SecurityToken securityToken, 
             final Collection<? extends DHTValueEntity> values) {
         
@@ -478,15 +400,10 @@ public class DefaultDHT extends AbstractDHT implements Context {
             return;
         }
         
-        Entry<Contact, SecurityToken>[] entry = new Entry[] { 
-            new EntryImpl<Contact, SecurityToken>(dst, securityToken) 
-        };
-        
         long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
         for (DHTValueEntity entity : values) {
-            StoreResponseHandler process = new StoreResponseHandler(
-                    this, entry, entity, timeout, TimeUnit.MILLISECONDS);
-            submit(process, timeout, TimeUnit.MILLISECONDS);
+            storeManager.enqueue(dst, securityToken, entity, 
+                    timeout, TimeUnit.MILLISECONDS);
         }
     }
     
