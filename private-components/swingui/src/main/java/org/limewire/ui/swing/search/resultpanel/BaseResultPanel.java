@@ -170,7 +170,7 @@ public class BaseResultPanel extends JXPanel {
         this.defaultTableCellRenderer = defaultTableCellRenderer;
         this.menuFactory = menuFactory;
         
-        rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery(), searchResultsModel.getAdvSearchquery());
+        rowHeightRule.initializeWithSearch(searchResultsModel.getSearchQuery(), searchResultsModel.getAdvancedSearchquery());
 
         // Create tables.
         this.resultsList = createList();

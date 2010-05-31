@@ -382,7 +382,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     }
     
     @Override
-    public Map<FilePropertyKey, String> getAdvSearchquery() {
+    public Map<FilePropertyKey, String> getAdvancedSearchquery() {
         return searchInfo.getAdvancedDetails();
     }
     

@@ -58,7 +58,9 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         }
         
         StringBuilder bldr = new StringBuilder();
-        if(search != null) bldr.append(search);
+        if(search != null){
+            bldr.append(search);
+        }
         for(FilePropertyKey key : advSearch.keySet()){
             bldr.append(" ").append(advSearch.get(key));
         }

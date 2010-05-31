@@ -39,9 +39,8 @@ public interface SearchResultsModel extends FilterableSource<VisualSearchResult>
     
     /**
      * Returns advance-search query strings for search 
-     * @return
      */
-    Map<FilePropertyKey, String> getAdvSearchquery();
+    Map<FilePropertyKey, String> getAdvancedSearchquery();
     
     /**
      * Returns the title string for the search.

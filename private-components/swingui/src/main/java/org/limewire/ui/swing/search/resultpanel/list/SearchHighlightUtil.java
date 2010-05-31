@@ -14,7 +14,7 @@ class SearchHighlightUtil {
          String literalSearch = createLiteralSearch(Objects.nonNull(search, "search"));
          
          // Create pattern to match on word boundary, and match content.
-         Pattern pattern = Pattern.compile("\\b(" + literalSearch + ")\\b", Pattern.CASE_INSENSITIVE);
+         Pattern pattern = Pattern.compile("\\b(" + literalSearch + ")", Pattern.CASE_INSENSITIVE);
          matcher = pattern.matcher("");
     }
 
