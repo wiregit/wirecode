@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 11:30-0400\n"
+"POT-Creation-Date: 2010-05-31 11:30-0400\n"
 "PO-Revision-Date: 2010-03-30 22:13+0000\n"
 "Last-Translator: The Translator <Unknown>\n"
 "Language-Team: DA\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-05-25 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-06-01 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Bookmarks: -1,378,659,884,481,-1,-1,-1,-1,-1\n"
 
@@ -123,7 +123,7 @@ msgid "The file is corrupted"
 msgstr "Denne fil er ødelagt"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this file for sharing"
+msgid "The copyright holder has not authorized this for sharing"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
@@ -325,7 +325,7 @@ msgstr "Creative Commons"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:191
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
 msgid "LimeWire Store Integration"
 msgstr "LimeWire butiksintegration"
 
@@ -3317,19 +3317,19 @@ msgstr "Få personlig &teknisk support"
 msgid "&Tech Support"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&Using LimeWire"
 msgstr "&Brug af LimeWire"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:55
 msgid "&FAQ"
 msgstr "&OSS"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
 msgid "&Forum"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&Give Feedback"
 msgstr "&Giv feedback"
 

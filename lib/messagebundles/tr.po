@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 11:30-0400\n"
-"PO-Revision-Date: 2010-05-14 17:18+0000\n"
-"Last-Translator: Angel Spy <melissadilara@yahoo.com>\n"
+"POT-Creation-Date: 2010-05-31 11:30-0400\n"
+"PO-Revision-Date: 2010-05-30 14:54+0000\n"
+"Last-Translator: AngelOfDie <Unknown>\n"
 "Language-Team: TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-05-25 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-06-01 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -105,7 +105,7 @@ msgid "The file is corrupted"
 msgstr "Dosya hasarlı"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this file for sharing"
+msgid "The copyright holder has not authorized this for sharing"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
@@ -307,9 +307,9 @@ msgstr "Yaratıcı Çevre"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:191
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
 msgid "LimeWire Store Integration"
-msgstr ""
+msgstr "LimeWire Mağaza Entegrasyonu"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
@@ -811,7 +811,7 @@ msgstr "Aşamalar için NYC Temizleniyor..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:598
 msgid "Squeezing Limes..."
-msgstr ""
+msgstr "Sıkıştırılmış Limes..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:639
@@ -830,6 +830,10 @@ msgid ""
 "connections on the local machine. Please add LimeWire as an exception to "
 "your security software and restart LimeWire."
 msgstr ""
+"LimeWire başlatılamadı. Bu genellikle bir güvenlik prgramının LimeWire "
+"erişimini engellemesinden veya yerel makinadaki döngü bağlanılarından "
+"kaynaklanıyor olabilir. Lütfen LimeWire'ı güvenlik programınızın istisna "
+"listesine ekleyin ve LimeWire'ı yeniden başlatın."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:682
 msgid ""
@@ -1246,7 +1250,7 @@ msgstr "Ultraeş düğümüsünüz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:63
 msgid "You are a Leaf node"
-msgstr ""
+msgstr "Yaprak düğümüsünüz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:64
 msgid "You are not behind a firewall"
@@ -1509,11 +1513,11 @@ msgstr "Uyarı: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:143
 msgid "The torrent file download could not be virus scanned."
-msgstr ""
+msgstr "İndirilen torrent dosyası virüs taramasından geçirilemedi."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
 msgid "Do you want to continue and download the torrent?"
-msgstr ""
+msgstr "Devam etmek ve torrent dosyasını indirmek istermisiniz?"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -1621,7 +1625,7 @@ msgstr "Arkadaşlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:207
 msgid "Web Search"
-msgstr ""
+msgstr "Web Araması"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:209
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:244
@@ -1639,7 +1643,7 @@ msgstr[0] "P2P Kullanıcısı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:280
 msgid "Locate"
-msgstr ""
+msgstr "Yer Belirle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:116
 msgid "Loading LimeWire..."
@@ -2850,11 +2854,11 @@ msgstr[0] "Dosya/Dosyalar diskten silinsin mi?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:58
 msgid "&Remove from Library"
-msgstr ""
+msgstr "&Kitaplıktan çıkar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
 msgid "&Cancel"
-msgstr ""
+msgstr "&İptal"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:62
 msgid "Move File to the Recycle Bin or Remove from Library"
@@ -2895,7 +2899,7 @@ msgstr[0] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:73
 msgid "&Move to Trash"
-msgstr ""
+msgstr "&Çöp Kutusuna Taşı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:76
 msgid "Delete File or Remove from Library"
@@ -2913,7 +2917,7 @@ msgstr[0] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:80
 msgid "&Delete from Disk"
-msgstr ""
+msgstr "&Bellekten sil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:408
 msgid "This file is still processing."
@@ -3299,19 +3303,19 @@ msgstr "Kişiselleştirilmiş &Teknik Destek Al"
 msgid "&Tech Support"
 msgstr "&Teknik Destek"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&Using LimeWire"
 msgstr "&LimeWire Kullanımı"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:55
 msgid "&FAQ"
 msgstr "&SSS"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
 msgid "&Forum"
 msgstr "&Forum"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&Give Feedback"
 msgstr "&Geribildirim Verin"
 
@@ -3605,6 +3609,8 @@ msgid ""
 "LimeWire can allow other processes to make use of its services, like search "
 "and download, via a REST interface."
 msgstr ""
+"LimeWire diğer arama ve indirme hizmet yöntemlerinden faydalanmak için REST "
+"arayüzünü açabilir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExternalAccessOptionPanel.java:47
 msgid "Enable local access to REST service"
@@ -4031,7 +4037,7 @@ msgstr "Benzer arama sonuçlarını gruplandır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:78
 msgid "Use web search to find additional torrent sources"
-msgstr ""
+msgstr "Ek torrent kaynakları bulmak için web aramasını kullanın"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:142
 msgid "Search Bar"
@@ -4517,7 +4523,7 @@ msgstr "Dosya Bilgilerini Görüntüle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:195
 msgid "torrent file hash:"
-msgstr ""
+msgstr "Torrent dosyası karıştı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:196
 msgid "payload hash:"
@@ -4525,7 +4531,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:201
 msgid "Hashes"
-msgstr ""
+msgstr "Karışıklıklar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:213
 msgid "Hash"
@@ -4541,7 +4547,7 @@ msgstr "Detaylar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:375
 msgid "Open Website"
-msgstr ""
+msgstr "Web sayfasını aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:383
 msgid "Block Address"
@@ -4549,7 +4555,7 @@ msgstr "Adresi Engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:398
 msgid "Unable to Locate"
-msgstr ""
+msgstr "Bulunamadı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoLimitsPanel.java:38
 msgid "Torrent Settings"
@@ -4652,7 +4658,7 @@ msgstr "Parçalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:44
 msgid "Limits"
-msgstr ""
+msgstr "Limitler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTrackersPanel.java:67
 msgid "Add Tracker:"
@@ -5226,11 +5232,11 @@ msgstr "Benzer Dosyaları Göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:47
 msgid "Seeders"
-msgstr ""
+msgstr "Kaynaklar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:48
 msgid "Leechers"
-msgstr ""
+msgstr "Sömürücüler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:49
 msgid "Downloaded"
@@ -5666,7 +5672,7 @@ msgstr "Kullanıcı Aracısı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:44
 msgid "Referrer"
-msgstr ""
+msgstr "Yönlendirme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:78
 #, java-format
@@ -6102,7 +6108,7 @@ msgstr "Dosya İlişkilendirmeleri ve Başlatma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
 msgid "Associate magnet links and torrent files with LimeWire"
-msgstr ""
+msgstr "LimeWire ile mıknatıs bağlantılarını ilişkilendir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:66
 msgid "Launch LimeWire at system startup"

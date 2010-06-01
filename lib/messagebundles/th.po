@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 11:30-0400\n"
-"PO-Revision-Date: 2010-03-14 22:58+0000\n"
-"Last-Translator: rodney ramsey <Unknown>\n"
+"POT-Creation-Date: 2010-05-31 11:30-0400\n"
+"PO-Revision-Date: 2010-05-31 07:57+0000\n"
+"Last-Translator: SiraNokyoongtong <gumaraa@gmail.com>\n"
 "Language-Team: Thai <th@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-05-25 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-06-01 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -105,7 +105,7 @@ msgid "The file is corrupted"
 msgstr "แฟ้มข้อมูลมีปัญหา"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this file for sharing"
+msgid "The copyright holder has not authorized this for sharing"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
@@ -148,7 +148,7 @@ msgstr ""
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
 msgid "Free to chat"
-msgstr ""
+msgstr "สนทนาได้อย่างอิสระ"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:131
@@ -166,7 +166,7 @@ msgstr "เดี๋ยวมา"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:113
 msgid "Do not disturb"
-msgstr ""
+msgstr "กรุณาอย่ารบกวน"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:307
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -190,7 +190,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:401
 msgid "Connection Management"
-msgstr ""
+msgstr "จัดการการเชื่อมต่อ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:69
 msgid "Stale Connection Management"
@@ -268,7 +268,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
-msgstr ""
+msgstr "จัดการเนื้อหา"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
@@ -291,15 +291,15 @@ msgstr "มีอะไรใหม่บ้าง"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:182
 msgid "Creative Commons"
-msgstr ""
+msgstr "สัญญาอนุญาตครีเอทีฟคอมมอนส์"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:143
 msgid "Mojito DHT"
 msgstr ""
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:191
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
 msgid "LimeWire Store Integration"
-msgstr ""
+msgstr "ผนึกรวมกับร้านค้าของ LimeWire"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
@@ -607,12 +607,16 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"LimeWire ไม่สามารถบันทึกข้อมูลได้เนื่องจากพื้นที่ฮาร์ดดิสก์ไม่เพียงพอ "
+"หากต้องการบันทึกรายการให้ลบข้อมูลที่ไม่ต้องการออกจากฮาร์ดดิสก์"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"Limewire ไม่สามารถเปิดไฟล์ได้เนื่องจากมีโปรแกรมอื่นใช้งานอยู่  "
+"ปิดโปรแกรมเพื่อเริ่มต้นใช้แฟ้ม"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
@@ -620,25 +624,33 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
+"LimeWire ไม่สามารถเขียนแฟ้มได้เนื่องจากไม่ได้รับอนุญาตจากระบบ "
+"การปรับเปลี่ยนจะแสดงผลเมื่อเริ่มโปรแกรมใหม่ "
+"หรือโปรแกรมอาจไม่เกิดการเปลี่ยนแปลง"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
-msgstr ""
+msgstr "LimeWire ไม่สนับสนุนแฟ้มนี้บนระบบปฏิบัติการของท่าน"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire ไม่สามารถดาวน์โหลดแฟ้มที่เลือกได้เนื่องฮาร์ดดิสก์เต็ม "
+"เพื่อดาวน์โหลดแฟ้มเพิ่มเติม คุณต้องเพิ่มพื้นที่ว่างบนฮาร์ดดิสก์ของคุณ"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"LimeWire "
+"ไม่สามารถดาวน์โหลดแฟ้มที่เลือกได้เนื่องจากมีโปรแกรมอื่นกำลังใช้แฟ้มอยู่ "
+"โปรดปิดโปรแกรมอื่นเพื่อลองดาวน์โหลดอีกครั้ง"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
@@ -647,6 +659,9 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire ไม่สามารถสร้าง หรือบันทึกข้อมูลต่อเนื่องจากแฟ้มที่ไม่สมบูรณ์ "
+"ต้องการการอนุญาตเพื่อบันทึกข้อมูล หากต้องการใช้งาน LimeWire "
+"ให้เลือกบันทึกที่แฟ้มอื่น"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
@@ -654,6 +669,8 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire ไม่สามารถเปิดแฟ้มที่ไม่สมบูรณ์ที่เลือกดาวน์โหลดไว้ "
+"เนื่องจากชื่อแฟ้มประกอบด้วยอักขระที่ระบบปฏิบัติการของคุณไม่สนับสนุน"
 
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:32
 msgid "Firewall Manager"
@@ -661,7 +678,7 @@ msgstr ""
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
-msgstr ""
+msgstr "จัดการสถิติ"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:375
 msgid "Oops!"
@@ -678,6 +695,9 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
+"อ๊ะ! คุณได้เจอสิ่งที่เรายังไม่ได้แก้ไข ต้องขออภัยเป็นอย่างสูง LimeWire "
+"จะยังทำงานได้ปกติ แต่กรุณาคลิก 'Send Bug' เพื่อเตือนพวกเราให้ทำการแก้ไขด้วย "
+"ถ้าต้องการ คุณสามารถคลิก 'Show Bug' เพื่อดูข้อมูลที่จะถูกส่งได้, ขอบคุณ!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
@@ -685,12 +705,17 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
+"อ๊ะ! คุณได้เจอสิ่งที่เรายังไม่ได้แก้ไข ต้องขออภัยเป็นอย่างสูง LimeWire "
+"จะยังทำงานได้ปกติ ไม่ต้องกังวล ถ้าต้องการ คุณสามารถคลิก 'Show Bug' "
+"เพื่อดูข้อมูลเกี่ยวกับข้อผิดพลาด"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
+"ขออภัย LimeWire ประสบปัญหาเสียแล้ว LimeWire จะยังทำงานได้ปกติ "
+"แต่คุณควรจะแจ้งปัญหาให้พวกเราทราบเพื่อแก้ไข"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
@@ -699,6 +724,9 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
+"LimeWire พบปัญหาระบบภายใน และเป็นไปได้ว่า LimeWire จะสามารถฟื้นฟู "
+"และกลับมาทำงานได้ปกติ หากต้องการใช้งาน LimeWire ให้ปิดหน้าต่างนี้ ถ้าต้องการ "
+"คุณสามารถคลิก 'Show Bug' เพื่อดูข้อมูลเกี่ยวกับข้อผิดพลาด"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -3166,19 +3194,19 @@ msgstr ""
 msgid "&Tech Support"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&Using LimeWire"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:55
 msgid "&FAQ"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
 msgid "&Forum"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&Give Feedback"
 msgstr ""
 
@@ -5057,7 +5085,7 @@ msgstr "สนับสนุน LimeWire PRO เพื่อดาวน์โ�
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:50
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "เร่งความเร็วติดเทอร์โบกับ LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:72
 msgid "Support open networks. Get LimeWire PRO."
@@ -5065,12 +5093,12 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
+msgstr "สนับสนุนโอเพนซอร์สและโปรโตคอลเปิด ด้วย LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:79
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:62
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr ""
+msgstr "เพิ่มประสิทธิภาพเทอร์โบดาวน์โหลดด้วย LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:82
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:66
@@ -5079,7 +5107,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:85
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr ""
+msgstr "การพัฒนา LimeWire ต้องใช้เงินจริง โหลดรุ่น PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:95
 msgid "\"magnet:\" links"
@@ -5916,6 +5944,7 @@ msgstr ""
 msgid ""
 "Shared files from your old version will continue to be shared with the world."
 msgstr ""
+"แฟ้มข้อมูลที่คุณได้แบ่งปันไว้ในรุ่นเก่า จะยังคงถูกแบ่งปันต่อไปบนโลกใบนี้"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:184
 #, java-format
@@ -5923,6 +5952,8 @@ msgid ""
 "{0} shared files from your previous version will continue to be shared with "
 "the world."
 msgstr ""
+"{0} แฟ้มข้อมูลที่คุณได้แบ่งปันไว้ในเวอร์ชันเก่า "
+"จะยังคงถูกแบ่งปันต่อไปบนโลกใบนี้"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:104
 msgid "LimeWire PRO"

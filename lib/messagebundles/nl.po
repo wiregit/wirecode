@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-24 11:30-0400\n"
-"PO-Revision-Date: 2010-05-21 19:54+0000\n"
+"POT-Creation-Date: 2010-05-31 11:30-0400\n"
+"PO-Revision-Date: 2010-05-25 11:18+0000\n"
 "Last-Translator: Tim van der Meij <timvandermeij@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-05-25 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-06-01 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -105,7 +105,7 @@ msgid "The file is corrupted"
 msgstr "Het bestand is beschadigd"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this file for sharing"
+msgid "The copyright holder has not authorized this for sharing"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
@@ -311,7 +311,7 @@ msgstr "Creative Commons"
 msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:191
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
 msgid "LimeWire Store Integration"
 msgstr "LimeWire Store-integratie"
 
@@ -1527,10 +1527,11 @@ msgstr "Waarschuwing: {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:143
 msgid "The torrent file download could not be virus scanned."
 msgstr ""
+"De download van het torrentbestand kan niet op virussen worden gescand."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
 msgid "Do you want to continue and download the torrent?"
-msgstr ""
+msgstr "Wilt u doorgaan met het downloaden van deze torrent?"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -2882,11 +2883,11 @@ msgstr[1] "Deze bestanden van de harde schijf verwijderen?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:58
 msgid "&Remove from Library"
-msgstr ""
+msgstr "Verwijderen uit bibliotheek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
 msgid "&Cancel"
-msgstr ""
+msgstr "Annuleren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:62
 msgid "Move File to the Recycle Bin or Remove from Library"
@@ -2912,7 +2913,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:66
 msgid "&Move to Recycle Bin"
-msgstr ""
+msgstr "Naar prullenbak verplaatsen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:69
 msgid "Move File to the Trash or Remove from Library"
@@ -2938,7 +2939,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:73
 msgid "&Move to Trash"
-msgstr ""
+msgstr "Naar prullenbak verplaatsen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:76
 msgid "Delete File or Remove from Library"
@@ -2960,7 +2961,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:80
 msgid "&Delete from Disk"
-msgstr ""
+msgstr "Verwijderen van schijf"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:408
 msgid "This file is still processing."
@@ -3348,19 +3349,19 @@ msgstr "Persoonlijke &technische ondersteuning verkrijgen"
 msgid "&Tech Support"
 msgstr "Technische ondersteuning"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:54
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&Using LimeWire"
 msgstr "&Gebruik van LimeWire"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:56
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:55
 msgid "&FAQ"
 msgstr "&FAQ"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:58
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:57
 msgid "&Forum"
 msgstr "Forum"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:61
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:60
 msgid "&Give Feedback"
 msgstr "&Feedback geven"
 
@@ -4092,7 +4093,7 @@ msgstr "Gelijksoortige zoekresultaten groeperen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:78
 msgid "Use web search to find additional torrent sources"
-msgstr ""
+msgstr "Zoek op het internet om meerdere torrentbronnen te vinden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:142
 msgid "Search Bar"
