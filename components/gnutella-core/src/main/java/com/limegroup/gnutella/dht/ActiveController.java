@@ -34,7 +34,6 @@ import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
@@ -297,12 +296,6 @@ public class ActiveController extends SimpleController {
             out.writeInt(DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.getValue());
             synchronized (dht) {
                 out.writeObject(dht.getRouteTable());
-                
-                Database database = null;
-                if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
-                    database = dht.getDatabase();
-                }                    
-                out.writeObject(database);
             }
             out.flush();
         } catch (IOException ignored) {
@@ -329,17 +322,6 @@ public class ActiveController extends SimpleController {
                 int routeTableVersion = in.readInt();
                 if (routeTableVersion >= DHTSettings.ACTIVE_DHT_ROUTETABLE_VERSION.getValue()) {
                     RouteTable routeTable = (RouteTable)in.readObject();
-
-                    Database database = null;
-                    try {
-                        if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
-                            database = (Database)in.readObject();                                                        
-                        }
-                    } catch (Throwable ignored) {
-                        LOG.error("Throwable", ignored);
-                    }
-                    
-                    // The Database depends on the RouteTable!
                     if (routeTable != null) {
                         long maxElaspedTime 
                             = DHTSettings.MAX_ELAPSED_TIME_SINCE_LAST_CONTACT.getTimeInMillis();

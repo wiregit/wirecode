@@ -155,7 +155,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(true);
         DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(true);
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
-        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         

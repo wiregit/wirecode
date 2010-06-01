@@ -38,7 +38,6 @@ public class DHTTestUtils {
         
         // DHT Settings
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
-        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         DHTSettings.ENABLE_PUSH_PROXY_QUERIES.setValue(true);
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
