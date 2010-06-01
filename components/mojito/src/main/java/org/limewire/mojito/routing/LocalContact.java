@@ -90,6 +90,7 @@ public class LocalContact implements Contact {
         this.vendor = vendor;
     }
     
+    @Override
     public Vendor getVendor() {
         return vendor;
     }
@@ -101,6 +102,7 @@ public class LocalContact implements Contact {
         this.version = version;
     }
     
+    @Override
     public Version getVersion() {
         return version;
     }
@@ -114,14 +116,17 @@ public class LocalContact implements Contact {
         this.nodeId = nodeId;
     }
     
+    @Override
     public KUID getContactId() {
         return nodeId;
     }
     
+    @Override
     public int getInstanceId() {
         return instanceId;
     }
     
+    @Override
     public int getFlags() {
         return flags;
     }
@@ -133,6 +138,7 @@ public class LocalContact implements Contact {
         instanceId = (instanceId + 1) % 0xFF;
     }
 
+    @Override
     public SocketAddress getContactAddress() {
         return contactAddress;
     }
@@ -149,8 +155,7 @@ public class LocalContact implements Contact {
      * Sets the local Node's Contact (external) Port.
      */
     public synchronized void setExternalPort(int port) {
-        InetSocketAddress addr = (InetSocketAddress)getContactAddress();
-        setContactAddress(new InetSocketAddress(addr.getAddress(), port));
+        setContactAddress(NetworkUtils.merge(getContactAddress(), port));
     }
     
     /**
@@ -160,6 +165,7 @@ public class LocalContact implements Contact {
         return ((InetSocketAddress)getContactAddress()).getPort();
     }
     
+    @Override
     public SocketAddress getSourceAddress() {
         return sourceAddress;
     }
@@ -168,6 +174,7 @@ public class LocalContact implements Contact {
         this.sourceAddress = sourceAddress;
     }
     
+    @Override
     public boolean isFirewalled() {
         return (flags & FIREWALLED_FLAG) != 0;
     }
@@ -194,11 +201,11 @@ public class LocalContact implements Contact {
         
         // --- DOES NOT CHANGE THE PORT! ---
         
-        InetAddress externalAddress = ((InetSocketAddress)externalSocketAddress).getAddress();
-        //int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
+        InetAddress externalAddress = NetworkUtils.getAddress(externalSocketAddress);
+        //int externalPort = NetworkUtils.getPort(externalSocketAddress);
         
-        InetAddress currentAddress = ((InetSocketAddress)getContactAddress()).getAddress();
-        int currentPort = ((InetSocketAddress)getContactAddress()).getPort();
+        InetAddress currentAddress = NetworkUtils.getAddress(getContactAddress());
+        int currentPort = NetworkUtils.getPort(getContactAddress());
         
         if (externalAddress.equals(currentAddress)) {
             if (LOG.isInfoEnabled()) {
@@ -219,7 +226,7 @@ public class LocalContact implements Contact {
         }
         
         if (!NetworkUtils.isSameAddressSpace(
-                        externalAddress, currentAddress)) {
+                externalAddress, currentAddress)) {
             
             // The remote Node tries to set our external address
             // to an address that's from a different address space?
@@ -252,6 +259,7 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return 0.
      */
+    @Override
     public int getFailures() {
         return 0;
     }
@@ -259,6 +267,7 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return 0L.
      */
+    @Override
     public long getLastFailedTime() {
         return 0L;
     }
@@ -266,12 +275,14 @@ public class LocalContact implements Contact {
     /**
      * Does nothing.
      */
+    @Override
     public void setRoundTripTime(long rtt) {
     }
     
     /**
      * Hard coded to return 0L.
      */
+    @Override
     public long getRoundTripTime() {
         return 0L;
     }
@@ -279,12 +290,14 @@ public class LocalContact implements Contact {
     /**
      * Does nothing.
      */
+    @Override
     public void setTimeStamp(long timeStamp) {
     }
     
     /** 
      * Hard coded to return @see #LOCAL_CONTACT.
      */
+    @Override
     public long getTimeStamp() {
         return LOCAL_CONTACT;
     }
@@ -292,6 +305,7 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return 0L.
      */
+    @Override
     public long getAdaptativeTimeout(long defaultValue, TimeUnit unit) {
         return defaultValue;
     }
@@ -299,12 +313,14 @@ public class LocalContact implements Contact {
     /**
      * Does nothing.
      */
+    @Override
     public void handleFailure() {
     }
 
     /**
      * Hard coded to return true.
      */
+    @Override
     public boolean hasBeenRecentlyAlive() {
         return true;
     }
@@ -312,6 +328,7 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return false.
      */
+    @Override
     public boolean hasFailed() {
         return false;
     }
@@ -323,6 +340,7 @@ public class LocalContact implements Contact {
      * Nodes only and as there's no reason to contact
      * the local Node.
      */
+    @Override
     public boolean isAlive() {
         return false;
     }
@@ -330,6 +348,7 @@ public class LocalContact implements Contact {
     /**
      * Hard coded to return false.
      */
+    @Override
     public boolean isDead() {
         return false;
     }
@@ -339,6 +358,7 @@ public class LocalContact implements Contact {
      * 
      * @see #isAlive()
      */
+    @Override
     public boolean isUnknown() {
         return true;
     }
@@ -346,13 +366,16 @@ public class LocalContact implements Contact {
     /**
      * Does nothing.
      */
+    @Override
     public void unknown() {
     }
     
+    @Override
     public boolean isShutdown() {
         return (flags & SHUTDOWN_FLAG) != 0;
     }
 
+    @Override
     public void shutdown(boolean shutdown) {
         if (isShutdown() != shutdown) {
             this.flags ^= SHUTDOWN_FLAG;
@@ -369,6 +392,7 @@ public class LocalContact implements Contact {
      * happen. If it does then there's a bug in the RouteTable
      * update logic!
      */
+    @Override
     public void updateWithExistingContact(Contact existing) {
         if (existing != this) {
             throw new UnsupportedOperationException();
