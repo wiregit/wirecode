@@ -327,7 +327,6 @@ public class BucketNodeTest extends MojitoTestCase {
             Contact node = ContactFactory.createLiveContact(src, vendor, version, nodeId, con,
                     instanceId, flags);
             routeTable.add(node);
-            System.out.println(node);
         }
         
         for (Bucket bucket : routeTable.getBuckets()) {
