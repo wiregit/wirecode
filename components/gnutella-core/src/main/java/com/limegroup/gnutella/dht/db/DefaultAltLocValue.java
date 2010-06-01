@@ -7,8 +7,8 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.ApplicationServices;
@@ -35,7 +35,7 @@ public class DefaultAltLocValue extends AbstractAltLocValue {
     /**
      * 
      */
-    public DefaultAltLocValue(DHTValue value) throws IOException {
+    public DefaultAltLocValue(Value value) throws IOException {
         this(value.getValueType(), value.getVersion(), value.getValue());
     }
     
@@ -49,7 +49,7 @@ public class DefaultAltLocValue extends AbstractAltLocValue {
     /**
      * 
      */
-    private DefaultAltLocValue(DHTValueType valueType, 
+    private DefaultAltLocValue(ValueType valueType, 
             Version version, byte[] data) throws IOException {
         super (version);
         

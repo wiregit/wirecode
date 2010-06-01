@@ -34,5 +34,5 @@ public interface DatabaseSecurityConstraint extends Serializable {
      * <code>DHTValue</code> in the <code>Database</code> and 
      * <code>DHTValueBag</code> respectively.
      */
-    public boolean allowStore(Database database, Map<KUID, DHTValueEntity> bag, DHTValueEntity entity);
+    public boolean allowStore(Database database, Map<KUID, ValueTuple> bag, ValueTuple entity);
 }

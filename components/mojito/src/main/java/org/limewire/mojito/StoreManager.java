@@ -18,8 +18,8 @@ import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.io.StoreResponseHandler;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ExceptionUtils;
@@ -44,15 +44,15 @@ class StoreManager implements Closeable {
         queue.clear();
     }
     
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
+    public DHTFuture<StoreEntity> put(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         
-        DHTValueEntity entity = DHTValueEntity.createFromValue(
+        ValueTuple entity = ValueTuple.createFromValue(
                 dht, key, value);
         return put(entity, timeout, unit);
     }
     
-    private DHTFuture<StoreEntity> put(DHTValueEntity value, 
+    private DHTFuture<StoreEntity> put(ValueTuple value, 
             long timeout, TimeUnit unit) {
         
         // The store operation is a composition of two DHT operations.
@@ -137,7 +137,7 @@ class StoreManager implements Closeable {
     
     @SuppressWarnings("unchecked")
     private DHTFuture<StoreEntity> store(Contact dst, 
-            SecurityToken securityToken, DHTValueEntity entity, 
+            SecurityToken securityToken, ValueTuple entity, 
             long timeout, TimeUnit unit) {
         
         Entry<Contact, SecurityToken>[] contacts = new Entry[] { 
@@ -153,7 +153,7 @@ class StoreManager implements Closeable {
     /**
      * 
      */
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, 
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         
         return queue.enqueue(key, value, timeout, unit);
@@ -163,7 +163,7 @@ class StoreManager implements Closeable {
      * 
      */
     public DHTFuture<StoreEntity> enqueue(Contact dst, SecurityToken securityToken, 
-            DHTValueEntity entity, long timeout, TimeUnit unit) {
+            ValueTuple entity, long timeout, TimeUnit unit) {
         return queue.enqueue(dst, securityToken, entity, timeout, unit);
     }
     
@@ -205,10 +205,10 @@ class StoreManager implements Closeable {
         /**
          * 
          */
-        public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, 
+        public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
                 long timeout, TimeUnit unit) {
             
-            DHTValueEntity entity = DHTValueEntity.createFromValue(
+            ValueTuple entity = ValueTuple.createFromValue(
                     dht, key, value);
             return enqueue(entity, timeout, unit);
         }
@@ -216,7 +216,7 @@ class StoreManager implements Closeable {
         /**
          * 
          */
-        private DHTFuture<StoreEntity> enqueue(final DHTValueEntity entity, 
+        private DHTFuture<StoreEntity> enqueue(final ValueTuple entity, 
                 final long timeout, final TimeUnit unit) {
             
             FutureHandle handle = new FutureHandle() {
@@ -233,7 +233,7 @@ class StoreManager implements Closeable {
          * 
          */
         public DHTFuture<StoreEntity> enqueue(final Contact dst, 
-                final SecurityToken securityToken, final DHTValueEntity entity, 
+                final SecurityToken securityToken, final ValueTuple entity, 
                 final long timeout, final TimeUnit unit) {
             
             FutureHandle handle = new FutureHandle() {

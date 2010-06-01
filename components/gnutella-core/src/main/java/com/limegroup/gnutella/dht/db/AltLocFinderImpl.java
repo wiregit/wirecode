@@ -18,7 +18,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -26,9 +26,9 @@ import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
@@ -179,7 +179,7 @@ public class AltLocFinderImpl implements AltLocFinder {
         
         private void doLookup() {
             KUID key = KUIDUtils.toKUID(urn);
-            EntityKey lookupKey = EntityKey.createEntityKey(
+            ValueKey lookupKey = ValueKey.createEntityKey(
                     key, AltLocValue.ALT_LOC);
             
             lookup = dhtManager.getAll(lookupKey);
@@ -220,10 +220,10 @@ public class AltLocFinderImpl implements AltLocFinder {
         
         private void onLookup(ValueEntity[] entities) throws IOException {
             for (ValueEntity entity : entities) {
-                for (DHTValueEntity values : entity.getEntities()) {
-                    DHTValue value = values.getValue();
+                for (ValueTuple values : entity.getValues()) {
+                    Value value = values.getValue();
                     
-                    DHTValueType valueType = value.getValueType();
+                    ValueType valueType = value.getValueType();
                     if (!valueType.equals(AltLocValue.ALT_LOC)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Not a PushProxy: " + value);
@@ -284,7 +284,7 @@ public class AltLocFinderImpl implements AltLocFinder {
                 }
                 
                 ProxyHandle handle = proxies.remove(0);
-                final DHTValueEntity entity = handle.entity;
+                final ValueTuple entity = handle.entity;
                 
                 DHTFuture<PushEndpoint> future 
                     = pushEndpointManager.findPushEndpoint(handle.guid);
@@ -300,7 +300,7 @@ public class AltLocFinderImpl implements AltLocFinder {
             }
         }
         
-        private void onPushEnpoint(DHTValueEntity entity, 
+        private void onPushEnpoint(ValueTuple entity, 
                 FutureEvent<PushEndpoint> event) {
             synchronized (future) {
                 if (future.isDone()) {
@@ -319,7 +319,7 @@ public class AltLocFinderImpl implements AltLocFinder {
             }
         }
         
-        private void onPushEndpoint(DHTValueEntity entity, PushEndpoint endpoint) {
+        private void onPushEndpoint(ValueTuple entity, PushEndpoint endpoint) {
             // So we made a lookup for AltLocs, the found AltLoc was firewalled 
             // and we made a lookup for its PushProxies. In any case the creator 
             // of both values should be the same Node!
@@ -344,11 +344,11 @@ public class AltLocFinderImpl implements AltLocFinder {
     
     private static class ProxyHandle {
         
-        private final DHTValueEntity entity;
+        private final ValueTuple entity;
         
         private final GUID guid;
         
-        public ProxyHandle(DHTValueEntity entity, GUID guid) {
+        public ProxyHandle(ValueTuple entity, GUID guid) {
             this.entity = entity;
             this.guid = guid;
         }

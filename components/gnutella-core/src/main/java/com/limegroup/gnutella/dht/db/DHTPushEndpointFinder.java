@@ -16,15 +16,15 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,7 +63,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
                 = new DHTValueFuture<PushEndpoint>();
             
             KUID key = KUIDUtils.toKUID(guid);
-            EntityKey lookupKey = EntityKey.createEntityKey(
+            ValueKey lookupKey = ValueKey.createEntityKey(
                     key, PushProxiesValue.PUSH_PROXIES);
             
             final DHTFuture<ValueEntity[]> lookup 
@@ -131,10 +131,10 @@ public class DHTPushEndpointFinder implements PushEndpointService {
             byte[] guid, ValueEntity... entities) throws NoSuchElementException, IOException {
         
         for (ValueEntity entity : entities) {
-            for (DHTValueEntity values : entity.getEntities()) {
-                DHTValue value = values.getValue();
+            for (ValueTuple values : entity.getValues()) {
+                Value value = values.getValue();
                 
-                DHTValueType valueType = value.getValueType();
+                ValueType valueType = value.getValueType();
                 if (!valueType.equals(PushProxiesValue.PUSH_PROXIES)) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Not a PushProxy: " + value);

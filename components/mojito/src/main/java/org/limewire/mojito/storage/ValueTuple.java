@@ -19,19 +19,19 @@
 
 package org.limewire.mojito.storage;
 
-import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * A <code>DHTValueEntity</code> is a row in a {@link Database}. 
+ * A {@link ValueTuple} is a row in a {@link Database}. It consists
+ * of a creator of the {@link Value}, the sender, a primary key,
+ * a secondary key and the {@link Value} itself.
  */
-public class DHTValueEntity implements Serializable {
+public class ValueTuple {
     
-    private static final long serialVersionUID = 2007158043378144871L;
-
     /**
      * The creator of the value.
      */
@@ -55,7 +55,7 @@ public class DHTValueEntity implements Serializable {
     /**
      * The actual value.
      */
-    private final DHTValue value;
+    private final Value value;
     
     /**
      * The time when this value was created (local time).
@@ -74,28 +74,29 @@ public class DHTValueEntity implements Serializable {
     private final int hashCode;
     
     /**
-     * Creates and returns a <code>DHTValueEntity</code> for the given primary 
+     * Creates and returns a {@link ValueTuple} for the given primary 
      * key and value.
      */
-    public static DHTValueEntity createFromValue(Context context, KUID primaryKey, DHTValue value) {
-        return new DHTValueEntity(context.getLocalNode(), context.getLocalNode(), 
-                primaryKey, value, true);
+    public static ValueTuple createFromValue(Context context, 
+            KUID primaryKey, Value value) {
+        return new ValueTuple(context.getLocalNode(), 
+                context.getLocalNode(), primaryKey, value, true);
     }
     
     /**
-     * Creates and returns a <code>DHTValueEntity</code> from arguments that were created.
+     * Creates and returns a {@link ValueTuple} from arguments that were created.
      */
-    public static DHTValueEntity createFromRemote(Contact creator, Contact sender, 
-            KUID primaryKey, DHTValue value) {
-        return new DHTValueEntity(creator, sender, primaryKey, value, false);
+    public static ValueTuple createFromRemote(Contact creator, 
+            Contact sender, KUID primaryKey, Value value) {
+        return new ValueTuple(creator, sender, primaryKey, value, false);
     }
     
     /**
-     * Constructor to create DHTValueEntities. It's package private
-     * for testing purposes. Use the factory methods!
+     * Constructor to create {@link ValueTuple}ies. It's package 
+     * private for testing purposes. Use the factory methods!
      */
-    DHTValueEntity(Contact creator, Contact sender, 
-            KUID primaryKey, DHTValue value, boolean local) {
+    ValueTuple(Contact creator, Contact sender, 
+            KUID primaryKey, Value value, boolean local) {
         this.creator = creator;
         this.sender = sender;
         this.primaryKey = primaryKey;
@@ -137,7 +138,7 @@ public class DHTValueEntity implements Serializable {
     /**
      * Returns the value.
      */
-    public DHTValue getValue() {
+    public Value getValue() {
         return value;
     }
    
@@ -146,6 +147,22 @@ public class DHTValueEntity implements Serializable {
      */
     public long getCreationTime() {
         return creationTime;
+    }
+    
+    /**
+     * Returns the age of the {@link ValueTuple} in 
+     * the given {@link TimeUnit}.
+     */
+    public long getAge(TimeUnit unit) {
+        long time = System.currentTimeMillis() - creationTime;
+        return unit.convert(time, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the age of the {@link ValueTuple} in milliseconds.
+     */
+    public long getAgeInMillis() {
+        return getAge(TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -170,11 +187,11 @@ public class DHTValueEntity implements Serializable {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof DHTValueEntity)) {
+        } else if (!(o instanceof ValueTuple)) {
             return false;
         }
         
-        DHTValueEntity other = (DHTValueEntity)o;
+        ValueTuple other = (ValueTuple)o;
         return primaryKey.equals(other.getPrimaryKey())
                     && secondaryKey.equals(other.getSecondaryKey());
     }

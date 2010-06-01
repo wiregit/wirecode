@@ -19,16 +19,32 @@
 
 package org.limewire.mojito.storage;
 
-import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.io.Writeable;
+import org.limewire.mojito.routing.Version;
 
 /**
- * Defines an interface to control the removal of an expired 
- * {@link ValueTuple} from the {@link Database}.
+ * Defines an interface for a DHT value encapsulating the {@link ValueType}, 
+ * {@link Version} and value. 
  */
-public interface Evictor {
+public interface Value extends Writeable {
     
     /**
-     * Returns true if the given {@link ValueTuple} is expired.
+     * Returns the type of the value.
      */
-    public boolean isExpired(RouteTable routeTable, ValueTuple entity);
+    public ValueType getValueType();
+
+    /**
+     * Returns the version of the value.
+     */
+    public Version getVersion();
+
+    /**
+     * Returns the actual value (a copy) as bytes.
+     */
+    public byte[] getValue();
+    
+    /**
+     * Returns the size of the value payload in byte.
+     */
+    public int size();
 }

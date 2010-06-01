@@ -31,41 +31,41 @@ import org.limewire.mojito.util.ArrayUtils;
  * your own and the "ANY" type when looking up nodes. However, ANY can not
  * be used an actual type (only for looking up nodes).
  */
-public final class DHTValueType implements Comparable<DHTValueType>, Serializable {
+public final class ValueType implements Comparable<ValueType>, Serializable {
     
     private static final long serialVersionUID = -3662336008253896020L;
     
     private static final String UNKNOWN_NAME = "UNKNOWN";
     
-    private static final Map<Integer, DHTValueType> TYPES 
-        = new FixedSizeHashMap<Integer, DHTValueType>(16, 0.75f, true, 254);
+    private static final Map<Integer, ValueType> TYPES 
+        = new FixedSizeHashMap<Integer, ValueType>(16, 0.75f, true, 254);
     
     /**
      * An arbitrary type of value.
      */
-    public static final DHTValueType BINARY = DHTValueType.valueOf("Binary", 0x00000000);
+    public static final ValueType BINARY = ValueType.valueOf("Binary", 0x00000000);
     
     /**
      * LIME and all deviations of LIME like LiMe or lime are reserved
      * for Lime Wire LLC.
      */
-    public static final DHTValueType LIME = DHTValueType.valueOf("LimeWire", "LIME");
+    public static final ValueType LIME = ValueType.valueOf("LimeWire", "LIME");
     
     /**
      * Type for UTF-8 encoded Strings.
      */
-    public static final DHTValueType TEXT = DHTValueType.valueOf("UTF-8 Encoded String", "TEXT");
+    public static final ValueType TEXT = ValueType.valueOf("UTF-8 Encoded String", "TEXT");
     
     /**
      * A value that is used for testing purposes.
      */
-    public static final DHTValueType TEST = DHTValueType.valueOf("Test Value", "TEST");
+    public static final ValueType TEST = ValueType.valueOf("Test Value", "TEST");
     
     /**
      * The ANY type is reserved for requesting purposes. You may not
      * use it as an actual value type.
      */
-    public static final DHTValueType ANY = DHTValueType.valueOf("Any Type", "****");
+    public static final ValueType ANY = ValueType.valueOf("Any Type", "****");
     
     /** The Name of the value type. */
     private final String name;
@@ -73,7 +73,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     /** The type code of the value. */
     private final int type;
     
-    private DHTValueType(String name, int type) {
+    private ValueType(String name, int type) {
         this.name = name;
         this.type = type;
     }
@@ -86,7 +86,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return type;
     }
     
-    public int compareTo(DHTValueType o) {
+    public int compareTo(ValueType o) {
         return type - o.type;
     }
 
@@ -99,11 +99,11 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof DHTValueType)) {
+        } else if (!(o instanceof ValueType)) {
             return false;
         }
         
-        return compareTo((DHTValueType)o)==0;
+        return compareTo((ValueType)o)==0;
     }
     
     @Override
@@ -118,31 +118,31 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return buffer.toString();
     }
     
-    public static DHTValueType[] values() {
+    public static ValueType[] values() {
         synchronized (TYPES) {
-            return TYPES.values().toArray(new DHTValueType[0]);
+            return TYPES.values().toArray(new ValueType[0]);
         }
     }
     
-    public static DHTValueType valueOf(int type) {
+    public static ValueType valueOf(int type) {
         return valueOf(UNKNOWN_NAME, type);
     }
     
-    public static DHTValueType valueOf(String type) {
+    public static ValueType valueOf(String type) {
         return valueOf(UNKNOWN_NAME, type);
     }
     
-    public static DHTValueType valueOf(String name, String type) {
+    public static ValueType valueOf(String name, String type) {
         return valueOf(name, ArrayUtils.toInteger(type));
     }
     
-    public static DHTValueType valueOf(String name, int type) {
+    public static ValueType valueOf(String name, int type) {
         Integer key = Integer.valueOf(type);
         synchronized (TYPES) {
-            DHTValueType valueType = TYPES.get(key);
+            ValueType valueType = TYPES.get(key);
             if (valueType == null 
                     || isBetterName(valueType, name)) {
-                valueType = new DHTValueType(name, type);
+                valueType = new ValueType(name, type);
                 TYPES.put(key, valueType);
             }
             return valueType;
@@ -156,7 +156,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
      */
     private Object readResolve() {
         Integer key = Integer.valueOf(type);
-        DHTValueType valueType = null;
+        ValueType valueType = null;
         synchronized (TYPES) {
             valueType = TYPES.get(key);
             if (valueType == null || isBetterName(valueType, name)) {
@@ -171,7 +171,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
      * Returns true if the given name is a better than DHTValueType's
      * current name.
      */
-    private static boolean isBetterName(DHTValueType valueType, String name) {
+    private static boolean isBetterName(ValueType valueType, String name) {
         return valueType.name.equals(UNKNOWN_NAME) && !name.equals(UNKNOWN_NAME);
     }
 }

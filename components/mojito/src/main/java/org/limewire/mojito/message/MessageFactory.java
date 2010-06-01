@@ -26,8 +26,8 @@ import java.net.SocketAddress;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
@@ -130,7 +130,7 @@ public interface MessageFactory {
      * @param valueType the type of value we're looking for
      */
     public ValueRequest createValueRequest(Contact src, SocketAddress dst, 
-            KUID primaryKey, KUID[] secondaryKeys, DHTValueType valueType);
+            KUID primaryKey, KUID[] secondaryKeys, ValueType valueType);
 
     /**
      * Creates and returns a <code>FindValueResponse</code> Message.
@@ -146,7 +146,7 @@ public interface MessageFactory {
      * 
      */
     public ValueResponse createValueResponse(Contact src, Contact dst, 
-            MessageID messageId, float requestLoad, DHTValueEntity[] entities, KUID[] secondaryKeys);
+            MessageID messageId, float requestLoad, ValueTuple[] entities, KUID[] secondaryKeys);
 
     /**
      * Creates and returns a StoreRequest Message
@@ -158,7 +158,7 @@ public interface MessageFactory {
      * a store request
      */
     public StoreRequest createStoreRequest(Contact src, SocketAddress dst, 
-            SecurityToken securityToken, DHTValueEntity[] values);
+            SecurityToken securityToken, ValueTuple[] values);
 
     /**
      * Creates and returns a StoreResponse Message

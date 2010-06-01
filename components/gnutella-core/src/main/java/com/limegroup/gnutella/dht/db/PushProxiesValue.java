@@ -5,7 +5,7 @@ import java.util.Set;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueType;
 
 /**
  * 
@@ -13,10 +13,10 @@ import org.limewire.mojito.storage.DHTValueType;
 public interface PushProxiesValue extends SerializableValue {
 
     /**
-     * {@link DHTValueType} for Push-Proxies.
+     * {@link ValueType} for Push-Proxies.
      */
-    public static final DHTValueType PUSH_PROXIES 
-        = DHTValueType.valueOf("Gnutella Push Proxy", "PROX");
+    public static final ValueType PUSH_PROXIES 
+        = ValueType.valueOf("Gnutella Push Proxy", "PROX");
 
     /**
      * Version of {@link PushProxiesValue}.

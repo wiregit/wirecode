@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -17,10 +17,10 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.SecurityTokenEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
@@ -93,8 +93,8 @@ public class ValueTest extends MojitoTestCase {
             
             KUID key = KUID.createRandomID();
             
-            DHTValue value = new DHTValueImpl(
-                    DHTValueType.TEST, 
+            Value value = new DefaultValue(
+                    ValueType.TEST, 
                     Version.ZERO, 
                     StringUtils.toUTF8Bytes("Hello World"));
             
@@ -102,15 +102,15 @@ public class ValueTest extends MojitoTestCase {
             dhts.get(0).put(key, value).get();
             
             // FIND_VALUE (check every Node)
-            EntityKey lookupKey = EntityKey.createEntityKey(
-                    key, DHTValueType.ANY);
+            ValueKey lookupKey = ValueKey.createEntityKey(
+                    key, ValueType.ANY);
             for (MojitoDHT dht : dhts) {
                 ValueEntity entity = dht.get(lookupKey).get();
-                DHTValueEntity[] values = entity.getEntities();
+                ValueTuple[] values = entity.getValues();
                 
                 assertEquals(1, values.length);
                 
-                DHTValue v = values[0].getValue();
+                Value v = values[0].getValue();
                 assertEquals(value, v);
             }
             

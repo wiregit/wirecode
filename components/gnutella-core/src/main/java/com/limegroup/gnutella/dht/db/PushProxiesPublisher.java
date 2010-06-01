@@ -8,7 +8,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -225,9 +225,9 @@ public class PushProxiesPublisher extends Publisher {
     }
     
     /**
-     * Publishes the given {@link DHTValue} to the DHT
+     * Publishes the given {@link Value} to the DHT
      */
-    protected void publish(KUID key, DHTValue value) {
+    protected void publish(KUID key, Value value) {
         manager.enqueue(key, value);
     }
 }

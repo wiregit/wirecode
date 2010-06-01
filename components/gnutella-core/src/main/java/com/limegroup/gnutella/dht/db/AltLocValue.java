@@ -2,17 +2,17 @@ package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueType;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 public interface AltLocValue extends SerializableValue {
 
     /**
-     * {@link DHTValueType} for {@link AlternateLocation}s.
+     * {@link ValueType} for {@link AlternateLocation}s.
      */
-    public static final DHTValueType ALT_LOC 
-        = DHTValueType.valueOf("Gnutella Alternate Location", "ALOC");
+    public static final ValueType ALT_LOC 
+        = ValueType.valueOf("Gnutella Alternate Location", "ALOC");
 
     public static final Version VERSION_ONE = Version.valueOf(1);
 

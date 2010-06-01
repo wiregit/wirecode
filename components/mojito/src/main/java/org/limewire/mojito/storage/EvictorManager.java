@@ -32,13 +32,13 @@ public class EvictorManager {
     
     public static final Evictor defaultEvictor = new DefaultEvictor();
     
-    private final Map<DHTValueType, Evictor> evictors 
-        = Collections.synchronizedMap(new HashMap<DHTValueType, Evictor>());
+    private final Map<ValueType, Evictor> evictors 
+        = Collections.synchronizedMap(new HashMap<ValueType, Evictor>());
     
     /**
-     * Registers a {@link Evictor} under the given {@link DHTValueType}.
+     * Registers a {@link Evictor} under the given {@link ValueType}.
      */
-    public Evictor addEvictor(DHTValueType valueType, Evictor evictor) {
+    public Evictor addEvictor(ValueType valueType, Evictor evictor) {
         if (valueType == null) {
             throw new NullPointerException("DHTValueType is null");
         }
@@ -52,9 +52,9 @@ public class EvictorManager {
     
     /**
      * Removes and returns a {@link Evictor} that is registered under the
-     * given {@link DHTValueType}.
+     * given {@link ValueType}.
      */
-    public Evictor removeEvictor(DHTValueType valueType) {
+    public Evictor removeEvictor(ValueType valueType) {
         if (valueType == null) {
             throw new NullPointerException("DHTValueType is null");
         }
@@ -63,10 +63,10 @@ public class EvictorManager {
     }
     
     /**
-     * Returns the {@link Evictor} for the given {@link DHTValueType}
+     * Returns the {@link Evictor} for the given {@link ValueType}
      * or the {@link DefaultEvictor} if none exists.
      */
-    public Evictor getEvictor(DHTValueType valueType) {
+    public Evictor getEvictor(ValueType valueType) {
         if (valueType == null) {
             throw new NullPointerException("DHTValueType is null");
         }
@@ -82,8 +82,8 @@ public class EvictorManager {
     /**
      * A helper method that delegates to a dedicated {@link Evictor}.
      */
-    public boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
-        DHTValueType valueType = entity.getValue().getValueType();
+    public boolean isExpired(RouteTable routeTable, ValueTuple entity) {
+        ValueType valueType = entity.getValue().getValueType();
         return getEvictor(valueType).isExpired(routeTable, entity);
     }
 }

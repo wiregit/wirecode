@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 
 /**
  * A StoreStatusCode represents the result of a STORE operation
@@ -43,7 +43,7 @@ public final class StoreStatusCode implements Serializable {
      */
     private final StatusCode statusCode;
     
-    public StoreStatusCode(DHTValueEntity entity, StatusCode statusCode) {
+    public StoreStatusCode(ValueTuple entity, StatusCode statusCode) {
         this(entity.getPrimaryKey(), entity.getSecondaryKey(), statusCode);
     }
     
@@ -57,7 +57,7 @@ public final class StoreStatusCode implements Serializable {
      * Returns true if this StoreStatusCode is for the
      * given DHTValueEntity.
      */
-    public boolean isFor(DHTValueEntity entity) {
+    public boolean isFor(ValueTuple entity) {
         return primaryKey.equals(entity.getPrimaryKey())
                 && secondaryKey.equals(entity.getSecondaryKey());
     }

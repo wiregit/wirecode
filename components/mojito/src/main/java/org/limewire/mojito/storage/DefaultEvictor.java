@@ -23,11 +23,11 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.DatabaseUtils;
 
 /**
- * Decides whether a {@link DHTValueEntity} is expired for a given {@link RouteTable}.
+ * Decides whether a {@link ValueTuple} is expired for a given {@link RouteTable}.
  */
 public class DefaultEvictor implements Evictor {
 
-    public boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
+    public boolean isExpired(RouteTable routeTable, ValueTuple entity) {
         return DatabaseUtils.isExpired(routeTable, entity);
     }
 }

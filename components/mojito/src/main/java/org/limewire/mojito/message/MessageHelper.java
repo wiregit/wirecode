@@ -25,8 +25,8 @@ import java.net.SocketAddress;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -83,19 +83,19 @@ public class MessageHelper {
     }
 
     public ValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
-            KUID[] keys, DHTValueType valueType) {
+            KUID[] keys, ValueType valueType) {
         return factory.createValueRequest(getLocalNode(), dst, lookupId, keys, valueType);
     }
 
     public ValueResponse createFindValueResponse(RequestMessage request, 
-            float requestLoad, DHTValueEntity[] values, KUID[] keys) {
+            float requestLoad, ValueTuple[] values, KUID[] keys) {
         
         return factory.createValueResponse(getLocalNode(), request.getContact(), 
                 request.getMessageId(), requestLoad, values, keys);
     }
 
     public StoreRequest createStoreRequest(SocketAddress dst, SecurityToken securityToken, 
-            DHTValueEntity[] values) {
+            ValueTuple[] values) {
         
         return factory.createStoreRequest(getLocalNode(), dst, securityToken, values);
     }

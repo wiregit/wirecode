@@ -19,7 +19,7 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
 import org.limewire.security.SecurityToken;
 
@@ -108,7 +108,7 @@ public class DefaultStoreForward implements StoreForward {
     private void forwardOrRemoveValues(Contact node, 
             Contact existing, Message message) {
         
-        List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
+        List<ValueTuple> valuesToForward = new ArrayList<ValueTuple>();
         
         synchronized (database) {
             for(KUID primaryKey : database.keySet()) {
@@ -119,14 +119,14 @@ public class DefaultStoreForward implements StoreForward {
                     LOG.debug("node: " + node + ", existing: " + existing + ", operation: " + op);
                 
                 if (op.equals(Operation.FORWARD)) {
-                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
+                    Map<KUID, ValueTuple> bag = database.get(primaryKey);
                     valuesToForward.addAll(bag.values());
                     STORE_FORWARD_VALUE.incrementAndGet();
                     
                 } else if (op.equals(Operation.DELETE)
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
-                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
-                    for (DHTValueEntity entity : bag.values()) {
+                    Map<KUID, ValueTuple> bag = database.get(primaryKey);
+                    for (ValueTuple entity : bag.values()) {
                         //System.out.println("REMOVING: " + entity + "\n");
                         database.remove(entity.getPrimaryKey(), entity.getSecondaryKey());
                     }
@@ -289,6 +289,6 @@ public class DefaultStoreForward implements StoreForward {
          * 
          */
         public void store(Contact dst, SecurityToken securityToken, 
-                Collection<? extends DHTValueEntity> values);
+                Collection<? extends ValueTuple> values);
     }
 }

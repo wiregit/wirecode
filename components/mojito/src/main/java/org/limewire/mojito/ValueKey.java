@@ -20,17 +20,18 @@
 package org.limewire.mojito;
 
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 
 /**
- * An EntityKey specifies the exact location of a DHTValueEntity.
+ * An {@link ValueKey} specifies the exact location of a {@link ValueTuple}.
  */
-public class EntityKey {
+public class ValueKey {
     
     /**
      * The Contact that has the Entity.
      */
-    private final Contact node;
+    private final Contact src;
     
     /**
      * The primary key of the entity.
@@ -45,15 +46,15 @@ public class EntityKey {
     /**
      * The type of the entity.
      */
-    private final DHTValueType valueType;
+    private final ValueType valueType;
     
     private final int hashCode;
     
     /**
-     * Creates and returns an EntityKey that will do a full lookup
+     * Creates and returns an {@link ValueKey} that will do a full lookup
      * for the value.
      */
-    public static EntityKey createEntityKey(KUID primaryKey, DHTValueType valueType) {
+    public static ValueKey createEntityKey(KUID primaryKey, ValueType valueType) {
         
         if (primaryKey == null) {
             throw new NullPointerException("PrimaryKey is null");
@@ -63,15 +64,15 @@ public class EntityKey {
             throw new NullPointerException("DHTValueType is null");
         }
         
-        return new EntityKey(null, primaryKey, null, valueType);
+        return new ValueKey(null, primaryKey, null, valueType);
     }
     
     /**
-     * Creates and returns a new EntityKey with a known source
+     * Creates and returns a new {@link ValueKey} with a known source
      * which will look only at the given Node for the value.
      */
-    public static EntityKey createEntityKey(Contact node, KUID primaryKey, 
-            KUID secondaryKey, DHTValueType valueType) {
+    public static ValueKey createEntityKey(Contact node, KUID primaryKey, 
+            KUID secondaryKey, ValueType valueType) {
         
         if (node == null) {
             throw new NullPointerException("Contact is null");
@@ -89,13 +90,13 @@ public class EntityKey {
             throw new NullPointerException("DHTValueType is null");
         }
         
-        return new EntityKey(node, primaryKey, secondaryKey, valueType);
+        return new ValueKey(node, primaryKey, secondaryKey, valueType);
     }
     
-    private EntityKey(Contact node, KUID primaryKey, 
-            KUID secondaryKey, DHTValueType valueType) {
+    private ValueKey(Contact node, KUID primaryKey, 
+            KUID secondaryKey, ValueType valueType) {
         
-        this.node = node;
+        this.src = node;
         this.primaryKey = primaryKey;
         this.secondaryKey = secondaryKey;
         this.valueType = valueType;
@@ -118,30 +119,30 @@ public class EntityKey {
     }
     
     /**
-     * Returns the node that has the DHTValueEntity.
+     * Returns the node that has the {@link ValueTuple}.
      */
     public Contact getContact() {
-        return node;
+        return src;
     }
     
     /**
-     * Returns the primary key of the DHTValueEntity.
+     * Returns the primary key of the {@link ValueTuple}.
      */
     public KUID getPrimaryKey() {
         return primaryKey;
     }
     
     /**
-     * Returns the secondary key of the DHTValueEntity.
+     * Returns the secondary key of the {@link ValueTuple}.
      */
     public KUID getSecondaryKey() {
         return secondaryKey;
     }
     
     /**
-     * Returns the type of the DHTValueEntity.
+     * Returns the type of the {@link ValueTuple}.
      */
-    public DHTValueType getDHTValueType() {
+    public ValueType getValueType() {
         return valueType;
     }
     
@@ -154,11 +155,11 @@ public class EntityKey {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof EntityKey)) {
+        } else if (!(o instanceof ValueKey)) {
             return false;
         }
         
-        EntityKey other = (EntityKey)o;
+        ValueKey other = (ValueKey)o;
         
         if (isLookupKey() != other.isLookupKey()) {
             return false;
@@ -180,7 +181,7 @@ public class EntityKey {
         buffer.append("Contact: ").append(getContact()).append("\n");
         buffer.append("PrimaryKey: ").append(getPrimaryKey()).append("\n");
         buffer.append("SecondaryKey: ").append(getSecondaryKey()).append("\n");
-        buffer.append("DHTValueType: ").append(getDHTValueType()).append("\n");
+        buffer.append("ValueType: ").append(getValueType()).append("\n");
         buffer.append("IsLookupKey: ").append(isLookupKey()).append("\n");
         return buffer.toString();
     }

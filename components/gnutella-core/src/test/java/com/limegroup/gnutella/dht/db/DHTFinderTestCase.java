@@ -9,7 +9,7 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.util.IoUtils;
@@ -75,18 +75,18 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         
         mojitoDHT = dhts.get(0);
         context.checking(new Expectations() {{
-            allowing(dhtManager).get(with(any(EntityKey.class)));
+            allowing(dhtManager).get(with(any(ValueKey.class)));
             will(new CustomAction("Mojito Get") {
                 public Object invoke(Invocation invocation) throws Throwable {
-                    return mojitoDHT.get((EntityKey)invocation.getParameter(0));
+                    return mojitoDHT.get((ValueKey)invocation.getParameter(0));
                 }                
             });
             
-            allowing(dhtManager).getAll(with(any(EntityKey.class)));
+            allowing(dhtManager).getAll(with(any(ValueKey.class)));
             will(new CustomAction("Mojito Get-All") {
                 @Override
                 public Object invoke(Invocation invocation) throws Throwable {
-                    return mojitoDHT.getAll((EntityKey)invocation.getParameter(0));
+                    return mojitoDHT.getAll((ValueKey)invocation.getParameter(0));
                 }
             });
             

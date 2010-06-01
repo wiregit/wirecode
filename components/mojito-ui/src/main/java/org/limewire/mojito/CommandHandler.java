@@ -30,7 +30,7 @@ import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
 import org.limewire.mojito.DefaultDHT;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.entity.BootstrapEntity;
@@ -43,8 +43,8 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.CollectionUtils;
 
@@ -210,7 +210,7 @@ public class CommandHandler {
             
             out.println("Storing... " + key);
             
-            StoreEntity evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value)).get();
+            StoreEntity evt = dht.put(key, new DefaultValue(ValueType.TEST, Version.ZERO, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
@@ -257,7 +257,7 @@ public class CommandHandler {
             }
             md.reset();
             
-            EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
+            ValueKey lookupKey = ValueKey.createEntityKey(key, ValueType.ANY);
             ValueEntity evt = dht.get(lookupKey).get();
             out.println(evt.toString());
             

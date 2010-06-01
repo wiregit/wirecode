@@ -15,10 +15,10 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -128,7 +128,7 @@ public class MessageInputStream extends DataInputStream {
         
         KUID lookupId = readKUID();
         KUID[] secondaryKeys = readKUIDs();
-        DHTValueType valueType = readValueType();
+        ValueType valueType = readValueType();
         
         return new DefaultValueRequest(messageId, contact, 
                 lookupId, secondaryKeys, valueType);
@@ -138,7 +138,7 @@ public class MessageInputStream extends DataInputStream {
             Contact contact) throws IOException {
         
         float requestLoad = readFloat();
-        DHTValueEntity[] entities = readValueEntities(contact);
+        ValueTuple[] entities = readValueEntities(contact);
         KUID[] secondaryKeys = readKUIDs();
         
         return new DefaultValueResponse(messageId, contact, 
@@ -149,7 +149,7 @@ public class MessageInputStream extends DataInputStream {
             Contact contact) throws IOException {
         
         SecurityToken securityToken = readSecurityToken();
-        DHTValueEntity[] entities = readValueEntities(contact);
+        ValueTuple[] entities = readValueEntities(contact);
         
         return new DefaultStoreRequest(messageId, contact, 
                 securityToken, entities);
@@ -185,33 +185,33 @@ public class MessageInputStream extends DataInputStream {
         return StatusCode.valueOf(code, StringUtils.toUTF8String(decription));
     }
     
-    private DHTValueEntity[] readValueEntities(Contact sender) throws IOException {
+    private ValueTuple[] readValueEntities(Contact sender) throws IOException {
         int length = readUnsignedByte();
-        DHTValueEntity[] entities = new DHTValueEntity[length];
+        ValueTuple[] entities = new ValueTuple[length];
         for (int i = 0; i < entities.length; i++) {
             entities[i] = readValueEntity(sender);
         }
         return entities;
     }
     
-    private DHTValueEntity readValueEntity(Contact sender) throws IOException {
+    private ValueTuple readValueEntity(Contact sender) throws IOException {
         Contact creator = readContact();
         KUID primaryKey = readKUID();
-        DHTValue value = readValue();
+        Value value = readValue();
         
-        return DHTValueEntity.createFromRemote(
+        return ValueTuple.createFromRemote(
                 creator, sender, primaryKey, value);
     }
     
-    private DHTValue readValue() throws IOException {
-        DHTValueType type = readValueType();
+    private Value readValue() throws IOException {
+        ValueType type = readValueType();
         Version version = readVersion();
         
         int length = readUnsignedShort();
         byte[] data = new byte[length];
         readFully(data);
         
-        return new DHTValueImpl(type, version, data);
+        return new DefaultValue(type, version, data);
     }
     
     private OpCode readOpCode() throws IOException {
@@ -239,8 +239,8 @@ public class MessageInputStream extends DataInputStream {
         return kuids;
     }
     
-    private DHTValueType readValueType() throws IOException {
-        return DHTValueType.valueOf(readInt());
+    private ValueType readValueType() throws IOException {
+        return ValueType.valueOf(readInt());
     }
     
     private SecurityToken readSecurityToken() throws IOException {

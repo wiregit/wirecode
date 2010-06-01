@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -14,7 +14,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
@@ -204,22 +204,22 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
     /**
      * 
      */
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> put(KUID key, Value value);
 
     /**
      * 
      */
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
     
     /**
      * 
      */
-    public DHTFuture<ValueEntity> get(EntityKey key);
+    public DHTFuture<ValueEntity> get(ValueKey key);
 
     /**
      * 
      */
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key);
     
     /**
      * 

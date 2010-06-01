@@ -26,13 +26,13 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.settings.DatabaseSettings;
 
 /**
- * Determines when it is acceptable to store a {@link DHTValueEntity} in a {@link Database}.
+ * Determines when it is acceptable to store a {@link ValueTuple} in a {@link Database}.
  */
 public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstraint {
     
     private static final long serialVersionUID = 4513377023367562179L;
 
-    public boolean allowStore(Database database, Map<KUID, DHTValueEntity> bag, DHTValueEntity entity) {
+    public boolean allowStore(Database database, Map<KUID, ValueTuple> bag, ValueTuple entity) {
         
         // Allow as many local values as you want!
         if (entity.isLocalValue()) {
@@ -50,7 +50,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         }
         
         // Limit the number of values per key
-        DHTValueEntity existing = bag.get(entity.getSecondaryKey());
+        ValueTuple existing = bag.get(entity.getSecondaryKey());
         if (existing == null) {
             // Allow to store if there's enough free space
             if (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey) {
@@ -64,7 +64,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
             
             // Get the oldest firewalled value from the Bag, remove it and
             // allow the Database to store the new value
-            DHTValueEntity firewalled = getOldestFirewalledValue(bag.values());
+            ValueTuple firewalled = getOldestFirewalledValue(bag.values());
             if (firewalled != null) {
                 database.remove(firewalled.getPrimaryKey(), 
                         firewalled.getSecondaryKey());
@@ -81,8 +81,8 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
      * Returns <code>true</code> if it's OK to replace the existing value with
      * the new value.
      */
-    private boolean allowReplace(Database database, Map<KUID, DHTValueEntity> bag, 
-            DHTValueEntity existing, DHTValueEntity entity) {
+    private boolean allowReplace(Database database, Map<KUID, ValueTuple> bag, 
+            ValueTuple existing, ValueTuple entity) {
         
         // Non-local values cannot replace local values
         if (existing.isLocalValue() && !entity.isLocalValue()) {
@@ -104,10 +104,10 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         return true;
     }
     
-    private DHTValueEntity getOldestFirewalledValue(Collection<DHTValueEntity> entities) {
-        DHTValueEntity oldest = null;
+    private ValueTuple getOldestFirewalledValue(Collection<ValueTuple> entities) {
+        ValueTuple oldest = null;
         
-        for (DHTValueEntity entity : entities) {
+        for (ValueTuple entity : entities) {
             if (!entity.isLocalValue() 
                     && entity.getCreator().isFirewalled()) {
                 if (oldest == null || entity.getCreationTime() < oldest.getCreationTime()) {

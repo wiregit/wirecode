@@ -7,7 +7,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -164,9 +164,9 @@ public class AltLocPublisher extends Publisher {
     }
     
     /**
-     * Publishes the given {@link DHTValue} to the DHT
+     * Publishes the given {@link Value} to the DHT
      */
-    protected void publish(KUID key, DHTValue value) {
+    protected void publish(KUID key, Value value) {
         manager.enqueue(key, value);
     }
     

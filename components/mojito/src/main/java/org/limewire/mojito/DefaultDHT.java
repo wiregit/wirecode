@@ -36,8 +36,8 @@ import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseCleaner;
 import org.limewire.mojito.util.DHTSizeEstimator;
@@ -147,7 +147,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
 
             @Override
             public void store(Contact dst, SecurityToken securityToken,
-                    Collection<? extends DHTValueEntity> values) {
+                    Collection<? extends ValueTuple> values) {
                 DefaultDHT.this.store(dst, securityToken, values);
             }
         };
@@ -357,7 +357,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key, 
+    public DHTFuture<ValueEntity> get(ValueKey key, 
             long timeout, TimeUnit unit) {
         
         AsyncProcess<ValueEntity> process = new ValueResponseHandler(
@@ -367,22 +367,22 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, 
+    public DHTFuture<StoreEntity> put(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         return storeManager.put(key, value, timeout, unit);
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, 
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         return storeManager.enqueue(key, value, timeout, unit);
     }
 
     /**
-     * Stores the given {@link DHTValueEntity}ies.
+     * Stores the given {@link ValueTuple}ies.
      */
     private void store(final Contact dst, final SecurityToken securityToken, 
-            final Collection<? extends DHTValueEntity> values) {
+            final Collection<? extends ValueTuple> values) {
         
         if (securityToken == null) {
             long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
@@ -403,7 +403,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         }
         
         long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
-        for (DHTValueEntity entity : values) {
+        for (ValueTuple entity : values) {
             storeManager.enqueue(dst, securityToken, entity, 
                     timeout, TimeUnit.MILLISECONDS);
         }

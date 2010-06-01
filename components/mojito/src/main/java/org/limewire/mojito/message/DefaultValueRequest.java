@@ -2,17 +2,17 @@ package org.limewire.mojito.message;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueType;
 
 public class DefaultValueRequest extends AbstractLookupRequest 
         implements ValueRequest {
 
     private final KUID[] secondaryKeys;
     
-    private final DHTValueType valueType;
+    private final ValueType valueType;
     
     public DefaultValueRequest(MessageID messageId, Contact contact, 
-            KUID lookupId, KUID[] secondaryKeys, DHTValueType valueType) {
+            KUID lookupId, KUID[] secondaryKeys, ValueType valueType) {
         super(messageId, contact, lookupId);
         
         this.secondaryKeys = secondaryKeys;
@@ -25,7 +25,7 @@ public class DefaultValueRequest extends AbstractLookupRequest
     }
 
     @Override
-    public DHTValueType getValueType() {
+    public ValueType getValueType() {
         return valueType;
     }
 }

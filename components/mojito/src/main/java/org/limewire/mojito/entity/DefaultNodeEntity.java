@@ -3,13 +3,15 @@ package org.limewire.mojito.entity;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.DHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.LookupResponseHandler.State;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.security.SecurityToken;
 
+/**
+ * The default implementation of {@link NodeEntity}.
+ */
 public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
 
     private final KUID key;

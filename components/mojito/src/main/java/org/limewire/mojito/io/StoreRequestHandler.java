@@ -36,7 +36,7 @@ import org.limewire.mojito.message.StoreResponse;
 import org.limewire.mojito.message.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
@@ -98,14 +98,14 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        DHTValueEntity[] values = request.getValueEntities();
+        ValueTuple[] values = request.getValueEntities();
         
         List<StoreStatusCode> status 
             = new ArrayList<StoreStatusCode>(values.length);
         
         Database database = context.getDatabase();
         
-        for (DHTValueEntity entity : values) {
+        for (ValueTuple entity : values) {
             
             if (database.store(entity)) {
                 STORE_SUCCESS.incrementAndGet();

@@ -43,8 +43,9 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.DHTValue;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.util.ExceptionUtils;
 
@@ -171,20 +172,20 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> put(KUID key, Value value) {
         long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
         return put(key, value, timeout, TimeUnit.MILLISECONDS);
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
         long timeout = StoreSettings.STORE_TIMEOUT.getTimeInMillis();
         return enqueue(key, value, timeout, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public DHTFuture<StoreEntity> remove(KUID key) {
-        return put(key, DHTValue.EMPTY_VALUE);
+        return put(key, DefaultValue.EMPTY_VALUE);
     }
     
     @Override
@@ -194,13 +195,13 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key) {
+    public DHTFuture<ValueEntity> get(ValueKey key) {
         long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
         return get(key, timeout, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key) {
         final Object lock = new Object();
         
         synchronized (lock) {
@@ -224,8 +225,8 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
                 }
             });
             
-            final List<EntityKey> keys 
-                = new ArrayList<EntityKey>();
+            final List<ValueKey> keys 
+                = new ArrayList<ValueKey>();
             
             final List<ValueEntity> entities 
                 = new ArrayList<ValueEntity>();
@@ -264,8 +265,8 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
                     entities.add(entity);
                     
                     if (first.getAndSet(false)) {
-                        EntityKey[] more 
-                            = entity.getEntityKeys();
+                        ValueKey[] more 
+                            = entity.getValueKeys();
                         keys.addAll(Arrays.asList(more));
                     }
                     

@@ -17,7 +17,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 /**
  * 
@@ -128,12 +128,12 @@ public interface MojitoDHT extends DHT {
     /**
      * 
      */
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> put(KUID key, Value value);
     
     /**
      * 
      */
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
  
     /**
      * 
@@ -148,12 +148,12 @@ public interface MojitoDHT extends DHT {
     /**
      * 
      */
-    public DHTFuture<ValueEntity> get(EntityKey key);
+    public DHTFuture<ValueEntity> get(ValueKey key);
     
     /**
      * 
      */
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key);
     
     /**
      * 

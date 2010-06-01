@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -17,8 +17,8 @@ import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.message.ValueRequest;
 import org.limewire.mojito.message.ValueResponse;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.DatabaseUtils;
 
 public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity> {
@@ -26,10 +26,10 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
     private static final Log LOG 
         = LogFactory.getLog(GetValueResponseHandler.class);
     
-    private final EntityKey lookupKey;
+    private final ValueKey lookupKey;
     
     public GetValueResponseHandler(Context context, 
-            EntityKey lookupKey, long timeout, TimeUnit unit) {
+            ValueKey lookupKey, long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
         this.lookupKey = lookupKey;
@@ -40,7 +40,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         Contact node = lookupKey.getContact();
         KUID primaryKey = lookupKey.getPrimaryKey();
         KUID secondaryKey = lookupKey.getSecondaryKey();
-        DHTValueType valueType = lookupKey.getDHTValueType();
+        ValueType valueType = lookupKey.getValueType();
         
         KUID contactId = node.getContactId();
         SocketAddress addr = node.getContactAddress();
@@ -79,11 +79,11 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         
         // Make sure the DHTValueEntities have the expected
         // value type.
-        DHTValueEntity[] entities 
-            = DatabaseUtils.filter(lookupKey.getDHTValueType(), 
+        ValueTuple[] entities 
+            = DatabaseUtils.filter(lookupKey.getValueType(), 
                     response.getValueEntities());
         
-        EntityKey[] entityKeys = new EntityKey[0];
+        ValueKey[] entityKeys = new ValueKey[0];
         
         ValueEntity entity = new DefaultValueEntity(
                 lookupKey, entities, entityKeys, time, unit);

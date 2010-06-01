@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -13,7 +13,7 @@ import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -37,12 +37,12 @@ public class DHTManagerStub implements DHTManager {
     }
 
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key) {
+    public DHTFuture<ValueEntity> get(ValueKey key) {
         return null;
     }
     
     @Override
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key) {
         return null;
     }
 
@@ -106,12 +106,12 @@ public class DHTManagerStub implements DHTManager {
     }
 
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> put(KUID key, Value value) {
         return null;
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
         return null;
     }
 

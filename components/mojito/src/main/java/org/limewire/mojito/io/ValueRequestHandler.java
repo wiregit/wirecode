@@ -35,8 +35,8 @@ import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.RequestMessage;
 import org.limewire.mojito.message.ValueRequest;
 import org.limewire.mojito.message.ValueResponse;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
@@ -73,9 +73,9 @@ public class ValueRequestHandler extends AbstractRequestHandler {
         ValueRequest request = (ValueRequest)message;
         
         KUID lookupId = request.getLookupId();
-        DHTValueType valueType = request.getValueType();
+        ValueType valueType = request.getValueType();
         
-        Map<KUID, DHTValueEntity> bag = null;
+        Map<KUID, ValueTuple> bag = null;
         float requestLoad = 0f;
         
         Database database = context.getDatabase();
@@ -86,18 +86,18 @@ public class ValueRequestHandler extends AbstractRequestHandler {
         
         // The keys and values we'll return
         Set<KUID> availableKeys = new HashSet<KUID>();
-        Set<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
+        Set<ValueTuple> valuesToReturn = new HashSet<ValueTuple>();
         
         // The keys the remote Node is requesting
         KUID[] requestedSecondaryKeys = request.getSecondaryKeys();
         
         if (bag != null && !bag.isEmpty()) {
             availableKeys = new HashSet<KUID>();
-            valuesToReturn = new HashSet<DHTValueEntity>();
+            valuesToReturn = new HashSet<ValueTuple>();
             
-            DHTValueEntity[] entities 
-                = bag.values().toArray(new DHTValueEntity[0]);
-            DHTValueEntity[] filtered 
+            ValueTuple[] entities 
+                = bag.values().toArray(new ValueTuple[0]);
+            ValueTuple[] filtered 
                 = DatabaseUtils.filter(valueType, entities);
             
             if (requestedSecondaryKeys.length == 0) {
@@ -105,14 +105,14 @@ public class ValueRequestHandler extends AbstractRequestHandler {
                         && filtered.length == 1) {
                     valuesToReturn.addAll(Arrays.asList(filtered));
                 } else {
-                    for (DHTValueEntity entity : filtered) {
+                    for (ValueTuple entity : filtered) {
                         availableKeys.add(entity.getSecondaryKey());
                     }
                 }
             } else {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                for (DHTValueEntity entity : filtered) {
+                for (ValueTuple entity : filtered) {
                     KUID secondaryKey = entity.getSecondaryKey();
                     if (contains(requestedSecondaryKeys, secondaryKey)) {
                         valuesToReturn.add(entity);
@@ -147,7 +147,7 @@ public class ValueRequestHandler extends AbstractRequestHandler {
             MessageHelper messageHelper = context.getMessageHelper();
             ValueResponse response = messageHelper.createFindValueResponse(
                     request, requestLoad, 
-                    valuesToReturn.toArray(new DHTValueEntity[0]), 
+                    valuesToReturn.toArray(new ValueTuple[0]), 
                     availableKeys.toArray(new KUID[0]));
             send(request.getContact(), response);
         }

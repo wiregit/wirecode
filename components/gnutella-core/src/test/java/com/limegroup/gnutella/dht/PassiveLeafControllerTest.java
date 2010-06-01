@@ -12,7 +12,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
@@ -29,9 +29,9 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
@@ -118,16 +118,16 @@ public class PassiveLeafControllerTest extends DHTTestCase {
             try {
                 // Store a DHTValue
                 KUID key = KUID.createRandomID();
-                DHTValue value = new DHTValueImpl(
-                        DHTValueType.BINARY, 
+                Value value = new DefaultValue(
+                        ValueType.BINARY, 
                         Version.ZERO, 
                         StringUtils.toAsciiBytes("Hello World"));
                 
                 StoreEntity result = dhts.get(0).put(key, value).get();
                 assertEquals(KademliaSettings.K, result.getContacts().length);
                 
-                EntityKey lookupKey = EntityKey.createEntityKey(
-                        key, DHTValueType.ANY);
+                ValueKey lookupKey = ValueKey.createEntityKey(
+                        key, ValueType.ANY);
                 
                 // Try to get the value which should fail
                 try {
@@ -172,7 +172,7 @@ public class PassiveLeafControllerTest extends DHTTestCase {
                 // Try again and it should work now
                 try {
                     ValueEntity r = controller.get(lookupKey).get();
-                    if (r.getEntities().length == 0) {
+                    if (r.getValues().length == 0) {
                         fail("Should have found DHTValue");
                     }
                 } catch (ExecutionException err) {

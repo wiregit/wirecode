@@ -18,9 +18,9 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.util.StringUtils;
@@ -87,8 +87,8 @@ public class SerializeTest extends MojitoTestCase {
             
             KUID primaryKey = KUID.createRandomID();
             
-            DHTValueEntity entity = DHTValueEntity.createFromRemote(node, node, primaryKey, 
-                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
+            ValueTuple entity = ValueTuple.createFromRemote(node, node, primaryKey, 
+                    new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
             
             database1.store(entity);
         }
@@ -107,11 +107,11 @@ public class SerializeTest extends MojitoTestCase {
         
         assertNotSame(database1, database2);
         assertEquals(100, database2.getValueCount());
-        for (DHTValueEntity entity : database1.values()) {
-            Map<KUID, DHTValueEntity> bag = database2.get(entity.getPrimaryKey());
+        for (ValueTuple entity : database1.values()) {
+            Map<KUID, ValueTuple> bag = database2.get(entity.getPrimaryKey());
             assertNotNull(bag);
             
-            DHTValueEntity other = bag.get(entity.getSecondaryKey());
+            ValueTuple other = bag.get(entity.getSecondaryKey());
             assertNotNull(other);
             
             assertEquals(entity, other);

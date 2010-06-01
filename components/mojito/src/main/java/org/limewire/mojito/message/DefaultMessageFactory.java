@@ -27,8 +27,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
@@ -111,14 +111,14 @@ public class DefaultMessageFactory implements MessageFactory {
 
     @Override
     public ValueRequest createValueRequest(Contact contact, SocketAddress dst, 
-            KUID lookupId, KUID[] keys, DHTValueType valueType) {
+            KUID lookupId, KUID[] keys, ValueType valueType) {
         return new DefaultValueRequest(createMessageID(dst), contact, lookupId, keys, valueType);
     }
 
     @Override
     public ValueResponse createValueResponse(Contact contact, Contact dst, 
             MessageID messageId, float requestLoad, 
-            DHTValueEntity[] entities, KUID[] secondaryKeys) {
+            ValueTuple[] entities, KUID[] secondaryKeys) {
         return new DefaultValueResponse(messageId, contact, requestLoad, secondaryKeys, entities);
     }
 
@@ -135,7 +135,7 @@ public class DefaultMessageFactory implements MessageFactory {
 
     @Override
     public StoreRequest createStoreRequest(Contact contact, SocketAddress dst, 
-            SecurityToken securityToken, DHTValueEntity[] values) {
+            SecurityToken securityToken, ValueTuple[] values) {
         return new DefaultStoreRequest(createMessageID(dst), contact, securityToken, values);
     }
 

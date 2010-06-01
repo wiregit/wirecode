@@ -6,6 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * The default implementation of {@link PingEntity}.
+ */
 public class DefaultPingEntity extends AbstractEntity implements PingEntity {
 
     private final Contact contact;

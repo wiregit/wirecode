@@ -14,7 +14,7 @@ import org.limewire.mojito.util.SchedulingUtils;
 
 /**
  * The {@link DatabaseCleaner} is responsible for removing expired 
- * {@link DHTValue}s from the {@link Database}.
+ * {@link Value}s from the {@link Database}.
  */
 public class DatabaseCleaner implements Closeable {
 
@@ -97,7 +97,7 @@ public class DatabaseCleaner implements Closeable {
     
     private void process() {
         synchronized (database) {
-            for (DHTValueEntity entity : database.values()) {
+            for (ValueTuple entity : database.values()) {
                 if (evictorManager.isExpired(routeTable, entity)) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(entity + " is expired!");

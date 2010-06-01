@@ -26,7 +26,7 @@ import org.limewire.mojito.message.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.MaxStack;
@@ -39,7 +39,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private final Entry<Contact, SecurityToken>[] contacts;
     
-    private final DHTValueEntity entity;
+    private final ValueTuple entity;
     
     private final MaxStack processCounter 
         = new MaxStack(StoreSettings.PARALLEL_STORES.getValue());
@@ -58,14 +58,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     private final AtomicInteger complete = new AtomicInteger();
     
     public StoreResponseHandler(Context context, 
-            DHTValueEntity entity, 
+            ValueTuple entity, 
             long timeout, TimeUnit unit) {
         this(context, null, entity, timeout, unit);
     }
     
     public StoreResponseHandler(Context context, 
             Entry<Contact, SecurityToken>[] contacts, 
-            DHTValueEntity entity, 
+            ValueTuple entity, 
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
@@ -194,7 +194,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             return;
         }
         
-        DHTValueEntity entity = process.entity;
+        ValueTuple entity = process.entity;
         if (!code.isFor(entity)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(src + " sent a wrong [" + code + "] for " + entity);
@@ -223,9 +223,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         SocketAddress dst = handle.getAddress();
         
         StoreRequest request = (StoreRequest)handle.getRequest();
-        DHTValueEntity[] entities = request.getValueEntities();
+        ValueTuple[] entities = request.getValueEntities();
         
-        DHTValueEntity entity = entities[0];
+        ValueTuple entity = entities[0];
         
         if (LOG.isInfoEnabled()) {
             LOG.info("Couldn't store " + entity + " at " 
@@ -241,7 +241,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     }
     
     private void addStoreStatusCode(Contact dst, 
-            DHTValueEntity entity, StatusCode code) {
+            ValueTuple entity, StatusCode code) {
         
         List<StoreStatusCode> list = codes.get(dst);
         if (list == null) {
@@ -261,10 +261,10 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         
         protected final SecurityToken securityToken;
         
-        protected final DHTValueEntity entity;
+        protected final ValueTuple entity;
         
         public StoreProcess(Contact dst, SecurityToken securityToken, 
-                DHTValueEntity entity) {
+                ValueTuple entity) {
             this.dst = dst;
             this.securityToken = securityToken;
             this.entity = entity;
@@ -277,7 +277,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
 
         public LocalStoreProcess(Contact dst, 
                 SecurityToken securityToken, 
-                DHTValueEntity entity) {
+                ValueTuple entity) {
             super(dst, securityToken, entity);
         }
 
@@ -295,7 +295,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     private class RemoteStoreProcess extends StoreProcess {
 
         public RemoteStoreProcess(Contact dst, 
-                SecurityToken securityToken, DHTValueEntity entity) {
+                SecurityToken securityToken, ValueTuple entity) {
             super(dst, securityToken, entity);
         }
 
@@ -308,7 +308,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             
             MessageHelper messageHelper = context.getMessageHelper();
             StoreRequest request = messageHelper.createStoreRequest(
-                    addr, securityToken, new DHTValueEntity[] { entity });
+                    addr, securityToken, new ValueTuple[] { entity });
             
             long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
             send(contactId, addr, request, adaptiveTimeout, unit);
@@ -338,7 +338,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
                     code.getSecondaryKey());
         }
         
-        public ProcessKey(KUID nodeId, DHTValueEntity entity) {
+        public ProcessKey(KUID nodeId, ValueTuple entity) {
             this(nodeId, entity.getPrimaryKey(), 
                     entity.getSecondaryKey());
         }

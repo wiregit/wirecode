@@ -19,7 +19,6 @@
 
 package org.limewire.mojito.storage;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +33,7 @@ import org.limewire.mojito.KUID;
  * interface to implement a custom <code>Database</code> that is
  * built on top of BDBJE, for example.
  */
-public interface Database extends Serializable {
+public interface Database {
     
     /**
      * Sets the <code>DatabaseSecurityConstraint</code>. Use null to reset 
@@ -52,7 +51,7 @@ public interface Database extends Serializable {
      * @param entity DHTValue to store (add or remove)
      * @return whether or not the given DHTValue was added or removed
      */
-    public boolean store(DHTValueEntity entity);
+    public boolean store(ValueTuple entity);
     
     /**
      * Removes the given <code>DHTValue</code> from the Database.
@@ -62,7 +61,7 @@ public interface Database extends Serializable {
      * @return previous value associated with specified key, or null 
      * if there was no mapping for the <code>secondaryKey</code>.
      */
-    public DHTValueEntity remove(KUID primaryKey, KUID secondaryKey);
+    public ValueTuple remove(KUID primaryKey, KUID secondaryKey);
     
     /**
      * Returns whether or not the given <code>DHTValue</code> is stored in our
@@ -75,7 +74,7 @@ public interface Database extends Serializable {
      * 
      * @param primaryKey the <code>KUID</code> of the value to lookup in the database
      */
-    public Map<KUID, DHTValueEntity> get(KUID primaryKey);
+    public Map<KUID, ValueTuple> get(KUID primaryKey);
     
     /**
      * Returns the load factor for a <code>KUID</code> Will increment the load value
@@ -96,7 +95,7 @@ public interface Database extends Serializable {
     /**
      * Returns a collection of <code>DHTValueEntity</code>.
      */
-    public Collection<DHTValueEntity> values();
+    public Collection<ValueTuple> values();
     
     /**
      * Returns the number of <code>Key</code>s in the Database.

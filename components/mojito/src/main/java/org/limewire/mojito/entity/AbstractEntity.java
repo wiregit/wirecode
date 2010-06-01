@@ -2,7 +2,10 @@ package org.limewire.mojito.entity;
 
 import java.util.concurrent.TimeUnit;
 
-public class AbstractEntity implements Entity {
+/**
+ * An abstract implementation of {@link Entity}.
+ */
+abstract class AbstractEntity implements Entity {
 
     private final long time;
     

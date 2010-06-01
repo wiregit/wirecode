@@ -27,9 +27,9 @@ import java.util.Map;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.settings.DatabaseSettings;
 /**
- * Stores a {@link DHTValueEntity} in a map.
+ * Stores a {@link ValueTuple} in a map.
  */
-public class DHTValueEntityBag implements Serializable {
+public class ValueTupleBag implements Serializable {
     
     private static final long serialVersionUID = -439172537233232473L;
 
@@ -39,11 +39,12 @@ public class DHTValueEntityBag implements Serializable {
     private static final int LOAD_NULLING_DELAY 
         = DatabaseSettings.VALUE_REQUEST_LOAD_NULLING_DELAY.getValue();
 
-    private final DatabaseImpl database;
+    private final Database database;
     
     private final KUID primaryKey;
     
-    private final Map<KUID, DHTValueEntity> values = new HashMap<KUID, DHTValueEntity>();
+    private final Map<KUID, ValueTuple> values 
+        = new HashMap<KUID, ValueTuple>();
 
     /**
      * The request load associated with this DHT value bag
@@ -55,7 +56,7 @@ public class DHTValueEntityBag implements Serializable {
      */
     private transient long lastRequestTime;
     
-    DHTValueEntityBag(DatabaseImpl database, KUID primaryKey) {
+    ValueTupleBag(Database database, KUID primaryKey) {
         this.database = database;
         this.primaryKey = primaryKey;
     }
@@ -110,7 +111,7 @@ public class DHTValueEntityBag implements Serializable {
         return requestLoad;
     }
     
-    public boolean add(DHTValueEntity entity) {
+    public boolean add(ValueTuple entity) {
         if (entity == null) {
             throw new NullPointerException("DHTValueEntity is null");
         }
@@ -123,11 +124,11 @@ public class DHTValueEntityBag implements Serializable {
         return true;
     }
     
-    public DHTValueEntity get(KUID secondaryKey) {
+    public ValueTuple get(KUID secondaryKey) {
         return values.get(secondaryKey);
     }
     
-    public DHTValueEntity remove(KUID secondaryKey) {
+    public ValueTuple remove(KUID secondaryKey) {
         return values.remove(secondaryKey);
     }
     
@@ -152,17 +153,17 @@ public class DHTValueEntityBag implements Serializable {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof DHTValueEntityBag)) {
+        } else if (!(o instanceof ValueTupleBag)) {
             return false;
         }
         
-        return primaryKey.equals(((DHTValueEntityBag)o).primaryKey);
+        return primaryKey.equals(((ValueTupleBag)o).primaryKey);
     }
     
-    public Map<KUID, DHTValueEntity> getValues(boolean copy) {
+    public Map<KUID, ValueTuple> getValues(boolean copy) {
         if (copy) {
             return Collections.unmodifiableMap(
-                    new HashMap<KUID, DHTValueEntity>(values));
+                    new HashMap<KUID, ValueTuple>(values));
         } else {
             return Collections.unmodifiableMap(values);
         }
@@ -175,7 +176,7 @@ public class DHTValueEntityBag implements Serializable {
         buffer.append("Load: ").append(getRequestLoad(false)).append("\n");
         buffer.append("Values:").append("\n");
         
-        for(DHTValueEntity entity : values.values()) {    
+        for(ValueTuple entity : values.values()) {    
             buffer.append(entity).append("\n");  
         }
         

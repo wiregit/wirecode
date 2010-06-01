@@ -1,7 +1,7 @@
 package org.limewire.mojito.message;
 
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 
 public class DefaultStoreRequest extends AbstractRequest 
@@ -9,10 +9,10 @@ public class DefaultStoreRequest extends AbstractRequest
 
     private final SecurityToken securityToken;
     
-    private final DHTValueEntity[] values;
+    private final ValueTuple[] values;
     
     public DefaultStoreRequest(MessageID messageId, Contact contact, 
-            SecurityToken securityToken, DHTValueEntity[] values) {
+            SecurityToken securityToken, ValueTuple[] values) {
         super(messageId, contact);
         
         this.securityToken = securityToken;
@@ -20,7 +20,7 @@ public class DefaultStoreRequest extends AbstractRequest
     }
 
     @Override
-    public DHTValueEntity[] getValueEntities() {
+    public ValueTuple[] getValueEntities() {
         return values;
     }
 

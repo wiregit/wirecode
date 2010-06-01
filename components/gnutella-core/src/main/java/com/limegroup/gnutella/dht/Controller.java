@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.DHT;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -14,7 +14,7 @@ import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -67,22 +67,22 @@ public interface Controller extends Closeable, ConnectionLifecycleListener {
     /**
      * Stores the given Key-Value pair in the {@link DHT}.
      */
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> put(KUID key, Value value);
     
     /**
      * Stores the given Key-Value pair in the {@link DHT}.
      */
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value);
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
     
     /**
      * Retrieves a value from the {@link DHT}.
      */
-    public DHTFuture<ValueEntity> get(EntityKey key);
+    public DHTFuture<ValueEntity> get(ValueKey key);
     
     /**
      * Retrieves all values from the {@link DHT}.
      */
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key);
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key);
     
     /**
      * Returns the max number of {@link Contact}'s from the {@link DHT}'s

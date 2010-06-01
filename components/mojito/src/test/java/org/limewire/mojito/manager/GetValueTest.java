@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
@@ -15,10 +15,10 @@ import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
@@ -53,20 +53,20 @@ public class GetValueTest extends MojitoTestCase {
             Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
-            DHTValue value = new DHTValueImpl(
-                    DHTValueType.TEXT, Version.ZERO, 
+            Value value = new DefaultValue(
+                    ValueType.TEXT, Version.ZERO, 
                     StringUtils.toAsciiBytes("Hello World"));
             
             first.put(valueId, value).get();
             
             try {
-                EntityKey lookupKey = EntityKey.createEntityKey(
-                        valueId, DHTValueType.TEXT);
+                ValueKey lookupKey = ValueKey.createEntityKey(
+                        valueId, ValueType.TEXT);
                 
                 ValueEntity result = dhts.get(1).get(lookupKey).get();
-                DHTValueEntity[] entities = result.getEntities();
+                ValueTuple[] entities = result.getValues();
                 assertEquals(1, entities.length);
-                for (DHTValueEntity entity : entities) {
+                for (ValueTuple entity : entities) {
                     assertEquals(value, entity.getValue());
                 }
             } catch (Exception err) {
@@ -74,13 +74,13 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                EntityKey lookupKey = EntityKey.createEntityKey(
-                        valueId, DHTValueType.ANY);
+                ValueKey lookupKey = ValueKey.createEntityKey(
+                        valueId, ValueType.ANY);
                 
                 ValueEntity result = dhts.get(1).get(lookupKey).get();
-                DHTValueEntity[] entities = result.getEntities();
+                ValueTuple[] entities = result.getValues();
                 assertEquals(1, entities.length);
-                for (DHTValueEntity entity : entities) {
+                for (ValueTuple entity : entities) {
                     assertEquals(value, entity.getValue());
                 }
             } catch (Exception err) {
@@ -88,7 +88,7 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                EntityKey lookupKey = EntityKey.createEntityKey(valueId, DHTValueType.LIME);
+                ValueKey lookupKey = ValueKey.createEntityKey(valueId, ValueType.LIME);
                 dhts.get(1).get(lookupKey).get();
                 fail("Should have failed!");
             } catch (ExecutionException err) {
@@ -111,18 +111,18 @@ public class GetValueTest extends MojitoTestCase {
             Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
-            DHTValue value = new DHTValueImpl(
-                    DHTValueType.TEXT, Version.ZERO, 
+            Value value = new DefaultValue(
+                    ValueType.TEXT, Version.ZERO, 
                     StringUtils.toAsciiBytes("Hello World"));
             
             first.put(valueId, value).get();
             
-            EntityKey lookupKey1 = EntityKey.createEntityKey(
-                    valueId, DHTValueType.TEXT);
+            ValueKey lookupKey1 = ValueKey.createEntityKey(
+                    valueId, ValueType.TEXT);
             ValueEntity result1 = dhts.get(1).get(lookupKey1).get();
             
-            EntityKey lookupKey2 = EntityKey.createEntityKey(
-                    valueId, DHTValueType.ANY);
+            ValueKey lookupKey2 = ValueKey.createEntityKey(
+                    valueId, ValueType.ANY);
             ValueEntity result2 = dhts.get(1).get(lookupKey2).get();
             
             assertNotSame(result1, result2);

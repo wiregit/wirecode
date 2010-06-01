@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.DefaultMojitoDHT;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.BootstrapManager.State;
@@ -21,7 +21,7 @@ import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.util.HostFilter;
@@ -99,22 +99,22 @@ public class PassiveLeafController extends AbstractController {
     }
     
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key) {
+    public DHTFuture<ValueEntity> get(ValueKey key) {
         return dht.get(key);
     }
 
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> put(KUID key, Value value) {
         return dht.put(key, value);
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
         return dht.enqueue(key, value);
     }
     
     @Override
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key) {
         return dht.getAll(key);
     }
 

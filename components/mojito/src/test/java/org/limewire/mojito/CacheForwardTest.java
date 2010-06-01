@@ -43,10 +43,10 @@ import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueImpl;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.StringUtils;
 
@@ -135,7 +135,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // Use the furthest Node as the creator.
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             // Store the value
-            DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
+            Value value = new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World"));
             StoreEntity evt = creator.put(valueId, value).get();            
             
             // see LWC-2778. In case the root is UNKNOWN in others route table, 
@@ -170,7 +170,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 MojitoDHT dht = dhts.get(remote.getContactId());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
-                for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
+                for (ValueTuple dhtValue : dht.getDatabase().values()) {
                     assertEquals(valueId, dhtValue.getPrimaryKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -202,7 +202,7 @@ public class CacheForwardTest extends MojitoTestCase {
 
                 assertEquals("I dont have it?? "+dht.getLocalNodeID(),1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
-                for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
+                for (ValueTuple dhtValue : dht.getDatabase().values()) {
                     assertEquals(valueId, dhtValue.getPrimaryKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -214,7 +214,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // previous 'closest' Node
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
+            for (ValueTuple dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -249,7 +249,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
+            for (ValueTuple dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -288,7 +288,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : middle.getDatabase().values()) {
+            for (ValueTuple dhtValue : middle.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getPrimaryKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());

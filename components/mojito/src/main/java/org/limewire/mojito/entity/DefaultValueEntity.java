@@ -2,30 +2,33 @@ package org.limewire.mojito.entity;
 
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.LookupResponseHandler.State;
-import org.limewire.mojito.storage.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 
+/**
+ * The default implementation of {@link ValueEntity}.
+ */
 public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
 
-    private final EntityKey lookupKey;
+    private final ValueKey lookupKey;
     
-    private final DHTValueEntity[] entities;
+    private final ValueTuple[] entities;
     
-    private final EntityKey[] entityKeys;
+    private final ValueKey[] entityKeys;
     
-    public DefaultValueEntity(EntityKey lookupKey, 
-            DHTValueEntity[] entities, 
-            EntityKey[] entityKeys, 
+    public DefaultValueEntity(ValueKey lookupKey, 
+            ValueTuple[] entities, 
+            ValueKey[] entityKeys, 
             State state) {
         this(lookupKey, entities, entityKeys, 
                 state.getTimeInMillis(), TimeUnit.MILLISECONDS);
     }
     
-    public DefaultValueEntity(EntityKey lookupKey, 
-            DHTValueEntity[] entities, 
-            EntityKey[] entityKeys, 
+    public DefaultValueEntity(ValueKey lookupKey, 
+            ValueTuple[] entities, 
+            ValueKey[] entityKeys, 
             long time, TimeUnit unit) {
         
         super(time, unit);
@@ -41,17 +44,17 @@ public class DefaultValueEntity extends AbstractEntity implements ValueEntity {
     }
 
     @Override
-    public DHTValueEntity[] getEntities() {
+    public ValueTuple[] getValues() {
         return entities;
     }
 
     @Override
-    public EntityKey getEntityKey() {
+    public ValueKey getValueKey() {
         return lookupKey;
     }
 
     @Override
-    public EntityKey[] getEntityKeys() {
+    public ValueKey[] getValueKeys() {
         return entityKeys;
     }
 }

@@ -16,8 +16,8 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.ApplicationServices;
@@ -61,7 +61,7 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
     /**
      * 
      */
-    public DefaultPushProxiesValue(DHTValue value) throws IOException {
+    public DefaultPushProxiesValue(Value value) throws IOException {
         this(value.getValueType(), value.getVersion(), value.getValue());
     }
     
@@ -72,7 +72,7 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
     /**
      * 
      */
-    private DefaultPushProxiesValue(DHTValueType valueType, 
+    private DefaultPushProxiesValue(ValueType valueType, 
             Version version, byte[] data) throws IOException {
         
         super(version);

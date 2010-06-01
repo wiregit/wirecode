@@ -27,23 +27,26 @@ import java.util.Arrays;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ArrayUtils;
 
-
 /**
- * A <code>DHTValue</code> is a {@link DHTValueType}, {@link Version} and value triple.
+ * A default implementation of {@link Value}.
  */
-public class DHTValueImpl implements DHTValue {
+public class DefaultValue implements Value {
     
-    private static final long serialVersionUID = -7381830963268622187L;
-
     /**
      * An empty byte array
      */
     private static final byte[] EMPTY = new byte[0];
     
     /**
+     * 
+     */
+    public static final Value EMPTY_VALUE = new DefaultValue(
+            ValueType.BINARY, Version.ZERO, EMPTY);
+    
+    /**
      * The type of the value
      */
-    private final DHTValueType valueType;
+    private final ValueType valueType;
     
     /**
      * The version of the value
@@ -60,7 +63,7 @@ public class DHTValueImpl implements DHTValue {
      */
     private final int hashCode;
     
-    public DHTValueImpl(DHTValueType valueType, 
+    public DefaultValue(ValueType valueType, 
             Version version, byte[] value) {
         this.valueType = valueType;
         this.version = version;
@@ -74,40 +77,28 @@ public class DHTValueImpl implements DHTValue {
         this.hashCode = Arrays.hashCode(value);
     }
 
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValueType()
-     */
-    public DHTValueType getValueType() {
+    @Override
+    public ValueType getValueType() {
         return valueType;
     }
     
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getVersion()
-     */
+    @Override
     public Version getVersion() {
         return version;
     }
     
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#writeValue(java.io.OutputStream)
-     */
-    public void write(OutputStream out) throws IOException {
+    @Override
+    public int write(OutputStream out) throws IOException {
         out.write(value, 0, value.length);
+        return value.length;
     }
     
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValue()
-     */
+    @Override
     public byte[] getValue() {
-        byte[] copy = new byte[value.length];
-        System.arraycopy(value, 0, copy, 0, value.length);
-        return copy;
+        return value.clone();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#size()
-     */
+    @Override
     public int size() {
         return value.length;
     }
@@ -121,11 +112,11 @@ public class DHTValueImpl implements DHTValue {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof DHTValue)) {
+        } else if (!(o instanceof Value)) {
             return false;
         }
         
-        DHTValue other = (DHTValue)o;
+        Value other = (Value)o;
         return valueType.equals(other.getValueType())
                     && version.equals(other.getVersion())
                     && Arrays.equals(value, other.getValue());
@@ -134,7 +125,7 @@ public class DHTValueImpl implements DHTValue {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("DHTValueType: ").append(getValueType()).append("\n");
+        buffer.append("ValueType: ").append(getValueType()).append("\n");
         buffer.append("Version: ").append(getVersion()).append("\n");
         
         buffer.append("Value: ");
@@ -142,8 +133,8 @@ public class DHTValueImpl implements DHTValue {
             buffer.append("This is an empty value (REMOVE operation)");
         } else {
             try {
-                if (valueType.equals(DHTValueType.TEXT) 
-                        || valueType.equals(DHTValueType.TEST)) {
+                if (valueType.equals(ValueType.TEXT) 
+                        || valueType.equals(ValueType.TEST)) {
                     buffer.append(new String(getValue(), "UTF-8")).append("\n");
                 } else {
                     buffer.append(ArrayUtils.toHexString(getValue())).append("\n");

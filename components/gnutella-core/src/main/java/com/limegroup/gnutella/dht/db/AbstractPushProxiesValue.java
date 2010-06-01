@@ -14,8 +14,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.ByteUtils;
 
@@ -49,7 +49,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     @Override
-    public DHTValue serialize() {
+    public Value serialize() {
         
         GGEP ggep = new GGEP();
         ggep.put(CLIENT_ID, getGUID());
@@ -80,7 +80,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
             throw new RuntimeException(err);
         }
         
-        return new DHTValueImpl(PUSH_PROXIES, version, ggep.toByteArray());
+        return new DefaultValue(PUSH_PROXIES, version, ggep.toByteArray());
     }
     
     @Override

@@ -60,7 +60,7 @@ import org.limewire.mojito.util.ContactUtils;
  */
 
 /**
- * Adds, removes and stores a {@link DHTValueEntity} to a 
+ * Adds, removes and stores a {@link ValueTuple} to a 
  * database. Values are stored in-memory. 
  */ 
  /* TODO: For more advanced features we need some definition for
@@ -69,14 +69,13 @@ import org.limewire.mojito.util.ContactUtils;
  */
 public class DatabaseImpl implements Database {
     
-    private static final long serialVersionUID = -4857315774747734947L;
-    
     private static final Log LOG = LogFactory.getLog(DatabaseImpl.class);
     
     public static final int IPV4_ADDRESS_NETMASK = 0xFFFFFFFF;
     
     /** LOCKING: this */
-    private final Map<KUID, DHTValueEntityBag> database = new HashMap<KUID, DHTValueEntityBag>();
+    private final Map<KUID, ValueTupleBag> database 
+        = new HashMap<KUID, ValueTupleBag>();
     
     /**
      * The DatabaseSecurityConstraint handle.
@@ -87,17 +86,16 @@ public class DatabaseImpl implements Database {
     /**
      * A Map of masked IP address to number of values.
      */
-    private final IntHashMap<AtomicInteger> valuesPerNetwork = new IntHashMap<AtomicInteger>();
+    private final IntHashMap<AtomicInteger> valuesPerNetwork 
+        = new IntHashMap<AtomicInteger>();
     
     /**
      * A Map of IP address to number of values.
      */
-    private final IntHashMap<AtomicInteger> valuesPerAddress = new IntHashMap<AtomicInteger>();
+    private final IntHashMap<AtomicInteger> valuesPerAddress 
+        = new IntHashMap<AtomicInteger>();
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#setDatabaseSecurityConstraint(com.limegroup.mojito.db.DatabaseSecurityConstraint)
-     */
+    @Override
     public void setDatabaseSecurityConstraint(
             DatabaseSecurityConstraint securityConstraint) {
         
@@ -108,35 +106,23 @@ public class DatabaseImpl implements Database {
         this.securityConstraint = securityConstraint;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#getKeyCount()
-     */
+    @Override
     public synchronized int getKeyCount() {
         return database.size();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#getValueCount()
-     */
+    @Override
     public synchronized int getValueCount() {
         return values().size();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#clear()
-     */
+    @Override
     public synchronized void clear() {
         database.clear();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.Database#store(org.limewire.mojito.db.DHTValueEntity)
-     */
-    public synchronized boolean store(DHTValueEntity entity) {
+    @Override
+    public synchronized boolean store(ValueTuple entity) {
         if (!allowStore(entity)) {
             return false;
         }
@@ -152,12 +138,12 @@ public class DatabaseImpl implements Database {
      * Adds the given <code>DHTValue</code> to the Database succeeded.
      * @return true if adding the <code>DHTValueEntity</code> succeeded
      */
-    public synchronized boolean add(DHTValueEntity entity) {
+    public synchronized boolean add(ValueTuple entity) {
         KUID primaryKey = entity.getPrimaryKey();
-        DHTValueEntityBag bag = database.get(primaryKey);
+        ValueTupleBag bag = database.get(primaryKey);
         
         if (bag == null) {
-            bag = new DHTValueEntityBag(this, primaryKey);
+            bag = new ValueTupleBag(this, primaryKey);
         }
         
         if (bag.add(entity)) {
@@ -173,14 +159,11 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.Database#remove(org.limewire.mojito.KUID, org.limewire.mojito.KUID)
-     */
-    public synchronized DHTValueEntity remove(KUID primaryKey, KUID secondaryKey) {
+    @Override
+    public synchronized ValueTuple remove(KUID primaryKey, KUID secondaryKey) {
         
-        DHTValueEntity entity = null;
-        DHTValueEntityBag bag = database.get(primaryKey);
+        ValueTuple entity = null;
+        ValueTupleBag bag = database.get(primaryKey);
         if (bag != null && (entity = bag.remove(secondaryKey)) != null) {
             
             if (bag.isEmpty()) {
@@ -198,7 +181,7 @@ public class DatabaseImpl implements Database {
      * Returns the number of values that are currently stored under
      * the same Class C Network.
      */
-    public synchronized int getValuesPerNetwork(DHTValueEntity entity) {
+    public synchronized int getValuesPerNetwork(ValueTuple entity) {
         return getValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
     }
     
@@ -206,7 +189,7 @@ public class DatabaseImpl implements Database {
      * Returns the number of values that are currently stored under
      * the same IP Address.
      */
-    public synchronized int getValuesPerAddress(DHTValueEntity entity) {
+    public synchronized int getValuesPerAddress(ValueTuple entity) {
         return getValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
@@ -214,7 +197,7 @@ public class DatabaseImpl implements Database {
      * A helper method to get the number of values that are currently stored
      * under a certain masked IP address.
      */
-    private static int getValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+    private static int getValueCount(ValueTuple entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
             return 0;
         }
@@ -236,7 +219,7 @@ public class DatabaseImpl implements Database {
      * Increments and returns the number of values that are stored under the
      * same Class C Network.
      */
-    private int incrementValuesPerNetwork(DHTValueEntity entity) {
+    private int incrementValuesPerNetwork(ValueTuple entity) {
         return incrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
     }
     
@@ -244,7 +227,7 @@ public class DatabaseImpl implements Database {
      * Increments and returns the number of values that are stored under the
      * same IP address.
      */
-    private int incrementValuesPerAddress(DHTValueEntity entity) {
+    private int incrementValuesPerAddress(ValueTuple entity) {
         return incrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
@@ -252,7 +235,7 @@ public class DatabaseImpl implements Database {
      * A helper method to increment the number of values that are stored
      * under a certain masked IP address.
      */
-    private static int incrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+    private static int incrementValueCount(ValueTuple entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
             return 0;
         }
@@ -277,7 +260,7 @@ public class DatabaseImpl implements Database {
      * Decrements and returns the number of values that are currently
      * stored under the same Class C Network.
      */
-    private int decrementValuesPerNetwork(DHTValueEntity entity) {
+    private int decrementValuesPerNetwork(ValueTuple entity) {
         return decrementValueCount(entity, valuesPerNetwork, NetworkUtils.CLASS_C_NETMASK);
     }
     
@@ -285,7 +268,7 @@ public class DatabaseImpl implements Database {
      * Decrements and returns the number of values that are currently
      * stored under the same IP address.
      */
-    private int decrementValuesPerAddress(DHTValueEntity entity) {
+    private int decrementValuesPerAddress(ValueTuple entity) {
         return decrementValueCount(entity, valuesPerAddress, IPV4_ADDRESS_NETMASK);
     }
     
@@ -293,7 +276,7 @@ public class DatabaseImpl implements Database {
      * A helper method to decrement the number of values that are stored
      * under a certain masked IP address.
      */
-    private static int decrementValueCount(DHTValueEntity entity, IntHashMap<AtomicInteger> map, int netmask) {
+    private static int decrementValueCount(ValueTuple entity, IntHashMap<AtomicInteger> map, int netmask) {
         if (entity.isLocalValue()) {
             return 0;
         }
@@ -321,7 +304,7 @@ public class DatabaseImpl implements Database {
      * @see org.limewire.mojito.db.Database#getRequestLoad(org.limewire.mojito.KUID, boolean)
      */
     public synchronized float getRequestLoad(KUID primaryKey, boolean incrementLoad) {
-        DHTValueEntityBag bag = database.get(primaryKey);
+        ValueTupleBag bag = database.get(primaryKey);
         if (bag != null) {
             return bag.getRequestLoad(incrementLoad);
         }
@@ -333,7 +316,7 @@ public class DatabaseImpl implements Database {
      * and then delegates calls to the <code>DatabaseSecurityConstraint</code> instance 
      * if possible.
      */
-    private boolean allowStore(DHTValueEntity entity) {
+    private boolean allowStore(ValueTuple entity) {
         if (entity.isLocalValue()) {
             return true;
         }
@@ -371,7 +354,7 @@ public class DatabaseImpl implements Database {
         }
         
         // Check with the security constraint now
-        DHTValueEntityBag bag = database.get(entity.getPrimaryKey());
+        ValueTupleBag bag = database.get(entity.getPrimaryKey());
         DatabaseSecurityConstraint dbsc = securityConstraint;
         if (dbsc != null && bag != null) {
             return dbsc.allowStore(this, bag.getValues(false), entity);
@@ -383,46 +366,34 @@ public class DatabaseImpl implements Database {
     /**
      * For internal use only.
      */
-    public synchronized DHTValueEntityBag getBag(KUID valueId) {
+    public synchronized ValueTupleBag getBag(KUID valueId) {
         return database.get(valueId);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.Database#get(org.limewire.mojito.KUID)
-     */
-    public synchronized Map<KUID, DHTValueEntity> get(KUID valueId) {
-        DHTValueEntityBag bag = database.get(valueId);
+    @Override
+    public synchronized Map<KUID, ValueTuple> get(KUID valueId) {
+        ValueTupleBag bag = database.get(valueId);
         if (bag != null) {
             return bag.getValues(true);
         }
         return Collections.emptyMap();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.Database#contains(org.limewire.mojito.KUID, org.limewire.mojito.KUID)
-     */
+    @Override
     public synchronized boolean contains(KUID primaryKey, KUID secondaryKey) {
-        DHTValueEntityBag bag = database.get(primaryKey); 
+        ValueTupleBag bag = database.get(primaryKey); 
         return (bag != null && bag.contains(secondaryKey));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#keySet()
-     */
+    @Override
     public synchronized Set<KUID> keySet() {
         return new HashSet<KUID>(database.keySet());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#values()
-     */
-    public synchronized Collection<DHTValueEntity> values() {
-        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>(getKeyCount() * 2);
-        for (DHTValueEntityBag bag : database.values()) {
+    @Override
+    public synchronized Collection<ValueTuple> values() {
+        List<ValueTuple> values = new ArrayList<ValueTuple>(getKeyCount() * 2);
+        for (ValueTupleBag bag : database.values()) {
             values.addAll(bag.getValues(false).values());
         }
         return values;
@@ -431,7 +402,7 @@ public class DatabaseImpl implements Database {
     @Override
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
-        for (DHTValueEntityBag bag : database.values()) {
+        for (ValueTupleBag bag : database.values()) {
             buffer.append(bag.toString());
         }
         

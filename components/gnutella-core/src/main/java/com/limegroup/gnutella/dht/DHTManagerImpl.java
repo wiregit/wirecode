@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -22,7 +22,7 @@ import org.limewire.mojito.message.DefaultMessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -420,22 +420,22 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     }
     
     @Override
-    public synchronized DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+    public synchronized DHTFuture<StoreEntity> put(KUID key, Value value) {
         return controller.put(key, value);
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
         return controller.enqueue(key, value);
     }
 
     @Override
-    public synchronized DHTFuture<ValueEntity> get(EntityKey key) {
+    public synchronized DHTFuture<ValueEntity> get(ValueKey key) {
         return controller.get(key);
     }
     
     @Override
-    public synchronized DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+    public synchronized DHTFuture<ValueEntity[]> getAll(ValueKey key) {
         return controller.getAll(key);
     }
 

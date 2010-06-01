@@ -5,8 +5,8 @@ import java.util.Arrays;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueImpl;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.util.ByteUtils;
 
@@ -36,7 +36,7 @@ public abstract class AbstractAltLocValue implements AltLocValue {
     }
     
     @Override
-    public DHTValue serialize() {
+    public Value serialize() {
         GGEP ggep = new GGEP();
         
         ggep.put(CLIENT_ID, getGUID());
@@ -61,7 +61,7 @@ public abstract class AbstractAltLocValue implements AltLocValue {
             }
         }
         
-        return new DHTValueImpl(ALT_LOC, version, ggep.toByteArray());
+        return new DefaultValue(ALT_LOC, version, ggep.toByteArray());
     }
     
     @Override

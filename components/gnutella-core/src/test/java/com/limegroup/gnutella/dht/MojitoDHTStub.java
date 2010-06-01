@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.AsyncProcess;
@@ -27,7 +27,7 @@ import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.NopTransport;
@@ -75,12 +75,12 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key) {
+    public DHTFuture<ValueEntity> get(ValueKey key) {
         return createFuture();
     }
 
     @Override
-    public DHTFuture<ValueEntity[]> getAll(EntityKey key) {
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key) {
         return createFuture();
     }
 
@@ -125,12 +125,12 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> put(KUID key, Value value) {
         return createFuture();
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
         return createFuture();
     }
 
@@ -170,7 +170,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public DHTFuture<ValueEntity> get(EntityKey key, long timeout, TimeUnit unit) {
+    public DHTFuture<ValueEntity> get(ValueKey key, long timeout, TimeUnit unit) {
         return createFuture();
     }
 
@@ -270,12 +270,12 @@ public class MojitoDHTStub implements MojitoDHT {
     }
     
     @Override
-    public DHTFuture<StoreEntity> put(KUID key, DHTValue value, long timeout, TimeUnit unit) {
+    public DHTFuture<StoreEntity> put(KUID key, Value value, long timeout, TimeUnit unit) {
         return createFuture();
     }
     
     @Override
-    public DHTFuture<StoreEntity> enqueue(KUID key, DHTValue value, long timeout, TimeUnit unit) {
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value, long timeout, TimeUnit unit) {
         return createFuture();
     }
 

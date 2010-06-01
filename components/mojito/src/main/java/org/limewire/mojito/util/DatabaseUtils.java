@@ -29,8 +29,8 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 
 
 /**
@@ -43,7 +43,7 @@ public class DatabaseUtils {
     /**
      * Returns the expiration time of the given DHTValue.
      */
-    public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
+    public static long getExpirationTime(RouteTable routeTable, ValueTuple entity) {
         KUID primaryKey = entity.getPrimaryKey();
         
         Collection<Contact> nodes = routeTable.select(primaryKey, 
@@ -78,37 +78,37 @@ public class DatabaseUtils {
     /**
      * Returns whether or not the given DHTValue has expired.
      */
-    public static boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
+    public static boolean isExpired(RouteTable routeTable, ValueTuple entity) {
         return System.currentTimeMillis() >= getExpirationTime(routeTable, entity);
     }
 
-    public static boolean isDHTValueType(DHTValueType valueType, DHTValueEntity entity) {
-        return valueType.equals(DHTValueType.ANY) 
+    public static boolean isDHTValueType(ValueType valueType, ValueTuple entity) {
+        return valueType.equals(ValueType.ANY) 
                 || valueType.equals(entity.getValue().getValueType());
     }
 
-    public static DHTValueEntity[] filter(
-            DHTValueType valueType,  DHTValueEntity[] entities) {
+    public static ValueTuple[] filter(
+            ValueType valueType,  ValueTuple[] entities) {
         
-        if (valueType.equals(DHTValueType.ANY)) {
+        if (valueType.equals(ValueType.ANY)) {
             return entities;
         }
         
-        List<DHTValueEntity> filtered 
-            = new ArrayList<DHTValueEntity>(entities.length);
+        List<ValueTuple> filtered 
+            = new ArrayList<ValueTuple>(entities.length);
         
-        for (DHTValueEntity entity : entities) {
+        for (ValueTuple entity : entities) {
             if (isDHTValueType(valueType, entity)) {
                 filtered.add(entity);
             }
         }
         
-        return filtered.toArray(new DHTValueEntity[0]);
+        return filtered.toArray(new ValueTuple[0]);
     }
     
-    public static DHTValueEntity getFirstEntityFor(DHTValueType valueType, 
-            Collection<? extends DHTValueEntity> entities) {
-        for (DHTValueEntity entity : entities) {
+    public static ValueTuple getFirstEntityFor(ValueType valueType, 
+            Collection<? extends ValueTuple> entities) {
+        for (ValueTuple entity : entities) {
             if (isDHTValueType(valueType, entity)) {
                 return entity;
             }

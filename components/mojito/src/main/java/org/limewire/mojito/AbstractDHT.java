@@ -15,7 +15,7 @@ import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.BootstrapConfig;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.ValueType;
 
 /**
  * An abstract implementation of {@link DHT}.
@@ -114,8 +114,8 @@ public abstract class AbstractDHT implements DHT {
     public DHTFuture<ValueEntity> get(KUID lookupId, 
             long timeout, TimeUnit unit) {
         
-        EntityKey key = EntityKey.createEntityKey(
-                lookupId, DHTValueType.ANY);
+        ValueKey key = ValueKey.createEntityKey(
+                lookupId, ValueType.ANY);
         
         return get(key, timeout, unit);
     }

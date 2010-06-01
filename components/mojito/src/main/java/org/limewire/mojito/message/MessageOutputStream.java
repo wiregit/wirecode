@@ -14,9 +14,9 @@ import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DHTValue;
-import org.limewire.mojito.storage.DHTValueEntity;
-import org.limewire.mojito.storage.DHTValueType;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
@@ -137,20 +137,20 @@ public class MessageOutputStream extends DataOutputStream {
         writeStoreStatusCodes(message.getStoreStatusCodes());
     }
     
-    public void writeValueEntities(DHTValueEntity[] values) throws IOException {
+    public void writeValueEntities(ValueTuple[] values) throws IOException {
         writeByte(values.length);
-        for (DHTValueEntity value : values) {
+        for (ValueTuple value : values) {
             writeValueEntity(value);
         }
     }
     
-    public void writeValueEntity(DHTValueEntity value) throws IOException {
+    public void writeValueEntity(ValueTuple value) throws IOException {
         writeContact(value.getCreator());
         writeKUID(value.getPrimaryKey());
         writeValue(value.getValue());
     }
     
-    public void writeValue(DHTValue value) throws IOException {
+    public void writeValue(Value value) throws IOException {
         writeValueType(value.getValueType());
         writeVersion(value.getVersion());
         
@@ -265,7 +265,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeSocketAddress(contact.getContactAddress());
     }
     
-    public void writeValueType(DHTValueType valueType) throws IOException {
+    public void writeValueType(ValueType valueType) throws IOException {
         writeInt(valueType.intValue());
     }
     
