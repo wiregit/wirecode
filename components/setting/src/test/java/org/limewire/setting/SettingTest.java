@@ -1,9 +1,13 @@
 package org.limewire.setting;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -406,5 +410,42 @@ public class SettingTest extends BaseTestCase {
         Properties readProps = new Properties();
         readProps.load(new FileInputStream(f));
         assertEquals("defaultValue", readProps.get("KEY"));
+    }
+    
+    public void testTimeSetting() throws IOException {
+        File f = new File("testSettings.props");
+        f.delete();
+        f.deleteOnExit();
+        
+        // Initialize the setting file with a key-value pair
+        BufferedWriter out = new BufferedWriter(
+                new FileWriter(f));
+        out.write("HELLO=8000\n");
+        out.close();
+        
+        SettingsFactory factory = new SettingsFactory(f);
+        
+        TimeSetting setting1 = factory.createTimeSetting(
+                "TIME_SETTING", 10L, TimeUnit.SECONDS);
+        
+        // TimeSetting is internally a LongSetting that
+        // holds the time in milliseconds.
+        assertEquals(10L*1000L, setting1.getValue());
+        assertEquals(10L, setting1.getTime(TimeUnit.SECONDS));
+        assertEquals(10L*1000L, setting1.getTimeInMillis());
+        
+        setting1.setTime(5L, TimeUnit.MINUTES);
+        assertEquals(5L*60L*1000L, setting1.getValue());
+        assertEquals(5L, setting1.getTime(TimeUnit.MINUTES));
+        assertEquals(5L*60L*1000L, setting1.getTimeInMillis());
+        
+        // Let's assume there was previously a LongSetting 
+        // with the key HELLO and we're turning it into a
+        // TimeSetting.
+        TimeSetting setting2 = factory.createTimeSetting(
+                "HELLO", 10L, TimeUnit.MINUTES);
+        assertEquals(8L*1000L, setting2.getValue());
+        assertEquals(8L, setting2.getTime(TimeUnit.SECONDS));
+        assertEquals(8L*1000L, setting2.getTimeInMillis());
     }
 }
