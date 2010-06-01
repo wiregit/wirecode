@@ -21,6 +21,8 @@ import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 /**
  * An abstract implementation of {@link Controller}.
+ * 
+ * THIS IS A TEST
  */
 abstract class AbstractController implements Controller {
     
