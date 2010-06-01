@@ -136,8 +136,9 @@ class StoreManager implements Closeable {
     }
     
     @SuppressWarnings("unchecked")
-    private DHTFuture<StoreEntity> put(Contact dst, SecurityToken securityToken, 
-            DHTValueEntity entity, long timeout, TimeUnit unit) {
+    private DHTFuture<StoreEntity> store(Contact dst, 
+            SecurityToken securityToken, DHTValueEntity entity, 
+            long timeout, TimeUnit unit) {
         
         Entry<Contact, SecurityToken>[] contacts = new Entry[] { 
             new EntryImpl<Contact, SecurityToken>(dst, securityToken) 
@@ -238,7 +239,7 @@ class StoreManager implements Closeable {
             FutureHandle handle = new FutureHandle() {
                 @Override
                 protected DHTFuture<StoreEntity> createFuture() {
-                    return StoreManager.this.put(dst, securityToken, entity, timeout, unit);
+                    return StoreManager.this.store(dst, securityToken, entity, timeout, unit);
                 }
             };
             
