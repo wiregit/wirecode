@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.List;
 
 import org.limewire.core.api.magnet.MagnetLink;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 
 public class MagnetLinkImpl implements MagnetLink {

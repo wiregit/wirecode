@@ -8,13 +8,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.util.Visitor;
+import org.limewire.io.URN;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;

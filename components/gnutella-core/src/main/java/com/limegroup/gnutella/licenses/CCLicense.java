@@ -15,12 +15,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * A concrete implementation of a License, for Creative Commons licenses.

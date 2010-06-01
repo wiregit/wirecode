@@ -7,9 +7,9 @@ import junit.framework.Test;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;

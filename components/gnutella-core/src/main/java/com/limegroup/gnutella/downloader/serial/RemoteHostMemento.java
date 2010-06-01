@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.URN;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.UnboxUtils;
@@ -20,7 +21,6 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescImpl;
 
 /** A memento for a remote host. */

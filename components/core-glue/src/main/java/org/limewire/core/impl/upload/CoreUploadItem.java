@@ -316,7 +316,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public URN getUrn() {
-        com.limegroup.gnutella.URN urn = uploader.getUrn();
+        org.limewire.io.URN urn = uploader.getUrn();
         if(urn != null) {
             return urn;
         }

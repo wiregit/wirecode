@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

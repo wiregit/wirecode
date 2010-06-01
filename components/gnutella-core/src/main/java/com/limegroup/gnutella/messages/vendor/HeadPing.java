@@ -8,10 +8,10 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /**

@@ -21,10 +21,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.collection.CollectionUtils;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileViewChangeFailedException.Reason;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

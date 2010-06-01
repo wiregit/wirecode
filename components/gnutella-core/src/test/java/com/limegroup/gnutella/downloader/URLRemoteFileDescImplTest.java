@@ -5,10 +5,10 @@ import java.net.URL;
 import junit.framework.Test;
 
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 
 public class URLRemoteFileDescImplTest extends BaseTestCase {

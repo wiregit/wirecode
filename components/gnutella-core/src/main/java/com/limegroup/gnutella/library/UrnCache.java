@@ -26,6 +26,7 @@ import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.CommonUtils;
@@ -35,7 +36,6 @@ import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.hashing.AudioHashingUtils;
 

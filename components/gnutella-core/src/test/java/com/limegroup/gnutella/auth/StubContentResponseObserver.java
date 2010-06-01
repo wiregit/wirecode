@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.auth;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 public class StubContentResponseObserver implements ContentResponseObserver {
 

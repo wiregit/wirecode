@@ -10,10 +10,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public abstract class AbstractFileCollectionStub implements FileCollection {

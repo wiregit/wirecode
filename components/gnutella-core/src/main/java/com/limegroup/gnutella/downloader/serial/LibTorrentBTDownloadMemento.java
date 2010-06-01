@@ -4,7 +4,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 

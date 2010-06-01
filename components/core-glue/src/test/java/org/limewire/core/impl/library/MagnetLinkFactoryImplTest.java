@@ -3,12 +3,12 @@ package org.limewire.core.impl.library;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.URN;
 
 public class MagnetLinkFactoryImplTest extends BaseTestCase {
 

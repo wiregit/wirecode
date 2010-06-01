@@ -10,11 +10,11 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;

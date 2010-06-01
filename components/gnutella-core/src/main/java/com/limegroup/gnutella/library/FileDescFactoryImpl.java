@@ -3,11 +3,11 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.listener.SourcedEventMulticaster;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 

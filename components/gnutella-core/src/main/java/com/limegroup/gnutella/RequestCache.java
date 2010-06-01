@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 

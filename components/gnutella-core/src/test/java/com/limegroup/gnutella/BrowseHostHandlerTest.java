@@ -29,6 +29,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.util.TestUtils;

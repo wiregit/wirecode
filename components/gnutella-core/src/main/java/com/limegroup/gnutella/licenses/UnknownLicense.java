@@ -4,8 +4,8 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * An unknown license (unverifiable).

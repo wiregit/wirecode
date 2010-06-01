@@ -8,13 +8,13 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
+import org.limewire.io.URN;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

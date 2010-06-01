@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.xml.SerialXml;
 

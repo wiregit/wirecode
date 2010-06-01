@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
@@ -14,7 +15,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadState;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.PushEndpointService;

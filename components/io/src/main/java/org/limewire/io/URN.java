@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,13 +20,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.io.GUID;
-import org.limewire.io.IOUtils;
 import org.limewire.security.SHA1;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 
+import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.UrnType;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.MerkleTree;

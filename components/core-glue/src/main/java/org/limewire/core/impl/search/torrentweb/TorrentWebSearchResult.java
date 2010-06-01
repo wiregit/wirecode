@@ -28,7 +28,7 @@ import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 import org.limewire.util.URIUtils;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 /**
  * A torrent web search result.

@@ -12,6 +12,7 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 

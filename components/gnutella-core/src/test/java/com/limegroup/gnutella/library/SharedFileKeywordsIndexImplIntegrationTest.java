@@ -23,6 +23,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.TestUtils;
 
@@ -30,7 +31,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImplTest;

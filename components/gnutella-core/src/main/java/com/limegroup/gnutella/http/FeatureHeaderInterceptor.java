@@ -14,8 +14,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
 /**

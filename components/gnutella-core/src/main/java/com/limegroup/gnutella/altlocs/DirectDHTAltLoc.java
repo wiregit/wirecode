@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * An AltLoc that was found through the DHT.

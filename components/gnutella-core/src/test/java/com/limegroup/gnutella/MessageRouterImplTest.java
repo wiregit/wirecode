@@ -34,6 +34,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;

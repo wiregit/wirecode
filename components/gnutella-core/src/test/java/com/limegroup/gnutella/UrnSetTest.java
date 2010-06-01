@@ -15,6 +15,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 /**

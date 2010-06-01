@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 
 public class GnutellaFileCollectionStub extends AbstractFileCollectionStub implements SharedFileCollection {

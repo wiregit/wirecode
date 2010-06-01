@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.nio.observer.Shutdownable;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 /**

@@ -20,12 +20,12 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.util.EncodingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
 
 /**
  * Contains information fields extracted from a magnet link.

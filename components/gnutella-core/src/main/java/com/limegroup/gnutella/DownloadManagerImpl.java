@@ -40,6 +40,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;

@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.io.URN;
 import org.limewire.listener.SourcedEventMulticaster;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

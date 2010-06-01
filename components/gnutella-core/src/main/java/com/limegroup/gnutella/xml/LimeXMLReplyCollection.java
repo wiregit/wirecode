@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IdentityHashSet;
 import org.limewire.collection.StringTrie;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -34,7 +35,6 @@ import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Provider;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.licenses.LicenseType;

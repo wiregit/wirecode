@@ -10,6 +10,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.browser.MagnetOptions;

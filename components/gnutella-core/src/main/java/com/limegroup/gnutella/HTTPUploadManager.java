@@ -27,6 +27,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.auth.ServerAuthState;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileLocker;

@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.IntSet;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.URN;
 
 abstract class AbstractFileView implements FileView {
     

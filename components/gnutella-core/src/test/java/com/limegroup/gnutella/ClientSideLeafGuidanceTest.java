@@ -12,6 +12,7 @@ import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;

@@ -27,6 +27,7 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendManager;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
@@ -38,7 +39,6 @@ import ca.odell.glazedlists.EventList;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 

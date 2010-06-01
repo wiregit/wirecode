@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader.serial.conversion;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 @SuppressWarnings("unused")
 class SerialInNetworkDownloader extends SerialManagedDownloaderImpl {

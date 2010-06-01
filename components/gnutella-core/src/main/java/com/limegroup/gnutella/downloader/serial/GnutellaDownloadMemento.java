@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 public interface GnutellaDownloadMemento extends DownloadMemento {
 

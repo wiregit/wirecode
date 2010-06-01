@@ -5,10 +5,10 @@ import java.util.Arrays;
 import org.jmock.Mockery;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.gnutella.tests.LimeTestCase;
+import org.limewire.io.URN;
 
 import ca.odell.glazedlists.BasicEventList;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;

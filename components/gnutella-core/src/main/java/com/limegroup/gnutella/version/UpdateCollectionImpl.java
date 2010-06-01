@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.URN;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
@@ -20,7 +21,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.Certificate;
 import com.limegroup.gnutella.security.CertificateParserImpl;
 import com.limegroup.gnutella.security.CertifiedMessageVerifier.CertifiedMessage;

@@ -12,8 +12,8 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.auth.ServerAuthState;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;

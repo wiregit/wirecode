@@ -20,6 +20,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;

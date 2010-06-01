@@ -8,9 +8,9 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Range;
 import org.limewire.core.api.transfer.SourceInfo;
+import org.limewire.io.URN;
 
 import com.limegroup.gnutella.PushEndpoint;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
 import com.limegroup.gnutella.library.FileDesc;

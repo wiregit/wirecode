@@ -11,6 +11,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
@@ -21,7 +22,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 
 @Singleton
 public class AlternateLocationFactoryImpl implements AlternateLocationFactory {

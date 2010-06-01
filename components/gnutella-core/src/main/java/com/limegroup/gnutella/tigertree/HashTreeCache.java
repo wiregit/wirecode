@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.tigertree;
 
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.Library;
 

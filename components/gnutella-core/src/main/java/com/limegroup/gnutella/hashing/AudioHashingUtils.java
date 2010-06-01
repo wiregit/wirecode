@@ -3,11 +3,11 @@ package com.limegroup.gnutella.hashing;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.io.URN;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * Utility methods for locating the start/end of the audio portion of

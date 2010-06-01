@@ -9,9 +9,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 import org.limewire.util.Base32;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.security.Tiger;

@@ -11,9 +11,9 @@ import junit.framework.Test;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 
 public final class CCLicenseTest extends BaseTestCase {

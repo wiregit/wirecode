@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,

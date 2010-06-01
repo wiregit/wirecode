@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.version;
 
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.URN;
 
 public interface UpdateHandler {
 

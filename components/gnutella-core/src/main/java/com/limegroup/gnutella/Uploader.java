@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Connectable;
+import org.limewire.io.URN;
 
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;

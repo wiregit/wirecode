@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.auth;
 
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
-import com.limegroup.gnutella.URN;
 
 /** 
  * Validates URNs with a content authority.

@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 class SerialResumeDownloader4x11 extends SerialManagedDownloaderImpl implements SerialResumeDownloader {
     private static final long serialVersionUID = -4535935715006098724L;

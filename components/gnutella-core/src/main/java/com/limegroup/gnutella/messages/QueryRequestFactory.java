@@ -3,9 +3,9 @@ package com.limegroup.gnutella.messages;
 import java.util.Set;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.io.URN;
 import org.limewire.security.AddressSecurityToken;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message.Network;
 
 public interface QueryRequestFactory {

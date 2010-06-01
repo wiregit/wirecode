@@ -454,7 +454,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     
     @Override
     public URN getUrn() {
-        com.limegroup.gnutella.URN urn = downloader.getSha1Urn();
+        URN urn = downloader.getSha1Urn();
         return urn;
     }
 

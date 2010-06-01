@@ -14,6 +14,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 

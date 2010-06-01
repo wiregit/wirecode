@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectInputStream.GetField;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 class SerialResumeDownloader4x16 extends SerialManagedDownloaderImpl implements SerialResumeDownloader {
     private static final long serialVersionUID = -4535935715006098724L;

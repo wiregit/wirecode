@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 
-import com.limegroup.gnutella.URN;
 
 /** A read-only view of a collection of files. */
 public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewChangeEvent> {

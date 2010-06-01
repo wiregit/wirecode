@@ -18,6 +18,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.AddressSecurityToken;
@@ -28,7 +29,6 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.util.QueryUtils;

@@ -21,6 +21,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.URN;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.TLSManager;
 import org.limewire.nio.NIOSocket;

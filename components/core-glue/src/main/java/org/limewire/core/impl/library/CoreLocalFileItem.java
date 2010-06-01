@@ -14,13 +14,13 @@ import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.impl.FileMetaDataImpl;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;

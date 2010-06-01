@@ -11,8 +11,8 @@ import java.util.zip.Inflater;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.Utilities;

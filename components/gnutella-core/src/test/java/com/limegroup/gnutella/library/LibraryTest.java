@@ -31,11 +31,11 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.auth.UrnValidator;

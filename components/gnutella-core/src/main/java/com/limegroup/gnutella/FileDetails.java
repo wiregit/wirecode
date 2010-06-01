@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.util.Set;
 
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public interface FileDetails {

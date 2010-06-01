@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.limewire.collection.MultiRRIterator;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;

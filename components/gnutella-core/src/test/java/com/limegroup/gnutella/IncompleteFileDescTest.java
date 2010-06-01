@@ -11,6 +11,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.URN;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;

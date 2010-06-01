@@ -10,9 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.io.URN;
 import org.limewire.util.URIUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMemento, Serializable {

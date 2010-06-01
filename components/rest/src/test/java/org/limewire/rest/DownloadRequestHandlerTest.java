@@ -18,7 +18,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.library.URNFactory;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.util.BaseTestCase;
@@ -40,7 +39,6 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     private DownloadListManager mockDownloadListManager;
     private SearchManager mockSearchManager;
     private MagnetFactory mockMagnetFactory;
-    private URNFactory mockUrnFactory;
     private DownloadItem mockDownloadItem;
     
     private EventList<DownloadItem> downloadItems;
@@ -61,7 +59,6 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
         mockDownloadListManager = context.mock(DownloadListManager.class);
         mockSearchManager = context.mock(SearchManager.class);
         mockMagnetFactory = context.mock(MagnetFactory.class);
-        mockUrnFactory = context.mock(URNFactory.class);
         mockDownloadItem = context.mock(DownloadItem.class);
         
         // Create test collections.
@@ -70,7 +67,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
         
         // Create instance to be tested.
         requestHandler = new DownloadRequestHandler(mockDownloadListManager,
-                mockSearchManager, mockMagnetFactory, mockUrnFactory);
+                mockSearchManager, mockMagnetFactory);
     }
 
     @Override
@@ -81,7 +78,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for all downloads. */
     public void testGetAllDownloads() throws Exception {
         final String testUri = "http://localhost/remote/download";
-        final URN testUrn = new MockURN(DOWNLOAD_URN);
+        final URN testUrn = org.limewire.io.URN.createSHA1Urn(DOWNLOAD_URN);
         final Long testSize = Long.valueOf(32768L);
         final Long testBytes = Long.valueOf(16384L);
         final DownloadState testState = DownloadState.DOWNLOADING;
@@ -94,6 +91,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
                 new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, ""));
         
         context.checking(new Expectations() {{
+            
             allowing(mockDownloadListManager).getDownloads();
             will(returnValue(downloadItems));
             
@@ -144,7 +142,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for download progress. */
     public void testGetProgress() throws Exception {
         final String testUri = "http://localhost/remote/download/" + DOWNLOAD_URN;
-        final URN testUrn = new MockURN(DOWNLOAD_URN);
+        final URN testUrn = org.limewire.io.URN.createSHA1Urn(DOWNLOAD_URN);
         final Long testSize = Long.valueOf(32768L);
         final Long testBytes = Long.valueOf(16384L);
         final DownloadState testState = DownloadState.DOWNLOADING;
@@ -156,9 +154,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
         HttpResponse response = new BasicHttpResponse(
                 new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, ""));
         
-        context.checking(new Expectations() {{
-            allowing(mockUrnFactory).createSHA1Urn(DOWNLOAD_URN);
-            will(returnValue(testUrn));
+        context.checking(new Expectations() {{           
             
             allowing(mockDownloadListManager).getDownloadItem(testUrn);
             will(returnValue(mockDownloadItem));

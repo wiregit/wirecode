@@ -11,10 +11,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileViewChangeEvent;
 import com.limegroup.gnutella.util.ClassCNetworks;
 

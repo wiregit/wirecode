@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 public class MockHeadPongRequestor implements HeadPongRequestor {
     

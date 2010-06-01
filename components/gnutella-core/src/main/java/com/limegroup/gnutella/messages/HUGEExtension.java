@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 
 /** 

@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 interface SerialResumeDownloader extends SerialManagedDownloader {
 

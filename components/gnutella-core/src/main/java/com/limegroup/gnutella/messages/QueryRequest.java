@@ -2,10 +2,10 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public interface QueryRequest extends Message {

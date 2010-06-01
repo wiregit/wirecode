@@ -6,12 +6,12 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.URN;
 import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
 import com.limegroup.gnutella.metadata.audio.reader.WeedInfo;
 

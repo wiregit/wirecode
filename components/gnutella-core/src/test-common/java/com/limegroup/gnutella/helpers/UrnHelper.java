@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.library.UrnCache;
 
 public class UrnHelper {

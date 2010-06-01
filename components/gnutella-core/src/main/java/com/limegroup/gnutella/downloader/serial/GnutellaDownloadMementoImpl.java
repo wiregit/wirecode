@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class GnutellaDownloadMementoImpl implements GnutellaDownloadMemento, Serializable {

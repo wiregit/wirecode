@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 public class SerialIncompleteFileManager implements Serializable {
     private static final long serialVersionUID = -7658285233614679878L;

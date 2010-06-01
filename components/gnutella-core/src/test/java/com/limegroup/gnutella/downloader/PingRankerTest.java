@@ -28,6 +28,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPPingerImpl;
 import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPing;

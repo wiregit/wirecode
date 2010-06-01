@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.Address;
+import org.limewire.io.URN;
 import org.limewire.net.address.AddressFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.util.DataUtils;
 

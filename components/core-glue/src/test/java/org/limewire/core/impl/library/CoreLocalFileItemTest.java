@@ -14,8 +14,8 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.friend.api.FileMetaData;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;

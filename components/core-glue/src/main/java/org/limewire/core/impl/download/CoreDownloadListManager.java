@@ -76,7 +76,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     
     private static final int PERIOD = 1000;
     
-    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<org.limewire.core.api.URN, DownloadItem>());
+    private Map<URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<URN, DownloadItem>());
     private final DownloadItemFactoryRegistry downloadItemFactoryRegistry;
 	
 	@Inject
@@ -374,7 +374,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addTorrentDownload(String name, URN sha1, List<URI> trackers) throws DownloadException {
         Downloader downloader = downloadManager.downloadTorrent(name, 
-                (com.limegroup.gnutella.URN)sha1,
+                (org.limewire.io.URN)sha1,
                 trackers);
         
         return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);
@@ -407,12 +407,12 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public boolean contains(org.limewire.core.api.URN urn) {
+    public boolean contains(URN urn) {
         return urnMap.containsKey(urn);
     }
     
     @Override
-    public DownloadItem getDownloadItem(org.limewire.core.api.URN urn) {
+    public DownloadItem getDownloadItem(URN urn) {
         return urnMap.get(urn);
     }
 

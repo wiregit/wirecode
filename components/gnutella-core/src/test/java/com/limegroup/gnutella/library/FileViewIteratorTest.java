@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.collection.IntSet;
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 import junit.framework.Test;
 
 /**

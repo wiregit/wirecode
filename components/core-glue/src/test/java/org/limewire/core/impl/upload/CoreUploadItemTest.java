@@ -17,11 +17,11 @@ import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.library.FileDesc;

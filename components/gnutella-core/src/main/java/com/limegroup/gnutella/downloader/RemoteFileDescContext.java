@@ -5,10 +5,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.auth.Credentials;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
+import org.limewire.io.URN;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 
 public class RemoteFileDescContext {
     

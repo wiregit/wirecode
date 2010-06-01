@@ -7,13 +7,13 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.IntSet;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 
 public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
 

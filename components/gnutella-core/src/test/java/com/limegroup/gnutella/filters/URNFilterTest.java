@@ -16,7 +16,7 @@ import org.limewire.util.Base32;
 import org.limewire.util.Visitor;
 
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

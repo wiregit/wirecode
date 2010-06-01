@@ -6,7 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeFactoryImpl;
 import com.limegroup.gnutella.tigertree.SimpleHashTreeNodeManager;

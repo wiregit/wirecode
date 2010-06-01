@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
 

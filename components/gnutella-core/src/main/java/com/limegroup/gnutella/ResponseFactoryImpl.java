@@ -26,6 +26,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.service.ErrorService;

@@ -23,10 +23,10 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class RemoteFileDescAdapterTest extends BaseTestCase {

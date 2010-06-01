@@ -10,10 +10,10 @@ import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * JUnit test case for CoreSearchResultList.

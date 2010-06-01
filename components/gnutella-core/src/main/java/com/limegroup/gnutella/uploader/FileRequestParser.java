@@ -8,9 +8,9 @@ import java.util.Locale;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.io.URN;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;

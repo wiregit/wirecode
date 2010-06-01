@@ -24,6 +24,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.TestUtils;
 

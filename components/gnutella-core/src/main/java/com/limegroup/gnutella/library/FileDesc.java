@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.RPNParser.StringLookup;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

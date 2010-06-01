@@ -6,12 +6,12 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.limewire.util.URIUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**

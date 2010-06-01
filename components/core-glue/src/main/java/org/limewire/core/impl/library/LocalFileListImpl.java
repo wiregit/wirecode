@@ -69,14 +69,14 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public boolean contains(URN urn) {
-        if(urn instanceof com.limegroup.gnutella.URN) {
-            return containsCoreUrn((com.limegroup.gnutella.URN)urn);
+        if(urn instanceof org.limewire.io.URN) {
+            return containsCoreUrn((org.limewire.io.URN)urn);
         } else {
             return false;
         }
     }
     
-    protected boolean containsCoreUrn(com.limegroup.gnutella.URN urn) {
+    protected boolean containsCoreUrn(org.limewire.io.URN urn) {
         return !getCoreCollection().getFileDescsMatching(urn).isEmpty();
     }
 
@@ -247,8 +247,8 @@ abstract class LocalFileListImpl implements LocalFileList {
 
     @Override
     public LocalFileItem getFileItem(URN urn) {
-        if (urn instanceof com.limegroup.gnutella.URN) {
-            FileDesc fd = getCoreCollection().getFileDesc((com.limegroup.gnutella.URN)urn);
+        if (urn instanceof org.limewire.io.URN) {
+            FileDesc fd = getCoreCollection().getFileDesc((org.limewire.io.URN)urn);
 
             if (fd != null) {
                 return (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);

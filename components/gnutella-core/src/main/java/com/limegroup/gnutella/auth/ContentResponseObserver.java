@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.auth;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 /** An observer for URNs. */
 public interface ContentResponseObserver {

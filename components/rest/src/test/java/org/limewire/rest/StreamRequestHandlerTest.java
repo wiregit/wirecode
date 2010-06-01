@@ -20,7 +20,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.URNFactory;
 import org.limewire.http.handler.MimeTypeProvider;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -36,7 +35,6 @@ public class StreamRequestHandlerTest extends BaseTestCase {
     private Mockery context;
     private LibraryManager mockLibraryManager;
     private MimeTypeProvider mockMimeProvider;
-    private URNFactory mockUrnFactory;
     private StatusLine line;
     private HttpResponse response;
 
@@ -55,13 +53,12 @@ public class StreamRequestHandlerTest extends BaseTestCase {
         context = new Mockery();
         mockLibraryManager = context.mock(LibraryManager.class);
         mockMimeProvider   = context.mock(MimeTypeProvider.class);
-        mockUrnFactory     = context.mock(URNFactory.class);
         
         line = new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, "");
         response = new BasicHttpResponse(line);
                        
         // Create instance to be tested.
-        requestHandler = new StreamRequestHandler(mockLibraryManager, mockMimeProvider, mockUrnFactory);
+        requestHandler = new StreamRequestHandler(mockLibraryManager, mockMimeProvider);
     }
 
     @Override
@@ -96,8 +93,6 @@ public class StreamRequestHandlerTest extends BaseTestCase {
           allowing(lml).getFileItem(with(any(URN.class)));
           will(returnValue(mockFileItem));
           
-          allowing(mockUrnFactory).createSHA1Urn(with(any(String.class)));
-          
           allowing(lml);
           
           allowing(mockLibraryManager).getLibraryManagedList();
@@ -107,7 +102,7 @@ public class StreamRequestHandlerTest extends BaseTestCase {
           allowing(mockMimeProvider);
         }});
 
-        get("http://localhost/remote/stream/00000000000000000000000000000000");
+        get("http://localhost/remote/stream/urn:sha1:00000000000000000000000000000000");
         
         // Verify response values.
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
@@ -125,8 +120,6 @@ public class StreamRequestHandlerTest extends BaseTestCase {
         context.checking(new Expectations() {{            
           allowing(lml).getFileItem(with(any(URN.class)));
           will(returnValue(null));
-
-          allowing(mockUrnFactory).createSHA1Urn(with(any(String.class)));
           
           allowing(lml);
           
@@ -137,7 +130,7 @@ public class StreamRequestHandlerTest extends BaseTestCase {
           allowing(mockMimeProvider);
         }});
 
-        get("http://localhost/remote/stream/00000000000000000000000000000000");
+        get("http://localhost/remote/stream/urn:sha1:00000000000000000000000000000000");
         
         // Verify response values.
         assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());

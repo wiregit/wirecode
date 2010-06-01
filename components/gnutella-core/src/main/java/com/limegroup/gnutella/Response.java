@@ -8,6 +8,7 @@ import java.util.Set;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;

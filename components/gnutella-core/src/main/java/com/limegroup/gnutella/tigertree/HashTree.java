@@ -4,8 +4,8 @@ import java.io.RandomAccessFile;
 import java.util.List;
 
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 
 /**

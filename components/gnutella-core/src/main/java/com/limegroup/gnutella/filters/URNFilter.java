@@ -2,7 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.util.Set;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.filters.response.SearchResultFilter;
 import com.limegroup.gnutella.messages.QueryReply;

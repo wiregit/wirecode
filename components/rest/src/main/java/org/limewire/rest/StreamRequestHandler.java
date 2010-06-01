@@ -15,7 +15,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.URNFactory;
 import org.limewire.http.handler.MimeTypeProvider;
 
 import com.google.inject.Inject;
@@ -27,13 +26,11 @@ class StreamRequestHandler extends AbstractRestRequestHandler {
     
     private final LibraryManager libraryManager;
     private final MimeTypeProvider mimeTypeProvider;
-    private final URNFactory urnFactory;
     
     @Inject
-    public StreamRequestHandler(LibraryManager libraryManager, MimeTypeProvider mimeTypeProvider, URNFactory urnFactory) {
+    public StreamRequestHandler(LibraryManager libraryManager, MimeTypeProvider mimeTypeProvider) {
         this.libraryManager = libraryManager;
         this.mimeTypeProvider = mimeTypeProvider;
-        this.urnFactory = urnFactory;
     }
     
     @Override
@@ -58,7 +55,7 @@ class StreamRequestHandler extends AbstractRestRequestHandler {
     
     private URN getSha1UrnStringFromUri(String uri) throws IOException {
         String sha1 = uri.substring(1);  // remove "/..."  
-        return urnFactory.createSHA1Urn(sha1);
+        return org.limewire.io.URN.createSHA1Urn(sha1);
     }
     
     /**

@@ -6,9 +6,9 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;

@@ -10,9 +10,9 @@ import java.io.IOException;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEPKeys;
 

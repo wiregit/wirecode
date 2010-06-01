@@ -18,6 +18,7 @@ import org.limewire.io.CountingOutputStream;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
@@ -27,7 +28,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;

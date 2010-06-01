@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.limewire.io.URN;
+
 /**
  * A Set specifically for URNs.
  * This is not backed by a HashSet because there are

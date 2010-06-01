@@ -6,9 +6,9 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
+import org.limewire.io.URN;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
  
 public class ContentManagerTest extends LimeTestCase {

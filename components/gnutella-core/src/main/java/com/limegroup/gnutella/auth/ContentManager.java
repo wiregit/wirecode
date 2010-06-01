@@ -15,12 +15,12 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 

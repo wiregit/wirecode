@@ -5,9 +5,9 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Set;
 
+import org.limewire.io.URN;
 import org.limewire.security.AddressSecurityToken;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

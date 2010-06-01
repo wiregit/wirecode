@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.altlocs;
 
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 

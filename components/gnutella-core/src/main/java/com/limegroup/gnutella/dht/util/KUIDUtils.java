@@ -5,9 +5,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.mojito.KUID;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * Utilities to convert between {@link GUID}, {@link URN} and {@link KUID}.

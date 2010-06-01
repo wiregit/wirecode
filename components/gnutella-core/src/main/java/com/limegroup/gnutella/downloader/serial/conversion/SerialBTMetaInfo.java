@@ -11,9 +11,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.io.URN;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.URN;
 
 public class SerialBTMetaInfo implements Serializable {
     

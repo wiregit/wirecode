@@ -23,6 +23,7 @@ import org.hamcrest.Matcher;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 

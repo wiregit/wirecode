@@ -13,8 +13,8 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.AbstractModule;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.StubSpamServices;
 import com.limegroup.gnutella.LifecycleManager;

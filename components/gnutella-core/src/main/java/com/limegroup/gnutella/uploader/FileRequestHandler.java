@@ -22,11 +22,11 @@ import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
+import org.limewire.io.URN;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;

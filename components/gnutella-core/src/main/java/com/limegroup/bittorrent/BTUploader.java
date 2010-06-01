@@ -20,11 +20,11 @@ import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.transfer.SourceInfo;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;

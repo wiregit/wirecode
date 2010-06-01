@@ -2,8 +2,8 @@ package com.limegroup.gnutella.search;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * Used to track the search results of a given URN. A single search will result

@@ -2,10 +2,11 @@ package com.limegroup.gnutella.library;
 
 import java.util.Set;
 
+import org.limewire.io.URN;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @Singleton

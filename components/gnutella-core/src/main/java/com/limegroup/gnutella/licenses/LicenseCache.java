@@ -16,12 +16,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 
 /**
  * A repository of licenses.

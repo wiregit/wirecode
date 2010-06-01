@@ -15,12 +15,12 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.URN;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileCollection;
 

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.limewire.collection.MultiCollection;
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.io.URN;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Storable;
@@ -21,7 +22,6 @@ import org.limewire.mojito.util.DatabaseUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;

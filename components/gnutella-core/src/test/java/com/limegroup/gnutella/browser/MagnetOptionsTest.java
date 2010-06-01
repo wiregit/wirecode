@@ -11,11 +11,11 @@ import java.util.Locale;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.EncodingUtils;
 
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
 
 public class MagnetOptionsTest extends BaseTestCase {
 

@@ -30,6 +30,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -42,7 +43,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.inject.Inject;
 import com.limegroup.gnutella.QueryCategoryFilterer;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**

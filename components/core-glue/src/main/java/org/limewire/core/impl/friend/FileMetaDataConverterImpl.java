@@ -14,11 +14,11 @@ import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.util.DataUtils;
 

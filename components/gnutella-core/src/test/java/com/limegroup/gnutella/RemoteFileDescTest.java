@@ -13,6 +13,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;

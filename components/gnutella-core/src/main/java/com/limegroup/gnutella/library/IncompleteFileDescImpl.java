@@ -5,9 +5,9 @@ import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.URN;
 import org.limewire.listener.SourcedEventMulticaster;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 

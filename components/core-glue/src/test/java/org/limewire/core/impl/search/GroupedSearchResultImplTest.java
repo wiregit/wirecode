@@ -1,9 +1,9 @@
 package org.limewire.core.impl.search;
 
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 
 /**
  * JUnit test case for GroupedSearchResultImpl.

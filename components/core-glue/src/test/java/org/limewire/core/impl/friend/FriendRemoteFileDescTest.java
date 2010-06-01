@@ -11,6 +11,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.BaseTestCase;
@@ -26,7 +27,6 @@ import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.friend.impl.feature.AuthTokenImpl;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 public class FriendRemoteFileDescTest extends BaseTestCase{

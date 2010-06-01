@@ -8,11 +8,11 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 
 public class AltLocUtilsTest extends BaseTestCase {

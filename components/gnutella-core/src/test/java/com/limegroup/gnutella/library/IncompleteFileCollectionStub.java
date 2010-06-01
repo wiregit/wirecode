@@ -3,7 +3,8 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Set;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
 public class IncompleteFileCollectionStub extends AbstractFileCollectionStub implements IncompleteFileCollection {

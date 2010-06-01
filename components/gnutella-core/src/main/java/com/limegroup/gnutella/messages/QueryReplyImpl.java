@@ -29,6 +29,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -38,7 +39,6 @@ import org.limewire.util.StringUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 

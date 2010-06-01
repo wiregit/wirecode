@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
 
 public interface LicenseFactory {
 

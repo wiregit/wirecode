@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.library.URNFactory;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.GroupedSearchResult;
@@ -42,17 +41,14 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
     private final DownloadListManager downloadListManager;
     private final SearchManager searchManager;
     private final MagnetFactory magnetFactory;
-    private final URNFactory urnFactory;
     
     @Inject
     public DownloadRequestHandler(DownloadListManager downloadListManager,
             SearchManager searchManager,
-            MagnetFactory magnetFactory,
-            URNFactory urnFactory) {
+            MagnetFactory magnetFactory) {
         this.downloadListManager = downloadListManager;
         this.searchManager = searchManager;
         this.magnetFactory = magnetFactory;
-        this.urnFactory = urnFactory;
     }
     
     @Override
@@ -106,7 +102,7 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
         
         // Create URN using ID string.
         String id = parseId(uriTarget);
-        URN urn = urnFactory.createSHA1Urn(id);
+        URN urn = org.limewire.io.URN.createSHA1Urn(id);
         
         // Get download item.
         DownloadItem downloadItem = downloadListManager.getDownloadItem(urn);
@@ -165,7 +161,7 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
     private void doCancel(String uriTarget, HttpResponse response) throws IOException {
         // Create URN using ID string.
         String id = parseId(uriTarget);
-        URN urn = urnFactory.createSHA1Urn(id);
+        URN urn = org.limewire.io.URN.createSHA1Urn(id);
         
         // Get download item.
         DownloadItem downloadItem = downloadListManager.getDownloadItem(urn);
@@ -200,7 +196,7 @@ class DownloadRequestHandler extends AbstractRestRequestHandler {
         }
 
         // Find search results for URN.
-        URN urn = urnFactory.createSHA1Urn(fileUrn);
+        URN urn = org.limewire.io.URN.createSHA1Urn(fileUrn);
         GroupedSearchResult groupedResult = resultList.getGroupedResult(urn);
         if (groupedResult == null) {
             return Collections.<DownloadItem>emptyList();

@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.URN;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -18,7 +19,6 @@ import org.limewire.util.StringUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.messages.BadPacketException;

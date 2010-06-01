@@ -3,10 +3,10 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 
 public interface AlternateLocationFactory {
 

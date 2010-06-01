@@ -10,10 +10,10 @@ import java.util.Set;
 import org.limewire.collection.IntSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 
 /**
  * A session of OOB result exchange between the local host and a remote host.

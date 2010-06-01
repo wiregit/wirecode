@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.messages.QueryRequestTest.PositionByteArrayOutputStream;
 

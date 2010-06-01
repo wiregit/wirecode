@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-import com.limegroup.gnutella.URN;
+import org.limewire.io.URN;
+
 
 interface SerialRemoteFileDesc {
 

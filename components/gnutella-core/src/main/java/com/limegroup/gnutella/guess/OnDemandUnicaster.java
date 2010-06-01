@@ -18,6 +18,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.security.AddressSecurityToken;
 
@@ -26,7 +27,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;

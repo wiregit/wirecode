@@ -26,6 +26,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
