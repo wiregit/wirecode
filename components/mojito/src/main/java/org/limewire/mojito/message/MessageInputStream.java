@@ -199,7 +199,7 @@ public class MessageInputStream extends DataInputStream {
         KUID primaryKey = readKUID();
         Value value = readValue();
         
-        return ValueTuple.createFromRemote(
+        return ValueTuple.createValueTuple(
                 creator, sender, primaryKey, value);
     }
     

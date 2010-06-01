@@ -47,7 +47,7 @@ class StoreManager implements Closeable {
     public DHTFuture<StoreEntity> put(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         
-        ValueTuple entity = ValueTuple.createFromValue(
+        ValueTuple entity = ValueTuple.createValueTuple(
                 dht, key, value);
         return put(entity, timeout, unit);
     }
@@ -208,7 +208,7 @@ class StoreManager implements Closeable {
         public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
                 long timeout, TimeUnit unit) {
             
-            ValueTuple entity = ValueTuple.createFromValue(
+            ValueTuple entity = ValueTuple.createValueTuple(
                     dht, key, value);
             return enqueue(entity, timeout, unit);
         }

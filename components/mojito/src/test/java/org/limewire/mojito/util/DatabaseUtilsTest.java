@@ -59,7 +59,7 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         
         Contact creator = routeTable.getLocalNode();
         KUID valueId = creator.getContactId().invert();
-        ValueTuple value = ValueTuple.createFromRemote(creator, creator, valueId, 
+        ValueTuple value = ValueTuple.createValueTuple(creator, creator, valueId, 
 															   new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
         
         long expectedExpiresAt = value.getCreationTime() 

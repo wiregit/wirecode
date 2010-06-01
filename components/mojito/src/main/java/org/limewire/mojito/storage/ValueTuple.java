@@ -77,16 +77,16 @@ public class ValueTuple {
      * Creates and returns a {@link ValueTuple} for the given primary 
      * key and value.
      */
-    public static ValueTuple createFromValue(Context context, 
+    public static ValueTuple createValueTuple(Context context, 
             KUID primaryKey, Value value) {
-        return new ValueTuple(context.getLocalNode(), 
-                context.getLocalNode(), primaryKey, value, true);
+        Contact src = context.getLocalNode();
+        return new ValueTuple(src, src, primaryKey, value, true);
     }
     
     /**
      * Creates and returns a {@link ValueTuple} from arguments that were created.
      */
-    public static ValueTuple createFromRemote(Contact creator, 
+    public static ValueTuple createValueTuple(Contact creator, 
             Contact sender, KUID primaryKey, Value value) {
         return new ValueTuple(creator, sender, primaryKey, value, false);
     }

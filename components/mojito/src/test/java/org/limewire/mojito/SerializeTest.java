@@ -87,7 +87,7 @@ public class SerializeTest extends MojitoTestCase {
             
             KUID primaryKey = KUID.createRandomID();
             
-            ValueTuple entity = ValueTuple.createFromRemote(node, node, primaryKey, 
+            ValueTuple entity = ValueTuple.createValueTuple(node, node, primaryKey, 
                     new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
             
             database1.store(entity);
