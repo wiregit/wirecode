@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
@@ -136,7 +137,7 @@ public class RemoteContact implements Contact {
             
             SocketAddress backup = contactAddress;
             
-            int port = ((InetSocketAddress)contactAddress).getPort();
+            int port = NetworkUtils.getPort(contactAddress);
             if (port == 0) {
                 if (!isFirewalled()) {
                     if (LOG.isWarnEnabled()) {
@@ -153,8 +154,7 @@ public class RemoteContact implements Contact {
                 // don't use it because the other Node is on the 
                 // same LAN as we are (damn NAT routers!).
                 if (!ContactUtils.isPrivateAddress(sourceAddress)) {
-                    contactAddress = new InetSocketAddress(
-                            ((InetSocketAddress)sourceAddress).getAddress(), port);
+                    contactAddress = NetworkUtils.merge(sourceAddress, port);
                 }
             }
             

@@ -1061,4 +1061,42 @@ public final class NetworkUtils {
         InetAddress address = getAndCheckAddress(http.substring(separator+1));
         return new IpPortImpl(address, port);
     }
+    
+    /**
+     * An utility method to retrieve a {@link SocketAddress}'s
+     * {@link InetAddress}.
+     * 
+     * @see InetSocketAddress.
+     */
+    public static InetAddress getAddress(SocketAddress addr) {
+        return ((InetSocketAddress)addr).getAddress();
+    }
+    
+    /**
+     * An utility method to retrieve a {@link SocketAddress}'s
+     * port number.
+     * 
+     * @see InetSocketAddress.
+     */
+    public static int getPort(SocketAddress addr) {
+        return ((InetSocketAddress)addr).getPort();
+    }
+    
+    /**
+     * Takes the {@link InetAddress} of the 1st argument and the
+     * port number of the 2nd argument and merges them into a new
+     * {@link InetSocketAddress}.
+     */
+    public static InetSocketAddress merge(SocketAddress address, 
+            SocketAddress port) {
+        return merge(address, getPort(port));
+    }
+    
+    /**
+     * Takes the {@link InetAddress} of the 1st argument and the port 
+     * number and merges them into a new {@link InetSocketAddress}.
+     */
+    public static InetSocketAddress merge(SocketAddress address, int port) {
+        return new InetSocketAddress(getAddress(address), port);
+    }
 }
