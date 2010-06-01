@@ -53,10 +53,6 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     @Override
     public void initializeWithSearch(String search, Map<FilePropertyKey, String> advSearch) {
         
-        if(search == null && advSearch.isEmpty()) {
-            return;
-        }
-        
         StringBuilder bldr = new StringBuilder();
         if(search != null){
             bldr.append(search);
