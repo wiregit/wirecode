@@ -8,15 +8,12 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.DHTSizeEstimator;
 
 
 public class DHTSizeEstimatorTest extends MojitoTestCase {
@@ -223,13 +220,13 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
     	
     	assertEquals(479, routeTable.size());
     	
-    	DHTSizeEstimator estimator = new DHTSizeEstimator();
+    	DHTSizeEstimator estimator = new DHTSizeEstimator(routeTable);
     	
     	int[] remote = {525, 601, 310, 750, 455, 654, 512, 210, 497, 101 };
     	for (int size : remote) {
             estimator.addEstimatedRemoteSize(BigInteger.valueOf(size));
     	}
     	
-    	assertEquals(BigInteger.valueOf(486), estimator.getEstimatedSize(routeTable));
+    	assertEquals(BigInteger.valueOf(486), estimator.getEstimatedSize());
     }
 }

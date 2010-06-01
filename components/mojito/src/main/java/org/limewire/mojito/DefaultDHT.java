@@ -65,7 +65,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     /**
      * 
      */
-    private final DHTSizeEstimator estimator = new DHTSizeEstimator();
+    private final DHTSizeEstimator estimator;
     
     /**
      * 
@@ -127,6 +127,8 @@ public class DefaultDHT extends AbstractDHT implements Context {
         this.name = name;
         this.routeTable = routeTable;
         this.database = database;
+        
+        this.estimator = new DHTSizeEstimator(routeTable);
         
         this.databaseCleaner = new DatabaseCleaner(
                 routeTable, database, 
@@ -199,7 +201,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
 
     @Override
     public BigInteger size() {
-        return estimator.getEstimatedSize(routeTable);
+        return estimator.getEstimatedSize();
     }
     
     @Override

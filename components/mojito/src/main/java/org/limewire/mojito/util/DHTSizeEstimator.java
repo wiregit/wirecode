@@ -51,11 +51,16 @@ public class DHTSizeEstimator {
     private static final int MIN_NODE_COUNT = 3;
     
     /** History of local estimations. */
-    private List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
+    private final List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
 
     /** History of remote estimations (sizes we received with pongs). */
-    private List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
+    private final List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
 
+    /**
+     * The local {@link RouteTable}.
+     */
+    private final RouteTable routeTable;
+    
     /** Current estimated size. */
     private BigInteger estimatedSize = BigInteger.ZERO;
 
@@ -65,6 +70,13 @@ public class DHTSizeEstimator {
     /** The time when we updated the estimated DHT size. */
     private long updateEstimatedSizeTime = 0L;
 
+    /**
+     * Creates a {@link DHTSizeEstimator}
+     */
+    public DHTSizeEstimator(RouteTable routeTable) {
+        this.routeTable = routeTable;
+    }
+    
     /**
      * Clears the history and sets everything to
      * its initial state.
@@ -81,10 +93,10 @@ public class DHTSizeEstimator {
     /**
      * Returns the approximate DHT size.
      */
-    public synchronized BigInteger getEstimatedSize(RouteTable routeTable) {
-        if (routeTable != null && 
-                (System.currentTimeMillis() - localEstimateTime) 
-                    >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
+    public synchronized BigInteger getEstimatedSize() {
+        long time = System.currentTimeMillis() - localEstimateTime;
+        if (routeTable != null && time >= ContextSettings
+                .ESTIMATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
             
             SelectMode mode = SelectMode.ALL;
             if (ContextSettings.ESTIMATE_WITH_LIVE_NODES_ONLY.getValue()) {
