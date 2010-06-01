@@ -20,8 +20,8 @@ public interface ValueEntity extends LookupEntity {
     public ValueTuple[] getValues();
     
     /**
-     * Returns the {@link ValueKey}s that may be used to retrieve 
-     * more values.
+     * Returns the {@link ValueKey}s that may be used to 
+     * retrieve more values.
      */
     public ValueKey[] getValueKeys();
 }

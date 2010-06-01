@@ -70,12 +70,7 @@ public class DefaultNodeEntity extends AbstractEntity implements NodeEntity {
     public int getHop() {
         return hop;
     }
-
-    @Override
-    public int size() {
-        return contacts.length;
-    }
-
+    
     @Override
     public KUID getKey() {
         return key;

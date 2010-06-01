@@ -4,6 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * The default implementation of {@link StoreEntity}.
+ */
 public class DefaultStoreEntity extends AbstractEntity implements StoreEntity {
 
     private final Contact[] contacts;
