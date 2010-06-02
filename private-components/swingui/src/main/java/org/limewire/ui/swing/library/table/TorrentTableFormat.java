@@ -61,10 +61,10 @@ public class TorrentTableFormat<T extends LocalFileItem> extends AbstractLibrary
         case ACTION_INDEX: return baseObject;
         case FILES_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
-            return torrent.getTorrentFileEntries();
+            return torrent != null ? torrent.getTorrentFileEntries() : null;
         case TRACKERS_INDEX:
             torrent = (Torrent) baseObject.getProperty(FilePropertyKey.TORRENT);
-            return torrent.getTrackers();
+            return torrent != null ? torrent.getTrackers() : null;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
