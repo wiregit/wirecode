@@ -268,7 +268,7 @@ public class RemoteContact implements Contact {
             long rttFactor = NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue();
             long adaptiveTimeout = ((rttFactor * rtt) + failures * rtt);
             timeout = Math.max(Math.min(timeout, adaptiveTimeout), 
-                    NetworkSettings.MIN_TIMEOUT_RTT.getValue());
+                    NetworkSettings.MIN_TIMEOUT_RTT.getTimeInMillis());
         }
         
         return unit.convert(timeout, TimeUnit.MILLISECONDS);
@@ -304,8 +304,8 @@ public class RemoteContact implements Contact {
     
     @Override
     public boolean hasBeenRecentlyAlive() {
-        return ((System.currentTimeMillis() - getTimeStamp())
-                    < RouteTableSettings.MIN_RECONNECTION_TIME.getTimeInMillis());
+        long time = System.currentTimeMillis() - getTimeStamp();
+        return time < RouteTableSettings.MIN_RECONNECTION_TIME.getTimeInMillis();
     }
     
     @Override
