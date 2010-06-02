@@ -50,9 +50,9 @@ class AddToListMenu extends JMenu {
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
                         if(selectedFiles.get().size() == 1) {
-                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
+                            menu.add(new AddListAction(I18n.tr(fileList.getCollectionName()), icons.getListIcon(fileList), fileList));
                         } else {
-                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
+                            menu.add(new AddListAction(I18n.tr(fileList.getCollectionName()), icons.getListIcon(fileList), fileList));
                         }
                     }
                 } finally {

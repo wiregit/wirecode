@@ -41,6 +41,7 @@ import org.limewire.friend.api.feature.LibraryChangedNotifierFeature;
 import org.limewire.friend.impl.feature.LimewireFeatureInitializer;
 import org.limewire.friend.impl.feature.NoSaveFeature;
 import org.limewire.friend.impl.util.PresenceUtils;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.listener.AsynchronousEventMulticaster;
 import org.limewire.listener.EventBroadcaster;
@@ -52,7 +53,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.features.NoSaveFeatureInitializer;
@@ -210,7 +210,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 org.jivesoftware.smack.packet.Presence.Type.available);
         presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
         if (jabberSettings.advertiseLimeWireStatus()) {
-            presence.setStatus(I18n.tr("on LimeWire"));
+            presence.setStatus(I18nMarker.marktr("on LimeWire"));
         }
         return presence;
     }

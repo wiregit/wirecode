@@ -14,6 +14,7 @@ import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.MessageReader;
 import org.limewire.friend.api.MessageWriter;
 import org.limewire.friend.api.feature.LimewireFeature;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 class ChatFriendImpl extends AbstractBean implements ChatFriend {
@@ -66,7 +67,7 @@ class ChatFriendImpl extends AbstractBean implements ChatFriend {
     
     void setStatus(String status) {
         String oldStatus = getStatus();
-        this.status = status;
+        this.status = I18n.tr(status);
         firePropertyChange("status", oldStatus, status);
     }
 
