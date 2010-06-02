@@ -22,7 +22,7 @@ import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
@@ -116,6 +116,10 @@ public class BootstrapWorker implements Closeable {
         if (contacts == null || contacts.length == 0) {
             tryBootstrap();
             return;
+        }
+        
+        if (DHTSettings.SHUFFLE_BOOTSTRAP_CONTACTS.getValue()) {
+            contacts = ArrayUtils.shuffle(contacts);
         }
         
         Contact src = dht.getLocalNode();

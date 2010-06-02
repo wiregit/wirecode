@@ -430,4 +430,11 @@ public class DHTSettings extends LimeProps {
                 5L, TimeUnit.MINUTES, 
                 "DHT.PushEndpointCacheTime",
                 10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * Whether or not we should shuffle the Contacts we read from disk.
+     */
+    public static final BooleanSetting SHUFFLE_BOOTSTRAP_CONTACTS
+        = FACTORY.createRemoteBooleanSetting("SHUFFLE_BOOTSTRAP_CONTACTS", 
+                false, "DHT.ShuffleBootstrapContacts");
 }

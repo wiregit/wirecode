@@ -47,6 +47,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         FIND_VALUE;
     }
     
+    protected final Type type;
+    
     protected final KUID lookupId;
     
     private final LookupManager lookupManager;
@@ -62,6 +64,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
+        this.type = type;
         this.lookupId = lookupId;
         
         RouteTable routeTable = context.getRouteTable();
@@ -69,9 +72,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             = routeTable.select(lookupId, 
                     KademliaSettings.K, SelectMode.ALL);
         
-        lookupManager = new LookupManager(context, 
-                lookupId, contacts.toArray(new Contact[0]));
-        
+        lookupManager = new LookupManager(
+                contacts.toArray(new Contact[0]));
         lookupCounter = createStack(type);
     }
     
@@ -81,11 +83,10 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
+        this.type = type;
         this.lookupId = lookupId;
         
-        lookupManager = new LookupManager(context, 
-                lookupId, contacts);
-        
+        lookupManager = new LookupManager(contacts);
         lookupCounter = createStack(type);
     }
 
@@ -272,10 +273,6 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         private final boolean exchaustive 
             = LookupSettings.EXHAUSTIVE.getValue();
         
-        private final Context context;
-        
-        private final KUID lookupId;
-        
         /**
          * The initial set of {@link Contact} {@link KUID}s that were
          * picked from the {@link RouteTable}.
@@ -317,11 +314,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         private int routeTableTimeouts = 0;
         
-        public LookupManager(Context context, 
-                KUID lookupId, Contact[] contacts) {
-            
-            this.context = context;
-            this.lookupId = lookupId;
+        public LookupManager(Contact[] contacts) {
             
             Comparator<Contact> comparator 
                 = new XorComparator(lookupId);
