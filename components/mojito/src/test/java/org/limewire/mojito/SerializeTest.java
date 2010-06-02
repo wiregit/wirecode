@@ -6,24 +6,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.storage.Database;
-import org.limewire.mojito.storage.DatabaseImpl;
-import org.limewire.util.StringUtils;
 
 public class SerializeTest extends MojitoTestCase {
     
@@ -69,53 +60,6 @@ public class SerializeTest extends MojitoTestCase {
             assertNotNull(other);
             assertEquals(node, other);
             assertNotSame(node, other);
-        }
-    }
-    
-    public void testSerializeDatabase() throws IOException, ClassNotFoundException {
-        Database database1 = new DatabaseImpl();
-        
-        for (int i = 0; i < 100; i++) {
-            SocketAddress addr = new InetSocketAddress("192.168.1." + i, 2000 + i);
-            Contact node = ContactFactory.createLiveContact(
-                    addr, 
-                    Vendor.UNKNOWN, 
-                    Version.ZERO, 
-                    KUID.createRandomID(), 
-                    addr, 0, 
-                    Contact.DEFAULT_FLAG);
-            
-            KUID primaryKey = KUID.createRandomID();
-            
-            ValueTuple entity = ValueTuple.createValueTuple(node, node, primaryKey, 
-                    new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
-            
-            database1.store(entity);
-        }
-        
-        assertEquals(100, database1.getValueCount());
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(database1);
-        oos.close();
-        
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bais);
-        Database database2 = (Database)ois.readObject();
-        ois.close();
-        
-        assertNotSame(database1, database2);
-        assertEquals(100, database2.getValueCount());
-        for (ValueTuple entity : database1.values()) {
-            Map<KUID, ValueTuple> bag = database2.get(entity.getPrimaryKey());
-            assertNotNull(bag);
-            
-            ValueTuple other = bag.get(entity.getSecondaryKey());
-            assertNotNull(other);
-            
-            assertEquals(entity, other);
-            assertNotSame(entity, other);
         }
     }
 }
