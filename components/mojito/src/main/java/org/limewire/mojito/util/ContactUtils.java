@@ -257,11 +257,12 @@ public final class ContactUtils {
     
     /**
      * Returns {@code true} if both have the same {@link KUID} -AND-
-     * {@link SocketAddress} as returned by {@link Contact#getContactAddress()}.
+     * different {@link SocketAddress}es as returned by 
+     * {@link Contact#getContactAddress()}.
      */
     public static boolean isCollision(Contact localhost, Contact other) {
         if (localhost.getContactId().equals(other.getContactId())
-                && localhost.getContactAddress().equals(
+                && !localhost.getContactAddress().equals(
                         other.getContactAddress())) {
             return true;
         }
