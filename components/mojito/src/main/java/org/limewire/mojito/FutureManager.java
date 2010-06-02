@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.IdentityHashSet;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureTask;
 
@@ -38,10 +38,10 @@ class FutureManager implements Closeable {
     private boolean open = true;
     
     /**
-     * Submits the given {@link AsyncProcess} for execution and returns
+     * Submits the given {@link DHTFutureProcess} for execution and returns
      * a {@link DHTFuture} for it.
      */
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+    public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, 
             long timeout, TimeUnit unit) {
         
         synchronized (futures) {
@@ -83,7 +83,7 @@ class FutureManager implements Closeable {
      */
     private class ManagedFutureTask<T> extends DHTFutureTask<T> {
 
-        public ManagedFutureTask(AsyncProcess<T> process, 
+        public ManagedFutureTask(DHTFutureProcess<T> process, 
                 long timeout, TimeUnit unit) {
             super(process, timeout, unit);
         }

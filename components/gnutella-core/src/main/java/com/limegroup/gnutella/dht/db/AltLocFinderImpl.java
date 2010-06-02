@@ -20,7 +20,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
@@ -82,7 +82,7 @@ public class AltLocFinderImpl implements AltLocFinder {
     }
     
     private class AlternateLocationProcess 
-            implements AsyncProcess<AlternateLocation[]> {
+            implements DHTFutureProcess<AlternateLocation[]> {
         
         private final URN urn;
         

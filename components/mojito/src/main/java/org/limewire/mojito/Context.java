@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.message.MessageFactory;
@@ -107,6 +107,6 @@ public interface Context {
     /**
      * 
      */
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+    public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, 
             long timeout, TimeUnit unit);
 }

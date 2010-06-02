@@ -3,17 +3,17 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
+ * An asynchronous process that is started by a {@link DHTFuture}.
  */
-public interface AsyncProcess<V> {
+public interface DHTFutureProcess<V> {
 
     /**
-     * Starts the {@link AsyncProcess}
+     * Starts the {@link DHTFutureProcess}
      */
     public void start(DHTFuture<V> future);
     
     /**
-     * A mix-in interface for {@link AsyncProcess}es.
+     * A mix-in interface for {@link DHTFutureProcess}es.
      */
     public static interface Delay {
         

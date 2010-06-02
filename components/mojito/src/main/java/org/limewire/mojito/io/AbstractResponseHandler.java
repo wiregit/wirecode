@@ -8,7 +8,7 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.Entity;
 import org.limewire.mojito.entity.RequestTimeoutException;
@@ -21,7 +21,7 @@ import org.limewire.util.Objects;
  * An abstract implementation of {@link ResponseHandler}.
  */
 public abstract class AbstractResponseHandler<V extends Entity> 
-        implements ResponseHandler, AsyncProcess<V> {
+        implements ResponseHandler, DHTFutureProcess<V> {
     
     protected final Context context;
     

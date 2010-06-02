@@ -1,5 +1,8 @@
 package org.limewire.mojito.exceptions;
 
+/**
+ * Thrown if a <tt>FIND_VALUE</tt> lookup failed.
+ */
 public class NoSuchValueException extends DHTException {
 
     public NoSuchValueException() {

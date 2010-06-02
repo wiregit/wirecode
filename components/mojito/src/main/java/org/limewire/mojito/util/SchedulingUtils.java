@@ -7,7 +7,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.jmx.ExecutorBean;
 import org.limewire.mojito.concurrent.DefaultThreadFactory;
+import org.limewire.util.JmxUtils;
 
 /**
  * An utility class to create {@link ScheduledThreadPoolExecutor}s and
@@ -17,8 +19,13 @@ public class SchedulingUtils {
 
     private static final long PURGE = 30L * 1000L;
     
-    private static ScheduledExecutorService SCHEDULED_EXECUTOR 
-        = newSingleThreadScheduledExecutor("ExecutorUtilsThread");
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR 
+        = newSingleThreadScheduledExecutor("SchedulingUtilsThread");
+    
+    static {
+        JmxUtils.add(SchedulingUtils.class, "SchedulingUtilsThread", 
+                new ExecutorBean.Impl(SCHEDULED_EXECUTOR));
+    }
     
     private SchedulingUtils() {}
     

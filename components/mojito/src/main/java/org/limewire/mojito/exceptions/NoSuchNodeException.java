@@ -1,5 +1,8 @@
 package org.limewire.mojito.exceptions;
 
+/**
+ * Thrown if a <tt>FIND_NODE</tt> lookup failed.
+ */
 public class NoSuchNodeException extends DHTException {
 
     public NoSuchNodeException() {

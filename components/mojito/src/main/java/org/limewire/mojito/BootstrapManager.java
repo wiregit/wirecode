@@ -3,7 +3,7 @@ package org.limewire.mojito;
 import java.io.Closeable;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.io.BootstrapConfig;
@@ -117,7 +117,7 @@ public class BootstrapManager implements Closeable {
             future.cancel(true);
         }
         
-        AsyncProcess<BootstrapEntity> process 
+        DHTFutureProcess<BootstrapEntity> process 
             = new BootstrapProcess(dht, config, timeout, unit);
         
         future = dht.submit(process, timeout, unit);

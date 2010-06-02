@@ -17,9 +17,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.NopAsyncProcess;
+import org.limewire.mojito.concurrent.NopProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -210,7 +210,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
                 = new ArrayList<DHTFuture<ValueEntity>>();
             
             long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
-            AsyncProcess<ValueEntity[]> process = NopAsyncProcess.process();
+            DHTFutureProcess<ValueEntity[]> process = NopProcess.process();
             final DHTFuture<ValueEntity[]> lookup = submit(process, 
                     timeout, TimeUnit.MILLISECONDS);
             
@@ -309,7 +309,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
             long timeout, TimeUnit unit) {
         
         KUID lookupId = KUID.createRandomID();
-        AsyncProcess<SecurityTokenEntity> process 
+        DHTFutureProcess<SecurityTokenEntity> process 
             = new SecurityTokenResponseHandler(this, 
                     dst, lookupId, timeout, unit);
         

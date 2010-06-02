@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
@@ -295,7 +295,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, long timeout, TimeUnit unit) {
+    public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, long timeout, TimeUnit unit) {
         return createFuture();
     }
 

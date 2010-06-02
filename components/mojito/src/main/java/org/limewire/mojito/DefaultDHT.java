@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
@@ -297,7 +297,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     @Override
     public DHTFuture<PingEntity> ping(SocketAddress dst, 
             long timeout, TimeUnit unit) {
-        AsyncProcess<PingEntity> process = new PingResponseHandler(
+        DHTFutureProcess<PingEntity> process = new PingResponseHandler(
                 this, dst, timeout, unit);
         
         DHTFuture<PingEntity> future 
@@ -309,7 +309,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     @Override
     public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
         
-        AsyncProcess<PingEntity> process 
+        DHTFutureProcess<PingEntity> process 
             = new PingResponseHandler(
                 this, dst, timeout, unit);
         
@@ -323,7 +323,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     public DHTFuture<PingEntity> ping(Contact src, Contact[] dst, 
             long timeout, TimeUnit unit) {
         
-        AsyncProcess<PingEntity> process 
+        DHTFutureProcess<PingEntity> process 
             = new PingResponseHandler(
                 this, src, dst, timeout, unit);
         
@@ -341,7 +341,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit) {
         
-        AsyncProcess<NodeEntity> process 
+        DHTFutureProcess<NodeEntity> process 
             = new NodeResponseHandler(
                 this, lookupId, timeout, unit);
         
@@ -351,7 +351,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     @Override
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             Contact[] contacts, long timeout, TimeUnit unit) {
-        AsyncProcess<NodeEntity> process = new NodeResponseHandler(
+        DHTFutureProcess<NodeEntity> process = new NodeResponseHandler(
                 this, lookupId, contacts, timeout, unit);
         
         return submit(process, timeout, unit);
@@ -361,7 +361,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     public DHTFuture<ValueEntity> get(ValueKey key, 
             long timeout, TimeUnit unit) {
         
-        AsyncProcess<ValueEntity> process = new ValueResponseHandler(
+        DHTFutureProcess<ValueEntity> process = new ValueResponseHandler(
                 this, key, timeout, unit);
         
         return submit(process, timeout, unit);
@@ -417,7 +417,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
             Contact dst, long timeout, TimeUnit unit) {
         
         KUID lookupId = KUID.createRandomID();
-        AsyncProcess<SecurityTokenEntity> process 
+        DHTFutureProcess<SecurityTokenEntity> process 
             = new SecurityTokenResponseHandler(this, 
                     dst, lookupId, timeout, unit);
         

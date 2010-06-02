@@ -13,8 +13,8 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.DHT;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AsyncProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.DefaultBootstrapEntity;
@@ -27,7 +27,7 @@ import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.TimeAwareIterable;
 import org.limewire.util.ExceptionUtils;
 
-public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
+public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     
     private final DHT dht;
     
@@ -53,8 +53,6 @@ public class BootstrapProcess implements AsyncProcess<BootstrapEntity> {
     private DHTFuture<PingEntity> collisitonFuture = null;
     
     private Iterator<KUID> bucketsToRefresh = null;
-    
-    private int routeTableTimeouts = 0;
     
     public BootstrapProcess(DHT dht, BootstrapConfig config, 
             long timeout, TimeUnit unit) {

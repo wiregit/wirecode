@@ -3,6 +3,9 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A default implementation of {@link ThreadFactory}.
+ */
 public class DefaultThreadFactory implements ThreadFactory {
     
     private final AtomicInteger counter = new AtomicInteger();

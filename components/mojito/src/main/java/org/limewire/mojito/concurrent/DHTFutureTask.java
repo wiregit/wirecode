@@ -1,17 +1,15 @@
 package org.limewire.mojito.concurrent;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.AsyncProcess.Delay;
+import org.limewire.mojito.concurrent.DHTFutureProcess.Delay;
 import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito.util.SchedulingUtils;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -21,12 +19,8 @@ import org.limewire.mojito.util.EventUtils;
  * @see AsyncFutureTask
  */
 public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V> {
-
-    private static final ScheduledExecutorService WATCHDOG 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
     
-    private final AsyncProcess<V> task;
+    private final DHTFutureProcess<V> task;
     
     private final long timeout;
     
@@ -39,7 +33,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Creates an {@link DHTFutureTask}
      */
-    public DHTFutureTask(AsyncProcess<V> task, long timeout, TimeUnit unit) {
+    public DHTFutureTask(DHTFutureProcess<V> task, long timeout, TimeUnit unit) {
         
         this.task = task;
         
@@ -87,7 +81,7 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
             }
         };
         
-        watchdog = WATCHDOG.schedule(task, timeout, unit);
+        watchdog = SchedulingUtils.schedule(task, timeout, unit);
         return true;
     }
     

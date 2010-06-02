@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.AsyncProcess;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -121,7 +121,7 @@ public abstract class AbstractDHT implements DHT {
     }
     
     @Override
-    public <T> DHTFuture<T> submit(AsyncProcess<T> process, 
+    public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, 
             long timeout, TimeUnit unit) {
         return futureManager.submit(process, timeout, unit);
     }
