@@ -63,7 +63,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
                 = new DHTValueFuture<PushEndpoint>();
             
             KUID key = KUIDUtils.toKUID(guid);
-            ValueKey lookupKey = ValueKey.createEntityKey(
+            ValueKey lookupKey = ValueKey.createValueKey(
                     key, PushProxiesValue.PUSH_PROXIES);
             
             final DHTFuture<ValueEntity[]> lookup 

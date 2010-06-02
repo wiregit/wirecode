@@ -15,6 +15,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 
+/**
+ * A default implementation of {@link Transport} that is utilizing 
+ * a {@link DatagramSocket}.
+ */
 public class DatagramTransport extends AbstractTransport implements Closeable {
 
     private static final Log LOG 
@@ -56,14 +60,14 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     }
     
     /**
-     * 
+     * Returns the bind {@link SocketAddress}.
      */
     public SocketAddress getBindAddress() {
         return bindaddr;
     }
     
     /**
-     * 
+     * Returns the {@link DatagramSocket} or null.
      */
     public synchronized DatagramSocket getDatagramSocket() {
         return socket;
@@ -87,7 +91,11 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                loop();
+                try {
+                    loop();
+                } finally {
+                    unbind();
+                }
             }
         };
         
@@ -141,12 +149,13 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     }
 
     /**
-     * 
+     * The {@link DatagramSocket}'s main loop.
      */
     private void loop() {
         try {
             DatagramSocket socket = null;
-            while (open && (socket = this.socket) != null && !socket.isClosed()) {
+            while (open && (socket = this.socket) != null 
+                    && !socket.isClosed()) {
                 DatagramPacket packet = receive(
                         socket, PACKET_SIZE);
                 process(packet);
@@ -159,7 +168,19 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     }
     
     /**
-     * 
+     * Closes the {@link DatagramSocket}.
+     */
+    private void shutdown() {
+        try {
+            close();
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
+    }
+    
+    /**
+     * Reads a {@link DatagramPacket} from the given {@link DatagramSocket}
+     * and returns it.
      */
     private static DatagramPacket receive(
             DatagramSocket socket, int size) throws IOException {
@@ -171,18 +192,7 @@ public class DatagramTransport extends AbstractTransport implements Closeable {
     }
     
     /**
-     * 
-     */
-    private void shutdown() {
-        try {
-            close();
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-    }
-    
-    /**
-     * 
+     * Processes the given {@link DatagramPacket}.
      */
     private void process(final DatagramPacket packet) {
         if (isBound()) {

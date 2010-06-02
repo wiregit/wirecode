@@ -29,7 +29,7 @@ import org.limewire.mojito.storage.ValueType;
 public class ValueKey {
     
     /**
-     * The Contact that has the Entity.
+     * The Contact that has the {@link ValueTuple}.
      */
     private final Contact src;
     
@@ -54,7 +54,7 @@ public class ValueKey {
      * Creates and returns an {@link ValueKey} that will do a full lookup
      * for the value.
      */
-    public static ValueKey createEntityKey(KUID primaryKey, ValueType valueType) {
+    public static ValueKey createValueKey(KUID primaryKey, ValueType valueType) {
         
         if (primaryKey == null) {
             throw new NullPointerException("PrimaryKey is null");
@@ -71,7 +71,7 @@ public class ValueKey {
      * Creates and returns a new {@link ValueKey} with a known source
      * which will look only at the given Node for the value.
      */
-    public static ValueKey createEntityKey(Contact node, KUID primaryKey, 
+    public static ValueKey createValueKey(Contact node, KUID primaryKey, 
             KUID secondaryKey, ValueType valueType) {
         
         if (node == null) {

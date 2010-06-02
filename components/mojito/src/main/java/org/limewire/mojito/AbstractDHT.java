@@ -114,7 +114,7 @@ public abstract class AbstractDHT implements DHT {
     public DHTFuture<ValueEntity> get(KUID lookupId, 
             long timeout, TimeUnit unit) {
         
-        ValueKey key = ValueKey.createEntityKey(
+        ValueKey key = ValueKey.createValueKey(
                 lookupId, ValueType.ANY);
         
         return get(key, timeout, unit);

@@ -21,6 +21,7 @@ package org.limewire.mojito.settings;
 
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.mojito.routing.Contact;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
@@ -106,7 +107,9 @@ public class LookupSettings extends MojitoProps {
         = FACTORY.createBooleanSetting("EXHAUSTIVE", false);
     
     /**
-     * 
+     * Whether or not {@link Contact}s should be picket randomly from 
+     * the set of the K-closest. This distribute the load more evenly
+     * among the K-closest {@link Contact}s.
      */
     public static final BooleanSetting RANDOMIZE
         = FACTORY.createRemoteBooleanSetting("RANDOMIZE", 

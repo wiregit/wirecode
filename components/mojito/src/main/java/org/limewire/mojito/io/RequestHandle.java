@@ -16,6 +16,9 @@ import org.limewire.mojito.message.ValueRequest;
 import org.limewire.mojito.message.ValueResponse;
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * 
+ */
 public class RequestHandle {
 
     private final KUID contactId;
@@ -25,38 +28,53 @@ public class RequestHandle {
     private final RequestMessage request;
     
     public RequestHandle(KUID contactId, 
-            SocketAddress address, RequestMessage request) {
+            SocketAddress address, 
+            RequestMessage request) {
         
         this.contactId = contactId;
         this.address = address;
         this.request = request;
     }
 
+    /**
+     * Returns the remote host's {@link KUID}.
+     */
     public KUID getContactId() {
         return contactId;
     }
 
+    /**
+     * Returns the remote host's {@link SocketAddress}.
+     */
     public SocketAddress getAddress() {
         return address;
     }
 
+    /**
+     * Returns the {@link RequestMessage} that was sent to the remote host.
+     */
     public RequestMessage getRequest() {
         return request;
     }
     
+    /**
+     * Returns the {@link MessageID} of the {@link RequestMessage}.
+     */
     MessageID getMessageId() {
         return request.getMessageId();
     }
     
     /**
-     * 
+     * Returns {@code true} if the given {@link ResponseMessage} 
+     * fulfills all requirements.
      */
     boolean check(ResponseMessage response) {
         return checkType(response) && checkContactId(response);
     }
     
     /**
-     * 
+     * Returns {@code true} if the {@link ResponseMessage} has 
+     * the correct type.
      */
     private boolean checkType(ResponseMessage response) {
         if (request instanceof PingRequest) {
@@ -74,7 +92,7 @@ public class RequestHandle {
     }
     
     /**
-     * 
+     * Returns {@code true} if the {@link KUID}s match.
      */
     private boolean checkContactId(ResponseMessage response) {
         if (contactId == null) {

@@ -22,6 +22,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.entity.LookupEntity;
+import org.limewire.mojito.message.LookupRequest;
 import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
@@ -34,6 +35,10 @@ import org.limewire.mojito.util.SchedulingUtils;
 import org.limewire.mojito.util.ContactsScrubber.Scrubbed;
 import org.limewire.security.SecurityToken;
 
+/**
+ * An abstract implementation of a {@link ResponseHandler} that handles
+ * lookups (<tt>FIND_NODE</tt> and <tt>FIND_VALUE</tt>).
+ */
 public abstract class LookupResponseHandler<V extends LookupEntity> 
         extends AbstractResponseHandler<V> {
     
@@ -113,7 +118,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
 
     /**
-     * 
+     * Tries to spawn additional lookups (boosting) if we haven't received
+     * any responses for a certain amount of time.
      */
     private synchronized void boost() throws IOException {
         if (lookupManager.hasNext(true)) {
@@ -132,7 +138,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Processes the given {@code count} number of responses and 
+     * spawns more lookups.
      */
     private void process(int count) throws IOException {
         try {
@@ -153,7 +160,8 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Decrements the {@link #lookupCounter} by the given number
+     * of responses.
      */
     private void preProcess(int count) {
         if (startTime == -1L) {
@@ -164,7 +172,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Terminates the lookup if there is nothing left to do.
      */
     private void postProcess() {
         int count = lookupCounter.poll();
@@ -175,19 +183,16 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Sends a {@link LookupRequest} to the given {@link Contact}.
      */
     protected abstract void lookup(Contact dst, KUID key, 
             long timeout, TimeUnit unit) throws IOException;
     
     /**
-     * 
+     * Called upon completion.
      */
     protected abstract void complete(State state);
     
-    /**
-     * 
-     */
     @Override
     protected final void processResponse(RequestHandle request, 
             ResponseMessage response, long time,
@@ -200,14 +205,14 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Called for each {@link ResponseMessage}.
      */
     protected abstract void processResponse0(RequestHandle request, 
             ResponseMessage response, long time,
             TimeUnit unit) throws IOException;
     
     /**
-     * 
+     * Called for each {@link ResponseMessage}.
      */
     protected boolean processContacts(Contact src, SecurityToken securityToken, 
             Contact[] contacts, long time, TimeUnit unit) {
@@ -215,9 +220,6 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 contacts, time, unit);
     }
     
-    /**
-     * 
-     */
     @Override
     protected final void processTimeout(RequestHandle request, 
             long time, TimeUnit unit) throws IOException {
@@ -229,7 +231,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Called for each timeout.
      */
     protected void processTimeout0(RequestHandle request, 
             long time, TimeUnit unit) throws IOException {
@@ -259,29 +261,53 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
                 time, TimeUnit.MILLISECONDS);
     }
     
+    /**
+     * The {@link LookupManager} manages the lookup process.
+     */
     private class LookupManager {
         
-        private final boolean RANDOMIZE = LookupSettings.RANDOMIZE.getValue();
+        private final boolean randomize 
+            = LookupSettings.RANDOMIZE.getValue();
         
-        private final boolean EXHAUSTIVE = LookupSettings.EXHAUSTIVE.getValue();
+        private final boolean exchaustive 
+            = LookupSettings.EXHAUSTIVE.getValue();
         
         private final Context context;
         
         private final KUID lookupId;
         
         /**
-         * 
+         * The initial set of {@link Contact} {@link KUID}s that were
+         * picked from the {@link RouteTable}.
          */
         private final Set<KUID> init = new HashSet<KUID>();
         
+        /**
+         * All {@link Contact}s that collide with the localhost
+         */
         private final List<Contact> collisions = new ArrayList<Contact>();
         
+        /**
+         * {@link Contact}s from which we received responses.
+         */
         private final NavigableMap<Contact, SecurityToken> responses;
         
+        /**
+         * This is a sub-set of {@link #responses} where we keep only
+         * the K-closest {@link Contact}s.
+         */
         private final NavigableSet<Contact> closest;
         
+        /**
+         * A set of {@link Contact}s to query.
+         */
         private final NavigableSet<Contact> query;
         
+        /**
+         * A map of {@link Contact}s we've sent requests to. To be 
+         * more precise it's a map of their {@link KUID}s and the 
+         * hop number.
+         */
         private final Map<KUID, Integer> history 
             = new HashMap<KUID, Integer>();
         
@@ -321,6 +347,9 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             }
         }
         
+        /**
+         * Called for each {@link ResponseMessage}.
+         */
         public boolean handleResponse(Contact src, SecurityToken securityToken,
                 Contact[] contacts, long time, TimeUnit unit) {
             
@@ -361,6 +390,9 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return true;
         }
         
+        /**
+         * Called for each timeout.
+         */
         public void handleTimeout(RequestHandle handle, 
                 long time, TimeUnit unit) {
             
@@ -372,27 +404,48 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             ++timeouts;
         }
         
+        /**
+         * Returns all {@link Contact}s and their {@link SecurityToken}s.
+         */
         @SuppressWarnings("unchecked")
         public Entry<Contact, SecurityToken>[] getContacts() {
             return responses.entrySet().toArray(new Entry[0]);
         }
         
+        /**
+         * Returns all {@link Contact}s that collide with the localhost
+         */
         public Contact[] getCollisions() {
             return collisions.toArray(new Contact[0]);
         }
         
+        /**
+         * Returns the current hop.
+         */
         public int getCurrentHop() {
             return currentHop;
         }
         
+        /**
+         * Returns the number of timeouts that occurred during the lookup.
+         */
         public int getTimeouts() {
             return timeouts;
         }
         
+        /**
+         * Returns the number of {@link RouteTable} timeouts that occurred
+         * during the lookup. In other words, the number of {@link Contact}s
+         * from our {@link RouteTable} that failed to respond.
+         */
         public int getRouteTableTimeouts() {
             return routeTableTimeouts;
         }
         
+        /**
+         * Adds the given {@link Contact} and {@link SecurityToken} to
+         * the list of nodes that responded to our lookup requests.
+         */
         private boolean addToResponses(Contact contact, 
                 SecurityToken securityToken) {
             
@@ -411,6 +464,9 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return false;
         }
         
+        /**
+         * Add the given {@link Contact} to the to-be-queried list.
+         */
         private boolean addToQuery(Contact contact, int hop) {
             KUID contactId = contact.getContactId();
             if (!history.containsKey(contactId)) {
@@ -421,6 +477,11 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return false;
         }
         
+        /**
+         * Returns {@code true} if the given {@link Contact} is closer to 
+         * the {@link #lookupId} than our {@link Contact} that is furthest 
+         * away from it.
+         */
         private boolean isCloserThanClosest(Contact other) {
             if (!closest.isEmpty()) {
                 Contact contact = closest.last();
@@ -431,26 +492,37 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
             return true;
         }
         
+        /**
+         * Returns {@code true} if there are {@link Contact}s that
+         * are worthwhile to be queried.
+         */
         public boolean hasNext() {
             return hasNext(false);
         }
         
+        /**
+         * Returns {@code true} if there are {@link Contact}s that
+         * are worthwhile to be queried.
+         */
         public boolean hasNext(boolean force) {
             if (!query.isEmpty()) {
                 Contact contact = query.first();
                 if (force || closest.size() < KademliaSettings.K
                         || isCloserThanClosest(contact)
-                        || EXHAUSTIVE) {
+                        || exchaustive) {
                     return true;
                 }
             }
             return false;
         }
         
+        /**
+         * Returns the next {@link Contact} to be queried.
+         */
         public Contact next() {
             Contact contact = null;
             
-            if (RANDOMIZE) {
+            if (randomize) {
                 if (!query.isEmpty()) {
                     // TODO: There is a better way to do it!
                     List<Contact> contacts = new ArrayList<Contact>();
@@ -477,6 +549,10 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         }
     }
     
+    /**
+     * An implementation of {@link Comparator} that compares 
+     * {@link Contact}s by their XOR-distance to a given {@link KUID}.
+     */
     private static class XorComparator implements Comparator<Contact> {
 
         private final KUID key;
@@ -487,10 +563,14 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
         
         @Override
         public int compare(Contact o1, Contact o2) {
-            return o1.getContactId().xor(key).compareTo(o2.getContactId().xor(key));
+            return o1.getContactId().xor(key)
+                    .compareTo(o2.getContactId().xor(key));
         }
     }
     
+    /**
+     * The final state of the lookup.
+     */
     public static class State {
         
         private final KUID key;
@@ -558,7 +638,7 @@ public abstract class LookupResponseHandler<V extends LookupEntity>
     }
     
     /**
-     * 
+     * Creates a {@link MaxStack} for the given {@link Type}.
      */
     public static MaxStack createStack(Type type) {
         int alpha = -1;

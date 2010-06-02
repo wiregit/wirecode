@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
 import org.limewire.setting.TimeSetting;
 
 /**
@@ -54,9 +53,12 @@ public final class NetworkSettings extends MojitoProps {
     /**
      * A multiplication factor for the RTT.
      */
-    public static final LongSetting MIN_TIMEOUT_RTT
-        = FACTORY.createRemoteLongSetting("MIN_TIMEOUT_RTT", 1000L, 
-                "Mojito.MinTimeoutRTT", 10L, 30L*1000L);
+    public static final TimeSetting MIN_TIMEOUT_RTT
+        = FACTORY.createRemoteTimeSetting("MIN_TIMEOUT_RTT", 
+                1L, TimeUnit.SECONDS,
+                "Mojito.MinTimeoutRTT", 
+                10L, TimeUnit.MILLISECONDS,
+                30L, TimeUnit.SECONDS);
     
     /**
      * The maximum number of errors (timeouts) that may occur 

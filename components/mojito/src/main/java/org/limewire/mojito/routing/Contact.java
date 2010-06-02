@@ -150,12 +150,17 @@ public interface Contact extends Serializable {
     /**
      * Sets the Round Trip Time (RTT).
      */
-    public void setRoundTripTime(long rtt);
+    public void setRoundTripTime(long rtt, TimeUnit unit);
     
     /**
      * Returns the Round Trip Time (RTT).
      */
-    public long getRoundTripTime();
+    public long getRoundTripTime(TimeUnit unit);
+    
+    /**
+     * Returns the Round Trip Time (RTT) in milliseconds.
+     */
+    public long getRoundTripTimeInMillis();
     
     /**
      * Returns an adaptive timeout based on the RTT and number of failures.

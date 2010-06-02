@@ -126,7 +126,7 @@ public class PassiveLeafControllerTest extends DHTTestCase {
                 StoreEntity result = dhts.get(0).put(key, value).get();
                 assertEquals(KademliaSettings.K, result.getContacts().length);
                 
-                ValueKey lookupKey = ValueKey.createEntityKey(
+                ValueKey lookupKey = ValueKey.createValueKey(
                         key, ValueType.ANY);
                 
                 // Try to get the value which should fail

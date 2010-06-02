@@ -9,6 +9,9 @@ import org.limewire.mojito.message.RequestMessage;
 import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * An abstract implementation of {@link RequestHandler}.
+ */
 abstract class AbstractRequestHandler implements RequestHandler {
 
     private static final Log LOG 
@@ -21,7 +24,7 @@ abstract class AbstractRequestHandler implements RequestHandler {
     }
     
     /**
-     * 
+     * Sends a {@link ResponseMessage} to the given {@link Contact}.
      */
     protected void send(Contact dst, 
             ResponseMessage response) throws IOException {
@@ -42,7 +45,7 @@ abstract class AbstractRequestHandler implements RequestHandler {
     }
     
     /**
-     * 
+     * Called for each {@link RequestMessage}.
      */
     protected abstract void processRequest(
             RequestMessage message) throws IOException;

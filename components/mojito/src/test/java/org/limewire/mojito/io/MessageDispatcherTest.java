@@ -11,7 +11,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.RequestMessage;

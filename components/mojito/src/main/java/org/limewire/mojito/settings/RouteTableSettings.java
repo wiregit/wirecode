@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
 import org.limewire.setting.TimeSetting;
 
 /**
@@ -71,9 +70,12 @@ public final class RouteTableSettings extends MojitoProps {
      * The minimum time that must pass since the last successful contact 
      * before we're contacting a Node for RouteTable maintenance reasons.
      */
-    public static final LongSetting MIN_RECONNECTION_TIME
-        = FACTORY.createRemoteLongSetting("MIN_RECONNECTION_TIME", 30L*1000L, 
-                "Mojito.MinReconnectTime", 0L, 5L*60L*1000L);
+    public static final TimeSetting MIN_RECONNECTION_TIME
+        = FACTORY.createRemoteTimeSetting("MIN_RECONNECTION_TIME", 
+                30L, TimeUnit.SECONDS,
+                "Mojito.MinReconnectTime", 
+                0L, TimeUnit.MILLISECONDS,
+                5L, TimeUnit.MINUTES);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step.

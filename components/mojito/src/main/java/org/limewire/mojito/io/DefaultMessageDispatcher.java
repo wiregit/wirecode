@@ -26,7 +26,7 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.MessageUtils;
 
-public class DefaultMessageDispatcher extends MessageDispatcher {
+public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
 
     private static final Log LOG 
         = LogFactory.getLog(DefaultMessageDispatcher.class);
@@ -63,7 +63,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
     }
     
     /**
-     * 
+     * Returns the {@link Context}.
      */
     public Context getContext() {
         return context;
@@ -215,7 +215,7 @@ public class DefaultMessageDispatcher extends MessageDispatcher {
             }
         }
         
-        node.setRoundTripTime(unit.toMillis(time));
+        node.setRoundTripTime(time, unit);
         
         super.handleResponse(callback, request, response, time, unit);
         defaultHandler.handleResponse(request, response, time, unit);

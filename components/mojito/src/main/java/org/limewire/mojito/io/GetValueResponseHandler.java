@@ -1,6 +1,5 @@
 package org.limewire.mojito.io;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -8,10 +7,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.message.ValueRequest;
@@ -21,29 +21,40 @@ import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.DatabaseUtils;
 
+/**
+ * An utility class that retrieves a {@link ValueTuple} from
+ * a known {@link Contact}. In other words this class does not
+ * perform a DHT lookup.
+ */
 public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity> {
 
     private static final Log LOG 
         = LogFactory.getLog(GetValueResponseHandler.class);
     
-    private final ValueKey lookupKey;
+    private final ValueKey valueKey;
     
     public GetValueResponseHandler(Context context, 
-            ValueKey lookupKey, long timeout, TimeUnit unit) {
+            ValueKey valueKey, long timeout, TimeUnit unit) {
         super(context, timeout, unit);
         
-        this.lookupKey = lookupKey;
+        // This class assumes we already know the exact location
+        // of the value we're looking for.
+        if (valueKey.isLookupKey()) {
+            throw new IllegalArgumentException("valueKey=" + valueKey);
+        }
+        
+        this.valueKey = valueKey;
     }
 
     @Override
     protected void start() throws IOException {
-        Contact node = lookupKey.getContact();
-        KUID primaryKey = lookupKey.getPrimaryKey();
-        KUID secondaryKey = lookupKey.getSecondaryKey();
-        ValueType valueType = lookupKey.getValueType();
+        Contact dst = valueKey.getContact();
+        KUID primaryKey = valueKey.getPrimaryKey();
+        KUID secondaryKey = valueKey.getSecondaryKey();
+        ValueType valueType = valueKey.getValueType();
         
-        KUID contactId = node.getContactId();
-        SocketAddress addr = node.getContactAddress();
+        KUID contactId = dst.getContactId();
+        SocketAddress addr = dst.getContactAddress();
         
         MessageHelper messageHelper = context.getMessageHelper();
         ValueRequest request = messageHelper.createFindValueRequest(
@@ -53,7 +64,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
             LOG.debug("start looking for: " + request);
         }
         
-        long adaptiveTimeout = node.getAdaptativeTimeout(timeout, unit);
+        long adaptiveTimeout = dst.getAdaptativeTimeout(timeout, unit);
         send(contactId, addr, request, adaptiveTimeout, unit);
     }
 
@@ -71,7 +82,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         // it may no longer exists and the remote Node returns us
         // a Set of the k-closest Nodes instead.
         if (!(message instanceof ValueResponse)) {
-            setException(new FileNotFoundException());
+            setException(new NoSuchValueException());
             return;
         }
         
@@ -80,19 +91,19 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         // Make sure the DHTValueEntities have the expected
         // value type.
         ValueTuple[] entities 
-            = DatabaseUtils.filter(lookupKey.getValueType(), 
+            = DatabaseUtils.filter(valueKey.getValueType(), 
                     response.getValueEntities());
         
         ValueKey[] entityKeys = new ValueKey[0];
         
         ValueEntity entity = new DefaultValueEntity(
-                lookupKey, entities, entityKeys, time, unit);
+                valueKey, entities, entityKeys, time, unit);
         setValue(entity);
     }
     
     @Override
     protected void processTimeout(RequestHandle message, 
             long time, TimeUnit unit) {
-        setException(new FileNotFoundException());
+        setException(new NoSuchValueException());
     }
 }

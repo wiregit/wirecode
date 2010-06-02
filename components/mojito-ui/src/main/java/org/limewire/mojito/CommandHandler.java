@@ -257,7 +257,7 @@ public class CommandHandler {
             }
             md.reset();
             
-            ValueKey lookupKey = ValueKey.createEntityKey(key, ValueType.ANY);
+            ValueKey lookupKey = ValueKey.createValueKey(key, ValueType.ANY);
             ValueEntity evt = dht.get(lookupKey).get();
             out.println(evt.toString());
             

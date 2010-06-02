@@ -139,7 +139,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
         this.entities.addAll(Arrays.asList(filtered));
         
         for (KUID secondaryKey : availableSecondaryKeys) {
-            ValueKey entityKey = ValueKey.createEntityKey(
+            ValueKey entityKey = ValueKey.createValueKey(
                     src, lookupId, secondaryKey, lookupKey.getValueType());
             
             this.entityKeys.add(entityKey);

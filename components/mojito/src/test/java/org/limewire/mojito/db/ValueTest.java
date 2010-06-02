@@ -102,7 +102,7 @@ public class ValueTest extends MojitoTestCase {
             dhts.get(0).put(key, value).get();
             
             // FIND_VALUE (check every Node)
-            ValueKey lookupKey = ValueKey.createEntityKey(
+            ValueKey lookupKey = ValueKey.createValueKey(
                     key, ValueType.ANY);
             for (MojitoDHT dht : dhts) {
                 ValueEntity entity = dht.get(lookupKey).get();

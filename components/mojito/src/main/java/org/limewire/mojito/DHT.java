@@ -18,8 +18,8 @@ import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
 
 /**

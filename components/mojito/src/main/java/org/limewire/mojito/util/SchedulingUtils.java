@@ -76,4 +76,12 @@ public class SchedulingUtils {
         return SCHEDULED_EXECUTOR.scheduleWithFixedDelay(
                 task, initialDelay, delay, unit);
     }
+    
+    /**
+     * Schedules the given {@link Runnable}
+     */
+    public static ScheduledFuture<?> schedule(Runnable task, 
+            long delay, TimeUnit unit) {
+        return SCHEDULED_EXECUTOR.schedule(task, delay, unit);
+    }
 }

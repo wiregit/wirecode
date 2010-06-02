@@ -237,7 +237,8 @@ public class LocalContact implements Contact {
             return false;
         }
         
-        SocketAddress addr = new InetSocketAddress(externalAddress, currentPort);
+        SocketAddress addr = new InetSocketAddress(
+                externalAddress, currentPort);
         
         if (tmpExternalAddress == null 
                 || tmpExternalAddress.equals(addr)) {
@@ -276,15 +277,20 @@ public class LocalContact implements Contact {
      * Does nothing.
      */
     @Override
-    public void setRoundTripTime(long rtt) {
+    public void setRoundTripTime(long rtt, TimeUnit unit) {
     }
     
     /**
      * Hard coded to return 0L.
      */
     @Override
-    public long getRoundTripTime() {
+    public long getRoundTripTime(TimeUnit unit) {
         return 0L;
+    }
+    
+    @Override
+    public long getRoundTripTimeInMillis() {
+        return getRoundTripTime(TimeUnit.MILLISECONDS);
     }
 
     /**

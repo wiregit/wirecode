@@ -179,7 +179,7 @@ public class AltLocFinderImpl implements AltLocFinder {
         
         private void doLookup() {
             KUID key = KUIDUtils.toKUID(urn);
-            ValueKey lookupKey = ValueKey.createEntityKey(
+            ValueKey lookupKey = ValueKey.createValueKey(
                     key, AltLocValue.ALT_LOC);
             
             lookup = dhtManager.getAll(lookupKey);

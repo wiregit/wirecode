@@ -60,7 +60,7 @@ public class GetValueTest extends MojitoTestCase {
             first.put(valueId, value).get();
             
             try {
-                ValueKey lookupKey = ValueKey.createEntityKey(
+                ValueKey lookupKey = ValueKey.createValueKey(
                         valueId, ValueType.TEXT);
                 
                 ValueEntity result = dhts.get(1).get(lookupKey).get();
@@ -74,7 +74,7 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                ValueKey lookupKey = ValueKey.createEntityKey(
+                ValueKey lookupKey = ValueKey.createValueKey(
                         valueId, ValueType.ANY);
                 
                 ValueEntity result = dhts.get(1).get(lookupKey).get();
@@ -88,7 +88,7 @@ public class GetValueTest extends MojitoTestCase {
             }
             
             try {
-                ValueKey lookupKey = ValueKey.createEntityKey(valueId, ValueType.LIME);
+                ValueKey lookupKey = ValueKey.createValueKey(valueId, ValueType.LIME);
                 dhts.get(1).get(lookupKey).get();
                 fail("Should have failed!");
             } catch (ExecutionException err) {
@@ -117,11 +117,11 @@ public class GetValueTest extends MojitoTestCase {
             
             first.put(valueId, value).get();
             
-            ValueKey lookupKey1 = ValueKey.createEntityKey(
+            ValueKey lookupKey1 = ValueKey.createValueKey(
                     valueId, ValueType.TEXT);
             ValueEntity result1 = dhts.get(1).get(lookupKey1).get();
             
-            ValueKey lookupKey2 = ValueKey.createEntityKey(
+            ValueKey lookupKey2 = ValueKey.createValueKey(
                     valueId, ValueType.ANY);
             ValueEntity result2 = dhts.get(1).get(lookupKey2).get();
             

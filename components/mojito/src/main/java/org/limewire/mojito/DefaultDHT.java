@@ -36,12 +36,13 @@ import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseCleaner;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -137,8 +138,8 @@ public class DefaultDHT extends AbstractDHT implements Context {
         
         this.messageHelper = new MessageHelper(this, messageFactory);
         
-        DefaultStoreForward.Provider provider 
-                = new DefaultStoreForward.Provider() {
+        DefaultStoreForward.StoreProvider provider 
+                = new DefaultStoreForward.StoreProvider() {
 
             @Override
             public boolean isReady() {
@@ -174,7 +175,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         bucketRefresher.close();
         storeManager.close();
         
-        messageDispatcher.close();
+        IoUtils.close(messageDispatcher);
     }
     
     @Override

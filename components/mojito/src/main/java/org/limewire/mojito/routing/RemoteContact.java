@@ -171,7 +171,7 @@ public class RemoteContact implements Contact {
         }
         
         if (rtt < 0L) {
-            rtt = existing.getRoundTripTime();
+            rtt = existing.getRoundTripTimeInMillis();
         }
         
         if (!isAlive() || (getTimeStamp() < existing.getTimeStamp())) {
@@ -181,55 +181,73 @@ public class RemoteContact implements Contact {
         }
     }
     
+    @Override
     public Vendor getVendor() {
         return vendor;
     }
 
+    @Override
     public Version getVersion() {
         return version;
     }
 
+    @Override
     public KUID getContactId() {
         return nodeId;
     }
     
+    @Override
     public int getInstanceId() {
         return instanceId;
     }
     
+    @Override
     public int getFlags() {
         return flags;
     }
     
+    @Override
     public SocketAddress getContactAddress() {
         return contactAddress;
     }
     
+    @Override
     public SocketAddress getSourceAddress() {
         return sourceAddress;
     }
     
-    public long getRoundTripTime() {
-        return rtt;
+    @Override
+    public long getRoundTripTime(TimeUnit unit) {
+        return unit.convert(rtt, TimeUnit.MILLISECONDS);
     }
     
-    public void setRoundTripTime(long rtt) {
-        this.rtt = rtt;
+    @Override
+    public long getRoundTripTimeInMillis() {
+        return getRoundTripTime(TimeUnit.MILLISECONDS);
     }
     
+    @Override
+    public void setRoundTripTime(long rtt, TimeUnit unit) {
+        this.rtt = unit.toMillis(rtt);
+    }
+    
+    @Override
     public void setTimeStamp(long timeStamp) {
         assert (timeStamp != LOCAL_CONTACT);
         this.timeStamp = timeStamp;
     }
     
+    @Override
     public long getTimeStamp() {
         return timeStamp;
     }
     
+    @Override
     public long getLastFailedTime() {
         return lastFailedTime;
     }
 
+    @Override
     public boolean isFirewalled() {
         return (flags & FIREWALLED_FLAG) != 0;
     }
@@ -240,6 +258,7 @@ public class RemoteContact implements Contact {
         }
     }
     
+    @Override
     public long getAdaptativeTimeout(long defaultValue, TimeUnit unit) {
         //for now, based on failures and previous round trip time
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
@@ -261,33 +280,40 @@ public class RemoteContact implements Contact {
         timeStamp = System.currentTimeMillis();
     }
     
+    @Override
     public boolean isAlive() {
         return State.ALIVE.equals(state);
     }
     
+    @Override
     public void unknown() {
         state = State.UNKNOWN;
         failures = 0;
         timeStamp = 0L;
     }
     
+    @Override
     public boolean isUnknown() {
         return State.UNKNOWN.equals(state);
     }
     
+    @Override
     public boolean isDead() {
         return State.DEAD.equals(state);
     }
     
+    @Override
     public boolean hasBeenRecentlyAlive() {
         return ((System.currentTimeMillis() - getTimeStamp())
-                    < RouteTableSettings.MIN_RECONNECTION_TIME.getValue());
+                    < RouteTableSettings.MIN_RECONNECTION_TIME.getTimeInMillis());
     }
     
+    @Override
     public int getFailures() {
         return failures;
     }
     
+    @Override
     public void handleFailure() {
         failures++;
         lastFailedTime = System.currentTimeMillis();
@@ -306,6 +332,7 @@ public class RemoteContact implements Contact {
         }
     }
     
+    @Override
     public boolean hasFailed() {
         return failures > 0;
     }
@@ -327,10 +354,12 @@ public class RemoteContact implements Contact {
         this.state = state;
     }
     
+    @Override
     public boolean isShutdown() {
         return (flags & SHUTDOWN_FLAG) != 0;
     }
     
+    @Override
     public void shutdown(boolean shutdown) {
         if (isShutdown() != shutdown) {
             this.flags ^= SHUTDOWN_FLAG;
@@ -368,7 +397,7 @@ public class RemoteContact implements Contact {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getContactId(), getContactAddress()))
-            .append(", rtt=").append(getRoundTripTime())
+            .append(", rtt=").append(getRoundTripTimeInMillis())
             .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceId())
             .append(", state=").append(isShutdown() ? "DOWN" : getState())

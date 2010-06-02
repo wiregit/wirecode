@@ -19,10 +19,13 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 
+/**
+ * The default implementation of {@link StoreForward}.
+ */
 public class DefaultStoreForward implements StoreForward {
 
     private static final Log LOG 
@@ -49,20 +52,20 @@ public class DefaultStoreForward implements StoreForward {
     
     private final Database database;
     
-    private final Provider provider;
+    private final StoreProvider provider;
     
     public DefaultStoreForward(RouteTable routeTable, 
-            Database database, Provider provider) {
+            Database database, StoreProvider provider) {
         this.routeTable = routeTable;
         this.database = database;
         this.provider = provider;
     }
     
-    private boolean isLocalNode(Contact contact) {
+    private boolean isLocalhost(Contact contact) {
         return routeTable.getLocalNode().equals(contact);
     }
     
-    private KUID getLocalNodeID() {
+    private KUID getLocalhostId() {
         return routeTable.getLocalNode().getContactId();
     }
     
@@ -88,7 +91,7 @@ public class DefaultStoreForward implements StoreForward {
                             nodeId, 2*KademliaSettings.K, SelectMode.ALL);
                     
                     // Are we one of the K nearest Nodes to the contact?
-                    if (containsNodeID(nodes, getLocalNodeID())) {
+                    if (containsNodeID(nodes, getLocalhostId())) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
                         }
@@ -212,10 +215,10 @@ public class DefaultStoreForward implements StoreForward {
         // That means we're the second closest and since
         // the other Node has changed its instanceId we must
         // re-send the values
-        if (isLocalNode(closest)
+        if (isLocalhost(closest)
                 || (node.equals(closest)
                         && nodes.size() > 1
-                        && isLocalNode(nodes.get(1)))) {
+                        && isLocalhost(nodes.get(1)))) {
             
             KUID nodeId = node.getContactId();
             KUID furthestId = furthest.getContactId();
@@ -254,7 +257,7 @@ public class DefaultStoreForward implements StoreForward {
         // #4 The new Node is nearer to the given valueId then
             //    the furthest away Node (we).
         } else if (nodes.size() >= KademliaSettings.K 
-                && isLocalNode(furthest) 
+                && isLocalhost(furthest) 
                 && (existing == null || existing.isDead())) {
             
             KUID nodeId = node.getContactId();
@@ -276,17 +279,18 @@ public class DefaultStoreForward implements StoreForward {
     }
     
     /**
-     * 
+     * An interface that provides store facilities for 
+     * the {@link DefaultStoreForward} class.
      */
-    public static interface Provider {
+    public static interface StoreProvider {
         
         /**
-         * 
+         * Returns {@code true} if the node is ready to store-forward values. 
          */
         public boolean isReady();
         
         /**
-         * 
+         * Stores the {@link ValueTuple}s at the given {@link Contact}.
          */
         public void store(Contact dst, SecurityToken securityToken, 
                 Collection<? extends ValueTuple> values);

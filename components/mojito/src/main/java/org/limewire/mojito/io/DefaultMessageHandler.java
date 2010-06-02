@@ -15,6 +15,10 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.util.ContactUtils;
 
+/**
+ * The {@link DefaultMessageHandler} handles {@link RequestMessage}s 
+ * and {@link ResponseMessage}s.
+ */
 public class DefaultMessageHandler implements ResponseHandler {
 
     private static final Log LOG 
