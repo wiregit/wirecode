@@ -5,7 +5,7 @@ import org.limewire.mojito.storage.ValueTuple;
 public interface StoreRequest extends RequestMessage, SecurityTokenProvider {
     
     /**
-     * The {@link ValueTuple}ies to store.
+     * The {@link ValueTuple} to store.
      */
-    public ValueTuple[] getValueEntities();
+    public ValueTuple[] getValues();
 }

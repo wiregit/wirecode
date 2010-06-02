@@ -223,7 +223,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         SocketAddress dst = handle.getAddress();
         
         StoreRequest request = (StoreRequest)handle.getRequest();
-        ValueTuple[] entities = request.getValueEntities();
+        ValueTuple[] entities = request.getValues();
         
         ValueTuple entity = entities[0];
         

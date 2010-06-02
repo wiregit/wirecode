@@ -138,7 +138,7 @@ public class MessageInputStream extends DataInputStream {
             Contact contact) throws IOException {
         
         float requestLoad = readFloat();
-        ValueTuple[] entities = readValueEntities(contact);
+        ValueTuple[] entities = readValueTuples(contact);
         KUID[] secondaryKeys = readKUIDs();
         
         return new DefaultValueResponse(messageId, contact, 
@@ -149,7 +149,7 @@ public class MessageInputStream extends DataInputStream {
             Contact contact) throws IOException {
         
         SecurityToken securityToken = readSecurityToken();
-        ValueTuple[] entities = readValueEntities(contact);
+        ValueTuple[] entities = readValueTuples(contact);
         
         return new DefaultStoreRequest(messageId, contact, 
                 securityToken, entities);
@@ -185,16 +185,16 @@ public class MessageInputStream extends DataInputStream {
         return StatusCode.valueOf(code, StringUtils.toUTF8String(decription));
     }
     
-    private ValueTuple[] readValueEntities(Contact sender) throws IOException {
+    private ValueTuple[] readValueTuples(Contact sender) throws IOException {
         int length = readUnsignedByte();
         ValueTuple[] entities = new ValueTuple[length];
         for (int i = 0; i < entities.length; i++) {
-            entities[i] = readValueEntity(sender);
+            entities[i] = readValueTuple(sender);
         }
         return entities;
     }
     
-    private ValueTuple readValueEntity(Contact sender) throws IOException {
+    private ValueTuple readValueTuple(Contact sender) throws IOException {
         Contact creator = readContact();
         KUID primaryKey = readKUID();
         Value value = readValue();

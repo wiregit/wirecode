@@ -20,7 +20,7 @@ public class DefaultStoreRequest extends AbstractRequest
     }
 
     @Override
-    public ValueTuple[] getValueEntities() {
+    public ValueTuple[] getValues() {
         return values;
     }
 

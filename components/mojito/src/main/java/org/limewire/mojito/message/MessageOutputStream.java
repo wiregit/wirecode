@@ -124,27 +124,27 @@ public class MessageOutputStream extends DataOutputStream {
     
     public void writeValueResponse(ValueResponse message) throws IOException {
         writeFloat(message.getRequestLoad());
-        writeValueEntities(message.getValueEntities());
+        writeValueTuples(message.getValueEntities());
         writeKUIDs(message.getSecondaryKeys());
     }
     
     public void writeStoreRequest(StoreRequest message) throws IOException {
         writeSecurityToken(message.getSecurityToken());
-        writeValueEntities(message.getValueEntities());
+        writeValueTuples(message.getValues());
     }
     
     public void writeStoreResponse(StoreResponse message) throws IOException {
         writeStoreStatusCodes(message.getStoreStatusCodes());
     }
     
-    public void writeValueEntities(ValueTuple[] values) throws IOException {
+    public void writeValueTuples(ValueTuple[] values) throws IOException {
         writeByte(values.length);
         for (ValueTuple value : values) {
-            writeValueEntity(value);
+            writeValueTuple(value);
         }
     }
     
-    public void writeValueEntity(ValueTuple value) throws IOException {
+    public void writeValueTuple(ValueTuple value) throws IOException {
         writeContact(value.getCreator());
         writeKUID(value.getPrimaryKey());
         writeValue(value.getValue());

@@ -98,7 +98,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        ValueTuple[] values = request.getValueEntities();
+        ValueTuple[] values = request.getValues();
         
         List<StoreStatusCode> status 
             = new ArrayList<StoreStatusCode>(values.length);
