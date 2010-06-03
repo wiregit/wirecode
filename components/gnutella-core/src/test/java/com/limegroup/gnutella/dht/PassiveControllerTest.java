@@ -36,7 +36,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
-import com.limegroup.gnutella.dht.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 public class PassiveControllerTest extends DHTTestCase {

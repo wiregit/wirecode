@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht;
 
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -12,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
-import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.ValueKey;
@@ -43,7 +41,6 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.BootstrapWorker.BootstrapListener;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -59,10 +56,6 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
 
     private static final Log LOG 
         = LogFactory.getLog(DHTManagerImpl.class);
-    
-    /** Property change support object. */
-    private final PropertyChangeSupport changeSupport 
-        = new SwingSafePropertyChangeSupport(this);
     
     private final NetworkManager networkManager;
     

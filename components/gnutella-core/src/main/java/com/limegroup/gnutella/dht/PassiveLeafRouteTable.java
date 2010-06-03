@@ -20,8 +20,6 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;

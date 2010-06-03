@@ -37,8 +37,6 @@ public class PassiveLeafController extends AbstractController {
 
     private static final String NAME = "LeafDHT";
     
-    private final Transport transport;
-    
     private final RouteTable routeTable = new PassiveLeafRouteTable(
             DHTManager.VENDOR, DHTManager.VERSION);
     
@@ -52,8 +50,6 @@ public class PassiveLeafController extends AbstractController {
         super(DHTMode.PASSIVE_LEAF, 
                 transport, 
                 networkManager);
-        
-        this.transport = transport;
         
         Database database = new DatabaseImpl();
         

@@ -28,7 +28,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
@@ -65,7 +64,6 @@ class BootstrapWorker implements Closeable {
     
     private DHTFuture<BootstrapEntity> bootFuture = null;
     
-    @Inject
     public BootstrapWorker(MojitoDHT dht, 
             ConnectionServices connectionServices,
             Provider<HostCatcher> hostCatcher,
@@ -436,24 +434,6 @@ class BootstrapWorker implements Closeable {
         };
         
         EventUtils.fireEvent(event);
-    }
-    
-    /**
-     * 
-     */
-    public static interface BootstrapListener {
-        
-        public void handleConnecting();
-        
-        /**
-         * 
-         */
-        public void handleConnected(boolean success);
-        
-        /**
-         * 
-         */
-        public void handleCollision(CollisionException ex);
     }
     
     private static class XorComparator implements Comparator<Contact> {
