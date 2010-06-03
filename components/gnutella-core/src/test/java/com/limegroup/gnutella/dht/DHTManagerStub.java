@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
@@ -147,5 +148,10 @@ public class DHTManagerStub implements DHTManager {
 
     @Override
     public void dispatchEvent(DHTEvent event) {
+    }
+
+    @Override
+    public boolean handle(String command, PrintWriter out) {
+        return false;
     }
 }

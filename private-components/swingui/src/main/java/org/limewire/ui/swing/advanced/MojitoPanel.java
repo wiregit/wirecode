@@ -3,20 +3,21 @@ package org.limewire.ui.swing.advanced;
 import java.awt.BorderLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-import org.limewire.core.api.mojito.MojitoManager;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.ui.swing.plugin.SwingUiPlugin;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
 
 /**
  * The Mojito tab panel for the Advanced Tools window.  This displays the
@@ -24,28 +25,36 @@ import com.limegroup.gnutella.dht.DHTEvent;
  */
 class MojitoPanel extends TabPanel {
     
-    /** Manager instance for Mojito DHT. */
-    private final MojitoManager mojitoManager;
+    private final AtomicBoolean registered = new AtomicBoolean(false);
+    
+    private final DHTEventListener listener 
+            = new DHTEventListener() {
+        @Override
+        public void handleDHTEvent(DHTEvent evt) {
+            MojitoPanel.this.handleDHTEvent(evt);
+        }
+    };
+    
+    private final JLabel label = new JLabel();
+    
+    /** The {@link DHTManager} */
+    private final DHTManager manager;
     
     /** Plugin for Mojito Arcs view component. */
-    private SwingUiPlugin plugin;
-    
-    /** Listener to handle start event on Mojito DHT. */
-    private PropertyChangeListener dhtListener;
+    private volatile SwingUiPlugin plugin;
     
     /** Indicator that determines if DHT has started. */
-    private volatile boolean dhtStarted;
+    private volatile boolean started;
     
-    private JLabel dhtLabel = new JLabel();
-    private JComponent dhtRenderer;
+    private volatile JComponent renderer;
 
     /**
      * Constructs a MojitoPanel using the specified MojitoManager.
      */
     @Inject
-    public MojitoPanel(MojitoManager mojitoManager) {
+    public MojitoPanel(DHTManager manager) {
         
-        this.mojitoManager = mojitoManager;
+        this.manager = manager;
         
         setBorder(BorderFactory.createEmptyBorder(3, 12, 12, 12));
         setLayout(new BorderLayout());
@@ -55,18 +64,19 @@ class MojitoPanel extends TabPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                if (dhtRenderer != null) {
-                    dhtRenderer.requestFocusInWindow();
+                if (renderer != null) {
+                    renderer.requestFocusInWindow();
                 }
             }
         });
         
-        dhtLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
-        dhtLabel.setHorizontalAlignment(JLabel.CENTER);
+        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
+        label.setHorizontalAlignment(JLabel.CENTER);
     }
     
-    @Inject(optional=true) void register(@Named("MojitoArcsPlugin") SwingUiPlugin mojitoPlugin) {
-        this.plugin = mojitoPlugin;
+    @Inject(optional=true) void register(
+            @Named("MojitoArcsPlugin") SwingUiPlugin plugin) {
+        this.plugin = plugin;
     }
 
     /**
@@ -75,7 +85,7 @@ class MojitoPanel extends TabPanel {
     @Override
     public boolean isTabEnabled() {
         // Tab enabled if plugin is installed and DHT has started.
-        return ((plugin != null) && dhtStarted);
+        return ((plugin != null) && started);
     }
 
     /**
@@ -92,59 +102,53 @@ class MojitoPanel extends TabPanel {
         }
         
         DHTEvent.Type type = DHTEvent.Type.STOPPED;
-        if (mojitoManager.isRunning()) {
+        if (manager.isRunning()) {
             type = DHTEvent.Type.STARTING;
             
-            if (mojitoManager.isBooting()) {
+            if (manager.isBooting()) {
                 type = DHTEvent.Type.CONNECTING;
-            } else if (mojitoManager.isReady()) {
+            } else if (manager.isReady()) {
                 type = DHTEvent.Type.CONNECTED;
             }
             
-            dhtStarted = true;
+            started = true;
         }
         
-        dhtLabel.setText(createName(type));
+        label.setText(createName(type));
         fireEnabledChanged(isTabEnabled());
         
-        // Add property change listener to update DHT state.
-        if (dhtListener == null) {
-            dhtListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent e) {
-                    
-                    DHTEvent.Type type = DHTEvent.Type.valueOf(
-                            e.getPropertyName());
-                    
-                    boolean wasStarted = dhtStarted;
-                    
-                    dhtStarted = (type != DHTEvent.Type.STOPPED);
-                    dhtLabel.setText(createName(type));
-                    
-                    // Render plugin if available and DHT just started. 
-                    if (dhtStarted && !wasStarted && (plugin != null)) {
-                        renderPlugin();
-                    }
-                    
-                    // Notify listeners about enabled state.
-                    if (wasStarted != dhtStarted) {
-                        fireEnabledChanged(isTabEnabled());
-                    }
-                }
-            };
-            mojitoManager.addPropertyChangeListener(dhtListener);
+        if (!registered.getAndSet(true)) {
+            manager.addEventListener(listener);
         }
     }
-
+    
+    private void handleDHTEvent(DHTEvent evt) {
+        DHTEvent.Type type = evt.getType();
+        
+        boolean wasStarted = started;
+        started = (type != DHTEvent.Type.STOPPED);
+        label.setText(createName(type));
+        
+        // Render plugin if available and DHT just started. 
+        if (started && !wasStarted && (plugin != null)) {
+            renderPlugin();
+        }
+        
+        // Notify listeners about enabled state.
+        if (wasStarted != started) {
+            fireEnabledChanged(isTabEnabled());
+        }
+    }
+    
     /**
      * Displays the Mojito plugin component in the tab.  
      */
     private void renderPlugin() {
-        dhtRenderer = plugin.getPluginComponent();
-        if (dhtRenderer != null) {
+        renderer = plugin.getPluginComponent();
+        if (renderer != null) {
             removeAll();
-            add(dhtLabel, BorderLayout.NORTH);
-            add(dhtRenderer, BorderLayout.CENTER);
+            add(label, BorderLayout.NORTH);
+            add(renderer, BorderLayout.CENTER);
         } else {
             renderNotAvailable();
         }
@@ -156,7 +160,7 @@ class MojitoPanel extends TabPanel {
      */
     private void renderNotAvailable() {
         removeAll();
-        dhtRenderer = null;
+        renderer = null;
         JLabel naLabel = new JLabel();
         naLabel.setText(I18n.tr("Mojito Arcs View not available"));
         naLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -175,15 +179,15 @@ class MojitoPanel extends TabPanel {
             plugin.stopPlugin();
         }
         
-        // Remove property change listener.
-        if (dhtListener != null) {
-            mojitoManager.removePropertyChangeListener(dhtListener);
-            dhtListener = null;
+        if (registered.getAndSet(false)) {
+            manager.removeEventListener(listener);
         }
     }
     
     private String createName(DHTEvent.Type type) {
-        String name = mojitoManager.getName();
+        MojitoDHT dht = manager.getMojitoDHT();
+        String name = dht != null ? dht.getName() : null;
+        
         if (name == null) {
             return "(disabled)";
         }

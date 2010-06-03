@@ -57,7 +57,6 @@ import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggerRepository;
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.core.api.mojito.MojitoManager;
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.i18n.I18nMarker;
@@ -72,6 +71,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.ThreadUtils;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.dht.DHTManager;
 
 /**
  * A Console for log/any output.
@@ -88,7 +88,7 @@ public class Console extends JPanel {
     private volatile LocalClientInfoFactory localClientInfoFactory;
     
     /** Manager for Mojito DHT. */
-    private final MojitoManager mojitoManager;
+    private final DHTManager manager;
     
     private final int idealSize;
     private final int maxExcess;
@@ -141,9 +141,9 @@ public class Console extends JPanel {
      * Constructs the Console for displaying messages.
      */
     @Inject
-    public Console(MojitoManager mojitoManager, 
+    public Console(DHTManager manager, 
             LocalClientInfoFactory localClientInfoFactory) {
-        this.mojitoManager = mojitoManager;
+        this.manager = manager;
         this.localClientInfoFactory = localClientInfoFactory;
         
         idealSize = ConsoleSettings.CONSOLE_IDEAL_SIZE.getValue();
@@ -377,7 +377,7 @@ public class Console extends JPanel {
                         public void run() {
                             try {
                                 // Invoke method to pass command to DHT.
-                                Console.this.mojitoManager.handle(command, out);
+                                Console.this.manager.handle(command, out);
                                 
                             } catch (SecurityException e) {
                                 e.printStackTrace(out);
