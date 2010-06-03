@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.Closeable;
-import java.io.PrintWriter;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
@@ -251,10 +250,4 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
      * Equivalent to {@link #getController()#getMojitoDHT()}
      */
     public MojitoDHT getMojitoDHT();
-    
-    /**
-     * Invokes the specified command on the Mojito DHT, and forwards output
-     * to the specified PrintWriter. 
-     */
-    public boolean handle(String command, PrintWriter out);
 }

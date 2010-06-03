@@ -24,6 +24,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,6 +62,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.components.NonNullJComboBox;
 import org.limewire.ui.swing.components.NumericTextField;
@@ -372,13 +375,12 @@ public class Console extends JPanel {
             });
             
             addConsoleListener(new ConsoleListener() {
-                public boolean handleCommand(final String command, final PrintWriter out) throws IOException {
+                public boolean handleCommand(final String command, 
+                        final PrintWriter out) throws IOException {
                     Runnable task = new Runnable() {
                         public void run() {
                             try {
-                                // Invoke method to pass command to DHT.
-                                Console.this.manager.handle(command, out);
-                                
+                                Console.this.handleCommand(command, out);
                             } catch (SecurityException e) {
                                 e.printStackTrace(out);
                             } catch (IllegalArgumentException e) {
@@ -413,6 +415,44 @@ public class Console extends JPanel {
         output.setFont(this.outputFont);
 
         refreshLoggers();
+    }
+    
+    /**
+     * Invokes the specified command on the Mojito DHT, and forwards output
+     * to the specified PrintWriter.
+     * @return true if command was successfully invoked
+     */
+    @SuppressWarnings("unchecked")
+    private boolean handleCommand(String command, PrintWriter out) {
+        try {
+            // Get DHT using manager.
+            MojitoDHT dht = manager.getMojitoDHT();
+            if (dht == null) {
+                out.println("Mojito is not running");
+                return false;
+            }
+
+            // Get command handler method.
+            Class cmdHandler = Class.forName("org.limewire.mojito.CommandHandler");
+            Method handle = cmdHandler.getMethod("handle", 
+                    MojitoDHT.class, String.class, PrintWriter.class);
+
+            // Invoke method to pass command to DHT.
+            return ((Boolean) handle.invoke(null, 
+                        dht, command, out)).booleanValue();
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace(out);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace(out);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace(out);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace(out);
+        }
+        
+        // Return result.
+        return false;
     }
     
     /**
