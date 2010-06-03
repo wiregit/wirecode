@@ -223,14 +223,6 @@ public final class ArrayUtils {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * Returns the index of the given {@code element} in the
-     * {@code elements} array or -1 if it's not in the array.
-     */
-    public static <T> int indexOf(T[] elements, T element) {
-        return Arrays.asList(elements).indexOf(element);
-    }
     
     /**
      * Returns {@code true} if the {@code elements} array contains
@@ -238,37 +230,5 @@ public final class ArrayUtils {
      */
     public static <T> boolean contains(T[] elements, T element) {
         return Arrays.asList(elements).contains(element);
-    }
-    
-    /**
-     * Swaps two elements in the given array.
-     */
-    public static <T> T[] swap(T[] elements, int i, int j) {
-        T element = elements[i];
-        elements[i] = elements[j];
-        elements[j] = element;
-        return elements;
-    }
-    
-    /**
-     * Shuffles the given array.
-     */
-    public static <T> T[] shuffle(T[] elements) {
-        return shuffle(elements, 0, elements.length);
-    }
-    
-    /**
-     * Shuffles the given array.
-     */
-    public static <T> T[] shuffle(T[] elements, int offset, int length) {
-        if (offset < 0 || length < 0 || elements.length < (offset + length)) {
-            throw new ArrayIndexOutOfBoundsException(
-                    "offset=" + offset + ", length=" + length);
-        }
-        
-        for (int i = 0; i < length; i++) {
-            swap(elements, offset + i, offset + (int)(Math.random() * length));
-        }
-        return elements;
     }
 }

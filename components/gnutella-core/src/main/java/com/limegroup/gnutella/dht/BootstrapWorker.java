@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -16,13 +18,13 @@ import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.listener.EventListener;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 
@@ -118,8 +120,9 @@ class BootstrapWorker implements Closeable {
             return;
         }
         
-        if (DHTSettings.SHUFFLE_BOOTSTRAP_CONTACTS.getValue()) {
-            contacts = ArrayUtils.shuffle(contacts);
+        if (DHTSettings.SORT_BOOTSTRAP_CONTACTS.getValue()) {
+            Contact localhost = dht.getLocalNode();
+            Arrays.sort(contacts, new XorComparator(localhost));
         }
         
         Contact src = dht.getLocalNode();
@@ -451,5 +454,20 @@ class BootstrapWorker implements Closeable {
          * 
          */
         public void handleCollision(CollisionException ex);
+    }
+    
+    private static class XorComparator implements Comparator<Contact> {
+        
+        private final KUID localhost;
+        
+        public XorComparator(Contact localhost) {
+            this.localhost = localhost.getContactId();
+        }
+
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            return o1.getContactId().xor(localhost)
+                    .compareTo(o2.getContactId().xor(localhost));
+        }
     }
 }

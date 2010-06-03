@@ -28,8 +28,6 @@ public class PushProxiesPublisher extends Publisher {
     @InspectablePrimitive(value = "The number of values that have been published")
     private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
     
-    private static final int PROXY_THRESHOLD = 2;
-    
     private final DHTManager manager;
     
     private final NetworkManager networkManager;
@@ -217,7 +215,8 @@ public class PushProxiesPublisher extends Publisher {
         IpPortSet old = new IpPortSet(pendingValue.getPushProxies());
         old.retainAll(value.getPushProxies());
         
-        if (old.size() < PROXY_THRESHOLD) {
+        // Publish if too many proxies have changed.
+        if (old.size() < DHTSettings.PROXY_CHANGE_THRESHOLD.getValue()) {
             return true;
         }
         

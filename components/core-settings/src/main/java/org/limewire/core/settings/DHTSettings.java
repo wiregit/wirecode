@@ -413,6 +413,13 @@ public class DHTSettings extends LimeProps {
                 10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
+     * 
+     */
+    public static final IntSetting PROXY_CHANGE_THRESHOLD
+        = FACTORY.createRemoteIntSetting("PROXY_CHANGE_THRESHOLD", 
+                2, "DHT.ProxyChangeThreshold", 1, 32);
+    
+    /**
      * The frequency at which cached {@link PushEndpoint}s are being purged.
      */
     public static final TimeSetting PUSH_ENDPOINT_PURGE_FREQUENCY
@@ -432,9 +439,9 @@ public class DHTSettings extends LimeProps {
                 10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
-     * Whether or not we should shuffle the Contacts we read from disk.
+     * Whether or not we should sort the Contacts we read from disk.
      */
-    public static final BooleanSetting SHUFFLE_BOOTSTRAP_CONTACTS
-        = FACTORY.createRemoteBooleanSetting("SHUFFLE_BOOTSTRAP_CONTACTS", 
-                false, "DHT.ShuffleBootstrapContacts");
+    public static final BooleanSetting SORT_BOOTSTRAP_CONTACTS
+        = FACTORY.createRemoteBooleanSetting("SORT_BOOTSTRAP_CONTACTS", 
+                false, "DHT.SortBootstrapContacts");
 }
