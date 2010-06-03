@@ -18,6 +18,11 @@ public interface SessionInfo {
      * Returns the current uptime.
      */
     public long getCurrentUptime();
+    
+    /**
+     * @return the clock time when uptime began recording from.
+     */
+    public long getStartTime();
 
     /**
      * Returns the number of active ultrapeer -> leaf connections.

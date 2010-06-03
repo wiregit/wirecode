@@ -189,4 +189,9 @@ public class MockSessionInfo implements SessionInfo {
         return 0;
     }
 
+    @Override
+    public long getStartTime() {
+        return 0;
+    }
+
 }

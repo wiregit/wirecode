@@ -60,7 +60,10 @@ public class ActivityInspections implements Service {
         
         @InspectablePrimitive(value = "current session uptime in milliseconds", category = DataCategory.USAGE)
         private final Inspectable currentSessionUptimeMilliSecs = new GetCurrentUptimeMilliSecsInspectable();
-    
+
+        @InspectablePrimitive(value = "system time the session began ", category = DataCategory.USAGE)
+        private final Inspectable currentSessionStartTime = new GetSessionStartTimeInspectable();
+        
         @InspectablePrimitive(value = "limewire visible", category = DataCategory.USAGE)
         private final Inspectable limewireVisible = new IsLimewireVisibleInspectable();
         
@@ -114,10 +117,17 @@ public class ActivityInspections implements Service {
     public void stop() {
     }
     
-    private class GetCurrentUptimeMilliSecsInspectable extends SwingInspectable {
+    private class GetCurrentUptimeMilliSecsInspectable implements Inspectable {
         @Override
-        public Object inspectOnEDT() {
-           return sessionInfo.getCurrentUptime();
+        public Object inspect() {
+            return sessionInfo.getCurrentUptime();
+        }
+    }
+
+    private class GetSessionStartTimeInspectable implements Inspectable {
+        @Override
+        public Object inspect() {
+            return sessionInfo.getStartTime();
         }
     }
     

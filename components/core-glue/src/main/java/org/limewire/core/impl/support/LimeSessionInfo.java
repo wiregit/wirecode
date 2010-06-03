@@ -121,6 +121,11 @@ class LimeSessionInfo implements SessionInfo {
     public long getCurrentUptime() {
         return statistics.getUptime();
     }
+    
+    @Override
+    public long getStartTime() {
+        return statistics.getStartTime();
+    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SessionInfo#getNumUltrapeerToLeafConnections()
@@ -304,5 +309,4 @@ class LimeSessionInfo implements SessionInfo {
     public int receivedIpPong() {
         return udpService.receivedIpPong();
     }
-    
 }
