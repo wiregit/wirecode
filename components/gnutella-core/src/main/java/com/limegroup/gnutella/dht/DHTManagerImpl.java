@@ -11,9 +11,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.StoreEntity;
@@ -278,6 +278,11 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     }
     
     @Override
+    public synchronized boolean isBooting() {
+        return controller.isBooting();
+    }
+    
+    @Override
     public synchronized boolean isReady() {
         return controller.isReady();
     }
@@ -299,13 +304,25 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
     /**
      * 
      */
-    private synchronized void onReady() {
-        altLocPublisher.start();
-        pushProxiesPublisher.start();
-        
-        fireConnected();
+    private synchronized void onConnecting() {
+        fireConnecting();
     }
     
+    /**
+     * 
+     */
+    private synchronized void onConnected(boolean success) {
+        if (success) {
+            altLocPublisher.start();
+            pushProxiesPublisher.start();
+            
+            fireConnected();
+        }
+    }
+    
+    /**
+     * 
+     */
     private synchronized void onCollision(DHTMode mode) {
         stop();
         start(mode);
@@ -328,13 +345,18 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
             = controller.getBootstrapWorker();
         worker.addBootstrapListener(new BootstrapListener() {
             @Override
-            public void handleReady() {
-                onReady();
-            }
-            
-            @Override
             public void handleCollision(CollisionException ex) {
                 onCollision(DHTMode.ACTIVE);
+            }
+
+            @Override
+            public void handleConnected(boolean success) {
+                onConnected(success);
+            }
+
+            @Override
+            public void handleConnecting() {
+                onConnecting();
             }
         });
         
@@ -357,13 +379,18 @@ public class DHTManagerImpl extends AbstractDHTManager implements Service {
             = controller.getBootstrapWorker();
         worker.addBootstrapListener(new BootstrapListener() {
             @Override
-            public void handleReady() {
-                onReady();
-            }
-            
-            @Override
             public void handleCollision(CollisionException ex) {
                 onCollision(DHTMode.PASSIVE);
+            }
+
+            @Override
+            public void handleConnected(boolean success) {
+                onConnected(success);
+            }
+
+            @Override
+            public void handleConnecting() {
+                onConnecting();
             }
         });
         

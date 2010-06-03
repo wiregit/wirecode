@@ -16,25 +16,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.DHT;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherListener;
-import org.limewire.mojito.message.DefaultNodeRequest;
-import org.limewire.mojito.message.DefaultNodeResponse;
-import org.limewire.mojito.message.DefaultPingRequest;
-import org.limewire.mojito.message.DefaultPingResponse;
-import org.limewire.mojito.message.DefaultStoreRequest;
-import org.limewire.mojito.message.DefaultStoreResponse;
-import org.limewire.mojito.message.DefaultValueRequest;
-import org.limewire.mojito.message.DefaultValueResponse;
 import org.limewire.mojito.message.Message;
 import org.limewire.mojito.routing.Contact;
 
@@ -43,22 +34,56 @@ import org.limewire.mojito.routing.Contact;
  * <code>ArcsVisualizer</code> is a small framework for visually representing 
  * the DHT messages distinguished by color and dash patterns.
  */
-public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
+public class ArcsVisualizer extends JPanel {
 
     private static final int SLEEP = 100;
     
     private static final float FONT_SIZE = 24f;
     
-    private final Context context;
+    private final MessageDispatcherListener listener 
+            = new MessageDispatcherListener() {
+        @Override
+        public void messageSent(KUID contactId, 
+                SocketAddress dst, Message message) {
+            
+            if (contactId != null) {
+                synchronized (lock) {
+                    painter.handle(true, contactId, dst, message);
+                }
+            }
+        }
+        
+        @Override
+        public void messageReceived(Message message) {
+            Contact contact = message.getContact();
+            KUID contactId = contact.getContactId();
+            SocketAddress src = contact.getContactAddress();
+            
+            synchronized (lock) {
+                painter.handle(false, contactId, src, message);
+            }
+        }
+    };
+    
+    private final List<Painter> painters = new ArrayList<Painter>();
+
+    private final Object lock = new Object();
+
+    private final DHT dht;
+    
+    private Painter painter;
+    
+    private int painterIndex = 0;
 
     private Timer timer;
     
-    public static ArcsVisualizer show(final DefaultDHT context) {
-        final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
+    public static ArcsVisualizer show(final DHT dht) {
+        final ArcsVisualizer arcs = new ArcsVisualizer(
+                dht, dht.getLocalNode().getContactId());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                JFrame frame = new JFrame(context.getName());
+                JFrame frame = new JFrame("HELLO" + dht.getName());
                 frame.getContentPane().add(arcs);
                 frame.setBounds(20, 30, 640, 640);
                 frame.addWindowListener(new WindowAdapter() {
@@ -78,29 +103,23 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     public void startArcs() {
         timer.start();
         
-        if (context != null) {
-            context.getMessageDispatcher().addMessageDispatcherListener(this);
+        if (dht != null) {
+            MessageDispatcher messageDispatcher = dht.getMessageDispatcher();
+            messageDispatcher.addMessageDispatcherListener(listener);
         }
     }
     
     public void stopArcs() {
         timer.stop();
         
-        if (context != null) {
-            context.getMessageDispatcher().removeMessageDispatcherListener(this);
+        if (dht != null) {
+            MessageDispatcher messageDispatcher = dht.getMessageDispatcher();
+            messageDispatcher.removeMessageDispatcherListener(listener);
         }
     }
     
-    private final Object lock = new Object();
-    
-    private Painter painter;
-    
-    private int painterIndex = 0;
-    
-    private final List<Painter> painters = new ArrayList<Painter>();
-    
-    public ArcsVisualizer(Context context, KUID nodeId) {
-        this.context = context;
+    public ArcsVisualizer(DHT dht, KUID nodeId) {
+        this.dht = dht;
         addPainter(new SnowMan(nodeId));
         addPainter(new PlasmaLamp(nodeId));
         addPainter(new DartBoard(nodeId));
@@ -209,29 +228,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         }
     }
 
-    @Override
-    public void messageSent(KUID contactId, 
-            SocketAddress dst, Message message) {
-        
-        if (contactId != null) {
-            synchronized (lock) {
-                painter.handle(true, contactId, dst, message);
-            }
-        }
-    }
-    
-    @Override
-    public void messageReceived(Message message) {
-        Contact contact = message.getContact();
-        KUID contactId = contact.getContactId();
-        SocketAddress src = contact.getContactAddress();
-        
-        synchronized (lock) {
-            painter.handle(false, contactId, src, message);
-        }
-    }
-    
-    @SuppressWarnings({"InfiniteLoopStatement"})
+    /*@SuppressWarnings({"InfiniteLoopStatement"})
     public static void main(String[] args) throws Exception {
         ArcsVisualizer arcs = new ArcsVisualizer(null, KUID.createRandomID());
         arcs.startArcs();
@@ -275,5 +272,5 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 //arcs.painter.handle(!outgoing, nodeId, null, message);
             }
         }
-    }
+    }*/
 }

@@ -25,7 +25,8 @@ public class MojitoManagerImpl implements MojitoManager {
     private final DHTManager manager;
     
     /** Property change support object. */
-    private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
+    private final PropertyChangeSupport changeSupport 
+        = new SwingSafePropertyChangeSupport(this);
 
     /**
      * Constructs the live implementation of MojitoManager using the specified
@@ -42,6 +43,21 @@ public class MojitoManagerImpl implements MojitoManager {
         return (dht != null) ? dht.getName() : null;
     }
     
+    @Override
+    public boolean isBooting() {
+        return manager.isBooting();
+    }
+
+    @Override
+    public boolean isReady() {
+        return manager.isReady();
+    }
+    
+    @Override
+    public boolean isRunning() {
+        return manager.isRunning();
+    }
+
     /**
      * Add listener to fire property change on DHT event.
      */
@@ -50,8 +66,8 @@ public class MojitoManagerImpl implements MojitoManager {
         manager.addEventListener(new DHTEventListener() {
             @Override
             public void handleDHTEvent(DHTEvent evt) {
-                changeSupport.firePropertyChange(DHT_STARTED, false, 
-                    (evt.getType() != DHTEvent.Type.STOPPED));
+                String name = evt.getType().name();
+                changeSupport.firePropertyChange(name, false, true);
             }
         });
     }
@@ -73,14 +89,6 @@ public class MojitoManagerImpl implements MojitoManager {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
-    }
-    
-    /**
-     * Returns true if the Mojito DHT is running.
-     */
-    @Override
-    public boolean isRunning() {
-        return manager.isRunning();
     }
     
     /**

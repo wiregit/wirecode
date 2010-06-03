@@ -7,9 +7,7 @@ import java.io.PrintWriter;
  * Defines the manager interface for the Mojito DHT.
  */
 public interface MojitoManager {
-    /** Property name for DHT started value. */
-    public static final String DHT_STARTED = "started";
-
+    
     /**
      * Adds the specified listener to the list that is notified when a 
      * property value changes. 
@@ -37,4 +35,14 @@ public interface MojitoManager {
      * Returns the name of the DHT.
      */
     public String getName();
+    
+    /**
+     * Returns {@code true} if the DHT is ready.
+     */
+    public boolean isReady();
+    
+    /**
+     * Returns {@code true} if the DHT is booting.
+     */
+    public boolean isBooting();
 }

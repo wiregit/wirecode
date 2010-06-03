@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.DHT;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.StoreEntity;
@@ -47,6 +47,11 @@ public interface Controller extends Closeable, ConnectionLifecycleListener {
      * Returns {@code true} if the {@link Controller} is running.
      */
     public boolean isRunning();
+    
+    /**
+     * Returns {@code true} if the {@link Controller} is booting.
+     */
+    public boolean isBooting();
     
     /**
      * Returns {@code true} if the {@link Controller} is ready.

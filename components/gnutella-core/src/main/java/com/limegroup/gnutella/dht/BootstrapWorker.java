@@ -38,7 +38,7 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 /**
  * 
  */
-public class BootstrapWorker implements Closeable {
+class BootstrapWorker implements Closeable {
 
     private static final Log LOG 
         = LogFactory.getLog(BootstrapWorker.class);
@@ -131,6 +131,8 @@ public class BootstrapWorker implements Closeable {
                 onPong(event);
             }
         });
+        
+        fireConnecting();
     }
     
     /**
@@ -236,7 +238,7 @@ public class BootstrapWorker implements Closeable {
      * 
      */
     private void onSuccess() {
-        fireReady();
+        fireConnected(true);
         onComplete();
     }
     
@@ -271,6 +273,7 @@ public class BootstrapWorker implements Closeable {
             return;
         }
         
+        fireConnected(false);
         tryBootstrap();
     }
     
@@ -341,6 +344,8 @@ public class BootstrapWorker implements Closeable {
                 onPong(event);
             }
         });
+        
+        fireConnecting();
     }
     
     private static SocketAddress getSimppHost() {
@@ -385,12 +390,28 @@ public class BootstrapWorker implements Closeable {
     /**
      * 
      */
-    protected void fireReady() {
+    protected void fireConnecting() {
         Runnable event = new Runnable() {
             @Override
             public void run() {
                 for (BootstrapListener l : listeners) {
-                    l.handleReady();
+                    l.handleConnecting();
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
+    /**
+     * 
+     */
+    protected void fireConnected(final boolean success) {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleConnected(success);
                 }
             }
         };
@@ -419,10 +440,12 @@ public class BootstrapWorker implements Closeable {
      */
     public static interface BootstrapListener {
         
+        public void handleConnecting();
+        
         /**
          * 
          */
-        public void handleReady();
+        public void handleConnected(boolean success);
         
         /**
          * 

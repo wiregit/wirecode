@@ -20,9 +20,9 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.DefaultMojitoDHT;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.StoreEntity;
@@ -33,8 +33,8 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTableImpl;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.DatabaseImpl;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.IoUtils;
@@ -116,13 +116,17 @@ public class ActiveController extends SimpleController {
         contactPusher = new ContactPusher(connectionManager);
         bootstrapWorker.addBootstrapListener(new BootstrapListener() {
             @Override
-            public void handleReady() {
-            }
-            
-            @Override
             public void handleCollision(CollisionException ex) {
                 collision.set(true);
                 ACTIVE_FILE.delete();
+            }
+
+            @Override
+            public void handleConnected(boolean success) {
+            }
+
+            @Override
+            public void handleConnecting() {
             }
         });
     }
@@ -175,7 +179,12 @@ public class ActiveController extends SimpleController {
     
     @Override
     public boolean isReady() {
-        return dht.isBound() && dht.isReady();
+        return isRunning() && dht.isReady();
+    }
+    
+    @Override
+    public boolean isBooting() {
+        return isRunning() && dht.isBooting();
     }
 
     @Override

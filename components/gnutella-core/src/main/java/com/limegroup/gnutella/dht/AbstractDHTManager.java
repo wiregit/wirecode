@@ -44,6 +44,13 @@ abstract class AbstractDHTManager implements DHTManager {
     }
     
     /**
+     * Fires a connecting event
+     */
+    protected void fireConnecting() {
+        dispatchEvent(new DHTEvent(Type.CONNECTING, this));
+    }
+    
+    /**
      * Fires a connected event
      */
     protected void fireConnected() {

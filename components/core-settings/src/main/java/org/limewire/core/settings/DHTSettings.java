@@ -42,7 +42,7 @@ public class DHTSettings extends LimeProps {
     // Was DHT.ForceDHTConnect
     public static final BooleanSetting FORCE_DHT_CONNECT 
         = FACTORY.createRemoteBooleanSetting("FORCE_DHT_CONNECT", 
-                false, "DHT.ForceConnect");
+                true, "DHT.ForceConnect");
     
     /**
      * A settable list of bootstrap hosts in the host:port format.

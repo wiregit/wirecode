@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -98,6 +98,11 @@ public class DHTManagerStub implements DHTManager {
     @Override
     public boolean isReady() {
         return isRunning();
+    }
+    
+    @Override
+    public boolean isBooting() {
+        return false;
     }
 
     @Override

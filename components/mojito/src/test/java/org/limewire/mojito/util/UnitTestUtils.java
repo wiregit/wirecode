@@ -10,14 +10,14 @@ public class UnitTestUtils {
     }
     
     public static void setBooting(MojitoDHT dht, boolean booting) {
-        setState(dht, booting ? State.BOOTING : State.INIT);
+        setState(dht, booting ? State.BOOTING : State.UNDEFINED);
     }
     
     public static void setReady(MojitoDHT dht, boolean ready) {
-        setState(dht, ready ? State.READY : State.INIT);
+        setState(dht, ready ? State.READY : State.UNDEFINED);
     }
     
     public static void setState(MojitoDHT dht, State state) {
-        ((DefaultDHT)dht).getBootstrapManager().setState(state);
+        ((DefaultDHT)dht).getBootstrapManager().setCustomState(state);
     }
 }

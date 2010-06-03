@@ -27,6 +27,16 @@ public class MockMojitoManager implements MojitoManager {
     public boolean isRunning() {
         return false;
     }
+    
+    @Override
+    public boolean isBooting() {
+        return false;
+    }
+
+    @Override
+    public boolean isReady() {
+        return false;
+    }
 
     /**
      * Invokes the specified command on the Mojito DHT, and forwards output

@@ -4,9 +4,9 @@ import java.io.Closeable;
 import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -37,22 +37,22 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
     public static enum DHTMode {
         
         /**
-         * A DHT Node is in INACTIVE mode if it supports the DHT
+         * A DHT Node is in #INACTIVE mode if it supports the DHT
          * but is currently not capable of joining it.
          * 
-         * @see NodeAssigner.java
+         * @see NodeAssigner
          */
         INACTIVE(0x00, new byte[]{ 'I', 'D', 'H', 'T' }),
         
         /**
-         * A DHT Node is ACTIVE mode if it's a full participant
+         * A DHT Node is #ACTIVE mode if it's a full participant
          * of the DHT, e.g. a non-firewalled Gnutella leave node
          * with a sufficiently stable connection.
          */
         ACTIVE(0x01, new byte[]{ 'A', 'D', 'H', 'T' }),
         
         /**
-         * A DHT Node is in PASSIVE mode if it's connected to
+         * A DHT Node is in #PASSIVE mode if it's connected to
          * the DHT but is not part of the global DHT routing table. 
          * Thus, a passive node never receives requests from the DHT 
          * and does necessarily have an accurate knowledge of the DHT
@@ -61,7 +61,7 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
         PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' }),
         
         /**
-         * The PASSIVE_LEAF mode is very similar to PASSIVE mode with
+         * The #PASSIVE_LEAF mode is very similar to #PASSIVE mode with
          * two major differences:
          * <pre>
          * 1) A passive leaf has a fixed size LRU Map as its RouteTable.
@@ -181,6 +181,11 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
      */
     public void addressChanged();
 
+    /**
+     * 
+     */
+    public boolean isBooting();
+    
     /**
      * 
      */

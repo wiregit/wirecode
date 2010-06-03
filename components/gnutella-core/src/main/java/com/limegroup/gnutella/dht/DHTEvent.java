@@ -15,6 +15,7 @@ public class DHTEvent extends EventObject {
      */
     public static enum Type {
         STARTING,
+        CONNECTING,
         CONNECTED,
         STOPPED;
     }

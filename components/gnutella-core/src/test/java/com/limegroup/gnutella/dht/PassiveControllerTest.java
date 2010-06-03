@@ -163,10 +163,16 @@ public class PassiveControllerTest extends DHTTestCase {
                 final CountDownLatch latch = new CountDownLatch(1);
                 worker.addBootstrapListener(new BootstrapListener() {
                     @Override
-                    public void handleReady() {
-                        latch.countDown();
+                    public void handleConnected(boolean success) {
+                        if (success) {
+                            latch.countDown();
+                        }
                     }
                     
+                    @Override
+                    public void handleConnecting() {
+                    }
+
                     @Override
                     public void handleCollision(CollisionException ex) {
                         fail("Collision!");

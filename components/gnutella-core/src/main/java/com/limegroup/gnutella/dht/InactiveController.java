@@ -79,6 +79,11 @@ public class InactiveController implements Controller {
     public boolean isReady() {
         return false;
     }
+    
+    @Override
+    public boolean isBooting() {
+        return false;
+    }
 
     @Override
     public void start() {

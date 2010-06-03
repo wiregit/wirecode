@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -33,6 +33,18 @@ public abstract class AbstractDHT implements DHT {
      */
     private final BootstrapManager bootstrapManager 
         = new BootstrapManager(this);
+    
+    public AbstractDHT() {
+        bootstrapManager.addFutureListener(
+                new EventListener<FutureEvent<BootstrapEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<BootstrapEntity> event) {
+                if (event.getType() == Type.SUCCESS) {
+                    bootstrapped(event.getResult());
+                }
+            }
+        });
+    }
     
     @Override
     public void close() {
@@ -76,20 +88,7 @@ public abstract class AbstractDHT implements DHT {
      */
     protected DHTFuture<BootstrapEntity> bootstrap(
             BootstrapConfig config, long timeout, TimeUnit unit) {
-        DHTFuture<BootstrapEntity> future 
-            = bootstrapManager.bootstrap(config, timeout, unit);
-        
-        future.addFutureListener(
-                new EventListener<FutureEvent<BootstrapEntity>>() {
-            @Override
-            public void handleEvent(FutureEvent<BootstrapEntity> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    bootstrapped(event.getResult());
-                }
-            }
-        });
-        
-        return future;
+        return bootstrapManager.bootstrap(config, timeout, unit);
     }
     
     /**

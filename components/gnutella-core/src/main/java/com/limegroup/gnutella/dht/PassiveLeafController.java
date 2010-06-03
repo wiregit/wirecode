@@ -6,9 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.DefaultMojitoDHT;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.BootstrapManager.State;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
@@ -21,9 +21,9 @@ import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.IoUtils;
 
@@ -95,6 +95,11 @@ public class PassiveLeafController extends AbstractController {
     }
     
     @Override
+    public boolean isBooting() {
+        return isRunning() && dht.isBooting();
+    }
+
+    @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
     }
     
@@ -132,7 +137,7 @@ public class PassiveLeafController extends AbstractController {
             super(name, messageFactory, routeTable, database);
             
             // Passive-Leafs are out of the box ready!
-            getBootstrapManager().setState(State.READY);
+            getBootstrapManager().setCustomState(State.READY);
         }
         
         @Override

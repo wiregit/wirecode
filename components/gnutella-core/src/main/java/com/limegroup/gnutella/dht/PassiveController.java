@@ -162,7 +162,12 @@ public class PassiveController extends SimpleController {
     
     @Override
     public boolean isReady() {
-        return dht.isBound() && dht.isReady();
+        return isRunning() && dht.isReady();
+    }
+    
+    @Override
+    public boolean isBooting() {
+        return isRunning() && dht.isBooting();
     }
     
     @Override

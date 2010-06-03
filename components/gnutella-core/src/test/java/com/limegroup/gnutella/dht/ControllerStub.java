@@ -82,6 +82,11 @@ public class ControllerStub implements Controller {
     public boolean isReady() {
         return dht.isReady();
     }
+    
+    @Override
+    public boolean isBooting() {
+        return dht.isBooting();
+    }
 
     @Override
     public boolean isRunning() {

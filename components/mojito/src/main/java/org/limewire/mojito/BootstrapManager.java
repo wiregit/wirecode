@@ -1,10 +1,14 @@
 package org.limewire.mojito;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.concurrent.DHTFutureProcess;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.io.BootstrapConfig;
 import org.limewire.mojito.io.BootstrapProcess;
@@ -20,9 +24,9 @@ public class BootstrapManager implements Closeable {
      */
     public static enum State {
         /**
-         * The initial state (i.e. not ready).
+         * The initial state (i.e. not booting nor ready).
          */
-        INIT,
+        UNDEFINED,
         
         /**
          * The {@link DHT} is booting
@@ -35,9 +39,12 @@ public class BootstrapManager implements Closeable {
         READY;
     }
     
+    private final List<EventListener<FutureEvent<BootstrapEntity>>> listeners 
+        = new ArrayList<EventListener<FutureEvent<BootstrapEntity>>>();
+    
     private final DHT dht;
     
-    private State state = State.INIT;
+    private State customState = State.UNDEFINED;
     
     private DHTFuture<BootstrapEntity> future = null;
     
@@ -50,8 +57,15 @@ public class BootstrapManager implements Closeable {
     /**
      * Changes the internal {@link State} to the given value.
      */
-    public synchronized void setState(State state) {
-        this.state = Objects.nonNull(state, "state");
+    public synchronized void setCustomState(State customState) {
+        this.customState = Objects.nonNull(customState, "state");
+    }
+    
+    /**
+     * Returns the internal {@link State}.
+     */
+    public synchronized State getCustomState() {
+        return customState;
     }
     
     /**
@@ -62,7 +76,7 @@ public class BootstrapManager implements Closeable {
             return false;
         }
         
-        if (state == State.BOOTING) {
+        if (customState == State.BOOTING) {
             return true;
         }
         
@@ -81,7 +95,7 @@ public class BootstrapManager implements Closeable {
             return false;
         }
         
-        if (state == State.READY) {
+        if (customState == State.READY) {
             return true;
         }
         
@@ -121,6 +135,28 @@ public class BootstrapManager implements Closeable {
             = new BootstrapProcess(dht, config, timeout, unit);
         
         future = dht.submit(process, timeout, unit);
+        
+        for (EventListener<FutureEvent<BootstrapEntity>> l : listeners) {
+            future.addFutureListener(l);
+        }
+        
         return future;
+    }
+    
+    /**
+     * 
+     */
+    public synchronized void addFutureListener(
+            EventListener<FutureEvent<BootstrapEntity>> l) {
+        if (future != null) {
+            future.addFutureListener(l);
+        }
+        
+        listeners.add(l);
+    }
+    
+    public synchronized void removeFutureListener(
+            EventListener<FutureEvent<BootstrapEntity>> l) {
+        listeners.remove(l);
     }
 }

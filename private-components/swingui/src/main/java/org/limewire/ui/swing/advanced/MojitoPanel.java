@@ -16,6 +16,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.dht.DHTEvent;
 
 /**
  * The Mojito tab panel for the Advanced Tools window.  This displays the
@@ -33,7 +34,7 @@ class MojitoPanel extends TabPanel {
     private PropertyChangeListener dhtListener;
     
     /** Indicator that determines if DHT has started. */
-    private boolean dhtStarted;
+    private volatile boolean dhtStarted;
     
     private JLabel dhtLabel = new JLabel();
     private JComponent dhtRenderer;
@@ -90,9 +91,20 @@ class MojitoPanel extends TabPanel {
             renderNotAvailable();
         }
         
-        // Initialize DHT state, and notify listeners if enabled.
-        dhtStarted = mojitoManager.isRunning();
-        dhtLabel.setText(mojitoManager.getName());
+        DHTEvent.Type type = DHTEvent.Type.STOPPED;
+        if (mojitoManager.isRunning()) {
+            type = DHTEvent.Type.STARTING;
+            
+            if (mojitoManager.isBooting()) {
+                type = DHTEvent.Type.CONNECTING;
+            } else if (mojitoManager.isReady()) {
+                type = DHTEvent.Type.CONNECTED;
+            }
+            
+            dhtStarted = true;
+        }
+        
+        dhtLabel.setText(createName(type));
         fireEnabledChanged(isTabEnabled());
         
         // Add property change listener to update DHT state.
@@ -100,19 +112,22 @@ class MojitoPanel extends TabPanel {
             dhtListener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent e) {
-                    if (MojitoManager.DHT_STARTED.equals(e.getPropertyName())) {
-                        boolean wasStarted = dhtStarted;
-                        
-                        // Update DHT state.
-                        dhtStarted = ((Boolean) e.getNewValue()).booleanValue();
-                        dhtLabel.setText(mojitoManager.getName());
-                        
-                        // Render plugin if available and DHT just started. 
-                        if (dhtStarted && !wasStarted && (plugin != null)) {
-                            renderPlugin();
-                        }
-                        
-                        // Notify listeners about enabled state.
+                    
+                    DHTEvent.Type type = DHTEvent.Type.valueOf(
+                            e.getPropertyName());
+                    
+                    boolean wasStarted = dhtStarted;
+                    
+                    dhtStarted = (type != DHTEvent.Type.STOPPED);
+                    dhtLabel.setText(createName(type));
+                    
+                    // Render plugin if available and DHT just started. 
+                    if (dhtStarted && !wasStarted && (plugin != null)) {
+                        renderPlugin();
+                    }
+                    
+                    // Notify listeners about enabled state.
+                    if (wasStarted != dhtStarted) {
                         fireEnabledChanged(isTabEnabled());
                     }
                 }
@@ -164,6 +179,24 @@ class MojitoPanel extends TabPanel {
         if (dhtListener != null) {
             mojitoManager.removePropertyChangeListener(dhtListener);
             dhtListener = null;
+        }
+    }
+    
+    private String createName(DHTEvent.Type type) {
+        String name = mojitoManager.getName();
+        if (name == null) {
+            return "(disabled)";
+        }
+        
+        switch (type) {
+            case STARTING:
+                return name;
+            case CONNECTING:
+                return name + " (booting)";
+            case CONNECTED:
+                return name + " (ready)";
+            default:
+                return name + " (stopped)";
         }
     }
 }
