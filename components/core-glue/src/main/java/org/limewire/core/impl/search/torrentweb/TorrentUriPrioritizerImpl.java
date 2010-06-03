@@ -31,7 +31,7 @@ import com.google.inject.assistedinject.Assisted;
  * <li>Remove uris that are known to not be torrent uris</li>
  * <li>Calculate a likelihood score for a uri being a torrent uri</li>
  * <li>Sort list by this score</li>
- * <li>Cap list to the top 20 elements in it</li>
+ * <li>Cap list to the top n elements in it</li>
  * </ul>
  */
 public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
@@ -39,8 +39,10 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
     private static final Log LOG = LogFactory.getLog(TorrentUriPrioritizerImpl.class);
     
     private final static Pattern numbers = Pattern.compile("[0-9]+");
+    private final static int MAX_URIS = 20;
     
     private final String referrerHost;
+    
     
     /**
      * List of predicates contributing to the likelihood score of a uri
@@ -84,8 +86,8 @@ public class TorrentUriPrioritizerImpl implements TorrentUriPrioritizer {
         List<Tuple<URI, Integer>> scoredUris = transform(candidates, new TorrentUriLikelihoodFunction());
         // sort by how likely a candidate
         Collections.sort(scoredUris, new ScoreComparator());
-        // only look at the top 20 uris
-        scoredUris = scoredUris.subList(0, Math.min(scoredUris.size(), 20));
+        // only look at the top n uris
+        scoredUris = scoredUris.subList(0, Math.min(scoredUris.size(), MAX_URIS));
         // transform back
         return transform(scoredUris, new UriExtractor());
     }
