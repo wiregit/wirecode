@@ -279,7 +279,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Adds an active Node's {@link SocketAddress}.
      */
     public synchronized void addActiveNode(SocketAddress address) {
         if (!open) {
@@ -290,6 +290,9 @@ class BootstrapWorker implements Closeable {
         tryBootstrap();
     }
     
+    /**
+     * Adds a passive Node's {@link SocketAddress.
+     */
     public synchronized void addPassiveNode(SocketAddress address) {
         if (!open) {
             return;
@@ -303,7 +306,8 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Tries to bootstrap the DHT from the next 
+     * {@link SocketAddress} in the queue.
      */
     private synchronized void tryBootstrap() {
         if (!open) {
@@ -382,14 +386,14 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Adds a {@link BootstrapListener}.
      */
     public void addBootstrapListener(BootstrapListener l) {
         listeners.add(l);
     }
     
     /**
-     * 
+     * Fires a connectin event.
      */
     protected void fireConnecting() {
         Runnable event = new Runnable() {
@@ -405,7 +409,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Fires a connected event.
      */
     protected void fireConnected(final boolean success) {
         Runnable event = new Runnable() {
@@ -421,7 +425,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Fires a collision event.
      */
     protected void fireCollision(final CollisionException ex) {
         Runnable event = new Runnable() {
