@@ -123,13 +123,8 @@ abstract class AbstractController implements Controller {
         contact.setVersion(DHTManager.VERSION);
         contact.setContactAddress(getExternalAddress());  
         
-        switch (mode) {
-            case PASSIVE:
-            case PASSIVE_LEAF:
-                contact.setFirewalled(true);
-                break;
-        }
-        
+        // Everything but ACTIVE mode is considered firewalled.
+        contact.setFirewalled(mode != DHTMode.ACTIVE);
         contact.nextInstanceID();
     }
     
