@@ -6,7 +6,6 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureProcess;
@@ -39,9 +38,7 @@ public abstract class AbstractDHT implements DHT {
                 new EventListener<FutureEvent<BootstrapEntity>>() {
             @Override
             public void handleEvent(FutureEvent<BootstrapEntity> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    bootstrapped(event.getResult());
-                }
+                bootstrapped(event);
             }
         });
     }
@@ -84,7 +81,7 @@ public abstract class AbstractDHT implements DHT {
     }
     
     /**
-     * 
+     * Attempts to bootstrap this Node with the given {@link BootstrapConfig}.
      */
     protected DHTFuture<BootstrapEntity> bootstrap(
             BootstrapConfig config, long timeout, TimeUnit unit) {
@@ -92,9 +89,9 @@ public abstract class AbstractDHT implements DHT {
     }
     
     /**
-     * 
+     * A callback method that's called if this Node finished bootstrapping.
      */
-    protected void bootstrapped(BootstrapEntity entity) {
+    protected void bootstrapped(FutureEvent<BootstrapEntity> event) {
     }
     
     @Override

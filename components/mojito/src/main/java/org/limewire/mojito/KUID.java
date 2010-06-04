@@ -39,7 +39,6 @@ import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.SecurityUtils;
 
 
-
 /**
  * KUID stands for Kademlia Unique Identifier and represents 
  * a 160-bit integer.

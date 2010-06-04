@@ -17,8 +17,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.NopProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
@@ -50,7 +50,7 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.util.ExceptionUtils;
 
 /**
- * 
+ * A default implementation of {@link MojitoDHT}.
  */
 public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     

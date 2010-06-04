@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -288,10 +288,12 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    protected void bootstrapped(BootstrapEntity entity) {
-        // We start the BucketRefresher as soon as our
-        // not is done with bootstrapping.
-        bucketRefresher.start();
+    protected void bootstrapped(FutureEvent<BootstrapEntity> event) {
+        if (event.getType() == Type.SUCCESS) {
+            // We start the BucketRefresher as soon as our
+            // not is done with bootstrapping.
+            bucketRefresher.start();
+        }
     }
     
     @Override
@@ -425,7 +427,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
 
     /**
-     * 
+     * A callback method for all PONGs.
      */
     private void update(PingEntity entity) {
         SocketAddress externalAddress 

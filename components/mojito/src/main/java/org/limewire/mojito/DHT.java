@@ -23,7 +23,7 @@ import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
 
 /**
- * 
+ * The DHT interface.
  */
 public interface DHT extends ContactPinger, AddressPinger, Closeable {
     
@@ -103,61 +103,61 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
     public boolean isReady();
     
     /**
-     * 
+     * Tries to bootstrap the {@link DHT} from the given {@link Contact}.
      */
     public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Tries to bootstrap the {@link DHT} from the given {@link SocketAddress}.
      */
     public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Sends a PING to the given {@link Contact}s.
      */
     public DHTFuture<PingEntity> ping(Contact src, 
             Contact[] dst, long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Performs a FIND_NODE lookup for the given {@link KUID}.
      */
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Performs a FIND_NODE lookup for the given {@link KUID}.
      */
     public DHTFuture<NodeEntity> lookup(KUID lookupId, 
             Contact[] dst, long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Retrieves the given {@link KUID} from the {@link DHT}.
      */
     public DHTFuture<ValueEntity> get(KUID lookupId, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Retrieves the given {@link KUID} from the {@link DHT}.
      */
     public DHTFuture<ValueEntity> get(ValueKey key, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Stores the given key-value in the {@link DHT}.
      */
     public DHTFuture<StoreEntity> put(KUID key, Value value, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Stores the given key-value in the {@link DHT}.
      */
     public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
             long timeout, TimeUnit unit);
     
     /**
-     * 
+     * Submits the given {@link DHTFutureProcess} for execution.
      */
     public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, 
             long timeout, TimeUnit unit);
