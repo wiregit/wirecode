@@ -16,6 +16,7 @@ import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -61,6 +62,10 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         DownloadState downloadStatus = event.getType();
         
         if (DownloadState.SCAN_FAILED == downloadStatus) {
+            if (downloader instanceof BTDownloader) {
+                
+            }
+            
             if (!activityCallback.promptAboutTorrentDownloadWithFailedScan()) {
                 // Don't start downloading if the user said not to
                 return;
