@@ -101,7 +101,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * Sets the expiration time.
      */
     public void setExpireTime(long time, TimeUnit unit) {
         if (time >= Integer.MAX_VALUE) {

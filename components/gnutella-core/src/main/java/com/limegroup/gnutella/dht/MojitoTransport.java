@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.io.AbstractTransport;
+import org.limewire.mojito.io.Transport;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,6 +18,10 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 
+/**
+ * An implementation of {@link Transport} that funnels all I/O
+ * through {@link UDPService} and {@link MessageRouter}.
+ */
 class MojitoTransport extends AbstractTransport {
 
     private static final Log LOG 

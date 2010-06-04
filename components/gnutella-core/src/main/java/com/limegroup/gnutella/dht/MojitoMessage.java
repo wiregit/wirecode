@@ -5,6 +5,10 @@ import java.io.OutputStream;
 
 import com.limegroup.gnutella.messages.Message;
 
+/**
+ * An implementation of {@link Message} that is essentially just a 
+ * wrapper for a DHT message.
+ */
 class MojitoMessage implements Message {
 
     private static final int GUILD_LENGTH = 16;
@@ -142,6 +146,9 @@ class MojitoMessage implements Message {
         return getPriority() - o.getPriority();
     }
     
+    /**
+     * Concatenates the two byte arrays into one byte array.
+     */
     private static byte[] concat(byte[] header, byte[] payload) {
         byte[] message = new byte[header.length + payload.length];
         

@@ -166,7 +166,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Callback method for PONG {@link FutureEvent}s.
      */
     private synchronized void onPong(FutureEvent<PingEntity> event) {
         if (!open) {
@@ -182,7 +182,7 @@ class BootstrapWorker implements Closeable {
                     onException(event.getException());
                     break;
                 default:
-                    stop();
+                    onCancellation();
                     break;
             }
         } catch (Throwable t) {
@@ -192,7 +192,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Callback method for successful PONGs.
      */
     private synchronized void onPong(PingEntity entity) {
         // We got a PONG, stop the NodeFetcher!
@@ -213,7 +213,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Callback method for bootstrap {@link FutureEvent}s.
      */
     private synchronized void onBootstrap(FutureEvent<BootstrapEntity> event) {
         if (!open) {
@@ -229,7 +229,7 @@ class BootstrapWorker implements Closeable {
                     onException(event.getException());
                     break;
                 default:
-                    onComplete();
+                    onCancellation();
                     break;
             }
         } catch (Throwable t) {
@@ -238,22 +238,23 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Callback method for successful bootstrapping.
      */
     private void onSuccess() {
         fireConnected(true);
-        onComplete();
-    }
-    
-    /**
-     * 
-     */
-    private void onComplete() {
         stop();
     }
     
     /**
-     * 
+     * Callback method for cancellation.
+     */
+    private void onCancellation() {
+        fireConnected(false);
+        stop();
+    }
+    
+    /**
+     * Callback method for uncaught {@link Exception}s.
      */
     private void uncaughtException(Throwable t) {
         ExceptionUtils.reportIfUnchecked(t);
@@ -261,7 +262,7 @@ class BootstrapWorker implements Closeable {
     }
     
     /**
-     * 
+     * Callback method for {@link Exception}
      */
     private synchronized void onException(Throwable t) {
         if (LOG.isDebugEnabled()) {
@@ -355,6 +356,9 @@ class BootstrapWorker implements Closeable {
         fireConnecting();
     }
     
+    /**
+     * Returns a random {@link SocketAddress} from the SIMPP list.
+     */
     private static SocketAddress getSimppHost() {
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.get();
         List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
