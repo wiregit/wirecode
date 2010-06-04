@@ -54,8 +54,7 @@ public class Wizard extends JPanel {
     
     private int currentPage;
 
-    private final JXButton continueButton;
-    
+    private final JXButton continueButton;    
     private Action continueAction = new AbstractAction(I18n.tr("Continue")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -63,7 +62,7 @@ public class Wizard extends JPanel {
         }
     };
     
-    private JButton backButton;
+    private final JButton backButton;
     private Action backAction = new AbstractAction(I18n.tr("Go back")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -71,7 +70,7 @@ public class Wizard extends JPanel {
         }
     };
     
-    private JXButton finishButton;    
+    private final JXButton finishButton;    
     private Action finishAction = new AbstractAction(I18n.tr("Continue")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -269,4 +268,20 @@ public class Wizard extends JPanel {
             continueButton.requestFocusInWindow();
         }
     }
+    
+    public void resetFinishButtonAction(){
+        WizardPage page = pageList.get(currentPage);
+        if (finishButton.isVisible() && !finishButton.getText().equals(page.getForwardButtonText())){
+            finishButton.setAction(finishAction);
+            finishButton.setText(page.getForwardButtonText());          
+        }
+    }
+    
+    public void modifyFinishButtonAction(String text, Action action){
+        if (finishButton.isVisible() && !finishButton.getText().equals(text)){
+            finishButton.setAction(action);
+            finishButton.setText(text);
+        }
+    }
+
 }

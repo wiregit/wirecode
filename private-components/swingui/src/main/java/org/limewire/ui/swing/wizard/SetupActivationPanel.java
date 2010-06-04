@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,6 +26,7 @@ import org.limewire.activation.api.ActivationState;
 import org.limewire.core.api.Application;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.listener.EventListener;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.activation.ActivationWarningPanel;
 import org.limewire.ui.swing.activation.LabelWithLinkSupport;
 import org.limewire.ui.swing.activation.LicenseKeyTextField;
@@ -54,7 +55,7 @@ public class SetupActivationPanel extends JPanel {
     @Resource
     private Color greenButtonForeground;
     
-    public SetupActivationPanel(WizardPage wizardPage, ActivationManager activationManager, Application application) {
+    public SetupActivationPanel(final Wizard wizard, final WizardPage wizardPage, ActivationManager activationManager, Application application) {
         super(new MigLayout("fillx, insets 75 60 10 60, gap 0, gapy 0", "[][grow][]", "[][][][][][][][][][]"));
         
         GuiUtils.assignResources(this);
@@ -86,24 +87,31 @@ public class SetupActivationPanel extends JPanel {
         add(Box.createHorizontalStrut(3), "cell 1 6, aligny 50%");
 
         add(wizardPage.createAndDecorateHeader(I18n.tr("License Key:")), "aligny 50%");
+        
+        final Action activateKeyAction = new ActivateKeyAction(I18n.tr("Activate"));
         licenseField = wizardPage.createAndDecorateLicenseKeyField();
         if (!ActivationSettings.ACTIVATION_KEY.isDefault()) {
             licenseField.setText(ActivationSettings.ACTIVATION_KEY.getValueAsString());
         }
-        licenseField.addActionListener(new EnterActionListener());
+        licenseField.addActionListener(activateKeyAction);
         add(licenseField, "cell 2 6, aligny 50%");
 
         okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
         okButton.setBackgroundPainter(new GreenButtonBackgroundPainter());
         okButton.setForeground(greenButtonForeground);
-        okButton.addActionListener(new EnterActionListener());
-        okButton.setEnabled(licenseField.getText().length() == 14);
+        okButton.setAction(activateKeyAction);
+        okButton.setEnabled(licenseField.getText().length() == 14);    
         licenseField.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(LicenseKeyTextField.LICENSE_IS_CORRECT_LENGTH)) {
                     Boolean enabled = (Boolean) evt.getNewValue();
                     okButton.setEnabled(enabled.booleanValue());
+                    if(enabled){
+                        wizard.modifyFinishButtonAction(I18n.tr("Activate"), activateKeyAction);
+                    }else{
+                        wizard.resetFinishButtonAction();
+                    }
                 }
             }
         });
@@ -139,7 +147,7 @@ public class SetupActivationPanel extends JPanel {
     public void applySettings() {
         String licenseKey = licenseField.getText();
         if (licenseKey.length() == 14 && (state == null || state != ActivationState.AUTHORIZED)) {
-            new EnterActionListener().actionPerformed(null);
+            new ActivateKeyAction("").actionPerformed(null); // not sure if this is required.
         }
     }
 
@@ -207,11 +215,16 @@ public class SetupActivationPanel extends JPanel {
         }
     }
 
-    class EnterActionListener implements ActionListener {
+    private class ActivateKeyAction extends AbstractAction {
+        
+        ActivateKeyAction(String text){
+            super(text);
+        }
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             final String key = licenseField.getText();
-            if (key != null) {
+            if (key != null && key.length() == 14 ) {
                 BackgroundExecutorService.execute(new Runnable(){
                     public void run() {
                         // we check for empty strings as key entries, and manually set the error for it,
