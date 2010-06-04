@@ -14,13 +14,14 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
- * 
+ * An abstract implementation of {@link Controller} that utilizes 
+ * {@link ConnectionServices}.
  */
-abstract class SimpleController extends AbstractController {
+abstract class AbstractConnectionController extends AbstractController {
 
     protected final ConnectionServices connectionServices;
     
-    public SimpleController(DHTMode mode, 
+    public AbstractConnectionController(DHTMode mode, 
             Transport transport,
             NetworkManager networkManager,
             ConnectionServices connectionServices) {

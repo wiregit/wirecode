@@ -96,22 +96,23 @@ public interface Controller extends Closeable, ConnectionLifecycleListener {
     public Contact[] getActiveContacts(int max);
     
     /**
-     * 
+     * Adds an ACTIVE node's {@link SocketAddress}.
      */
     public void addActiveNode(SocketAddress address);
     
     /**
-     * 
+     * Adds a PASSIVE node's {@link SocketAddress}.
      */
     public void addPassiveNode(SocketAddress address);
     
     /**
-     * 
+     * A callback method that handles collisions.
      */
     public void handleCollision(CollisionException ex);
     
     /**
-     * 
+     * A callback method that handles {@link Contact}s as received 
+     * from the Gnutella Network.
      */
     public void handleContactsMessage(DHTContactsMessage msg);
 }

@@ -10,8 +10,8 @@ public class DHTEvent extends EventObject {
     private static final long serialVersionUID = 912814275883336092L;
 
     /**
-     * Defines the various type of <code>DHTEvent</code>s, either starting, 
-     * connected or stopped.
+     * Defines the various type of {@link DHTEvent}s, either starting, 
+     * connecting, connected or stopped.
      */
     public static enum Type {
         STARTING,
@@ -31,6 +31,9 @@ public class DHTEvent extends EventObject {
         return type;
     }
     
+    /**
+     * Returns the {@link DHTManager}.
+     */
     public DHTManager getManager() {
         return (DHTManager)getSource();
     }

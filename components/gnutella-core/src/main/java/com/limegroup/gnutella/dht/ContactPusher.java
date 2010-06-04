@@ -3,15 +3,13 @@ package com.limegroup.gnutella.dht;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.Buffer;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.SchedulingUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;
@@ -20,10 +18,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 class ContactPusher implements Closeable {
-    
-    private static final ScheduledExecutorService EXECUTOR 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("ContactPusherThread"));
     
     /**
      * Contacts to forward to passive leafs.
@@ -77,7 +71,7 @@ class ContactPusher implements Closeable {
                 }
             };
             
-            future = EXECUTOR.scheduleWithFixedDelay(
+            future = SchedulingUtils.scheduleWithFixedDelay(
                     task, frequency, frequency, unit);
         }
     }

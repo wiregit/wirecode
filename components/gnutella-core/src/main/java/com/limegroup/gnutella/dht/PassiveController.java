@@ -55,7 +55,7 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
-public class PassiveController extends SimpleController {
+public class PassiveController extends AbstractConnectionController {
 
     private static final Log LOG 
         = LogFactory.getLog(PassiveController.class);

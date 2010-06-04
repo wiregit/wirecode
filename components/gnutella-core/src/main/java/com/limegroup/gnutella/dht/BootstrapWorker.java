@@ -37,7 +37,9 @@ import com.limegroup.gnutella.dht.NodeFetcher.NodeFetcherListener;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
- * 
+ * A helper class that tries to bootstrap the DHT. It utilizes
+ * {@link Contact}s from previous sessions and fetches addresses
+ * from the Gnutella Network.
  */
 class BootstrapWorker implements Closeable {
 

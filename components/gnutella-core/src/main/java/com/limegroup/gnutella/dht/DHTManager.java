@@ -17,12 +17,14 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.RouteTable;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * 
+ * The {@link DHTManager} is managing the various types of modes
+ * in which nodes may connect to the DHT.
  */
 public interface DHTManager extends Closeable, ConnectionLifecycleListener, 
         EventDispatcher<DHTEvent, DHTEventListener> {
@@ -127,122 +129,125 @@ public interface DHTManager extends Closeable, ConnectionLifecycleListener,
     }
     
     /**
-     * 
+     * Returns the {@link Vendor}.
      */
     public Vendor getVendor();
     
     /**
-     * 
+     * Returns the {@link Version}.
      */
     public Version getVersion();
     
     /**
-     * 
+     * Starts the DHT in the given {@link DHTMode}.
      */
     public boolean start(DHTMode mode);
 
     /**
-     * 
+     * Stops the DHT.
      */
     public void stop();
 
     /**
-     * 
+     * Returns the {@link Controller}.
      */
     public Controller getController();
 
     /**
-     * 
+     * Returns {@code true} if the DHT is running.
      */
     public boolean isRunning();
 
     /**
-     * 
+     * Sets whether or not the DHT is enabled.
      */
     public void setEnabled(boolean enabled);
 
     /**
-     * 
+     * Returns {@code true} if the DHT is enabled.
      */
     public boolean isEnabled();
 
     /**
-     * 
+     * Returns the current {@link DHTMode}.
      */
     public DHTMode getMode();
 
     /**
-     * 
+     * Returns true if the DHT is running in the given {@link DHTMode}.
      */
     public boolean isMode(DHTMode mode);
 
     /**
-     * 
+     * A callback method that's being called by Gnutella to indicate
+     * that the host's address has changed.
      */
     public void addressChanged();
 
     /**
-     * 
+     * Returns {@code true} if the DHT is currently booting.
      */
     public boolean isBooting();
     
     /**
-     * 
+     * Returns {@code true} if the DHT is ready.
      */
     public boolean isReady();
 
     /**
-     * 
+     * Returns up to the given number of {@link Contact}s 
+     * from the {@link RouteTable}.
      */
     public Contact[] getActiveContacts(int max);
 
     /**
-     * 
+     * Returns up to the given number of {@link IpPort}s 
+     * from the {@link RouteTable}.
      */
     public IpPort[] getActiveIpPort(int max);
 
     /**
-     * 
+     * A callback method for Gnutella.
      */
     public void handleContactsMessage(DHTContactsMessage msg);
 
     /**
-     * 
+     * Stores the given key-value pair in the DHT
      */
     public DHTFuture<StoreEntity> put(KUID key, Value value);
 
     /**
-     * 
+     * Stores the given key-value pair in the DHT
      */
     public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
     
     /**
-     * 
+     * Retrieves a value from the DHT.
      */
     public DHTFuture<ValueEntity> get(ValueKey key);
 
     /**
-     * 
+     * Retrieves a value from the DHT.
      */
     public DHTFuture<ValueEntity[]> getAll(ValueKey key);
     
     /**
-     * 
+     * Adds an ACTIVE node's {@link SocketAddress}.
      */
     public void addActiveNode(SocketAddress address);
 
     /**
-     * 
+     * Adds a PASSIVE node's {@link SocketAddress}.
      */
     public void addPassiveNode(SocketAddress address);
 
     /**
-     * 
+     * Adds an {@link DHTEventListener}.
      */
     public void addEventListener(DHTEventListener listener);
 
     /**
-     * 
+     * Removes a {@link DHTEventListener}.
      */
     public void removeEventListener(DHTEventListener listener);
     
