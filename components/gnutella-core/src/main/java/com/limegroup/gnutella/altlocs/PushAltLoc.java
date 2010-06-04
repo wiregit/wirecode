@@ -6,11 +6,11 @@ import java.util.Set;
 
 import org.limewire.io.GUID;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPConstants;
 

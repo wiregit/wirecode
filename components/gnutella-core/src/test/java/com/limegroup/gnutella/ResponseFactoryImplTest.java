@@ -12,6 +12,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 

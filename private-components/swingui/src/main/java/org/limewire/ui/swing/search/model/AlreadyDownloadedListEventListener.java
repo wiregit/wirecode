@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryFileList;

@@ -14,7 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Application;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;

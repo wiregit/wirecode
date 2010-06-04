@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.bittorrent.Torrent;
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.search.SearchResult;

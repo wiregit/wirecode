@@ -12,6 +12,7 @@ import org.limewire.io.URN;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileView;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvider;
@@ -49,7 +50,7 @@ class FileRequestParser {
         
         String uriRes = uri.substring(index);
         
-        URN urn = URN.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
+        URN urn = URNFactory.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy. URI scheme names are not case-sensitive.

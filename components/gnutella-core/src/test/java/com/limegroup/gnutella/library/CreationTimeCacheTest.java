@@ -18,11 +18,11 @@ import junit.framework.Test;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.MediaTypeAggregatorStub;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.helpers.UrnHelper;
 
 public class CreationTimeCacheTest extends LimeTestCase {

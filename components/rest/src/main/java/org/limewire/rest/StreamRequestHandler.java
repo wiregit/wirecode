@@ -11,7 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.NFileEntity;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;

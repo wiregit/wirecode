@@ -3,7 +3,7 @@ package org.limewire.core.api.search;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.friend.api.Friend;
 

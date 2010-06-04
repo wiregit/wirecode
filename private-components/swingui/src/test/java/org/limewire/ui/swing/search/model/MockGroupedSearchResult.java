@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchResult;

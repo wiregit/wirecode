@@ -19,6 +19,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.UrnSet;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.TestUtils;

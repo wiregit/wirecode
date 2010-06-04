@@ -2,8 +2,8 @@ package com.limegroup.gnutella.library;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.common.HTTPHeaderValue;
 
-import com.limegroup.gnutella.http.HTTPHeaderValue;
 
 public interface IncompleteFileDesc extends FileDesc, HTTPHeaderValue {
 

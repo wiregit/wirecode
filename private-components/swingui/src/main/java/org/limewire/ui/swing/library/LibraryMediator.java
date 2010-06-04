@@ -7,8 +7,8 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.library.LibraryManager;

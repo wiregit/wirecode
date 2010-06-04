@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.limewire.io.URN;
 
 /**
  * A Set specifically for URNs.

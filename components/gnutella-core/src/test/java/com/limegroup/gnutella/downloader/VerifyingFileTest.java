@@ -19,6 +19,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.VerifyingFile.WriteCallback;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeFactory;
 import com.limegroup.gnutella.tigertree.HashTreeFactoryImpl;
@@ -542,7 +543,7 @@ public class VerifyingFileTest extends LimeTestCase {
         HashTree exactTree;
         try {
             exactTree = tigerTreeFactory.createHashTree(exact.length(), in,
-                    URN.createSHA1Urn(exact));
+                    URNFactory.createSHA1Urn(exact));
         } finally {
             in.close();
         }

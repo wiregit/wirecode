@@ -1,7 +1,7 @@
 package org.limewire.core.impl;
 
 
-public final class InvalidURN implements org.limewire.core.api.URN {
+public final class InvalidURN implements org.limewire.common.URN {
     
     public static InvalidURN instance = new InvalidURN();
     
@@ -10,7 +10,7 @@ public final class InvalidURN implements org.limewire.core.api.URN {
     }
     
     @Override
-    public int compareTo(org.limewire.core.api.URN o) {
+    public int compareTo(org.limewire.common.URN o) {
         return toString().compareTo(o.toString());
     }
     

@@ -8,6 +8,8 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.io.URNFactory;
+
 
 /**
  * Utility methods for locating the start/end of the audio portion of
@@ -32,7 +34,7 @@ public class AudioHashingUtils {
 
             length = length - startPosition;
 
-            return URN.generateNMS1FromFile(file, startPosition, length);            
+            return URNFactory.generateNMS1FromFile(file, startPosition, length);            
         } catch (IOException e) {
             LOG.error("IOException reading file: " + file.getName(), e);
         } catch (NumberFormatException e) {

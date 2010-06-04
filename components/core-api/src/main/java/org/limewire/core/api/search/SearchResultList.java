@@ -2,7 +2,7 @@ package org.limewire.core.api.search;
 
 import java.util.Collection;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.io.GUID;
 import org.limewire.listener.ListenerSupport;
 

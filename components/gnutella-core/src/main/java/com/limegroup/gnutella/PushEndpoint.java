@@ -2,11 +2,11 @@ package com.limegroup.gnutella;
 
 import java.util.Set;
 
+import org.limewire.common.HTTPHeaderValue;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.http.HTTPHeaderValue;
 
 /**
  * a class that represents an endpoint behind one or more PushProxies.

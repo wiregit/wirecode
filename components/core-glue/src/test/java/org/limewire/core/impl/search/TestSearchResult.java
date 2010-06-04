@@ -4,9 +4,9 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;

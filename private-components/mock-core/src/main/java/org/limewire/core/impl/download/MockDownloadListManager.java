@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;

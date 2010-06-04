@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.http.HttpStatus;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;

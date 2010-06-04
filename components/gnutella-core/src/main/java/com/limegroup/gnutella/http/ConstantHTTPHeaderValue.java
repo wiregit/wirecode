@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.http;
 
+import org.limewire.common.HTTPHeaderValue;
+
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

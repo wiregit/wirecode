@@ -3,7 +3,7 @@ package org.limewire.ui.swing.action;
 import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;

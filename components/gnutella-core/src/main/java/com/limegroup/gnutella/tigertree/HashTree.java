@@ -4,9 +4,9 @@ import java.io.RandomAccessFile;
 import java.util.List;
 
 import org.limewire.collection.Range;
+import org.limewire.common.HTTPHeaderValue;
 import org.limewire.io.URN;
 
-import com.limegroup.gnutella.http.HTTPHeaderValue;
 
 /**
  * A Merkle Tree using the Tiger hash algorithm.
@@ -35,7 +35,7 @@ public interface HashTree extends HTTPHeaderValue {
 
     /**
      * @return Thex URI for this HashTree
-     * @see com.limegroup.gnutella.http.HTTPHeaderValue#httpStringValue()
+     * @see org.limewire.common.HTTPHeaderValue#httpStringValue()
      */
     public String httpStringValue();
 

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.http;
+package org.limewire.common;
 
 /**
  * This interface for classes that contain values that can be accessed

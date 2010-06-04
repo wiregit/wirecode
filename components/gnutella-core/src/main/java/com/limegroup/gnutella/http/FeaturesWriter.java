@@ -3,6 +3,8 @@ package com.limegroup.gnutella.http;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.common.HTTPHeaderValue;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;

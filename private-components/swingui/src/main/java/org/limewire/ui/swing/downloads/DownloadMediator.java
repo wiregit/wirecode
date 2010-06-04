@@ -17,7 +17,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;

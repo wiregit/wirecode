@@ -28,6 +28,7 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Inject;
@@ -35,7 +36,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.library.FileCollectionManager;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManagerTestUtils;

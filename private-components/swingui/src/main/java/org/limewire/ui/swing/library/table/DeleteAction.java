@@ -9,7 +9,7 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;

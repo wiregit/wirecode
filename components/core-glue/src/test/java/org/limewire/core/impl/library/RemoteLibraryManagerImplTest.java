@@ -7,7 +7,7 @@ import java.util.List;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.CollectionUtils;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteLibrary;

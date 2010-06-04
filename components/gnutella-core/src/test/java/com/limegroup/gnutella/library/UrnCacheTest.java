@@ -18,12 +18,12 @@ import org.jmock.Mockery;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.AssignParameterAction;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.helpers.UrnHelper;
 
 

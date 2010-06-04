@@ -22,6 +22,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescFactory;
 import com.limegroup.gnutella.library.UrnCache;
@@ -465,7 +466,7 @@ public class CollectionTest extends LimeTestCase {
     
     private static URN getHash(File f) {
         try {
-            return URN.createSHA1Urn(f);
+            return URNFactory.createSHA1Urn(f);
         } catch(IOException ioe) {
             return null;
         } catch(InterruptedException ie) {

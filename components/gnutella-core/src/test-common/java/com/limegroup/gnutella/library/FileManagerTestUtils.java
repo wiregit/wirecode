@@ -25,6 +25,7 @@ import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.library.FileViewChangeFailedException.Reason;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -40,7 +41,7 @@ public class FileManagerTestUtils {
     }
 
     public static URN getUrn(File f) throws Exception {
-        return URN.createSHA1Urn(f);
+        return URNFactory.createSHA1Urn(f);
     }
 
     public static void assertAddFails(Reason reason, FileCollection fileList, File... files) throws Exception {

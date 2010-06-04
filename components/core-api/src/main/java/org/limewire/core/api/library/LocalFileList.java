@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.List;
 
+import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.URN;
 
 import com.google.common.base.Predicate;
 

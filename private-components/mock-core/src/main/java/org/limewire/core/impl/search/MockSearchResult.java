@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.MockSearch.MockRemoteHost;

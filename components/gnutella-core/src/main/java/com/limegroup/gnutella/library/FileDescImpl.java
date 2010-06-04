@@ -10,12 +10,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseType;

@@ -2,9 +2,9 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.friend.api.FileMetaData;
 

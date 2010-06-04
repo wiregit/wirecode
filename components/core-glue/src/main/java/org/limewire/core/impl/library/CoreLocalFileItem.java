@@ -187,7 +187,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     }
     
     @Override
-    public org.limewire.core.api.URN getUrn() {
+    public org.limewire.common.URN getUrn() {
         URN urn = fileDesc.getSHA1Urn();
         if(urn != null) {
             return urn;

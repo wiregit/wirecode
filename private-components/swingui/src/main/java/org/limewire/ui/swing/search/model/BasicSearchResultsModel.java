@@ -15,7 +15,7 @@ import java.util.Random;
 import javax.swing.SwingUtilities;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;

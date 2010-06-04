@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.http;
 
+import org.limewire.common.HTTPHeaderValue;
+
 public class SimpleHTTPHeaderValue implements HTTPHeaderValue {
     
     private final String value;

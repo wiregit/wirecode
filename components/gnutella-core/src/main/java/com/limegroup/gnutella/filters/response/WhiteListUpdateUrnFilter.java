@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.filters.response;
 
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.version.UpdateCollection;
 import com.limegroup.gnutella.version.UpdateData;

@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;

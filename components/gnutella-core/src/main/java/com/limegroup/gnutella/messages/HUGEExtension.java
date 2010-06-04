@@ -11,8 +11,8 @@ import java.util.Set;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 
-import com.limegroup.gnutella.UrnSet;
 
 /** 
  * Encapsulation of a HUGE block.  Offers various get methods to retrieve its

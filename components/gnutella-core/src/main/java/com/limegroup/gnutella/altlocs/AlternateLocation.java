@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.altlocs;
 
+import org.limewire.common.HTTPHeaderValue;
 import org.limewire.io.URN;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.http.HTTPHeaderValue;
 
 /**
  * This interface defines classes that encapsulate the data for an alternate resource location, as 

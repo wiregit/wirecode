@@ -27,6 +27,7 @@ import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.util.CommonUtils;
@@ -36,8 +37,8 @@ import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.hashing.AudioHashingUtils;
+import com.limegroup.gnutella.io.URNFactory;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -230,6 +231,7 @@ public final class UrnCache {
             ois = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
             // Allow for refactoring from gnutella -> gnutella.library
             ois.addLookup("com.limegroup.gnutella.UrnCache$UrnSetKey", UrnSetKey.class.getName());
+            ois.addLookup("com.limegroup.gnutella.URN", URN.class.getName());
             return (Map) ois.readObject();
         } catch (Throwable t) {
             LOG.error("Unable to read UrnCache", t);
@@ -343,7 +345,7 @@ public final class UrnCache {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Hashing sha1 file: " + file);
                 try {
-                    UrnSet calculatedUrns = URN.generateUrnsFromFile(file);
+                    UrnSet calculatedUrns = URNFactory.generateUrnsFromFile(file);
                     UrnSet set = new UrnSet();
                     synchronized (UrnCache.this) {
                         set.addAll(getUrns(file));

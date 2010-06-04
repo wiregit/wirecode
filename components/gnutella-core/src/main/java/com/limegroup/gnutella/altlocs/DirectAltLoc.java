@@ -10,10 +10,10 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;

@@ -6,10 +6,10 @@ import java.io.FileFilter;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.core.api.library.LibraryFileList;

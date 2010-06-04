@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.limewire.common.URN;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadPiecesInfo;

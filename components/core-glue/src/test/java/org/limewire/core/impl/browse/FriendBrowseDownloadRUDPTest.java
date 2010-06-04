@@ -16,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.Icon;
 
+import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;

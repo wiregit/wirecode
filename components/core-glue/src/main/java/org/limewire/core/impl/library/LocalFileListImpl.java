@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.listener.EventListener;

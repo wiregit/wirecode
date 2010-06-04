@@ -2,6 +2,8 @@ package com.limegroup.gnutella.http;
 
 import java.util.Collection;
 
+import org.limewire.common.HTTPHeaderValue;
+
 public class HTTPHeaderValueCollection implements HTTPHeaderValue {
     
     private final Collection<? extends HTTPHeaderValue> _delegate;

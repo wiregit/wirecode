@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.limewire.io.URN;
 
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeFactoryImpl;
 import com.limegroup.gnutella.tigertree.SimpleHashTreeNodeManager;
@@ -40,7 +41,7 @@ public class TestFile {
         try {
             File tmpFile = File.createTempFile("testPart", "tmp");
             writeFile(tmpFile, length);
-            return URN.createSHA1Urn(tmpFile);
+            return URNFactory.createSHA1Urn(tmpFile);
         } catch(Throwable t) {
             throw new RuntimeException(t);
         }
@@ -51,7 +52,7 @@ public class TestFile {
             try {
                 File tmpFile = File.createTempFile("tst", "tmp");
                 writeFile(tmpFile, length());
-                myHash = URN.createSHA1Urn(tmpFile);
+                myHash = URNFactory.createSHA1Urn(tmpFile);
             } catch(Throwable e ) {
                 throw new RuntimeException(e);
             }

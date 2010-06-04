@@ -1,6 +1,6 @@
 package org.limewire.core.impl.integration;
 
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 
 /**
  * Test implementation of URN.

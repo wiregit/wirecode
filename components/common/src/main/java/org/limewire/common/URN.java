@@ -1,4 +1,4 @@
-package org.limewire.core.api;
+package org.limewire.common;
 
 /**
  * Exposes the Underlying URN for testing equality of files only.

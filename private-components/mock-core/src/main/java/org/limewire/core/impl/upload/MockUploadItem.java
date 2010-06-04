@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.api.upload.UploadItem;

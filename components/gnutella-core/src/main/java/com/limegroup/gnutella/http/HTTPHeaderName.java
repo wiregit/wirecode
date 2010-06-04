@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.limewire.common.HTTPHeaderValue;
 
 /** All HTTPHeaderNames. */
 public enum HTTPHeaderName {

@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.xml.SerialXml;
 
 class SerialRemoteFileDesc4x14 implements Serializable, SerialRemoteFileDesc {

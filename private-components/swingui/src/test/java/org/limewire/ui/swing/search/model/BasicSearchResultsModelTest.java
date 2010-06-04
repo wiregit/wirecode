@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;

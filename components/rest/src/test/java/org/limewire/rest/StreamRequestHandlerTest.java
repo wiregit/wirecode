@@ -16,7 +16,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.api.URN;
+import org.limewire.common.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;

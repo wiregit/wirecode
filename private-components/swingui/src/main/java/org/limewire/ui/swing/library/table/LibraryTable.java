@@ -16,8 +16,8 @@ import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.common.URN;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;

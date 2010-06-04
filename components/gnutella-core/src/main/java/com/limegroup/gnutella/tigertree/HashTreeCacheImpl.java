@@ -29,6 +29,7 @@ import org.limewire.util.GenericsUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.Library;
@@ -461,7 +462,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
                 throw new IOException("no FDs with SHA1 anymore.");
             }
             
-            URN ttRoot = URN.createTTRootFile(FD.getFile()); // BLOCKING
+            URN ttRoot = URNFactory.createTTRootFile(FD.getFile()); // BLOCKING
             List<FileDesc> fds = managedFileList.getFileDescsMatching(FD.getSHA1Urn());
             for(FileDesc fd : fds) {
                 fd.addUrn(ttRoot);

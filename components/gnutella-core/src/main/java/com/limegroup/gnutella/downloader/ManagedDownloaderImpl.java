@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -45,6 +47,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
 import org.limewire.io.URN;
+import org.limewire.io.UrnSet;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -58,14 +61,12 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -84,6 +85,7 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.GnutellaFiles;
@@ -2140,7 +2142,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         try {
             // let the user know we're hashing the file
             setState(DownloadState.HASHING);
-            fileHash = URN.createSHA1Urn(incompleteFile);
+            fileHash = URNFactory.createSHA1Urn(incompleteFile);
         }
         catch (IOException ignored) {
         }

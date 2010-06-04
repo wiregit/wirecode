@@ -26,6 +26,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
+import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.util.UUID;
 
 /**
@@ -74,7 +75,7 @@ public class HashTreeTest extends BaseTestCase {
     }
     
     public void testLargeFile()  throws Exception {
-    	URN urn = URN.createSHA1Urn(file);
+    	URN urn = URNFactory.createSHA1Urn(file);
     	try {
     	    tigerTreeFactory.createHashTree(1780149344l, new ByteArrayInputStream(new byte[0]), urn);
     		fail("shouldn't have read whole file");
@@ -88,7 +89,7 @@ public class HashTreeTest extends BaseTestCase {
 
     public void testBasicTigerTree() throws Exception {
         assertTrue(file.exists());
-        URN urn = URN.createSHA1Urn(file);
+        URN urn = URNFactory.createSHA1Urn(file);
         assertEquals(sha1, urn.toString());
                 
         InputStream in = new BufferedInputStream(new FileInputStream(file));
