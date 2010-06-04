@@ -63,7 +63,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
         
         if (DownloadState.SCAN_FAILED == downloadStatus) {
             if (downloader instanceof BTDownloader) {
-                
+                return;                
             }
             
             if (!activityCallback.promptAboutTorrentDownloadWithFailedScan()) {
