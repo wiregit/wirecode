@@ -37,7 +37,8 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
- * 
+ * The {@link NodeFetcher} sends Gnutella PINGs (with special flags)
+ * and receives some DHT nodes in return.
  */
 public class NodeFetcher implements Closeable {
 
@@ -111,28 +112,28 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * Returns the expire time in the given {@link TimeUnit}.
      */
     public long getExpireTime(TimeUnit unit) {
         return unit.convert(expireTimeInMillis, TimeUnit.MILLISECONDS);
     }
     
     /**
-     * 
+     * Returns the expire time in milliseconds.
      */
     public long getExpireTimeInMillis() {
         return getExpireTime(TimeUnit.MILLISECONDS);
     }
     
     /**
-     * 
+     * Returns {@code true} if the {@link NodeFetcher} is running.
      */
     public synchronized boolean isRunning() {
         return open && future != null && !future.isDone();
     }
     
     /**
-     * 
+     * Starts the {@link NodeFetcher}.
      */
     public synchronized void start() {
         if (!open) {
@@ -156,7 +157,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * Stops the {@link NodeFetcher}.
      */
     public synchronized void stop() {
         if (future != null) {
@@ -171,7 +172,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * The main process loop.
      */
     private void process() {
         
@@ -219,7 +220,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * Sends a PING to the given {@link SocketAddress}.
      */
     public boolean ping(SocketAddress address) {
         synchronized (this) {
@@ -250,7 +251,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * Processes the given {@link Message}.
      */
     private void processMessage(Message m) {
         if (!(m instanceof PingReply)) {
@@ -278,7 +279,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * A callback class for the {@link UDPPinger}.
      */
     private class MessageCallback implements MessageListener, Cancellable {
         
@@ -305,7 +306,7 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * A callback class for the {@link UDPPinger}.
      */
     private class SingleMessageCallback extends MessageCallback {
 
@@ -322,10 +323,16 @@ public class NodeFetcher implements Closeable {
         }
     }
     
+    /**
+     * Adds a {@link NodeFetcherListener}.
+     */
     public void addNodeFetcherListener(NodeFetcherListener listener) {
         listeners.add(listener);
     }
     
+    /**
+     * Fires an event with the given {@link SocketAddress}.
+     */
     protected void fireActiveNode(final SocketAddress address) {
         Runnable event = new Runnable() {
             @Override
@@ -340,12 +347,13 @@ public class NodeFetcher implements Closeable {
     }
     
     /**
-     * 
+     * A callback interface for the {@link NodeFetcher}.
      */
     public static interface NodeFetcherListener {
         
         /**
-         * 
+         * Called for each {@link SocketAddress} that has been fetched from
+         * the Gnutella Network.
          */
         public void handleActiveNode(SocketAddress address);
     }
