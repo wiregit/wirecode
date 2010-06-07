@@ -1,295 +1,142 @@
-/*
- * Mojito Distributed Hash Table (Mojito DHT)
- * Copyright (C) 2006-2007 LimeWire LLC
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 package org.limewire.mojito;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
-import java.security.KeyPair;
+import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueFactoryManager;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.EvictorManager;
-import org.limewire.mojito.db.StorableModelManager;
-import org.limewire.mojito.io.MessageDispatcher;
-import org.limewire.mojito.io.MessageDispatcherFactory;
-import org.limewire.mojito.messages.MessageFactory;
-import org.limewire.mojito.result.BootstrapResult;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.statistics.DHTStats;
-import org.limewire.mojito.util.HostFilter;
-import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SecurityToken;
+import org.limewire.mojito.storage.Value;
 
+import com.limegroup.gnutella.RouteTable;
 
 /**
- * Defines the interface of the Mojito DHT, the heart of the DHT.
+ * The {@link MojitoDHT} interface provides simplified versions of some
+ * methods and 
  */
-public interface MojitoDHT extends Closeable {
+public interface MojitoDHT extends DHT {
     
     /**
-     * Returns the name of the DHT instance.
-     */
-    public String getName();
-    
-    /**
-     * Returns the vendor of the DHT.
+     * Returns the {@link Vendor}.
      */
     public Vendor getVendor();
     
     /**
-     * Returns the version of the DHT.
+     * Returns the {@link Version}.
      */
     public Version getVersion();
     
     /**
-     * Sets the KeyPair that is used to verify signed messages.
+     * Returns the localhost's {@link KUID}.
      */
-    public void setKeyPair(KeyPair keyPair);
+    public KUID getContactId();
     
     /**
-     * Returns the KeyPair that is used to verify signed messages.
+     * Sets the localhost's {@link KUID}.
      */
-    public KeyPair getKeyPair();
+    public void setContactId(KUID contactId);
     
     /**
-     * Returns the DHT stats.
-     */
-    public DHTStats getDHTStats();
-    
-    /**
-     * Returns the local Node ID.
-     */
-    public KUID getLocalNodeID();
-    
-    /**
-     * Returns the local Node's Contact.
-     */
-    public Contact getLocalNode();
-    
-    /**
-     * Returns whether or not this DHT is firewalled.
-     */
-    public boolean isFirewalled();
-    
-    /**
-     * Returns true if this Node is bound to a Network Interface.
-     */
-    public boolean isBound();
-    
-    /**
-     * Binds the DHT to the specified Port number and the
-     * any-address.
-     * 
-     * @throws IOException
-     */
-    public void bind(int port) throws IOException;
-    
-    /**
-     * Binds the DHT to the specified InetAddress and Port number.
-     * 
-     * @throws IOException
-     */
-    public void bind(InetAddress addr, int port) throws IOException;
-    
-    /**
-     * Binds the DHT to the specified SocketAddress.
-     */
-    public void bind(SocketAddress address) throws IOException;
-    
-    /**
-     * Returns whether or not this DHT is running.
-     */
-    public boolean isRunning();
-    
-    /**
-     * Starts the DHT.
-     */
-    public void start();
-    
-    /**
-     * Stops the DHT.
-     */
-    public void stop();
-    
-    /**
-     * Closes the DHT instance and releases all resources.
-     */
-    public void close();
-    
-    /**
-     * Returns whether or not the MojitoDHT is bootstrapping.
-     */
-    public boolean isBootstrapping();
-    
-    /**
-     * Returns whether or not this DHT is bootstrapped.
-     */
-    public boolean isBootstrapped();
-    
-    /**
-     * Returns the approximate size of the DHT.
-     */
-    public BigInteger size();
-    
-    /**
-     * Sets the external (forced) Port number.
-     */
-    public void setExternalPort(int port);
-    
-    /**
-     * Returns the external (forced) Port number.
-     */
-    public int getExternalPort();
-    
-    /**
-     * Returns the external (forced) contact address.
+     * Returns the localhost's {@link SocketAddress}.
      */
     public SocketAddress getContactAddress();
     
     /**
-     * Returns the local address.
+     * Sets the localhost's {@link SocketAddress}.
      */
-    public SocketAddress getLocalAddress();
+    public void setContactAddress(SocketAddress address);
     
     /**
-     * Sets the MessageFactory.
+     * Sets the localhost's external {@link SocketAddress}.
      */
-    public void setMessageFactory(MessageFactory messageFactory);
+    public void setExternalAddress(SocketAddress address);
     
     /**
-     * Sets the MessageDispatcher as created from the factory.
+     * Returns the first {@link Contact} from the {@link RouteTable} that
+     * responds to a PING.
      */
-    public MessageDispatcher setMessageDispatcher(MessageDispatcherFactory messageDispatcherFactory);
+    public DHTFuture<PingEntity> findActiveContact();
     
     /**
-     * Sets the RouteTable.
+     * @see #ping(String, int, long, TimeUnit)
      */
-    public void setRouteTable(RouteTable routeTable);
+    public DHTFuture<PingEntity> ping(String address, int port);
     
     /**
-     * Returns the RouteTable.
+     * @see #ping(InetAddress, int, long, TimeUnit)
      */
-    public RouteTable getRouteTable();
+    public DHTFuture<PingEntity> ping(InetAddress address, int port);
     
     /**
-     * Sets the Host Filter.
+     * @see #ping(SocketAddress, long, TimeUnit)
      */
-    public void setHostFilter(HostFilter hostFilter);
+    public DHTFuture<PingEntity> ping(SocketAddress addr);
     
     /**
-     * Returns the current Host Filter.
+     * @see #ping(Contact, Contact[], long, TimeUnit)
      */
-    public HostFilter getHostFilter();
+    public DHTFuture<PingEntity> ping(Contact src, Contact[] dst);
     
     /**
-     * Sets the Database.
+     * Sends a special PING to the given {@link Contact} that checks
+     * whether or not 
      */
-    public void setDatabase(Database database);
+    public DHTFuture<PingEntity> collisionPing(Contact dst);
     
     /**
-     * Returns the Database.
+     * @see #bootstrap(SocketAddress, long, TimeUnit)
      */
-    public Database getDatabase();
+    public DHTFuture<BootstrapEntity> bootstrap(String address, int port);
     
     /**
-     * Returns the DHTValueFactoryManager.
+     * @see #bootstrap(SocketAddress, long, TimeUnit)
      */
-    public DHTValueFactoryManager getDHTValueFactoryManager();
+    public DHTFuture<BootstrapEntity> bootstrap(InetAddress address, int port);
     
     /**
-     * Returns the StorableModelManager.
+     * @see #bootstrap(SocketAddress, long, TimeUnit)
      */
-    public StorableModelManager getStorableModelManager();
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress addr);
     
     /**
-     * Returns the EvictorManager.
+     * @see #bootstrap(Contact, long, TimeUnit)
      */
-    public EvictorManager getEvictorManager();
+    public DHTFuture<BootstrapEntity> bootstrap(Contact contact);
     
     /**
-     * Bootstraps the MojitoDHT from the given Contact. Use
-     * the ping() methods to find a Contact!
+     * @see #put(KUID, Value, long, TimeUnit)
      */
-    public DHTFuture<BootstrapResult> bootstrap(Contact node);
+    public DHTFuture<StoreEntity> put(KUID key, Value value);
     
     /**
-     * Bootstraps the MojitoDHT from the given SocketAddress.
+     * @see #enqueue(KUID, Value, long, TimeUnit)
      */
-    public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst);
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
+ 
+    /**
+     * Removes the given {@link KUID} from the DHT.
+     */
+    public DHTFuture<StoreEntity> remove(KUID key);
     
     /**
-     * Tries to ping Contacts in the RouteTable. You may use
-     * this method to find a remote Node from where you can
-     * bootstrap your MojitoDHT instance.
+     * @see #lookup(KUID, long, TimeUnit)
      */
-    public DHTFuture<PingResult> findActiveContact();
+    public DHTFuture<NodeEntity> lookup(KUID lookupId);
     
     /**
-     * Tries to ping the given address.
+     * @see #get(ValueKey, long, TimeUnit)
      */
-    public DHTFuture<PingResult> ping(SocketAddress dst);
+    public DHTFuture<ValueEntity> get(ValueKey key);
     
     /**
-     * Tries to find and get a DHTValue with the given EntityKey.
+     * Retrieves all values for the given {@link ValueKey} from the DHT.
      */
-    public DHTFuture<FindValueResult> get(EntityKey entityKey);
-    
-    /**
-     * Stores the given key, value pair.
-     */
-    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
-    
-    /**
-     * Removes the value for the given key.
-     */
-    public DHTFuture<StoreResult> remove(KUID key);
-    
-    /**
-     * Sets the DHTExecutorService.
-     */
-    public void setDHTExecutorService(DHTExecutorService executorService);
-    
-    /**
-     * Returns the DHTExecutorService
-     */
-    public DHTExecutorService getDHTExecutorService();
-    
-    /**
-     * Sets the TokenProvider.
-     */
-    public void setSecurityTokenProvider(SecurityToken.TokenProvider tokenProvider);
-    
-    /**
-     * Sets the MACCalculatorRepositoryManager.
-     */
-    public void setMACCalculatorRepositoryManager(MACCalculatorRepositoryManager manager);
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key);
 }

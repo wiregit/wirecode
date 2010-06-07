@@ -5,9 +5,7 @@ import java.util.Set;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.dht.db.PushEndpointService;
-
-public interface PushEndpointCache extends PushEndpointService {
+public interface PushEndpointCache {
 
     void clear();
     
@@ -17,7 +15,13 @@ public interface PushEndpointCache extends PushEndpointService {
      * For retrieving a value from the cache use {@link #getPushEndpoint()}.
      * </p>
      */
-    PushEndpoint getCached(GUID guid);    
+    PushEndpoint getCached(GUID guid);
+    
+    /**
+     * Returns the {@link PushEndpoint} for the given {@link GUID}
+     * or {@code null} if no such {@link PushEndpoint} exists.
+     */
+    public PushEndpoint getPushEndpoint(GUID guid);
     
     /**
      * Overwrites the current known push proxies for the host specified

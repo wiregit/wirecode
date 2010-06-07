@@ -1,6 +1,7 @@
 package org.limewire.mojito;
 
-import java.net.InetSocketAddress;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,10 +9,15 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.DHT;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.IoUtils;
 
 public class ContextTest extends MojitoTestCase {
     
@@ -31,61 +37,42 @@ public class ContextTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void testStartWithoutBind() {
+    public void testUnbindWithoutBind() throws IOException {
         MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
         
         try {
-            dht.start();
-            fail("Start without bind should have failed");
-        } catch (IllegalStateException expected) {
+            dht.unbind();
+        } finally {
+            IoUtils.close(dht);
+        }
+    }
+    
+    public void testBind() throws IOException {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        
+        try {
+            MojitoFactory.bind(dht, 2000);
+        } finally {
+            IoUtils.close(dht);
+        }
+    }
+    
+    public void testUnbind() throws IOException {
+        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
+        Transport transport = null;
+        
+        try {
+            transport = MojitoFactory.bind(dht, 2000);
+            dht.unbind();
             
         } finally {
-            dht.close();
+            IoUtils.close(dht);
+            IoUtils.close((Closeable)transport);
         }
     }
     
-    public void testStartWithBind() throws Exception {
+    public void testCloseWithoutBind() throws IOException {
         MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
-        dht.bind(2000);
-        
-        try {
-            dht.start();
-        } catch (IllegalStateException err) {
-            fail(err);            
-        } finally {
-            dht.close();
-        }
-    }
-    
-    public void testStopWithoutBind() {
-        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
-        
-        try {
-            dht.stop();
-        } finally {
-            dht.close();
-        }
-    }
-    
-    public void testStopWithoutStart() throws Exception {
-        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
-        dht.bind(2000);
-        
-        try {
-            dht.stop();
-        } finally {
-            dht.close();
-        }
-    }
-    
-    public void testCloseWithoutBind() {
-        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
-        dht.close();
-    }
-    
-    public void testCloseWithoutStart() throws Exception {
-        MojitoDHT dht = MojitoFactory.createDHT("DHT-0");
-        dht.bind(2000);
         dht.close();
     }
     
@@ -94,36 +81,39 @@ public class ContextTest extends MojitoTestCase {
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(1);
         
         int m = ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.getValue();
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        int expected = m*k;
+        int expected = m*KademliaSettings.K;
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         
         try {
             for (int i = 0; i < (2*expected); i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                InetSocketAddress addr = new InetSocketAddress("localhost",2000 + i); 
-                dht.bind(addr);
-                dht.start();
+                
+                int port = 2000 + i;
+                
+                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, port);
                 
                 if (i > 0) {
                     // bootstrap from the node 0, but make sure node 0
                     // pings back to mark the new node as ALIVE.
-                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
-                    dhts.get(0).ping(addr).get();
+                    dht.bootstrap("localhost", 2000).get();
+                    dhts.get(0).ping("localhost", port).get();
                     
                     // make sure after the first k nodes bootstrap the rest have at least k nodes in the rt
-                    if (i > k)
-                        assertGreaterThanOrEquals(k, dht.getRouteTable().getContacts().size());
+                    if (i > KademliaSettings.K) {
+                        assertGreaterThanOrEquals(KademliaSettings.K, 
+                                dht.getRouteTable().getContacts().size());
+                    }
                 }
+                
                 dhts.add(dht);
             }
-            dhts.get(0).bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
+            
+            dhts.get(0).bootstrap("localhost", 2000+1).get();
             Thread.sleep(250);
             
             // Shutdown a random MojitoDHT instance
             Random generator = new Random();
-            int index = generator.nextInt(dhts.size() / 2) + k;
+            int index = generator.nextInt(dhts.size() / 2) + KademliaSettings.K;
             MojitoDHT down = dhts.get(index);
             down.close();
             
@@ -138,7 +128,7 @@ public class ContextTest extends MojitoTestCase {
             
             for (int i = 0; i < dhts.size(); i++) {
                 if (i != index) {
-                    Context dht = (Context)dhts.get(i);
+                    MojitoDHT dht = dhts.get(i);
                     RouteTable routeTable = dht.getRouteTable();
                     Collection<Contact> nodes = routeTable.getContacts();
                     boolean flag = false;
@@ -150,7 +140,7 @@ public class ContextTest extends MojitoTestCase {
                             flag = true;
                         }
                         
-                        if (node.getNodeID().equals(down.getLocalNodeID())) {
+                        if (node.getContactId().equals(down.getLocalhost().getContactId())) {
                             locationCounter++;
                         }
                     }
@@ -158,12 +148,14 @@ public class ContextTest extends MojitoTestCase {
             }
             
             assertGreaterThanOrEquals(expected, locationCounter);
+            
+            // Test is failing because we're not waiting for the
+            // shutdown messages to be sent, received or processed.
+            // It's essentially a network race-condition.
             assertEquals(expected, downCounter);
             
         } finally {
-            for (MojitoDHT dht : dhts) {
-                dht.close();
-            }
+            IoUtils.closeAll(dhts);
         }
     }
 }

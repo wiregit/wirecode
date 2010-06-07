@@ -23,8 +23,6 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact.State;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.routing.impl.RemoteContact;
 
 
 /**

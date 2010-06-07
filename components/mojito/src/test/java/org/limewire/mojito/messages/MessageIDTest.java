@@ -5,15 +5,18 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.messages.impl.DefaultMessageID;
-import org.limewire.mojito.messages.impl.DefaultMessageID.MessageSecurityToken;
+import org.limewire.mojito.message.DefaultMessageID;
+import org.limewire.mojito.message.MessageID;
+import org.limewire.mojito.message.DefaultMessageID.MessageSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 public class MessageIDTest extends MojitoTestCase {
     
-    private MACCalculatorRepositoryManager macManager = new MACCalculatorRepositoryManager();
+    private MACCalculatorRepositoryManager macManager 
+        = new MACCalculatorRepositoryManager();
+    
     public MessageIDTest(String name) {
         super(name);
     }
@@ -49,7 +52,7 @@ public class MessageIDTest extends MojitoTestCase {
         InetSocketAddress addr1 = new InetSocketAddress("localhost", 1234);
         SecurityToken key1 = new MessageSecurityToken(new DefaultMessageID.DHTTokenData(addr1),macManager);
         
-        MessageID messageId1 = DefaultMessageID.createWithSocketAddress(addr1, macManager);
+        DefaultMessageID messageId1 = DefaultMessageID.createWithSocketAddress(addr1, macManager);
         SecurityToken key2 = (SecurityToken)PrivilegedAccessor.invokeMethod(messageId1, "getSecurityToken", new Object[0]);
         
         assertTrue(key1.equals(key2));

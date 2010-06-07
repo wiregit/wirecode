@@ -15,8 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
-import org.limewire.mojito.messages.DHTMessage.OpCode;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.RequestMessage;
 
 class DartBoard extends Painter {
     
@@ -94,13 +94,11 @@ class DartBoard extends Painter {
     }
     
     @Override
-    public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
-        if (nodeId == null) {
-            return;
-        }
-        
-        synchronized (nodes) {
-            nodes.add(new Node(type, nodeId.xor(this.nodeId), opcode, request));
+    public void handle(boolean outgoing, KUID nodeId, SocketAddress dst, Message message) {
+        if (nodeId != null) {
+            synchronized (nodes) {
+                nodes.add(new Node(outgoing, nodeId.xor(this.nodeId), message));
+            }
         }
     }
     
@@ -115,22 +113,22 @@ class DartBoard extends Painter {
         
         private final long timeStamp = System.currentTimeMillis();
         
-        private final EventType type;
+        private final boolean outgoing;
         
         private final KUID nodeId;
         
-        private final boolean request;
+        private final Message message;
         
         private final Stroke stroke;
         
         private final Ellipse2D.Float ellipse = new Ellipse2D.Float();
         
-        public Node(EventType type, KUID nodeId, OpCode opcode, boolean request) {
-            this.type = type;
+        public Node(boolean outgoing, KUID nodeId, Message message) {
+            this.outgoing = outgoing;
             this.nodeId = nodeId;
-            this.request = request;
+            this.message = message;
             
-            this.stroke = getStrokeForOpCode(opcode);
+            this.stroke = getStrokeForMessage(message);
         }
         
         private int alpha() {
@@ -186,14 +184,14 @@ class DartBoard extends Painter {
             int green = 0;
             int blue = 0;
             
-            if (type.equals(EventType.MESSAGE_SENT)) {
+            if (outgoing) {
                 red = 255;
-                if (!request) {
+                if (!(message instanceof RequestMessage)) {
                     blue = 255;
                 }
             } else {
                 green = 255;
-                if (request) {
+                if (message instanceof RequestMessage) {
                     blue = 255;
                 }
             }

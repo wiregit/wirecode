@@ -19,9 +19,11 @@
 
 package org.limewire.mojito.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 public class StoreSettings extends MojitoProps {
 
@@ -50,27 +52,10 @@ public class StoreSettings extends MojitoProps {
      * The maximum amount of time the store process can take
      * before it's interrupted.
      */
-    public static final LongSetting STORE_TIMEOUT
-        = FACTORY.createRemoteLongSetting("STORE_TIMEOUT", 
-                4L*60L*1000L, "Mojito.StoreTimeout", 60L*1000L, 10L*60L*1000L);
-    
-    /**
-     * Returns the lock timeout for the StoreProcess.
-     * 
-     * @param hasLocations pass true if the StoreProcess already knows 
-     *                  the locations where to store the value
-     */
-    public static long getWaitOnLock(boolean hasLocations) {
-        long waitOnLock = 0L;
-        
-        if (!hasLocations) {
-            waitOnLock += LookupSettings.getWaitOnLock(
-                    LookupSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue());
-        }
-        
-        waitOnLock += ContextSettings.getWaitOnLock(
-                StoreSettings.STORE_TIMEOUT.getValue());
-        
-        return waitOnLock;
-    }
+    public static final TimeSetting STORE_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("STORE_TIMEOUT", 
+                4L, TimeUnit.MINUTES,
+                "Mojito.StoreTimeout", 
+                60L, TimeUnit.SECONDS,
+                10L, TimeUnit.MINUTES);
 }

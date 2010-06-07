@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.message.MessageOutputStream;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 
@@ -24,7 +25,7 @@ public class MessageOutputStreamTest extends BaseTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MessageOutputStream messageStream = new MessageOutputStream(out);
         
-        messageStream.writeDHTString("");
+        messageStream.writeString("");
         
         byte[] writtenBytes = out.toByteArray();
         assertEquals(2, writtenBytes.length);

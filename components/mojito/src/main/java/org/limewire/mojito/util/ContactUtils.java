@@ -35,13 +35,12 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
-import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.LocalContact;
 
 import com.google.inject.Inject;
 
@@ -54,7 +53,8 @@ public final class ContactUtils {
     private static final Log LOG = LogFactory.getLog(ContactUtils.class);
     
     @Inject
-    private static volatile NetworkInstanceUtils networkInstanceUtils = new SimpleNetworkInstanceUtils();
+    private static volatile NetworkInstanceUtils networkInstanceUtils 
+        = new SimpleNetworkInstanceUtils();
     
     public static void setNetworkInstanceUtils(NetworkInstanceUtils networkInstanceUtils) {
         ContactUtils.networkInstanceUtils = networkInstanceUtils;
@@ -77,7 +77,8 @@ public final class ContactUtils {
      * A Comparator that orders a Collection of Contacts from
      * most recently seen to least recently seen.
      */
-    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR = new Comparator<Contact>() {
+    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR 
+            = new Comparator<Contact>() {
         public int compare(Contact a, Contact b) {
             // Note: There's a minus sign to change the order from
             // 'small to big' to 'big to small' values
@@ -92,7 +93,8 @@ public final class ContactUtils {
      * Contacts is ordered by least recently failed to most recently
      * failed.
      */
-    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR = new Comparator<Contact>() {
+    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR 
+            = new Comparator<Contact>() {
         public int compare(Contact a, Contact b) {
             // If neither a nor b has failed then use the standard
             // most recently seen (MRS) Comparator
@@ -250,28 +252,31 @@ public final class ContactUtils {
      * Returns true if both Contacts have the same Node ID.
      */
     public static boolean isSameNodeID(Contact node1, Contact node2) {
-        return node1.getNodeID().equals(node2.getNodeID());
+        return node1.getContactId().equals(node2.getContactId());
     }
     
     /**
-     * Returns true if the given Contact has the same Node ID as the
-     * local Node but a different IP Address.
+     * Returns {@code true} if both have the same {@link KUID} -AND-
+     * different {@link SocketAddress}es as returned by 
+     * {@link Contact#getContactAddress()}.
      */
-    public static boolean isCollision(Context context, Contact node) {
-        if (context.isLocalNodeID(node.getNodeID())
-                && !context.isLocalContactAddress(node.getContactAddress())) {
+    public static boolean isCollision(Contact localhost, Contact other) {
+        if (localhost.getContactId().equals(other.getContactId())
+                && !localhost.getContactAddress().equals(
+                        other.getContactAddress())) {
             return true;
         }
+        
         return false;
     }
     
     /**
-     * Returns true if the given Contact has the same Node ID or the
-     * same IP Address as the local Node.
+     * Returns {@code true} if the both {@link Contact}s have the same
+     * {@link KUID} -OR- {@link SocketAddress} as returned by 
+     * {@link Contact#getContactAddress()}.
      */
-    public static boolean isLocalContact(Context context, Contact node) {
-        
-        if (context.isLocalNodeID(node.getNodeID())) {
+    public static boolean isLocalContact(Contact localhost, Contact other) {
+        if (localhost.getContactId().equals(other.getContactId())) {
             return true;
         }
         
@@ -284,10 +289,9 @@ public final class ContactUtils {
         // Node ID but same IPP). So what happens now is that
         // we're sending a lookup to that Node which is the same
         // as sending the lookup to ourself (loopback).
-        if (context.isLocalContactAddress(node.getContactAddress())) {
+        if (localhost.getContactAddress().equals(other.getContactAddress())) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(node + " has the same Contact addess as we do " 
-                        + context.getLocalNode());
+                LOG.warn(other + " has the same Contact addess as we do " + localhost);
             }
             
             return true;
@@ -322,7 +326,7 @@ public final class ContactUtils {
         // (with the inverted Node ID of course).
         Vendor vendor = localNode.getVendor();
         Version version = localNode.getVersion();
-        KUID nodeId = localNode.getNodeID().invert();
+        KUID nodeId = localNode.getContactId().invert();
         SocketAddress addr = localNode.getContactAddress();
         Contact sender = ContactFactory.createLiveContact(
                 addr, vendor, version, nodeId, addr, 0, Contact.FIREWALLED_FLAG);
@@ -341,7 +345,7 @@ public final class ContactUtils {
         
         // See createCollisionPingSender(...)
         KUID expectedSenderId = localNodeId.invert();
-        return expectedSenderId.equals(sender.getNodeID());
+        return expectedSenderId.equals(sender.getContactId());
     }
     
     /**

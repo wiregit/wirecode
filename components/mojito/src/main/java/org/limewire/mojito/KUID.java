@@ -24,19 +24,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.Random;
-import java.util.Map.Entry;
 
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
+import org.limewire.mojito.io.Writeable;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.SecurityUtils;
-
 
 
 /**
@@ -45,11 +40,12 @@ import org.limewire.security.SecurityUtils;
  * <p>
  * This class is immutable!
  */
-public class KUID implements Comparable<KUID>, Serializable {
+public class KUID implements Comparable<KUID>, Serializable, Writeable {
     
     private static final long serialVersionUID = 633717248208386374L;
     
-    private static final Random GENERATOR = SecurityUtils.createSecureRandomNoBlock();
+    private static final Random GENERATOR 
+        = SecurityUtils.createSecureRandomNoBlock();
     
     public static final int LENGTH = 20;
     
@@ -105,8 +101,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Writes the ID to the OutputStream.
      */
-    public void write(OutputStream out) throws IOException {
+    @Override
+    public int write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
+        return id.length;
     }
     
     /**
@@ -394,129 +392,9 @@ public class KUID implements Comparable<KUID>, Serializable {
      * globally unique.
      */
     public static KUID createRandomID() {
-        
-        /*
-         * Random Numbers.
-         */
-        MessageDigestInput randomNumbers = new MessageDigestInput() {
-            @Override
-            public void update(MessageDigest md) {
-                byte[] random = new byte[LENGTH * 2];
-                GENERATOR.nextBytes(random);
-                md.update(random);
-            }
-        };
-        
-        /*
-         * System Properties. Many of them are not unique but
-         * properties like user.name, user.home or os.arch will
-         * add some randomness.
-         */
-        MessageDigestInput properties = new MessageDigestInput() {
-            @Override
-            public void update(MessageDigest md) {
-                Properties props = System.getProperties();
-                try {
-                    for (Entry entry : props.entrySet()) {
-                        String key = (String)entry.getKey();
-                        String value = (String)entry.getValue();
-                        
-                        md.update(key.getBytes("UTF-8"));
-                        md.update(value.getBytes("UTF-8"));
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        
-        /*
-         * System time in milliseconds (GMT). Many computer clocks
-         * are off. Should be a good source for randomness.
-         */
-        MessageDigestInput millis = new MessageDigestInput() {
-            @Override
-            public void update(MessageDigest md) {
-                long millis = System.currentTimeMillis();
-                md.update((byte)((millis >> 56L) & 0xFFL));
-                md.update((byte)((millis >> 48L) & 0xFFL));
-                md.update((byte)((millis >> 40L) & 0xFFL));
-                md.update((byte)((millis >> 32L) & 0xFFL));
-                md.update((byte)((millis >> 24L) & 0xFFL));
-                md.update((byte)((millis >> 16L) & 0xFFL));
-                md.update((byte)((millis >>  8L) & 0xFFL));
-                md.update((byte)((millis       ) & 0xFFL));
-            }
-        };
-        
-        /*
-         * VM/machine dependent pseudo time.
-         */
-        MessageDigestInput nanos = new MessageDigestInput() {
-            @Override
-            public void update(MessageDigest md) {
-                long nanos = System.nanoTime();
-                md.update((byte)((nanos >> 56L) & 0xFFL));
-                md.update((byte)((nanos >> 48L) & 0xFFL));
-                md.update((byte)((nanos >> 40L) & 0xFFL));
-                md.update((byte)((nanos >> 32L) & 0xFFL));
-                md.update((byte)((nanos >> 24L) & 0xFFL));
-                md.update((byte)((nanos >> 16L) & 0xFFL));
-                md.update((byte)((nanos >>  8L) & 0xFFL));
-                md.update((byte)((nanos       ) & 0xFFL));
-            }
-        };
-        
-        /*
-         * Sort the MessageDigestInput(s) by their random
-         * index (i.e. shuffle the array).
-         */
-        MessageDigestInput[] input = { 
-            properties, 
-            randomNumbers, 
-            millis, 
-            nanos
-        };
-        
-        Arrays.sort(input);
-        
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            
-            // Get the SHA1...
-            for(MessageDigestInput mdi : input) {
-                mdi.update(md);
-                
-                // Hash also the identity hash code
-                int hashCode = System.identityHashCode(mdi);
-                md.update((byte)((hashCode >> 24) & 0xFF));
-                md.update((byte)((hashCode >> 16) & 0xFF));
-                md.update((byte)((hashCode >>  8) & 0xFF));
-                md.update((byte)((hashCode      ) & 0xFF));
-                
-                // and the random index
-                md.update((byte)((mdi.rnd >> 24) & 0xFF));
-                md.update((byte)((mdi.rnd >> 16) & 0xFF));
-                md.update((byte)((mdi.rnd >>  8) & 0xFF));
-                md.update((byte)((mdi.rnd      ) & 0xFF));
-            }
-            
-            return new KUID(md.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    private abstract static class MessageDigestInput 
-            implements Comparable<MessageDigestInput> {
-        
-        private int rnd = GENERATOR.nextInt();
-        
-        public abstract void update(MessageDigest md);
-        
-        public int compareTo(MessageDigestInput o) {
-            return rnd - o.rnd;
-        }
+        byte[] id = new byte[LENGTH];
+        GENERATOR.nextBytes(id);
+        return new KUID(id);
     }
     
     /**

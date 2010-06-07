@@ -19,14 +19,8 @@
  
 package org.limewire.mojito;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,23 +29,23 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
-import org.limewire.io.SecureInputStream;
-import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.StorableModelManager;
-import org.limewire.mojito.db.impl.DHTValueImpl;
-import org.limewire.mojito.result.BootstrapResult;
-import org.limewire.mojito.result.FindNodeResult;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.ValueKey;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
-import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.statistics.DHTStats;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
+import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.CollectionUtils;
 
 /**
@@ -125,15 +119,15 @@ public class CommandHandler {
     }
     
     public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) {
-        boolean current = LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
-        LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
-                !LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        boolean current = LookupSettings.EXHAUSTIVE.getValue();
+        LookupSettings.EXHAUSTIVE.setValue(
+                !LookupSettings.EXHAUSTIVE.getValue());
         
-        out.println("Exhaustive: " + current + " -> " + LookupSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        out.println("Exhaustive: " + current + " -> " + LookupSettings.EXHAUSTIVE.getValue());
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) {
-        ((LocalContact)dht.getLocalNode()).setFirewalled(!dht.isFirewalled());
+        ((LocalContact)dht.getLocalhost()).setFirewalled(!dht.isFirewalled());
         out.println("Firewalled: " + dht.isFirewalled());
     }
     
@@ -144,13 +138,6 @@ public class CommandHandler {
         out.println(buffer);
     }
     
-    public static void publisher(MojitoDHT dht, String[] args, PrintWriter out) {
-        StringBuilder buffer = new StringBuilder("\n");
-        StorableModelManager modelManager = dht.getStorableModelManager();
-        buffer.append(modelManager.toString());
-        out.println(buffer);
-    }
-    
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
         RouteTable routingTable = dht.getRouteTable();
@@ -158,7 +145,7 @@ public class CommandHandler {
         out.println(buffer);
     }
     
-    public static Future<PingResult> ping(MojitoDHT dht, String[] args, final PrintWriter out) {
+    public static Future<PingEntity> ping(MojitoDHT dht, String[] args, final PrintWriter out) {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
@@ -166,9 +153,9 @@ public class CommandHandler {
         
         out.println("Pinging... " + addr);
         
-        Future<PingResult> future = dht.ping(addr);
+        Future<PingEntity> future = dht.ping(addr);
         try {
-            PingResult result = future.get();
+            PingEntity result = future.get();
             out.println(result);
         } catch (Exception err) {
             err.printStackTrace(out);
@@ -186,8 +173,8 @@ public class CommandHandler {
         
         out.println("Bootstrapping... " + addr);
         try {
-            PingResult pong = dht.ping(addr).get();
-            BootstrapResult result = dht.bootstrap(pong.getContact()).get();
+            PingEntity pong = dht.ping(addr).get();
+            BootstrapEntity result = dht.bootstrap(pong.getContact()).get();
             out.println("Bootstraping finished:\n" + result);
             out.flush();
         } catch (Exception e) {
@@ -223,7 +210,7 @@ public class CommandHandler {
             
             out.println("Storing... " + key);
             
-            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value)).get();
+            StoreEntity evt = dht.put(key, new DefaultValue(ValueType.TEST, Version.ZERO, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
@@ -247,7 +234,7 @@ public class CommandHandler {
             
             out.println("Removing... " + key);
             
-            StoreResult evt = dht.remove(key).get();
+            StoreEntity evt = dht.remove(key).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("REMOVE RESULT:\n");
             buffer.append(evt.toString());
@@ -270,8 +257,8 @@ public class CommandHandler {
             }
             md.reset();
             
-            EntityKey lookupKey = EntityKey.createEntityKey(key, DHTValueType.ANY);
-            FindValueResult evt = dht.get(lookupKey).get();
+            ValueKey lookupKey = ValueKey.createValueKey(key, ValueType.ANY);
+            ValueEntity evt = dht.get(lookupKey).get();
             out.println(evt.toString());
             
         } catch (Exception e) {
@@ -291,65 +278,12 @@ public class CommandHandler {
             }
             md.reset();
             
-            FindNodeResult evt = ((Context)dht).lookup(key).get();
+            NodeEntity evt = dht.lookup(key).get();
             out.println(evt.toString());
             
         } catch (Exception e) {
             e.printStackTrace(out);
         }
-    }
-    
-    public static MojitoDHT load(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        File file = new File(args[1]);
-        out.println("Loading: " + file);
-        ObjectInputStream ois = null;
-        
-        try {
-            ois = new ObjectInputStream(
-                    new BufferedInputStream(
-                        new SecureInputStream(
-                            new FileInputStream(file))));
-            RouteTable routeTable = (RouteTable)ois.readObject();
-            Database database = (Database)ois.readObject();
-            
-            MojitoDHT mojito = MojitoFactory.createDHT(dht.getName());
-            synchronized (mojito) {
-                mojito.setRouteTable(routeTable);
-                mojito.setDatabase(database);
-            }
-            return mojito;
-        } finally {
-            try {
-                if (ois != null) { ois.close(); }
-            } catch (IOException ignore) {}
-        }
-    }
-    
-    public static void store(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        File file = new File(args[1]);
-        out.println("Storing: " + file);
-        ObjectOutputStream oos = null;
-        
-        try {
-            oos = new ObjectOutputStream(
-                    new BufferedOutputStream(
-                        new SecureOutputStream(
-                            new FileOutputStream(file))));
-            synchronized (dht) {
-                oos.writeObject(dht.getRouteTable());
-                oos.writeObject(dht.getDatabase());
-            }
-            oos.flush();
-        } finally {
-            try {
-                if (oos != null) { oos.close(); }
-            } catch (IOException ignore) {}
-        }
-    }
-    
-    public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        DHTStats stats = ((Context)dht).getDHTStats();
-        stats.dump(out, true);
     }
     
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
@@ -364,47 +298,25 @@ public class CommandHandler {
         KUID nodeId = KUID.createWithHexString(args[1]);
         out.println("Selecting: " + nodeId);
         
-        RouteTable routeTable = ((Context)dht).getRouteTable();
+        RouteTable routeTable = ((DefaultDHT)dht).getRouteTable();
         out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, SelectMode.ALL)));
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        ((Context)dht).getLocalNode().nextInstanceID();
-    }
-    
-    public static void kill(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        if (dht.isRunning()) {
-            out.println("Stopping " + dht.getName());
-            dht.stop();
-        }
-    }
-    
-    public static void restart(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        if (!dht.isRunning()) {
-            out.println("Starting " + dht.getName());
-            dht.start();
-        }
+        ((DefaultDHT)dht).getLocalhost().nextInstanceID();
     }
     
     @SuppressWarnings("unchecked")
     public static void rt_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("org.limewire.mojito.visual.RouteTableVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
+        Method show = clazz.getDeclaredMethod("show", DefaultDHT.class);
         show.invoke(null, dht);
     }
     
     @SuppressWarnings("unchecked")
     public static void arcs_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("org.limewire.mojito.visual.ArcsVisualizer");
-        Method show = clazz.getDeclaredMethod("show", Context.class);
+        Method show = clazz.getDeclaredMethod("show", DefaultDHT.class);
         show.invoke(null, dht);
-    }
-    
-    public static void bootstrapped(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-    	Context context = (Context)dht;
-    	
-    	boolean bootstrapped = context.isBootstrapped();
-    	context.setBootstrapped(!bootstrapped);
-        out.println(bootstrapped + " -> " + (!bootstrapped));
     }
 }

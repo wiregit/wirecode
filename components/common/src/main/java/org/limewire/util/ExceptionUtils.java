@@ -72,4 +72,41 @@ public class ExceptionUtils {
             rethrow(t);
         }
     }
+    
+    /**
+     * Reports an unchecked {@link Exception} such as 
+     * {@link RuntimeException}s and {@link Error}s.
+     */
+    public static boolean reportIfUnchecked(Throwable t) {
+        if (t instanceof RuntimeException
+                || t instanceof Error) {
+            reportOrReturn(t);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the given {@link Throwable} was cased by an another
+     * {@link Exception} that is of the given type.
+     */
+    public static boolean isCausedBy(Throwable t, Class<? extends Throwable> clazz) {
+        return getCause(t, clazz) != null;
+    }
+    
+    /**
+     * Returns the first {@link Exception} in the cause chain that is
+     * of the given type or {@code null} if the {@link Exception} was
+     * caused by something else.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T getCause(Throwable t, Class<T> clazz) {
+        while(t != null) {
+            if (clazz.isInstance(t)) {
+                return (T)t;
+            }
+            t = t.getCause();
+        }
+        return null;
+    }
 }

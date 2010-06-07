@@ -3,23 +3,34 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.EntityKey;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.nio.observer.Shutdownable;
+import org.limewire.mojito.settings.LookupSettings;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
+import org.limewire.mojito.util.EventUtils;
+import org.limewire.util.ExceptionUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,7 +48,7 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
  * alternate locations.
  */
 @Singleton
-class AltLocFinderImpl implements AltLocFinder {
+public class AltLocFinderImpl implements AltLocFinder {
 
     private static final Log LOG = LogFactory.getLog(AltLocFinderImpl.class);
     
@@ -50,7 +61,8 @@ class AltLocFinderImpl implements AltLocFinder {
     private final PushEndpointService pushEndpointManager;
     
     @Inject
-    public AltLocFinderImpl(DHTManager dhtManager, AlternateLocationFactory alternateLocationFactory, 
+    public AltLocFinderImpl(DHTManager dhtManager, 
+            AlternateLocationFactory alternateLocationFactory, 
             AltLocManager altLocManager, 
             @Named("pushEndpointManager") PushEndpointService pushEndpointManager) {
         this.dhtManager = dhtManager;
@@ -58,121 +70,287 @@ class AltLocFinderImpl implements AltLocFinder {
         this.altLocManager = altLocManager;
         this.pushEndpointManager = pushEndpointManager;
     }
-    
-    public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
-        listener = SearchListenerAdapter.nonNullListener(listener);
+
+    @Override
+    public DHTFuture<AlternateLocation[]> findAltLocs(final URN urn) {
+        AlternateLocationProcess process 
+            = new AlternateLocationProcess(urn);
         
-        KUID key = KUIDUtils.toKUID(urn);
-        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
-      
-          
-          final DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
-          if(future == null) {
-              return null;
-          } else {
-              future.addFutureListener(new AltLocsHandler(dhtManager, urn, key, listener));
-              return new Shutdownable() {
-                  public void shutdown() {
-                      future.cancel(true);
-                  }
-              };
-          }              
+        long timeout = LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis();
+        return dhtManager.getMojitoDHT().submit(process, 
+                timeout, TimeUnit.MILLISECONDS);
     }
     
-    /**
-     * Looks up the push endpoint for an alternate location based on the guid.
-     */
-    private void findPushAltLocs(final GUID guid, final URN urn, 
-            final DHTValueEntity altLocEntity, final SearchListener<AlternateLocation> listener) {
+    private class AlternateLocationProcess 
+            implements DHTFutureProcess<AlternateLocation[]> {
         
-        SearchListener<PushEndpoint> pushEndpointListener = new SearchListener<PushEndpoint>() {
-            public void handleResult(PushEndpoint pushEndpoint) {
-                // So we made a lookup for AltLocs, the found AltLoc was 
-                // firewalled and we made a lookup for its PushProxies.
-                // In any case the creator of both values should be the 
-                // same Node!
-                InetAddress creatorAddress = ((InetSocketAddress)altLocEntity.getCreator().getContactAddress()).getAddress();
-                InetAddress externalAddress = pushEndpoint.getInetAddress();
-                // external address can be null if not retrieved from DHT
-                if (externalAddress != null && !externalAddress.equals(creatorAddress)) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Creator of " + altLocEntity + " and found " + pushEndpoint + " do not match!");
-                    }
-                    listener.searchFailed();
-                } else {
-                    AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
-                    altLocManager.add(alternateLocation, this);
-                    listener.handleResult(alternateLocation);
-                }
+        private final URN urn;
+        
+        private final List<AlternateLocation> locations 
+            = new ArrayList<AlternateLocation>();
+        
+        private final List<ProxyHandle> proxies 
+            = new ArrayList<ProxyHandle>();
+        
+        private final List<DHTFuture<?>> futures 
+            = new ArrayList<DHTFuture<?>>();
+        
+        private volatile DHTFuture<AlternateLocation[]> future = null;
+        
+        private DHTFuture<ValueEntity[]> lookup = null;
+        
+        public AlternateLocationProcess(URN urn) {
+            this.urn = urn;
+        }
+        
+        private void uncaughtException(Throwable t) {
+            onException(t);
+            ExceptionUtils.reportOrReturn(t);
+        }
+        
+        private void onException(Throwable t) {
+            future.setException(t);
+        }
+        
+        private void onCancellation() {
+            future.cancel(true);
+        }
+        
+        private void onComplete() {
+            final AlternateLocation[] locations 
+                = this.locations.toArray(new AlternateLocation[0]);
+            
+            if (locations.length == 0) {
+                future.setException(new NoSuchValueException());
+                return;
             }
             
-            public void searchFailed() {
-                listener.searchFailed();
-            }  
+            future.setValue(locations);
             
-        };
-        pushEndpointManager.findPushEndpoint(guid, pushEndpointListener);
-    }
-    
-    /**
-     * The AltLocsHandler listens for the FindValueResult, constructs 
-     * AlternateLocations from the results and passes them to AltLocManager 
-     * which in turn notifies every Downloader about the new locations.
-     */
-    private class AltLocsHandler extends AbstractResultHandler {
-        
-        private final SearchListener<AlternateLocation> listener;
-        private final URN urn;
-
-        private AltLocsHandler(DHTManager dhtManager, URN urn, KUID key, 
-                SearchListener<AlternateLocation> listener) {
-            super(dhtManager, key, listener, AbstractAltLocValue.ALT_LOC);
-            this.urn = urn;
-            this.listener = listener;
+            Runnable event = new Runnable() {
+                @Override
+                public void run() {
+                    for (AlternateLocation location : locations) {
+                        altLocManager.add(location, AltLocFinderImpl.this);
+                    }
+                }
+            };
+            
+            EventUtils.fireEvent(event);
         }
         
         @Override
-        protected Result handleDHTValueEntity(DHTValueEntity entity) {
-            DHTValue value = entity.getValue();
-            if (!(value instanceof AltLocValue)) {
-                return Result.NOT_FOUND;
+        public void start(DHTFuture<AlternateLocation[]> future) {
+            this.future = future;
+            
+            synchronized (future) {
+                future.addFutureListener(new EventListener<FutureEvent<AlternateLocation[]>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<AlternateLocation[]> event) {
+                        stop();
+                    }
+                });
+                start();
             }
-            
-            AltLocValue altLoc = (AltLocValue)value;
-            
-            // If the AltLoc is firewalled then do a lookup for
-            // its PushProxies
-            if (altLoc.isFirewalled()) {
-                if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
-                    GUID guid = new GUID(altLoc.getGUID());
-                    findPushAltLocs(guid, urn, entity, listener);
-                    return Result.NOT_YET_FOUND;
-                }
-            // If it's not then create just an AlternateLocation
-            // from the info
-            } else {
-                Contact creator = entity.getCreator();
-                InetAddress addr = ((InetSocketAddress)
-                        creator.getContactAddress()).getAddress();
-                
-                IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
-                Connectable c = new ConnectableImpl(ipp, altLoc.supportsTLS());
-
-                long fileSize = altLoc.getFileSize();
-                byte[] ttroot = altLoc.getRootHash();
+        }
+        
+        private void start() {
+            synchronized (future) {
                 try {
-                    AlternateLocation location = alternateLocationFactory
-                            .createDirectDHTAltLoc(c, urn, fileSize, ttroot);
-                    altLocManager.add(location, this);
-                    listener.handleResult(location);
-                    return Result.FOUND;
-                } catch (IOException e) {
-                    // Thrown if IpPort is an invalid address
-                    LOG.error("IOException", e);
+                    doLookup();
+                } catch (Throwable t) {
+                    uncaughtException(t);
                 }
             }
-            return Result.NOT_FOUND;
+        }
+        
+        private void stop() {
+            synchronized (future) {
+                if (lookup != null) {
+                    lookup.cancel(true);
+                }
+                
+                for (DHTFuture<?> future : futures) {
+                    future.cancel(true);
+                }
+                futures.clear();
+            }
+        }
+        
+        private void doLookup() {
+            KUID key = KUIDUtils.toKUID(urn);
+            ValueKey lookupKey = ValueKey.createValueKey(
+                    key, AltLocValue.ALT_LOC);
+            
+            lookup = dhtManager.getAll(lookupKey);
+            lookup.addFutureListener(new EventListener<FutureEvent<ValueEntity[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<ValueEntity[]> event) {
+                    onLookup(event);
+                }
+            });
+        }
+        
+        private void onLookup(FutureEvent<ValueEntity[]> event) {
+            synchronized (future) {
+                if (future.isDone()) {
+                    return;
+                }
+                
+                try {
+                    switch (event.getType()) {
+                        case SUCCESS:
+                            onLookup(event.getResult());
+                            break;
+                        case EXCEPTION:
+                            onException(event.getException());
+                            break;
+                        case CANCELLED:
+                            onCancellation();
+                            break;
+                    }
+                } catch (IOException err) {
+                    onException(err);
+                    
+                } catch (Throwable t) {
+                    uncaughtException(t);
+                }
+            }
+        }
+        
+        private void onLookup(ValueEntity[] entities) throws IOException {
+            for (ValueEntity entity : entities) {
+                for (ValueTuple values : entity.getValues()) {
+                    Value value = values.getValue();
+                    
+                    ValueType valueType = value.getValueType();
+                    if (!valueType.equals(AltLocValue.ALT_LOC)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Not a PushProxy: " + value);
+                        }
+                        continue;
+                    }
+                    
+                    AltLocValue altLoc 
+                        = new DefaultAltLocValue(value);
+                    if (altLoc.isFirewalled()) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Location is Firewalled: " + altLoc);
+                        }
+                        
+                        if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
+                            GUID guid = new GUID(altLoc.getGUID());
+                            proxies.add(new ProxyHandle(values, guid));
+                        }
+                        
+                        continue;
+                    }
+                    
+                    Contact creator = values.getCreator();
+                    InetAddress addr = ((InetSocketAddress)
+                            creator.getContactAddress()).getAddress();
+                    
+                    IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
+                    Connectable c = new ConnectableImpl(
+                            ipp, altLoc.supportsTLS());
+
+                    long fileSize = altLoc.getFileSize();
+                    byte[] ttroot = altLoc.getRootHash();
+                    
+                    AlternateLocation location = alternateLocationFactory
+                        .createDirectDHTAltLoc(c, urn, fileSize, ttroot);
+                    
+                    altLocManager.add(location, AltLocFinderImpl.this);
+                    locations.add(location);
+                }
+            }
+            
+            doNext();
+        }
+        
+        /**
+         * This method is called recursively!
+         */
+        private void doNext() {
+            synchronized (future) {
+                if (future.isDone()) {
+                    return;
+                }
+                
+                // We're done if there is nothing left to be looked up!
+                if (proxies.isEmpty()) {
+                    onComplete();
+                    return;
+                }
+                
+                ProxyHandle handle = proxies.remove(0);
+                final ValueTuple entity = handle.entity;
+                
+                DHTFuture<PushEndpoint> future 
+                    = pushEndpointManager.findPushEndpoint(handle.guid);
+                
+                future.addFutureListener(new EventListener<FutureEvent<PushEndpoint>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<PushEndpoint> event) {
+                        onPushEnpoint(entity, event);
+                    }
+                });
+                
+                futures.add(future);
+            }
+        }
+        
+        private void onPushEnpoint(ValueTuple entity, 
+                FutureEvent<PushEndpoint> event) {
+            synchronized (future) {
+                if (future.isDone()) {
+                    return;
+                }
+                
+                try {
+                    if (event.getType() == Type.SUCCESS) {
+                        onPushEndpoint(entity, event.getResult());
+                    }
+                    
+                    doNext();
+                } catch (Throwable t) {
+                    uncaughtException(t);
+                }
+            }
+        }
+        
+        private void onPushEndpoint(ValueTuple entity, PushEndpoint endpoint) {
+            // So we made a lookup for AltLocs, the found AltLoc was firewalled 
+            // and we made a lookup for its PushProxies. In any case the creator 
+            // of both values should be the same Node!
+            InetAddress creatorAddress = ((InetSocketAddress)
+                    entity.getCreator().getContactAddress()).getAddress();
+            InetAddress externalAddress = endpoint.getInetAddress();
+            
+            if (externalAddress != null 
+                    && !externalAddress.equals(creatorAddress)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Creator of " + entity + " and found " 
+                            + endpoint + " do not match!");
+                }
+                return;
+            }
+            
+            AlternateLocation location 
+                = alternateLocationFactory.createPushAltLoc(endpoint, urn);
+            locations.add(location);
         }
     }
     
+    private static class ProxyHandle {
+        
+        private final ValueTuple entity;
+        
+        private final GUID guid;
+        
+        public ProxyHandle(ValueTuple entity, GUID guid) {
+            this.entity = entity;
+            this.guid = guid;
+        }
+    }
 }

@@ -24,14 +24,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.Storable;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 
 
 /**
@@ -44,25 +43,26 @@ public class DatabaseUtils {
     /**
      * Returns the expiration time of the given DHTValue.
      */
-    public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
+    public static long getExpirationTime(RouteTable routeTable, ValueTuple entity) {
         KUID primaryKey = entity.getPrimaryKey();
         
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        Collection<Contact> nodes = routeTable.select(primaryKey, k, SelectMode.ALL);
+        Collection<Contact> nodes = routeTable.select(primaryKey, 
+                KademliaSettings.K, SelectMode.ALL);
         
         long creationTime = entity.getCreationTime();
-        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getTimeInMillis();
         
         // If there are less than k Nodes or the local Node is member
         // of the k-closest Nodes then use the default expiration time
-        if (nodes.size() < k || nodes.contains(routeTable.getLocalNode())) {
+        if (nodes.size() < KademliaSettings.K 
+                || nodes.contains(routeTable.getLocalNode())) {
             return creationTime + expirationTime;
             
         // The value expires inversely proportional otherwise by using
         // the xor distance
         } else {
             KUID valueBucketId = routeTable.getBucket(primaryKey).getBucketID();
-            KUID localBucketId = routeTable.getBucket(routeTable.getLocalNode().getNodeID()).getBucketID();
+            KUID localBucketId = routeTable.getBucket(routeTable.getLocalNode().getContactId()).getBucketID();
             KUID xor = localBucketId.xor(valueBucketId);
             
             int lowestSetBit = xor.toBigInteger().getLowestSetBit();
@@ -78,56 +78,37 @@ public class DatabaseUtils {
     /**
      * Returns whether or not the given DHTValue has expired.
      */
-    public static boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
+    public static boolean isExpired(RouteTable routeTable, ValueTuple entity) {
         return System.currentTimeMillis() >= getExpirationTime(routeTable, entity);
     }
-    
-    public static boolean isPublishingRequired(Storable storable) {
-        return isPublishingRequired(storable.getPublishTime(), storable.getLocationCount());
-    }
-    
-    public static boolean isPublishingRequired(long publishingTime, int locationCount) {
-        if (publishingTime <= 0L || locationCount <= 0) {
-            return true;
-        }
-        
-        long t = ((locationCount 
-                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
-                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
-        
-        // Do never republish more than every X minutes
-        long nextPublishTime = Math.max(t, 
-                DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
-        
-        long time = publishingTime + nextPublishTime;
-        
-        return System.currentTimeMillis() >= time;
-    }
 
-    public static boolean isDHTValueType(DHTValueType valueType, DHTValueEntity entity) {
-        return valueType.equals(DHTValueType.ANY) 
+    public static boolean isDHTValueType(ValueType valueType, ValueTuple entity) {
+        return valueType.equals(ValueType.ANY) 
                 || valueType.equals(entity.getValue().getValueType());
     }
 
-    public static Collection<? extends DHTValueEntity> filter(DHTValueType valueType, 
-            Collection<? extends DHTValueEntity> entities) {
+    public static ValueTuple[] filter(
+            ValueType valueType,  ValueTuple[] entities) {
         
-        if (valueType.equals(DHTValueType.ANY)) {
+        if (valueType.equals(ValueType.ANY)) {
             return entities;
         }
         
-        List<DHTValueEntity> filtered = new ArrayList<DHTValueEntity>(entities.size());
-        for (DHTValueEntity entity : entities) {
+        List<ValueTuple> filtered 
+            = new ArrayList<ValueTuple>(entities.length);
+        
+        for (ValueTuple entity : entities) {
             if (isDHTValueType(valueType, entity)) {
                 filtered.add(entity);
             }
         }
-        return filtered;
+        
+        return filtered.toArray(new ValueTuple[0]);
     }
     
-    public static DHTValueEntity getFirstEntityFor(DHTValueType valueType, 
-            Collection<? extends DHTValueEntity> entities) {
-        for (DHTValueEntity entity : entities) {
+    public static ValueTuple getFirstEntityFor(ValueType valueType, 
+            Collection<? extends ValueTuple> entities) {
+        for (ValueTuple entity : entities) {
             if (isDHTValueType(valueType, entity)) {
                 return entity;
             }

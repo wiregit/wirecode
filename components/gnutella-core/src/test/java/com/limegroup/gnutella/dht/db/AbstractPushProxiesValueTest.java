@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -13,8 +11,8 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
+
 
 
 public class AbstractPushProxiesValueTest extends BaseTestCase {
@@ -38,9 +36,11 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
      * Ensures different impls with same values are considered equal
      */
     public void testEqualsObject() throws Exception {
-       final TestPushProxiesValue value = new TestPushProxiesValue();
+       final TestPushProxiesValue value 
+           = new TestPushProxiesValue();
        
-       final PushProxiesValue mockedValue = context.mock(PushProxiesValue.class);
+       final PushProxiesValue mockedValue 
+           = context.mock(PushProxiesValue.class);
        
        context.checking(new Expectations() {{
            allowing(mockedValue).getTLSInfo();
@@ -55,6 +55,8 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
            will(returnValue(value.getFwtVersion()));
            allowing(mockedValue).getPort();
            will(returnValue(value.getPort()));
+           allowing(mockedValue).getVersion();
+           will(returnValue(PushProxiesValue.VERSION));
        }});
            
        assertTrue(value.equals(mockedValue));
@@ -69,42 +71,38 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
         private IpPortSet proxies;
         
         public TestPushProxiesValue() throws Exception {
-            super(Version.ZERO);
+            super(PushProxiesValue.VERSION);
             proxies = new IpPortSet(new IpPortImpl("129.0.0.1", 9595));
         }
         
+        @Override
         public byte getFeatures() {
             return 1;
         }
 
+        @Override
         public int getFwtVersion() {
             return 5;
         }
 
+        @Override
         public byte[] getGUID() {
             return guid.bytes();
         }
 
+        @Override
         public int getPort() {
             return 6667;
         }
 
+        @Override
         public Set<? extends IpPort> getPushProxies() {
             return proxies;
         }
 
+        @Override
         public BitNumbers getTLSInfo() {
             return BitNumbers.EMPTY_BN;
         }
-
-        public byte[] getValue() {
-            return AbstractPushProxiesValue.serialize(this);
-        }
-
-        public void write(OutputStream out) throws IOException {
-            out.write(getValue());
-        }
-        
     }
-
 }

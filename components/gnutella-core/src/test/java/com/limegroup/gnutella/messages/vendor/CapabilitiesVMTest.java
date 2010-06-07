@@ -5,12 +5,12 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
+import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

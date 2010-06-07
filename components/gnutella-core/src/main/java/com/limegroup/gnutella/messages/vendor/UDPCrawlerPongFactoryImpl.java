@@ -20,16 +20,17 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
 
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final Provider<ConnectionManager> connectionManager;
 
     @Inject
-    public UDPCrawlerPongFactoryImpl(Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager) {
+    public UDPCrawlerPongFactoryImpl(Provider<DHTManagerImpl> dhtManager, Provider<ConnectionManager> connectionManager) {
         this.dhtManager = dhtManager;
         this.connectionManager = connectionManager;
     }
@@ -147,26 +148,29 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             ByteUtils.int2leb((int)currentAverage, result, 3);
         }
         
-        if(request.hasDHTStatus()) {
+        if (request.hasDHTStatus()) {
             byte dhtStatus = 0x00;
             DHTManager manager = dhtManager.get();
-            if(manager.isRunning()) {
-                switch (manager.getDHTMode()) {
-                    case ACTIVE:
-                        dhtStatus |= UDPCrawlerPong.DHT_ACTIVE_MASK;
-                        break;
-                    case PASSIVE:
-                        dhtStatus |= UDPCrawlerPong.DHT_PASSIVE_MASK;
-                        break;
-                    case PASSIVE_LEAF:
-                        dhtStatus |= UDPCrawlerPong.DHT_PASSIVE_LEAF_MASK;
-                        break;        
-                }
-                
-                if(!manager.isMemberOfDHT()) {
-                    dhtStatus |= UDPCrawlerPong.DHT_WAITING_MASK;
+            synchronized (manager) {
+                if (manager.isRunning()) {
+                    switch (manager.getMode()) {
+                        case ACTIVE:
+                            dhtStatus |= UDPCrawlerPong.DHT_ACTIVE_MASK;
+                            break;
+                        case PASSIVE:
+                            dhtStatus |= UDPCrawlerPong.DHT_PASSIVE_MASK;
+                            break;
+                        case PASSIVE_LEAF:
+                            dhtStatus |= UDPCrawlerPong.DHT_PASSIVE_LEAF_MASK;
+                            break;        
+                    }
+                    
+                    if (!manager.isReady()) {
+                        dhtStatus |= UDPCrawlerPong.DHT_WAITING_MASK;
+                    }
                 }
             }
+            
             result[index-1] = dhtStatus;
         }
         

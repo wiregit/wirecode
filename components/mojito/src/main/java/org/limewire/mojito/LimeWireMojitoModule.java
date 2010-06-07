@@ -10,5 +10,4 @@ public class LimeWireMojitoModule extends AbstractModule {
     protected void configure() {
         requestStaticInjection(ContactUtils.class);
     }
-    
 }

@@ -1,281 +1,396 @@
-/*
- * Mojito Distributed Hash Table (Mojito DHT)
- * Copyright (C) 2006-2007 LimeWire LLC
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 package org.limewire.mojito.routing;
 
+import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.FutureEvent;
-import org.limewire.concurrent.FutureEvent.Type;
-import org.limewire.mojito.Context;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.DHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.manager.BootstrapManager;
-import org.limewire.mojito.result.FindNodeResult;
-import org.limewire.mojito.result.PingResult;
+import org.limewire.mojito.concurrent.ManagedRunnable;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.settings.LookupSettings;
+import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito.util.SchedulingUtils;
 
 /**
- * The BucketRefresher goes in periodic intervals through all Buckets
- * and refreshes every Bucket that hasn't been touched for a certain
- * amount of time.
+ * 
  */
-public class BucketRefresher implements Runnable {
+public class BucketRefresher implements Closeable {
     
-    private static final Log LOG = LogFactory.getLog(BucketRefresher.class);
+    private final DHT dht;
     
-    private final Context context;
+    private final Config config;
     
-    private final RefreshTask refreshTask = new RefreshTask();
+    private final long frequency;
     
-    private ScheduledFuture future;
+    private final TimeUnit unit;
     
-    public BucketRefresher(Context context) {
-        this.context = context;
+    private ScheduledFuture<?> future;
+    
+    /**
+     * 
+     */
+    private final AtomicBoolean active 
+        = new AtomicBoolean(false);
+    
+    private PingTask pingTask = null;
+    
+    private LookupTask lookupTask = null;
+    
+    private boolean open = true;
+    
+    /**
+     * Creates a {@link BucketRefresher}
+     */
+    public BucketRefresher(DHT dht) {
+        this (dht, BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getTimeInMillis(), 
+                TimeUnit.MILLISECONDS);
     }
     
     /**
-     * Starts the BucketRefresher.
+     * Creates a {@link BucketRefresher}
      */
-    public void start() {
-        synchronized (refreshTask) {
-            if (future == null) {
-                long delay = BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getValue();
-                long initialDelay = delay;
-                
-                if (BucketRefresherSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
-                    initialDelay = delay + (long)(delay * Math.random());
-                }
-                
-                future = context.getDHTExecutorService()
-                    .scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
-            }
+    public BucketRefresher(DHT dht, long frequency, TimeUnit unit) {
+        this(dht, new Config(), frequency, unit);
+    }
+    
+    /**
+     * Creates a {@link BucketRefresher}
+     */
+    public BucketRefresher(DHT dht, Config config,
+            long frequency, TimeUnit unit) {
+        
+        this.dht = dht;
+        this.config = config;
+        this.frequency = frequency;
+        this.unit = unit;
+    }
+    
+    /**
+     * Starts the {@link BucketRefresher}
+     */
+    public synchronized void start() {
+        
+        if (!open) {
+            return;
         }
+        
+        if (future != null && !future.isDone()) {
+            return;
+        }
+        
+        Runnable task = new ManagedRunnable() {
+            @Override
+            protected void doRun() {
+                if (dht.isReady()) {
+                    process();
+                }
+            }
+        };
+        
+        active.set(false);
+        future = SchedulingUtils.scheduleWithFixedDelay(
+                task, frequency, frequency, unit);
     }
     
     /**
-     * Stops the BucketRefresher.
+     * Stops the {@link BucketRefresher}
      */
-    public void stop() {
-        synchronized (refreshTask) {
-            if (future != null) {
-                future.cancel(true);
-                future = null;
-            }
-            
-            refreshTask.stop();
+    public synchronized void stop() {
+        if (future != null) {
+            future.cancel(true);
+        }
+        
+        if (pingTask != null) {
+            pingTask.close();
+        }
+        
+        if (lookupTask != null) {
+            lookupTask.close();
         }
     }
     
     @Override
-    public void run() {
-        synchronized (refreshTask) {
-            
-            if(LOG.isTraceEnabled()) {
-                LOG.trace("Random bucket refresh");
-            }
-            
-            // Running the BucketRefresher w/o being bootstrapped is
-            // pointless. Try to bootstrap from the RouteTable if 
-            // it's possible.
-            
-            BootstrapManager bootstrapManager = context.getBootstrapManager();
-            synchronized (bootstrapManager) {
-                if (!bootstrapManager.isBootstrapped()) {
-                    if (!bootstrapManager.isBootstrapping()) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Bootstrap " + context.getName());
-                        }
-                        
-                        // If we are not bootstrapped and have some 
-                        // Nodes in our RouteTable, try to bootstrap
-                        // from the RouteTable
-                        
-                        DHTFutureAdapter<PingResult> listener 
-                                = new DHTFutureAdapter<PingResult>() {
-                            @Override
-                            protected void operationComplete(FutureEvent<PingResult> event) {
-                                if (event.getType() == Type.SUCCESS) {
-                                    context.bootstrap(event.getResult().getContact());
-                                }
-                            }
-                        };
-                        
-                        DHTFuture<PingResult> future = context.findActiveContact();
-                        future.addFutureListener(listener);
-                        
-                    } else {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info(context.getName() + " is bootstrapping");
-                        }
-                    }
-                    
-                    // In any case exit here!
-                    return;
-                }
-            }
-            
-            
-            // Refresh but make sure the task from the previous
-            // run() call has finished as we don't want to run
-            // refresher tasks in parallel
-            if (refreshTask.isDone()) {
-                
-                long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getValue();
-                if (pingNearest > 0L) {
-                    Collection<Contact> nodes = context.getRouteTable().select(
-                            context.getLocalNodeID(), 
-                            KademliaSettings.REPLICATION_PARAMETER.getValue(), 
-                            SelectMode.ALL);
-                    
-                    for (Contact node : nodes) {
-                        if (context.isLocalNode(node)) {
-                            continue;
-                        }
-                        
-                        // Ping only Nodes that haven't responded/contacted us
-                        // for a certain amount of time
-                        long timeStamp = node.getTimeStamp();
-                        if ((System.currentTimeMillis() - timeStamp) >= pingNearest) {
-                            context.ping(node);
-                        }
-                    }
-                }
-                
-                refreshTask.refresh();
-            }
+    public synchronized void close() {
+        open = false;
+        stop();
+    }
+    
+    /**
+     * 
+     */
+    private synchronized void process() {
+        if (!active.getAndSet(true)) {
+            ping();
         }
     }
     
     /**
-     * The RefreshTask iterates one-by-one through a List of KUIDs
-     * and does a lookup for the ID. Every time a lookup finishes it
-     * starts a new lookup for the next ID until all KUIDs have been
-     * looked up.
+     * Sends a bunch of PINGs and calls {@link #lookup()} when done.
      */
-    private class RefreshTask extends DHTFutureAdapter<FindNodeResult> {
+    private synchronized void ping() {
         
-        private Iterator<KUID> bucketIds = null;
-        
-        private DHTFuture<FindNodeResult> future = null;
-        
-        /**
-         * Returns whether or not the refresh task has 
-         * finished (initial state is true)
-         */
-        public synchronized boolean isDone() {
-            return bucketIds == null || !bucketIds.hasNext();
-        }
-        
-        /**
-         * Stops the RefreshTask.
-         */
-        public synchronized void stop() {
-            if (future != null) {
-                future.cancel(true);
-                future = null;
+        Runnable callback = new Runnable() {
+            @Override
+            public void run() {
+                lookup();
             }
-            
-            bucketIds = null;
-        }
+        };
         
-        /**
-         * Starts the refresh.
-         */
-        public synchronized boolean refresh() {
-            Collection<KUID> list = context.getRouteTable().getRefreshIDs(false);
-            
-            if (LOG.isInfoEnabled()) {
-                LOG.info(context.getName() + " has " + list.size() + " Buckets to refresh");
+        long timeout = config.getPingTimeoutInMillis();
+        pingTask = new PingTask(dht, callback, 
+                timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * 
+     */
+    private synchronized void lookup() {
+        Runnable callback = new Runnable() {
+            @Override
+            public void run() {
+                active.set(false);
             }
-            
-            bucketIds = list.iterator();
-            return next();
-        }
+        };
         
-        /**
-         * Lookup the next KUID.
-         */
-        private synchronized boolean next() {
-            if (isDone()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " finished Bucket refreshes");
-                }
-                return false;
-            }
+        long timeout = config.getLookupTimeoutInMillis();
+        lookupTask = new LookupTask(dht, callback, 
+                timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * 
+     */
+    private static abstract class AbstractTask implements Closeable {
+        
+        protected final DHT dht;
+        
+        protected final Runnable callback;
+        
+        protected final long timeout;
+        
+        protected final TimeUnit unit;
+        
+        protected volatile boolean open = true;
+        
+        public AbstractTask(DHT dht, Runnable callback, 
+                long timeout, TimeUnit unit) {
             
-            KUID lookupId = bucketIds.next();
-            future = context.lookup(lookupId);
-            future.addFutureListener(this);
-            
-            if (LOG.isInfoEnabled()) {
-                LOG.info(context.getName() + " started a Bucket refresh lookup for " + lookupId);
-            }
-            
-            return true;
+            this.dht = dht;
+            this.callback = callback;
+            this.timeout = timeout;
+            this.unit = unit;
         }
         
         @Override
-        protected void operationComplete(FutureEvent<FindNodeResult> event) {
-            switch (event.getType()) {
-                case SUCCESS:
-                    handleFutureSuccess(event.getResult());
-                    break;
-                case CANCELLED:
-                    handleCancellationException();
-                    break;
-                case EXCEPTION:
-                    handleExecutionException(event.getException());
-                    break;
+        public void close() {
+            open = false;
+        }
+    }
+    
+    /**
+     * 
+     */
+    private static class PingTask extends AbstractTask {
+        
+        private final EventListener<FutureEvent<PingEntity>> listener 
+                = new EventListener<FutureEvent<PingEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<PingEntity> event) {
+                doNext();
+            }
+        };
+        
+        private final Contact[] contacts;
+        
+        private int index = 0;
+        
+        private volatile DHTFuture<PingEntity> future = null;
+        
+        public PingTask(DHT dht, 
+                Runnable callback, 
+                long timeout, TimeUnit unit) {
+            super(dht, callback, timeout, unit);
+            
+            List<Contact> contacts = new ArrayList<Contact>();
+            
+            long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getTimeInMillis();
+            
+            if (0L < pingNearest) {
+                Contact localhost = dht.getLocalhost();
+                RouteTable routeTable = dht.getRouteTable();
+                Collection<Contact> nodes = routeTable.select(
+                        localhost.getContactId(),
+                        KademliaSettings.K, 
+                        SelectMode.ALL);
+                
+                
+                for (Contact node : nodes) {
+                    if (localhost.equals(node)) {
+                        continue;
+                    }
+                    
+                    long timeStamp = node.getTimeStamp();
+                    long time = System.currentTimeMillis() - timeStamp;
+                    
+                    if (time >= pingNearest) {
+                        contacts.add(node);
+                    }
+                }
+            }
+            
+            this.contacts = contacts.toArray(new Contact[0]);
+            
+            doNext();
+        }
+        
+        @Override
+        public void close() {
+            super.close();
+            
+            DHTFuture<PingEntity> future = this.future;
+            if (future != null) {
+                future.cancel(true);
             }
         }
+        
+        private void doNext() {
+            if (!open || contacts == null 
+                    || index >= contacts.length) {
+                EventUtils.fireEvent(callback);
+                return;
+            }
+            
+            Contact dst = contacts[index++];
+            
+            future = dht.ping(dst, timeout, unit);
+            future.addFutureListener(listener);
+        }
+    }
+    
+    /**
+     * 
+     */
+    private static class LookupTask extends AbstractTask {
+        
+        private final EventListener<FutureEvent<NodeEntity>> listener 
+                = new EventListener<FutureEvent<NodeEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<NodeEntity> event) {
+                doNext();
+            }
+        };
+        
+        private final KUID[] lookupIds;
+        
+        private int index = 0;
+        
+        private volatile DHTFuture<NodeEntity> future = null;
+        
+        public LookupTask(DHT dht, 
+                Runnable callback, 
+                long timeout, TimeUnit unit) {
+            
+            super(dht, callback, timeout, unit);
+            
+            RouteTable routeTable = dht.getRouteTable();
+            Collection<KUID> list = routeTable.getRefreshIDs(false);
+            this.lookupIds = list.toArray(new KUID[0]);
+            
+            doNext();
+        }
+        
+        @Override
+        public void close() {
+            super.close();
+            
+            DHTFuture<NodeEntity> future = this.future;
+            if (future != null) {
+                future.cancel(true);
+            }
+        }
+        
+        private void doNext() {
+            if (!open || lookupIds == null 
+                    || index >= lookupIds.length) {
+                EventUtils.fireEvent(callback);
+                return;
+            }
+            
+            KUID next = lookupIds[index++];
+            
+            future = dht.lookup(next, timeout, unit);
+            future.addFutureListener(listener);
+        }
+    }
+    
+    /**
+     * 
+     */
+    public static class Config {
 
-        private void handleFutureSuccess(FindNodeResult result) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info(result);
-            }
+        private volatile long pingTimeout 
+            = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
+        
+        private volatile long lookupTimeout 
+            = LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getTimeInMillis();
+        
+        public Config() {
             
-            if (!next()) {
-                stop();
-            }
         }
         
-        private void handleExecutionException(ExecutionException e) {
-            LOG.error("ExecutionException", e);
-            
-            if (!next()) {
-                stop();
-            }
+        /**
+         * 
+         */
+        public long getPingTimeout(TimeUnit unit) {
+            return unit.convert(pingTimeout, TimeUnit.MILLISECONDS);
         }
         
-        private void handleCancellationException() {
-            LOG.trace("Cancelled");
-            stop();
+        /**
+         * 
+         */
+        public long getPingTimeoutInMillis() {
+            return getPingTimeout(TimeUnit.MILLISECONDS);
+        }
+        
+        /**
+         * 
+         */
+        public void setPingTimeout(long timeout, TimeUnit unit) {
+            this.pingTimeout = unit.toMillis(timeout);
+        }
+        
+        /**
+         * 
+         */
+        public long getLookupTimeout(TimeUnit unit) {
+            return unit.convert(lookupTimeout, TimeUnit.MILLISECONDS);
+        }
+        
+        /**
+         * 
+         */
+        public long getLookupTimeoutInMillis() {
+            return getLookupTimeout(TimeUnit.MILLISECONDS);
+        }
+        
+        /**
+         * 
+         */
+        public void setLookupTimeout(long timeout, TimeUnit unit) {
+            this.lookupTimeout = unit.toMillis(timeout);
         }
     }
 }

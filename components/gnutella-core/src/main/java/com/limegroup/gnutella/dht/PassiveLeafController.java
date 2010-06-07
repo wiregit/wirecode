@@ -1,62 +1,146 @@
 package com.limegroup.gnutella.dht;
 
-import org.limewire.mojito.Context;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
+
+import org.limewire.mojito.DefaultDHT;
+import org.limewire.mojito.DefaultMojitoDHT;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.ValueKey;
+import org.limewire.mojito.BootstrapManager.State;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.io.BootstrapConfig;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.message.MessageFactory;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.Vendor;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.DatabaseImpl;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito.util.IoUtils;
 
+import com.google.inject.Inject;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
-/**
- * Controls passive leaf nodes (DHT nodes which are Gnutella leaves that 
- * do not fulfill the requirements to become active DHT Nodes). Passive leaf nodes
- * must be able to receive solicited UDP to communicate with DHT nodes. They 
- * also mark mark themselves as firewalled so that nobody will add them to 
- * the RouteTables. 
- * <p>
- * Passive leaf nodes must be connected (via Gnutella) to a DHT 
- * enabled Ultrapeer. The reasoning is that a passive leaf node does not bootstrap, 
- * nor performs any other DHT maintenance operations like refreshing the Buckets 
- * to avoid additional load on the DHT. They depend entirely on their 
- * Ultrapeer which feeds them constantly with fresh Contacts. The RouteTable of 
- * a passive leaf Node is a simple List of size k with LRU eviction (see 
- * <a href="http://en.wikipedia.org/wiki/Cache_algorithms">Least Recently Used</a>
- * caching algorithm). 
- */
-class PassiveLeafController extends AbstractDHTController {
+public class PassiveLeafController extends AbstractController {
 
-    private RouteTable routeTable;
+    private static final String NAME = "LeafDHT";
     
-    PassiveLeafController(Vendor vendor, Version version,
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
-            DHTControllerFacade dhtControllerFacade) {
-        super(vendor, version, dispatcher, DHTMode.PASSIVE_LEAF,
-                dhtControllerFacade);
+    private final RouteTable routeTable = new PassiveLeafRouteTable(
+            DHTManager.VENDOR, DHTManager.VERSION);
+    
+    private final DefaultMojitoDHT dht;
+    
+    @Inject
+    public PassiveLeafController(Transport transport, 
+            MessageFactory messageFactory,
+            NetworkManager networkManager,
+            HostFilter hostFilter) throws UnknownHostException {
+        super(DHTMode.PASSIVE_LEAF, 
+                transport, 
+                networkManager);
+        
+        Database database = new DatabaseImpl();
+        
+        dht = new LeafContext(NAME, 
+                messageFactory, routeTable, database);
+        dht.setHostFilter(hostFilter);
+        init(dht);
+    }
+    
+    private void init(DefaultDHT context) 
+            throws UnknownHostException {
+        LocalContact localhost = context.getLocalhost();
+        initLocalhost(localhost);
+    }
+    
+    @Override
+    public void start() throws IOException {
+        super.start();
     }
 
     @Override
-    protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
-        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveLeafDHT", vendor, version);
-        
-        ((Context)dht).setBootstrapped(true);
-        ((Context)dht).setBucketRefresherDisabled(true);
-        
-        routeTable = new PassiveLeafRouteTable(vendor, version);
-        dht.setRouteTable(routeTable);
-        assert (dht.isFirewalled());
-        
+    public void close() throws IOException {
+        IoUtils.closeAll(dht);
+    }
+    
+    @Override
+    public MojitoDHT getMojitoDHT() {
         return dht;
     }
+    
+    @Override
+    public boolean isRunning() {
+        return dht.isBound();
+    }
+    
+    @Override
+    public boolean isReady() {
+        return isRunning() && dht.isReady();
+    }
+    
+    @Override
+    public boolean isBooting() {
+        return isRunning() && dht.isBooting();
+    }
 
     @Override
-    public void start() {
-        super.start();
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
+    
+    @Override
+    public DHTFuture<ValueEntity> get(ValueKey key) {
+        return dht.get(key);
+    }
+
+    @Override
+    public DHTFuture<StoreEntity> put(KUID key, Value value) {
+        return dht.put(key, value);
+    }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
+        return dht.enqueue(key, value);
+    }
+    
+    @Override
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key) {
+        return dht.getAll(key);
+    }
+
+    @Override
+    public void handleContactsMessage(DHTContactsMessage msg) {
+        for (Contact contact : msg.getContacts()) {
+            routeTable.add(contact);
+        }
+    }
+    
+    private static class LeafContext extends DefaultMojitoDHT {
+
+        public LeafContext(String name, MessageFactory messageFactory, 
+                RouteTable routeTable, Database database) {
+            super(name, messageFactory, routeTable, database);
+            
+            // Passive-Leafs are out of the box ready!
+            getBootstrapManager().setCustomState(State.READY);
+        }
         
-        if (isRunning()) {
-            sendUpdatedCapabilities();
+        @Override
+        protected DHTFuture<BootstrapEntity> bootstrap(
+                BootstrapConfig config, long timeout, TimeUnit unit) {
+            return new DHTValueFuture<BootstrapEntity>(
+                    new UnsupportedOperationException());
         }
     }
 }

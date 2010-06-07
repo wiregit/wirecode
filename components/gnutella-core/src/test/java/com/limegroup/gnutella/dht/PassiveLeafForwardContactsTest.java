@@ -2,11 +2,12 @@ package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -20,10 +21,11 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -55,7 +57,6 @@ import com.limegroup.gnutella.util.EmptyResponder;
  */
 public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
-    
     private static final int PORT = 6667;
     
     private List<MojitoDHT> dhts;
@@ -82,19 +83,19 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
+        
         doSettings();
         
-        final NodeAssigner na = new NodeAssignerStub();
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);
-                bind(NodeAssigner.class).toInstance(na);
-                bind(BandwidthCollector.class).toInstance(new BandwidthCollectorStub());
-                bind(BandwidthCollectorDriver.class).toInstance(new BandwidthCollectorStub());
+                bind(NodeAssigner.class).to(NodeAssignerStub.class);
+                bind(BandwidthCollector.class).to(BandwidthCollectorStub.class);
+                bind(BandwidthCollectorDriver.class).to(BandwidthCollectorStub.class);
             }            
         });
-
+        
         // start an instance of LimeWire in Ultrapeer mode
         injector.getInstance(LifecycleManager.class).start();
             
@@ -109,12 +110,19 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         connectionManager = injector.getInstance(ConnectionManager.class);
         
         dhtManager = injector.getInstance(DHTManager.class);
+        
         // Start and bootstrap a bunch of DHT Nodes
-        dhts = Collections.emptyList();
         dhts = MojitoUtils.createBootStrappedDHTs(2);
     }
 
-    private void doSettings() {
+    @Override
+    protected void tearDown() throws Exception {
+        IoUtils.closeAll(dhts);
+        injector.getInstance(LifecycleManager.class).shutdown();
+    }
+    
+    private static void doSettings() {
+        
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -126,10 +134,10 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        ConnectionSettings.DISABLE_UPNP.setValue(true);
         
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(
                 new String[] {"*.*.*.*"});
@@ -147,7 +155,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(true);
         DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(true);
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
-        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
@@ -156,27 +163,13 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         // We're working on the loopback. Everything should be done
         // in less than 500ms
-        NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
-        
-        // Nothing should take longer than 1.5 seconds. If we start seeing
-        // LockTimeoutExceptions on the loopback then check this Setting!
-        ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        NetworkSettings.DEFAULT_TIMEOUT.setTime(500, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
-        dhts = null;
-        
-        injector.getInstance(LifecycleManager.class).shutdown();
-    }
-    
     public void testForwardContacts() throws Exception {
         // There should be no connections
         assertEquals(0, connectionManager.getNumConnections());
-
+        
         // Connect a leaf Node to the Ultrapeer
         BlockingConnection out = createLeafConnection();
         try {
@@ -199,7 +192,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             addPassiveLeafCapability();
            
             // Tell our Ultrapeer that we've PASSIVE_LEAF mode enabled
-            CapabilitiesVM vm = injector.getInstance(CapabilitiesVMFactory.class).getCapabilitiesVM();
+            CapabilitiesVM vm = injector.getInstance(
+                    CapabilitiesVMFactory.class).getCapabilitiesVM();
             assertEquals(0, vm.isPassiveLeafNode());
             out.send(vm);
             out.flush();
@@ -219,7 +213,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             long firstMsg = System.currentTimeMillis() + 58000;
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
@@ -237,20 +231,20 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // And check what the leaf is receiving...
             Set<Contact> nodes = new HashSet<Contact>();
-                while(true) {
-                    Message msg = out.receive(10000);
-                    if (msg instanceof DHTContactsMessage) {
-                        DHTContactsMessage message = (DHTContactsMessage)msg;
-                        assertEquals(10,message.getContacts().size());
-                        nodes.addAll(message.getContacts());
-                        break;
-                    }
+            while(true) {
+                Message msg = out.receive(10000);
+                if (msg instanceof DHTContactsMessage) {
+                    DHTContactsMessage message = (DHTContactsMessage)msg;
+                    assertEquals(10,message.getContacts().length);
+                    nodes.addAll(Arrays.asList(message.getContacts()));
+                    break;
                 }
+            }
             
             // the ultrapeer id should not be sent as ups are passive.
-            for (Contact c : nodes) 
-                assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
-            
+            for (Contact c : nodes) {
+                assertFalse(dhtManager.getMojitoDHT().getContactId().equals(c.getContactId()));
+            }
         } finally {
             out.close();
         }
@@ -293,7 +287,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(350);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
@@ -356,7 +350,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(250);
-            assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
+            assertEquals(DHTMode.PASSIVE, dhtManager.getMode());
             
             // Bootstrap the Ultrapeer
             dhtManager.getMojitoDHT().bootstrap(dhts.get(0).getContactAddress()).get();
@@ -379,7 +373,9 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     }
     
     private void addPassiveLeafCapability() {
-        CapabilitiesVMFactoryImplStub factory = (CapabilitiesVMFactoryImplStub) injector.getInstance(CapabilitiesVMFactory.class);
+        CapabilitiesVMFactoryImplStub factory 
+            = (CapabilitiesVMFactoryImplStub) injector.getInstance(
+                    CapabilitiesVMFactory.class);
         factory.addMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), 0);
     }
 
@@ -392,21 +388,5 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         BlockingConnection c = injector.getInstance(BlockingConnectionFactory.class).createConnection("localhost", PORT);
         c.initialize(headers, new EmptyResponder(), 1000);
         return c;
-    }
-    
-    private class NodeAssignerStub implements NodeAssigner{
-
-        public boolean isTooGoodUltrapeerToPassUp() {
-            return false;
-        }
-
-
-        public void start() {
-        }
-
-
-        public void stop() {
-        }
-        
     }
 }

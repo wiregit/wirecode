@@ -3,35 +3,39 @@ package com.limegroup.gnutella.dht;
 import java.util.EventObject;
 
 /**
- * <code>DHTEvent</code>s are fired for DHT state changes.
+ * {@link DHTEvent}s are fired for DHT state changes.
  */
 public class DHTEvent extends EventObject {
-    
+
     private static final long serialVersionUID = 912814275883336092L;
 
     /**
-     * Defines the various type of <code>DHTEvent</code>s, either starting, 
-     * connected or stopped.
+     * Defines the various type of {@link DHTEvent}s, either starting, 
+     * connecting, connected or stopped.
      */
     public static enum Type {
         STARTING,
+        CONNECTING,
         CONNECTED,
         STOPPED;
     }
     
     private final Type type;
-
-    public DHTEvent(DHTController source, Type type) {
-        super(source);
+    
+    public DHTEvent(Type type, DHTManager manager) {
+        super(manager);
         this.type = type;
-    }
-
-    public DHTController getDHTController() {
-        return (DHTController)getSource();
     }
     
     public Type getType() {
         return type;
+    }
+    
+    /**
+     * Returns the {@link DHTManager}.
+     */
+    public DHTManager getManager() {
+        return (DHTManager)getSource();
     }
     
     @Override

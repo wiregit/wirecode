@@ -19,10 +19,13 @@
  
 package org.limewire.mojito.settings;
 
+import java.util.concurrent.TimeUnit;
+
+import org.limewire.mojito.routing.Contact;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Setting for Kademlia lookups.
@@ -48,23 +51,23 @@ public class LookupSettings extends MojitoProps {
     /**
      * The FIND_NODE lookup timeout.
      */
-    public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 
-                90L*1000L, "Mojito.FindNodeLookupTimeout", 10L*1000L, 5L*60L*1000L);
+    public static final TimeSetting FIND_NODE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("FIND_NODE_LOOKUP_TIMEOUT", 
+                90L, TimeUnit.SECONDS,
+                "Mojito.FindNodeLookupTimeout", 
+                10L, TimeUnit.SECONDS, 
+                5L, TimeUnit.MINUTES);
 
     /**
      * The FIND_VALUE lookup timeout.
      */
-    public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createRemoteLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
-                90L*1000L, "Mojito.FindValueLookupTimeout", 10L*1000L, 5L*60L*1000L);
-
-    /**
-     * Whether or not a value lookup is exhaustive.
-     */
-    public static final BooleanSetting EXHAUSTIVE_VALUE_LOOKUP
-        = FACTORY.createBooleanSetting("EXHAUSTIVE_VALUE_LOOKUP", false);
-
+    public static final TimeSetting FIND_VALUE_LOOKUP_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("FIND_VALUE_LOOKUP_TIMEOUT", 
+                90L, TimeUnit.SECONDS,
+                "Mojito.FindValueLookupTimeout", 
+                10L, TimeUnit.SECONDS,
+                5L, TimeUnit.MINUTES);
+    
     /**
      * The number of parallel FIND_VALUE lookups.
      */
@@ -98,21 +101,37 @@ public class LookupSettings extends MojitoProps {
                 0.0f, "Mojito.ContactsScrubberRequiredRatio", 0.0f, 1.0f);
     
     /**
-     * Returns the lock timeout for a lookup process.
-     * 
-     * @param findNode whether it's a FIND_NODE or FIND_VALUE operation
+     * Whether or not a lookup is exhaustive.
      */
-    public static long getWaitOnLock(boolean findNode) {
-        long waitOnLock = 0L;
-        
-        if (findNode) {
-            waitOnLock += ContextSettings.getWaitOnLock(
-                    LookupSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue());
-        } else {
-            waitOnLock += ContextSettings.getWaitOnLock(
-                    LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue());
-        }
-        
-        return waitOnLock;
-    }
+    public static final BooleanSetting EXHAUSTIVE
+        = FACTORY.createBooleanSetting("EXHAUSTIVE", false);
+    
+    /**
+     * Whether or not {@link Contact}s should be picket randomly from 
+     * the set of the K-closest. This distribute the load more evenly
+     * among the K-closest {@link Contact}s.
+     */
+    public static final BooleanSetting RANDOMIZE
+        = FACTORY.createRemoteBooleanSetting("RANDOMIZE", 
+                false, "Mojito.Randomize");
+    
+    /**
+     * 
+     */
+    public static final TimeSetting BOOST_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("BOOST_FREQUENCY", 
+                0L, TimeUnit.MILLISECONDS, /* 0 = disabled! */
+                "Mojito.BoostLookupFrequency", 
+                0L, TimeUnit.MILLISECONDS,
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    public static final TimeSetting BOOST_TIMEOUT
+        = FACTORY.createRemoteTimeSetting("BOOST_TIMEOUT", 
+                5L, TimeUnit.SECONDS, 
+                "Mojito.BoostLookupTimeout", 
+                0L, TimeUnit.MILLISECONDS,
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 }

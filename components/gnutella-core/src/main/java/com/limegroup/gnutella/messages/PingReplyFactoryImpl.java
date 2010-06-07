@@ -29,6 +29,7 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
 
@@ -39,7 +40,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
     private final Provider<Statistics> statistics;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<HostCatcher> hostCatcher;
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final LocalPongInfo localPongInfo;
     private final MACCalculatorRepositoryManager macCalculatorRepositoryManager;
     private final NetworkInstanceUtils networkInstanceUtils;
@@ -50,7 +51,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Provider<Statistics> statistics,
             Provider<ConnectionManager> connectionManager,
             Provider<HostCatcher> hostCatcher,
-            Provider<DHTManager> dhtManager,
+            Provider<DHTManagerImpl> dhtManager,
             LocalPongInfo localPongInfo,
             MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
             NetworkInstanceUtils networkInstanceUtils) {
@@ -506,16 +507,17 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         byte[] payload = new byte[3];
 
         // put version
-        int version = dhtManager.get().getVersion().shortValue();
+        int version = DHTManager.VERSION.shortValue();
 
         ByteUtils.short2beb((short) version, payload, 0);
-
-        if (dhtManager.get().isMemberOfDHT()) {
-            DHTMode mode = dhtManager.get().getDHTMode();
-            assert (mode != null);
+        
+        DHTManager manager = dhtManager.get();
+        synchronized (manager) {
+            DHTMode mode = DHTMode.INACTIVE;
+            if (manager.isReady()) {
+                mode = manager.getMode();
+            }
             payload[2] = mode.byteValue();
-        } else {
-            payload[2] = DHTMode.INACTIVE.byteValue();
         }
 
         // add it

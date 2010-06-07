@@ -1,22 +1,26 @@
 package com.limegroup.gnutella.altlocs;
 
+import java.io.IOException;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.api.Invocation;
-import org.jmock.lib.action.CustomAction;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
@@ -37,7 +41,8 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         // commented out since magnet search is not performed on add right now
         // use magnet without sha1 so we can just check if 
 //        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
-        final DownloaderGuidAlternateLocationFinder endpointFinder = new DownloaderGuidAlternateLocationFinder(null, null, null);
+        final DownloaderGuidAlternateLocationFinder endpointFinder 
+            = new DownloaderGuidAlternateLocationFinder(null, null, null);
         
         context.checking(new Expectations() {{
             // commented out since magnet search is not performed on add right now
@@ -57,8 +62,8 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    @SuppressWarnings("unchecked")
-    public void testSearchForPushEndpointsNonFirewalledResult() throws Exception {
+    public void testSearchForPushEndpointsNonFirewalledResult() 
+            throws IOException, InterruptedException {
         final AlternateLocationFactory alternateLocationFactory = context.mock(AlternateLocationFactory.class);
         final PushEndpointService pushEndpointManager = context.mock(PushEndpointService.class);
         final AltLocManager altLocManager = new AltLocManager();
@@ -66,21 +71,20 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
         final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
         
-        final DownloaderGuidAlternateLocationFinder endpointFinder = 
-            new DownloaderGuidAlternateLocationFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
+        final DownloaderGuidAlternateLocationFinder endpointFinder 
+            = new DownloaderGuidAlternateLocationFinder(
+                pushEndpointManager, alternateLocationFactory, altLocManager);
         
         final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
         final URN guidUrn = URN.createGUIDUrn(guid);
         
+        final DHTFuture<PushEndpoint> future 
+            = new DHTValueFuture<PushEndpoint>(result);
+        
         context.checking(new Expectations() {{
-            one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));
-            will(new CustomAction("call listener") {
-                public Object invoke(Invocation invocation) throws Throwable {
-                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
-                    return null;
-                }
-            });
+            one(pushEndpointManager).findPushEndpoint(with(equal(guid)));
+            will(returnValue(future));
             
             allowing(result).getValidExternalAddress();
             will(returnValue(ipPort));
@@ -93,16 +97,23 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
             will(returnValue(sha1Urn));
         }});
         
-        try {
-            endpointFinder.searchForPushEndpoints(sha1Urn, Collections.singleton(guidUrn));
-            fail("AltLocManager was not called, which should have caused an IllegalState exception for an invalid AlternateLocation");
-        } catch (IllegalStateException ise) {
+        endpointFinder.searchForPushEndpoints(
+                sha1Urn, Collections.singleton(guidUrn));
+        
+        // The DownloaderGuidAlternateLocationFinder class is calling
+        // everything after findPushEndpoint() on Mojito's internal
+        // Event-Thread which is causing a race-condition with Mockery's
+        // assertIsSatisfied() must wait for the event to finish before
+        // it can check the final state.
+        if (!awaitEventThread(future, 10L, TimeUnit.MILLISECONDS)) {
+            fail("Shouldn't have failed!");
         }
+        
         context.assertIsSatisfied();
     }
     
-    @SuppressWarnings("unchecked")
-    public void testSearchForPushEndpointsFirewalledResult() throws Exception {
+    public void testSearchForPushEndpointsFirewalledResult() 
+            throws IOException, InterruptedException {
         final AlternateLocationFactory alternateLocationFactory = context.mock(AlternateLocationFactory.class);
         final PushEndpointService pushEndpointManager = context.mock(PushEndpointService.class);
         final AltLocManager altLocManager = new AltLocManager();
@@ -111,21 +122,20 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
         final IpPort otherIpPort = new IpPortImpl("129.155.4.5:6667");
         
-        final DownloaderGuidAlternateLocationFinder endpointFinder = 
-            new DownloaderGuidAlternateLocationFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
+        final DownloaderGuidAlternateLocationFinder endpointFinder 
+            = new DownloaderGuidAlternateLocationFinder(
+                pushEndpointManager, alternateLocationFactory, altLocManager);
         
         final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
         final URN guidUrn = URN.createGUIDUrn(guid);
         
+        final DHTFuture<PushEndpoint> future 
+            = new DHTValueFuture<PushEndpoint>(result);
+        
         context.checking(new Expectations() {{
-            one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));
-            will(new CustomAction("call listener") {
-                public Object invoke(Invocation invocation) throws Throwable {
-                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
-                    return null;
-                }
-            });
+            one(pushEndpointManager).findPushEndpoint(with(equal(guid)));
+            will(returnValue(future));
             
             allowing(result).getValidExternalAddress();
             will(returnValue(ipPort));
@@ -138,12 +148,32 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
             will(returnValue(sha1Urn));
         }});
         
-        try {
-            endpointFinder.searchForPushEndpoints(sha1Urn, Collections.singleton(guidUrn));
-            fail("AltLocManager was not called, which should have caused an IllegalState exception for an invalid AlternateLocation");
-        } catch (IllegalStateException ise) {
+        endpointFinder.searchForPushEndpoints(
+                sha1Urn, Collections.singleton(guidUrn));
+        
+        // The DownloaderGuidAlternateLocationFinder class is calling
+        // everything after findPushEndpoint() on Mojito's internal
+        // Event-Thread which is causing a race-condition with Mockery's
+        // assertIsSatisfied() must wait for the event to finish before
+        // it can check the final state.
+        if (!awaitEventThread(future, 10L, TimeUnit.MILLISECONDS)) {
+            fail("Shouldn't have failed!");
         }
+        
         context.assertIsSatisfied();
     }
 
+    private static <T> boolean awaitEventThread(DHTFuture<T> future, 
+            long timeout, TimeUnit unit) throws InterruptedException {
+        
+        final CountDownLatch latch = new CountDownLatch(1);
+        future.addFutureListener(new EventListener<FutureEvent<T>>() {
+            @Override
+            public void handleEvent(FutureEvent<T> event) {
+                latch.countDown();
+            }
+        });
+        
+        return latch.await(timeout, unit);
+    }
 }

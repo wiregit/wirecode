@@ -16,8 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
-import org.limewire.mojito.messages.DHTMessage.OpCode;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.RequestMessage;
 
 /**
  * Imagine the local Node's ID is at 1/3rd of the available
@@ -50,6 +50,7 @@ class SnowMan extends Painter {
     
     @Override
     public void paint(Component c, Graphics2D g2) {
+        
         int width = c.getWidth();
         int height = c.getHeight();
         
@@ -76,13 +77,13 @@ class SnowMan extends Painter {
     }
     
     @Override
-    public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
-        if (nodeId == null) {
-            return;
-        }
+    public void handle(boolean outgoing, KUID nodeId, 
+            SocketAddress dst, Message message) {
         
-        synchronized (nodes) {
-            nodes.add(new Node(dot, type, nodeId, opcode, request));
+        if (nodeId != null) {
+            synchronized (nodes) {
+                nodes.add(new Node(dot, outgoing, nodeId, message));
+            }
         }
     }
     
@@ -95,15 +96,15 @@ class SnowMan extends Painter {
     
     private static class Node {
         
+        private final long timeStamp = System.currentTimeMillis();
+        
         private final Ellipse2D.Double dot;
         
-        private final EventType type;
+        private final boolean outgoing;
         
         private final KUID nodeId;
         
-        private final boolean request;
-        
-        private final long timeStamp = System.currentTimeMillis();
+        private final Message message;
         
         private final Arc2D.Double arc = new Arc2D.Double();
         
@@ -113,17 +114,14 @@ class SnowMan extends Painter {
         
         private final Stroke stroke;
         
-        public Node(Ellipse2D.Double dot, EventType type, KUID nodeId, OpCode opcode, boolean request) {
+        public Node(Ellipse2D.Double dot, boolean outgoing, 
+                KUID nodeId, Message message) {
             this.dot = dot;
-            this.type = type;
+            this.outgoing = outgoing;
             this.nodeId = nodeId;
-            this.request = request;
+            this.message = message;
             
-            this.stroke = getStrokeForOpCode(opcode);
-            
-            if (nodeId == null) {
-                assert (request && type.equals(EventType.MESSAGE_SENT));
-            }
+            this.stroke = getStrokeForMessage(message);
         }
         
         private int alpha() {
@@ -179,9 +177,9 @@ class SnowMan extends Painter {
             int green = 0;
             int blue = 0;
             
-            if (type.equals(EventType.MESSAGE_SENT)) {
+            if (outgoing) {
                 red = 255;
-                if (!request) {
+                if (!(message instanceof RequestMessage)) {
                     blue = 255;
                 }
                 if (localhost.y < nodeY) {
@@ -193,7 +191,7 @@ class SnowMan extends Painter {
                 }
             } else {
                 green = 255;
-                if (request) {
+                if (message instanceof RequestMessage) {
                     blue = 255;
                 }
                 if (localhost.y < nodeY) {

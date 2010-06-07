@@ -89,7 +89,7 @@ public final class CollectionUtils {
      * the first K elements
      */
     public static <T> Collection<T> getCollection(Collection<T> c) {
-        return getCollection(c, KademliaSettings.REPLICATION_PARAMETER.getValue());
+        return getCollection(c, KademliaSettings.K);
     }
     
     /**

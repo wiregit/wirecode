@@ -1,0 +1,463 @@
+package com.limegroup.gnutella.dht;
+
+import java.io.Closeable;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedSizeLIFOSet;
+import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.core.settings.DHTSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.CollisionException;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.EventUtils;
+import org.limewire.util.ExceptionUtils;
+
+import com.google.inject.Provider;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UniqueHostPinger;
+import com.limegroup.gnutella.dht.NodeFetcher.NodeFetcherListener;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+
+/**
+ * A helper class that tries to bootstrap the DHT. It utilizes
+ * {@link Contact}s from previous sessions and fetches addresses
+ * from the Gnutella Network.
+ */
+class BootstrapWorker implements Closeable {
+
+    private static final Log LOG 
+        = LogFactory.getLog(BootstrapWorker.class);
+    
+    private final List<BootstrapListener> listeners 
+        = new CopyOnWriteArrayList<BootstrapListener>();
+    
+    /**
+     * A list of DHT bootstrap hosts coming from the Gnutella network. 
+     * Limit size to 50 for now.
+     */
+    private final Set<SocketAddress> addresses 
+        = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
+    
+    private final MojitoDHT dht;
+    
+    private final NodeFetcher nodeFetcher;
+    
+    private boolean open = true;
+    
+    private DHTFuture<PingEntity> pingFuture = null;
+    
+    private DHTFuture<BootstrapEntity> bootFuture = null;
+    
+    public BootstrapWorker(MojitoDHT dht, 
+            ConnectionServices connectionServices,
+            Provider<HostCatcher> hostCatcher,
+            PingRequestFactory pingRequestFactory,
+            Provider<UniqueHostPinger> uniqueHostPinger,
+            Provider<UDPPinger> udpPinger) {
+        
+        this.dht = dht;
+        
+        this.nodeFetcher = new NodeFetcher(connectionServices, 
+                hostCatcher, pingRequestFactory, uniqueHostPinger,
+                udpPinger);
+        
+        nodeFetcher.addNodeFetcherListener(new NodeFetcherListener() {
+            @Override
+            public void handleActiveNode(SocketAddress address) {
+                addActiveNode(address);
+            }
+        });
+    }
+    
+    /**
+     * Returns the {@link NodeFetcher}
+     */
+    public NodeFetcher getNodeFetcher() {
+        return nodeFetcher;
+    }
+    
+    /**
+     * Starts the bootstrapping process.
+     */
+    public synchronized void start(Contact... contacts) {
+        
+        if (!open) {
+            throw new IllegalStateException();
+        }
+        
+        if (dht.isReady()) {
+            return;
+        }
+        
+        if (pingFuture != null) {
+            pingFuture.cancel(true);
+        }
+        
+        if (bootFuture != null) {
+            bootFuture.cancel(true);
+        }
+        
+        if (contacts == null || contacts.length == 0) {
+            tryBootstrap();
+            return;
+        }
+        
+        if (DHTSettings.SORT_BOOTSTRAP_CONTACTS.getValue()) {
+            Contact localhost = dht.getLocalhost();
+            Arrays.sort(contacts, new XorComparator(localhost));
+        }
+        
+        Contact src = dht.getLocalhost();
+        pingFuture = dht.ping(src, contacts);
+        pingFuture.addFutureListener(
+                new EventListener<FutureEvent<PingEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<PingEntity> event) {
+                onPong(event);
+            }
+        });
+        
+        fireConnecting();
+    }
+    
+    /**
+     * Stops the bootstrapping process
+     */
+    public synchronized void stop() {
+        if (nodeFetcher != null) {
+            nodeFetcher.stop();
+        }
+        
+        if (pingFuture != null) {
+            pingFuture.cancel(true);
+        }
+        
+        if (bootFuture != null) {
+            bootFuture.cancel(true);
+        }
+    }
+    
+    /**
+     * Stops and closes the {@link BootstrapWorker}
+     */
+    @Override
+    public synchronized void close() {
+        open = false; 
+        nodeFetcher.close();
+        stop();
+    }
+    
+    /**
+     * Callback method for PONG {@link FutureEvent}s.
+     */
+    private synchronized void onPong(FutureEvent<PingEntity> event) {
+        if (!open) {
+            return;
+        }
+        
+        try {
+            switch (event.getType()) {
+                case SUCCESS:
+                    onPong(event.getResult());
+                    break;
+                case EXCEPTION:
+                    onException(event.getException());
+                    break;
+                default:
+                    onCancellation();
+                    break;
+            }
+        } catch (Throwable t) {
+            ExceptionUtils.reportIfUnchecked(t);
+            uncaughtException(t);
+        }
+    }
+    
+    /**
+     * Callback method for successful PONGs.
+     */
+    private synchronized void onPong(PingEntity entity) {
+        // We got a PONG, stop the NodeFetcher!
+        if (nodeFetcher != null) {
+            nodeFetcher.stop();
+        }
+        
+        Contact src = entity.getContact();
+        
+        bootFuture = dht.bootstrap(src);
+        bootFuture.addFutureListener(
+                new EventListener<FutureEvent<BootstrapEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<BootstrapEntity> event) {
+                onBootstrap(event);
+            }
+        });
+    }
+    
+    /**
+     * Callback method for bootstrap {@link FutureEvent}s.
+     */
+    private synchronized void onBootstrap(FutureEvent<BootstrapEntity> event) {
+        if (!open) {
+            return;
+        }
+        
+        try {
+            switch (event.getType()) {
+                case SUCCESS:
+                    onSuccess();
+                    break;
+                case EXCEPTION:
+                    onException(event.getException());
+                    break;
+                default:
+                    onCancellation();
+                    break;
+            }
+        } catch (Throwable t) {
+            uncaughtException(t);
+        }
+    }
+    
+    /**
+     * Callback method for successful bootstrapping.
+     */
+    private void onSuccess() {
+        fireConnected(true);
+        stop();
+    }
+    
+    /**
+     * Callback method for cancellation.
+     */
+    private void onCancellation() {
+        fireConnected(false);
+        stop();
+    }
+    
+    /**
+     * Callback method for uncaught {@link Exception}s.
+     */
+    private void uncaughtException(Throwable t) {
+        ExceptionUtils.reportIfUnchecked(t);
+        onException(t);
+    }
+    
+    /**
+     * Callback method for {@link Exception}
+     */
+    private synchronized void onException(Throwable t) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Failed to bootstrap", t);
+        }
+        
+        final CollisionException cause 
+            = ExceptionUtils.getCause(t, CollisionException.class);
+        
+        if (cause != null) {
+            fireCollision(cause);
+            return;
+        }
+        
+        fireConnected(false);
+        tryBootstrap();
+    }
+    
+    /**
+     * Adds an active Node's {@link SocketAddress}.
+     */
+    public synchronized void addActiveNode(SocketAddress address) {
+        if (!open) {
+            return;
+        }
+        
+        addresses.add(address);
+        tryBootstrap();
+    }
+    
+    /**
+     * Adds a passive Node's {@link SocketAddress.
+     */
+    public synchronized void addPassiveNode(SocketAddress address) {
+        if (!open) {
+            return;
+        }
+        
+        if (dht.isReady() || dht.isBooting()) {
+            return;
+        }
+        
+        nodeFetcher.ping(address);
+    }
+    
+    /**
+     * Tries to bootstrap the DHT from the next 
+     * {@link SocketAddress} in the queue.
+     */
+    private synchronized void tryBootstrap() {
+        if (!open) {
+            return;
+        }
+        
+        if (dht.isBooting() || dht.isReady()) {
+            return;
+        }
+
+        if (pingFuture != null && !pingFuture.isDone()) {
+            return;
+        }
+        
+        if (addresses.isEmpty()) {
+            SocketAddress address = getSimppHost();
+            if (address != null) {
+                addresses.add(address);
+            }
+        }
+        
+        Iterator<SocketAddress> it = addresses.iterator();
+        if (!it.hasNext()) {
+            if (nodeFetcher != null) {
+                nodeFetcher.start();
+            }
+            
+            return;
+        }
+        
+        SocketAddress address = it.next();
+        it.remove();
+        
+        pingFuture = dht.ping(address);
+        pingFuture.addFutureListener(
+                new EventListener<FutureEvent<PingEntity>>() {
+            @Override
+            public void handleEvent(FutureEvent<PingEntity> event) {
+                onPong(event);
+            }
+        });
+        
+        fireConnecting();
+    }
+    
+    /**
+     * Returns a random {@link SocketAddress} from the SIMPP list.
+     */
+    private static SocketAddress getSimppHost() {
+        String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.get();
+        List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
+
+        for (String hostString : simppHosts) {
+            int index = hostString.indexOf(":");
+            if(index < 0 || index == hostString.length()-1) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("invalid SIMPP host: " + hostString);
+                }
+                
+                continue;
+            }
+            
+            try {
+                String host = hostString.substring(0, index);
+                int port = Integer.parseInt(hostString.substring(index+1).trim());
+                list.add(new InetSocketAddress(host, port));
+            } catch(NumberFormatException nfe) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("invalid host: " + hostString);
+                }
+            }
+        }
+        
+        if (list.isEmpty()) {
+            return null;
+        }
+        
+        return list.get((int)(list.size() * Math.random()));
+    }
+    
+    /**
+     * Adds a {@link BootstrapListener}.
+     */
+    public void addBootstrapListener(BootstrapListener l) {
+        listeners.add(l);
+    }
+    
+    /**
+     * Fires a connectin event.
+     */
+    protected void fireConnecting() {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleConnecting();
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
+    /**
+     * Fires a connected event.
+     */
+    protected void fireConnected(final boolean success) {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleConnected(success);
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
+    /**
+     * Fires a collision event.
+     */
+    protected void fireCollision(final CollisionException ex) {
+        Runnable event = new Runnable() {
+            @Override
+            public void run() {
+                for (BootstrapListener l : listeners) {
+                    l.handleCollision(ex);
+                }
+            }
+        };
+        
+        EventUtils.fireEvent(event);
+    }
+    
+    private static class XorComparator implements Comparator<Contact> {
+        
+        private final KUID localhost;
+        
+        public XorComparator(Contact localhost) {
+            this.localhost = localhost.getContactId();
+        }
+
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            return o1.getContactId().xor(localhost)
+                    .compareTo(o2.getContactId().xor(localhost));
+        }
+    }
+}

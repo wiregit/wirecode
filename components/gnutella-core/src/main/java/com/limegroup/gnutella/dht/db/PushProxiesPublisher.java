@@ -1,222 +1,232 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.inspection.InspectionHistogram;
-import org.limewire.inspection.InspectionPoint;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.mojito.storage.Value;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
- * The PushProxiesPublisher publishes Push Proxy information for 
- * the localhost in the DHT.
- * <p>
- * It implements {@link DHTEventListener} and starts publishing push proxies
- * once the DHT is bootstrapped. It only publishes stable configurations that 
- * have been stable for a certain amount of time specified by 
- * {@link DHTSettings#PUSH_PROXY_STABLE_PUBLISHING_INTERVAL}.
- * <p>
- * Note: For this class to work it must be registered as a listener to
- * {@link DHTManager} before it fires events.
+ * The {@link PushProxiesPublisher} publishes the localhost's
+ * Push-Proxies to the DHT.
  */
 @Singleton
-public class PushProxiesPublisher implements DHTEventListener {
-    
-    private static final Log LOG = LogFactory.getLog(PushProxiesPublisher.class);
-    
-    private volatile PushProxiesValue lastSeenValue;
-    
-    private volatile PushProxiesValue lastPublishedValue;
-    
-    private volatile long lastPublishTime;
-    
-    private final PushProxiesValueFactory pushProxiesValueFactory;
+public class PushProxiesPublisher extends Publisher {
 
-    private final ScheduledExecutorService backgroundExecutor;
-
-    private volatile ScheduledFuture publishingFuture;
-
-    private final DHTManager dhtManager;
+    @InspectablePrimitive(value = "The number of values that have been published")
+    private static final AtomicInteger PUBLISH_COUNT = new AtomicInteger();
     
-    @InspectionPoint("push-proxies-publish-reason")
-    private final InspectionHistogram<String> publishReasons = new InspectionHistogram<String>();
+    private final DHTManager manager;
+    
+    private final NetworkManager networkManager;
+    
+    private final ApplicationServices applicationServices;
+    
+    private final PushEndpointFactory pushEndpointFactory;
+    
+    private volatile long stableTime = -1L;
+    
+    private volatile long publishTime = -1L;
+    
+    private volatile PushProxiesValue pendingValue = null;
+    
+    private volatile PushProxiesValue publishedValue = null;
+    
+    private volatile long pendingTimeStamp = 0L;
+    
+    private volatile long publishedTimeStamp = 0L;
     
     /**
-     * @param dhtManager just needed to hold a lock on it when sending queries
+     * Creates a {@link PushProxiesPublisher}
      */
     @Inject
-    public PushProxiesPublisher(PushProxiesValueFactory pushProxiesValueFactory,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            DHTManager dhtManager) {
-        this.pushProxiesValueFactory = pushProxiesValueFactory;
-        this.backgroundExecutor = backgroundExecutor;
-        this.dhtManager = dhtManager;
-    }
-
-    private PushProxiesValue getCurrentPushproxiesValue() {
-        PushProxiesValue pushProxiesValueForSelf = pushProxiesValueFactory.createDHTValueForSelf();
-        return pushProxiesValueForSelf.getPushProxies().isEmpty() ? null : createCopy(pushProxiesValueForSelf);
-    }
-    
-    private static final PushProxiesValue createCopy(PushProxiesValue original) {
-        return new PushProxiesValueImpl(original.getVersion(), original.getGUID(),
-                original.getFeatures(), original.getFwtVersion(), original.getPort(), original.getPushProxies());
-    }
-
-    /**
-     * Publishes push proxies if they are stable and have changed from the
-     * last time they were published.
-     */
-    void publish() {
-        PushProxiesValue valueToPublish = getValueToPublish();
-        if (valueToPublish != null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("publishing: " + valueToPublish);
-            }
-            GUID guid = new GUID(lastPublishedValue.getGUID());
-            KUID primaryKey = KUIDUtils.toKUID(guid);
-            DHTFuture<StoreResult> future = dhtManager.put(primaryKey, lastPublishedValue);
-            if (LOG.isDebugEnabled() && future != null) {
-                future.addFutureListener(new DHTFutureAdapter<StoreResult>() {
-                    @Override
-                    protected void operationComplete(FutureEvent<StoreResult> event) {
-                        switch (event.getType()) {
-                            case SUCCESS:
-                                LOG.debugf("Success: {0}", event.getResult());
-                                break;
-                            case EXCEPTION:
-                                LOG.debug("Exception", event.getException());
-                                break;
-                            case CANCELLED:
-                                LOG.debug("Cancelled");
-                                break;
-                        }   
-                    }
-                });
-            }
-        }
+    public PushProxiesPublisher(DHTManager manager, 
+            NetworkManager networkManager,
+            ApplicationServices applicationServices,
+            PushEndpointFactory pushEndpointFactory) {
+        this(manager, networkManager, applicationServices, pushEndpointFactory,
+                DHTSettings.PROXY_PUBLISHER_FREQUENCY.getTimeInMillis(), 
+                TimeUnit.MILLISECONDS);
     }
     
     /**
-     * Returns value to publish or null if there is nothing to publish.
-     * <p>
-     * Has the side effect of storing and updating the last published value.
-     * </p>
+     * Creates a {@link PushProxiesPublisher}
      */
-    PushProxiesValue getValueToPublish() {
-        // order is important to compare newest last seen value with last published value
-        if (pushProxiesAreStable() && (valueToPublishChangedSignificantly() || needsToBeRepublished())) {
-            lastPublishedValue = lastSeenValue;
-            lastPublishTime = System.currentTimeMillis();
-            return lastPublishedValue;
-        }
-        return null;
-    }
-    
-    private boolean needsToBeRepublished() {
-        boolean needsRepublish = System.currentTimeMillis() - lastPublishTime >= DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue();
-        if (needsRepublish) {
-            publishReasons.count("time");
-        }
-        return needsRepublish;
-    }
-
-    /**
-     * Returns true if there is a valid last seen value and it differs from
-     * the last published value significantly in the set of push proxies.
-     */
-    boolean valueToPublishChangedSignificantly() {
-        // no data or values the same
-        if (lastSeenValue == null || lastSeenValue.equals(lastPublishedValue)) {
-            return false;
-        }
-        // never published before
-        if (lastPublishedValue == null) {
-            return true;
-        }
-        // publish if fwt capabilities have changed
-        if (lastSeenValue.getFwtVersion() != lastPublishedValue.getFwtVersion()) {
-            publishReasons.count("fwt");
-            return true;
-        }
-        // value has changed, if only one or less proxies are still the same
-        // we republish
-        IpPortSet old = new IpPortSet(lastPublishedValue.getPushProxies());
-        old.retainAll(lastSeenValue.getPushProxies());
-        boolean differentProxies = old.size() < 2;
-        if (differentProxies) {
-            publishReasons.count("proxies");
-        }
-        return differentProxies;
-    }
-    
-    /**
-     * Returns true if the current value of push proxies is the same as the last 
-     * time this method was called.
-     * <p>
-     * Has the side effect of storing the last seen value.
-     * </p> 
-     */
-    boolean pushProxiesAreStable() {
-        PushProxiesValue previousValue = lastSeenValue;
-        lastSeenValue = getCurrentPushproxiesValue();
-        if (lastSeenValue == null) {
-            return false;
-        }
-        return lastSeenValue.equals(previousValue);
-    }
-
-
-    @Override
-    public String toString() {
-        StringBuilder buffer = new StringBuilder("PushProxiesPublisher: ");
-        buffer.append(lastPublishedValue);
-        return buffer.toString();
-    }
-    
-    public synchronized void handleDHTEvent(DHTEvent event) {
-        if (event.getType() == Type.CONNECTED) {
-            LOG.debug("starting push proxy publishing");
-            // order of events is not reliable, be defensive and cancel existing task
-            if (publishingFuture != null) {
-                publishingFuture.cancel(false);
-            }
-            long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
-            long initialDelay = (long)(Math.random() * interval);
-            publishingFuture = backgroundExecutor.scheduleWithFixedDelay(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
-        } else if (event.getType() == Type.STOPPED) {
-            LOG.debug("stopping push proxy publishing");
-            if (publishingFuture != null) {
-                publishingFuture.cancel(false);
-                publishingFuture = null;
-            }
-        }
-    }
-    
-    private class PublishingRunnable implements Runnable {
+    public PushProxiesPublisher(DHTManager manager, 
+            NetworkManager networkManager,
+            ApplicationServices applicationServices,
+            PushEndpointFactory pushEndpointFactory,
+            long frequency, TimeUnit unit) {
+        super(frequency, unit);
         
-        public void run() {
-            publish();
+        this.manager = manager;
+        this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
+        this.pushEndpointFactory = pushEndpointFactory;
+    }
+    
+    /**
+     * Sets the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT.
+     */
+    public void setStableProxiesTime(long time, TimeUnit unit) {
+        stableTime = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT in the given {@link TimeUnit}.
+     */
+    public long getStableProxiesTime(TimeUnit unit) {
+        long stableTime = this.stableTime;
+        if (stableTime != -1L) {
+            return unit.convert(stableTime, TimeUnit.MILLISECONDS);
         }
+        
+        return DHTSettings.STABLE_PROXIES_TIME.getTime(unit);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} must stay stable (unchanged)
+     * before it's being published to the DHT in milliseconds.
+     */
+    public long getStableProxiesTimeInMillis() {
+        return getStableProxiesTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Sets the time a {@link PushProxiesValue} needs to be re-published.
+     */
+    public void setPublishProxiesTime(long time, TimeUnit unit) {
+        publishTime = unit.toMillis(time);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} needs to be
+     * re-published in the given {@link TimeUnit}.
+     */
+    public long getPublishProxiesTime(TimeUnit unit) {
+        long publishTime = this.publishTime;
+        if (publishTime != -1L) {
+            return unit.convert(publishTime, TimeUnit.MILLISECONDS);
+        }
+        
+        return DHTSettings.PUBLISH_PROXIES_TIME.getTime(unit);
+    }
+    
+    /**
+     * Returns the time a {@link PushProxiesValue} needs to be
+     * re-published in milliseconds.
+     */
+    public long getPublishProxiesTimeInMillis() {
+        return getPublishProxiesTime(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Returns the currently pending {@link PushProxiesValue} or 
+     * {@code null} if no value is pending for publication.
+     */
+    public PushProxiesValue getPendingValue() {
+        return pendingValue;
+    }
+    
+    /**
+     * Returns the currently published {@link PushProxiesValue} or 
+     * {@code null} if no value has been published.
+     */
+    public PushProxiesValue getPublishedValue() {
+        return publishedValue;
+    }
+    
+    /**
+     * Tries to publish the localhost's Push-Proxies to the DHT
+     */
+    @Override
+    protected void publish() {
+        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
+            return;
+        }
+        
+        PushProxiesValue value = new DefaultPushProxiesValue(networkManager, 
+                applicationServices, pushEndpointFactory);
+        
+        // Check if the current value is equal to the pending-value.
+        // If *NOT* then replace the pending-value with the current
+        // value and reset the time stamp. The idea is to publish 
+        // only stable configurations to the DHT.
+        if (hasChangedTooMuch(value, pendingValue)) {
+            pendingValue = value;
+            pendingTimeStamp = System.currentTimeMillis();
+        }
+        
+        // Check for how long the pending-value has been stable for.
+        // Do not publish if it's less than the given threshold!
+        long stableTime = System.currentTimeMillis() - pendingTimeStamp;
+        if (stableTime < getStableProxiesTimeInMillis()) {
+            return;
+        }
+        
+        // Check the time since the last publishing and if it's less
+        // than the threshold and the value hasn't changed ever since
+        // then don't re-publish the value.
+        long publishTime = System.currentTimeMillis() - publishedTimeStamp;
+        if (publishTime < getPublishProxiesTimeInMillis() 
+                && pendingValue.equals(publishedValue)) {
+            return;
+        }
+        
+        KUID key = KUIDUtils.toKUID(new GUID(value.getGUID()));
+        publishedValue = pendingValue;
+        
+        publish(key, publishedValue.serialize());
+        publishedTimeStamp = System.currentTimeMillis();
+        PUBLISH_COUNT.incrementAndGet();
+    }
+    
+    /**
+     * Returns {@code true} if the current value differs too much
+     * from the pending value and needs to be replaced.
+     */
+    static boolean hasChangedTooMuch(PushProxiesValue value, 
+            PushProxiesValue pendingValue) {
+        
+        // Publish if first call
+        if (pendingValue == null) {
+            return true;
+        }
+        
+        // Publish if fwt capabilities have changed
+        if (value.getFwtVersion() != pendingValue.getFwtVersion()) {
+            return true;
+        }
+        
+        IpPortSet old = new IpPortSet(pendingValue.getPushProxies());
+        old.retainAll(value.getPushProxies());
+        
+        // Publish if too many proxies have changed.
+        if (old.size() < DHTSettings.PROXY_CHANGE_THRESHOLD.getValue()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Publishes the given {@link Value} to the DHT
+     */
+    protected void publish(KUID key, Value value) {
+        manager.enqueue(key, value);
     }
 }

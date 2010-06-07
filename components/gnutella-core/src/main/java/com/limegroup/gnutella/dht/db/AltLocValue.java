@@ -1,36 +1,33 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.Serializable;
-
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueType;
+import org.limewire.io.GUID;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.ValueType;
 
-/**
- * Defines an interface of an alternative location DHT value.
- */
-public interface AltLocValue extends DHTValue, Serializable {
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getVersion()
+public interface AltLocValue extends SerializableValue {
+
+    /**
+     * {@link ValueType} for {@link AlternateLocation}s.
+     */
+    public static final ValueType ALT_LOC 
+        = ValueType.valueOf("Gnutella Alternate Location", "ALOC");
+
+    public static final Version VERSION_ONE = Version.valueOf(1);
+
+    /**
+     * Version of {@link AltLocValue}.
+     */
+    public static final Version VERSION = VERSION_ONE;
+
+    /**
+     * Returns the value's {@link Version}
      */
     public Version getVersion();
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValueType()
-     */
-    public DHTValueType getValueType();
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#size()
-     */
-    public int size();
-
     /**
-     * The GUID of the AltLoc.
+     * The {@link GUID} of the AltLoc.
      */
     public byte[] getGUID();
 

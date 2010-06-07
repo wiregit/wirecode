@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht.db;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -11,11 +12,11 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
-import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -29,8 +30,8 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.DHTTestUtils;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 
 /**
@@ -58,18 +59,23 @@ public class PushProxyPublishingTest extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        PrivilegedAccessor.setValue(DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL, "value", 1000L);
+        DHTSettings.PUBLISH_PUSH_PROXIES.setValue(true);
+        PrivilegedAccessor.setValue(DHTSettings.STABLE_PROXIES_TIME, "value", 0L);
+        PrivilegedAccessor.setValue(DHTSettings.PUBLISH_PROXIES_TIME, "value", 0L);
+        
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         DHTTestUtils.setSettings(NetworkSettings.PORT.getValue());
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 500L);
         
-        injector = LimeTestUtils.createInjectorAndStart(new LimeWireIOTestModule(), new AbstractModule() {
+        injector = LimeTestUtils.createInjectorAndStart(
+                new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                //bind(NodeAssigner.class).to(NodeAssignerStub.class);
             }
         });
         dhtManager = injector.getInstance(DHTManager.class);
@@ -80,7 +86,8 @@ public class PushProxyPublishingTest extends LimeTestCase {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setAddress(NetworkUtils.getLocalAddress().getAddress());
      
-        ((ConnectionManagerStub)injector.getInstance(ConnectionManager.class)).setConnected(true);
+        ((ConnectionManagerStub)injector.getInstance(
+                ConnectionManager.class)).setConnected(true);
         
         Acceptor acceptor = injector.getInstance(Acceptor.class);
         networkManagerStub.setPort(acceptor.getPort(false));
@@ -92,32 +99,35 @@ public class PushProxyPublishingTest extends LimeTestCase {
     }
     
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         injector.getInstance(LifecycleManager.class).shutdown();
-        IOUtils.close(dhts);
+        IoUtils.closeAll(dhts);
     }
     
     public void testPushProxiesArePublished() throws Exception {
         MojitoDHT dht = dhts.get(0);
-        assertTrue(dht.isBootstrapped());
+        assertTrue(dht.isReady());
         
-        ExtendedEndpoint endpoint = new ExtendedEndpoint((InetSocketAddress)dht.getContactAddress());
+        ExtendedEndpoint endpoint = new ExtendedEndpoint(
+                (InetSocketAddress)dht.getContactAddress());
         endpoint.setDHTMode(DHTMode.ACTIVE);
         endpoint.setDHTVersion(dhtManager.getVersion().shortValue());
         
         hostCatcher.add(endpoint, true);
         
-        DHTTestUtils.waitForBootStrap(dhtManager, 5);
+        DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
         
         // should have published after 3 secs with  a publishing interval of 1 sec
         Thread.sleep(3 * 1000);
         
-        DHTPushEndpointFinder finder = injector.getInstance(DHTPushEndpointFinder.class);
-        GUID guid = new GUID(injector.getInstance(ApplicationServices.class).getMyGUID());
-        PushEndpoint pushEndpoint = finder.getPushEndpoint(guid);
+        DHTPushEndpointFinder finder = injector.getInstance(
+                DHTPushEndpointFinder.class);
+        GUID guid = new GUID(injector.getInstance(
+                ApplicationServices.class).getMyGUID());
+        
+        PushEndpoint pushEndpoint = finder.findPushEndpoint(guid).get();
         assertNotNull(pushEndpoint);
         assertEquals(networkManagerStub.getPort(), pushEndpoint.getPort());
         assertEquals(guid.bytes(), pushEndpoint.getClientGUID());
-        
     }
 }

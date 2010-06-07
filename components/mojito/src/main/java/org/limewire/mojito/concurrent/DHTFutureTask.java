@@ -1,17 +1,15 @@
 package org.limewire.mojito.concurrent;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.concurrent.AsyncFutureTask;
-import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.mojito.Context;
+import org.limewire.mojito.concurrent.DHTFutureProcess.Delay;
 import org.limewire.mojito.util.EventUtils;
+import org.limewire.mojito.util.SchedulingUtils;
 
 /**
  * {@link DHTFutureTask}s have a built-in watchdog {@link Thread} that 
@@ -21,14 +19,8 @@ import org.limewire.mojito.util.EventUtils;
  * @see AsyncFutureTask
  */
 public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V> {
-
-    private static final ScheduledExecutorService WATCHDOG 
-        = Executors.newSingleThreadScheduledExecutor(
-            ExecutorsHelper.defaultThreadFactory("WatchdogThread"));
     
-    private final Context context;
-    
-    private final DHTTask<V> task;
+    private final DHTFutureProcess<V> task;
     
     private final long timeout;
     
@@ -41,23 +33,18 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Creates an {@link DHTFutureTask}
      */
-    public DHTFutureTask(Context context, DHTTask<V> task) {
+    public DHTFutureTask(DHTFutureProcess<V> task, long timeout, TimeUnit unit) {
         
-        this.context = context;
         this.task = task;
         
-        this.timeout = task.getWaitOnLockTimeout();
-        this.unit = TimeUnit.MILLISECONDS;
-    }
-    
-    public Context getContext() {
-        return context;
+        this.timeout = timeout;
+        this.unit = unit;
     }
     
     @Override
     protected synchronized void doRun() {
         if (!isDone()) {
-            watchdog();
+            watchdog(timeout, unit);
             start();
         }
     }
@@ -72,24 +59,28 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
     /**
      * Starts the watchdog task
      */
-    private synchronized boolean watchdog() {
-        if (timeout == -1L || isDone()) {
+    private synchronized boolean watchdog(long timeout, TimeUnit unit) {
+        if (timeout < 0L || isDone()) {
             return false;
         }
         
         Runnable task = new Runnable() {
+            
+            private final long creationTime = System.currentTimeMillis();
+            
             @Override
             public void run() {
                 synchronized (DHTFutureTask.this) {
-                    if (!isDone()) {
+                    if (!isDone() && !isDelay()) {
                         wasTimeout = true;
-                        handleTimeout(timeout, unit);
+                        long time = System.currentTimeMillis() - creationTime;
+                        handleTimeout(time, TimeUnit.MILLISECONDS);
                     }
                 }
             }
         };
         
-        watchdog = WATCHDOG.schedule(task, timeout, unit);
+        watchdog = SchedulingUtils.schedule(task, timeout, unit);
         return true;
     }
     
@@ -99,7 +90,26 @@ public class DHTFutureTask<V> extends AsyncFutureTask<V> implements DHTFuture<V>
      * as an argument.
      */
     protected void handleTimeout(long timeout, TimeUnit unit) {
-        setException(new TimeoutException(timeout + " " + unit));
+        setException(new TimeoutException("Watchdog: " + timeout + " " + unit));
+    }
+    
+    /**
+     * Returns true if the watchdog was delayed.
+     */
+    private boolean isDelay() {
+        long delay = getDelay(unit);
+        return watchdog(delay, unit);
+    }
+    
+    /**
+     * Returns the watchdog delay.
+     */
+    protected long getDelay(TimeUnit unit) {
+        if (task instanceof Delay) {
+            return ((Delay)task).getDelay(unit);
+        }
+        
+        return -1L;
     }
     
     @Override

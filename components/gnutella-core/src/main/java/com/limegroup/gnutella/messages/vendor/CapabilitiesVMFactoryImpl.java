@@ -10,6 +10,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -18,14 +19,14 @@ import com.limegroup.gnutella.version.UpdateHandler;
 @Singleton
 public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
 
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
     private final Provider<NetworkManager> networkManager;
     private volatile CapabilitiesVM currentCapabilities;
 
     @Inject
-    public CapabilitiesVMFactoryImpl(Provider<DHTManager> dhtManager,
+    public CapabilitiesVMFactoryImpl(Provider<DHTManagerImpl> dhtManager,
             Provider<SimppManager> simppManager,
             Provider<UpdateHandler> updateHandler,
             Provider<NetworkManager> networkManager) {
@@ -72,12 +73,15 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
         supported.put(CapabilitiesVM.INCOMING_TCP_BYTES, networkManager.get().acceptedIncomingConnection() ? 1 : 0);
         supported.put(CapabilitiesVM.FWT_SUPPORT_BYTES, networkManager.get().supportsFWTVersion());
         
-        if (dhtManager.get().isMemberOfDHT()) {
-            DHTMode mode = dhtManager.get().getDHTMode();
-            assert (mode != null);
-            supported.put(mode.getCapabilityName(), dhtManager.get().getVersion().shortValue());
+        DHTManager manager = dhtManager.get();
+        synchronized (manager) {
+            if (manager.isReady()) {
+                DHTMode mode = manager.getMode();
+                supported.put(mode.getCapabilityName(), 
+                        DHTManager.VERSION.shortValue());
+            }
         }
-
+        
         if (networkManager.get().isIncomingTLSEnabled()) {
             supported.put(CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
         }

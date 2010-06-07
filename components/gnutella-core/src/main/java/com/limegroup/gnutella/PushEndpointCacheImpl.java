@@ -22,7 +22,6 @@ import org.limewire.lifecycle.ServiceScheduler;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @EagerSingleton
@@ -133,24 +132,17 @@ class PushEndpointCacheImpl implements PushEndpointCache {
     		current.setFWTVersion(version);
     }
     
+    @Override
     public CachedPushEndpoint getCached(GUID guid) {
         return GUID_PROXY_MAP.get(guid);
     }
 
+    @Override
     public PushEndpoint getPushEndpoint(GUID guid) {
         CachedPushEndpoint cached = GUID_PROXY_MAP.get(guid);
         return cached != null ? cached.createClone() : null;
     }
     
-    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
-        PushEndpoint pushEndpoint = getPushEndpoint(guid);
-        if (pushEndpoint != null) {
-            listener.handleResult(pushEndpoint);
-        } else {
-            listener.searchFailed();
-        }
-    }
-
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Updating proxies for: " + guid + " with: " + pushEndpoint + ", valid: " + valid);

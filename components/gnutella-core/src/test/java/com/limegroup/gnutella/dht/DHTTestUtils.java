@@ -38,17 +38,12 @@ public class DHTTestUtils {
         
         // DHT Settings
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
-        DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
         DHTSettings.ENABLE_PUSH_PROXY_QUERIES.setValue(true);
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
          // We're working on the loopback. Everything should be done
         // in less than 500ms
-        NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
-        
-        // Nothing should take longer than 1.5 seconds. If we start seeing
-        // LockTimeoutExceptions on the loopback then check this Setting!
-        ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        NetworkSettings.DEFAULT_TIMEOUT.setTime(500, TimeUnit.MILLISECONDS);
         
     }
 
@@ -65,7 +60,8 @@ public class DHTTestUtils {
      * 
      * @throw {@link AssertionFailedError} if not bootstrapped.
      */
-    public static void waitForBootStrap(DHTManager dhtManager, int seconds) throws Exception {
+    public static void waitForBootStrap(DHTManager dhtManager, 
+            long time, TimeUnit unit) throws InterruptedException {
         final CountDownLatch bootStrapped = new CountDownLatch(1);
         dhtManager.addEventListener(new DHTEventListener() {
             public void handleDHTEvent(DHTEvent evt) {
@@ -74,8 +70,9 @@ public class DHTTestUtils {
                 }
             }
         });
-        if (!dhtManager.isBootstrapped()) {
-            AssertComparisons.assertTrue(bootStrapped.await(seconds, TimeUnit.SECONDS));
+        
+        if (!dhtManager.isReady()) {
+            AssertComparisons.assertTrue(bootStrapped.await(time, unit));
         }
     }
 }

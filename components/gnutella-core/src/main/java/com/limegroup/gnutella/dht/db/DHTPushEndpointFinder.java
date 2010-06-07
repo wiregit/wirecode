@@ -1,22 +1,30 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Set;
+
+import net.sf.fmj.utility.ExceptionUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.EntityKey;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.ValueType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,93 +39,134 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 @Singleton
 public class DHTPushEndpointFinder implements PushEndpointService {
 
-    private static final Log LOG = LogFactory.getLog(DHTPushEndpointFinder.class);
+    private static final Log LOG 
+        = LogFactory.getLog(DHTPushEndpointFinder.class);
     
     private final PushEndpointFactory pushEndpointFactory;
+    
     private final DHTManager dhtManager;
 
     @Inject
-    public DHTPushEndpointFinder(DHTManager dhtManager, PushEndpointFactory pushEndpointFactory) {
+    public DHTPushEndpointFinder(DHTManager dhtManager, 
+            PushEndpointFactory pushEndpointFactory) {
         this.dhtManager = dhtManager;
         this.pushEndpointFactory = pushEndpointFactory;
     }
     
-    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
-        listener = SearchListenerAdapter.nonNullListener(listener);
+    @Override
+    public DHTFuture<PushEndpoint> findPushEndpoint(final GUID guid) {
         
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("starting dht lookup for guid: " + guid);
-        }
+        final Object lock = new Object();
         
-        KUID key = KUIDUtils.toKUID(guid);
-        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);        
-      
-        DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
-        if(future != null) {                        
-            future.addFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
-        } else {
-            LOG.debug("dht manager not bootstrapped or no dht");
-            listener.searchFailed();
-        }               
-    }
-
-    public PushEndpoint getPushEndpoint(GUID guid) {
-        BlockingSearchListener<PushEndpoint> listener = new BlockingSearchListener<PushEndpoint>();
-        findPushEndpoint(guid, listener);
-        return listener.getResult();
-    }
-
-    /**
-     * The PushAltLocsHandler listens for FindValueResults, constructs PushEndpoints
-     * from the results and passes them to AltLocManager which in turn notifies all
-     * Downloads about the new alternate locations.
-     */
-    private class PushEndpointHandler extends AbstractResultHandler {
-        
-        private final GUID guid;
-        
-        private final SearchListener<PushEndpoint> listener;
-
-        private PushEndpointHandler(DHTManager dhtManager, GUID guid, 
-                KUID key, SearchListener<PushEndpoint> listener) {
-            super(dhtManager, key, listener, AbstractPushProxiesValue.PUSH_PROXIES);
-            this.guid = guid;
-            this.listener = listener;
-        }
-        
-        @Override
-        protected Result handleDHTValueEntity(DHTValueEntity entity) {
-
-            DHTValue value = entity.getValue();
-            if (!(value instanceof PushProxiesValue)) {
-                return Result.NOT_FOUND;
-            }
+        synchronized (lock) {
+            final DHTValueFuture<PushEndpoint> future 
+                = new DHTValueFuture<PushEndpoint>();
             
-            Contact creator = entity.getCreator();
-            InetAddress addr = ((InetSocketAddress)creator.getContactAddress()).getAddress();
+            KUID key = KUIDUtils.toKUID(guid);
+            ValueKey lookupKey = ValueKey.createValueKey(
+                    key, PushProxiesValue.PUSH_PROXIES);
             
-            PushProxiesValue pushProxies = (PushProxiesValue)value;
+            final DHTFuture<ValueEntity[]> lookup 
+                = dhtManager.getAll(lookupKey);
             
-            // Compare the GUIDs from the AltLoc and PushProxy value!
-            // They should be the same!
-            byte[] guid = this.guid.bytes();
-            if (!Arrays.equals(guid, pushProxies.getGUID())) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("The AltLoc and PushProxy GUIDs do not match!");
+            lookup.addFutureListener(new EventListener<FutureEvent<ValueEntity[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<ValueEntity[]> event) {
+                    try {
+                        switch (event.getType()) {
+                            case SUCCESS:
+                                onSuccess(event.getResult());
+                                break;
+                            case EXCEPTION:
+                                onException(event.getException());
+                                break;
+                            case CANCELLED:
+                                onCancellation();
+                                break;
+                        }
+                    } catch (Throwable t) {
+                        onException(t);
+                        ExceptionUtils.reportOrReturn(t);
+                    }
                 }
-                return Result.NOT_FOUND;
-            }
+                
+                private void onSuccess(ValueEntity[] entities) {
+                    try {
+                        PushEndpoint pe = createPushEndpoint(
+                                pushEndpointFactory, guid, entities);
+                        future.setValue(pe);
+                    } catch (NoSuchElementException err) {
+                        onException(err);
+                    } catch (IOException err) {
+                        onException(err);
+                    }
+                }
+                
+                private void onException(Throwable t) {
+                    future.setException(t);
+                }
+                
+                private void onCancellation() {
+                    future.cancel(true);
+                }
+            });
             
-            Set<? extends IpPort> proxies = pushProxies.getPushProxies();
-            byte features = pushProxies.getFeatures();
-            int fwtVersion = pushProxies.getFwtVersion();
-            IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
-            PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid, proxies, features, fwtVersion, ipp);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("push endpoint found: " + pe);
-            }
-            listener.handleResult(pe);
-            return Result.FOUND;
+            future.addFutureListener(new EventListener<FutureEvent<PushEndpoint>>() {
+                @Override
+                public void handleEvent(FutureEvent<PushEndpoint> event) {
+                    lookup.cancel(true);
+                }
+            });
+            
+            return future;
         }
+    }
+    
+    public static PushEndpoint createPushEndpoint(PushEndpointFactory factory, 
+            GUID guid, ValueEntity... entities) throws NoSuchElementException, IOException {
+        return createPushEndpoint(factory, guid.bytes(), entities);
+    }
+    
+    public static PushEndpoint createPushEndpoint(PushEndpointFactory factory, 
+            byte[] guid, ValueEntity... entities) throws NoSuchElementException, IOException {
+        
+        for (ValueEntity entity : entities) {
+            for (ValueTuple values : entity.getValues()) {
+                Value value = values.getValue();
+                
+                ValueType valueType = value.getValueType();
+                if (!valueType.equals(PushProxiesValue.PUSH_PROXIES)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Not a PushProxy: " + value);
+                    }
+                    continue;
+                }
+                
+                PushProxiesValue pushProxies 
+                    = new DefaultPushProxiesValue(value);
+                if (!Arrays.equals(guid, pushProxies.getGUID())) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Not for GUID: " + guid 
+                                + ", pushProxies=" + pushProxies);
+                    }
+                    continue;
+                }
+                
+                Contact creator = values.getCreator();
+                InetAddress addr = ((InetSocketAddress)
+                        creator.getContactAddress()).getAddress();
+                
+                Set<? extends IpPort> proxies = pushProxies.getPushProxies();
+                byte features = pushProxies.getFeatures();
+                int fwtVersion = pushProxies.getFwtVersion();
+                IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
+                PushEndpoint pe = factory.createPushEndpoint(
+                        guid, proxies, features, fwtVersion, ipp);
+                
+                return pe;
+            }
+        }
+        
+        throw new NoSuchElementException("ValueEntities=" + Arrays.toString(entities));
     }
 }

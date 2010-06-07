@@ -1,17 +1,21 @@
 package org.limewire.core.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.setting.TimeSetting;
+
+import com.limegroup.gnutella.PushEndpoint;
 
 /**
  * Mojito DHT related settings.
  */
 public class DHTSettings extends LimeProps {
-
+    
     private DHTSettings() {}
     
     /**
@@ -72,9 +76,12 @@ public class DHTSettings extends LimeProps {
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
     // Was DHT.MinDHTAvgUptime
-    public static final LongSetting MIN_ACTIVE_DHT_AVERAGE_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinActiveAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_ACTIVE_DHT_AVERAGE_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_ACTIVE_DHT_AVERAGE_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinActiveAverageUptime", 
+                5L, TimeUnit.MINUTES,
+                2L, TimeUnit.DAYS);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
@@ -83,9 +90,12 @@ public class DHTSettings extends LimeProps {
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
     // Was DHT.MinDHTInitialUptime
-    public static final LongSetting MIN_ACTIVE_DHT_INITIAL_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinActiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_ACTIVE_DHT_INITIAL_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinActiveInitialUptime", 
+                5L, TimeUnit.MINUTES, 
+                2L, TimeUnit.DAYS);
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
@@ -93,9 +103,12 @@ public class DHTSettings extends LimeProps {
      * <p>
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
-    public static final LongSetting MIN_PASSIVE_DHT_AVERAGE_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_PASSIVE_DHT_AVERAGE_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_PASSIVE_DHT_AVERAGE_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinPassiveAverageUptime", 
+                5L, TimeUnit.MINUTES,
+                2L, TimeUnit.DAYS);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
@@ -103,9 +116,12 @@ public class DHTSettings extends LimeProps {
      * <p>
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
-    public static final LongSetting MIN_PASSIVE_DHT_INITIAL_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_PASSIVE_DHT_INITIAL_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_PASSIVE_DHT_INITIAL_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinPassiveInitialUptime", 
+                5L, TimeUnit.MINUTES,
+                2L, TimeUnit.DAYS);
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT
@@ -113,9 +129,12 @@ public class DHTSettings extends LimeProps {
      * <p>
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
-    public static final LongSetting MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveLeafAverageUptime", 1L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinPassiveLeafAverageUptime", 
+                1L, TimeUnit.MILLISECONDS,
+                2L, TimeUnit.DAYS);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT
@@ -123,9 +142,12 @@ public class DHTSettings extends LimeProps {
      * <p>
      * WARNING: DO NOT MANUALLY CHANGE THIS.
      */
-    public static final LongSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
-                "DHT.MinPassiveLeafInitialUptime", 1L, 48L*60L*60L*1000L);
+    public static final TimeSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
+        = FACTORY.createRemoteTimeSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 
+                2L, TimeUnit.HOURS,
+                "DHT.MinPassiveLeafInitialUptime", 
+                1L, TimeUnit.MILLISECONDS,
+                2L, TimeUnit.DAYS);
     
     /**
      * Setting for whether or not an Ultrapeer can join the DHT in active mode.
@@ -161,26 +183,24 @@ public class DHTSettings extends LimeProps {
      */
     // Was DHT.DHTNodeFetcherTime
     //30 minutes for now
-    public static final LongSetting DHT_NODE_FETCHER_TIME 
-        = FACTORY.createRemoteLongSetting("DHT_NODE_FETCHER_TIME", 
-                30L*60L*1000L, "DHT.NodeFetcherTime", 60L*1000L, 60L*60L*1000L); 
-    
-    /**
-     * The maximum amount of time for which we will ping the network for DHT nodes.
-     */
-    // Was DHT.MaxNodeFetcherTime
-    public static final LongSetting MAX_DHT_NODE_FETCHER_TIME 
-        = FACTORY.createRemoteLongSetting("MAX_DHT_NODE_FETCHER_TIME", 30L*1000L, 
-                "DHT.MaxNodeFetcherTime", 0L, 5L*60L*1000L);
+    public static final TimeSetting DHT_NODE_FETCHER_TIME 
+        = FACTORY.createRemoteTimeSetting("DHT_NODE_FETCHER_TIME", 
+                30L, TimeUnit.MINUTES,
+                "DHT.NodeFetcherTime", 
+                1L, TimeUnit.MINUTES,
+                1L, TimeUnit.HOURS); 
     
     /**
      * Setting for the delay between DHT random node adder runs.
      */
     // Was DHT.DHTNodeAdderDelay
     // 30 Minutes for now
-    public static final LongSetting DHT_NODE_ADDER_DELAY
-        = FACTORY.createRemoteLongSetting("DHT_NODE_ADDER_DELAY", 
-                30L*60L*1000L, "DHT.NodeAdderDelay", 30L*1000L, 24L*60L*60L*1000L);
+    public static final TimeSetting DHT_NODE_ADDER_DELAY
+        = FACTORY.createRemoteTimeSetting("DHT_NODE_ADDER_DELAY", 
+                30L, TimeUnit.MINUTES, 
+                "DHT.NodeAdderDelay", 
+                30L, TimeUnit.SECONDS, 
+                1L, TimeUnit.DAYS);
     
     /**
      * Setting for the number of persisted DHT nodes if this node is a passive DHT node
@@ -203,9 +223,12 @@ public class DHTSettings extends LimeProps {
      * <p>
      * Default is Long.MAX_VALUE and means purging is turned off!
      */
-    public static final LongSetting MAX_ELAPSED_TIME_SINCE_LAST_CONTACT
-        = FACTORY.createRemoteLongSetting("MAX_ELAPSED_TIME_SINCE_LAST_CONTACT", 
-                Long.MAX_VALUE, "DHT.MaxElapsedTimeSinceLastContact", 60L*60L*1000L, Long.MAX_VALUE);
+    public static final TimeSetting MAX_ELAPSED_TIME_SINCE_LAST_CONTACT
+        = FACTORY.createRemoteTimeSetting("MAX_ELAPSED_TIME_SINCE_LAST_CONTACT", 
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS,
+                "DHT.MaxElapsedTimeSinceLastContact", 
+                1L, TimeUnit.HOURS, 
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
      * Setting for whether or not the passive RouteTable should be persisted on disk.
@@ -215,19 +238,14 @@ public class DHTSettings extends LimeProps {
                 true, "DHTSettings.PersistPassiveRouteTable");
     
     /**
-     * Setting for whether or not the Database should be persisted on disk.
-     */
-    // Default value is true in LW 4.13.8 and older
-    public static final BooleanSetting PERSIST_DHT_DATABASE
-        = FACTORY.createRemoteBooleanSetting("PERSIST_DHT_DATABASE", 
-                false, "DHTSettings.PersistDatabase");
-    
-    /**
      * Setting for the time at which point a file is considered rare.
      */
-    public static final LongSetting RARE_FILE_TIME
-        = FACTORY.createRemoteLongSetting("RARE_FILE_TIME", 
-                3L*60L*60L*1000L, "DHT.RareFileTime", 10L*60L*1000L, 7L*24L*60L*60L*1000L);
+    public static final TimeSetting RARE_FILE_TIME
+        = FACTORY.createRemoteTimeSetting("RARE_FILE_TIME", 
+                3L, TimeUnit.HOURS,
+                "DHT.RareFileTime", 
+                10L, TimeUnit.MINUTES,
+                7L, TimeUnit.DAYS);
     
     /**
      * The minimum number of upload attempts before a file is considered
@@ -254,14 +272,6 @@ public class DHTSettings extends LimeProps {
                 new String[]{"ups","atUpSet","<","cups","cUpSet","<","OR","NOT",
                 "lastup","rftSet",">","AND"}, 
                 "DHT.RareFileDefinition");
-    /**
-     * Whether or not AlternativeLocations should be published.
-     * <p>
-     * WARNING: DO NOT MANUALLY CHANGE THIS
-     */
-    public static final BooleanSetting PUBLISH_ALT_LOCS
-        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
-                false, "DHT.PublishAltLocs");
     
     /**
      * Whether or not DHT querying is enabled.
@@ -280,9 +290,12 @@ public class DHTSettings extends LimeProps {
     /**
      * The minimum time between two DHT requeries.
      */
-    public static final LongSetting TIME_BETWEEN_DHT_ALT_LOC_QUERIES
-        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_ALT_LOC_QUERIES", 
-                30L*60L*1000L, "DHT.TimeBetweenAltLocQueries", 30L*1000L, 24L*60L*60L*1000L);
+    public static final TimeSetting TIME_BETWEEN_DHT_ALT_LOC_QUERIES
+        = FACTORY.createRemoteTimeSetting("TIME_BETWEEN_DHT_ALT_LOC_QUERIES", 
+                30L, TimeUnit.MINUTES, 
+                "DHT.TimeBetweenAltLocQueries", 
+                30L, TimeUnit.SECONDS,
+                1L, TimeUnit.DAYS);
     
     /**
      * Setting for whether or not the passive DHT mode should be active at all.
@@ -305,36 +318,11 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.EnablePassiveLeafMode");
     
     /**
-     * Whether or not PushProxies should be published.
-     * <p>
-     * WARNING: DO NOT MANUALLY CHANGE THIS.
-     */
-    public static final BooleanSetting PUBLISH_PUSH_PROXIES
-        = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
-                false, "DHT.PublishPushProxies");
-    
-    /**
      * Whether or not we query for PushProxies.
      */
     public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_PUSH_PROXY_QUERIES", 
                 false, "DHT.EnablePushProxyQueriesV2");
-    
-    /**
-     * Time between push proxy queries.
-     */
-    public static final LongSetting TIME_BETWEEN_PUSH_PROXY_QUERIES
-        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_PUSH_PROXY_QUERIES",
-                5L * 60L * 1000L, "DHT.TimeBetweenPushProxyQueries",
-                10L * 1000L, Long.MAX_VALUE);
-
-    /**
-     * The time in milliseconds push proxies have to be stable before being published.
-     */
-    public static final LongSetting PUSH_PROXY_STABLE_PUBLISHING_INTERVAL
-    = FACTORY.createRemoteLongSetting("PUSH_PROXY_STABLE_PUBLISHING_INTERVAL",
-            60L * 1000L, "DHT.pushProxyStablePublishingInterval",
-            10L * 1000L, Long.MAX_VALUE);
     
     /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.
@@ -358,4 +346,102 @@ public class DHTSettings extends LimeProps {
     public static final BooleanSetting ALLOW_DHT_SECURE_MESSAGE
         = FACTORY.createRemoteBooleanSetting("ALLOW_DHT_SECURE_MESSAGE", 
                 false, "DHTSettings.allowDHTSecureMessage");
+    
+    /**
+     * Whether or not AlternativeLocations should be published.
+     * <p>
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final BooleanSetting PUBLISH_ALT_LOCS
+        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
+                false, "DHT.PublishAltLocs");
+    
+    /**
+     * 
+     */
+    public static final TimeSetting LOCATION_PUBLISHER_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("LOCATION_PUBLISHER_FREQUENCY", 
+                30L, TimeUnit.MINUTES,
+                "DHT.LocationPublisherFrequency", 
+                3L, TimeUnit.MINUTES, 1L, TimeUnit.DAYS);
+    
+    /**
+     * 
+     */
+    public static final TimeSetting PUBLISH_LOCATION_EVERY
+        = FACTORY.createRemoteTimeSetting("PUBLISH_LOCATION_EVERY", 
+                30L, TimeUnit.MINUTES,
+                "DHT.publishLocationEvery", 
+                3L, TimeUnit.MINUTES, 1L, TimeUnit.DAYS);
+    
+    /**
+     * Whether or not PushProxies should be published.
+     * <p>
+     * WARNING: DO NOT MANUALLY CHANGE THIS.
+     */
+    public static final BooleanSetting PUBLISH_PUSH_PROXIES
+        = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
+                false, "DHT.PublishPushProxies");
+    
+    /**
+     * The frequency at which the Push-Proxy publisher is running.
+     */
+    public static final TimeSetting PROXY_PUBLISHER_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 
+                2L, TimeUnit.MINUTES,
+                "DHT.ProxyPublisherFrequency", 
+                30L, TimeUnit.SECONDS, 1L, TimeUnit.DAYS);
+    
+    /**
+     * The amount of time a Push-Proxy configuration must remain stable
+     * (i.e. not change) before it's considered to be published to the DHT.
+     */
+    public static final TimeSetting STABLE_PROXIES_TIME
+        = FACTORY.createRemoteTimeSetting("STABLE_PROXIES_TIME", 
+                2L, TimeUnit.MINUTES,
+                "DHT.StableProxiesTime", 
+                1L, TimeUnit.MINUTES, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * The amount of time in which stable Push-Proxy configurations are 
+     * being re-published.
+     */
+    public static final TimeSetting PUBLISH_PROXIES_TIME
+        = FACTORY.createRemoteTimeSetting("PUBLISH_PROXIES_TIME",
+                30L, TimeUnit.MINUTES, 
+                "DHT.PublishProxiesTime",
+                10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * 
+     */
+    public static final IntSetting PROXY_CHANGE_THRESHOLD
+        = FACTORY.createRemoteIntSetting("PROXY_CHANGE_THRESHOLD", 
+                2, "DHT.ProxyChangeThreshold", 1, 32);
+    
+    /**
+     * The frequency at which cached {@link PushEndpoint}s are being purged.
+     */
+    public static final TimeSetting PUSH_ENDPOINT_PURGE_FREQUENCY
+        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_PURGE_FREQUENCY", 
+                2L, TimeUnit.MINUTES,
+                "DHT.PushEndpointPurgeFrequency", 
+                30L, TimeUnit.SECONDS, 
+                1L, TimeUnit.DAYS);
+    
+    /**
+     * The cache time for {@link PushEndpoint}s.
+     */
+    public static final TimeSetting PUSH_ENDPOINT_CACHE_TIME
+        = FACTORY.createRemoteTimeSetting("PUSH_ENDPOINT_CACHE_TIME",
+                5L, TimeUnit.MINUTES, 
+                "DHT.PushEndpointCacheTime",
+                10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    
+    /**
+     * Whether or not we should sort the Contacts we read from disk.
+     */
+    public static final BooleanSetting SORT_BOOTSTRAP_CONTACTS
+        = FACTORY.createRemoteBooleanSetting("SORT_BOOTSTRAP_CONTACTS", 
+                false, "DHT.SortBootstrapContacts");
 }

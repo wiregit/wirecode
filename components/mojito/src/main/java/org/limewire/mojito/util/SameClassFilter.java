@@ -36,7 +36,7 @@ public class SameClassFilter {
     private final IntHashMap<Contact> filter;
     
     public SameClassFilter(Contact sender) {
-        this(sender, KademliaSettings.REPLICATION_PARAMETER.getValue());
+        this(sender, KademliaSettings.K);
     }
     
     public SameClassFilter(Contact sender, int initalSize) {

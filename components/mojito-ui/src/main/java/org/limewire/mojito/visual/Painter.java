@@ -8,8 +8,15 @@ import java.math.BigDecimal;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
-import org.limewire.mojito.messages.DHTMessage.OpCode;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.NodeRequest;
+import org.limewire.mojito.message.NodeResponse;
+import org.limewire.mojito.message.PingRequest;
+import org.limewire.mojito.message.PingResponse;
+import org.limewire.mojito.message.StoreRequest;
+import org.limewire.mojito.message.StoreResponse;
+import org.limewire.mojito.message.ValueRequest;
+import org.limewire.mojito.message.ValueResponse;
 
 /**<p>
  * Draws graphical representations of the DHT. <code>Painter</code> creates 
@@ -41,37 +48,36 @@ public abstract class Painter {
     
     public abstract void paint(Component c, Graphics2D g);
     
-    public abstract void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request);
+    public abstract void handle(boolean outgoing, KUID nodeId, 
+            SocketAddress dst, Message message);
     
     public abstract void clear();
     
-    public static Stroke getStrokeForOpCode(OpCode opcode) {
+    public static Stroke getStrokeForMessage(Message message) {
         float dash_phase = (float)Math.random() * 10f;
         
-        switch(opcode) {
-            case PING_REQUEST:
-            case PING_RESPONSE:
-                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
-                        BasicStroke.JOIN_ROUND, 10.0f, 
-                        new float[]{ 2f, 2f }, dash_phase);
-            case FIND_NODE_REQUEST:
-            case FIND_NODE_RESPONSE:
-                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
-                        BasicStroke.JOIN_ROUND, 10.0f, 
-                        new float[]{ 1f, 5f, 5f }, dash_phase);
-                
-            case FIND_VALUE_REQUEST:
-            case FIND_VALUE_RESPONSE:
-                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
-                        BasicStroke.JOIN_ROUND, 10.0f, 
-                        new float[]{ 5f, 5f }, dash_phase);
-            case STORE_REQUEST:
-            case STORE_RESPONSE:
-                return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
-                        BasicStroke.JOIN_ROUND, 10.0f, 
-                        new float[]{ 5f, 3f }, dash_phase);
-            default:
-                return DEFAULT_STROKE;
+        if (message instanceof PingRequest
+                || message instanceof PingResponse) {
+            return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                    BasicStroke.JOIN_ROUND, 10.0f, 
+                    new float[]{ 2f, 2f }, dash_phase);
+        } else if (message instanceof NodeRequest
+                || message instanceof NodeResponse) {
+            return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                    BasicStroke.JOIN_ROUND, 10.0f, 
+                    new float[]{ 1f, 5f, 5f }, dash_phase);
+        } else if (message instanceof ValueRequest
+                || message instanceof ValueResponse) {
+            return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                    BasicStroke.JOIN_ROUND, 10.0f, 
+                    new float[]{ 5f, 5f }, dash_phase);
+        } else if (message instanceof StoreRequest
+                || message instanceof StoreResponse) {
+            return new BasicStroke(1.0f, BasicStroke.CAP_ROUND, 
+                    BasicStroke.JOIN_ROUND, 10.0f, 
+                    new float[]{ 5f, 3f }, dash_phase);
+        } else {
+            return DEFAULT_STROKE;
         }
     }
     

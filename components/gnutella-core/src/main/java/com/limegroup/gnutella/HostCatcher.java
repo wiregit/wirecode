@@ -57,6 +57,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.bootstrap.Bootstrapper;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.Message;
@@ -293,7 +294,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     private final ConnectionServices connectionServices;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<UDPService> udpService;
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final Provider<QueryUnicaster> queryUnicaster;
     private final Provider<IPFilter> ipFilter;
     private final UniqueHostPinger uniqueHostPinger;
@@ -306,7 +307,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             ConnectionServices connectionServices,
             Provider<ConnectionManager> connectionManager,
             Provider<UDPService> udpService,
-            Provider<DHTManager> dhtManager,
+            Provider<DHTManagerImpl> dhtManager,
             Provider<QueryUnicaster> queryUnicaster,
             Provider<IPFilter> ipFilter,
             UniqueHostPinger uniqueHostPinger,
@@ -750,16 +751,20 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             DHTMode mode = pr.getDHTMode();
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(mode);
-            if(dhtManager.get().isRunning()) {
-                // Send active and passive DHT endpoints to the DHT manager
-                if(mode.equals(DHTMode.ACTIVE)) {
-                    SocketAddress address = new InetSocketAddress(
-                            endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.get().addActiveDHTNode(address);
-                } else if(mode.equals(DHTMode.PASSIVE)) {
-                    SocketAddress address = new InetSocketAddress(
-                            endpoint.getAddress(), endpoint.getPort());
-                    dhtManager.get().addPassiveDHTNode(address);
+            
+            DHTManager manager = dhtManager.get();
+            synchronized (manager) {
+                if (manager.isRunning()) {
+                    // Send active and passive DHT endpoints to the DHT manager
+                    if(mode.equals(DHTMode.ACTIVE)) {
+                        SocketAddress address = new InetSocketAddress(
+                                endpoint.getAddress(), endpoint.getPort());
+                        manager.addActiveNode(address);
+                    } else if(mode.equals(DHTMode.PASSIVE)) {
+                        SocketAddress address = new InetSocketAddress(
+                                endpoint.getAddress(), endpoint.getPort());
+                        manager.addPassiveNode(address);
+                    }
                 }
             }
         }

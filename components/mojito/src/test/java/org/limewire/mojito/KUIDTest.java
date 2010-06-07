@@ -19,6 +19,8 @@
  
 package org.limewire.mojito;
 
+import org.limewire.mojito.KUID;
+
 import junit.framework.TestSuite;
 
 public class KUIDTest extends MojitoTestCase {

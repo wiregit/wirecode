@@ -17,6 +17,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
 
+
 @SuppressWarnings("null")
 public class PassiveLeafRouteTableTest extends DHTTestCase {
     
@@ -36,12 +37,11 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
      * Test the PassiveLeafRouteTable's LRU properties
      */
     public void testPassiveLeafRouteTable() {
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
-        PassiveLeafRouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
+        PassiveLeafRouteTable routeTable 
+            = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
         
         List<Contact> list = new ArrayList<Contact>();
-        for (int i = 0; i < 2*k; i++) {
+        for (int i = 0; i < 2*KademliaSettings.K; i++) {
             Contact c = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2000+i));
@@ -51,16 +51,18 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         }
         
         // localhost + k Nodes
-        assertEquals(k+1, routeTable.getActiveContacts().size());
+        assertEquals(KademliaSettings.K+1, routeTable.getActiveContacts().size());
         
         // Select k Nodes
-        Collection<Contact> selected = routeTable.select(KUID.createRandomID(), k, SelectMode.ALIVE);
-        assertEquals(k, selected.size());
+        Collection<Contact> selected = routeTable.select(
+                KUID.createRandomID(), KademliaSettings.K, SelectMode.ALIVE);
+        assertEquals(KademliaSettings.K, selected.size());
         assertFalse(selected.contains(routeTable.getLocalNode()));
         
         // Should make no difference
-        selected = routeTable.select(KUID.createRandomID(), k, SelectMode.ALL);
-        assertEquals(k, selected.size());
+        selected = routeTable.select(KUID.createRandomID(), 
+                KademliaSettings.K, SelectMode.ALL);
+        assertEquals(KademliaSettings.K, selected.size());
         assertFalse(selected.contains(routeTable.getLocalNode()));
         
         // The first k elements should be gone and the last (newest) 
@@ -68,17 +70,18 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         for (int i = 0; i < list.size(); i++) {
             Contact c = list.get(i);
             
-            if (i < k) {
-                assertNull(routeTable.get(c.getNodeID()));
+            if (i < KademliaSettings.K) {
+                assertNull(routeTable.get(c.getContactId()));
             } else {
-                assertEquals(c, routeTable.get(c.getNodeID()));
+                assertEquals(c, routeTable.get(c.getContactId()));
             }
         }
         
         // Test the actual LRU property. Touch the k+1 th element
         // which should move it to the end of the List
-        routeTable.get(list.get(k+1).getNodeID());
-        selected = routeTable.select(KUID.createRandomID(), k, SelectMode.ALL);
+        routeTable.get(list.get(KademliaSettings.K+1).getContactId());
+        selected = routeTable.select(KUID.createRandomID(), 
+                KademliaSettings.K, SelectMode.ALL);
         
         Contact first = null;
         Contact last = null;
@@ -90,7 +93,7 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         }
         
         // And check if it's at the end of the List
-        assertEquals(list.get(k+1), last);
+        assertEquals(list.get(KademliaSettings.K+1), last);
         
         // Now add a new Contact to the LRU List
         Contact c = ContactFactory.createUnknownContact(
@@ -102,19 +105,19 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         
         // The first element should be gone now and the (previous) 
         // last element should be still there
-        assertEquals(c, routeTable.get(c.getNodeID()));
-        assertNull(routeTable.get(first.getNodeID()));
-        assertEquals(last, routeTable.get(last.getNodeID()));
+        assertEquals(c, routeTable.get(c.getContactId()));
+        assertNull(routeTable.get(first.getContactId()));
+        assertEquals(last, routeTable.get(last.getContactId()));
     }
     
     public void testClassfulNetworkCounter() {
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        PassiveLeafRouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
+        PassiveLeafRouteTable routeTable 
+            = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
         Bucket bucket = routeTable.getBucket(KUID.MINIMUM);
         
         // Fill the Bucket
         KUID firstId = null;
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < KademliaSettings.K; i++) {
             SocketAddress addr = new InetSocketAddress("192.168." + i + ".1", 1024);
             KUID nodeId = KUID.createRandomID();
             
@@ -129,7 +132,8 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         }
         
         assertTrue(bucket.containsActiveContact(firstId));
-        assertEquals(k, bucket.getClassfulNetworkCounter().size());
+        assertEquals(KademliaSettings.K, 
+                bucket.getClassfulNetworkCounter().size());
         
         // The first Contact changes its IP address
         SocketAddress addr = new InetSocketAddress("192.169.0.1", 1024);
@@ -138,7 +142,7 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         routeTable.add(node);
         
         // Eject them all from the RouteTable
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < KademliaSettings.K; i++) {
             addr = new InetSocketAddress("192.170." + i + ".1", 1024);
             KUID nodeId = KUID.createRandomID();
             

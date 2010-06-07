@@ -1,8 +1,15 @@
 package com.limegroup.gnutella.dht.db;
 
-import org.limewire.io.GUID;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.Test;
+
+import org.limewire.io.GUID;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+import org.limewire.mojito.KUID;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
@@ -27,20 +34,39 @@ public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
 
     public void testGetPushEndPoint() throws Exception {
         // publish push proxy manually
-        PushProxiesValue pushProxiesValue = pushProxiesValueFactory.createDHTValueForSelf();
-        mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();
+        
+        byte[] guid = GUID.makeGuid();
+        byte features = 0;
+        int fwtVersion = 0;
+        int port = 6969;
+        Set<? extends IpPort> proxies = new IpPortSet(
+                new IpPortImpl("localhost", 1234));
+        
+        PushProxiesValue value = new DefaultPushProxiesValue(
+                PushProxiesValue.VERSION,
+                guid, features, fwtVersion, port, proxies);
+        
+        KUID key = KUIDUtils.toKUID(new GUID(value.getGUID()));
+        
+        mojitoDHT.put(key, value.serialize()).get();
 
-        PushEndpoint pushEndpoint = pushEndpointFinder.getPushEndpoint(new GUID(pushProxiesValue.getGUID()));
+        PushEndpoint pushEndpoint = pushEndpointFinder.findPushEndpoint(
+                new GUID(value.getGUID())).get();
+        
         // only compare values, so we don't have to recreate the push endpoint
-        assertEquals(pushProxiesValue.getGUID(), pushEndpoint.getClientGUID());
-        assertEquals(pushProxiesValue.getPushProxies(), pushEndpoint.getProxies());
-        assertEquals(pushProxiesValue.getFeatures(), pushEndpoint.getFeatures());
-        assertEquals(pushProxiesValue.getFwtVersion(), pushEndpoint.getFWTVersion());
+        assertEquals(value.getGUID(), pushEndpoint.getClientGUID());
+        assertEquals(value.getPushProxies(), pushEndpoint.getProxies());
+        assertEquals(value.getFeatures(), pushEndpoint.getFeatures());
+        assertEquals(value.getFwtVersion(), pushEndpoint.getFWTVersion());
     }
     
-    public void testGetUnavailablePushEndpoint() throws Exception {
-        PushEndpoint result = pushEndpointFinder.getPushEndpoint(new GUID());
-        assertNull(result);
+    public void testGetUnavailablePushEndpoint() {
+        try {
+            pushEndpointFinder.findPushEndpoint(new GUID()).get();
+            fail("Should have failed!");
+        } catch (InterruptedException e) {
+            fail(e);
+        } catch (ExecutionException expected) {
+        }
     }
-    
 }

@@ -1,27 +1,32 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.routing.Contact;
-
-import com.limegroup.gnutella.PushEndpoint;
+import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.ValueType;
 
 /**
- * The representation of a {@link PushEndpoint} in the DHT. This can also 
- * represent non-firewalled clients. In that case the publisher's address
- * will match the single push proxy value in {@link #getPushProxies()}.
- * <p>
- * Does not contain external address information since it can be retrieved
- * from the {@link Contact} that created the value. This should be passed on
- * to the external address info of a {@link PushEndpoint} created from it.
- * <p>
- * Implementations should provide a value based {@link #equals(Object)} method.
+ * 
  */
-public interface PushProxiesValue extends DHTValue, Serializable  {
+public interface PushProxiesValue extends SerializableValue {
+
+    /**
+     * {@link ValueType} for Push-Proxies.
+     */
+    public static final ValueType PUSH_PROXIES 
+        = ValueType.valueOf("Gnutella Push Proxy", "PROX");
+
+    /**
+     * Version of {@link PushProxiesValue}.
+     */
+    public static final Version VERSION = Version.valueOf(0);
+
+    /**
+     * Returns the {@link Version}
+     */
+    public Version getVersion();
 
     /**
      * The Client ID of the Gnutella Node.
@@ -54,5 +59,5 @@ public interface PushProxiesValue extends DHTValue, Serializable  {
      * or empty Bit numbers
      */
     public BitNumbers getTLSInfo();
-    
+
 }

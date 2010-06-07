@@ -7,7 +7,7 @@ import org.limewire.concurrent.AsyncFuture;
 /**
  * 
  */
-public interface DHTFuture<V> extends AsyncFuture<V> {
+public interface DHTFuture<V> extends AsyncFuture<V>, Cancellable {
     
     /**
      * Returns the {@link DHTFuture}'s timeout in the given {@link TimeUnit}

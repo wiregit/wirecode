@@ -22,7 +22,7 @@ package org.limewire.mojito;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.limewire.mojito.util.FixedSizeHashMap;
+import org.limewire.mojito.collection.FixedSizeHashMap;
 
 /**
  * A 16 bit <code>int</code> value and a String which may or may

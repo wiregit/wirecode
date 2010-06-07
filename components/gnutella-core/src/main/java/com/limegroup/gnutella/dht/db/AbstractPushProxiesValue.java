@@ -6,31 +6,25 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.ByteUtils;
 
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
-/**
- * An implementation of <code>DHTValue</code> for Gnutella Push Proxies.
- */
 public abstract class AbstractPushProxiesValue implements PushProxiesValue {
 
-    /**
-     * DHTValueType for Push Proxies.
-     */
-    public static final DHTValueType PUSH_PROXIES = DHTValueType.valueOf("Gnutella Push Proxy", "PROX");
-    
-    /**
-     * Version of PushProxiesDHTValue.
-     */
-    public static final Version VERSION = Version.valueOf(0);
-        
     static final String CLIENT_ID = "client-id";
     
     static final String FWT_VERSION = "fwt-version";
@@ -43,55 +37,73 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     
     static final String TLS = "tls";
     
-    private final Version version;
+    protected final Version version;
     
     public AbstractPushProxiesValue(Version version) {
         this.version = version;
     }
 
-    public DHTValueType getValueType() {
-        return PUSH_PROXIES;
-    }
-
+    @Override
     public Version getVersion() {
         return version;
     }
-
-    public int size() {
-        return getValue().length;
+    
+    @Override
+    public Value serialize() {
+        
+        GGEP ggep = new GGEP();
+        ggep.put(CLIENT_ID, getGUID());
+        // Preserve insertion as an int, not a byte, for backwards compatability.
+        ggep.put(FEATURES, (int)getFeatures());
+        ggep.put(FWT_VERSION, getFwtVersion());
+        
+        byte[] port = new byte[2];
+        ByteUtils.short2beb((short)getPort(), port, 0);
+        ggep.put(PORT, port);
+        
+        try {
+            Set<? extends IpPort> proxies = getPushProxies();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            for (IpPort proxy : proxies) {
+                byte[] ipp = NetworkUtils.getBytes(proxy, java.nio.ByteOrder.BIG_ENDIAN);
+                assert (ipp.length == 6 || ipp.length == 18);
+                baos.write(ipp.length);
+                baos.write(ipp);
+            }
+            baos.close();
+            ggep.put(PROXIES, baos.toByteArray());
+            
+            if (!getTLSInfo().isEmpty())
+                ggep.put(TLS, getTLSInfo().toByteArray());
+        } catch (IOException err) {
+            // Impossible
+            throw new RuntimeException(err);
+        }
+        
+        return new DefaultValue(PUSH_PROXIES, version, ggep.toByteArray());
     }
     
-    /**
-     * Value based comparison with other object.
-     */
     @Override
-    public final boolean equals(Object obj) {
-        if (obj instanceof PushProxiesValue) {
-            PushProxiesValue other = (PushProxiesValue)obj;
-            return Arrays.equals(getGUID(), other.getGUID()) 
+    public int hashCode() {
+        return Arrays.hashCode(getGUID());
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof PushProxiesValue)) {
+            return false;
+        }
+        
+        PushProxiesValue other = (PushProxiesValue)o;
+        return Arrays.equals(getGUID(), other.getGUID())
             && getPort() == other.getPort()
             && getFeatures() == other.getFeatures()
             && getFwtVersion() == other.getFwtVersion()
             && getPushProxies().equals(other.getPushProxies())
-            && getTLSInfo().equals(other.getTLSInfo());
-        }
-        return false;
-    }
-    
-    @Override
-    public final int hashCode() {
-        return getPort() + getFeatures() * 31 + getFwtVersion() * 31 * 31 
-        + computeHashCode(getPushProxies()) * 31 * 31 * 31
-        + getTLSInfo().hashCode() * 31 * 31 * 31 * 31;
-    }
-    
-    private static final int computeHashCode(Set<? extends IpPort> pushProxies) {
-        int hashCode = 1;
-        // in case of connectables: we ignore the tls info
-        for (IpPort ipPort : pushProxies) {
-            hashCode *= 31 * ipPort.getInetSocketAddress().hashCode();
-        }
-        return hashCode;
+            && getTLSInfo().equals(other.getTLSInfo())
+            && getVersion().equals(other.getVersion());
     }
     
     @Override
@@ -105,42 +117,27 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     /**
-     * A helper method to serialize PushProxiesValues
+     * 
      */
-    protected static byte[] serialize(PushProxiesValue value) {
-        GGEP ggep = new GGEP();
-        ggep.put(CLIENT_ID, value.getGUID());
-        // Preserve insertion as an int, not a byte, for backwards compatability.
-        ggep.put(FEATURES, (int)value.getFeatures());
-        ggep.put(FWT_VERSION, value.getFwtVersion());
-        
-        byte[] port = new byte[2];
-        ByteUtils.short2beb((short)value.getPort(), port, 0);
-        ggep.put(PORT, port);
-        
-        try {
-            Set<? extends IpPort> proxies = value.getPushProxies();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            for (IpPort proxy : proxies) {
-                byte[] ipp = NetworkUtils.getBytes(proxy, java.nio.ByteOrder.BIG_ENDIAN);
-                assert (ipp.length == 6 || ipp.length == 18);
-                baos.write(ipp.length);
-                baos.write(ipp);
-            }
-            baos.close();
-            ggep.put(PROXIES, baos.toByteArray());
-            
-            if (!value.getTLSInfo().isEmpty())
-                ggep.put(TLS,value.getTLSInfo().toByteArray());
-        } catch (IOException err) {
-            // Impossible
-            throw new RuntimeException(err);
-        }
-        
-        return ggep.toByteArray();
+    static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
+        return BitNumbers.synchronizedBitNumbers(
+                HTTPHeaderUtils.getTLSIndices(proxies));
     }
     
-    static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
-        return BitNumbers.synchronizedBitNumbers(HTTPHeaderUtils.getTLSIndices(proxies));
+    /**
+     * Extracts and returns localhost's Push-Proxies.
+     */
+    static Set<? extends IpPort> getPushProxies(
+            NetworkManager networkManager, PushEndpoint endpoint) {
+        
+        if (networkManager.acceptedIncomingConnection()
+                && networkManager.isIpPortValid()) {
+            return new StrictIpPortSet<Connectable>(new ConnectableImpl(
+                    new IpPortImpl(networkManager.getAddress(), 
+                            networkManager.getPort()), 
+                            networkManager.isIncomingTLSEnabled()));
+        }
+        
+        return endpoint.getProxies();
     }
 }

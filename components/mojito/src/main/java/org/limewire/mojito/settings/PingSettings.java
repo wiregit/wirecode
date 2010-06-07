@@ -40,12 +40,4 @@ public class PingSettings extends MojitoProps {
      */
     public static final IntSetting MAX_PARALLEL_PING_FAILURES
         = FACTORY.createIntSetting("MAX_PARALLEL_PING_FAILURES", 40);
-    
-    /**
-     * Returns the lock timeout for pings.
-     */
-    public static long getWaitOnLock() {
-        return ContextSettings.getWaitOnLock(
-                NetworkSettings.DEFAULT_TIMEOUT.getValue());
-    }
 }

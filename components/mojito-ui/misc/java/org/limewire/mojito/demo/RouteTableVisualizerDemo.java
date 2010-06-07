@@ -1,21 +1,31 @@
 package org.limewire.mojito.demo;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.Context;
+import org.limewire.mojito.ContactPinger;
+import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.PingResult;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.DefaultPingEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.message.DefaultMessageFactory;
+import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
+import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.DatabaseImpl;
+import org.limewire.mojito.util.NopTransport;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 
 /**
@@ -201,16 +211,35 @@ public class RouteTableVisualizerDemo {
     }
 
     public RouteTableVisualizerDemo() {
-        Context dht = (Context)MojitoFactory.createDHT();
+        MessageFactory messageFactory 
+            = new DefaultMessageFactory();
+        RouteTable routeTable = new RouteTableImpl();
+        Database database = new DatabaseImpl();
+        
+        DefaultDHT dht = new DefaultDHT("DEMO", messageFactory, 
+                routeTable, database);
+        
+        try {
+            dht.bind(NopTransport.NOP);
+        } catch (IOException err) {
+            throw new RuntimeException(err);
+        }
+        
         RouteTableImpl rt = (RouteTableImpl)dht.getRouteTable();
         populateRouteTable(rt);
         RouteTableVisualizer.show(dht);        
     }
 
     public void populateRouteTable(RouteTableImpl rt) {
-        rt.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node,
-                    DHTFutureAdapter<PingResult> listener) {
+        rt.bind(new ContactPinger() {
+            @Override
+            public DHTFuture<PingEntity> ping(Contact dst, 
+                    long timeout, TimeUnit unit) {
+                return new DHTValueFuture<PingEntity>(
+                        new DefaultPingEntity(dst, 
+                                dst.getContactAddress(), 
+                                BigInteger.ONE, 
+                                0, TimeUnit.MILLISECONDS));
             }
         });
         

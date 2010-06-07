@@ -19,10 +19,12 @@
  
 package org.limewire.mojito.settings;
 
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
-import org.limewire.setting.LongSetting;
+import org.limewire.setting.TimeSetting;
 
 /**
  * Miscellaneous RouteTable related settings.
@@ -68,9 +70,12 @@ public final class RouteTableSettings extends MojitoProps {
      * The minimum time that must pass since the last successful contact 
      * before we're contacting a Node for RouteTable maintenance reasons.
      */
-    public static final LongSetting MIN_RECONNECTION_TIME
-        = FACTORY.createRemoteLongSetting("MIN_RECONNECTION_TIME", 30L*1000L, 
-                "Mojito.MinReconnectTime", 0L, 5L*60L*1000L);
+    public static final TimeSetting MIN_RECONNECTION_TIME
+        = FACTORY.createRemoteTimeSetting("MIN_RECONNECTION_TIME", 
+                30L, TimeUnit.SECONDS,
+                "Mojito.MinReconnectTime", 
+                0L, TimeUnit.MILLISECONDS,
+                5L, TimeUnit.MINUTES);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step.
@@ -83,17 +88,23 @@ public final class RouteTableSettings extends MojitoProps {
     /**
      * The period of the Bucket freshness.
      */
-    public static final LongSetting BUCKET_REFRESH_PERIOD
-        = FACTORY.createRemoteLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, 
-                "Mojito.BucketRefreshPeriod", 10L*60L*1000L, 2L*60L*60L*1000L);
+    public static final TimeSetting BUCKET_REFRESH_PERIOD
+        = FACTORY.createRemoteTimeSetting("BUCKET_REFRESH_PERIOD", 
+                30L, TimeUnit.MINUTES,
+                "Mojito.BucketRefreshPeriod", 
+                10L, TimeUnit.MINUTES,
+                2L, TimeUnit.HOURS);
     
     /**
      * A minimum time (in sec) to pass before pinging the least recently
      * seen node of a bucket again.
      */
-    public static final LongSetting BUCKET_PING_LIMIT
-        = FACTORY.createRemoteLongSetting("BUCKET_PING_LIMIT", 30L*1000L,
-                "Mojito.BucketPingLimit", 5L*1000L, 5L*60L*1000L);
+    public static final TimeSetting BUCKET_PING_LIMIT
+        = FACTORY.createRemoteTimeSetting("BUCKET_PING_LIMIT", 
+                30L, TimeUnit.SECONDS,
+                "Mojito.BucketPingLimit", 
+                5L, TimeUnit.SECONDS,
+                5L, TimeUnit.MINUTES);
     
     /**
      * The maximum number of consecutive failures that may occur

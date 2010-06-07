@@ -21,6 +21,7 @@ package org.limewire.mojito.routing;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.KUID;
 
@@ -100,7 +101,7 @@ public interface Contact extends Serializable {
     /**
      * Returns the Node ID of this Contact.
      */
-    public KUID getNodeID();
+    public KUID getContactId();
     
     /**
      * Returns the contact address. Use the contact
@@ -129,7 +130,7 @@ public interface Contact extends Serializable {
     /**
      * Returns the instance ID of this Contact.
      */
-    public int getInstanceID();
+    public int getInstanceId();
     
     /**
      * Returns the flags of this Contact.
@@ -149,17 +150,22 @@ public interface Contact extends Serializable {
     /**
      * Sets the Round Trip Time (RTT).
      */
-    public void setRoundTripTime(long rtt);
+    public void setRoundTripTime(long rtt, TimeUnit unit);
     
     /**
      * Returns the Round Trip Time (RTT).
      */
-    public long getRoundTripTime();
+    public long getRoundTripTime(TimeUnit unit);
+    
+    /**
+     * Returns the Round Trip Time (RTT) in milliseconds.
+     */
+    public long getRoundTripTimeInMillis();
     
     /**
      * Returns an adaptive timeout based on the RTT and number of failures.
      */
-    public long getAdaptativeTimeout();
+    public long getAdaptativeTimeout(long defaultValue, TimeUnit unit);
     
     /**
      * Returns the time of the last successful or unsuccessful contact

@@ -1,0 +1,165 @@
+package org.limewire.mojito;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
+
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
+import org.limewire.mojito.entity.BootstrapEntity;
+import org.limewire.mojito.entity.NodeEntity;
+import org.limewire.mojito.entity.PingEntity;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.io.Transport;
+import org.limewire.mojito.message.MessageFactory;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.util.HostFilter;
+
+/**
+ * The DHT interface.
+ */
+public interface DHT extends ContactPinger, AddressPinger, Closeable {
+    
+    /**
+     * Returns the name of the {@link DHT} instance.
+     */
+    public String getName();
+    
+    /**
+     * Returns the size of the {@link DHT}
+     */
+    public BigInteger size();
+    
+    /**
+     * Returns {@code true} if the DHT is firewalled
+     */
+    public boolean isFirewalled();
+    
+    /**
+     * Returns the localhost {@link Contact}
+     */
+    public LocalContact getLocalhost();
+    
+    /**
+     * Returns the {@link RouteTable}.
+     */
+    public RouteTable getRouteTable();
+    
+    /**
+     * Returns the {@link Database}.
+     */
+    public Database getDatabase();
+    
+    /**
+     * Returns the {@link MessageDispatcher}.
+     */
+    public MessageDispatcher getMessageDispatcher();
+    
+    /**
+     * Returns the {@link MessageFactory}.
+     */
+    public MessageFactory getMessageFactory();
+    
+    /**
+     * Returns the {@link HostFilter}.
+     */
+    public HostFilter getHostFilter();
+    
+    /**
+     * Sets the {@link HostFilter}.
+     */
+    public void setHostFilter(HostFilter hostFilter);
+    
+    /**
+     * Binds the {@link DHT} to the given {@link Transport}.
+     */
+    public void bind(Transport transport) throws IOException;
+    
+    /**
+     * Unbinds the {@link DHT} from the {@link Transport} and returns it.
+     */
+    public Transport unbind();
+    
+    /**
+     * Returns {@code true} if the {@link DHT} is bound to a {@link Transport}
+     */
+    public boolean isBound();
+    
+    /**
+     * Returns true if the {@link DHT} is in the process of bootstrapping
+     */
+    public boolean isBooting();
+    
+    /**
+     * Returns true if the {@link DHT} is ready (i.e. bootstrapped)
+     */
+    public boolean isReady();
+    
+    /**
+     * Tries to bootstrap the {@link DHT} from the given {@link Contact}.
+     */
+    public DHTFuture<BootstrapEntity> bootstrap(Contact dst, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Tries to bootstrap the {@link DHT} from the given {@link SocketAddress}.
+     */
+    public DHTFuture<BootstrapEntity> bootstrap(SocketAddress dst, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Sends a PING to the given {@link Contact}s.
+     */
+    public DHTFuture<PingEntity> ping(Contact src, 
+            Contact[] dst, long timeout, TimeUnit unit);
+    
+    /**
+     * Performs a FIND_NODE lookup for the given {@link KUID}.
+     */
+    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Performs a FIND_NODE lookup for the given {@link KUID}.
+     */
+    public DHTFuture<NodeEntity> lookup(KUID lookupId, 
+            Contact[] dst, long timeout, TimeUnit unit);
+    
+    /**
+     * Retrieves the given {@link KUID} from the {@link DHT}.
+     */
+    public DHTFuture<ValueEntity> get(KUID lookupId, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Retrieves the given {@link KUID} from the {@link DHT}.
+     */
+    public DHTFuture<ValueEntity> get(ValueKey key, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Stores the given key-value in the {@link DHT}.
+     */
+    public DHTFuture<StoreEntity> put(KUID key, Value value, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Stores the given key-value in the {@link DHT}.
+     */
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
+            long timeout, TimeUnit unit);
+    
+    /**
+     * Submits the given {@link DHTFutureProcess} for execution.
+     */
+    public <T> DHTFuture<T> submit(DHTFutureProcess<T> process, 
+            long timeout, TimeUnit unit);
+}

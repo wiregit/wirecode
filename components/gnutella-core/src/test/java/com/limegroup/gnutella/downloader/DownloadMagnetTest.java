@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -13,7 +14,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -24,10 +25,11 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.DefaultPushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
-import com.limegroup.gnutella.dht.db.PushProxiesValueImpl;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -62,7 +64,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 500L);
         super.setUp();
         networkManager.setCanReceiveSolicited(true);
-        dhtManager = injector.getInstance(DHTManager.class);
+        dhtManager = injector.getInstance(DHTManagerImpl.class);
         DHTTestUtils.setLocalIsPrivate(injector, false);
         // make sure address is updated which isn't done by mock network manager
         dhtManager.addressChanged();
@@ -84,7 +86,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
              dhts = MojitoUtils.createBootStrappedDHTs(1);
 
              MojitoDHT node  = dhts.get(0);
-             assertTrue(node.isBootstrapped());
+             assertTrue(node.isReady());
              
              ExtendedEndpoint endpoint = new ExtendedEndpoint((InetSocketAddress)node.getContactAddress());
              endpoint.setDHTMode(DHTMode.ACTIVE);
@@ -94,7 +96,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, PORTS[0], PORTS[0]);
              
-             DHTTestUtils.waitForBootStrap(dhtManager, 5);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
 
              Downloader downloader = downloadServices.download(magnet, true, saveDir, savedFileName);
              
@@ -124,7 +126,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, 5555 /* just a random different port */, PUSH_PROXY_PORT);
              
-             DHTTestUtils.waitForBootStrap(dhtManager, 5);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5, TimeUnit.SECONDS);
 
              TestUploader uploader = injector.getInstance(TestUploader.class);
              uploader.start("push uploader");
@@ -142,8 +144,12 @@ public class DownloadMagnetTest extends DownloadTestCase {
     }
     
     private void publishPushProxyForGuid(MojitoDHT dht, GUID guid, int proxyPort, int clientPort) throws Exception {
-        PushProxiesValue value = new PushProxiesValueImpl(dht.getVersion(), guid.bytes(), (byte) 0, RUDPUtils.VERSION, clientPort, Collections.singleton(new IpPortImpl("127.0.0.1", proxyPort)));
-        dht.put(KUIDUtils.toKUID(guid), value).get();
+        PushProxiesValue value = new DefaultPushProxiesValue(
+                dht.getVersion(), guid.bytes(), (byte) 0, 
+                RUDPUtils.VERSION, clientPort, 
+                Collections.singleton(new IpPortImpl("127.0.0.1", proxyPort)));
+        
+        dht.put(KUIDUtils.toKUID(guid), value.serialize()).get();
     }
     
     private FileDetails createFileDetails() {

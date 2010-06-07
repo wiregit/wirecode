@@ -53,7 +53,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.filters.AbstractIPFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.IPList;
@@ -1439,52 +1438,43 @@ public class TestUploader {
 
             @Override
             public PushEndpoint getCached(GUID guid) {
-                return null;
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void overwriteProxies(byte[] guid, String httpString) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void removePushProxy(byte[] bytes, IpPort pushProxy) {
-                throw new IllegalStateException();            
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void setAddr(byte[] guid, IpPort addr) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public void setFWTVersionSupported(byte[] guid, int version) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
-                throw new IllegalStateException();
-            }
-
-            @Override
-            public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public PushEndpoint getPushEndpoint(GUID guid) {
-                throw new IllegalStateException();
+                throw new UnsupportedOperationException();
             }
-            
         }
-
     }
-
-    
 }

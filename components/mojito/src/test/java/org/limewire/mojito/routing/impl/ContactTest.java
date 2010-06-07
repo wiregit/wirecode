@@ -8,6 +8,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.RemoteContact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
@@ -51,7 +53,7 @@ public class ContactTest extends MojitoTestCase {
         assertNotEquals(rc2, lc1);
         
         // Two LocalContacts with the same KUID are considered to be equal
-        lc1.setNodeID(lc2.getNodeID());
+        lc1.setNodeID(lc2.getContactId());
         assertEquals(lc1, lc2);
         
         // The SocketAddress doesn't change anything as there can be only
@@ -66,19 +68,19 @@ public class ContactTest extends MojitoTestCase {
         // considered to be equal
         rc1 = (RemoteContact)ContactFactory
             .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
-                    rc2.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
+                    rc2.getContactId(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertEquals(rc1, rc2);
         
         // But if their SocketAddress is different they're not equal
         rc1 = (RemoteContact)ContactFactory
             .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
-                    rc2.getNodeID(), new InetSocketAddress(2000), 0, Contact.DEFAULT_FLAG);
+                    rc2.getContactId(), new InetSocketAddress(2000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(rc1, rc2);
         
         // A Local- and RemoteContact cannot be equal!
         rc1 = (RemoteContact)ContactFactory
             .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
-                    lc1.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
+                    lc1.getContactId(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(lc1, rc1);
     }
 }

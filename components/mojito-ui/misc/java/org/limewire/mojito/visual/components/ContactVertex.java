@@ -1,7 +1,7 @@
 package org.limewire.mojito.visual.components;
 
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.routing.LocalContact;
 
 
 public class ContactVertex extends RouteTableVertex<Contact>{
@@ -30,6 +30,6 @@ public class ContactVertex extends RouteTableVertex<Contact>{
 
     @Override
     public String toString() {
-        return contact.getNodeID().toBinString().substring(0, depth);
+        return contact.getContactId().toBinString().substring(0, depth);
     }
 }

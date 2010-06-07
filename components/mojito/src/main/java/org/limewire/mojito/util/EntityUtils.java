@@ -22,15 +22,15 @@ package org.limewire.mojito.util;
 import java.util.Collection;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.storage.ValueTuple;
 
 public class EntityUtils {
     
     private EntityUtils() {}
     
-    public static KUID getPrimaryKey(Collection<? extends DHTValueEntity> entities) {
+    public static KUID getPrimaryKey(Collection<? extends ValueTuple> entities) {
         KUID primaryKey = null;
-        for (DHTValueEntity entity : entities) {
+        for (ValueTuple entity : entities) {
             if (primaryKey == null) {
                 primaryKey = entity.getPrimaryKey();
             }

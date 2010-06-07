@@ -1,137 +1,150 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.Executor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.Comparators;
-import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.FutureEvent;
-import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.inject.EagerSingleton;
-import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectionHistogram;
-import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
-import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
-import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.Database;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
-import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.entity.CollisionException;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.message.DefaultMessageFactory;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.statistics.DHTStats;
-import org.limewire.statistic.StatsUtils;
-import org.limewire.util.ByteUtils;
-import org.limewire.util.DebugRunnable;
+import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.util.HostFilter;
+import org.limewire.mojito.util.IoUtils;
+import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileView;
+import com.limegroup.gnutella.library.GnutellaFiles;
+import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
-import com.limegroup.gnutella.util.ClassCNetworks;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 
-/**
- * This DHT manager starts either an active or a passive DHT controller.
- * It also handles switching from one mode to the other.
- * <p>
- * This class offloads blocking operations to a thread pool
- * so that it never blocks on critical threads such as MessageDispatcher.
- */
-@EagerSingleton
-public class DHTManagerImpl implements DHTManager, Service {
+@Singleton
+public class DHTManagerImpl extends AbstractDHTManager implements Service {
+
+    private static final Log LOG 
+        = LogFactory.getLog(DHTManagerImpl.class);
     
-    private static final Log LOG = LogFactory.getLog(DHTManagerImpl.class);
+    private final NetworkManager networkManager;
     
-    /**
-     * The Vendor code of this DHT Node.
-     */
-    private final Vendor vendor = ContextSettings.getVendor();
+    private final Provider<UDPService> udpService;
     
-    /**
-     * The Version of this DHT Node.
-     */
-    private final Version version = ContextSettings.getVersion();
+    private final Provider<MessageRouter> messageRouter;
+
+    private final Provider<ConnectionManager> connectionManager;
     
-    /**
-     * The DHTController instance.
-     */
-    private DHTController controller = new NullDHTController();
+    private final Provider<MACCalculatorRepositoryManager> calculator;
     
-    /**
-     * List of event listeners for ConnectionLifeCycleEvents.
-     */
-    private final List<DHTEventListener> dhtEventListeners = new ArrayList<DHTEventListener>(1);
+    private final ConnectionServices connectionServices;
     
-    /** 
-     * The executor to use to execute blocking DHT methods, such
-     * as stopping or starting a Mojito instance (which perform 
-     * network and disk I/O). 
-     * */
-    private final Executor executor;
+    private final Provider<HostCatcher> hostCatcher;
     
-    /**
-     * The executor to use for dispatching events.
-     */
-    private final Executor dispatchExecutor;
+    private final PingRequestFactory pingRequestFactory;
+    
+    private final Provider<UniqueHostPinger> uniqueHostPinger;
+    
+    private final Provider<UDPPinger> udpPinger;
+    
+    private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
+    
+    private final HostFilter hostFilter;
+    
+    private final AltLocPublisher altLocPublisher;
+    
+    private final PushProxiesPublisher pushProxiesPublisher;
+    
+    private Controller controller = InactiveController.CONTROLLER;
     
     private volatile boolean enabled = true;
     
-    private final DHTControllerFactory dhtControllerFactory;
+    private boolean open = true;
     
-    @InspectionPoint("time for dht bootstrap")
-    private final BootstrapTimer bootstrapTimer = new BootstrapTimer();
-    
-    @InspectionPoint("dht get statistics")
-    private final TimeValuesInspectable getInspectable = new TimeValuesInspectable();
-    
-    @InspectionPoint("dht put statistics")
-    private final TimeValuesInspectable putInspectable = new TimeValuesInspectable();
-    
-    /**
-     * Constructs the DHTManager, using the given Executor to invoke blocking 
-     * methods. The executor MUST be single-threaded, otherwise there will be 
-     * failures.
-     * 
-     * @param service executor for executing blocking DHT methods
-     * @param dhtControllerFactory creates DHT node controllers
-     */
     @Inject
-    public DHTManagerImpl(@Named("dhtExecutor") Executor service, DHTControllerFactory dhtControllerFactory) {
-        this.executor = service;
-        this.dispatchExecutor = ExecutorsHelper.newProcessingQueue("DHT-EventDispatch");
-        this.dhtControllerFactory = dhtControllerFactory;
-        addEventListener(bootstrapTimer);
+    public DHTManagerImpl(NetworkManager networkManager,
+            com.limegroup.gnutella.messages.MessageFactory messageFactory,
+            Provider<UDPService> udpService, 
+            Provider<MessageRouter> messageRouter, 
+            Provider<MACCalculatorRepositoryManager> calculator,
+            Provider<ConnectionManager> connectionManager,
+            Provider<IPFilter> ipFilter,
+            ConnectionServices connectionServices,
+            Provider<HostCatcher> hostCatcher, 
+            PingRequestFactory pingRequestFactory,
+            Provider<UniqueHostPinger> uniqueHostPinger,
+            Provider<UDPPinger> udpPinger,
+            Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
+            ApplicationServices applicationServices,
+            PushEndpointFactory pushEndpointFactory,
+            @GnutellaFiles FileView gnutellaFileView, 
+            Provider<HashTreeCache> tigerTreeCache) {
+        
+        this.networkManager = networkManager;
+        this.udpService = udpService;
+        this.messageRouter = messageRouter;
+        this.calculator = calculator;
+        this.connectionManager = connectionManager;
+        this.connectionServices = connectionServices;
+        this.hostCatcher = hostCatcher;
+        this.pingRequestFactory = pingRequestFactory;
+        this.uniqueHostPinger = uniqueHostPinger;
+        this.udpPinger = udpPinger;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
+        
+        this.hostFilter = new DefaultHostFilter(ipFilter);
+        
+        this.pushProxiesPublisher = new PushProxiesPublisher(
+                this, networkManager, applicationServices, pushEndpointFactory);
+        this.altLocPublisher = new AltLocPublisher(this, networkManager, 
+                applicationServices, gnutellaFileView, tigerTreeCache);
+        
+        addEventListener(new DHTEventListener() {
+            @Override
+            public void handleDHTEvent(DHTEvent evt) {
+                switch (evt.getType()) {
+                    case CONNECTED:
+                    case STOPPED:
+                        DHTManagerImpl.this.capabilitiesVMFactory.get().updateCapabilities();
+                        DHTManagerImpl.this.connectionManager.get().sendUpdatedCapabilities();
+                        break;
+                }
+            }
+        });
+        
+        messageFactory.setParser(
+                (byte) org.limewire.mojito.message.Message.F_DHT_MESSAGE, 
+                new MojitoMessageParser());
     }
     
     @Inject
@@ -139,28 +152,111 @@ public class DHTManagerImpl implements DHTManager, Service {
         registry.register(this);
     }
     
+    @Override
     public String getServiceName() {
         return org.limewire.i18n.I18nMarker.marktr("Mojito DHT");
     }
-    
+
+    @Override
     public void initialize() {
     }
-    
+
+    @Override
     public void start() {
-    }    
+        start(DHTMode.INACTIVE);
+    }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.DHTManager#setEnabled(boolean)
-     */
+    @Override
+    public synchronized boolean start(DHTMode mode) {
+        if (!open) {
+            throw new IllegalStateException();
+        }
+        
+        if (controller.isMode(mode)) {
+            return true;
+        }
+        
+        stop();
+        
+        try {
+            switch (mode) {
+                case INACTIVE:
+                    controller = InactiveController.CONTROLLER;
+                    break;
+                case ACTIVE:
+                    controller = createActive();
+                    break;
+                case PASSIVE:
+                    controller = createPassive();
+                    break;
+                case PASSIVE_LEAF:
+                    controller = createLeaf();
+                    break;
+            }
+            
+            controller.start();
+            fireStarting();
+            
+            return true;
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+            stop();
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public synchronized void stop() {
+        altLocPublisher.stop();
+        pushProxiesPublisher.stop();
+        
+        IoUtils.close(controller);
+        controller = InactiveController.CONTROLLER;
+        fireStopped();
+    }
+    
+    @Override
+    public synchronized void close() {
+        open = false;
+        stop();
+        
+        IoUtils.closeAll(
+                altLocPublisher, 
+                pushProxiesPublisher);
+    }
+    
+    @Override
+    public Vendor getVendor() {
+        return VENDOR;
+    }
+
+    @Override
+    public Version getVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public synchronized Controller getController() {
+        return controller;
+    }
+    
+    @Override
+    public synchronized MojitoDHT getMojitoDHT() {
+        return controller.getMojitoDHT();
+    }
+
+    @Override
+    public synchronized boolean isRunning() {
+        return controller.isRunning();
+    }
+    
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.DHTManager#isEnabled()
-     */
+    @Override
     public boolean isEnabled() {
         if (!DHTSettings.DISABLE_DHT_NETWORK.getValue() 
                 && !DHTSettings.DISABLE_DHT_USER.getValue()
@@ -170,795 +266,217 @@ public class DHTManagerImpl implements DHTManager, Service {
         return false;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.DHTManager#start(com.limegroup.gnutella.dht.DHTManager.DHTMode)
-     */
-    public synchronized void start(DHTMode mode) {
-        executor.execute(createSwitchModeCommand(mode));
+    @Override
+    public synchronized DHTMode getMode() {
+        return controller.getMode();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.DHTManager#stop()
+    @Override
+    public synchronized boolean isMode(DHTMode mode) {
+        return controller.isMode(mode);
+    }
+    
+    @Override
+    public synchronized boolean isBooting() {
+        return controller.isBooting();
+    }
+    
+    @Override
+    public synchronized boolean isReady() {
+        return controller.isReady();
+    }
+    
+    /**
+     * Returns the {@link AltLocPublisher}
      */
-    public synchronized void stop() {
-        Runnable command = new DebugRunnable(new Runnable() {
-            public void run() {
-                synchronized (DHTManagerImpl.this) {
-                    try {
-                        createSwitchModeCommand(DHTMode.INACTIVE).run();
-                    } finally {
-                        DHTManagerImpl.this.notifyAll();
-                    }
-                }
-            }
-        });
-        
-        executor.execute(command);
-        
-        try {
-            this.wait(10000);
-        } catch (InterruptedException err) {
-            LOG.error("InterruptedException", err);
+    public AltLocPublisher getAltLocPublisher() {
+        return altLocPublisher;
+    }
+    
+    /**
+     * Returns the {@link PushProxiesPublisher}
+     */
+    public PushProxiesPublisher getPushProxiesPublisher() {
+        return pushProxiesPublisher;
+    }
+    
+    /**
+     * 
+     */
+    private synchronized void onConnecting() {
+        fireConnecting();
+    }
+    
+    /**
+     * 
+     */
+    private synchronized void onConnected(boolean success) {
+        if (success) {
+            altLocPublisher.start();
+            pushProxiesPublisher.start();
+            
+            fireConnected();
         }
     }
     
     /**
-     * Creates and returns a Runnable that switches the DHT node from
-     * the current <code>DHTMode</code> to the given <code>mode</code>.
      * 
-     * @param mode the new mode of the DHT node
-     * @return Runnable that switches the mode
      */
-    private Runnable createSwitchModeCommand(final DHTMode mode) {
-        Runnable command = new DebugRunnable(new Runnable() {
-            public void run() {
-                synchronized (DHTManagerImpl.this) {
-                    // Controller already running in the current mode?
-                    if (controller.getDHTMode() == mode) {
-                        return;
-                    }
-                    
-                    controller.stop();
+    private synchronized void onCollision(DHTMode mode) {
+        stop();
+        start(mode);
+    }
+    
+    private Controller createActive() throws IOException {
+        
+        MojitoTransport transport = new MojitoTransport(
+                udpService, messageRouter);
+        
+        DefaultMessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        ActiveController controller = new ActiveController( 
+                networkManager, transport, connectionManager, hostCatcher, 
+                pingRequestFactory, uniqueHostPinger, messageFactory, 
+                connectionServices, hostFilter, udpPinger);
+        
+        BootstrapWorker worker 
+            = controller.getBootstrapWorker();
+        worker.addBootstrapListener(new BootstrapListener() {
+            @Override
+            public void handleCollision(CollisionException ex) {
+                onCollision(DHTMode.ACTIVE);
+            }
 
-                    if (mode == DHTMode.ACTIVE) {
-                        controller = dhtControllerFactory.createActiveDHTNodeController(
-                                vendor, version, DHTManagerImpl.this);
-                    } else if (mode == DHTMode.PASSIVE) {
-                        controller = dhtControllerFactory
-                                .createPassiveDHTNodeController(vendor,
-                                        version, DHTManagerImpl.this);
-                    } else if (mode == DHTMode.PASSIVE_LEAF) {
-                        controller = dhtControllerFactory.createPassiveLeafController(
-                                vendor, version, DHTManagerImpl.this);
-                    } else {
-                        controller = new NullDHTController();
-                    }
-                    
-                    controller.start();
-                }
+            @Override
+            public void handleConnected(boolean success) {
+                onConnected(success);
+            }
+
+            @Override
+            public void handleConnecting() {
+                onConnecting();
             }
         });
         
-        return command;
+        return controller;
     }
     
-    public void addActiveDHTNode(final SocketAddress hostAddress) {
-        executor.execute(new Runnable() {
-            public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    controller.addActiveDHTNode(hostAddress);
-                }
+    private Controller createPassive() throws UnknownHostException {
+        MojitoTransport transport = new MojitoTransport(
+                udpService, messageRouter);
+        
+        DefaultMessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        PassiveController controller = new PassiveController(networkManager, 
+                transport, connectionManager, hostCatcher, 
+                pingRequestFactory, uniqueHostPinger, messageFactory, 
+                connectionServices, hostFilter, udpPinger);
+        
+        BootstrapWorker worker 
+            = controller.getBootstrapWorker();
+        worker.addBootstrapListener(new BootstrapListener() {
+            @Override
+            public void handleCollision(CollisionException ex) {
+                onCollision(DHTMode.PASSIVE);
+            }
+
+            @Override
+            public void handleConnected(boolean success) {
+                onConnected(success);
+            }
+
+            @Override
+            public void handleConnecting() {
+                onConnecting();
             }
         });
-    }
-    
-    public void addPassiveDHTNode(final SocketAddress hostAddress) {
-        executor.execute(new Runnable() {
-            public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    controller.addPassiveDHTNode(hostAddress);
-                }
-            }
-        });
-    }
-
-    public void addressChanged() {
-        // Do this in a different thread as there are some blocking
-        //disk and network ops.
-        executor.execute(new DebugRunnable(new Runnable() {
-            public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    if (controller.isRunning()) {
-                        controller.stop();
-                        controller.start();
-                    }
-                }
-            }
-        }));
-    }
-    
-    public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
-        return controller.getActiveDHTNodes(maxNodes);
-    }
-    
-    public synchronized DHTMode getDHTMode() {
-        return controller.getDHTMode();
-    }
-    
-    public synchronized boolean isRunning() {
-        return controller.isRunning();
-    }
-    
-    public synchronized boolean isBootstrapped() {
-        return controller.isBootstrapped();
-    }
-    
-    public synchronized boolean isMemberOfDHT() {
-        return isRunning() && isBootstrapped();
-    }
-
-    public synchronized boolean isWaitingForNodes() {
-        return controller.isWaitingForNodes();
-    }
-    
-    /**
-     * Adds a listener to DHT Events.
-     * <p>
-     * Be aware that listeners will receive events after
-     * after the DHT has dispatched them.  It is possible that
-     * the DHT's status may have changed between the time the 
-     * event was dispatched and the time the event is received
-     * by a listener.
-     */
-    public synchronized void addEventListener(DHTEventListener listener) {
-        if(dhtEventListeners.contains(listener))
-            throw new IllegalArgumentException("Listener " + listener + " already registered");
         
-        dhtEventListeners.add(listener);
+        return controller;
     }
-
-    /**
-     * Sends an event to all listeners.
-     * <p>
-     * Be aware that to prevent deadlock, listeners may receive
-     * the event long after the DHT's status has changed, and the
-     * current status may be very different.
-     * <p>
-     * No events will be received in a different order than they were
-     * dispatched, though.
-     */
-    public synchronized void dispatchEvent(final DHTEvent event) {
-        if(!dhtEventListeners.isEmpty()) {
-            final List<DHTEventListener> listeners = new ArrayList<DHTEventListener>(dhtEventListeners);
-            dispatchExecutor.execute(new Runnable() {
-                public void run() {
-                    for(DHTEventListener listener : listeners) {
-                        listener.handleDHTEvent(event);
-                    }        
-                }
-            });
+    
+    private Controller createLeaf() throws UnknownHostException {
+        MojitoTransport transport = new MojitoTransport(
+                udpService, messageRouter);
+        
+        DefaultMessageFactory messageFactory 
+            = new DefaultMessageFactory(calculator.get());
+        
+        return new PassiveLeafController(transport, messageFactory, 
+                networkManager, hostFilter);
+    }
+    
+    @Override
+    public synchronized Contact[] getActiveContacts(int max) {
+        return controller.getActiveContacts(max);
+    }
+    
+    @Override
+    public synchronized IpPort[] getActiveIpPort(int max) {
+        List<IpPort> ipp = new ArrayList<IpPort>();
+        
+        for (Contact contact : getActiveContacts(max)) {
+            ipp.add(new IpPortContact(contact));
         }
-    }
-
-    public synchronized void removeEventListener(DHTEventListener listener) {
-        dhtEventListeners.remove(listener);
-    }
-
-    /**
-     * This getter is for internal use only. The Mojito DHT is not meant to
-     * be handled or passed around independently, as only the DHT controllers 
-     * know how to interact correctly with it.
-     */
-    public synchronized MojitoDHT getMojitoDHT() {
-        return controller.getMojitoDHT();
-    }
-
-    /**
-     * Shuts the DHT down if we got disconnected from the network.
-     * The nodeAssigner will take care of restarting this DHT node if 
-     * it still qualifies.
-     * <p>
-     * If this event is not related to disconnection from the network, it
-     * is forwarded to the controller for proper handling.
-     */
-    public void handleConnectionLifecycleEvent(final ConnectionLifecycleEvent evt) {
-        Runnable command = null;
-        if (evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            command = new DebugRunnable( new Runnable() {
-                public void run() {
-                    synchronized(DHTManagerImpl.this) {
-                        if (controller.isRunning() 
-                                && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                            controller.stop();
-                            controller = new NullDHTController();
-                        }
-                    }
-                }
-            });
-        } else {
-            command = new Runnable() {
-                public void run() {
-                    synchronized(DHTManagerImpl.this) {
-                        controller.handleConnectionLifecycleEvent(evt);
-                    }
-                }
-            };
-        }
-        executor.execute(command);
+        
+        return ipp.toArray(new IpPort[0]);
     }
     
-    public Vendor getVendor() {
-        return vendor;
-    }
-    
-    public Version getVersion() {
-        return version;
-    }
-    
-    public void handleDHTContactsMessage(final DHTContactsMessage msg) {
-        executor.execute(new Runnable() {
-            public void run() {
-                synchronized(DHTManagerImpl.this) {
-                    for (Contact node : msg.getContacts()) {
-                        controller.addContact(node);
-                    }
-                }
-            }
-        });
-    }
-    
-    /**
-     * Calls the {@link MojitoDHT#put} if a bootstrappable DHT is available.
-     * Also handles the locking properly to ensure thread safety.
-     * 
-     * @param eKey the entity key used to perform lookup in the DHT.
-     * 
-     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
-     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
-     *          
-     */
-    public synchronized DHTFuture<FindValueResult> get(EntityKey eKey) {
-        MojitoDHT mojitoDHT = getMojitoDHT();
+    @Override
+    public synchronized void handleConnectionLifecycleEvent(
+            ConnectionLifecycleEvent evt) {
         
-        if (LOG.isDebugEnabled())
-            LOG.debug("DHT:" + mojitoDHT);
-        
-        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
-            LOG.debug("DHT is null or is not bootstrapped");                
-            return null;
-        }            
-
-        // instantiated here so it can record its instantiation time
-        TimeInspector<FindValueResult> inspector 
-                = new TimeInspector<FindValueResult>(getInspectable) {
-            @Override
-            protected void operationComplete(FutureEvent<FindValueResult> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    count(event.getResult().isSuccess());
-                }
-            }
-        };
-        DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
-        future.addFutureListener(inspector);
-        return future;
-    }
-    
-    /**
-     * Calls the {@link MojitoDHT#put} if a bootstrappable DHT is available.
-     * Also handles the locking properly to ensure thread safety.
-     * 
-     * @param key a unique id used as a key to find the associated value.
-     * @param value the value which will be stored in the DHT.
-     * 
-     * @return an instance of <code>DHTFuture</code> containing the result of the storage.
-     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
-     */
-    public synchronized DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-        MojitoDHT mojitoDHT = getMojitoDHT();
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("DHT: " + mojitoDHT);
-
-        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
-            LOG.debug("DHT is null or unable to bootstrap");                
-            return null;
-        }
-        // instantiated here so it can record its instantiation time
-        TimeInspector<StoreResult> inspector = new TimeInspector<StoreResult>(putInspectable) {
-            @Override
-            protected void operationComplete(FutureEvent<StoreResult> event) {
-                if (event.getType() == Type.SUCCESS) {
-                    boolean success = event.getResult().getLocations().size() > 0.8 * KademliaSettings.REPLICATION_PARAMETER.getValue();
-                    count(success);
-                }
-            }
-        };
-        DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
-        future.addFutureListener(inspector);
-        return future;
-    }
-
-    /** a bunch of inspectables */
-    @SuppressWarnings("unused")
-    @InspectableContainer
-    private class DHTInspectables {
-        
-        /*
-         * 1 - initial version, doubles reported as long * Integer.MAX_VALUE
-         * 2 - doubles reported as Double.doubleToLongBits
-         * 3 - Remove the BigInteger stats, use the 32 MSBits instead.
-         */
-        private static final int VERSION = 3;
-        
-        private void addVersion(Map<String, Object> m) {
-            m.put("sv",VERSION);
-        }
-        @InspectionPoint("general dht stats")
-        public Inspectable general = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                DHTMode mode = getDHTMode();
-                boolean running = isRunning();
-                boolean bootstrapped = isBootstrapped();
-                boolean waiting = isWaitingForNodes();
-                boolean enabled= isEnabled();
-                Version version = getVersion();
-                data.put("mode", Byte.valueOf(mode.byteValue())); // 4
-                data.put("v", Integer.valueOf(version.shortValue())); // 4
-                data.put("r", running);
-                data.put("b", bootstrapped);
-                data.put("w", waiting);
-                data.put("e", enabled);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    data.put("s", dht.size().toByteArray()); // 3
-                    RouteTable routeTable = dht.getRouteTable();
-                    Contact localNode = routeTable.getLocalNode();
-                    data.put("id", localNode.getNodeID().getBytes()); // 20
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht contacts")
-        public Inspectable contacts = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    RouteTable routeTable = dht.getRouteTable();
-                    synchronized(routeTable) {
-                        double local = getDoubleKUID(routeTable.getLocalNode().getNodeID());
-                        List<Double> activeContacts = getDouble(routeTable.getActiveContacts());
-                        data.put("acc", StatsUtils.quickStatsDouble(activeContacts).getMap()); // 5*20 + 4
-                        data.put("accx",StatsUtils.quickStatsDouble(getXorDistances(local, activeContacts)).getMap()); // 5*20 + 4
-                        List<Double> cachedContacts = getDouble(routeTable.getCachedContacts());
-                        data.put("ccc", StatsUtils.quickStatsDouble(cachedContacts).getMap()); // 5*20 + 4
-                        data.put("cccx", StatsUtils.quickStatsDouble(getXorDistances(local, cachedContacts)).getMap()); // 5*20 + 4
-                        
-                        List<Double> activeIps = new ArrayList<Double>();
-                        List<Double> cachedIps = new ArrayList<Double>();
-                        List<Double> allIps = new ArrayList<Double>();
-                        
-                        for (Contact node : routeTable.getActiveContacts()) {
-                            double masked = getUnsignedMaskedAddress(node);
-                            activeIps.add(masked);
-                            allIps.add(masked);
-                        }
-                        
-                        for (Contact node : routeTable.getCachedContacts()) {
-                            double masked = getUnsignedMaskedAddress(node);
-                            cachedIps.add(masked);
-                            allIps.add(masked);
-                        }
-                        
-                        data.put("aips", StatsUtils.quickStatsDouble(activeIps).getMap());
-                        data.put("cips", StatsUtils.quickStatsDouble(cachedIps).getMap());
-                        data.put("allips", StatsUtils.quickStatsDouble(allIps).getMap());
-                    }
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht route table dump")
-        public Inspectable RTDump = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    RouteTable routeTable = dht.getRouteTable();
-                    synchronized(routeTable) {
-                        data.put("active",routeTable.getActiveContacts());
-                        data.put("cached",routeTable.getCachedContacts());
-                    }
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht route table class C networks")
-        public Inspectable routeTableTop10Networks = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    RouteTable routeTable = dht.getRouteTable();
-                    synchronized(routeTable) {
-                        data.put("ta", getTopNetworks(routeTable.getActiveContacts(), 10));
-                        data.put("tc", getTopNetworks(routeTable.getCachedContacts(), 10));
-                    }
-                }
-                return data;
+        if (evt.isDisconnectedEvent() 
+                || evt.isNoInternetEvent()) {
+            
+            if (!DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+                stop();
             }
             
-            private byte [] getTopNetworks(Collection<? extends Contact> nodes, int count) {
-                // Masked IP -> Count
-                ClassCNetworks classCNetworks = new ClassCNetworks();
-                for (Contact node : nodes) {
-                    InetAddress addr = ((InetSocketAddress)node.getContactAddress()).getAddress();
-                    classCNetworks.add(addr, 1);
-                }
-                
-                // Return the Top IPs and their count
-                return classCNetworks.getTopInspectable(10);
-            }
-        };
-        
-        @InspectionPoint("dht buckets")
-        public Inspectable buckets = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    RouteTable routeTable = dht.getRouteTable();
-                    synchronized(routeTable) {
-                        double local = getDoubleKUID(routeTable.getLocalNode().getNodeID());
-                        Collection<Bucket> buckets = routeTable.getBuckets();
-                        
-                        List<Double> depths = new ArrayList<Double>(buckets.size());
-                        List<Double> sizes = new ArrayList<Double>(buckets.size());
-                        List<Double> kuids = new ArrayList<Double>(buckets.size());
-                        List<Double> times = new ArrayList<Double>(buckets.size());
-                        
-                        double fresh = 0;
-                        long now = System.currentTimeMillis(); 
-                        for (Bucket bucket : buckets) {
-                            depths.add((double)bucket.getDepth()); 
-                            sizes.add((double)bucket.size());
-                            kuids.add(getDoubleKUID(bucket.getBucketID()));
-                            times.add((double)(now - bucket.getTimeStamp()));
-                            if (!bucket.isRefreshRequired())
-                                fresh++;
-                        }
-                        
-                        // bucket kuid distribution *should* be similar to the others, but is it?
-                        data.put("bk", StatsUtils.quickStatsDouble(kuids).getMap()); // 5*20 + 4
-                        data.put("bkx", StatsUtils.quickStatsDouble(getXorDistances(local, kuids)).getMap()); // 5*20 + 4
-                        data.put("bd", StatsUtils.quickStatsDouble(depths).getMap()); // 5*(should be one byte) + 4
-                        data.put("bs", StatsUtils.quickStatsDouble(sizes).getMap()); // 5*(should be one byte) + 4
-                        data.put("bt", StatsUtils.quickStatsDouble(times).getMap()); // 5*(should be one byte) + 4
-                        data.put("bfr", (int)(100 * fresh / buckets.size())); // fresh buckets %
-                    }
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht buckets detailed")
-        public Inspectable bucketDetail = new Inspectable() {
-            @Override
-            public Object inspect() {
-                List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    RouteTable routeTable = dht.getRouteTable();
-                    synchronized(routeTable) {
-                        Collection<Bucket> buckets = routeTable.getBuckets();
-                        for (Bucket bucket : buckets) {
-                            Map<String, Object> detail = new HashMap<String, Object>();
-                            detail.put("i", bucket.getBucketID().getBytes());
-                            detail.put("d", bucket.getDepth());
-                            detail.put("t", System.currentTimeMillis() - bucket.getTimeStamp());
-                            detail.put("a", bucket.getActiveSize());
-                            detail.put("c", bucket.getCacheSize());
-                            detail.put("f", !bucket.isRefreshRequired());
-                            
-                            data.add(detail);
-                        }
-                    }
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht database")
-        public Inspectable database = new Inspectable() {
-            @Override
-            public Object inspect() {
-                Map<String, Object> data = new HashMap<String, Object>();
-                addVersion(data);
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    Database database = dht.getDatabase();
-                    Double local = getDoubleKUID(dht.getLocalNodeID());
-                    
-                    List<Double> primaryKeys = null;
-                    List<Double> requestLoads = null;
-                    List<Double> distanceToLoad = null;
-                    synchronized (database) {
-                        data.put("dvc", Integer.valueOf(database.getValueCount())); // 4
-                        Set<KUID> keys = database.keySet();
-                        
-                        primaryKeys = new ArrayList<Double>(keys.size());
-                        requestLoads = new ArrayList<Double>(keys.size());
-                        distanceToLoad = new ArrayList<Double>(keys.size());
-                        
-                        for (KUID primaryKey : keys) {
-                            Double big = getDoubleKUID(primaryKey);
-                            double load = database.getRequestLoad(primaryKey, false);
-                            primaryKeys.add(big);
-                            requestLoads.add(load);
-                            if (local == big)
-                                continue;
-                            big = (double)(local.longValue() ^ big.longValue());
-                            distanceToLoad.add(big - load * Integer.MAX_VALUE);
-                        }
-                    }
+        } else {
+            
+            controller.handleConnectionLifecycleEvent(evt);
+        }
+    }
+    
+    @Override
+    public synchronized void handleContactsMessage(DHTContactsMessage msg) {
+        controller.handleContactsMessage(msg);
+    }
+    
+    @Override
+    public synchronized DHTFuture<StoreEntity> put(KUID key, Value value) {
+        return controller.put(key, value);
+    }
+    
+    @Override
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value) {
+        return controller.enqueue(key, value);
+    }
 
-                    List<Double> storedXorDistances = getXorDistances(local, primaryKeys);
-                    data.put("dsk", StatsUtils.quickStatsDouble(primaryKeys).getMap()); // 5*20 + 4
-                    data.put("drl", StatsUtils.quickStatsDouble(requestLoads).getMap()); // 5*4 + 4
-                    data.put("dskx", StatsUtils.quickStatsDouble(storedXorDistances).getMap()); // 5*20 + 4
-                    data.put("dxlt", StatsUtils.quickStatsDouble(distanceToLoad).getTTestMap());
-                }
-                return data;
-            }
-        };
-        
-        @InspectionPoint("dht database top 10 keys")
-        public Inspectable databaseTop10Keys = new Inspectable() {
-            @Override
-            public Object inspect() {
-                List<byte[]>ret = new ArrayList<byte[]>();
-                MojitoDHT dht = getMojitoDHT();
-                if (dht != null) {
-                    Database database = dht.getDatabase();
-                    Map<Double, KUID> popularKeys = 
-                        new TreeMap<Double,KUID>(Comparators.inverseDoubleComparator());
-                    synchronized(database) {
-                        Set<KUID> keys = database.keySet();
-                        for (KUID primaryKey : keys) {
-                            popularKeys.put((double)database.getRequestLoad(primaryKey, false), 
-                                    primaryKey);
-                        }
-                    }
+    @Override
+    public synchronized DHTFuture<ValueEntity> get(ValueKey key) {
+        return controller.get(key);
+    }
+    
+    @Override
+    public synchronized DHTFuture<ValueEntity[]> getAll(ValueKey key) {
+        return controller.getAll(key);
+    }
 
-                    // load -> key
-                    for(double load : popularKeys.keySet()) {
-                        if (ret.size() >= 20)
-                            break;
-
-                        ret.add(BigInteger.valueOf(Double.doubleToLongBits(load)).toByteArray());
-                        ret.add(popularKeys.get(load).getBytes());
-                    }
-                }
-                return ret;
-            }
-        };
-        
-        @InspectionPoint("dht internal format stats")
-        public Inspectable mojitoStats = new Inspectable() {
-            @Override
-            public Object inspect() {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                Writer w = new OutputStreamWriter(baos, Charset.forName("UTF-8"));
-                try {
-                    MojitoDHT dht = getMojitoDHT();
-                    if(dht != null) {
-                        DHTStats stats = dht.getDHTStats();
-                        stats.dump(w, false);
-                        w.flush();
-                        return baos.toByteArray();
-                    } else {
-                        return null;
-                    }
-                } catch (IOException impossible) {
-                    return impossible.getMessage();
-                }
-            }
-        };
-        
-        /** Histograms of the stored keys with various detail */
-        @InspectionPoint("dht database 10 histogram")
-        public Inspectable database10StoredHist = new DBHist(10);
-        @InspectionPoint("dht database 100 histogram")
-        public Inspectable database100StoredHist = new DBHist(100); // ~ 400 bytes uncompressed
-        @InspectionPoint("dht database 500 histogram")
-        public Inspectable database500StoredHist = new DBHist(500); // ~ 2kb uncompressed
+    @Override
+    public synchronized void addressChanged() {
+        controller.addressChanged();
     }
     
-    /**
-     * Inspectable that returns a histogram of the stored keys in the
-     * database with specified accuracy.
-     */
-    private class DBHist implements Inspectable {
-        private final int breaks;
-        /**
-         * @param breaks how many breaks should the histogram have.
-         */
-        DBHist(int breaks) {
-            this.breaks = breaks;
-        }
-        @Override
-        public Object inspect() {
-            MojitoDHT dht = getMojitoDHT();
-            if (dht != null) {
-                Database database = dht.getDatabase();
-                List<BigInteger> primaryKeys;
-                synchronized(database) {
-                    Set<KUID> keys = database.keySet();
-                    primaryKeys = new ArrayList<BigInteger>(keys.size());
-                    for (KUID primaryKey : keys) 
-                        primaryKeys.add(primaryKey.toBigInteger());
-                }
-                return StatsUtils.getHistogramBigInt(primaryKeys, breaks);
-            }
-            return Collections.emptyList();
-        }
+    @Override
+    public synchronized void addActiveNode(SocketAddress address) {
+        controller.addActiveNode(address);
     }
     
-    /**
-     * @return a list of XOR distances from a provided node
-     */
-    private static List<Double> getXorDistances(Double local, List<Double> others) {
-        List<Double> distances = new ArrayList<Double>(others.size());
-        for (Double l : others) {
-            // Skip the local Node!
-            if (l != local)
-                distances.add((double)((local.longValue() ^ l.longValue())));
-        }
-        return distances;
-    }
-    
-    /**
-     * @return a list of big integers from a collection of contacts
-     */
-    private static List<Double> getDouble(Collection <? extends Contact> nodes) {
-        List<Double> doubles = new ArrayList<Double>(nodes.size());
-        for (Contact node : nodes) 
-            doubles.add(getDoubleKUID(node.getNodeID()));
-        return doubles;
-    }
-    
-    /**
-     * @return the 32 most significant bits from a KUID as a double primitive.
-     */
-    private static double getDoubleKUID(KUID k) {
-        byte [] b = k.getBytes();
-        long x = b[0];
-        for (int i = 1; i < 4; i++) {
-            x >>>= 8;
-            x |= b[i];
-        }
-        return x;
-    }
-    
-    /**
-     * Returns the masked contact address of the given Contact as an
-     * unsigned int.
-     */
-    private static double getUnsignedMaskedAddress(Contact node) {
-        InetSocketAddress addr = (InetSocketAddress)node.getContactAddress();
-        long masked = NetworkUtils.getClassC(addr.getAddress()) & 0xFFFFFFFFL;
-        return masked;
-    }
-    
-    /**
-     * Inspection point that tells us how long did the last bootstrap take.
-     */
-    private static class BootstrapTimer implements DHTEventListener, Inspectable {
-        private long start, stop;
-
-        @Override
-        public synchronized Object inspect() {
-            Map<String,Object> ret = new HashMap<String,Object>();
-            ret.put("ver",1);
-            ret.put("start",start);
-            ret.put("stop",stop);
-            return ret;
-        }
-
-        public synchronized void handleDHTEvent(DHTEvent evt) {
-            if (evt.getType() == DHTEvent.Type.STARTING) 
-                start = System.currentTimeMillis();
-            else if (evt.getType() == DHTEvent.Type.CONNECTED && start != 0)
-                stop = System.currentTimeMillis();
-        }
-    }
-    
-    abstract static class TimeInspector<T> extends DHTFutureAdapter<T> {
-        
-        private final long startTime = System.currentTimeMillis();
-        private final TimeValuesInspectable values;
-
-        public TimeInspector(TimeValuesInspectable values) {
-            this.values = values;
-        }
-        
-        public int getCurrentDuration() {
-            return ByteUtils.long2int(System.currentTimeMillis() - startTime);
-        }
-        
-        public void count(boolean success) {
-            int time = getCurrentDuration();
-            int index = getIndex(time);
-            if (success) {
-                values.successes.count(index);
-            } else {
-                values.failures.count(index);
-            }
-            synchronized (values) {
-                if (success) {
-                    values.maxSuccessful = Math.max(values.maxSuccessful, time);
-                } else {
-                    values.maxFailed = Math.max(values.maxFailed, time);
-                }
-            }
-        }
-        
-        public int getIndex(int time) {
-            int i;
-            if (time == 0) {
-                i = 0;
-            } else if (time < 5000 && time > 0) {
-                i = time / 500 + 1;
-            } else if (time < 10000) {
-                i = (time - 5000) / 1000 + 11;
-            } else if (time < 60000) {
-                i = (time - 10000) / 5000 + 16;
-            } else if (time < 180000) {
-                i = (time - 60000) / 10000 + 26;
-            } else if (time < 360000) {
-                i = (time - 180000) / 30000 + 38;
-            } else {
-                i = 44;
-            }
-            return i;
-        }
-    }
-    
-    static class TimeValuesInspectable implements Inspectable {
-
-        final InspectionHistogram<Integer> successes = new InspectionHistogram<Integer>();
-        
-        final InspectionHistogram<Integer> failures = new InspectionHistogram<Integer>();
-        
-        volatile int maxSuccessful = 0;
-        
-        volatile int maxFailed = 0;
-        
-        @Override
-        public synchronized Object inspect() {
-            Map<String, Object> values = new HashMap<String, Object>();
-            values.put("success hist", successes.inspect());
-            values.put("failure hist", failures.inspect());
-            values.put("max success", maxSuccessful);
-            values.put("max failure", maxFailed);
-            return values;
-        }
-        
+    @Override
+    public synchronized void addPassiveNode(SocketAddress address) {
+        controller.addPassiveNode(address);
     }
 }

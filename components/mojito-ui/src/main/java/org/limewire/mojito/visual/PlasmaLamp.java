@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
-import org.limewire.mojito.messages.DHTMessage.OpCode;
+import org.limewire.mojito.message.Message;
+import org.limewire.mojito.message.RequestMessage;
 
 /**
  * This looks a bit like a 2D Plasma Lamp (also known as
@@ -90,13 +90,13 @@ class PlasmaLamp extends Painter {
     }
     
     @Override
-    public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
-        if (nodeId == null) {
-            return;
-        }
+    public void handle(boolean outgoing, KUID nodeId, 
+            SocketAddress dst, Message message) {
         
-        synchronized (nodes) {
-            nodes.add(new Node(dot, type, nodeId, opcode, request));
+        if (nodeId != null) {
+            synchronized (nodes) {
+                nodes.add(new Node(dot, outgoing, nodeId, message));
+            }
         }
     }
     
@@ -111,11 +111,11 @@ class PlasmaLamp extends Painter {
         
         private final Ellipse2D.Double dot;
         
-        private final EventType type;
-        
         private final KUID nodeId;
         
-        private final boolean request;
+        private final boolean outgoing;
+        
+        private final Message message;
         
         private final int noise;
         
@@ -133,13 +133,16 @@ class PlasmaLamp extends Painter {
         
         private final Stroke stroke;
         
-        public Node(Ellipse2D.Double dot, EventType type, KUID nodeId, OpCode opcode, boolean request) {
-            this.dot = dot;
-            this.type = type;
-            this.nodeId = nodeId;
-            this.request = request;
+        public Node(Ellipse2D.Double dot, boolean outgoing, 
+                KUID nodeId, Message message) {
             
-            this.stroke = getStrokeForOpCode(opcode);
+            this.dot = dot;
+            
+            this.outgoing = outgoing;
+            this.nodeId = nodeId;
+            this.message = message;
+            
+            this.stroke = getStrokeForMessage(message);
             
             int noise = GENERATOR.nextInt(50);
             if (GENERATOR.nextBoolean()) {
@@ -182,14 +185,14 @@ class PlasmaLamp extends Painter {
             int green = 0;
             int blue = 0;
             
-            if (type.equals(EventType.MESSAGE_SENT)) {
+            if (outgoing) {
                 red = 255;
-                if (!request) {
+                if (!(message instanceof RequestMessage)) {
                     blue = 255;
                 }
             } else {
                 green = 255;
-                if (request) {
+                if (message instanceof RequestMessage) {
                     blue = 255;
                 }
             }

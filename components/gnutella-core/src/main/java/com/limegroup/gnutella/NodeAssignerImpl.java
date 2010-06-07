@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 
@@ -86,7 +87,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private final Provider<ConnectionManager> connectionManager;
     private final NetworkManager networkManager;
     private final SearchServices searchServices;
-    private final Provider<DHTManager> dhtManager;
+    private final Provider<DHTManagerImpl> dhtManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final Executor unlimitedExecutor;
     private final ConnectionServices connectionServices;
@@ -107,7 +108,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     public NodeAssignerImpl(Provider<ConnectionManager> connectionManager,
                         NetworkManager networkManager,
                         SearchServices searchServices,
-                        Provider<DHTManager> dhtManager,
+                        Provider<DHTManagerImpl> dhtManager,
                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         @Named("unlimitedExecutor") Executor unlimitedExecutor,
                         ConnectionServices connectionServices,
@@ -315,7 +316,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         
         // If I'm not a DHT Node running in ACTIVE mode then
         // try to become an Ultrapeer
-        if (dhtManager.get().getDHTMode() != DHTMode.ACTIVE) {
+        DHTManager manager = dhtManager.get();
+        if (!manager.isMode(DHTMode.ACTIVE)) {
             return true;
         }
         
@@ -345,21 +347,24 @@ class NodeAssignerImpl implements NodeAssigner, Service {
      */
     private DHTMode assignDHTMode() {
         
-        // Remember the old mode as we're only going to switch
-        // if the new mode is different from the old mode!
-        final DHTMode current = dhtManager.get().getDHTMode();
-        assert (current != null) : "Current DHTMode is null, fix your DHTManager-Stub!";
-        
         // Initial mode is to turn off the DHT
         DHTMode mode = DHTMode.INACTIVE;
+        DHTMode current = null;
         
-        // Check if the DHT was disabled by somebody. If so shut it
-        // down and return
-        if (!dhtManager.get().isEnabled()) {
-            if (current != mode) {
-                switchDHTMode(current, mode);
+        DHTManager manager = dhtManager.get();
+        synchronized (manager) {
+            // Get the current mode
+            current = manager.getMode();
+            
+            // Somebody disabled the DHT?
+            if (!manager.isEnabled()) {
+                // Switch mode if they're different.
+                if (current != mode) {
+                    switchDHTMode(current, mode);
+                }
+                
+                return mode;
             }
-            return mode;
         }
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
@@ -376,7 +381,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         if (!isUltrapeer || !DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
             
             // Make sure that the node has had the time to try to connect as an ultrapeer
-            assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L) 
+            assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L) 
                     > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
                     
             final long averageTime = Math.max(connectionManager.get().getCurrentAverageUptime(),
@@ -468,8 +473,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private boolean isPassiveDHTCapable() {
         long averageTime = getAverageTime();
         return ULTRAPEER_OS
-        && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getValue()
-                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
+        && (averageTime >= DHTSettings.MIN_PASSIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -480,8 +485,8 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         long averageTime = getAverageTime();
         
         return ULTRAPEER_OS
-                && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
-                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getTimeInMillis()
+                && getCurrentUptime() >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L))
                 && networkManager.canReceiveSolicited();
     }
     
@@ -495,7 +500,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
             LOG.trace("not hardcore capable");
             return false;
         }
-        if (averageTime < DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()) {
+        if (averageTime < DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getTimeInMillis()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("not long enough average uptime: " + averageTime);
             }
@@ -503,7 +508,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         }
         
         long currentUptime = getCurrentUptime();
-        if (currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L)) {
+        if (currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getTimeInMillis()/1000L)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("not long enough current uptime: " + currentUptime);
             }

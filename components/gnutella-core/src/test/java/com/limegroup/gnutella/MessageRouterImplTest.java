@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,13 +33,6 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.mojito.EntityKey;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.net.SocketsManager;
@@ -58,16 +49,14 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -92,7 +81,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
-import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
@@ -1293,90 +1281,51 @@ public final class MessageRouterImplTest extends LimeTestCase {
         
     }
     
-    private static class TestDHTManager implements DHTManager {
-
-        public List<IpPort> getActiveDHTNodes(int maxNodes){
-            LinkedList<IpPort> ipps = new LinkedList<IpPort>();
-            for(int i = 0; i < maxNodes; i++) {
+    private static class TestDHTManager extends DHTManagerStub {
+        
+        @Override
+        public IpPort[] getActiveIpPort(int max) {
+            List<IpPort> ipps = new ArrayList<IpPort>();
+            for(int i = 0; i < max; i++) {
                 IpPort ipp;
                 try {
                     ipp = new IpPortImpl("localhost", 3000+i);
-                    ipps.addFirst(ipp);
+                    ipps.add(0, ipp);
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
             }
-            return ipps;
+            return ipps.toArray(new IpPort[0]);
         }
 
-        public void addActiveDHTNode(SocketAddress hostAddress) {}
+        @Override
+        public DHTMode getMode() {
+            return DHTMode.INACTIVE;
+        }
         
-        public void addPassiveDHTNode(SocketAddress hostAddress) {}
-
-        public void addressChanged() {}
-        
-        public boolean isWaitingForNodes() {
-            return false;
-        }
-
-        public MojitoDHT getMojitoDHT() { return null; }
-
-        public DHTMode getDHTMode() { 
-            return DHTMode.INACTIVE; 
-        }
-
-        public boolean isRunning() { 
-            return true; 
-        }
-
-        public void stop() {}
-
-        public void start(DHTMode mode) {}
-        
-        public boolean isBootstrapped() {
-            return false;
-        }
-
-        public boolean isMemberOfDHT() {
-            return isRunning() && isBootstrapped();
-        }
-
-        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
-        
+        @Override
         public Vendor getVendor() {
             return Vendor.UNKNOWN;
         }
-        
+
+        @Override
         public Version getVersion() {
             return Version.ZERO;
         }
 
-        public void addEventListener(DHTEventListener listener) {
-        }
-
-        public void dispatchEvent(DHTEvent event) {
-        }
-
-        public void removeEventListener(DHTEventListener listener) {
-        }
-
-        public void handleDHTContactsMessage(DHTContactsMessage msg) {
-        }
-
+        @Override
         public boolean isEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isReady() {
+            return false;
+        }
+
+        @Override
+        public boolean isRunning() {
             return true;
         }
-
-        public void setEnabled(boolean enabled) {
-        }
-        
-        public DHTFuture<FindValueResult> get(EntityKey eKey) {
-            return null;
-        }
-        
-        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-            return null;
-        }
     }
-
 }

@@ -3,6 +3,7 @@ package org.limewire.mojito.routing.impl;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -10,20 +11,27 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
+import org.limewire.mojito.ContactPinger;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFutureAdapter;
-import org.limewire.mojito.result.PingResult;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.entity.DefaultPingEntity;
+import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.RemoteContact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.PurgeMode;
@@ -463,9 +471,10 @@ public class RouteTableTest extends MojitoTestCase {
         toPing.clear();
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node, DHTFutureAdapter<PingResult> listener) {
+        routeTable.bind(new ContactPinger() {
+            public DHTFuture<PingEntity> ping(Contact node, long timeout, TimeUnit unit) {
                 toPing.add(node);
+                return new DHTValueFuture<PingEntity>(new IllegalStateException());
             }
         });
         
@@ -517,14 +526,14 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         // Check if the local Node is in the right Bucket
-        Bucket bucket = routeTable.getBucket(localNode.getNodeID());
+        Bucket bucket = routeTable.getBucket(localNode.getContactId());
         assertEquals(KUID.createWithHexString(LOCAL_NODE_BUCKET_ID), bucket.getBucketID());
         
         // Check if the live Nodes are in the right Buckets
         for (int i = 0; i < LIVE_NODE_IDS.length; i++) {
             KUID nodeId = KUID.createWithHexString(LIVE_NODE_IDS[i]);
             Contact node1 = routeTable.select(nodeId);
-            assertEquals(nodeId, node1.getNodeID());
+            assertEquals(nodeId, node1.getContactId());
             
             Bucket b = routeTable.getBucket(nodeId);
             Contact node2 = b.getActiveContact(nodeId);
@@ -536,7 +545,7 @@ public class RouteTableTest extends MojitoTestCase {
             KUID nodeId = KUID.createWithHexString(CACHED_NODE_IDS[i]);
             Contact node1 = routeTable.get(nodeId);
             assertNotNull(CACHED_NODE_IDS[i], node1);
-            assertEquals(nodeId, node1.getNodeID());
+            assertEquals(nodeId, node1.getContactId());
             
             Bucket b = routeTable.getBucket(nodeId);
             Contact node2 = b.getCachedContact(nodeId);
@@ -610,7 +619,7 @@ public class RouteTableTest extends MojitoTestCase {
             
             // Checks also the order
             for (int i = 0; i < nodeIds.length; i++) {
-                assertEquals(nodeIds[i], nodes.get(i).getNodeID());
+                assertEquals(nodeIds[i], nodes.get(i).getContactId());
             }
         }
     }
@@ -628,7 +637,7 @@ public class RouteTableTest extends MojitoTestCase {
         PatriciaTrie<KUID, Contact> trie = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
         
         for (Contact node : nodes) {
-            trie.put(node.getNodeID(), node);
+            trie.put(node.getContactId(), node);
         }
         
         assert (nodes.size() == trie.size());
@@ -646,18 +655,23 @@ public class RouteTableTest extends MojitoTestCase {
             
             // Checks also the order
             for (int i = 0; i < nodeIds.length; i++) {
-                assertEquals(nodeIds[i], nodes1.get(i).getNodeID());
-                assertEquals(nodeIds[i], nodes2.get(i).getNodeID());
-                assertEquals(nodes1.get(i).getNodeID(), nodes2.get(i).getNodeID());
+                assertEquals(nodeIds[i], nodes1.get(i).getContactId());
+                assertEquals(nodeIds[i], nodes2.get(i).getContactId());
+                assertEquals(nodes1.get(i).getContactId(), nodes2.get(i).getContactId());
             }
         }
     }
     
     public void testSelectLiveNodes() throws Exception { 
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node,
-                    DHTFutureAdapter<PingResult> listener) {
+        routeTable.bind(new ContactPinger() {
+            @Override
+            public DHTFuture<PingEntity> ping(Contact dst, long timeout, TimeUnit unit) {
+                PingEntity entity = new DefaultPingEntity(dst, 
+                        new InetSocketAddress("localhost", 3000), 
+                        BigInteger.ONE, 
+                        0L, TimeUnit.MILLISECONDS);
+                return new DHTValueFuture<PingEntity>(entity);
             }
         });
         
@@ -676,17 +690,18 @@ public class RouteTableTest extends MojitoTestCase {
             Contact node = ContactFactory.createLiveContact(null,
                     Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
-            node.handleFailure();
-            node.handleFailure();
-            node.handleFailure();
-            node.handleFailure();
-            node.handleFailure();
+            
+            for (int j = 0; j < 5; j++) {
+                node.handleFailure();
+            }
+            
             routeTable.add(node);
             deadContacts.add(node);
         }
         
         //test select only alive nodes
-        Collection<Contact> nodes = routeTable.select(KUID.createRandomID(), 500, SelectMode.ALIVE);
+        Collection<Contact> nodes = routeTable.select(
+                KUID.createRandomID(), 500, SelectMode.ALIVE);
         assertNotContains(nodes, routeTable.getLocalNode());
         assertEquals(10, nodes.size());
         
@@ -708,11 +723,6 @@ public class RouteTableTest extends MojitoTestCase {
     
     public void testPurge() {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setContactPinger(new RouteTable.ContactPinger() {
-            public void ping(Contact node,
-                    DHTFutureAdapter<PingResult> listener) {
-            }
-        });
         
         int port = 3000;
         for(String nodeId : NODE_IDS) {
@@ -740,7 +750,7 @@ public class RouteTableTest extends MojitoTestCase {
         
         // Mark it as dead
         for (int i = 0; i < 100 && !node.isDead(); i++) {
-            routeTable.handleFailure(node.getNodeID(), node.getContactAddress());
+            routeTable.handleFailure(node.getContactId(), node.getContactAddress());
         }
         assertTrue(node.isDead());
         
@@ -748,11 +758,11 @@ public class RouteTableTest extends MojitoTestCase {
         routeTable.purge(PurgeMode.PURGE_CONTACTS);
         
         // The dead Node should be gone
-        assertNull(routeTable.get(node.getNodeID()));
+        assertNull(routeTable.get(node.getContactId()));
         
         // The local Node should be still there
-        assertEquals(localNode, routeTable.select(localNode.getNodeID()));
-        assertTrue(localNode == routeTable.select(localNode.getNodeID())); // it should be the same Object
+        assertEquals(localNode, routeTable.select(localNode.getContactId()));
+        assertTrue(localNode == routeTable.select(localNode.getContactId())); // it should be the same Object
     }
     
     public void testSelectAll() {
@@ -874,17 +884,15 @@ public class RouteTableTest extends MojitoTestCase {
     }
     
     public void testNetworkClass() {
-        final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
         // Make sure the cache has the same max size as the Buckets.
         // It'd make counting harder otherwise...!
-        RouteTableSettings.MAX_CACHE_SIZE.setValue(k);
+        RouteTableSettings.MAX_CACHE_SIZE.setValue(KademliaSettings.K);
         
         // Accept any IP address
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
         
         RouteTable routeTable1 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -894,13 +902,15 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         // There should be exactly k Contacts in the Bucket
-        assertEquals(k, routeTable1.size());
-        assertEquals(k, routeTable1.getActiveContacts().size());
+        assertEquals(KademliaSettings.K, routeTable1.size());
+        assertEquals(KademliaSettings.K, 
+                routeTable1.getActiveContacts().size());
+        
         assertEquals(0, routeTable1.getCachedContacts().size());
         
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.0f);
         RouteTable routeTable2 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -919,7 +929,7 @@ public class RouteTableTest extends MojitoTestCase {
         // Allow 50% to be from the same Network
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.5f);
         RouteTable routeTable3 = new RouteTableImpl();
-        for (int i = 0; i < (k-1); i++) {
+        for (int i = 0; i < (KademliaSettings.K-1); i++) {
             Contact node = ContactFactory.createUnknownContact(
                     Vendor.UNKNOWN, 
                     Version.ZERO, 
@@ -930,8 +940,9 @@ public class RouteTableTest extends MojitoTestCase {
         
         // 50% of them should be in the Bucket and the rest NOT in the
         // replacement cache since the bucket is splitable
-        assertEquals(k/2+1, routeTable3.size());
-        assertEquals(k/2+1, routeTable3.getActiveContacts().size());
+        assertEquals(KademliaSettings.K/2+1, routeTable3.size());
+        assertEquals(KademliaSettings.K/2+1, 
+                routeTable3.getActiveContacts().size());
         assertEquals(0, routeTable3.getCachedContacts().size());
         
         // Add a Contact from a different Class C Network
@@ -946,18 +957,18 @@ public class RouteTableTest extends MojitoTestCase {
                 Contact.DEFAULT_FLAG);
         
         routeTable3.add(node);
-        assertEquals(k/2+1+1, routeTable3.size());
-        assertEquals(k/2+1+1, routeTable3.getActiveContacts().size());
+        assertEquals(KademliaSettings.K/2+1+1, routeTable3.size());
+        assertEquals(KademliaSettings.K/2+1+1, routeTable3.getActiveContacts().size());
         assertEquals(0, routeTable3.getCachedContacts().size());
         
-        Bucket bucket = routeTable3.getBucket(node.getNodeID());
+        Bucket bucket = routeTable3.getBucket(node.getContactId());
         assertNotNull(bucket);
         
         ClassfulNetworkCounter counter = bucket.getClassfulNetworkCounter();
         int count = counter.get(node);
         assertEquals(1, count);
         
-        boolean removed = bucket.remove(node.getNodeID());
+        boolean removed = bucket.remove(node.getContactId());
         assertTrue(removed);
         
         count = counter.get(node);
@@ -1012,6 +1023,6 @@ public class RouteTableTest extends MojitoTestCase {
         // for more than 4500ms. Node #2 should be gone!
         routeTable.purge(4500);
         assertEquals(2, routeTable.size());
-        assertNull(routeTable.get(node2.getNodeID()));
+        assertNull(routeTable.get(node2.getContactId()));
     }
 }

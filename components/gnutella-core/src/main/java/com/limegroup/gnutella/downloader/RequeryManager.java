@@ -4,9 +4,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
@@ -16,7 +19,6 @@ import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -55,6 +57,7 @@ class RequeryManager implements DHTEventListener {
     private final AltLocFinder altLocFinder;
     
     private final DHTManager dhtManager;
+    
     private final ActivationManager activationManager;
     
     /** The type of the last query this sent out. */
@@ -76,16 +79,9 @@ class RequeryManager implements DHTEventListener {
      * a dht lookup to Shutdownable if we get shut down 
      * not null if a DHT query is currently out (and not finished, success or failure)
      */
-    private volatile Shutdownable dhtQuery;
+    private volatile DHTFuture<AlternateLocation[]> dhtQuery;
     
     private final ConnectionServices connectionServices;
-    
-    /**
-     * Used to be notified of finished dht queries.
-     * 
-     * Package access for tests.
-     */
-    final AltLocSearchHandler searchHandler = new AltLocSearchHandler();
     
     RequeryManager(RequeryListener requeryListener, 
             DownloadManager manager,
@@ -109,8 +105,10 @@ class RequeryManager implements DHTEventListener {
             return false;
         
         switch(lastQueryType) {
-        case DHT: return dhtQuery != null && getTimeLeftInQuery() > 0;
-        case GNUTELLA: return getTimeLeftInQuery() > 0;
+            case DHT: 
+                return dhtQuery != null && getTimeLeftInQuery() > 0;
+            case GNUTELLA: 
+                return getTimeLeftInQuery() > 0;
         }
         
         return false;
@@ -161,10 +159,13 @@ class RequeryManager implements DHTEventListener {
     
    /** Removes all event listeners, cancels ongoing searches and cleans up references. */
     void cleanUp() {
-        Shutdownable f = dhtQuery;
+        
+        DHTFuture<?> f = dhtQuery;
         dhtQuery = null;
-        if (f != null)
-            f.shutdown();
+        if (f != null) {
+            f.cancel(true);
+        }
+        
         dhtManager.removeEventListener(this);
     }
     
@@ -176,7 +177,7 @@ class RequeryManager implements DHTEventListener {
         }
     }
     
-    void handleAltLocSearchDone(boolean success){
+    void handleAltLocSearchDone(boolean success) {
         dhtQuery = null;
         // This changes the state to GAVE_UP regardless of success,
         // because even if this was a success (it found results),
@@ -190,7 +191,7 @@ class RequeryManager implements DHTEventListener {
      */
     private boolean isDHTUp() {
         return DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()
-                && dhtManager.isMemberOfDHT();
+                && dhtManager.isReady();
     }
     
     /** True if another DHT query can be sent right now. */
@@ -200,7 +201,7 @@ class RequeryManager implements DHTEventListener {
         return numDHTQueries == 0 || 
         (numDHTQueries < DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
                 && System.currentTimeMillis() - lastQuerySent >= 
-                    DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()
+                    DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getTimeInMillis()
         );
     }
     
@@ -209,12 +210,20 @@ class RequeryManager implements DHTEventListener {
         lastQuerySent = System.currentTimeMillis();
         lastQueryType = QueryType.DHT;
         numDHTQueries++;
-        requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
-                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
+        requeryListener.lookupStarted(QueryType.DHT, 
+                Math.max(TIME_BETWEEN_REQUERIES, 
+                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getTimeInMillis()));
       
         URN sha1Urn = requeryListener.getSHA1Urn();
         if (sha1Urn != null) {
-            dhtQuery = altLocFinder.findAltLocs(sha1Urn, searchHandler);
+            dhtQuery = altLocFinder.findAltLocs(sha1Urn);
+            dhtQuery.addFutureListener(new EventListener<FutureEvent<AlternateLocation[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<AlternateLocation[]> event) {
+                    boolean success = event.getType() == Type.SUCCESS;
+                    RequeryManager.this.handleAltLocSearchDone(success);
+                }
+            });
         }
         // fail silently otherwise as before
     }
@@ -266,18 +275,5 @@ class RequeryManager implements DHTEventListener {
         return connectionServices.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
                     >= MIN_NUM_CONNECTIONS &&
                     connectionServices.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
-    }
-
-    private class AltLocSearchHandler implements SearchListener<AlternateLocation> {
-
-        public void searchFailed() {
-            RequeryManager.this.handleAltLocSearchDone(false);
-        }
-
-        public void handleResult(AlternateLocation alternateLocation) {
-            // ManagedDownloader installs its own AlternatelocationListener so it
-            // is notified of all results
-            RequeryManager.this.handleAltLocSearchDone(true);
-        }
     }
 }

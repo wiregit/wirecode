@@ -7,17 +7,18 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.ValueType;
+import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.util.StringUtils;
 
 
@@ -42,7 +43,7 @@ public class DatabaseUtilsTest extends MojitoTestCase {
     }
     
     public void testExpirationTime() {
-        assertEquals(20, KademliaSettings.REPLICATION_PARAMETER.getValue());
+        assertEquals(20, KademliaSettings.K);
         
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         
@@ -57,11 +58,12 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         assertEquals(16, routeTable.size());
         
         Contact creator = routeTable.getLocalNode();
-        KUID valueId = creator.getNodeID().invert();
-        DHTValueEntity value = DHTValueEntity.createFromRemote(creator, creator, valueId, 
-															   new DHTValueImpl(DHTValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
+        KUID valueId = creator.getContactId().invert();
+        ValueTuple value = ValueTuple.createValueTuple(creator, creator, valueId, 
+															   new DefaultValue(ValueType.TEST, Version.ZERO, StringUtils.toUTF8Bytes("Hello World")));
         
-        long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        long expectedExpiresAt = value.getCreationTime() 
+            + DatabaseSettings.VALUE_EXPIRATION_TIME.getTimeInMillis();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));
         
         for (int i = 0; i < 4; i++) {

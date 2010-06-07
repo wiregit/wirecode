@@ -2593,7 +2593,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     } 
     
     private void handleDHTContactsMessage(DHTContactsMessage msg, ReplyHandler handler) {
-        dhtManager.handleDHTContactsMessage(msg);
+        dhtManager.handleContactsMessage(msg);
     }
     
     /* (non-Javadoc)

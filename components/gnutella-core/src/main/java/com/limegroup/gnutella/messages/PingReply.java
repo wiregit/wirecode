@@ -135,8 +135,14 @@ public interface PingReply extends Message {
      */
     List<IpPort> getPackedUDPHostCaches();
 
+    /**
+     * Returns the remote host's {@link DHTMode}.
+     */
     DHTMode getDHTMode();
 
+    /**
+     * Returns the remote host's DHT version
+     */
     int getDHTVersion();
 
     /**

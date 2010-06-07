@@ -47,7 +47,7 @@ import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
@@ -718,7 +718,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                 ConnectionServices connectionServices,
                 Provider<ConnectionManager> connectionManager,
                 Provider<UDPService> udpService,
-                Provider<DHTManager> dhtManager,
+                Provider<DHTManagerImpl> dhtManager,
                 Provider<QueryUnicaster> queryUnicaster,
                 Provider<IPFilter> ipFilter,
                 UniqueHostPinger uniqueHostPinger,
@@ -789,7 +789,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                 ConnectionServices connectionServices,
                 Provider<ConnectionManager> connectionManager,
                 Provider<UDPService> udpService,
-                Provider<DHTManager> dhtManager,
+                Provider<DHTManagerImpl> dhtManager,
                 Provider<QueryUnicaster> queryUnicaster,
                 @Named("hostileFilter") Provider<IPFilter> ipFilter,
                 UniqueHostPinger uniqueHostPinger,

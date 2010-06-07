@@ -23,7 +23,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import org.limewire.mojito.Context;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.SecuritySettings;
 import org.limewire.security.SecurityToken;
@@ -37,10 +36,17 @@ public class SecurityTokenHelper {
     
     private static final int SUBSTITUTE_PORT = 1024;
     
-    private final Context context;
+    private final SecurityToken.TokenProvider tokenProvider;
     
-    public SecurityTokenHelper(Context context) {
-        this.context = context;
+    public SecurityTokenHelper(SecurityToken.TokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
+    
+    /**
+     * 
+     */
+    public SecurityToken.TokenProvider getSecurityTokenProvider() {
+        return tokenProvider;
     }
     
     /**
@@ -69,13 +75,13 @@ public class SecurityTokenHelper {
      * Creates and returns a {@link SecurityToken} for the given destination {@link Contact}.
      */
     public SecurityToken createSecurityToken(Contact dst) {
-        return context.getSecurityTokenProvider().getSecurityToken(getTokenSocketAddress(dst));
+        return tokenProvider.getSecurityToken(getTokenSocketAddress(dst));
     }
     
     /**
      * Creates and returns a {@link TokenData} for the given source {@link Contact}.
      */
     public TokenData createTokenData(Contact src) {
-        return context.getSecurityTokenProvider().getTokenData(getTokenSocketAddress(src));
+        return tokenProvider.getTokenData(getTokenSocketAddress(src));
     }
 }

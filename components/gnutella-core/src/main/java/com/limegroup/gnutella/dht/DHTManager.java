@@ -1,54 +1,60 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.Closeable;
 import java.net.SocketAddress;
-import java.util.List;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.entity.StoreEntity;
+import org.limewire.mojito.entity.ValueEntity;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.RouteTable;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * The DHT Manager interface defines methods to start, stop and perform
- * operations related to the maintenance of the DHT (bootstrapping, etc.).
- * It also takes care of switching between different DHT modes for a DHT node.
+ * The {@link DHTManager} is managing the various types of modes
+ * in which nodes may connect to the DHT.
  */
-public interface DHTManager extends ConnectionLifecycleListener, 
-        EventDispatcher<DHTEvent, DHTEventListener>{
-    
+public interface DHTManager extends Closeable, ConnectionLifecycleListener, 
+        EventDispatcher<DHTEvent, DHTEventListener> {
+
+    public static final Vendor VENDOR = ContextSettings.getVendor();
+
+    public static final Version VERSION = ContextSettings.getVersion();
+
     /**
      * Defines the modes of a DHT Node (inactive, active, passive and passive leaf).
      */
     public static enum DHTMode {
         
         /**
-         * A DHT Node is in INACTIVE mode if it supports the DHT
+         * A DHT Node is in #INACTIVE mode if it supports the DHT
          * but is currently not capable of joining it.
          * 
-         * @see NodeAssigner.java
+         * @see NodeAssigner
          */
         INACTIVE(0x00, new byte[]{ 'I', 'D', 'H', 'T' }),
         
         /**
-         * A DHT Node is ACTIVE mode if it's a full participant
+         * A DHT Node is #ACTIVE mode if it's a full participant
          * of the DHT, e.g. a non-firewalled Gnutella leave node
          * with a sufficiently stable connection.
          */
         ACTIVE(0x01, new byte[]{ 'A', 'D', 'H', 'T' }),
         
         /**
-         * A DHT Node is in PASSIVE mode if it's connected to
+         * A DHT Node is in #PASSIVE mode if it's connected to
          * the DHT but is not part of the global DHT routing table. 
          * Thus, a passive node never receives requests from the DHT 
          * and does necessarily have an accurate knowledge of the DHT
@@ -57,7 +63,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
         PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' }),
         
         /**
-         * The PASSIVE_LEAF mode is very similar to PASSIVE mode with
+         * The #PASSIVE_LEAF mode is very similar to #PASSIVE mode with
          * two major differences:
          * <pre>
          * 1) A passive leaf has a fixed size LRU Map as its RouteTable.
@@ -93,9 +99,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * Returns the VM capability name.
          */
         public byte[] getCapabilityName() {
-            byte[] copy = new byte[capabilityName.length];
-            System.arraycopy(capabilityName, 0, copy, 0, copy.length);
-            return copy;
+            return capabilityName.clone();
         }
         
         private static final DHTMode[] MODES;
@@ -125,119 +129,130 @@ public interface DHTManager extends ConnectionLifecycleListener,
     }
     
     /**
-     * Sets whether or not the DHT is enabled.
-     */
-    public void setEnabled(boolean enabled);
-    
-    /**
-     * Returns whether or not the DHT is enabled.
-     */
-    public boolean isEnabled();
-    
-    /**
-     * Starts the DHT Node either in active or passive mode.
-     * <p>
-     * Note: You can use this method to stop the DHT by passing in
-     * DHTMode.INACTIVE. The difference between using this method
-     * and the {@link #stop()} method is that stop() is synchronous 
-     * (i.e. blocking) and start() with DHTMode.INACTIVE isn't.
-     */
-    public void start(DHTMode mode);
-
-    /**
-     * Stops the DHT Node.
-     */
-    public void stop();
-    
-    /**
-     * Passes the given active DHT node to the DHT controller 
-     * in order to bootstrap or perform other maintenance operations. 
-     */
-    public void addActiveDHTNode(SocketAddress hostAddress);
-    
-    /**
-     * Passes the given passive DHT node to the DHT controller 
-     * in order to bootstrap or perform other maintenance operations. 
-     */
-    public void addPassiveDHTNode(SocketAddress hostAddress);
-    
-    /**
-     * Notifies the DHT controller that our external Address has changed.
-     */
-    public void addressChanged();
-    
-    /**
-     * Returns maxNodes number of active Node's IP:Ports.
-     */
-    public List<IpPort> getActiveDHTNodes(int maxNodes);
-
-    /**
-     * Returns the mode of the DHT.
-     */
-    public DHTMode getDHTMode();
-    
-    /**
-     * Returns whether this Node is running.
-     */
-    public boolean isRunning();
-    
-    /**
-     * Returns whether this Node is bootstrapped.
-     */
-    public boolean isBootstrapped();
-    
-    /**
-     * Returns whether this Node is part of the DHT.
-     */
-    public boolean isMemberOfDHT();
-    
-    /**
-     * Returns whether this Node is waiting for Nodes or not.
-     */
-    public boolean isWaitingForNodes();
-    
-    /**
-     * Returns the MojitoDHT instance (null if Node is running in inactive mode!).
-     */
-    public MojitoDHT getMojitoDHT();
-    
-    /**
-     * Returns the Vendor code of this Node.
+     * Returns the {@link Vendor}.
      */
     public Vendor getVendor();
     
     /**
-     * Returns the Vendor code of this Node.
+     * Returns the {@link Version}.
      */
     public Version getVersion();
     
     /**
-     * Callback to notify the manager about new DHT Contacts that
-     * were exchanged over regular Gnutella messages.
-     * 
-     * @see com.limegroup.gnutella.messages.vendor.DHTContactsMessage
+     * Starts the DHT in the given {@link DHTMode}.
      */
-    public void handleDHTContactsMessage(DHTContactsMessage msg);
+    public boolean start(DHTMode mode);
+
+    /**
+     * Stops the DHT.
+     */
+    public void stop();
+
+    /**
+     * Returns the {@link Controller}.
+     */
+    public Controller getController();
+
+    /**
+     * Returns {@code true} if the DHT is running.
+     */
+    public boolean isRunning();
+
+    /**
+     * Sets whether or not the DHT is enabled.
+     */
+    public void setEnabled(boolean enabled);
+
+    /**
+     * Returns {@code true} if the DHT is enabled.
+     */
+    public boolean isEnabled();
+
+    /**
+     * Returns the current {@link DHTMode}.
+     */
+    public DHTMode getMode();
+
+    /**
+     * Returns true if the DHT is running in the given {@link DHTMode}.
+     */
+    public boolean isMode(DHTMode mode);
+
+    /**
+     * A callback method that's being called by Gnutella to indicate
+     * that the host's address has changed.
+     */
+    public void addressChanged();
+
+    /**
+     * Returns {@code true} if the DHT is currently booting.
+     */
+    public boolean isBooting();
     
     /**
-     * Calls the {@link MojitoDHT#get(EntityKey)} if a bootstrappable DHT is available.
-     * Also handles the locking properly to ensure thread safety.
-     * 
-     * @param eKey the entity key used to perform lookup in the DHT.
-     * 
-     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
-     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     * Returns {@code true} if the DHT is ready.
      */
-    public DHTFuture<FindValueResult> get(EntityKey eKey);
+    public boolean isReady();
+
+    /**
+     * Returns up to the given number of {@link Contact}s 
+     * from the {@link RouteTable}.
+     */
+    public Contact[] getActiveContacts(int max);
+
+    /**
+     * Returns up to the given number of {@link IpPort}s 
+     * from the {@link RouteTable}.
+     */
+    public IpPort[] getActiveIpPort(int max);
+
+    /**
+     * A callback method for Gnutella.
+     */
+    public void handleContactsMessage(DHTContactsMessage msg);
+
+    /**
+     * Stores the given key-value pair in the DHT
+     */
+    public DHTFuture<StoreEntity> put(KUID key, Value value);
+
+    /**
+     * Stores the given key-value pair in the DHT
+     */
+    public DHTFuture<StoreEntity> enqueue(KUID key, Value value);
     
     /**
-     * Calls the {@link MojitoDHT#put(KUID, DHTValue)} if a bootstrappable DHT is available.
-     * Also handles the locking properly to ensure thread safety.
-     * 
-     * @param eKey the entity key used to perform lookup in the DHT.
-     * 
-     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
-     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     * Retrieves a value from the DHT.
      */
-    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
+    public DHTFuture<ValueEntity> get(ValueKey key);
+
+    /**
+     * Retrieves a value from the DHT.
+     */
+    public DHTFuture<ValueEntity[]> getAll(ValueKey key);
+    
+    /**
+     * Adds an ACTIVE node's {@link SocketAddress}.
+     */
+    public void addActiveNode(SocketAddress address);
+
+    /**
+     * Adds a PASSIVE node's {@link SocketAddress}.
+     */
+    public void addPassiveNode(SocketAddress address);
+
+    /**
+     * Adds an {@link DHTEventListener}.
+     */
+    public void addEventListener(DHTEventListener listener);
+
+    /**
+     * Removes a {@link DHTEventListener}.
+     */
+    public void removeEventListener(DHTEventListener listener);
+    
+    /**
+     * Equivalent to {@link #getController()#getMojitoDHT()}
+     */
+    public MojitoDHT getMojitoDHT();
 }

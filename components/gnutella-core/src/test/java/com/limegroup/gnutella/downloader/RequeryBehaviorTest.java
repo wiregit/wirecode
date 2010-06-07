@@ -11,12 +11,18 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.activation.api.ActivationID;
+import org.limewire.activation.api.ActivationManager;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.FutureEvent.Type;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.nio.observer.Shutdownable;
+import org.limewire.listener.EventListener;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -26,6 +32,7 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.LegacyProActivationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -35,11 +42,7 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
-import org.limewire.activation.api.ActivationID;
-import org.limewire.activation.api.ActivationManager;
-import com.limegroup.gnutella.LegacyProActivationManager;
 
 public class RequeryBehaviorTest extends LimeTestCase {
 
@@ -66,7 +69,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
-      DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setValue(31*1000);
+      DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.setTime(31, TimeUnit.SECONDS);
         RequeryManager.TIME_BETWEEN_REQUERIES = 5000;
         
         myDHTManager = new MyDHTManager();
@@ -125,7 +128,8 @@ public class RequeryBehaviorTest extends LimeTestCase {
         dhtQueryTime = System.currentTimeMillis() - dhtQueryTime;
         
         LOG.debug("dht query fails");
-        myAltFinder.listener.searchFailed();
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_GNET_RESULTS, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -185,8 +189,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
         // now tell them the dht query failed
         LOG.debug("dht query fails");
-        assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.searchFailed();
+        assertNotNull(myAltFinder.future);
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_GNET_RESULTS, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -263,8 +268,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
         // now tell them the dht query failed
         LOG.debug("dht query fails");
-        assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.searchFailed();
+        assertNotNull(myAltFinder.future);
+        myAltFinder.failed();
+        
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.GAVE_UP, DownloadState.QUEUED);
         DownloadTestUtils.pumpThroughStates(downloader, pump, DownloadState.QUEUED, DownloadState.WAITING_FOR_USER, 
                 DownloadState.CONNECTING, DownloadState.GAVE_UP);
@@ -314,7 +320,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         }
 
         @Override
-        public boolean isMemberOfDHT() {
+        public boolean isReady() {
             return on;
         }
 
@@ -325,24 +331,28 @@ public class RequeryBehaviorTest extends LimeTestCase {
         }
     }
     
-    @Singleton
+    @Singleton    
     private static class MyAltLocFinder implements AltLocFinder {
-        private volatile SearchListener<AlternateLocation> listener;
         
-//        volatile boolean cancelled;
+        private volatile DHTFuture<AlternateLocation[]> future = null;
         
-        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
-            this.listener = listener;
-            return new Shutdownable() {
-                public void shutdown() {
-//                    cancelled = true;
+        private volatile boolean cancelled;
+        
+        @Override
+        public DHTFuture<AlternateLocation[]> findAltLocs(URN urn) {
+            future = new DHTValueFuture<AlternateLocation[]>();
+            future.addFutureListener(new EventListener<FutureEvent<AlternateLocation[]>>() {
+                @Override
+                public void handleEvent(FutureEvent<AlternateLocation[]> event) {
+                    cancelled = event.getType() == Type.CANCELLED;
                 }
-            };
+            });
+            return future;
         }
-
-//        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
-//            return true;
-//        }
+        
+        public void failed() {
+            future.setException(new IllegalStateException("Shouldn't have called get()!"));
+        }
     }
     
     @Singleton

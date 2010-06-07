@@ -3,12 +3,10 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.limewire.io.IOUtils;
-import org.limewire.mojito.io.MessageInputStream;
-import org.limewire.mojito.io.MessageOutputStream;
+import org.limewire.mojito.message.MessageInputStream;
+import org.limewire.mojito.message.MessageOutputStream;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
@@ -23,24 +21,26 @@ public class DHTContactsMessage extends AbstractVendorMessage {
     
     public static final int VERSION = 1;
     
-    private final Collection<? extends Contact> nodes;
+    private final Contact[] nodes;
     
     public DHTContactsMessage(Contact node) {
-        this(Collections.singleton(node));
+        this(new Contact[] { node });
     }
     
-    public DHTContactsMessage(Collection<? extends Contact> nodes) {
+    public DHTContactsMessage(Contact[] nodes) {
         super(F_LIME_VENDOR_ID, F_DHT_CONTACTS, VERSION, derivePayload(nodes));
         
         this.nodes = nodes;
     }
     
     public DHTContactsMessage(byte[] guid, byte ttl, byte hops, 
-            int version, byte[] payload, Network network, MACCalculatorRepositoryManager macManager) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_DHT_CONTACTS, version, payload, network);
+            int version, byte[] payload, Network network, 
+            MACCalculatorRepositoryManager macManager) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, 
+                F_DHT_CONTACTS, version, payload, network);
         
         ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-        MessageInputStream in = new MessageInputStream(bais,macManager);
+        MessageInputStream in = new MessageInputStream(bais, macManager);
         
         try {
             this.nodes = in.readContacts();
@@ -51,11 +51,11 @@ public class DHTContactsMessage extends AbstractVendorMessage {
         }
     }
     
-    public Collection<? extends Contact> getContacts() {
+    public Contact[] getContacts() {
         return nodes;
     }
     
-    private static byte[] derivePayload(Collection<? extends Contact> nodes) {
+    private static byte[] derivePayload(Contact[] nodes) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MessageOutputStream out = new MessageOutputStream(baos);
         

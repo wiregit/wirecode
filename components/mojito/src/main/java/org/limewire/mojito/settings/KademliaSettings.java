@@ -24,23 +24,10 @@ package org.limewire.mojito.settings;
  */
 public class KademliaSettings {
     
-    private KademliaSettings() {}
-    
     /**
-     * The replication parameter is also known as K.
+     * The replication parameter. It's an immutable constant.
      */
-    public static final FakeIntSetting REPLICATION_PARAMETER = new FakeIntSetting(20);
+    public static final int K = 20;
     
-    public static class FakeIntSetting {
-        
-        private final int value;
-        
-        private FakeIntSetting(int value) {
-            this.value = value;
-        }
-        
-        public int getValue() {
-            return value;
-        }
-    }
+    private KademliaSettings() {}
 }

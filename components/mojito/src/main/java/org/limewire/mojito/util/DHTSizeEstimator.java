@@ -51,11 +51,16 @@ public class DHTSizeEstimator {
     private static final int MIN_NODE_COUNT = 3;
     
     /** History of local estimations. */
-    private List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
+    private final List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
 
     /** History of remote estimations (sizes we received with pongs). */
-    private List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
+    private final List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
 
+    /**
+     * The local {@link RouteTable}.
+     */
+    private final RouteTable routeTable;
+    
     /** Current estimated size. */
     private BigInteger estimatedSize = BigInteger.ZERO;
 
@@ -65,6 +70,13 @@ public class DHTSizeEstimator {
     /** The time when we updated the estimated DHT size. */
     private long updateEstimatedSizeTime = 0L;
 
+    /**
+     * Creates a {@link DHTSizeEstimator}
+     */
+    public DHTSizeEstimator(RouteTable routeTable) {
+        this.routeTable = routeTable;
+    }
+    
     /**
      * Clears the history and sets everything to
      * its initial state.
@@ -81,19 +93,19 @@ public class DHTSizeEstimator {
     /**
      * Returns the approximate DHT size.
      */
-    public synchronized BigInteger getEstimatedSize(RouteTable routeTable) {
-        if (routeTable != null && 
-                (System.currentTimeMillis() - localEstimateTime) 
-                    >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
+    public synchronized BigInteger getEstimatedSize() {
+        long time = System.currentTimeMillis() - localEstimateTime;
+        if (routeTable != null && time >= ContextSettings
+                .ESTIMATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
             
             SelectMode mode = SelectMode.ALL;
             if (ContextSettings.ESTIMATE_WITH_LIVE_NODES_ONLY.getValue()) {
                 mode = SelectMode.ALIVE;
             }
             
-            KUID localNodeId = routeTable.getLocalNode().getNodeID();
+            KUID localNodeId = routeTable.getLocalNode().getContactId();
             Collection<Contact> nodes = routeTable.select(localNodeId, 
-                    KademliaSettings.REPLICATION_PARAMETER.getValue(), mode);
+                    KademliaSettings.K, mode);
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();
@@ -144,8 +156,8 @@ public class DHTSizeEstimator {
      * estimate the DHT size.
      */
     public synchronized void updateSize(Collection<? extends Contact> nodes) {
-        if ((System.currentTimeMillis() - updateEstimatedSizeTime) 
-                >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getValue()) {
+        long time = System.currentTimeMillis() - updateEstimatedSizeTime;
+        if (time >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getTimeInMillis()) {
 
             if (nodes.size() >= MIN_NODE_COUNT) {
                 estimatedSize = computeSize(nodes);
@@ -179,13 +191,13 @@ public class DHTSizeEstimator {
         BigInteger sum2 = BigInteger.ZERO;
         
         // The algorithm works relative to the ID space.
-        KUID nearestId = contacts.next().getNodeID();
+        KUID nearestId = contacts.next().getContactId();
         
         // We start 1 because the nearest Node is the 0th item!
         for (int i = 1; contacts.hasNext(); i++) {
             Contact node = contacts.next();
 
-            BigInteger distance = nearestId.xor(node.getNodeID()).toBigInteger();
+            BigInteger distance = nearestId.xor(node.getContactId()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);
 
             sum1 = sum1.add(j.multiply(distance));

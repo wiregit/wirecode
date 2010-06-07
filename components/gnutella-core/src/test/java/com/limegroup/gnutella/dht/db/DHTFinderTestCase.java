@@ -9,9 +9,10 @@ import org.jmock.lib.action.CustomAction;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -33,8 +34,6 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
     protected MojitoDHT mojitoDHT;
     protected NetworkManagerStub networkManager;
     protected Injector injector;
-    protected AltLocValueFactory altLocValueFactory;
-    protected PushProxiesValueFactory pushProxiesValueFactory;
     protected PushEndpointFactory pushEndpointFactory;
     protected AlternateLocationFactory alternateLocationFactory;
 
@@ -52,9 +51,11 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         networkManager = new NetworkManagerStub();
 
         // to have non-empty push proxies to send
-        final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
+        final ConnectionManager connectionManager 
+            = MockUtils.createConnectionManagerWithPushProxies(context);
         
-        injector = LimeTestUtils.createInjectorNonEagerly(new LimeWireIOTestModule(), new AbstractModule() {
+        injector = LimeTestUtils.createInjectorNonEagerly(
+                new LimeWireIOTestModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(DHTManager.class).toInstance(dhtManager);
@@ -64,35 +65,39 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         });
         DHTTestUtils.setLocalIsPrivate(injector, false);
         
-        altLocValueFactory = injector.getInstance(AltLocValueFactory.class);
-        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-        pushProxiesValueFactory = injector.getInstance(PushProxiesValueFactory.class);
-        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+        alternateLocationFactory 
+            = injector.getInstance(AlternateLocationFactory.class);
+        pushEndpointFactory 
+            = injector.getInstance(PushEndpointFactory.class);
         
         
         dhts = MojitoUtils.createBootStrappedDHTs(1);
         
         mojitoDHT = dhts.get(0);
         context.checking(new Expectations() {{
-            allowing(dhtManager).get(with(any(EntityKey.class)));
+            allowing(dhtManager).get(with(any(ValueKey.class)));
             will(new CustomAction("Mojito Get") {
                 public Object invoke(Invocation invocation) throws Throwable {
-                    return mojitoDHT.get((EntityKey)invocation.getParameter(0));
+                    return mojitoDHT.get((ValueKey)invocation.getParameter(0));
                 }                
             });
+            
+            allowing(dhtManager).getAll(with(any(ValueKey.class)));
+            will(new CustomAction("Mojito Get-All") {
+                @Override
+                public Object invoke(Invocation invocation) throws Throwable {
+                    return mojitoDHT.getAll((ValueKey)invocation.getParameter(0));
+                }
+            });
+            
+            allowing(dhtManager).getMojitoDHT();
+            will(returnValue(mojitoDHT));
         }});
-        assertTrue(mojitoDHT.isBootstrapped());
-
-        // register necessary factories
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractAltLocValue.ALT_LOC, altLocValueFactory);
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractPushProxiesValue.PUSH_PROXIES, pushProxiesValueFactory);
+        assertTrue(mojitoDHT.isReady());
     }
     
     @Override
     protected void tearDown() throws Exception {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
+        IoUtils.closeAll(dhts);
     }
-
 }
