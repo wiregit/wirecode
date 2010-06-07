@@ -49,7 +49,7 @@ import org.limewire.security.SecurityToken;
 public class DefaultDHT extends AbstractDHT implements Context {
     
     /**
-     * 
+     * A listener that is added to all PING requests.
      */
     private final EventListener<FutureEvent<PingEntity>> onPong 
             = new EventListener<FutureEvent<PingEntity>>() {
@@ -61,60 +61,30 @@ public class DefaultDHT extends AbstractDHT implements Context {
         }
     };
     
-    /**
-     * 
-     */
     private final DHTSizeEstimator estimator;
     
-    /**
-     * 
-     */
     private final BucketRefresher bucketRefresher 
         = new BucketRefresher(this);
     
-    /**
-     * 
-     */
     private final StoreManager storeManager 
         = new StoreManager(this);
     
-    /**
-     * 
-     */
     private final DatabaseCleaner databaseCleaner;
     
-    /**
-     * 
-     */
     private final String name;
     
-    /**
-     * 
-     */
     private final MessageDispatcher messageDispatcher;
     
-    /**
-     * 
-     */
     private final RouteTable routeTable;
     
-    /**
-     * 
-     */
     private final Database database;
     
-    /**
-     * 
-     */
     private final MessageHelper messageHelper;
     
-    /**
-     * 
-     */
     private volatile HostFilter hostFilter = null;
     
     /**
-     * 
+     * Creates a {@link DefaultDHT}.
      */
     public DefaultDHT(String name,
             MessageFactory messageFactory,

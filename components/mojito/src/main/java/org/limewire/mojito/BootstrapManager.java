@@ -144,7 +144,8 @@ public class BootstrapManager implements Closeable {
     }
     
     /**
-     * 
+     * Adds a {@link EventListener} that is automatically added
+     * to all {@link DHTFuture}s.
      */
     public synchronized void addFutureListener(
             EventListener<FutureEvent<BootstrapEntity>> l) {
@@ -155,6 +156,9 @@ public class BootstrapManager implements Closeable {
         listeners.add(l);
     }
     
+    /**
+     * Removes the {@link EventListener}.
+     */
     public synchronized void removeFutureListener(
             EventListener<FutureEvent<BootstrapEntity>> l) {
         listeners.remove(l);

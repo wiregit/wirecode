@@ -27,7 +27,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.RequestHandle;
 
 /**
- * 
+ * An exception that's thrown if a timeout for a request occurred.
  */
 public class RequestTimeoutException extends TimeoutException {
     
@@ -54,14 +54,23 @@ public class RequestTimeoutException extends TimeoutException {
         this.unit = unit;
     }
     
+    /**
+     * Returns the {@link RequestHandle}.
+     */
     public RequestHandle getHandle() {
         return handle;
     }
     
+    /**
+     * Returns the timeout in the given {@link TimeUnit}.
+     */
     public long getTime(TimeUnit unit) {
         return unit.convert(time, this.unit);
     }
     
+    /**
+     * Returns the timeout in milliseconds.
+     */
     public long getTimeInMillis() {
         return getTime(TimeUnit.MILLISECONDS);
     }
