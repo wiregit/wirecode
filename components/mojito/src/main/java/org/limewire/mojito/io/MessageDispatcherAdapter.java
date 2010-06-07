@@ -5,6 +5,9 @@ import java.net.SocketAddress;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.message.Message;
 
+/**
+ * An adapter implementation of {@link MessageDispatcherListener}.
+ */
 public class MessageDispatcherAdapter implements MessageDispatcherListener {
 
     @Override

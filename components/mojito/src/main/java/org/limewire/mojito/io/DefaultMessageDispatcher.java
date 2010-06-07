@@ -26,6 +26,9 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.MessageUtils;
 
+/**
+ * A default implementation of {@link MessageDispatcher}.
+ */
 public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
 
     private static final Log LOG 
@@ -43,6 +46,9 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
     
     private final StoreRequestHandler store;
     
+    /**
+     * Creates a {@link DefaultMessageDispatcher}.
+     */
     public DefaultMessageDispatcher(Context context, 
             MessageFactory messageFactory,
             StoreForward storeForward) {

@@ -17,14 +17,23 @@ import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
+/**
+ * A {@link ResponseHandler} that is called for <tt>FIND_NDOE</tt> responses.
+ */
 public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
 
+    /**
+     * Creates a {@link NodeResponseHandler}.
+     */
     public NodeResponseHandler(Context context, 
             KUID lookupId, 
             long timeout, TimeUnit unit) {
         super(Type.FIND_NODE, context, lookupId, timeout, unit);
     }
     
+    /**
+     * Creates a {@link NodeResponseHandler}.
+     */
     public NodeResponseHandler(Context context, 
             KUID lookupId, Contact[] contacts, 
             long timeout, TimeUnit unit) {
@@ -70,6 +79,9 @@ public class NodeResponseHandler extends LookupResponseHandler<NodeEntity> {
         processContacts(src, securityToken, contacts, time, unit);
     }
     
+    /**
+     * An exception that is thrown if a <tt>FIND_NODE</tt> lookup failed.
+     */
     private static class DefaultNoSuchNodeException extends NoSuchNodeException {
         
         private final State state;

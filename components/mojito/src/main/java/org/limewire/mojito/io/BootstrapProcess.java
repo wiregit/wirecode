@@ -27,6 +27,10 @@ import org.limewire.mojito.util.MaxStack;
 import org.limewire.mojito.util.TimeAwareIterable;
 import org.limewire.util.ExceptionUtils;
 
+/**
+ * This class implements the DHT bootstrap process which consists 
+ * of multiple steps.
+ */
 public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     
     private final DHT dht;
@@ -114,21 +118,21 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if an exception occurred.
      */
     private void onException(Throwable t) {
         future.setException(t);
     }
     
     /**
-     * 
+     * Called if the process was cancelled.
      */
     private void onCancellation() {
         future.cancel(true);
     }
     
     /**
-     * 
+     * Called if an collision occurred.
      */
     private void onCollision(PingEntity entity) {
         Contact contact = entity.getContact();
@@ -136,14 +140,14 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if the bootstrap process is complete
      */
     private void onCompletation(BootstrapEntity entity) {
         future.setValue(entity);
     }
     
     /**
-     * 
+     * Called if an uncaught exception occurred.
      */
     private void uncaughtException(Throwable t) {
         future.setException(t);
@@ -153,7 +157,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     // --- PING ---
     
     /**
-     * 
+     * Sends a PING to the given {@link SocketAddress}.
      */
     private void doPing(SocketAddress address) {
         long timeout = config.getPingTimeoutInMillis();
@@ -171,7 +175,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if a PONG was received.
      */
     private void onPong(FutureEvent<PingEntity> event) {
         synchronized (future) {
@@ -198,7 +202,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if a PONG was received.
      */
     private void onPong(PingEntity entity) {
         Contact contact = entity.getContact();
@@ -208,7 +212,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     // --- LOOKUP ---
     
     /**
-     * 
+     * Sends a FIND_NODE lookup to the given {@link Contact}.
      */
     private void doLookup(Contact contact) {
         Contact localhost = dht.getLocalhost();
@@ -229,7 +233,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if the lookup is complete.
      */
     private void onLookup(FutureEvent<NodeEntity> event) {
         synchronized (future) {
@@ -256,7 +260,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if the lookup is complete.
      */
     private void onLookup(NodeEntity entity) {
         Contact[] collisions = entity.getCollisions();
@@ -283,7 +287,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if a collision occurred.
      */
     private void onCollision(FutureEvent<PingEntity> event) {
         synchronized (future) {
@@ -310,7 +314,8 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Called if a collision occurred but we were unable
+     * to very it (i.e. we continue with bootstrapping).
      */
     private void onCollisionException(ExecutionException err) {
         doRefreshAll();
@@ -319,7 +324,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     // --- REFRESH ---
     
     /**
-     * 
+     * Refreshes all buckets.
      */
     private void doRefreshAll() {
         KUID[] bucketIds = getBucketsToRefresh();
@@ -332,7 +337,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Returns the {@link KUID}s we're trying lookup in the DHT.
      */
     private KUID[] getBucketsToRefresh() {
         RouteTable routeTable = dht.getRouteTable();
@@ -343,7 +348,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
     }
     
     /**
-     * 
+     * Refreshes the next bucket.
      */
     private void doRefreshNext(int count) {
         synchronized (future) {

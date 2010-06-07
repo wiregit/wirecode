@@ -68,16 +68,16 @@ public class DefaultMessageHandler implements ResponseHandler {
         processContact(message.getContact(), message);
     }
     
-    private boolean isLocalNodeID(KUID contactId) {
-        return getLocalNodeID().equals(contactId);
+    private boolean isLocalhost(KUID contactId) {
+        return getContactId().equals(contactId);
     }
     
-    private KUID getLocalNodeID() {
+    private KUID getContactId() {
         return routeTable.getLocalNode().getContactId();
     }
     
     /**
-     * 
+     * Processes the given {@link Message} from that {@link Contact}.
      */
     private synchronized void processContact(
             Contact node, Message message) {
@@ -126,7 +126,7 @@ public class DefaultMessageHandler implements ResponseHandler {
         }
         
         KUID nodeId = node.getContactId();
-        if (isLocalNodeID(nodeId)) {
+        if (isLocalhost(nodeId)) {
             
             // This is expected if there's a Node ID collision
             assert (message instanceof PingResponse) 
