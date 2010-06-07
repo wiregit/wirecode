@@ -121,11 +121,11 @@ class BootstrapWorker implements Closeable {
         }
         
         if (DHTSettings.SORT_BOOTSTRAP_CONTACTS.getValue()) {
-            Contact localhost = dht.getLocalNode();
+            Contact localhost = dht.getLocalhost();
             Arrays.sort(contacts, new XorComparator(localhost));
         }
         
-        Contact src = dht.getLocalNode();
+        Contact src = dht.getLocalhost();
         pingFuture = dht.ping(src, contacts);
         pingFuture.addFutureListener(
                 new EventListener<FutureEvent<PingEntity>>() {

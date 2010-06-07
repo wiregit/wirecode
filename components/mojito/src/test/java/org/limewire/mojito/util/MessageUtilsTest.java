@@ -34,15 +34,15 @@ public class MessageUtilsTest extends MojitoTestCase {
         dht.bind(NopTransport.NOP);
         
         MessageFactory factory = dht.getMessageFactory();
-        Contact localhost = dht.getLocalNode();
+        Contact localhost = dht.getLocalhost();
         
         PingRequest ping = null;
         
-        assertFalse(ContactUtils.isCollisionPingSender(localhost.getContactId(), dht.getLocalNode()));
-        ping = factory.createPingRequest(dht.getLocalNode(), new InetSocketAddress("localhost", 2000));
+        assertFalse(ContactUtils.isCollisionPingSender(localhost.getContactId(), dht.getLocalhost()));
+        ping = factory.createPingRequest(dht.getLocalhost(), new InetSocketAddress("localhost", 2000));
         assertFalse(MessageUtils.isCollisionPingRequest(localhost.getContactId(), ping));
         
-        Contact sender = ContactUtils.createCollisionPingSender(dht.getLocalNode());
+        Contact sender = ContactUtils.createCollisionPingSender(dht.getLocalhost());
         assertTrue(ContactUtils.isCollisionPingSender(localhost.getContactId(), sender));
         ping = factory.createPingRequest(sender, new InetSocketAddress("localhost", 2000));
         assertTrue(MessageUtils.isCollisionPingRequest(localhost.getContactId(), ping));

@@ -44,7 +44,7 @@ public class MojitoUtils {
                 
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i, port + i);
                 
-                dhts.put(dht.getLocalNodeID(), dht);
+                dhts.put(dht.getContactId(), dht);
                 
                 if (first == null) {
                     first = dht;

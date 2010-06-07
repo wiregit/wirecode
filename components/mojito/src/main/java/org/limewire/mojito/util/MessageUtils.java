@@ -23,6 +23,7 @@ package org.limewire.mojito.util;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.message.Message;
 import org.limewire.mojito.message.PingRequest;
+import org.limewire.mojito.routing.Contact;
 
 
 /**
@@ -35,16 +36,15 @@ public class MessageUtils {
     }
     
     /**
-     * Returns true if the given DHTMessage is a Node ID collision test ping.
-     * 
-     * @param nodeId the local Node ID
-     * @param message the Message
+     * Returns {@code true} if the given {@link Message} is a PING that
+     * checks if the remote host is colliding with the localhost.
      */
-    public static boolean isCollisionPingRequest(KUID nodeId, Message message) {
+    public static boolean isCollisionPingRequest(KUID contactId, Message message) {
         if (!(message instanceof PingRequest)) {
             return false;
         }
         
-        return ContactUtils.isCollisionPingSender(nodeId, message.getContact());
+        Contact contact = message.getContact();
+        return ContactUtils.isCollisionPingSender(contactId, contact);
     }
 }

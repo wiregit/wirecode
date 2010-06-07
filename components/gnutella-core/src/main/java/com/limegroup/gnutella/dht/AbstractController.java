@@ -97,7 +97,7 @@ abstract class AbstractController implements Controller {
             return false;
         }
         
-        return  dht.isLocalNode(contact);
+        return  dht.isLocalhost(contact);
     }
     
     @Override
@@ -105,7 +105,7 @@ abstract class AbstractController implements Controller {
         MojitoDHT dht = getMojitoDHT();
         if (dht != null) {
             try {
-                Contact contact = dht.getLocalNode();
+                Contact contact = dht.getLocalhost();
                 initLocalhost((LocalContact)contact);
             } catch (IOException err) {
                 LOG.error("IOException", err);

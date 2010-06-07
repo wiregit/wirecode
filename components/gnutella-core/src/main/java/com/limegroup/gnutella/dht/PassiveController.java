@@ -144,7 +144,7 @@ public class PassiveController extends AbstractConnectionController {
     }
     
     private Contact[] init(DefaultMojitoDHT context) throws UnknownHostException {
-        LocalContact localhost = context.getLocalNode();
+        LocalContact localhost = context.getLocalhost();
         initLocalhost(localhost);
         
         return read();
@@ -331,7 +331,7 @@ public class PassiveController extends AbstractConnectionController {
                     contacts = ContactUtils.sort(contacts, 
                             DHTSettings.MAX_PERSISTED_NODES.getValue());
                     
-                    KUID localNodeID = getMojitoDHT().getLocalNodeID();
+                    KUID localNodeID = getMojitoDHT().getContactId();
                     for(Contact node : contacts) {
                         if(!node.getContactId().equals(localNodeID)) {
                             oos.writeObject(node);

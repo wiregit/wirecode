@@ -90,7 +90,7 @@ public class PassiveLeafControllerTest extends DHTTestCase {
             assertFalse(controller.isReady());
             
             MojitoDHT dht = controller.getMojitoDHT();
-            Contact localhost = dht.getLocalNode();
+            Contact localhost = dht.getLocalhost();
             assertTrue(localhost.isFirewalled());
             
             controller.start();

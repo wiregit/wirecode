@@ -211,7 +211,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
      * 
      */
     private void doLookup(Contact contact) {
-        Contact localhost = dht.getLocalNode();
+        Contact localhost = dht.getLocalhost();
         KUID lookupId = localhost.getContactId();
         
         long timeout = config.getLookupTimeoutInMillis();
@@ -267,7 +267,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
         }
         
         Contact src = ContactUtils.createCollisionPingSender(
-                dht.getLocalNode());
+                dht.getLocalhost());
         
         long timeout = config.getPingTimeoutInMillis();
         collisitonFuture = dht.ping(

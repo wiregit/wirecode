@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.concurrent.ManagedRunnable;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.SchedulingUtils;
 
 /**
@@ -37,6 +38,15 @@ public class DatabaseCleaner implements Closeable {
     private ScheduledFuture<?> future;
     
     private boolean open = true;
+    
+    /**
+     * Creates a {@link DatabaseCleaner}.
+     */
+    public DatabaseCleaner(RouteTable routeTable, Database database) {
+        this(routeTable, database, 
+                DatabaseSettings.DATABASE_CLEANER_PERIOD.getTimeInMillis(), 
+                TimeUnit.MILLISECONDS);
+    }
     
     /**
      * Creates a {@link DatabaseCleaner}.

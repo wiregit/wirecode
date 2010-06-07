@@ -32,6 +32,7 @@ import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.NodeResponse;
 import org.limewire.mojito.message.RequestMessage;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -78,17 +79,18 @@ public class NodeRequestHandler extends AbstractRequestHandler {
         // We have incomplete information.
         if (!context.isBooting()) {
             
+            LocalContact localhost = context.getLocalhost();
             RouteTable routeTable = context.getRouteTable();
-            
-            if (context.isFirewalled()) {
+                        
+            if (localhost.isFirewalled()) {
                 nodes = ContactUtils.sort(
                             routeTable.getContacts(), 
                             KademliaSettings.K);
                 
                 // If the external port is not set then make sure
                 // we're not in the list!
-                if (context.getExternalPort() == 0) {
-                    nodes.remove(context.getLocalNode());
+                if (localhost.getExternalPort() == 0) {
+                    nodes.remove(context.getLocalhost());
                 }
                 
             } else {

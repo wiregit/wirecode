@@ -111,7 +111,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
         
         try {
             DHTFuture<BootstrapEntity> future = TEST_DHT.bootstrap(
-                    BOOTSTRAP_DHT.getLocalNode(), 
+                    BOOTSTRAP_DHT.getLocalhost(), 
                     250, TimeUnit.MILLISECONDS);
             future.get();
         } catch (ExecutionException expected) {
@@ -128,7 +128,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
             throws InterruptedException, ExecutionException {
         
         DHTFuture<BootstrapEntity> future = TEST_DHT.bootstrap(
-                BOOTSTRAP_DHT.getLocalNode(), 
+                BOOTSTRAP_DHT.getLocalhost(), 
                 250, TimeUnit.MILLISECONDS);
         future.get();
         
@@ -166,7 +166,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
         // Add one GOOD node!
         Contact contact = ContactFactory.createLiveContact(null, 
                 Vendor.UNKNOWN, Version.ZERO,
-                BOOTSTRAP_DHT.getLocalNodeID(),
+                BOOTSTRAP_DHT.getContactId(),
                 BOOTSTRAP_DHT.getContactAddress(), 
                 0, Contact.DEFAULT_FLAG);
         rt.add(contact);
@@ -243,7 +243,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
             assertFalse(BOOTSTRAP_DHT.isBooting());
             assertFalse(BOOTSTRAP_DHT.isReady());
             
-            BOOTSTRAP_DHT.bootstrap(dhts.get(0).getLocalNode()).get();
+            BOOTSTRAP_DHT.bootstrap(dhts.get(0).getLocalhost()).get();
             
             assertFalse(BOOTSTRAP_DHT.isBooting());
             assertTrue(BOOTSTRAP_DHT.isReady());
@@ -256,7 +256,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
             assertFalse(TEST_DHT.isReady());
             
             BootstrapEntity entity = TEST_DHT.bootstrap(
-                    BOOTSTRAP_DHT.getLocalNode()).get();
+                    BOOTSTRAP_DHT.getLocalhost()).get();
             
             assertFalse(TEST_DHT.isBooting());
             assertTrue(TEST_DHT.isReady());

@@ -45,7 +45,7 @@ public class ContactsScrubber {
     
     public static Scrubbed scrub(Context context, Contact src, 
             Contact[] contacts, float requiredRatio) {
-        return scrub(context.getLocalNode(), src, contacts, requiredRatio);
+        return scrub(context.getLocalhost(), src, contacts, requiredRatio);
     }
     
     public static Scrubbed scrub(Contact localhost, Contact src, 

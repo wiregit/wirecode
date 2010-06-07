@@ -243,7 +243,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // the ultrapeer id should not be sent as ups are passive.
             for (Contact c : nodes) {
-                assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getContactId()));
+                assertFalse(dhtManager.getMojitoDHT().getContactId().equals(c.getContactId()));
             }
         } finally {
             out.close();

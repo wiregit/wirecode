@@ -84,7 +84,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // collision ping checks work
             ContextSettings.ASSERT_COLLISION_PING.setValue(false);
             try {
-                PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
+                PingEntity entity = dht2.collisionPing(dht1.getLocalhost()).get();
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
                 assertTrue(ExceptionUtils.isCausedBy(
@@ -97,7 +97,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // malformed collision pings like above
             ContextSettings.ASSERT_COLLISION_PING.setValue(true);
             try {
-                PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
+                PingEntity entity = dht2.collisionPing(dht1.getLocalhost()).get();
                 fail("DHT-1 did respond to our request " + entity);
             } catch (ExecutionException expected) {
                 assertTrue(ExceptionUtils.isCausedBy(
@@ -106,9 +106,9 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             }
             
             // Set DHT-2's Node ID to DHT-1 and try again. This should work!
-            dht2.setContactId(dht1.getLocalNodeID());
+            dht2.setContactId(dht1.getContactId());
             try {
-                PingEntity entity = dht2.collisionPing(dht1.getLocalNode()).get();
+                PingEntity entity = dht2.collisionPing(dht1.getLocalhost()).get();
                 assertNotNull(entity);
             } catch (ExecutionException err) {
                 fail(err);

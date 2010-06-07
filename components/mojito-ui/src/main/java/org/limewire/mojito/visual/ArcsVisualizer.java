@@ -79,7 +79,7 @@ public class ArcsVisualizer extends JPanel {
     
     public static ArcsVisualizer show(final DHT dht) {
         final ArcsVisualizer arcs = new ArcsVisualizer(
-                dht, dht.getLocalNode().getContactId());
+                dht, dht.getLocalhost().getContactId());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

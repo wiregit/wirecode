@@ -54,6 +54,14 @@ public class BucketRefresher implements Closeable {
     /**
      * Creates a {@link BucketRefresher}
      */
+    public BucketRefresher(DHT dht) {
+        this (dht, BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getTimeInMillis(), 
+                TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Creates a {@link BucketRefresher}
+     */
     public BucketRefresher(DHT dht, long frequency, TimeUnit unit) {
         this(dht, new Config(), frequency, unit);
     }
@@ -221,7 +229,7 @@ public class BucketRefresher implements Closeable {
             long pingNearest = BucketRefresherSettings.BUCKET_REFRESHER_PING_NEAREST.getTimeInMillis();
             
             if (0L < pingNearest) {
-                Contact localhost = dht.getLocalNode();
+                Contact localhost = dht.getLocalhost();
                 RouteTable routeTable = dht.getRouteTable();
                 Collection<Contact> nodes = routeTable.select(
                         localhost.getContactId(),

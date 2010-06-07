@@ -79,7 +79,7 @@ public class ValueTuple {
      */
     public static ValueTuple createValueTuple(Context context, 
             KUID primaryKey, Value value) {
-        Contact src = context.getLocalNode();
+        Contact src = context.getLocalhost();
         return new ValueTuple(src, src, primaryKey, value, true);
     }
     

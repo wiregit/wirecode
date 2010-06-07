@@ -36,8 +36,8 @@ import org.limewire.mojito.message.StoreResponse;
 import org.limewire.mojito.message.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
@@ -84,7 +84,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        MessageFactory messageFactory = context.getMessageFactory();
+        MessageHelper messageHelper = context.getMessageHelper();
+        MessageFactory messageFactory = messageHelper.getMessageFactory();
         SecurityTokenHelper tokenHelper = messageFactory.getSecurityTokenHelper();
         
         Contact src = request.getContact();
@@ -116,10 +117,8 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }
         }
         
-        MessageHelper messageHelper = context.getMessageHelper();
         StoreResponse response = messageHelper.createStoreResponse(
                 request, status.toArray(new StoreStatusCode[0]));
-        
         send(request.getContact(), response);
     }
 }

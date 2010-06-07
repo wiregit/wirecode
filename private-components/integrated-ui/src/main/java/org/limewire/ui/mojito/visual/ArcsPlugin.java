@@ -40,7 +40,7 @@ class ArcsPlugin implements SwingUiPlugin {
         }
         
         arcsVisualizer = new ArcsVisualizer(
-                dht, dht.getLocalNode().getContactId());
+                dht, dht.getLocalhost().getContactId());
         return arcsVisualizer;
     }
 

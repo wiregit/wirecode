@@ -102,7 +102,7 @@ public class ActiveController extends AbstractConnectionController {
         contacts = init(dht);
         
         // Memorize the localhost's KUID
-        Contact localhost = dht.getLocalNode();
+        Contact localhost = dht.getLocalhost();
         KUID contactId = localhost.getContactId();
         DHTSettings.DHT_NODE_ID.set(contactId.toHexString());
         
@@ -141,8 +141,8 @@ public class ActiveController extends AbstractConnectionController {
     
     private Contact[] init(DefaultMojitoDHT context) throws IOException {
         
-        LocalContact contact = context.getLocalNode();
-        initLocalhost(context.getLocalNode());
+        LocalContact contact = context.getLocalhost();
+        initLocalhost(context.getLocalhost());
         
         RouteTable existing = read();
         

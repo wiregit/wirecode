@@ -32,8 +32,6 @@ import org.limewire.mojito.routing.BucketRefresher;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.settings.BucketRefresherSettings;
-import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.storage.Database;
@@ -46,7 +44,7 @@ import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.SecurityToken;
 
 /**
- * 
+ * A default implementation of {@link DHT}.
  */
 public class DefaultDHT extends AbstractDHT implements Context {
     
@@ -72,15 +70,13 @@ public class DefaultDHT extends AbstractDHT implements Context {
      * 
      */
     private final BucketRefresher bucketRefresher 
-        = new BucketRefresher(this, 
-                BucketRefresherSettings.BUCKET_REFRESHER_DELAY.getTimeInMillis(), 
-                TimeUnit.MILLISECONDS);
+        = new BucketRefresher(this);
     
     /**
      * 
      */
-    private final StoreManager storeManager = new StoreManager(this, 
-            StoreSettings.PARALLEL_STORES.getValue());
+    private final StoreManager storeManager 
+        = new StoreManager(this);
     
     /**
      * 
@@ -131,11 +127,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         
         this.estimator = new DHTSizeEstimator(routeTable);
         
-        this.databaseCleaner = new DatabaseCleaner(
-                routeTable, database, 
-                DatabaseSettings.DATABASE_CLEANER_PERIOD.getTimeInMillis(), 
-                TimeUnit.MILLISECONDS);
-        
+        this.databaseCleaner = new DatabaseCleaner(routeTable, database);
         this.messageHelper = new MessageHelper(this, messageFactory);
         
         DefaultStoreForward.StoreProvider provider 
@@ -231,38 +223,13 @@ public class DefaultDHT extends AbstractDHT implements Context {
     }
     
     @Override
-    public LocalContact getLocalNode() {
+    public LocalContact getLocalhost() {
         return (LocalContact)routeTable.getLocalNode();
     }
     
     @Override
-    public SocketAddress getContactAddress() {
-        return getLocalNode().getContactAddress();
-    }
-    
-    @Override
-    public int getExternalPort() {
-        return getLocalNode().getExternalPort();
-    }
-    
-    @Override
-    public KUID getLocalNodeID() {
-        return getLocalNode().getContactId();
-    }
-    
-    @Override
-    public boolean isLocalNodeID(KUID contactId) {
-        return getLocalNodeID().equals(contactId);
-    }
-    
-    @Override
-    public boolean isLocalNode(Contact contact) {
-        return getLocalNode().equals(contact);
-    }
-    
-    @Override
-    public boolean isLocalContactAddress(SocketAddress address) {
-        return getContactAddress().equals(address);
+    public boolean isFirewalled() {
+        return getLocalhost().isFirewalled();
     }
     
     /**
@@ -270,11 +237,6 @@ public class DefaultDHT extends AbstractDHT implements Context {
      */
     public BucketRefresher getBucketRefresher() {
         return bucketRefresher;
-    }
-    
-    @Override
-    public boolean isFirewalled() {
-        return getLocalNode().isFirewalled();
     }
     
     @Override
@@ -332,7 +294,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         DHTFuture<PingEntity> future 
             = submit(process, timeout * dst.length, unit);
         
-        if (src.equals(getLocalNode())) {
+        if (src.equals(getLocalhost())) {
             future.addFutureListener(onPong);
         }
         

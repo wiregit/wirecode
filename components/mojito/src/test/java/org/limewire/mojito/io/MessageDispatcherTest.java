@@ -44,8 +44,10 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             Context context = (Context)dht;
             MessageHelper helper = context.getMessageHelper();
-            MessageFactory factory = context.getMessageFactory();
+            MessageFactory factory = helper.getMessageFactory();
             MessageDispatcher dispatcher = context.getMessageDispatcher();
+            
+            Contact localhost = context.getLocalhost();
             
             // Send to an address
             dispatcher.send(null, null, new InetSocketAddress("www.google.com", 5000),
@@ -53,8 +55,8 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             // Send to local Node's contact address
             try {
-                dispatcher.send(null, null, context.getContactAddress(), 
-                        helper.createPingRequest(context.getContactAddress()), 1, TimeUnit.SECONDS);
+                dispatcher.send(null, null, localhost.getContactAddress(), 
+                        helper.createPingRequest(localhost.getContactAddress()), 1, TimeUnit.SECONDS);
                 fail("Should have failed!");
             } catch (IOException expected) {
             }
@@ -67,8 +69,8 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             // Sent to local Node
             try {
-                dispatcher.send(null, context.getLocalNode(), 
-                        helper.createPingRequest(context.getContactAddress()), 1, TimeUnit.SECONDS);
+                dispatcher.send(null, context.getLocalhost(), 
+                        helper.createPingRequest(localhost.getContactAddress()), 1, TimeUnit.SECONDS);
                 fail("Should have failed!");
             } catch (IOException expected) {
             }
@@ -76,7 +78,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             // Send to a Node that has the local Node's ID
             try {
                 node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.ZERO, 
-                        context.getLocalNodeID(), new InetSocketAddress("www.google.com", 5000));
+                        localhost.getContactId(), new InetSocketAddress("www.google.com", 5000));
                 dispatcher.send(null, node, helper.createPingRequest(node.getContactAddress()), 1, TimeUnit.SECONDS);
                 fail("Should have failed!");
             } catch (IOException expected) {
@@ -86,7 +88,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             try {
                 Contact sender = ContactFactory.createLiveContact(
                         new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
-                        context.getLocalNodeID().invert(), 
+                        localhost.getContactId().invert(), 
                         new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
                 
                 RequestMessage request = factory.createPingRequest(
@@ -99,7 +101,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             // Same as above but sender is firewalled
             Contact sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.ZERO, 
-                    context.getLocalNodeID().invert(), 
+                    localhost.getContactId().invert(), 
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             
             RequestMessage request = factory.createPingRequest(

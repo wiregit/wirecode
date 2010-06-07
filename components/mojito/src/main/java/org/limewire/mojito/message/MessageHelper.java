@@ -64,7 +64,10 @@ public class MessageHelper {
     public PingResponse createPingResponse(RequestMessage request, 
             SocketAddress externalAddress) {
         
-        if (context.getContactAddress().equals(externalAddress)) {
+        Contact localhost = context.getLocalhost();
+        SocketAddress contactAddress = localhost.getContactAddress();
+        
+        if (contactAddress.equals(externalAddress)) {
             throw new IllegalArgumentException("Cannot tell other Node that its external address is the same as yours!");
         }
         

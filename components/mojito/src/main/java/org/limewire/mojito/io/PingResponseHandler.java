@@ -140,7 +140,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         PingResponse pong = (PingResponse)response;
         
         Contact src = pong.getContact();
-        
+        KUID contactId = src.getContactId();
         SocketAddress externalAddress = pong.getExternalAddress();
         BigInteger estimatedSize = pong.getEstimatedSize();
         
@@ -153,8 +153,11 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
             return;
         }
         
+        Contact localhost = context.getLocalhost();
+        KUID localhostId = localhost.getContactId();
+        
         // Check if the other Node has the same ID as we do
-        if (context.isLocalNodeID(src.getContactId()) 
+        if (contactId.equals(localhostId) 
                 && !isCollisionPing()) {
             
             // If so check if this was a Node ID collision

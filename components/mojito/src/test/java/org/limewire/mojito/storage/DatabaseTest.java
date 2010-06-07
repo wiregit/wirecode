@@ -435,7 +435,7 @@ public class DatabaseTest extends MojitoTestCase {
         
         Value value = new DefaultValue(ValueType.BINARY, Version.ZERO, new byte[1]);
         ValueTuple entity1 = new ValueTuple(
-                dht.getLocalNode(), dht.getLocalNode(), key, value, true);
+                dht.getLocalhost(), dht.getLocalhost(), key, value, true);
         
         ValueTuple entity2 = new ValueTuple(c1, c1, key, value, false);
         ValueTuple entity3 = new ValueTuple(c2, c2, key, value, false);

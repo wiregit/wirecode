@@ -26,13 +26,13 @@ public interface MojitoDHT extends DHT {
      * Returns the localhost's {@link Contact}.
      */
     @Override
-    public LocalContact getLocalNode();
+    public LocalContact getLocalhost();
     
     /**
      * Returns {@code true} if the given {@link Contact} is equal
      * to the localhost's {@link Contact}.
      */
-    public boolean isLocalNode(Contact contact);
+    public boolean isLocalhost(Contact contact);
     
     /**
      * Returns the {@link Vendor}.
@@ -47,7 +47,7 @@ public interface MojitoDHT extends DHT {
     /**
      * Returns the localhost's {@link KUID}.
      */
-    public KUID getLocalNodeID();
+    public KUID getContactId();
     
     /**
      * Sets the localhost's {@link KUID}.

@@ -45,7 +45,7 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
     /**
      * Returns the localhost {@link Contact}
      */
-    public Contact getLocalNode();
+    public Contact getLocalhost();
     
     /**
      * Returns the {@link RouteTable}.

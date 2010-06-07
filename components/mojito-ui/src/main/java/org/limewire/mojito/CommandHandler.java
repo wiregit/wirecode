@@ -127,7 +127,7 @@ public class CommandHandler {
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) {
-        ((LocalContact)dht.getLocalNode()).setFirewalled(!dht.isFirewalled());
+        ((LocalContact)dht.getLocalhost()).setFirewalled(!dht.isFirewalled());
         out.println("Firewalled: " + dht.isFirewalled());
     }
     
@@ -303,7 +303,7 @@ public class CommandHandler {
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        ((DefaultDHT)dht).getLocalNode().nextInstanceID();
+        ((DefaultDHT)dht).getLocalhost().nextInstanceID();
     }
     
     @SuppressWarnings("unchecked")

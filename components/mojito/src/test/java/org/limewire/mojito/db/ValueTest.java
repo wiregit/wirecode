@@ -71,7 +71,7 @@ public class ValueTest extends MojitoTestCase {
             
             // Get the SecurityToken...
             DHTFuture<SecurityTokenEntity> future 
-                = dht1.getSecurityToken(dht2.getLocalNode(), 
+                = dht1.getSecurityToken(dht2.getLocalhost(), 
                     500, TimeUnit.MILLISECONDS);
             
             SecurityTokenEntity entity = future.get();

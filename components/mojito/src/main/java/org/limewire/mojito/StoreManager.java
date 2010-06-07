@@ -18,6 +18,7 @@ import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.io.StoreResponseHandler;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.util.EntryImpl;
@@ -30,6 +31,16 @@ class StoreManager implements Closeable {
     
     private final Queue queue;
     
+    /**
+     * Creates a {@link StoreManager}.
+     */
+    public StoreManager(DefaultDHT dht) {
+        this (dht, StoreSettings.PARALLEL_STORES.getValue());
+    }
+    
+    /**
+     * Creates a {@link StoreManager}.
+     */
     public StoreManager(DefaultDHT dht, int concurrency) {
         this.dht = dht;
         this.queue = new Queue(concurrency);

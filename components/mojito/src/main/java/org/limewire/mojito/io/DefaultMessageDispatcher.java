@@ -73,13 +73,16 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
     protected boolean isLocalhost(KUID contactId, 
             SocketAddress address, Message message) {
         
-        if (address.equals(context.getContactAddress())) {
+        Contact localhost = context.getLocalhost();
+        KUID localhostId = localhost.getContactId();
+        
+        if (address.equals(localhost.getContactAddress())) {
             return true;
         }
         
-        if (context.isLocalNodeID(contactId) 
+        if (localhostId.equals(contactId)
                 && !MessageUtils.isCollisionPingRequest(
-                        context.getLocalNodeID(), message)) {
+                        localhostId, message)) {
             return true;
         }
         
@@ -103,20 +106,23 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
     public void handleMessage(Message message) throws IOException {
         
         // Make sure we're not receiving messages from ourself.
-        Contact node = message.getContact();
-        KUID nodeId = node.getContactId();
-        SocketAddress src = node.getContactAddress();
+        Contact contact = message.getContact();
+        KUID contactId = contact.getContactId();
+        SocketAddress src = contact.getContactAddress();
         
-        if (context.isLocalContactAddress(src)
-                || (context.isLocalNodeID(nodeId) 
+        Contact localhost = context.getLocalhost();
+        KUID localhostId = localhost.getContactId();
+        
+        if (src.equals(localhost.getContactAddress())
+                || (localhostId.equals(contactId) 
                         && !(message instanceof PingResponse))) {
             
             if (LOG.isErrorEnabled()) {
                 String msg = "Received a message of type " 
                     + message.getClass().getName() 
-                    + " from " + node 
+                    + " from " + contact 
                     + " which is equal to our local Node " 
-                    + context.getLocalNode();
+                    + context.getLocalhost();
                 
                 LOG.error(msg);
             }
@@ -126,25 +132,25 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
         
         if (!NetworkUtils.isValidSocketAddress(src)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(node + " has an invalid IP:Port");
+                LOG.error(contact + " has an invalid IP:Port");
             }
             return;
         }
         
         // Make sure we're not mixing IPv4 and IPv6 addresses.
         // See RouteTableImpl.add() for more info!
-        if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+        if (!ContactUtils.isSameAddressSpace(context.getLocalhost(), contact)) {
             
             // Log as ERROR so that we're not missing this
             if (LOG.isErrorEnabled()) {
-                LOG.error(node + " is from a different IP address space than local Node");
+                LOG.error(contact + " is from a different IP address space than local Node");
             }
             return;
         }
         
         if (!allow(message)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping message from " + node);
+                LOG.info("Dropping message from " + contact);
             }
             
             return;
@@ -158,7 +164,7 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
         
         // A Node that is marked as firewalled must not respond
         // to REQUESTS!
-        if (context.getLocalNode().isFirewalled()
+        if (context.getLocalhost().isFirewalled()
                 && NetworkSettings.DROP_REQUEST_IF_FIREWALLED.getValue()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Local Node is firewalled, dropping " + request);

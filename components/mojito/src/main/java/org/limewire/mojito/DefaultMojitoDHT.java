@@ -66,37 +66,42 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     
     @Override
     public Vendor getVendor() {
-        return getLocalNode().getVendor();
+        return getLocalhost().getVendor();
     }
 
     @Override
     public Version getVersion() {
-        return getLocalNode().getVersion();
+        return getLocalhost().getVersion();
     }
     
     @Override
-    public KUID getLocalNodeID() {
-        return getLocalNode().getContactId();
+    public KUID getContactId() {
+        return getLocalhost().getContactId();
     }
     
     @Override
     public void setContactId(KUID contactId) {
-        getLocalNode().setNodeID(contactId);
+        getLocalhost().setNodeID(contactId);
     }
     
     @Override
     public void setContactAddress(SocketAddress address) {
-        getLocalNode().setContactAddress(address);
+        getLocalhost().setContactAddress(address);
     }
     
+    @Override
+    public SocketAddress getContactAddress() {
+        return getLocalhost().getContactAddress();
+    }
+
     @Override
     public void setExternalAddress(SocketAddress address) {
-        getLocalNode().setExternalAddress(address);
+        getLocalhost().setExternalAddress(address);
     }
     
     @Override
-    public boolean isLocalNode(Contact contact) {
-        return getLocalNode().equals(contact);
+    public boolean isLocalhost(Contact contact) {
+        return getLocalhost().equals(contact);
     }
 
     private Contact[] getActiveContacts() {
@@ -104,13 +109,13 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
         Collection<Contact> active = getRouteTable().getActiveContacts();
         active = ContactUtils.sort(active);
         nodes.addAll(active);
-        nodes.remove(getLocalNode());
+        nodes.remove(getLocalhost());
         return nodes.toArray(new Contact[0]);
     }
     
     @Override
     public DHTFuture<PingEntity> findActiveContact() {
-        Contact localhost = getLocalNode();
+        Contact localhost = getLocalhost();
         Contact[] dst = getActiveContacts();
         
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis() * dst.length;
@@ -142,7 +147,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
     @Override
     public DHTFuture<PingEntity> collisionPing(Contact dst) {
         
-        Contact src = ContactUtils.createCollisionPingSender(getLocalNode());
+        Contact src = ContactUtils.createCollisionPingSender(getLocalhost());
         
         long timeout = NetworkSettings.DEFAULT_TIMEOUT.getTimeInMillis();
         return ping(src, new Contact[] { dst }, 
@@ -352,7 +357,7 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
         MessageFactory messageFactory = getMessageFactory();
         
         // Shutdown the local Node
-        Contact localhost = getLocalNode();
+        Contact localhost = getLocalhost();
         localhost.shutdown(true);
         
         Contact shutdown = new LocalContact(

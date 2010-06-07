@@ -61,7 +61,7 @@ public class PassiveLeafController extends AbstractController {
     
     private void init(DefaultDHT context) 
             throws UnknownHostException {
-        LocalContact localhost = context.getLocalNode();
+        LocalContact localhost = context.getLocalhost();
         initLocalhost(localhost);
     }
     

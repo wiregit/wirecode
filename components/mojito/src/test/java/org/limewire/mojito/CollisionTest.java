@@ -86,10 +86,10 @@ public class CollisionTest extends MojitoTestCase {
             original.bootstrap("localhost", PORT).get();
             bootstrap.bootstrap("localhost", PORT+1).get();
             
-            assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
+            assertNotEquals(original.getContactId(), spoofer.getContactId());
             
-            spoofer.setContactId(original.getLocalNodeID());
-            assertEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
+            spoofer.setContactId(original.getContactId());
+            assertEquals(original.getContactId(), spoofer.getContactId());
             
             try {
                 spoofer.bootstrap("localhost", PORT).get();
@@ -102,7 +102,7 @@ public class CollisionTest extends MojitoTestCase {
                 
                 Contact cause = ex.getContact();
                 
-                assertEquals(original.getLocalNodeID(), cause.getContactId());
+                assertEquals(original.getContactId(), cause.getContactId());
                 assertEquals(original.getContactAddress(), cause.getContactAddress());
             }
             
@@ -116,14 +116,14 @@ public class CollisionTest extends MojitoTestCase {
                 assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
-            assertContains(map.keySet(), bootstrap.getLocalNodeID());
-            assertEquals(map.get(bootstrap.getLocalNodeID()), bootstrap.getContactAddress());
+            assertContains(map.keySet(), bootstrap.getContactId());
+            assertEquals(map.get(bootstrap.getContactId()), bootstrap.getContactAddress());
             
-            assertContains(map.keySet(), original.getLocalNodeID());
-            assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
+            assertContains(map.keySet(), original.getContactId());
+            assertEquals(map.get(original.getContactId()), original.getContactAddress());
             
-            assertContains(map.keySet(), spoofer.getLocalNodeID());
-            assertNotEquals(map.get(spoofer.getLocalNodeID()), spoofer.getContactAddress());
+            assertContains(map.keySet(), spoofer.getContactId());
+            assertNotEquals(map.get(spoofer.getContactId()), spoofer.getContactAddress());
             
         } finally {
             IoUtils.closeAll(bootstrap, original, spoofer);
@@ -162,13 +162,13 @@ public class CollisionTest extends MojitoTestCase {
                 assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
-            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), original.getLocalNodeID());
-            assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
+            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), original.getContactId());
+            assertEquals(map.get(original.getContactId()), original.getContactAddress());
             
             // The replacement Node
-            assertNotEquals(original.getLocalNodeID(), replacement.getLocalNodeID());
-            replacement.setContactId(original.getLocalNodeID());
-            assertEquals(original.getLocalNodeID(), replacement.getLocalNodeID());
+            assertNotEquals(original.getContactId(), replacement.getContactId());
+            replacement.setContactId(original.getContactId());
+            assertEquals(original.getContactId(), replacement.getContactId());
             
             // Bootstrap the replacement Contact
             replacement.bootstrap("localhost", PORT).get();
@@ -181,11 +181,11 @@ public class CollisionTest extends MojitoTestCase {
                 assertNull(map.put(node.getContactId(), node.getContactAddress()));
             }
             
-            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), replacement.getLocalNodeID());
-            assertEquals(map.get(replacement.getLocalNodeID()), replacement.getContactAddress());
+            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), replacement.getContactId());
+            assertEquals(map.get(replacement.getContactId()), replacement.getContactAddress());
             
             // The original Contact shouldn't be no longer there
-            assertNotEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
+            assertNotEquals(map.get(original.getContactId()), original.getContactAddress());
             
         } finally {
             IoUtils.closeAll(bootstrap, original, replacement);

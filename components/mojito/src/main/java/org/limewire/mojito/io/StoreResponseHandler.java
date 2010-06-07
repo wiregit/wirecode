@@ -26,8 +26,8 @@ import org.limewire.mojito.message.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.security.SecurityToken;
@@ -75,16 +75,18 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
     
     private void init(Entry<Contact, SecurityToken>[] contacts) {
         
+        Contact localhost = context.getLocalhost();
+        
         for (Entry<Contact, SecurityToken> entry : contacts) {
-            Contact node = entry.getKey();
+            Contact contact = entry.getKey();
             SecurityToken securityToken = entry.getValue();
             
-            if (context.isLocalNode(node)) {
+            if (contact.equals(localhost)) {
                 processes.add(new LocalStoreProcess(
-                        node, securityToken, entity));
+                        contact, securityToken, entity));
             } else {
                 processes.add(new RemoteStoreProcess(
-                        node, securityToken, entity));
+                        contact, securityToken, entity));
             }
         }
     }

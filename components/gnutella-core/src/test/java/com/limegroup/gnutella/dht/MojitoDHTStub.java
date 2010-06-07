@@ -35,7 +35,7 @@ import org.limewire.mojito.util.NopTransport;
 public class MojitoDHTStub implements MojitoDHT {
 
     @Override
-    public boolean isLocalNode(Contact contact) {
+    public boolean isLocalhost(Contact contact) {
         return false;
     }
 
@@ -90,7 +90,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public KUID getLocalNodeID() {
+    public KUID getContactId() {
         return null;
     }
 
@@ -190,7 +190,7 @@ public class MojitoDHTStub implements MojitoDHT {
     }
 
     @Override
-    public LocalContact getLocalNode() {
+    public LocalContact getLocalhost() {
         return null;
     }
 
