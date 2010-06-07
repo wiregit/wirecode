@@ -7,16 +7,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.concurrent.DHTFutureProcess;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.entity.SecurityTokenEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.MessageDispatcher;
@@ -27,18 +26,13 @@ import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.NopTransport;
 
 public class MojitoDHTStub implements MojitoDHT {
-
-    @Override
-    public boolean isLocalhost(Contact contact) {
-        return false;
-    }
-
+    
     @Override
     public DHTFuture<PingEntity> ping(Contact src, Contact[] dst) {
         return createFuture();
@@ -278,13 +272,7 @@ public class MojitoDHTStub implements MojitoDHT {
     public DHTFuture<StoreEntity> enqueue(KUID key, Value value, long timeout, TimeUnit unit) {
         return createFuture();
     }
-
-    @Override
-    public DHTFuture<SecurityTokenEntity> getSecurityToken(Contact dst, 
-            long timeout, TimeUnit unit) {
-        return createFuture();
-    }
-
+    
     @Override
     public void setHostFilter(HostFilter hostFilter) {
     }

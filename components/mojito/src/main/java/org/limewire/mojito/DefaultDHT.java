@@ -377,7 +377,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
     /**
      * Retrieves the {@link Contact}'s {@link SecurityToken}.
      */
-    protected DHTFuture<SecurityTokenEntity> getSecurityToken(
+    public DHTFuture<SecurityTokenEntity> getSecurityToken(
             Contact dst, long timeout, TimeUnit unit) {
         
         KUID lookupId = KUID.createRandomID();

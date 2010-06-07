@@ -97,7 +97,8 @@ abstract class AbstractController implements Controller {
             return false;
         }
         
-        return  dht.isLocalhost(contact);
+        Contact localhost = dht.getLocalhost();
+        return contact.equals(localhost);
     }
     
     @Override

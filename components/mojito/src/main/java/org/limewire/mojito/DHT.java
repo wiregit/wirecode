@@ -6,8 +6,8 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -17,6 +17,7 @@ import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.Value;
@@ -45,7 +46,7 @@ public interface DHT extends ContactPinger, AddressPinger, Closeable {
     /**
      * Returns the localhost {@link Contact}
      */
-    public Contact getLocalhost();
+    public LocalContact getLocalhost();
     
     /**
      * Returns the {@link RouteTable}.

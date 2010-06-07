@@ -7,19 +7,20 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.mojito.ValueKey;
+import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.SecurityTokenEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.IoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
@@ -71,7 +72,7 @@ public class ValueTest extends MojitoTestCase {
             
             // Get the SecurityToken...
             DHTFuture<SecurityTokenEntity> future 
-                = dht1.getSecurityToken(dht2.getLocalhost(), 
+                = ((DefaultDHT)dht1).getSecurityToken(dht2.getLocalhost(), 
                     500, TimeUnit.MILLISECONDS);
             
             SecurityTokenEntity entity = future.get();

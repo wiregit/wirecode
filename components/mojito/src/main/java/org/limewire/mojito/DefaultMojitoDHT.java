@@ -23,11 +23,9 @@ import org.limewire.mojito.concurrent.NopProcess;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
-import org.limewire.mojito.entity.SecurityTokenEntity;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.MessageDispatcher;
-import org.limewire.mojito.io.SecurityTokenResponseHandler;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.message.RequestMessage;
@@ -99,11 +97,6 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
         getLocalhost().setExternalAddress(address);
     }
     
-    @Override
-    public boolean isLocalhost(Contact contact) {
-        return getLocalhost().equals(contact);
-    }
-
     private Contact[] getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
         Collection<Contact> active = getRouteTable().getActiveContacts();
@@ -307,18 +300,6 @@ public class DefaultMojitoDHT extends DefaultDHT implements MojitoDHT {
             
             return lookup;
         }
-    }
-
-    @Override
-    public DHTFuture<SecurityTokenEntity> getSecurityToken(Contact dst, 
-            long timeout, TimeUnit unit) {
-        
-        KUID lookupId = KUID.createRandomID();
-        DHTFutureProcess<SecurityTokenEntity> process 
-            = new SecurityTokenResponseHandler(this, 
-                    dst, lookupId, timeout, unit);
-        
-        return submit(process, timeout, unit);
     }
     
     @Override
