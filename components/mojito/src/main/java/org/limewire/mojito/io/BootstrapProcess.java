@@ -62,7 +62,7 @@ public class BootstrapProcess implements DHTFutureProcess<BootstrapEntity> {
         this.timeout = timeout;
         this.unit = unit;
         
-        refreshStack = new MaxStack(config.getAlpha());
+        refreshStack = new MaxStack(config.getConcurrency());
     }
     
     @Override

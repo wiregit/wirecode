@@ -90,7 +90,7 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
     }
 
     /**
-     * 
+     * Returns {@code true} if the given {@link Message} is allowed to pass.
      */
     private boolean allow(Message message) {
         HostFilter hostFilter = context.getHostFilter();
@@ -241,7 +241,7 @@ public class DefaultMessageDispatcher extends AbstractMessageDispatcher {
     }
 
     /**
-     * 
+     * Called for each {@link RequestMessage} that was unhandled.
      */
     protected void unhandledRequest(RequestMessage message) throws IOException {
         if (LOG.isErrorEnabled()) {

@@ -83,7 +83,8 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
     }
     
     /**
-     * 
+     * Unbinds the {@link MessageDispatcher} from the underlying
+     * {@link Transport} and calls {@code close()} if necessary.
      */
     private synchronized Transport unbind(boolean close) {
         Transport transport = this.transport;
