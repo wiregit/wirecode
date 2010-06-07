@@ -25,6 +25,9 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 
+/**
+ * A default implementation of {@link PushProxiesValue}.
+ */
 public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
     
     /**
@@ -59,18 +62,22 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
     private final BitNumbers tlsInfo;
     
     /**
-     * 
+     * Creates a {@link DefaultPushProxiesValue}.
      */
     public DefaultPushProxiesValue(Value value) throws IOException {
         this(value.getValueType(), value.getVersion(), value.getValue());
     }
     
-    public DefaultPushProxiesValue(Version version, byte[] data) throws IOException {
+    /**
+     * Creates a {@link DefaultPushProxiesValue}.
+     */
+    public DefaultPushProxiesValue(Version version, 
+            byte[] data) throws IOException {
         this (PUSH_PROXIES, version, data);
     }
     
     /**
-     * 
+     * Creates a {@link DefaultPushProxiesValue}.
      */
     private DefaultPushProxiesValue(ValueType valueType, 
             Version version, byte[] data) throws IOException {
@@ -146,6 +153,9 @@ public class DefaultPushProxiesValue extends AbstractPushProxiesValue {
         }
     }
     
+    /**
+     * Creates a {@link DefaultPushProxiesValue}.
+     */
     public DefaultPushProxiesValue(NetworkManager networkManager, 
             ApplicationServices applicationServices, 
             PushEndpointFactory pushEndpointFactory) {

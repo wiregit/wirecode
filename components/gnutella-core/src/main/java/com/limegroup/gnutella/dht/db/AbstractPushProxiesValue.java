@@ -14,8 +14,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.DefaultValue;
+import org.limewire.mojito.storage.Value;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.ByteUtils;
 
@@ -23,6 +23,9 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
+/**
+ * An abstract implementation of {@link PushProxiesValue}.
+ */
 public abstract class AbstractPushProxiesValue implements PushProxiesValue {
 
     static final String CLIENT_ID = "client-id";
@@ -117,7 +120,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     /**
-     * 
+     * Returns a {@link BitNumbers} for the given set of {@link IpPort}s.
      */
     static BitNumbers getNumbersFromProxies(Set<? extends IpPort> proxies) {
         return BitNumbers.synchronizedBitNumbers(

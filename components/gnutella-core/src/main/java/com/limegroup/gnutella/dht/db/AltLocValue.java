@@ -6,6 +6,9 @@ import org.limewire.mojito.storage.ValueType;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
+/**
+ * A serializable value that represents a {@link AlternateLocation}.
+ */
 public interface AltLocValue extends SerializableValue {
 
     /**
