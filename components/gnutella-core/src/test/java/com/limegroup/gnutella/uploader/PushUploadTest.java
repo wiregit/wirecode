@@ -68,7 +68,7 @@ import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -549,7 +549,7 @@ public class PushUploadTest extends LimeTestCase {
 
         @Inject
         public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
-                Provider<DHTManagerImpl> dhtManager, Provider<ConnectionManager> connectionManager,
+                Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
                 NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
                 Provider<ByteBufferCache> bbCache, ApplicationServices applicationServices,
