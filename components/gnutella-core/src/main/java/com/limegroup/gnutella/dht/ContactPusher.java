@@ -63,6 +63,9 @@ class ContactPusher implements Closeable {
         }
     }
     
+    /**
+     * Adds the given {@link Contact} to the internal queue.
+     */
     public synchronized void addContact(Contact contact) {
         if (!open || !DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
             return;
@@ -83,6 +86,9 @@ class ContactPusher implements Closeable {
         }
     }
     
+    /**
+     * Pushes all {@link Contact}s from the queue to the Gnutella Network.
+     */
     private void push() {
         List<Contact> contacts = null;
         synchronized (this) {
