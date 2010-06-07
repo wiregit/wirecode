@@ -25,7 +25,7 @@ class SharedFileCountPanel extends JXButton {
     @Resource private Color foreground;
     
     @InspectablePrimitive(value = "bottom share button clicked", category = DataCategory.USAGE)
-    private int shareButtonClicked = 0;
+    private volatile int shareButtonClicked = 0;
     
     @Inject
     SharedFileCountPanel(SharedFileListManager shareListManager) {

@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public class FileSetting extends AbstractSetting<File> {
 
-    private String absolutePath;
+    private volatile String absolutePath;
 
 
 	/**

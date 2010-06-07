@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
@@ -24,6 +27,9 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.core.api.search.SearchDetails.SearchType;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -31,6 +37,7 @@ import org.limewire.ui.swing.components.DisposalListener;
 import org.limewire.ui.swing.filter.FilterDebugger;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.DownloadExceptionHandler;
+import org.limewire.ui.swing.util.SwingInspectable;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -54,6 +61,59 @@ import com.google.inject.Provider;
  */
 class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultStatusListener {
     private static final Log LOG = LogFactory.getLog(BasicSearchResultsModel.class);
+    
+    private final static List<Inspectable> resultsStatsList = new ArrayList<Inspectable>();
+    
+    @SuppressWarnings("unused")
+    @InspectionPoint(value = "list of stats for all search results models created", category = DataCategory.USAGE)
+    private final static Inspectable allSearchResultsStats = new Inspectable() {
+        @Override
+        public Object inspect() {
+            List<Object> proccessedResultsStatsList = new ArrayList<Object>(resultsStatsList.size());
+            
+            for ( Inspectable resultsInspectable : resultsStatsList ) {
+                proccessedResultsStatsList.add(resultsInspectable.inspect());
+            }
+            
+            return proccessedResultsStatsList;
+        }
+    };
+    
+    private final Inspectable resultsStats = new ResultsStatisticsInspectable();
+    private int downloadsStarted  = 0;
+    
+    private class ResultsStatisticsInspectable extends SwingInspectable {
+        
+        private final long createTime = System.currentTimeMillis();
+        
+        
+        ResultsStatisticsInspectable() {
+            resultsStatsList.add(this);
+        }
+        
+        @Override
+        protected Object inspectOnEDT() {
+            Map<String, Object> ret = new HashMap<String, Object>();
+            
+            ret.put("age", System.currentTimeMillis() - createTime);
+            ret.put("type", searchInfo.getSearchType());
+            ret.put("files", sortedResultList.size());
+            
+            if (sortedResultList.size() > 0) {
+                double random = new Random().nextDouble();
+                int randomIndex = (int) (sortedResultList.size() * random);
+            
+                ret.put("random result bytes", sortedResultList.get(randomIndex).getSize());
+            } else {
+                // No files to get the size of
+                ret.put("random result bytes", -1);
+            }
+            
+            ret.put("downloads", downloadsStarted);
+            
+            return ret;
+        }
+    }
     
     /** Filter debugger associated with this model. */
     private final FilterDebugger<VisualSearchResult> filterDebugger;
@@ -265,6 +325,10 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      */
     @Override
     public void dispose() {
+        
+        // Remove this element from the inspectable list
+        resultsStatsList.remove(resultsStats);
+        
         // Stop search.
         search.stop();
         
@@ -478,6 +542,9 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
     @Override
     public void download(final VisualSearchResult vsr, File saveFile) {
         try {
+            
+            downloadsStarted++;
+            
             // Add download to manager.  If save file is specified, then set
             // overwrite to true because the user has already confirmed it.
             DownloadItem di = (saveFile == null) ?

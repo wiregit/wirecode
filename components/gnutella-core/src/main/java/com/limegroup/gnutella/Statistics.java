@@ -34,6 +34,13 @@ public class Statistics {
         // Return 0 if the clock has gone backwards
         return Math.max(0, clock.now() - startTime);
     }
+    
+    /**
+     * @return the clock time when uptime began recording from.
+     */
+    public long getStartTime() {
+        return startTime;
+    }
 
     /**
      * Calculates the average number of seconds this host runs per day.

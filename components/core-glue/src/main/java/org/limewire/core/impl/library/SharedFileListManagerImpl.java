@@ -119,7 +119,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
         
         @InspectionPoint(value = "number of files in public shared list", category = DataCategory.USAGE)
-        private final Inspectable numberOfFiles = new Inspectable() {
+        private final Inspectable numberOfFilesV2 = new Inspectable() {
             @Override
             public Object inspect() {
                 return getModel().get(0).size();
@@ -151,11 +151,27 @@ class SharedFileListManagerImpl implements SharedFileListManager {
                 }
             }
         };
+        
+        @InspectionPoint(value = "has custom list with file", category = DataCategory.USAGE)
+        private final Inspectable hasCustomListWithFile = new Inspectable() {
+            @Override
+            public Object inspect() {
+                if (getModel().size() >= 2) {
+                    for ( SharedFileList list : getModel() ) {
+                        if (!list.isPublic() && list.size() != 0) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        };
+        
     }
 
 
     @InspectablePrimitive(value = "number of lists created", category = DataCategory.USAGE)
-    private volatile long listsCreated;
+    private volatile long listsCreatedV2;
     
     @InspectablePrimitive(value = "number of lists shared", category = DataCategory.USAGE)
     private volatile long listsShared;
@@ -318,7 +334,7 @@ class SharedFileListManagerImpl implements SharedFileListManager {
 
     @Override
     public int createNewSharedFileList(String name) {
-        listsCreated++;
+        listsCreatedV2++;
         return collectionManager.createNewCollection(name).getId();        
     }
 

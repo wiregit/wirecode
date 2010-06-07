@@ -9,9 +9,16 @@ import org.limewire.core.api.search.browse.BrowseStatus;
 import org.limewire.core.api.search.browse.BrowseStatusListener;
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 
 class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
    
+    @InspectablePrimitive(value = "successful browses", category = DataCategory.USAGE)
+    private static volatile int successesCount = 0;
+    @InspectablePrimitive(value = "failed browses", category = DataCategory.USAGE)
+    private static volatile int failuresCount = 0;
+    
     private final FriendPresence friendPresence;
     private final BrowseFactory browseFactory;
 
@@ -51,9 +58,15 @@ class AnonymousSingleBrowseSearch extends AbstractBrowseSearch {
 
         @Override
         public void browseFinished(final boolean success) {
-            BrowseStatus status = success? 
-                    new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.LOADED): 
-                    new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.FAILED, friendPresence.getFriend());
+            BrowseStatus status;
+            
+            if (success) {
+                successesCount++;                
+                status = new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.LOADED);
+            } else {
+                failuresCount++;
+                status = new BrowseStatus(AnonymousSingleBrowseSearch.this, BrowseState.FAILED, friendPresence.getFriend());
+            }
             
             for (SearchListener listener : searchListeners) {
                 listener.searchStopped(AnonymousSingleBrowseSearch.this);

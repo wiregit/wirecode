@@ -21,7 +21,7 @@ public class StringArraySetting extends AbstractSetting<String[]> {
     
     public static final char SEPARATOR = ';';
     
-    private String[] value;
+    private volatile String[] value;
 
     /**
      * Creates a new <tt>StringArraySetting</tt> instance with the specified

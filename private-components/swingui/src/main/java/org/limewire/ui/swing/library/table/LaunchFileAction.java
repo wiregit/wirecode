@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryInspectionUtils;
 import org.limewire.ui.swing.library.LibrarySelected;
 import org.limewire.ui.swing.library.navigator.LibraryNavigatorPanel;
+import org.limewire.ui.swing.library.navigator.LibraryNavItem.NavType;
 import org.limewire.ui.swing.player.Audio;
 import org.limewire.ui.swing.player.PlayerMediator;
 import org.limewire.ui.swing.player.PlayerUtils;
@@ -32,6 +35,12 @@ class LaunchFileAction extends AbstractAction {
     private final Provider<PlayerMediator> audioPlayerProvider;
     private final Provider<PlayerMediator> videoPlayerProvider;
     private final CategoryManager categoryManager;
+    
+    @InspectablePrimitive(value = "public shared launches", category = DataCategory.USAGE)
+    private static volatile int publicSharedLaunches = 0;
+    
+    @InspectablePrimitive(value = "library launches", category = DataCategory.USAGE)
+    private static volatile int nonPublicSharedLaunches = 0;
     
     @Inject
     public LaunchFileAction(@LibrarySelected Provider<List<LocalFileItem>> selectedLocalFileItems,
@@ -68,6 +77,14 @@ class LaunchFileAction extends AbstractAction {
             } else {    
                 NativeLaunchUtils.safeLaunchFile(fileItem.getFile(), categoryManager);
             }
+            
+            if (libraryNavProvider.get().getSelectedNavItem().getType() == NavType.PUBLIC_SHARED) {
+                publicSharedLaunches++;
+            } else {
+                nonPublicSharedLaunches++;
+            }
+            
         }
+
     }
 }

@@ -12,8 +12,8 @@ import java.util.Properties;
  */
 public final class IntSetting extends AbstractNumberSetting<Integer> {
     
-    private int value;
-
+    private volatile int value;
+     
 	/**
 	 * Creates a new <tt>IntSetting</tt> instance with the specified
 	 * key and default value.

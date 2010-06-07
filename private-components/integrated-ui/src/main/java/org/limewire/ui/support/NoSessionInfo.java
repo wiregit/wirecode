@@ -172,5 +172,9 @@ class NoSessionInfo implements SessionInfo {
     public int receivedIpPong() {
         return 0;
     }
-    
+
+    @Override
+    public long getStartTime() {
+        return 0;
+    }
 }

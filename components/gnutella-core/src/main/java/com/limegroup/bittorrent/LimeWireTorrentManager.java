@@ -88,12 +88,15 @@ public class LimeWireTorrentManager implements TorrentManager, Service {
                 int active = 0;
                 int seeding = 0;
                 int starting = 0;
+                int paused = 0;
 
                 if (isInitialized() && isValid()) {
                     getLock().lock();
                     try {
                         for (Torrent torrent : getTorrents()) {
-                            if (!torrent.isStarted()) {
+                            if (torrent.isPaused()) {
+                                paused++;
+                            } else if (!torrent.isStarted()) {
                                 starting++;
                             } else if (torrent.isFinished()) {
                                 seeding++;

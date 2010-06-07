@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public class FloatSetting extends AbstractNumberSetting<Float> {
     
-    private float value;
+    private volatile float value;
 
 	/**
 	 * Creates a new <tt>FloatSetting</tt> instance with the specified

@@ -7,7 +7,7 @@ import java.util.Properties;
 
 public class PropertiesSetting extends AbstractSetting<Properties> {
 
-    private Properties value;
+    private volatile Properties value;
     
     PropertiesSetting(Properties defaultProps, Properties props, String key, 
             Properties defaultValue) {

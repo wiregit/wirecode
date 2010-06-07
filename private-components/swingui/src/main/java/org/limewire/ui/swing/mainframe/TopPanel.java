@@ -31,6 +31,7 @@ import org.limewire.core.api.search.browse.BrowseSearch;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.Disposable;
@@ -60,6 +61,7 @@ import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.SearchInspectionUtils;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.search.SearchResultMediator;
@@ -69,6 +71,7 @@ import org.limewire.ui.swing.search.advanced.AdvancedSearchPanel;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingInspectable;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -88,7 +91,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @InspectableContainer
     private final class LazyInspectableContainer {
         @InspectablePrimitive(value = "search tab count", category = DataCategory.USAGE)
-        private final int tabCount = searchList.getTabs().size();        
+        private final Inspectable tabCount = new SwingInspectable() {
+            @Override
+            protected Object inspectOnEDT() {
+                return searchList.getTabs().size();
+            }
+        };        
     }
     private final Navigator navigator;
     private final NavItem homeNav;
@@ -106,9 +114,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private volatile long maxTabCount = 0;
 
     private final AllFriendsRefreshManager allFriendsRefreshManager;    
-    
-    @InspectablePrimitive(value = "advanced search opened", category = DataCategory.USAGE)
-    private int advancedSearches;
     
     @Inject
     public TopPanel(final SearchHandler searchHandler,
@@ -206,7 +211,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     @Override
     public SearchNavItem addAdvancedSearch() {
-        advancedSearches++;
+        SearchInspectionUtils.advancedSearchOpened();
         String title = I18n.tr("Advanced Search");
         AdvancedSearchPanel advancedPanel = advancedSearchPanel.get();
         
@@ -420,6 +425,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 // Fall back on the normal search
                 if (search == null) {
                     search = DefaultSearchInfo.createKeywordSearch(query, category);
+                } 
+                else {
+                    SearchInspectionUtils.textAdvancedSearchStarted();
                 }
                 
                 if(searchHandler.doSearch(search)) {

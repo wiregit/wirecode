@@ -18,7 +18,7 @@ import java.util.Properties;
  */
 public final class FontNameSetting extends AbstractSetting<String> {
    
-    private String _fontName;
+    private volatile String _fontName;
 
     FontNameSetting(Properties defaultProps, Properties props, String key,
                                                            String defaultStr) {

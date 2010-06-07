@@ -26,8 +26,6 @@ import org.limewire.inject.LazySingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
-import org.limewire.inspection.InspectableForSize;
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -37,27 +35,36 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.transfer.TransferTrayNavigator;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingInspectable;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 @LazySingleton
 public class DownloadMediator {
     
     public static enum SortOrder {ORDER_ADDED, NAME, PROGRESS, TIME_REMAINING, SPEED, STATUS, FILE_TYPE, EXTENSION};
 
-	/**
-	 * unfiltered - common to all tables
-	 */
-	@InspectableForSize(value = "download count", category = DataCategory.USAGE)
-    private final SortedList<DownloadItem> commonBaseList;
+	@SuppressWarnings("unused")
+    @InspectionPoint(value = "download count", category = DataCategory.USAGE)
+    private final Inspectable commonBaseList = new SwingInspectable() {
+        @Override
+        protected Object inspectOnEDT() {
+            return downloadsCommonBaseList.size();
+        }
+    };
+
+    /**
+     * unfiltered - common to all tables
+     */
+    private final SortedList<DownloadItem> downloadsCommonBaseList;
 	private final DownloadListManager downloadListManager;
 	private final Provider<MainDownloadPanel> downloadPanelFactory;
 	private final Provider<DownloadHeaderPopupMenu> headerPopupMenuFactory;
@@ -69,19 +76,27 @@ public class DownloadMediator {
 	private List<JButton> headerButtons;
 	private DownloadHeaderPopupMenu headerPopupMenu;
 	
-    @InspectablePrimitive(value = "download sorts", category = DataCategory.USAGE)
-    private final Set<SortOrder> sortInspection = new HashSet<SortOrder>();
+	@SuppressWarnings("unused")
+    @InspectionPoint(value = "download sorts", category = DataCategory.USAGE)
+    private final Inspectable sortInspection = new SwingInspectable() {
+        @Override
+        protected Object inspectOnEDT() {
+            return sortInspectionSet;
+        }
+    };
+    
+    private final Set<SortOrder> sortInspectionSet = new HashSet<SortOrder>();
     
     @SuppressWarnings("unused")
     @InspectableContainer
     private class LazyInspectableContainer {
         @InspectionPoint(value = "active downloads", category = DataCategory.USAGE)
-        private final Inspectable activeDownloads = new Inspectable() {
+        private final Inspectable activeDownloads = new SwingInspectable() {
             @Override
-            public Object inspect() {
+            protected Object inspectOnEDT() {
                 return getActiveList().size();
-            }            
-        };  
+            }
+        };
     }
 	
 	@Inject
@@ -95,7 +110,7 @@ public class DownloadMediator {
 	    this.transferTrayNavigator = transferTrayNavigator;
 	    
 	    EventList<DownloadItem> baseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
-	    commonBaseList = GlazedListsFactory.sortedList(baseList, getSortComparator(getSortOrder(), isSortAscending()));
+	    downloadsCommonBaseList = GlazedListsFactory.sortedList(baseList, getSortComparator(getSortOrder(), isSortAscending()));
 	}
     
 	/**
@@ -185,9 +200,9 @@ public class DownloadMediator {
 	    SwingUiSettings.DOWNLOAD_SORT_ASCENDING.setValue(isAscending);
 	    
         // Apply sort order.
-	    commonBaseList.setComparator(getSortComparator(order, isAscending));
+	    downloadsCommonBaseList.setComparator(getSortComparator(order, isAscending));
 	    
-	    sortInspection.add(order);
+	    sortInspectionSet.add(order);
 	}
 	
     /**
@@ -232,28 +247,28 @@ public class DownloadMediator {
 	}
 
 	public void pauseAll() {
-        commonBaseList.getReadWriteLock().writeLock().lock();
+        downloadsCommonBaseList.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : commonBaseList) {
+            for (DownloadItem item : downloadsCommonBaseList) {
                 if (item.getState().isPausable()) {
                     item.pause();
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
+            downloadsCommonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 
 	public void resumeAll() {
-        commonBaseList.getReadWriteLock().writeLock().lock();
+        downloadsCommonBaseList.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : commonBaseList) {
+            for (DownloadItem item : downloadsCommonBaseList) {
                 if (item.getState().isResumable()) {
                     item.resume();
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
+            downloadsCommonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 	
@@ -262,7 +277,7 @@ public class DownloadMediator {
      */
 	public EventList<DownloadItem> getActiveList() {
 	    if (activeList == null) {
-	        activeList = GlazedListsFactory.filterList(commonBaseList, 
+	        activeList = GlazedListsFactory.filterList(downloadsCommonBaseList, 
 	                new DownloadStateExcluder(DownloadState.ERROR,
 	                        DownloadState.DONE,
 	                        DownloadState.CANCELLED,
@@ -277,7 +292,7 @@ public class DownloadMediator {
      * Returns a sorted list of downloads.
      */
 	public EventList<DownloadItem> getDownloadList() {
-	    return commonBaseList;
+	    return downloadsCommonBaseList;
 	}
 	
     /**
@@ -348,27 +363,27 @@ public class DownloadMediator {
     }
     
     public boolean hasResumable() {
-        commonBaseList.getReadWriteLock().writeLock().lock();
+        downloadsCommonBaseList.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : commonBaseList) {
+            for (DownloadItem item : downloadsCommonBaseList) {
                 if(item.getState().isResumable())
                     return true;
             }
         } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
+            downloadsCommonBaseList.getReadWriteLock().writeLock().unlock();
         }
         return false;
     }
     
     public boolean hasPausable() {
-        commonBaseList.getReadWriteLock().writeLock().lock();
+        downloadsCommonBaseList.getReadWriteLock().writeLock().lock();
         try {
-            for (DownloadItem item : commonBaseList) {
+            for (DownloadItem item : downloadsCommonBaseList) {
                 if(item.getState().isPausable())
                     return true;
             }
         } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
+            downloadsCommonBaseList.getReadWriteLock().writeLock().unlock();
         }
         return false;
     }
@@ -395,11 +410,11 @@ public class DownloadMediator {
      */
     private List<DownloadItem> getMatchingDownloadItems(DownloadState state) {
         if (state == null) {
-            return new ArrayList<DownloadItem>(commonBaseList);
+            return new ArrayList<DownloadItem>(downloadsCommonBaseList);
         }
         
         List<DownloadItem> matchingItems = new ArrayList<DownloadItem>();
-        for (DownloadItem item : commonBaseList) {
+        for (DownloadItem item : downloadsCommonBaseList) {
             if (item.getState() == state) {
                 matchingItems.add(item);
             }

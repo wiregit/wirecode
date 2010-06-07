@@ -5,11 +5,13 @@ import java.io.File;
 import javax.swing.JOptionPane;
 
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadException;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.inject.LazySingleton;
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -25,6 +27,13 @@ class MagnetHandlerImpl implements MagnetHandler {
     private final SearchHandler searchHandler;
 
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
+    
+    @InspectablePrimitive(value = "number of gnutella download magnets started", category = DataCategory.USAGE)
+    private static volatile int gnutellaDownloadMagnetCount = 0;
+    
+    @InspectablePrimitive(value = "number of search magnets started", category = DataCategory.USAGE)
+    private static volatile int searchMagnetCount = 0;
+    
     
     @Inject
     MagnetHandlerImpl(SearchHandler searchHandler,
@@ -48,6 +57,7 @@ class MagnetHandlerImpl implements MagnetHandler {
                 } else if (magnet.isKeywordTopicOnly()) {
                     searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
                             .getQueryString(), SearchCategory.ALL));
+                    searchMagnetCount++;
                 } else {
                     FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), I18n
                             .tr("Invalid magnet option."), I18n.tr("Open Link"),
@@ -62,6 +72,7 @@ class MagnetHandlerImpl implements MagnetHandler {
             final Provider<DownloadExceptionHandler> downloadExceptionHandler, final MagnetLink magnet) {
         try {
             downloadListManager.addDownload(magnet, null, false);
+            gnutellaDownloadMagnetCount++;
         } catch (DownloadException e1) {
             downloadExceptionHandler.get().handleDownloadException(new DownloadAction() {
                 @Override

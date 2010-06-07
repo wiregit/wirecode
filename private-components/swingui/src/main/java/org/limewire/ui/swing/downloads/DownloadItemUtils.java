@@ -24,8 +24,11 @@ public class DownloadItemUtils {
     private DownloadItemUtils() {}
     
     @InspectablePrimitive(value = "number of completed downloads launched", category = DataCategory.USAGE)
-    private static volatile int downloadsLaunched = 0;
+    private static volatile int downloadsLaunchedV2 = 0;
     
+    @InspectablePrimitive(value = "number of non completed downloads launched", category = DataCategory.USAGE)
+    private static volatile int previewsLaunched = 0;
+        
     /**
      * Launches the download, loading the launchable portion in the background
      * if necessary.
@@ -68,9 +71,13 @@ public class DownloadItemUtils {
             }
         }.execute();
         
-        if (downloadItem.getState() == DownloadState.DONE) {
-            downloadsLaunched++;   
+        if (downloadItem.getState().isFinished()) {
+            downloadsLaunchedV2++;
+        } else {
+            previewsLaunched++;
         }
     }
+    
+    
 
 }

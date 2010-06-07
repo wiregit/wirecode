@@ -13,7 +13,7 @@ import java.util.Properties;
 public final class BooleanSettingImpl extends AbstractSetting<Boolean> implements BooleanSetting {
     
     /** Current value of the setting. */
-    private boolean value;
+    private volatile boolean value;
 
 	/**
 	 * Creates a new <tt>BooleanSetting</tt> instance with the specified

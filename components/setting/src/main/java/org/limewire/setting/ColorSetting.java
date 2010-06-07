@@ -14,7 +14,7 @@ import java.util.Properties;
  */
 public final class ColorSetting extends AbstractSetting<Color> {
     
-    private Color value;
+    private volatile Color value;
 
     
 	/**
