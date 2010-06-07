@@ -357,16 +357,16 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.PublishAltLocs");
     
     /**
-     * 
+     * The frequency at which the location publisher is running.
      */
     public static final TimeSetting LOCATION_PUBLISHER_FREQUENCY
         = FACTORY.createRemoteTimeSetting("LOCATION_PUBLISHER_FREQUENCY", 
-                30L, TimeUnit.MINUTES,
+                10L, TimeUnit.MINUTES,
                 "DHT.LocationPublisherFrequency", 
                 3L, TimeUnit.MINUTES, 1L, TimeUnit.DAYS);
     
     /**
-     * 
+     * The frequency at which locations are being published.
      */
     public static final TimeSetting PUBLISH_LOCATION_EVERY
         = FACTORY.createRemoteTimeSetting("PUBLISH_LOCATION_EVERY", 
@@ -390,7 +390,8 @@ public class DHTSettings extends LimeProps {
         = FACTORY.createRemoteTimeSetting("PROXY_PUBLISHER_FREQUENCY", 
                 2L, TimeUnit.MINUTES,
                 "DHT.ProxyPublisherFrequency", 
-                30L, TimeUnit.SECONDS, 1L, TimeUnit.DAYS);
+                30L, TimeUnit.SECONDS, 
+                1L, TimeUnit.DAYS);
     
     /**
      * The amount of time a Push-Proxy configuration must remain stable
@@ -400,7 +401,8 @@ public class DHTSettings extends LimeProps {
         = FACTORY.createRemoteTimeSetting("STABLE_PROXIES_TIME", 
                 2L, TimeUnit.MINUTES,
                 "DHT.StableProxiesTime", 
-                1L, TimeUnit.MINUTES, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                1L, TimeUnit.MINUTES, 
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
      * The amount of time in which stable Push-Proxy configurations are 
@@ -410,10 +412,13 @@ public class DHTSettings extends LimeProps {
         = FACTORY.createRemoteTimeSetting("PUBLISH_PROXIES_TIME",
                 30L, TimeUnit.MINUTES, 
                 "DHT.PublishProxiesTime",
-                10L, TimeUnit.SECONDS, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                10L, TimeUnit.SECONDS, 
+                Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     
     /**
-     * 
+     * A threshold that makes sure that a client has always 
+     * more than the given number of stable Push Proxies
+     * published to the DHT. 
      */
     public static final IntSetting PROXY_CHANGE_THRESHOLD
         = FACTORY.createRemoteIntSetting("PROXY_CHANGE_THRESHOLD", 
