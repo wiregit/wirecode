@@ -83,14 +83,18 @@ public class AltLocPublisher extends Publisher {
     }
     
     /**
+     * Sets the publish time.
      * 
+     * @see DHTSettings#PUBLISH_LOCATION_EVERY
      */
     public void setPublishTime(long time, TimeUnit unit) {
         publishTime = unit.toMillis(time);
     }
     
     /**
+     * Returns the publish time or the default value.
      * 
+     * @see DHTSettings#PUBLISH_LOCATION_EVERY
      */
     public long getPublishTime(TimeUnit unit) {
         long publishTime = this.publishTime;
@@ -102,7 +106,7 @@ public class AltLocPublisher extends Publisher {
     }
     
     /**
-     * 
+     * Returns the publish time or the default value in milliseconds.
      */
     public long getPublishTimeInMillis() {
         return getPublishTime(TimeUnit.MILLISECONDS);
