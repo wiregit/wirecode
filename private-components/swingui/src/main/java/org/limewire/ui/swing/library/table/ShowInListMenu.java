@@ -75,7 +75,12 @@ class ShowInListMenu extends JMenu {
                         for(SharedFileList fileList : manager.getModel()) {
                         	// only show lists that contain the file and isn't the currently selected list
                             if(fileList.contains(selectedFile) && (selectedLocalFileList == null || fileList != selectedLocalFileList.get())) {
-                                menu.add(new ShowAction(I18n.tr(fileList.getCollectionName()), getListIcon(fileList), fileList, selectedFile));//.setEnabled(selectedLocalFileList == null || fileList != selectedLocalFileList.get());
+                                // avoid translating names for user created collections
+                                if(fileList.isNameChangeAllowed()){
+                                    menu.add(new ShowAction(fileList.getCollectionName(), getListIcon(fileList), fileList, selectedFile));
+                                }else{
+                                    menu.add(new ShowAction(I18n.tr(fileList.getCollectionName()), getListIcon(fileList), fileList, selectedFile));
+                                }
                                 addSeperator = true;
                             }
                         }

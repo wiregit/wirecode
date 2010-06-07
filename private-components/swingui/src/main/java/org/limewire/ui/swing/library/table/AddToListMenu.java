@@ -49,8 +49,9 @@ class AddToListMenu extends JMenu {
                 manager.getModel().getReadWriteLock().readLock().lock();
                 try { 
                     for(SharedFileList fileList : manager.getModel()) {
-                        if(selectedFiles.get().size() == 1) {
-                            menu.add(new AddListAction(I18n.tr(fileList.getCollectionName()), icons.getListIcon(fileList), fileList));
+                        // avoid translation for user created share lists.
+                        if(fileList.isNameChangeAllowed()) {
+                            menu.add(new AddListAction(fileList.getCollectionName(), icons.getListIcon(fileList), fileList));
                         } else {
                             menu.add(new AddListAction(I18n.tr(fileList.getCollectionName()), icons.getListIcon(fileList), fileList));
                         }
