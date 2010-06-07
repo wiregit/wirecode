@@ -22,9 +22,9 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.DefaultMojitoDHT;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
@@ -33,9 +33,9 @@ import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
+import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.IoUtils;
@@ -55,6 +55,10 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
+/**
+ * The {@link PassiveController} is controlling a {@link MojitoDHT}
+ * instance that is running in {@link DHTMode#PASSIVE} mode.
+ */
 public class PassiveController extends AbstractConnectionController {
 
     private static final Log LOG 
@@ -71,6 +75,8 @@ public class PassiveController extends AbstractConnectionController {
     private final DefaultMojitoDHT dht;
     
     private final BootstrapWorker bootstrapWorker;
+    
+    private final ContactSink contactSink;
     
     private final ContactPusher contactPusher;
     
@@ -105,6 +111,7 @@ public class PassiveController extends AbstractConnectionController {
                 hostCatcher, pingRequestFactory, 
                 uniqueHostPinger, udpPinger);
         
+        contactSink = new ContactSink(dht);
         contactPusher = new ContactPusher(connectionManager);
     }
     
@@ -123,7 +130,8 @@ public class PassiveController extends AbstractConnectionController {
     
     @Override
     public void close() throws IOException {
-        IoUtils.closeAll(contactPusher, 
+        IoUtils.closeAll(contactSink, 
+                contactPusher, 
                 bootstrapWorker);
         
         super.close();
@@ -135,10 +143,16 @@ public class PassiveController extends AbstractConnectionController {
         return dht;
     }
     
+    /**
+     * Returns the {@link BootstrapWorker}.
+     */
     public BootstrapWorker getBootstrapWorker() {
         return bootstrapWorker;
     }
     
+    /**
+     * Returns the {@link PassiveRouteTable}.
+     */
     public PassiveRouteTable getPassiveRouteTable() {
         return routeTable;
     }
@@ -198,10 +212,13 @@ public class PassiveController extends AbstractConnectionController {
         return contacts.toArray(new Contact[0]);
     }
 
+    /**
+     * Adds a leaf node to the {@link RouteTable}.
+     */
     public void addLeafNode(SocketAddress address) {
         
         if (!isReady()) {
-            addActiveNode(address);
+            bootstrapWorker.addActiveNode(address);
         }
         
         if (LOG.isDebugEnabled()) {
@@ -211,6 +228,9 @@ public class PassiveController extends AbstractConnectionController {
         routeTable.addLeafNode(address);
     }
     
+    /**
+     * Removes a leaf node from the {@link RouteTable}.
+     */
     public boolean removeLeafNode(SocketAddress address) {
         SocketAddress removed = routeTable.removeLeafNode(address);
         
@@ -224,7 +244,7 @@ public class PassiveController extends AbstractConnectionController {
     @Override
     public void addActiveNode(SocketAddress address) {
         if (isReady()) {
-            //contactSink.addActiveNode(address);
+            contactSink.addActiveNode(address);
         } else {
             bootstrapWorker.addActiveNode(address);
         }

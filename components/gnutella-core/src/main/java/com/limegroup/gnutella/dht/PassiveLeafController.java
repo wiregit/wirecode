@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +24,6 @@ import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.NetworkManager;
@@ -33,6 +31,10 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+/**
+ * The {@link PassiveController} is controlling a {@link MojitoDHT}
+ * instance that is running in {@link DHTMode#PASSIVE_LEAF} mode.
+ */
 public class PassiveLeafController extends AbstractController {
 
     private static final String NAME = "LeafDHT";
@@ -63,16 +65,6 @@ public class PassiveLeafController extends AbstractController {
             throws UnknownHostException {
         LocalContact localhost = context.getLocalhost();
         initLocalhost(localhost);
-    }
-    
-    @Override
-    public void start() throws IOException {
-        super.start();
-    }
-
-    @Override
-    public void close() throws IOException {
-        IoUtils.closeAll(dht);
     }
     
     @Override
