@@ -3,8 +3,11 @@ package org.limewire.bittorrent;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -92,9 +95,11 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     
     /**
      * This list of fetched results.  Dually serves to cache.
+     * 
+     * <p>NOTE: uses {@link LinkedHashMap} to mantain LRU ordering of elements for cache.
      */
     private final Map<String,TorrentScrapeData> resultsMap 
-        = new HashMap<String, TorrentScrapeData>();
+        = new LinkedHashMap<String, TorrentScrapeData>();
         
     /**
      * List of failed torrents to not try again.
@@ -106,6 +111,8 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
      */
     private final Queue<Torrent> torrentsToScrape
         = new LinkedList<Torrent>();
+    
+    private final Map<Torrent,ScrapeCallback> callbacks = new HashMap<Torrent, ScrapeCallback>();
     
     /**
      * The current thread being processed.
@@ -168,7 +175,11 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             }
         }
 
-        
+        queueScrape(torrent, null);        
+    }
+    
+    @Override
+    public void queueScrape(Torrent torrent, ScrapeCallback callback) {
         synchronized (torrentsToScrape) {
             for ( Torrent torrentToScrape : torrentsToScrape ) {
                 if (torrentToScrape.getSha1().equals(torrent.getSha1())) {
@@ -179,10 +190,17 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             if (LOG.isDebugEnabled()) {
                 LOG.debugf("{0} queued", torrent.getName());
             }
+
+            // Do not reschedule torrents with callbacks if they have not
+            //  yet even been processed yet.
+            if (callback != null && callbacks.containsKey(torrent)) {
+                return;
+            }
             
+            callbacks.put(torrent, callback);
             torrentsToScrape.add(torrent);
             wakeup();
-        }
+        }   
     }
     
     /**
@@ -218,7 +236,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             int resultsToRemove = resultsMap.size() - MAX_RESULTS_TO_KEEP_CACHED;
             if (resultsToRemove > 0) {
                 LOG.debugf("purging {0} results", resultsToRemove);
-                randomPurge(resultsMap, resultsToRemove);
+                purge(resultsMap, resultsToRemove);
             }
         }        
     }
@@ -233,10 +251,14 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
     /**
      * Mark a torrent that failed so we dont attempt to scrape it again.
      */
-    private void markCurrentTorrentFailure() {
+    private void markCurrentTorrentFailure(ScrapeCallback callback, String reason) {
         LOG.debugf("  {0} MARK FAIL", currentlyScrapingTorrent.get().getName());
+        LOG.debugf("    reason=", reason);
         synchronized (failedTorrents) {
             failedTorrents.add(currentlyScrapingTorrent.getAndSet(null).getSha1());
+        }
+        if (callback != null) {
+            callback.failure(reason);
         }
     }
     
@@ -253,6 +275,9 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
      */
     private void process() {
         
+        final Torrent torrent;
+        final ScrapeCallback callback;
+        
         synchronized (torrentsToScrape) {
             if (!currentlyScrapingTorrent.compareAndSet(null, torrentsToScrape.peek())) {
                 if (processingPeriodsCount++ >= PROCESSING_PERIOD_MAX) {
@@ -263,24 +288,26 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
                 return;
             } else {
                 torrentsToScrape.poll();
-                processingPeriodsCount = 0;
+                
+                torrent = currentlyScrapingTorrent.get();
+                callback = callbacks.remove(torrent);
             }
         }
         
-        final Torrent torrent = currentlyScrapingTorrent.get();
-        if (torrent == null) {
+         if (torrent == null) {
             if (queueEmptyPeriodsCount++ > EMPTY_PERIOD_MAX) {
                 sleep();
             }
             return;
         } else {
+            processingPeriodsCount = 0;
             queueEmptyPeriodsCount = 0;
         }
         
         List<URI> trackers = torrent.getTrackerURIS();
         if (trackers.size() < 1) {
             // Has no trackers
-            markCurrentTorrentFailure();
+            markCurrentTorrentFailure(callback, "no trackers attached to the torrent");
             return;
         }
 
@@ -295,7 +322,7 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         
         if (tracker == null) {
             // Could not find any HTTP trackers.
-            markCurrentTorrentFailure();
+            markCurrentTorrentFailure(callback, "could not find an http tracker");
             return;
         }
         
@@ -315,6 +342,9 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
                     resultsMap.put(currentlyScrapingTorrent.getAndSet(null).getSha1(),
                             data);
                 }
+                if (callback != null) {
+                    callback.success(data);
+                }
             }
             @Override
             public void failure(String reason) {
@@ -322,18 +352,27 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
                     LOG.debugf("   {0} FAILED", torrent.getName());
                 }
                 markCurrentTrackerFailure();
-                markCurrentTorrentFailure();
+                markCurrentTorrentFailure(callback, reason);
             }
         });
         if (currentScrapeAttemptShutdown == null) {
-            markCurrentTorrentFailure();
+            markCurrentTorrentFailure(callback, "could not create scrape request");
             return;
         }
     }
     
-    
-    // REMOVE THESE WHEN CACHE CLEAR ALG IS DECIDED... see mrogers comment on LRU order in maps
-    
+    /**
+     * Randomly elements from a map, in this case in LRU order due to
+     *  LinkedHashMap
+     */
+    public static void purge(Map<?,?> m, int elementsToRemove) {
+        java.util.Iterator iterator = m.entrySet().iterator();
+        for ( int i=0 ; i<elementsToRemove ; i++ ) {
+            iterator.next();
+            iterator.remove();            
+        }
+    }
+
     /**
      * Randomly removes elements from a generic collection
      */
@@ -341,31 +380,21 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
         randomPurge(null, c, elementsToRemove);
     }
     
-    /**
-     * Randomly removes elements from a map
-     */
-    public static void randomPurge(Map<?,?> m, int elementsToRemove) {
-        randomPurge(m, null, elementsToRemove);
-    }
-    
     @SuppressWarnings("unchecked")
     private static void randomPurge(Map<?,?> m, Collection<?> c, int elementsToRemove) {
         List keys; 
         
         if (m == null) {
-            if (c instanceof List) {
-                keys = (List) c;
-            }
-            else {
-                keys = new ArrayList(c);
-            }
+            keys = new ArrayList(c);
         } else {
             keys = new ArrayList(m.keySet());
         }
         
+        Collections.shuffle(keys);
+        Iterator<?> iterator = keys.iterator();
+        
         for ( int i=0 ; i<elementsToRemove ; i++ ) {
-            int randomKeyIndex = (int) (keys.size()*Math.random());
-            Object keyToRemove = keys.remove(randomKeyIndex);
+            Object keyToRemove = iterator.next(); 
             if (m == null) {
                 c.remove(keyToRemove);
             } else {
@@ -373,4 +402,5 @@ public class TorrentScrapeSchedulerImpl implements TorrentScrapeScheduler {
             }
         }
     }
+
 }
