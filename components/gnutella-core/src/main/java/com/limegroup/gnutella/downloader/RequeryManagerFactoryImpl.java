@@ -7,7 +7,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 
 @Singleton
@@ -15,14 +15,14 @@ public class RequeryManagerFactoryImpl implements RequeryManagerFactory {
     
     private final Provider<DownloadManager> downloadManager;
     private final Provider<AltLocFinder> altLocFinder;
-    private final Provider<DHTManagerImpl> dhtManager;
+    private final Provider<DHTManager> dhtManager;
     private final ConnectionServices connectionServices;
     private final ActivationManager activationManager;
 
     @Inject
     public RequeryManagerFactoryImpl(Provider<DownloadManager> downloadManager,
             Provider<AltLocFinder> altLocFinder,
-            Provider<DHTManagerImpl> dhtManager,
+            Provider<DHTManager> dhtManager,
             ConnectionServices connectionServices,
             ActivationManager activationManager) {
         this.downloadManager = downloadManager;
