@@ -106,7 +106,6 @@ public class GetValueTest extends MojitoTestCase {
         try {
             dhts = MojitoUtils.createBootStrappedDHTs(1);
             MojitoDHT first = dhts.get(0);
-            Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
             Value value = new DefaultValue(
