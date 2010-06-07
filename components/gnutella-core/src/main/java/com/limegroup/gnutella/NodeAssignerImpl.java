@@ -21,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 
@@ -87,7 +86,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private final Provider<ConnectionManager> connectionManager;
     private final NetworkManager networkManager;
     private final SearchServices searchServices;
-    private final Provider<DHTManagerImpl> dhtManager;
+    private final Provider<DHTManager> dhtManager;
     private final ScheduledExecutorService backgroundExecutor;
     private final Executor unlimitedExecutor;
     private final ConnectionServices connectionServices;
@@ -108,7 +107,7 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     public NodeAssignerImpl(Provider<ConnectionManager> connectionManager,
                         NetworkManager networkManager,
                         SearchServices searchServices,
-                        Provider<DHTManagerImpl> dhtManager,
+                        Provider<DHTManager> dhtManager,
                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         @Named("unlimitedExecutor") Executor unlimitedExecutor,
                         ConnectionServices connectionServices,
