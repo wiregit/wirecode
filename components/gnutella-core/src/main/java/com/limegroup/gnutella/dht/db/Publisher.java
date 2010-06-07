@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.util.SchedulingUtils;
 
 /**
- * 
+ * An abstract class for publishing values in the DHT.
  */
 public abstract class Publisher implements Closeable {
     
@@ -94,7 +94,7 @@ public abstract class Publisher implements Closeable {
     }
     
     /**
-     * 
+     * Called by the publishing task.
      */
     protected abstract void publish();
 }

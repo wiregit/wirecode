@@ -2,6 +2,9 @@ package com.limegroup.gnutella.dht.db;
 
 import org.limewire.mojito.exceptions.DHTException;
 
+/**
+ * A {@link BadValueException} is thrown if a value couldn't be deserialized.
+ */
 public class BadValueException extends DHTException {
 
     public BadValueException() {

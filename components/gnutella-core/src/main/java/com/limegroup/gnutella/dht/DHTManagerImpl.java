@@ -52,7 +52,7 @@ import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 @Singleton
-public class DHTManagerImpl extends AbstractDHTManager implements Service {
+class DHTManagerImpl extends AbstractDHTManager implements Service {
 
     private static final Log LOG 
         = LogFactory.getLog(DHTManagerImpl.class);

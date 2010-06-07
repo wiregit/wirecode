@@ -25,7 +25,6 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.DefaultPushProxiesValue;
@@ -64,7 +63,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
         PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 500L);
         super.setUp();
         networkManager.setCanReceiveSolicited(true);
-        dhtManager = injector.getInstance(DHTManagerImpl.class);
+        dhtManager = injector.getInstance(DHTManager.class);
         DHTTestUtils.setLocalIsPrivate(injector, false);
         // make sure address is updated which isn't done by mock network manager
         dhtManager.addressChanged();

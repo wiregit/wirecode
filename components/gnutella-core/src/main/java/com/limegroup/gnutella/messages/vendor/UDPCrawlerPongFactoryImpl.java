@@ -20,17 +20,16 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
 
-    private final Provider<DHTManagerImpl> dhtManager;
+    private final Provider<DHTManager> dhtManager;
     private final Provider<ConnectionManager> connectionManager;
 
     @Inject
-    public UDPCrawlerPongFactoryImpl(Provider<DHTManagerImpl> dhtManager, Provider<ConnectionManager> connectionManager) {
+    public UDPCrawlerPongFactoryImpl(Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager) {
         this.dhtManager = dhtManager;
         this.connectionManager = connectionManager;
     }
