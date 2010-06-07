@@ -25,6 +25,9 @@ import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ExceptionUtils;
 
+/**
+ * The {@link StoreManager} is responsible for storing values in the DHT.
+ */
 class StoreManager implements Closeable {
     
     private final DefaultDHT dht;
@@ -51,10 +54,16 @@ class StoreManager implements Closeable {
         queue.close();
     }
     
+    /**
+     * Clears the {@link StoreManager}'s queue.
+     */
     public void clear() {
         queue.clear();
     }
     
+    /**
+     * Stores the given key-value pair.
+     */
     public DHTFuture<StoreEntity> put(KUID key, Value value, 
             long timeout, TimeUnit unit) {
         
@@ -63,6 +72,9 @@ class StoreManager implements Closeable {
         return put(entity, timeout, unit);
     }
     
+    /**
+     * Stores the given key-value pair.
+     */
     private DHTFuture<StoreEntity> put(ValueTuple value, 
             long timeout, TimeUnit unit) {
         
@@ -111,8 +123,7 @@ class StoreManager implements Closeable {
                                 }
                             }
                         } catch (Throwable t) {
-                            onException(t);
-                            ExceptionUtils.reportIfUnchecked(t);
+                            uncaughtException(t);
                         }
                     }
                 }
@@ -128,6 +139,11 @@ class StoreManager implements Closeable {
                 
                 private void onCancellation() {
                     futureRef.get().cancel(true);
+                }
+                
+                private void uncaughtException(Throwable t) {
+                    onException(t);
+                    ExceptionUtils.reportIfUnchecked(t);
                 }
             });
             
@@ -162,7 +178,7 @@ class StoreManager implements Closeable {
     }
     
     /**
-     * 
+     * Enqueues the given key-value pair.
      */
     public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
             long timeout, TimeUnit unit) {
@@ -171,15 +187,16 @@ class StoreManager implements Closeable {
     }
     
     /**
-     * 
+     * Enqueues the given key-value pair.
      */
-    public DHTFuture<StoreEntity> enqueue(Contact dst, SecurityToken securityToken, 
-            ValueTuple entity, long timeout, TimeUnit unit) {
+    public DHTFuture<StoreEntity> enqueue(Contact dst, 
+            SecurityToken securityToken, ValueTuple entity, 
+            long timeout, TimeUnit unit) {
         return queue.enqueue(dst, securityToken, entity, timeout, unit);
     }
     
     /**
-     * 
+     * The {@link Queue} manages parallel store-operations.
      */
     private class Queue implements Closeable {
         
@@ -200,6 +217,9 @@ class StoreManager implements Closeable {
             clear();
         }
         
+        /**
+         * Clears the queue and cancels active processes.
+         */
         public synchronized void clear() {
             for (FutureHandle handle : active) {
                 handle.cancel();
@@ -214,7 +234,7 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Enqueues the given key-value.
          */
         public DHTFuture<StoreEntity> enqueue(KUID key, Value value, 
                 long timeout, TimeUnit unit) {
@@ -225,7 +245,7 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Enqueues the given key-value.
          */
         private DHTFuture<StoreEntity> enqueue(final ValueTuple entity, 
                 final long timeout, final TimeUnit unit) {
@@ -241,7 +261,7 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Enqueues the given key-value.
          */
         public DHTFuture<StoreEntity> enqueue(final Contact dst, 
                 final SecurityToken securityToken, final ValueTuple entity, 
@@ -250,7 +270,8 @@ class StoreManager implements Closeable {
             FutureHandle handle = new FutureHandle() {
                 @Override
                 protected DHTFuture<StoreEntity> createFuture() {
-                    return StoreManager.this.store(dst, securityToken, entity, timeout, unit);
+                    return StoreManager.this.store(dst, 
+                            securityToken, entity, timeout, unit);
                 }
             };
             
@@ -258,7 +279,7 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Enqueues the given key-value.
          */
         private synchronized DHTFuture<StoreEntity> enqueue(FutureHandle handle) {
             queue.add(handle);
@@ -267,7 +288,7 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Stores the next value from the queue.
          */
         private synchronized void doNext() {
             while (active.size() < concurrency && !queue.isEmpty()) {
@@ -278,15 +299,22 @@ class StoreManager implements Closeable {
         }
         
         /**
-         * 
+         * Called if the given {@link FutureHandle} completed.
          */
         private synchronized void complete(FutureHandle handle) {
             active.remove(handle);
             doNext();
         }
         
+        /**
+         * A handle that keeps track of the external and 
+         * internal {@link DHTFuture}s.
+         */
         private abstract class FutureHandle {
             
+            /** 
+             * This {@link DHTFuture} is being given to the user.
+             */
             private final DHTFuture<StoreEntity> externalFuture 
                 = new DHTValueFuture<StoreEntity>();
             
@@ -321,18 +349,38 @@ class StoreManager implements Closeable {
                 }
             }
             
+            /**
+             * Called if a value was stored successfully.
+             */
             private void onSuccess(StoreEntity entity) {
                 externalFuture.setValue(entity);
             }
             
+            /**
+             * Called if an {@link Exception} occurred.
+             */
             private void onException(Throwable t) {
                 externalFuture.setException(t);
             }
             
+            /**
+             * Called if the store task was cancelled.
+             */
             private void onCancellation() {
                 externalFuture.cancel(true);
             }
             
+            /**
+             * Called if an uncaught {@link Exception} occurred.
+             */
+            private void uncaughtException(Throwable t) {
+                onException(t);
+                ExceptionUtils.reportIfUnchecked(t);
+            }
+            
+            /**
+             * Creates and returns a {@link DHTFuture}.
+             */
             protected abstract DHTFuture<StoreEntity> createFuture();
             
             public synchronized void store() {
@@ -358,8 +406,7 @@ class StoreManager implements Closeable {
                                         break;
                                 }
                             } catch (Throwable t) {
-                                onException(t);
-                                ExceptionUtils.reportIfUnchecked(t);
+                                uncaughtException(t);
                             }
                         }
                     }
