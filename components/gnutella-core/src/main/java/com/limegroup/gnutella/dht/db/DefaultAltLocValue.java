@@ -16,7 +16,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.security.MerkleTree;
 
 /**
- * 
+ * A default implementation of {@link AltLocValue}.
  */
 public class DefaultAltLocValue extends AbstractAltLocValue {
     
@@ -33,21 +33,21 @@ public class DefaultAltLocValue extends AbstractAltLocValue {
     private final boolean supportsTLS;
     
     /**
-     * 
+     * Creates a {@link DefaultAltLocValue} from the given Value.
      */
     public DefaultAltLocValue(Value value) throws IOException {
         this(value.getValueType(), value.getVersion(), value.getValue());
     }
     
     /**
-     * 
+     * Creates a {@link DefaultAltLocValue} from the given Value.
      */
     public DefaultAltLocValue(Version version, byte[] data) throws IOException {
         this (ALT_LOC, version, data);
     }
     
     /**
-     * 
+     * Creates a {@link DefaultAltLocValue}.
      */
     private DefaultAltLocValue(ValueType valueType, 
             Version version, byte[] data) throws IOException {
@@ -107,6 +107,9 @@ public class DefaultAltLocValue extends AbstractAltLocValue {
         }
     }
     
+    /**
+     * Creates a {@link DefaultAltLocValue}.
+     */
     public DefaultAltLocValue(long fileSize, byte[] ttroot,
             NetworkManager networkManager,
             ApplicationServices applicationServices) {

@@ -10,6 +10,9 @@ import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.util.ByteUtils;
 
+/**
+ * An abstract implementation of {@link AltLocValue}
+ */
 public abstract class AbstractAltLocValue implements AltLocValue {
 
     static final String CLIENT_ID = "client-id";
