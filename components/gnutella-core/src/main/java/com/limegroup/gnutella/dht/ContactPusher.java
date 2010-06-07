@@ -13,10 +13,17 @@ import org.limewire.mojito.util.SchedulingUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.RouteTable;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
+/**
+ * The {@link ContactPusher} receives {@link Contact}s from
+ * the DHT's {@link RouteTable} and pushes them to the Gnutella
+ * Network. Gnutella clients may use this information to bootstrap
+ * their DHT.
+ */
 class ContactPusher implements Closeable {
     
     /**
