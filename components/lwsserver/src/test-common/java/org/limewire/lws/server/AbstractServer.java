@@ -105,8 +105,7 @@ public abstract class AbstractServer implements Runnable  {
             } catch (IOException e) {
                 handle(e, getClass() + " on port " + port);
             }
-        }   
-        getDispatcher().deauthenticate();
+        }
         runner = null;
     }    
     

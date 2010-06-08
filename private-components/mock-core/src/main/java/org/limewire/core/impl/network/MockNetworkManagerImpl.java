@@ -41,4 +41,9 @@ public class MockNetworkManagerImpl implements NetworkManager {
     public void validateTLS() {
         
     }
+
+    @Override
+    public byte[] getExternalAddress() {
+        return null;
+    }
 }

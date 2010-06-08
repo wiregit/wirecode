@@ -3,7 +3,6 @@ package com.limegroup.gnutella.lws.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -14,9 +13,8 @@ import org.apache.http.util.EntityUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.lws.server.LWSDispatcher;
-import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LocalServerImpl;
 import org.limewire.lws.server.LocalServerDelegate;
+import org.limewire.lws.server.LocalServerImpl;
 
 /**
  * Send commands via the the {@link LimeHttpClient}.
@@ -61,17 +59,6 @@ final class CommandSender {
             client.releaseConnection(response);
         }
         return null;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.lws.server.CommandSender#detach()
-     */
-    public final void detach(String privateKey, String sharedKey) {
-        Map<String,String> args = new HashMap<String,String>();
-        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "_dummy");
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-        args.put(LWSDispatcherSupport.Parameters.SHARED, sharedKey);
-        sendMessage(LWSDispatcherSupport.Commands.DETATCH, args);
     }
     
     private int getPort() {

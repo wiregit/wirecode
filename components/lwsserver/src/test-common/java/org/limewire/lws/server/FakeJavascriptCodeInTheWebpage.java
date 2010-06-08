@@ -3,9 +3,6 @@ package org.limewire.lws.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
-
-import org.limewire.lws.server.StringCallback;
 import org.limewire.net.SocketsManager;
 
 
@@ -16,22 +13,13 @@ import org.limewire.net.SocketsManager;
 public final class FakeJavascriptCodeInTheWebpage {
 
 	private final LocalServerDelegate toLocalServer;
-	private final LocalServerDelegate toRemoteServer;
 	
 	public interface Handler {
-
-		public final static Handler ALERT = new Handler() {
-			public void handle(String res) {
-				JOptionPane.showMessageDialog(null, res);
-			}
-		};
-
 		void handle(String res);
 	}
 	
-	FakeJavascriptCodeInTheWebpage(SocketsManager socketsManager, LocalServerImpl local, RemoteServerImpl remote) {
+	FakeJavascriptCodeInTheWebpage(SocketsManager socketsManager, LocalServerImpl local) {
 		this.toLocalServer = new LocalServerDelegate(socketsManager, "localhost", local.getPort());
-        this.toRemoteServer = new LocalServerDelegate(socketsManager, "localhost", remote.getPort());
 	}
 	
 	protected final void sendLocalMsg(String msg, Map<String, String> args, final Handler h) {
@@ -41,26 +29,14 @@ public final class FakeJavascriptCodeInTheWebpage {
             }
         }, LocalServerDelegate.NormalStyleURLConstructor.INSTANCE);
 	}
-
-	protected final void sendRemoteMsg(String msg, Map<String, String> args, final Handler h) {
-        toRemoteServer.sendMessageToServer(msg, args, new StringCallback() {
-            public void process(String response) {
-                h.handle(removeHeaders(response));
-            }
-        }, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
-	}
 	
 	/**
 	 * Sends a <code>ping</code> message, whose response will be an image.
 	 * 
-	 * @param privateKey the private key
-	 * @param publicKey the public key
 	 * @param h handles the response.
 	 */
-	protected final void sendPing(String privateKey, String sharedKey, Handler h) {
+	protected final void sendPing(Handler h) {
 	    Map<String,String> args = new HashMap<String,String>();
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
-        args.put(LWSDispatcherSupport.Parameters.SHARED, sharedKey);
         args.put(LWSDispatcherSupport.Parameters.CALLBACK, "_dummy");
 	    sendLocalMsg(LWSDispatcherSupport.Commands.PING, args, h);
 	}

@@ -11,6 +11,9 @@ final class LWSDownloadTestConstants {
     /** Relative URL of the file we're downloading. */
     final String URL = "/" + FILE;
     
+    /** dummy auth parameters for downloading **/
+    final String AUTH_PARAMETERS = "hash=0f3a1cb18b672c468c1b4984a4d5dac86ce9bae0&signedHash=GAWQEFIAS3EKXL2TBFWUFX3B4THYAQKFMXFJAU7VAIKCTF6WY6JZWKCFPLPAYB5NY5L2MSQJAP6Q&browserIP=127.0.0.1&signedBrowserIP=GAWQEFCZHHPCBCNF2X23Z7NVPBCN2ZX2ILOSJTACCUAJAM3LRA2LRAEJY7NOVTXSGY477O2SMA2A";
+    
     /** The length of the file */
     final long LENGTH = 400000;
     

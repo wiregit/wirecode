@@ -56,4 +56,9 @@ public class NetworkManagerImpl implements NetworkManager {
     public void validateTLS() {
         coreNetworkManager.validateTLS();
     }
+
+    @Override
+    public byte[] getExternalAddress() {
+        return coreNetworkManager.getExternalAddress();
+    }
 }
