@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
+import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
@@ -33,7 +34,6 @@ import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 
@@ -180,7 +180,7 @@ public class PassiveLeafControllerTest extends DHTTestCase {
                 }
                 
             } finally {
-                IoUtils.closeAll(dhts);
+                IOUtils.close(dhts);
             }
             
         } finally {

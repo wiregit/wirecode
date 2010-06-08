@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -18,7 +19,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.IoUtils;
 
 
 public class MessageDispatcherTest extends MojitoTestCase {
@@ -109,7 +109,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             dispatcher.send(null, node, request, 1, TimeUnit.SECONDS);
             
         } finally {
-            IoUtils.close(dht);
+            IOUtils.close(dht);
         }
     }
 }

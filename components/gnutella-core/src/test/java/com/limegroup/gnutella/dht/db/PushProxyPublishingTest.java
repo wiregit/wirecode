@@ -12,11 +12,11 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
+import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -101,7 +101,7 @@ public class PushProxyPublishingTest extends LimeTestCase {
     @Override
     protected void tearDown() {
         injector.getInstance(LifecycleManager.class).shutdown();
-        IoUtils.closeAll(dhts);
+        IOUtils.close(dhts);
     }
     
     public void testPushProxiesArePublished() throws Exception {

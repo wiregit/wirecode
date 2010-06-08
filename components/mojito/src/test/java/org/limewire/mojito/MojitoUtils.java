@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.IoUtils;
 
 public class MojitoUtils {
 
@@ -58,7 +58,7 @@ public class MojitoUtils {
                 first.bootstrap("localhost", port + 1).get();
             }
         } catch (Exception err) {
-            IoUtils.closeAll(dhts.values());
+            IOUtils.close(dhts.values());
             
             if (err instanceof IOException) {
                 throw (IOException)err;

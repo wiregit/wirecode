@@ -232,19 +232,35 @@ public class IOUtils {
      * A utility method to close Closeable objects (Readers, Writers, 
      * Input- and OutputStreams and RandomAccessFiles).
      */
-    public static void close(Closeable closeable) {
-        FileUtils.close(closeable);
+    public static boolean close(Closeable closeable) {
+        return FileUtils.close(closeable);
     }
     
     /**
      * Closes a collection of closeables. Also handles a null argument gracefully. 
      */
-    public static void close(Iterable<? extends Closeable> closeables) {
+    public static boolean close(Iterable<? extends Closeable> closeables) {
+        boolean success = true;
         if (closeables != null) {
             for (Closeable closeable : closeables) {
-                close(closeable);
+                success &= close(closeable);
             }
         }
+        return success;
+    }
+    
+    /**
+     * Closes an array of {@link Closeable}s. Also handles a {@code null} 
+     * argument gracefully.
+     */
+    public static boolean close(Closeable... closeables) {
+        boolean success = true;
+        if (closeables != null) {
+            for (Closeable closeable : closeables) {
+                success &= close(closeable);
+            }
+        }
+        return success;
     }
     
     /**

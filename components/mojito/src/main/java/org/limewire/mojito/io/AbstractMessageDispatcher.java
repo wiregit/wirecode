@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.collection.FixedSizeHashSet;
 import org.limewire.mojito.message.Message;
@@ -26,7 +27,6 @@ import org.limewire.mojito.message.RequestMessage;
 import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.EventUtils;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.mojito.util.SchedulingUtils;
 import org.limewire.util.Objects;
 
@@ -93,7 +93,7 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
             transport.unbind();
             
             if (close && transport instanceof Closeable) {
-                IoUtils.close((Closeable)transport);
+                IOUtils.close((Closeable)transport);
             }
             
             this.transport = null;

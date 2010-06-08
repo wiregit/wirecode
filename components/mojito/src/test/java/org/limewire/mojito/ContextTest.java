@@ -9,6 +9,7 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.DHT;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -17,7 +18,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.IoUtils;
 
 public class ContextTest extends MojitoTestCase {
     
@@ -43,7 +43,7 @@ public class ContextTest extends MojitoTestCase {
         try {
             dht.unbind();
         } finally {
-            IoUtils.close(dht);
+            IOUtils.close(dht);
         }
     }
     
@@ -53,7 +53,7 @@ public class ContextTest extends MojitoTestCase {
         try {
             MojitoFactory.bind(dht, 2000);
         } finally {
-            IoUtils.close(dht);
+            IOUtils.close(dht);
         }
     }
     
@@ -66,8 +66,8 @@ public class ContextTest extends MojitoTestCase {
             dht.unbind();
             
         } finally {
-            IoUtils.close(dht);
-            IoUtils.close((Closeable)transport);
+            IOUtils.close(dht);
+            IOUtils.close((Closeable)transport);
         }
     }
     
@@ -155,7 +155,7 @@ public class ContextTest extends MojitoTestCase {
             assertEquals(expected, downCounter);
             
         } finally {
-            IoUtils.closeAll(dhts);
+            IOUtils.close(dhts);
         }
     }
 }

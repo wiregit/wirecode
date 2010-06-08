@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.FutureEvent.Type;
+import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureProcess;
@@ -40,7 +41,6 @@ import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -137,7 +137,7 @@ public class DefaultDHT extends AbstractDHT implements Context {
         bucketRefresher.close();
         storeManager.close();
         
-        IoUtils.close(messageDispatcher);
+        IOUtils.close(messageDispatcher);
     }
     
     @Override

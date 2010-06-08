@@ -20,12 +20,12 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -117,7 +117,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        IoUtils.closeAll(dhts);
+        IOUtils.close(dhts);
         injector.getInstance(LifecycleManager.class).shutdown();
     }
     

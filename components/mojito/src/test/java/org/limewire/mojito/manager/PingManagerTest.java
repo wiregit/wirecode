@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.DHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
@@ -14,7 +15,6 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.PingSettings;
-import org.limewire.mojito.util.IoUtils;
 
 public class PingManagerTest extends MojitoTestCase {
     
@@ -70,7 +70,7 @@ public class PingManagerTest extends MojitoTestCase {
             }
             
         } finally {
-            IoUtils.closeAll(dht1, dht2);
+            IOUtils.close(dht1, dht2);
         }
     }
 }

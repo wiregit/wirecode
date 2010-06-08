@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -37,7 +38,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 
 
@@ -126,7 +126,7 @@ public class CollisionTest extends MojitoTestCase {
             assertNotEquals(map.get(spoofer.getContactId()), spoofer.getContactAddress());
             
         } finally {
-            IoUtils.closeAll(bootstrap, original, spoofer);
+            IOUtils.close(bootstrap, original, spoofer);
         }
     }
     
@@ -149,7 +149,7 @@ public class CollisionTest extends MojitoTestCase {
             
             Transport transport = original.unbind();
             if (transport instanceof Closeable) {
-                IoUtils.close((Closeable)transport);
+                IOUtils.close((Closeable)transport);
             }
             
             Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
@@ -188,7 +188,7 @@ public class CollisionTest extends MojitoTestCase {
             assertNotEquals(map.get(original.getContactId()), original.getContactAddress());
             
         } finally {
-            IoUtils.closeAll(bootstrap, original, replacement);
+            IOUtils.close(bootstrap, original, replacement);
         }
     }
 }

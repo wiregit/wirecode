@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
@@ -18,7 +19,6 @@ import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 
@@ -97,7 +97,7 @@ public class GetValueTest extends MojitoTestCase {
             }
             
         } finally {
-            IoUtils.closeAll(dhts);
+            IOUtils.close(dhts);
         }
     }
     
@@ -125,7 +125,7 @@ public class GetValueTest extends MojitoTestCase {
             assertNotSame(result1, result2);
             
         } finally {
-            IoUtils.closeAll(dhts);
+            IOUtils.close(dhts);
         }
     }
 }

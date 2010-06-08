@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.mojito.KUID;
@@ -24,7 +25,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
 import com.google.inject.Inject;
@@ -211,7 +211,7 @@ class DHTManagerImpl extends AbstractDHTManager implements Service {
         altLocPublisher.stop();
         pushProxiesPublisher.stop();
         
-        IoUtils.close(controller);
+        IOUtils.close(controller);
         controller = InactiveController.CONTROLLER;
         fireStopped();
     }
@@ -221,7 +221,7 @@ class DHTManagerImpl extends AbstractDHTManager implements Service {
         open = false;
         stop();
         
-        IoUtils.closeAll(
+        IOUtils.close(
                 altLocPublisher, 
                 pushProxiesPublisher);
     }

@@ -8,11 +8,11 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
+import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoUtils;
-import org.limewire.mojito.util.IoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -98,6 +98,6 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
     
     @Override
     protected void tearDown() throws Exception {
-        IoUtils.closeAll(dhts);
+        IOUtils.close(dhts);
     }
 }

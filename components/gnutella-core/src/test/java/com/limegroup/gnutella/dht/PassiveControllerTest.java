@@ -13,6 +13,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
+import org.limewire.io.IOUtils;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -28,7 +29,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -224,7 +224,7 @@ public class PassiveControllerTest extends DHTTestCase {
                 Thread.sleep(1000);
                 
             } finally {
-                IoUtils.closeAll(dhts);
+                IOUtils.close(dhts);
             }
             
             assertEquals(routeTable.getDHTLeaves().size(), 

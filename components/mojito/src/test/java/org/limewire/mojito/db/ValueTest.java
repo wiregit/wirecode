@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -22,7 +23,6 @@ import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
@@ -81,7 +81,7 @@ public class ValueTest extends MojitoTestCase {
             assertNotNull(token);
             
         } finally {
-            IoUtils.closeAll(dht1, dht2);
+            IOUtils.close(dht1, dht2);
         }
     }
 
@@ -116,7 +116,7 @@ public class ValueTest extends MojitoTestCase {
             }
             
         } finally {
-            IoUtils.closeAll(dhts);
+            IOUtils.close(dhts);
         }
     }
 }

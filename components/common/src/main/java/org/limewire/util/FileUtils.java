@@ -702,13 +702,15 @@ public class FileUtils {
      * A utility method to close Closeable objects (Readers, Writers, Input- and
      * OutputStreams and RandomAccessFiles).
      */
-    public static void close(Closeable closeable) {
+    public static boolean close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
+                return true;
             } catch (IOException ignored) {
             }
         }
+        return false;
     }
 
     /**

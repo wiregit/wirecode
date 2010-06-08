@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestSuite;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -30,7 +31,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.ExceptionUtils;
 
 public class BootstrapManagerTest extends MojitoTestCase {
@@ -83,7 +83,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
 
     @Override
     protected void tearDown() {
-        IoUtils.closeAll(BOOTSTRAP_DHT, TEST_DHT);
+        IOUtils.close(BOOTSTRAP_DHT, TEST_DHT);
     }
     
     public void testBootstrapFailure() 
@@ -262,7 +262,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
             assertTrue(TEST_DHT.isReady());
             
         } finally {
-            IoUtils.closeAll(dhts);
+            IOUtils.close(dhts);
         }
     }
 }

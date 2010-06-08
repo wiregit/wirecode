@@ -32,6 +32,7 @@ import junit.framework.TestSuite;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -47,7 +48,6 @@ import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.StringUtils;
 
 @SuppressWarnings("null")
@@ -316,7 +316,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(KademliaSettings.K + 1, count);
             
         } finally {
-            IoUtils.closeAll(dhts.values());
+            IOUtils.close(dhts.values());
         }
     }
     

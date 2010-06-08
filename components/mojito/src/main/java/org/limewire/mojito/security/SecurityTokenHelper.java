@@ -43,7 +43,7 @@ public class SecurityTokenHelper {
     }
     
     /**
-     * 
+     * Returns the {@link SecurityToken.TokenProvider}
      */
     public SecurityToken.TokenProvider getSecurityTokenProvider() {
         return tokenProvider;

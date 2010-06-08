@@ -37,7 +37,6 @@ import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.mojito.util.IoUtils;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
@@ -208,7 +207,7 @@ public class ActiveController extends AbstractConnectionController {
     
     @Override
     public void close() throws IOException {
-        IoUtils.closeAll(contactSink, 
+        IOUtils.close(contactSink, 
                 contactPusher, 
                 bootstrapWorker);
         

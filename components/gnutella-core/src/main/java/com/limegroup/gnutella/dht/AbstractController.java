@@ -8,12 +8,12 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.LocalContact;
-import org.limewire.mojito.util.IoUtils;
 
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -51,7 +51,7 @@ abstract class AbstractController implements Controller {
     
     @Override
     public void close() throws IOException {
-        IoUtils.close(getMojitoDHT());
+        IOUtils.close(getMojitoDHT());
     }
     
     @Override

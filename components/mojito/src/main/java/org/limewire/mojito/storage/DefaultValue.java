@@ -38,7 +38,7 @@ public class DefaultValue implements Value {
     private static final byte[] EMPTY = new byte[0];
     
     /**
-     * 
+     * An {@link Value} that is empty.
      */
     public static final Value EMPTY_VALUE = new DefaultValue(
             ValueType.BINARY, Version.ZERO, EMPTY);
