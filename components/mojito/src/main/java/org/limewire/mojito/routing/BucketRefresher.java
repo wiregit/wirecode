@@ -25,7 +25,9 @@ import org.limewire.mojito.util.EventUtils;
 import org.limewire.mojito.util.SchedulingUtils;
 
 /**
- * 
+ * The {@link BucketRefresher}'s job is to perform <tt>PINGs</tt>
+ * and <tt>FIND_NODE</tt> in periodic intervals to refresh the
+ * {@link RouteTable}'s buckets.
  */
 public class BucketRefresher implements Closeable {
     
@@ -40,7 +42,8 @@ public class BucketRefresher implements Closeable {
     private ScheduledFuture<?> future;
     
     /**
-     * 
+     * A flag (barrier) that's set to {@code true} if the 
+     * {@link BucketRefresher} is currently active.
      */
     private final AtomicBoolean active 
         = new AtomicBoolean(false);
@@ -142,6 +145,7 @@ public class BucketRefresher implements Closeable {
      */
     private synchronized void ping() {
         
+        // Called if the PING-ing is complete.
         Runnable callback = new Runnable() {
             @Override
             public void run() {
@@ -155,9 +159,11 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * Performs <tt>FIND_NODE</tt> lookups to refresh all buckets.
      */
     private synchronized void lookup() {
+        
+        // Called if FIND_NODE-ing is complete.
         Runnable callback = new Runnable() {
             @Override
             public void run() {
@@ -171,9 +177,9 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * An abstract task.
      */
-    private static abstract class AbstractTask implements Closeable {
+    private static abstract class Task implements Closeable {
         
         protected final DHT dht;
         
@@ -185,7 +191,7 @@ public class BucketRefresher implements Closeable {
         
         protected volatile boolean open = true;
         
-        public AbstractTask(DHT dht, Runnable callback, 
+        public Task(DHT dht, Runnable callback, 
                 long timeout, TimeUnit unit) {
             
             this.dht = dht;
@@ -201,9 +207,9 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * A {@link Task} that sends <tt>PING</tt> requests.
      */
-    private static class PingTask extends AbstractTask {
+    private static class PingTask extends Task {
         
         private final EventListener<FutureEvent<PingEntity>> listener 
                 = new EventListener<FutureEvent<PingEntity>>() {
@@ -281,9 +287,9 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * A {@link Task} that performs <tt>FIND_NODE</tt> lookups.
      */
-    private static class LookupTask extends AbstractTask {
+    private static class LookupTask extends Task {
         
         private final EventListener<FutureEvent<NodeEntity>> listener 
                 = new EventListener<FutureEvent<NodeEntity>>() {
@@ -337,7 +343,7 @@ public class BucketRefresher implements Closeable {
     }
     
     /**
-     * 
+     * The configuration for the {@link BucketRefresher}.
      */
     public static class Config {
 
@@ -352,42 +358,42 @@ public class BucketRefresher implements Closeable {
         }
         
         /**
-         * 
+         * Returns the <tt>PING</tt> timeout.
          */
         public long getPingTimeout(TimeUnit unit) {
             return unit.convert(pingTimeout, TimeUnit.MILLISECONDS);
         }
         
         /**
-         * 
+         * Returns the <tt>PING</tt> timeout in milliseconds.
          */
         public long getPingTimeoutInMillis() {
             return getPingTimeout(TimeUnit.MILLISECONDS);
         }
         
         /**
-         * 
+         * Sets the <tt>PING</tt> timeout.
          */
         public void setPingTimeout(long timeout, TimeUnit unit) {
             this.pingTimeout = unit.toMillis(timeout);
         }
         
         /**
-         * 
+         * Returns the <tt>FIND_NODE</tt> timeout.
          */
         public long getLookupTimeout(TimeUnit unit) {
             return unit.convert(lookupTimeout, TimeUnit.MILLISECONDS);
         }
         
         /**
-         * 
+         * Returns the <tt>FIND_NODE</tt> timeout in milliseconds.
          */
         public long getLookupTimeoutInMillis() {
             return getLookupTimeout(TimeUnit.MILLISECONDS);
         }
         
         /**
-         * 
+         * Sets the <tt>FIND_NODE</tt> timeout.
          */
         public void setLookupTimeout(long timeout, TimeUnit unit) {
             this.lookupTimeout = unit.toMillis(timeout);
