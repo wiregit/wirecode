@@ -324,7 +324,7 @@ public class ActiveController extends AbstractConnectionController {
                 && ACTIVE_FILE.exists() && ACTIVE_FILE.isFile()) {
             ObjectInputStream in = null;
             try {
-                in = new ObjectInputStream(
+                in = new MojitoObjectInputStream(
                         new BufferedInputStream(
                             new SecureInputStream(
                                 new FileInputStream(ACTIVE_FILE))));

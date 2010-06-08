@@ -41,7 +41,7 @@ import org.limewire.mojito.settings.RouteTableSettings;
 /**
  * An implementation of Bucket
  */
-class BucketNode implements Bucket {
+public class BucketNode implements Bucket {
     
     private static final long serialVersionUID = -4116522147032657308L;
     
@@ -59,7 +59,7 @@ class BucketNode implements Bucket {
     
     private long timeStamp = 0L;
     
-    public BucketNode(RouteTable routeTable, KUID bucketId, int depth) {
+    BucketNode(RouteTable routeTable, KUID bucketId, int depth) {
         this.routeTable = routeTable;
         this.bucketId = bucketId;
         this.depth = depth;

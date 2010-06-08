@@ -312,7 +312,7 @@ public class PassiveController extends AbstractConnectionController {
                 && PASSIVE_FILE.exists() && PASSIVE_FILE.isFile()) {
             ObjectInputStream ois = null;
             try {
-                ois = new ObjectInputStream(
+                ois = new MojitoObjectInputStream(
                             new BufferedInputStream(
                                 new SecureInputStream(
                                     new FileInputStream(PASSIVE_FILE))));
