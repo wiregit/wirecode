@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package org.limewire.mojito.routing;
+package org.limewire.mojito.routing.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,10 +30,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.ContactUtils;
-
 
 /**
  * The RemoteContact class implements the Contact interface 

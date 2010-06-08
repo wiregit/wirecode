@@ -3,11 +3,11 @@ package com.limegroup.gnutella.dht;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.limewire.mojito.routing.BucketNode;
-import org.limewire.mojito.routing.LocalContact;
-import org.limewire.mojito.routing.RemoteContact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.routing.impl.BucketNode;
+import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.routing.impl.RemoteContact;
+import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.util.ConverterObjectInputStream;
 
 /**

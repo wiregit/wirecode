@@ -24,7 +24,7 @@ import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.ClassfulNetworkCounter;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.NetworkSettings;
 
 /**

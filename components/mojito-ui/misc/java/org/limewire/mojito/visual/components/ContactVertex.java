@@ -1,7 +1,7 @@
 package org.limewire.mojito.visual.components;
 
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.impl.LocalContact;
 
 
 public class ContactVertex extends RouteTableVertex<Contact>{

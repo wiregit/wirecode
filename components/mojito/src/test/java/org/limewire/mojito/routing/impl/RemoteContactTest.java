@@ -9,7 +9,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.RemoteContact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;

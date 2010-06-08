@@ -8,7 +8,7 @@ import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message.DefaultMessageFactory;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTableImpl;
+import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.storage.DatabaseImpl;
 
 /**

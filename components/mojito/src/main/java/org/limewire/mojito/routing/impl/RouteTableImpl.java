@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package org.limewire.mojito.routing;
+package org.limewire.mojito.routing.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,6 +45,13 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.RequestTimeoutException;
+import org.limewire.mojito.routing.Bucket;
+import org.limewire.mojito.routing.ClassfulNetworkCounter;
+import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
@@ -52,7 +59,6 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ExceptionUtils;
-
 
 /**
  * A PatriciaTrie based RouteTable implementation for the Mojito DHT.

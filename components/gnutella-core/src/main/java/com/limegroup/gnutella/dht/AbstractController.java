@@ -13,7 +13,7 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.LocalContact;
+import org.limewire.mojito.routing.impl.LocalContact;
 
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;

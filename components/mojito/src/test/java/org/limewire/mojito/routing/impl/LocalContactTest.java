@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.LocalContact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 

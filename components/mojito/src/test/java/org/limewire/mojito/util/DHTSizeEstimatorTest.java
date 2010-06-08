@@ -11,9 +11,9 @@ import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.RouteTableImpl;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.impl.RouteTableImpl;
 
 
 public class DHTSizeEstimatorTest extends MojitoTestCase {
