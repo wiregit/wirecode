@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-31 11:30-0400\n"
-"PO-Revision-Date: 2010-02-05 17:06+0000\n"
-"Last-Translator: MagisterMatic <matic.magister@gmail.com>\n"
+"POT-Creation-Date: 2010-06-07 11:30-0400\n"
+"PO-Revision-Date: 2010-06-06 07:49+0000\n"
+"Last-Translator: Jure Pasekure <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || "
 "n%100==4 ? 3 : 0);\n"
-"X-Launchpad-Export-Date: 2010-06-01 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-06-08 03:32+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -118,7 +118,7 @@ msgstr "Napaka pri povezovanju"
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:46
 msgid "No problems."
-msgstr "Ni napak"
+msgstr "Ni težav"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
@@ -143,7 +143,7 @@ msgstr "XMPP storitev"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr ""
+msgstr "REST servis"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -176,7 +176,7 @@ msgid ""
 "Some features of LimeWire may not work as expected."
 msgstr ""
 "LimeWire ni uspel nastaviti vrat za poslušanje prihajajočih povezav. "
-"Nekatera orodja morda ne bodo delovala normalno."
+"Nekatera orodja morda ne bodo delovala pravilno."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:407
 msgid "Connection Listener"
@@ -184,7 +184,7 @@ msgstr "Prisluškovalec povezave"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
-msgstr "Brskajte Gostitelju"
+msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
@@ -221,7 +221,7 @@ msgid ""
 "file, the download will pick up where it left off."
 msgstr ""
 "Oprostite, LimeWire ni mogel prebrati vaših starih datotek. Lahko jih "
-"vnovično zaženete s klikom na \"Poskusite Ponovno\" v prenosih. Ko LimeWire "
+"ponovno zaženete s klikom na \"Poskusite Ponovno\" v prenosih. Ko LimeWire "
 "najde vir datoteke, se prenos nadaljuje, kjer je bil prekinjen."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:293
@@ -231,7 +231,7 @@ msgid ""
 "for the file, the download will pick up where it left off."
 msgstr ""
 "Oprostite, LimeWire ni mogel prebrati nekaterih vaših starih prenosov. Lahko "
-"jih vnovično zaženete s klikom na \"Poskusite Ponovno\" v prenosih. Ko "
+"jih ponovno zaženete s klikom na \"Poskusite Ponovno\" v prenosih. Ko "
 "LimeWire najde vir datoteke, se prenos nadaljuje, kjer je bil prekinjen."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
@@ -256,11 +256,11 @@ msgstr "Usmerjanje Sporočil"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:190
 msgid "Network Management"
-msgstr "Upravitelj Omrežja"
+msgstr "Upravljanje omrežij"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:160
 msgid "Ultrapeer/DHT Management"
-msgstr "Upravitelj Ultrapeer/DHT"
+msgstr "Upravljanje Ultrapeer/DTH"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
@@ -280,7 +280,7 @@ msgstr "Upravljanje Vsebine"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr "Lokalno Socket Slušalac"
+msgstr "Lokalni Vtični Poslušalec"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
@@ -292,9 +292,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
-"Limewire je mogla začeti Digital Audio Access Protocol Service (za izmenjavo "
-"datotek v iTunes). Ta funkcija bo izklopljen. Tu lahko vključite nazaj v "
-"opcije, pod Advanced -> Files -> iTunes."
+"Limewire ni mogel začeti Digitalnega Avdio Dostopa Protokola Servisa (za "
+"izmenjavo datotek v iTunes). Ta funkcija bo izklopljena. Lahko jo ponovno "
+"vključite v možnostih, pod Napredno -> Datoteke -> iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:181
 msgid "What's New"
@@ -302,7 +302,7 @@ msgstr "Kaj je novega"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:182
 msgid "Creative Commons"
-msgstr "Creative Commons"
+msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:143
 msgid "Mojito DHT"
@@ -314,19 +314,19 @@ msgstr "Limewire Shranjujte Integration"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr "Prenesti Nadgradnja Naloga"
+msgstr "prenesi opravila za nadgranjo"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:60
 msgid "Shared Files"
-msgstr "Deljeno Datoteke"
+msgstr "Datoteke v souporabi"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
-msgstr "Statična Sporočila"
+msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr "QRP Posodobitever"
+msgstr "QRP Posodobljevalec"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
@@ -338,20 +338,20 @@ msgstr "Nastav Štediša"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:131
 msgid "Spam Management"
-msgstr "Spam Vodstvo"
+msgstr "upravljanje neželene pošte"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
-msgstr "Čas Statistika"
+msgstr "statistika nalaganja"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:74
 msgid "Browse"
-msgstr "Brskanje"
+msgstr "Brskaj"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1074
 msgid "Update Checks"
-msgstr "Posodobitev Pregledi"
+msgstr "pregled posodobitev"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:102
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -453,7 +453,7 @@ msgstr "Dolžina"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:41
 msgid "Year"
-msgstr "Leto"
+msgstr "Letnik"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -467,12 +467,12 @@ msgstr "Jezik"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AudioTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:25
 msgid "Bitrate"
-msgstr "Bitna hitrost"
+msgstr "Vzorčenje"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:129
 msgid "Comments"
-msgstr "Komentarji"
+msgstr "Opombe"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
@@ -494,7 +494,7 @@ msgstr "Vrsta licence"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Director"
-msgstr "Reziser"
+msgstr "režiser"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Producer"
@@ -6011,19 +6011,19 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:104
 msgid "LimeWire PRO"
-msgstr ""
+msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:113
 msgid "You can activate LimeWire PRO later from File > License"
-msgstr ""
+msgstr "LimeWire PRO lahko aktivirate kasneje v: Datotetka > Licence"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "No thanks"
-msgstr ""
+msgstr "ne, hvala"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"
-msgstr ""
+msgstr "vašo licenco lahko urejate v: Datoteta > Licence"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75

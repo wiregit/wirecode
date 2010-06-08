@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-31 11:30-0400\n"
-"PO-Revision-Date: 2010-05-31 07:57+0000\n"
+"POT-Creation-Date: 2010-06-07 11:30-0400\n"
+"PO-Revision-Date: 2010-06-07 09:38+0000\n"
 "Last-Translator: SiraNokyoongtong <gumaraa@gmail.com>\n"
 "Language-Team: Thai <th@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-06-01 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-06-08 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -25,7 +25,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedPopupPanel.java:56
 msgid "Audio"
-msgstr "Audio"
+msgstr "เสียง"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:183
@@ -33,13 +33,13 @@ msgstr "Audio"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:116
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/advanced/AdvancedPopupPanel.java:57
 msgid "Video"
-msgstr "วีดิโอ"
+msgstr "วิดีโอ"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:94
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 msgid "Videos"
-msgstr "วีดิทัศน์ต่าง ๆ"
+msgstr "ภาพเคลื่อนไหวต่างๆ"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:137
@@ -51,7 +51,7 @@ msgstr "รูปภาพ"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:121
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:33
 msgid "Images"
-msgstr "อิมเมจ"
+msgstr "รูปภาพ"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:17
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:144
@@ -88,29 +88,29 @@ msgstr "อื่นๆ"
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:42
 msgid "Torrent"
-msgstr ""
+msgstr "ไฟล์ทอร์เรนท์"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:20
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:36
 msgid "Torrents"
-msgstr ""
+msgstr "ไฟล์ทอร์เรนท์ต่างๆ"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:38
 msgid "There is a disk problem"
-msgstr "พบปัญหาเกี่ยวกับดิสก์"
+msgstr "มีปัญหาเกี่ยวกับดิสก์"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:39
 msgid "The file is corrupted"
-msgstr "แฟ้มข้อมูลมีปัญหา"
+msgstr "ไฟล์เสียหาย"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
 msgid "The copyright holder has not authorized this for sharing"
-msgstr ""
+msgstr "ผู้จดลิขสิทธิ์ยังไม่ได้อนุญาติให้เผยแพร่"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "Trouble connecting to people"
-msgstr "พบปัญหาในการติดต่อกับผู้ใช้งานอื่น"
+msgstr "ไม่สามารถติดต่อกับผู้ใช้งานอื่นได้"
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -126,15 +126,15 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>โปรแกรม Limewire อาจมีความเสี่ยงจากไวรัส "
-"หรืิอโทรจัน</b><br><br>โปรดติดต่อ <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> "
-"และทำการดาวน์โหลด Limewire เวอร์ชันล่าสุด</html>"
+"<html><b>โปรแกรท LimeWire อาจได้รับความเสียหายจาก ไวรัส หรือ "
+"โทรจัน!</b><br><br>โปรดไปที่<a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> และดาวร์โหลด "
+"LimeWire เวอร์ชั่นใหม่ล่าสุด</html>"
 
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
 msgid "The file could not be scanned for viruses. Preview anyway?"
-msgstr ""
+msgstr "ไฟล์ไม่สามารถได้รับการสแกนไวรัสได้. ยืนยันต้องการจะดู?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -142,13 +142,13 @@ msgstr "บริการ XMPP"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr ""
+msgstr "บริการ REST"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
 msgid "Free to chat"
-msgstr "สนทนาได้อย่างอิสระ"
+msgstr "แชทฟรี"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:131
@@ -178,15 +178,15 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:407
 msgid "Connection Listener"
-msgstr ""
+msgstr "ผู้ที่กำลังเชื่อมต่อ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
-msgstr ""
+msgstr "ผู้ดูแลจัดการ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
-msgstr ""
+msgstr "ผู้บอกการเชื่อมต่อ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionManagerImpl.java:401
 msgid "Connection Management"
@@ -194,23 +194,23 @@ msgstr "จัดการการเชื่อมต่อ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:69
 msgid "Stale Connection Management"
-msgstr ""
+msgstr "จัดการการเชื่อมต่อที่ค้างไว้"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:99
 msgid "Various Core Services"
-msgstr ""
+msgstr "บริการ Core หลายแบบ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:104
 msgid "Gnutella Connections"
-msgstr ""
+msgstr "การเชื่อมต่อ Gnutella"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:216
 msgid "Old Downloads"
-msgstr ""
+msgstr "ไฟล์ดาวน์โหลดเก่า"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:241
 msgid "Download Management"
-msgstr ""
+msgstr "จัดการการดาวน์โหลด"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:291
 msgid ""
@@ -218,6 +218,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"ขออภัย, LimeWire ไม่สามารถอ่านไฟล์ดาวน์โหลดเก่าของคุณ. "
+"คุณสามารถลองอีกครั้งโดนการคลิกที่ 'ลองอีกครั้ง' ในดาวน์โหลด. เมื่อ LimeWire "
+"สามารถหาที่มาสำหรับไฟล์, การดาวน์โหลดจะดำเนินการต่อจากครั้งที่แล้ว."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:293
 msgid ""
@@ -225,6 +228,9 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
+"ขออภัย, LimeWire ไม่สามารถอ่านไฟล์ดาวน์โหลดเก่าบางไฟล์ของคุณ. "
+"คุณสามารถลองอีกครั้งโดนการคลิกที่ 'ลองอีกครั้ง' ในดาวน์โหลด. เมื่อ LimeWire "
+"สามารถหาที่มาสำหรับไฟล์, การดาวน์โหลดจะดำเนินการต่อจากครั้งที่แล้ว."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -232,15 +238,15 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:232
 msgid "Upload Management"
-msgstr ""
+msgstr "จัดการการอัพโหลด"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HostCatcher.java:375
 msgid "Peer Locator"
-msgstr ""
+msgstr "Peer Locater"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/LimeCoreGlue.java:107
 msgid "Core Glue"
-msgstr ""
+msgstr "Core Glue"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/MessageRouterImpl.java:568
 msgid "Message Routing"
@@ -248,11 +254,11 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:190
 msgid "Network Management"
-msgstr ""
+msgstr "การจัดการระบบการเชื่อมต่อ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:160
 msgid "Ultrapeer/DHT Management"
-msgstr ""
+msgstr "การจัดการ Ultrapeer/DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
@@ -260,7 +266,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
 msgid "Promotion System"
-msgstr ""
+msgstr "ระบบโปรโมชั่น"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/QueryUnicaster.java:223
 msgid "Directed Querier"
@@ -284,10 +290,13 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
+"LimeWire ไม่สามารถเริ่ม Digital Audio Access Protocol Service "
+"(สำหรับแชร์ไฟล์ใน iTunes). ฟีเจอร์นี้จะถูกปิดลง. คุณสามารถเปิดขึ้นมาได้อีกใน "
+"ตัวเลือก, ใน อื่นๆ -> ไฟล์ต่างๆ > iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:181
 msgid "What's New"
-msgstr "มีอะไรใหม่บ้าง"
+msgstr "มีอะไรใหม่"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:182
 msgid "Creative Commons"
@@ -295,7 +304,7 @@ msgstr "สัญญาอนุญาตครีเอทีฟคอมมอ
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/dht/DHTManagerImpl.java:143
 msgid "Mojito DHT"
-msgstr ""
+msgstr "Mojito DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
 msgid "LimeWire Store Integration"
@@ -303,11 +312,11 @@ msgstr "ผนึกรวมกับร้านค้าของ LimeWire"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr ""
+msgstr "แถบการดาวน์โหลดอัพเกรด"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:60
 msgid "Shared Files"
-msgstr "ไฟล์ที่แบ่งปัน"
+msgstr "แฟ้มที่ใช้ร่วม"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
@@ -315,7 +324,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/routing/QRPUpdater.java:194
 msgid "QRP Updater"
-msgstr ""
+msgstr "ผู้อัพเดต QRP"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 msgid "RUDP Message Routing"
@@ -323,15 +332,15 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/settings/SettingsSaverService.java:37
 msgid "Settings Saver"
-msgstr ""
+msgstr "ที่เก็บการตั้งค่า"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:131
 msgid "Spam Management"
-msgstr "จัดการแสปม"
+msgstr "การจัดการสแปม"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/statistics/UptimeStatTimer.java:62
 msgid "Uptime Statistics"
-msgstr ""
+msgstr "สถิติเวลาการอัพโหลด"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:74
@@ -340,7 +349,7 @@ msgstr "เรียกดู"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1074
 msgid "Update Checks"
-msgstr ""
+msgstr "ตรวจสอบการอัพเดต"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:102
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -357,7 +366,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:17
 msgid "Title"
-msgstr "หัวเรื่อง"
+msgstr "ชื่อเพลง"
 
 #. *
 #. * Variables for displaying substitutable values, visual form
@@ -394,7 +403,7 @@ msgstr "อัลบั้ม"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:53
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:30
 msgid "Genre"
-msgstr "ชนิด"
+msgstr "ประเภท"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:57
@@ -417,7 +426,7 @@ msgstr "แทร็ก"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:46
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/OtherTableFormat.java:32
 msgid "Type"
-msgstr "ประเภท"
+msgstr "รูปแบบ"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:124
@@ -466,7 +475,7 @@ msgstr "ข้อคิดเห็น"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 msgid "Action"
-msgstr "การกระทำ"
+msgstr "แอคชั่น"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:131
@@ -499,7 +508,7 @@ msgstr "ดารา"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 msgid "Subtitles"
-msgstr "หัวข้อย่อย"
+msgstr "คำบรรยาย"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:128
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:47
@@ -507,7 +516,7 @@ msgstr "หัวข้อย่อย"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:36
 msgid "Rating"
-msgstr "อันดับ"
+msgstr "อันดับความนิยม"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:31
@@ -554,7 +563,7 @@ msgstr "หัวข้อ"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/DocumentTableFormat.java:50
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/FilePropertyKeyUtils.java:23
 msgid "Author"
-msgstr "ผู้ประพันธ์"
+msgstr "ผู้แต่ง"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:151
 msgid "Application"
@@ -607,16 +616,18 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire ไม่สามารถบันทึกข้อมูลได้เนื่องจากพื้นที่ฮาร์ดดิสก์ไม่เพียงพอ "
-"หากต้องการบันทึกรายการให้ลบข้อมูลที่ไม่ต้องการออกจากฮาร์ดดิสก์"
+"LimeWire ไม่สามารถบันทึกไฟล์ข้อมูลที่จำเป็นได้ "
+"เนื่องจากพื้นที่ฮาร์ดไดร์ฟของคุณเต็ม. หากต้องการดำเนินการต่อโดยใช้ LimeWire "
+"คุณต้องเคลียร์พื้นที่บนฮาร์ดไดร์ฟของคุณ."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Limewire ไม่สามารถเปิดไฟล์ได้เนื่องจากมีโปรแกรมอื่นใช้งานอยู่  "
-"ปิดโปรแกรมเพื่อเริ่มต้นใช้แฟ้ม"
+"LimeWire ไม่สามารถเปิดไฟล์ที่จำเป็นได้ "
+"เนื่องจากมีโปรแกรมที่ใช้งานอยู่ได้ล๊อคไฟล์ไว้. LimeWire "
+"อาจไม่สามารถใช้งานได้อย่างที่ควร จนกว่าไฟล์จะถูกปลดล๊อค."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
@@ -624,9 +635,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"LimeWire ไม่สามารถเขียนแฟ้มได้เนื่องจากไม่ได้รับอนุญาตจากระบบ "
-"การปรับเปลี่ยนจะแสดงผลเมื่อเริ่มโปรแกรมใหม่ "
-"หรือโปรแกรมอาจไม่เกิดการเปลี่ยนแปลง"
+"LimeWire ไม่สามารถเขียนไฟล์ที่จำเป็นได้ เนื่องจากคุณได้รับการอนุญาติ. "
+"การปรับเปลี่ยนอาจไม่สามารถใช้ได้ครั้งต่อไปเมื่อคุณเริ่ม LimeWire, หรือ "
+"LimeWire อาจไม่สามารถใช้งานได้อย่างที่ควร."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
