@@ -6,6 +6,8 @@ import java.net.SocketAddress;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.entity.DefaultPingEntity;
@@ -26,13 +28,17 @@ import org.limewire.mojito.util.MaxStack;
  */
 public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     
+    private static final Log LOG 
+        = LogFactory.getLog(PingResponseHandler.class);
+    
     private final MaxStack stack = new MaxStack(
             PingSettings.PARALLEL_PINGS.getValue());
     
     private final Pinger pinger;
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler} that sends a <tt>PING</tt>
+     * to the given {@link SocketAddress}.
      */
     public PingResponseHandler(Context context, 
             SocketAddress dst, 
@@ -41,7 +47,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler} that sends a <tt>PING</tt>
+     * to the given {@link SocketAddress}.
      */
     public PingResponseHandler(Context context, 
             KUID contactId,
@@ -52,7 +59,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler} that sends a <tt>PING</tt>
+     * to the given {@link Contact}.
      */
     public PingResponseHandler(Context context, 
             Contact dst, long timeout, TimeUnit unit) {
@@ -60,7 +68,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler} that sends a <tt>PING</tt>
+     * from the given source to the destination {@link Contact}.
      */
     public PingResponseHandler(Context context, 
             Contact src, Contact dst, long timeout, TimeUnit unit) {
@@ -68,7 +77,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler} that sends a <tt>PING</tt>
+     * from the given source to the array of {@link Contact}s.
      */
     public PingResponseHandler(Context context, 
             Contact src, Contact[] dst, long timeout, TimeUnit unit) {
@@ -76,7 +86,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * Creates a {@link PingResponseHandler}.
      */
     private PingResponseHandler(Context context, 
             Pinger pinger, long timeout, TimeUnit unit) {
@@ -119,12 +129,17 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         }
     }
     
+    /**
+     * Called if the process is complete. Should never happen!
+     */
     private void complete() {
         setException(new IllegalStateException());
     }
     
     /**
-     * 
+     * Returns {@code true} if this {@link PingResponseHandler} is 
+     * sending <tt>PINGs</tt> that are testing for a {@link KUID}
+     * collision.
      */
     private boolean isCollisionPing() {
         if (pinger instanceof ContactPinger) {
@@ -145,9 +160,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         BigInteger estimatedSize = pong.getEstimatedSize();
         
         if (src.getContactAddress().equals(externalAddress)) {
-            /*if (LOG.isErrorEnabled()) {
-                LOG.error(node + " is trying to set our external address to its address!");
-            }*/
+            if (LOG.isErrorEnabled()) {
+                LOG.error(src + " is trying to set our external address to its address!");
+            }
             
             setException(new IOException());
             return;
@@ -165,9 +180,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
             // sender which has a different Node ID than our
             // actual Node ID
             
-            /*if (LOG.isErrorEnabled()) {
-                LOG.error(node + " is trying to spoof our Node ID");
-            }*/
+            if (LOG.isErrorEnabled()) {
+                LOG.error(src + " is trying to spoof our Node ID");
+            }
             
             setException(new IOException());
             return;
@@ -212,23 +227,26 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * An interface to send <tt>PINGs</tt>.
      */
     private static interface Pinger {
         
         /**
+         * Returns {@code true} if the {@link Pinger} has more
+         * hosts to ping.
          */
         public boolean hasMore();
         
         /**
-         * 
+         * Sends a <tt>PING</tt> to the next host in the queue.
          */
         public void ping(PingResponseHandler handler,
                 long timeout, TimeUnit unit) throws IOException;
     }
     
     /**
-     * 
+     * An implementation of {@link Pinger} that sends <tt>PINGs</tt> 
+     * to {@link SocketAddress}es.
      */
     private static class SocketAddressPinger implements Pinger {
         
@@ -277,7 +295,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
     }
     
     /**
-     * 
+     * An implementation of {@link Pinger} that sends <tt>PINGs</tt> 
+     * to {@link Contact}s.
      */
     private static class ContactPinger implements Pinger {
         
@@ -287,16 +306,10 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         
         private int index = 0;
         
-        /**
-         * 
-         */
         public ContactPinger(Contact dst) {
             this(null, new Contact[] { dst });
         }
         
-        /**
-         * 
-         */
         public ContactPinger(Contact src, Contact dst) {
             this(src, new Contact[] { dst });
         }
@@ -312,7 +325,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEntity> {
         }
 
         /**
-         * 
+         * Returns {@code true} if the {@link Pinger} is sending
+         * <tt>PINGs</tt> that check for collisions.
          */
         public boolean isCollisionPing() {
             return src != null;
