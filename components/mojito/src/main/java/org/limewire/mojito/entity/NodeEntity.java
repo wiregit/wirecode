@@ -26,18 +26,6 @@ public interface NodeEntity extends LookupEntity {
     public Contact[] getCollisions();
     
     /**
-     * Returns the number of timeouts that occurred.
-     */
-    @Deprecated
-    public int getRouteTableTimeouts();
-    
-    /**
-     * Returns the number of timeouts that occurred.
-     */
-    @Deprecated
-    public int getTimeouts();
-    
-    /**
      * Returns the number of hops that were performed.
      */
     public int getHop();

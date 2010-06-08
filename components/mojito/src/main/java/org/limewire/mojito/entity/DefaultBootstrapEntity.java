@@ -4,6 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.DHT;
 
+/**
+ * A default implementation of {@link BootstrapEntity}.
+ */
 public class DefaultBootstrapEntity extends AbstractEntity 
         implements BootstrapEntity {
 
