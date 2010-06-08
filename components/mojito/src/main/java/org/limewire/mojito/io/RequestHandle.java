@@ -17,7 +17,7 @@ import org.limewire.mojito.message.ValueResponse;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * 
+ * A handle that keeps track of a {@link RequestMessage}.
  */
 public class RequestHandle {
 
