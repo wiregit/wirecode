@@ -23,6 +23,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
+import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -78,6 +79,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     
     private Map<org.limewire.core.api.URN, DownloadItem> urnMap = Collections.synchronizedMap(new HashMap<org.limewire.core.api.URN, DownloadItem>());
     private final DownloadItemFactoryRegistry downloadItemFactoryRegistry;
+    private final CategoryManager categoryManager;
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
@@ -85,7 +87,8 @@ public class CoreDownloadListManager implements DownloadListManager {
             ItunesDownloadListenerFactory itunesDownloadListenerFactory, 
             TorrentDownloadListenerFactory torrentDownloadListenerFactory,
             CoreDownloadItem.Factory coreDownloadItemFactory,
-            DownloadItemFactoryRegistry downloadItemFactoryRegistry) {
+            DownloadItemFactoryRegistry downloadItemFactoryRegistry,
+            CategoryManager categoryManager) {
 	    
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
@@ -94,6 +97,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         this.torrentDownloadListenerFactory = torrentDownloadListenerFactory;
         this.coreDownloadItemFactory = coreDownloadItemFactory;
         this.downloadItemFactoryRegistry = downloadItemFactoryRegistry;
+        this.categoryManager = categoryManager;
         
         threadSafeDownloadItems = GlazedListsFactory.threadSafeList(new BasicEventList<DownloadItem>());
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -302,7 +306,11 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
             DownloadItem item = coreDownloadItemFactory.create(downloader, queueTimeCalculator);
             downloader.setAttribute(DownloadItem.DOWNLOAD_ITEM, item, false);
-            downloader.addListener(torrentDownloadListenerFactory.createListener(downloader, list));
+            
+            if (categoryManager.getCategoryForFile(downloader.getFile()) == Category.TORRENT) {
+                downloader.addListener(torrentDownloadListenerFactory.createListener(downloader, list));
+            }            
+            
             downloader.addListener(new RecentDownloadListener(downloader));
             downloader.addListener(itunesDownloadListenerFactory.createListener(downloader));
             threadSafeDownloadItems.add(item);

@@ -59,6 +59,7 @@ public class TorrentDownloadListener implements EventListener<DownloadStateEvent
 
     @Override
     public void handleEvent(DownloadStateEvent event) {
+        
         DownloadState downloadStatus = event.getType();
         
         if (DownloadState.SCAN_FAILED == downloadStatus) {
