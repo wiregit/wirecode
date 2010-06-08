@@ -2,6 +2,9 @@ package org.limewire.mojito.message;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * An abstract implementation of {@link Message}.
+ */
 public abstract class AbstractMessage implements Message {
 
     private final long creationTime = System.currentTimeMillis();
@@ -15,6 +18,9 @@ public abstract class AbstractMessage implements Message {
         this.contact = contact;
     }
     
+    /**
+     * Returns the {@link Message}'s creation time.
+     */
     public long getCreationTime() {
         return creationTime;
     }

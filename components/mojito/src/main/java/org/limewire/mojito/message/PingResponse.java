@@ -3,6 +3,9 @@ package org.limewire.mojito.message;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
+/**
+ * An interface for <tt>PING</tt> response {@link Message}s.
+ */
 public interface PingResponse extends ResponseMessage {
 
     /**

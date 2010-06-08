@@ -3,6 +3,9 @@ package org.limewire.mojito.message;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
+/**
+ * The default implementation of a {@link NodeResponse}.
+ */
 public class DefaultNodeResponse extends AbstractLookupResponse 
         implements NodeResponse {
 

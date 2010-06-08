@@ -32,6 +32,10 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.MaxStack;
 import org.limewire.security.SecurityToken;
 
+/**
+ * An implementation of {@link ResponseHandler} that is managing the
+ * storing of value at a remote node.
+ */
 public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
 
     private static final Log LOG 
@@ -257,6 +261,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         }
     }
     
+    /**
+     * An abstract class to store values.
+     */
     private abstract class StoreProcess {
         
         protected final Contact dst;
@@ -272,9 +279,16 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             this.entity = entity;
         }
         
+        /**
+         * Stores a {@link ValueTuple} at a remote node.
+         */
         public abstract boolean store() throws IOException;
     }
     
+    /**
+     * An implementation of {@link StoreProcess} that stores a
+     * value in the local database.
+     */
     private class LocalStoreProcess extends StoreProcess {
 
         public LocalStoreProcess(Contact dst, 
@@ -288,12 +302,17 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
             Database database = context.getDatabase();
             boolean stored = database.store(entity);
             
-            addStoreStatusCode(dst, entity, stored ? StoreStatusCode.OK : StoreStatusCode.ERROR);
+            addStoreStatusCode(dst, entity, stored ? 
+                    StoreStatusCode.OK : StoreStatusCode.ERROR);
             
             return true;
         }
     }
     
+    /**
+     * An implementation of {@link StoreProcess} that stores a
+     * value at a remote node.
+     */
     private class RemoteStoreProcess extends StoreProcess {
 
         public RemoteStoreProcess(Contact dst, 
@@ -319,6 +338,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEntity> {
         }
     }
     
+    /**
+     * A handle that is used as a key for a {@link Map}.
+     */
     private static class ProcessKey {
         
         private final KUID contactId;

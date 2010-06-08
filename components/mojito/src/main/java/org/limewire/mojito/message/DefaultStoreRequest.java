@@ -4,6 +4,9 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 
+/**
+ * The default implementation of a {@link StoreRequest}.
+ */
 public class DefaultStoreRequest extends AbstractRequest 
         implements StoreRequest {
 

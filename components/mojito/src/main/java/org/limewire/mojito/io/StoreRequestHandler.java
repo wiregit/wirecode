@@ -41,12 +41,10 @@ import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
-
 /**
- * Handles incoming store requests as 
- * sent by other Nodes. It performs some probability tests to
- * make sure the request makes sense (i.e. if the Key is close
- * to us and so on).
+ * Handles incoming store requests as sent by other Nodes. It performs some 
+ * probability tests to make sure the request makes sense (i.e. if the 
+ * Key is close to us and so on).
  */
 public class StoreRequestHandler extends AbstractRequestHandler {
     

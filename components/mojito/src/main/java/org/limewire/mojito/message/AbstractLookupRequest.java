@@ -3,6 +3,9 @@ package org.limewire.mojito.message;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * An abstract implementation of {@link LookupRequest}.
+ */
 public abstract class AbstractLookupRequest extends AbstractResponse 
         implements LookupRequest {
 

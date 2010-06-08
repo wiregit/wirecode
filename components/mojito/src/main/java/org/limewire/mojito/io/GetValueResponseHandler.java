@@ -92,7 +92,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<ValueEntity
         // value type.
         ValueTuple[] entities 
             = DatabaseUtils.filter(valueKey.getValueType(), 
-                    response.getValueEntities());
+                    response.getValues());
         
         ValueKey[] entityKeys = new ValueKey[0];
         

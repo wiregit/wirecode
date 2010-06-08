@@ -4,6 +4,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.storage.ValueTuple;
 
+/**
+ * The default implementation of a {@link ValueResponse}.
+ */
 public class DefaultValueResponse extends AbstractLookupResponse 
         implements ValueResponse {
 
@@ -33,7 +36,7 @@ public class DefaultValueResponse extends AbstractLookupResponse
     }
 
     @Override
-    public ValueTuple[] getValueEntities() {
+    public ValueTuple[] getValues() {
         return entities;
     }
 }

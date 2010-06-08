@@ -15,6 +15,10 @@ import org.limewire.mojito.message.ResponseMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
+/**
+ * An implementation of {@link ResponseHandler} to retrieve a
+ * node's {@link SecurityToken}.
+ */
 public class SecurityTokenResponseHandler 
         extends AbstractResponseHandler<SecurityTokenEntity> {
 

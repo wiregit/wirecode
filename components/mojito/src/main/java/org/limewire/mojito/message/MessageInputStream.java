@@ -15,15 +15,18 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.Value;
 import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.DefaultValue;
 import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 
+/**
+ * An {@link InputStream} that can deserialize DHT {@link Message}s.
+ */
 public class MessageInputStream extends DataInputStream {
 
     private static enum Type {

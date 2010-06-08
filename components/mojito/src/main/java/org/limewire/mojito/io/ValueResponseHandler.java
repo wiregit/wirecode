@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.entity.DefaultValueEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
@@ -26,6 +26,10 @@ import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
 
+/**
+ * An implementation of {@link ResponseHandler} that is managing 
+ * a <tt>FIND_VALUE</tt> lookup process.
+ */
 public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
 
     private static final Log LOG 
@@ -107,7 +111,7 @@ public class ValueResponseHandler extends LookupResponseHandler<ValueEntity> {
         Contact src = response.getContact();
         
         KUID[] availableSecondaryKeys = response.getSecondaryKeys();
-        ValueTuple[] entities = response.getValueEntities();
+        ValueTuple[] entities = response.getValues();
         
         // No keys and no values? In other words the remote Node sent us
         // a FindValueResponse even though it doesn't have a value for

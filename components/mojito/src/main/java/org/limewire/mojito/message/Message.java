@@ -3,7 +3,7 @@ package org.limewire.mojito.message;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * 
+ * An interface for DHT messages.
  */
 public interface Message {
 

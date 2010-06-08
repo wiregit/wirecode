@@ -21,6 +21,9 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;
 
+/**
+ * An {@link OutputStream} that can write DHT {@link Message}s.
+ */
 public class MessageOutputStream extends DataOutputStream {
 
     private static final byte[] EMPTY = new byte[0];
@@ -124,7 +127,7 @@ public class MessageOutputStream extends DataOutputStream {
     
     public void writeValueResponse(ValueResponse message) throws IOException {
         writeFloat(message.getRequestLoad());
-        writeValueTuples(message.getValueEntities());
+        writeValueTuples(message.getValues());
         writeKUIDs(message.getSecondaryKeys());
     }
     

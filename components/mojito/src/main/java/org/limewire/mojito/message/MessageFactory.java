@@ -33,37 +33,37 @@ import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 
 /**
- * Defines the interface for a factory to construct DHT messages.
+ * Defines the interface for a factory to construct DHT {@link Message}s.
  */
 public interface MessageFactory {
 
     /**
-     * 
+     * Returns the {@link MACCalculatorRepositoryManager}.
      */
     public MACCalculatorRepositoryManager getMACCalculatorRepositoryManager();
     
     /**
-     * 
+     * Returns the {@link SecurityTokenHelper}.
      */
     public SecurityTokenHelper getSecurityTokenHelper();
     
     /**
-     * 
+     * Returns a {@link SecurityToken} for the given {@link Contact}.
      */
     public SecurityToken createSecurityToken(Contact dst);
     
     /**
-     * 
+     * Returns the {@link TokenData} for the given {@link Contact}.
      */
     public TokenData createTokenData(Contact src);
     
     /**
-     * 
+     * Serializes the given {@link Message}.
      */
     public byte[] serialize(SocketAddress dst, Message message) throws IOException;
     
     /**
-     * 
+     * Deserializes the given message.
      */
     public Message deserialize(SocketAddress src, 
             byte[] message, int offset, int length) throws IOException;

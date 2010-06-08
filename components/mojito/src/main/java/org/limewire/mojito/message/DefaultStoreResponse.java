@@ -2,6 +2,9 @@ package org.limewire.mojito.message;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * The default implementation of a {@link StoreResponse}.
+ */
 public class DefaultStoreResponse extends AbstractResponse 
         implements StoreResponse {
 

@@ -2,6 +2,9 @@ package org.limewire.mojito.message;
 
 import java.io.IOException;
 
+/**
+ * The opcode of a {@link Message}.
+ */
 enum OpCode {
     
     PING_REQUEST(0x01),
@@ -22,6 +25,9 @@ enum OpCode {
         this.opcode = opcode;
     }
 
+    /**
+     * Returns the {@link OpCode} as a byte (unsigned) byte value.
+     */
     public int byteValue() {
         return opcode;
     }

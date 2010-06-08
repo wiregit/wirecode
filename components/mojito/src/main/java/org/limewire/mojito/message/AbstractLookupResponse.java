@@ -2,6 +2,9 @@ package org.limewire.mojito.message;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * An abstract implementation of {@link LookupResponse}.
+ */
 public class AbstractLookupResponse extends AbstractResponse 
         implements LookupResponse {
 

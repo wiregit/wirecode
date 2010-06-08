@@ -4,6 +4,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.storage.ValueType;
 
+/**
+ * The default implementation of a {@link ValueRequest}.
+ */
 public class DefaultValueRequest extends AbstractLookupRequest 
         implements ValueRequest {
 

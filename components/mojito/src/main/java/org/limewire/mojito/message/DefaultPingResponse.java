@@ -5,6 +5,9 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito.routing.Contact;
 
+/**
+ * The default implementation of a {@link PingResponse}.
+ */
 public class DefaultPingResponse extends AbstractResponse 
         implements PingResponse {
 
