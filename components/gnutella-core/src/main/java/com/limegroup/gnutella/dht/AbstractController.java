@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.io.Transport;
@@ -135,19 +136,14 @@ abstract class AbstractController implements Controller {
     protected SocketAddress getExternalAddress() 
             throws UnknownHostException {
         
-        InetAddress address = null;
-        
         byte[] external = networkManager.getExternalAddress();
         int port = networkManager.getNonForcedPort();
         
-        if (external != null) {
-            address = InetAddress.getByAddress(external);
+        if (external == null || NetworkUtils.isPrivateAddress(external)) {
+            return new InetSocketAddress(port);
         }
         
-        if (address == null || address.isAnyLocalAddress()) {
-            address = InetAddress.getLocalHost();
-        }
-        
+        InetAddress address = InetAddress.getByAddress(external);
         return new InetSocketAddress(address, port);
     }
 }
