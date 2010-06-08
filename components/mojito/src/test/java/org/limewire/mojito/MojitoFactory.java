@@ -3,13 +3,13 @@ package org.limewire.mojito;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.io.DatagramTransport;
 import org.limewire.mojito.io.Transport;
 import org.limewire.mojito.message.DefaultMessageFactory;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
-import org.limewire.mojito.storage.DatabaseImpl;
 
 /**
  * An utility class to create {@link MojitoDHT} instances.

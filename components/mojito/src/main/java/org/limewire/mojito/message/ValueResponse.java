@@ -1,7 +1,7 @@
 package org.limewire.mojito.message;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.db.ValueTuple;
 
 /**
  * An interface for <tt>FIND_VALUE</tt> lookup response {@link Message}s.

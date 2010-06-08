@@ -9,12 +9,12 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.Value;
 import org.limewire.mojito.entity.CollisionException;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;

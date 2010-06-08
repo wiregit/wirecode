@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package org.limewire.mojito.storage;
+package org.limewire.mojito.db;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,6 +34,13 @@ import org.limewire.mojito.DHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
+import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.db.impl.ValueTupleBag;
 import org.limewire.mojito.message.DefaultMessageFactory;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.routing.Contact;
@@ -42,13 +49,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueTupleBag;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.storage.Database;
-import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.util.NopTransport;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;

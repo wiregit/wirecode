@@ -33,6 +33,9 @@ import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -43,9 +46,6 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.CollectionUtils;
 
 /**

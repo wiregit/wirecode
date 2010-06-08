@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.storage;
+package org.limewire.mojito.db.impl;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.settings.DatabaseSettings;
 /**
  * Stores a {@link ValueTuple} in a map.

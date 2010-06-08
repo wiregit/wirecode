@@ -22,7 +22,7 @@ package org.limewire.mojito.util;
 import java.util.Collection;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.db.ValueTuple;
 
 public class EntityUtils {
     

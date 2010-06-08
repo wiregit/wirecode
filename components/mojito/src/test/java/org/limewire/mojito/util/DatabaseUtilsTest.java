@@ -7,6 +7,9 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
@@ -15,9 +18,6 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.util.StringUtils;
 

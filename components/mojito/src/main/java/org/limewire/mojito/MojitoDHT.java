@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.Value;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.NodeEntity;
 import org.limewire.mojito.entity.PingEntity;
@@ -13,7 +14,6 @@ import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.Value;
 
 import com.limegroup.gnutella.RouteTable;
 

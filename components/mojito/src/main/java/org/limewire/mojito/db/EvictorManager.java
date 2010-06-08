@@ -17,12 +17,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.storage;
+package org.limewire.mojito.db;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.mojito.db.impl.DefaultEvictor;
 import org.limewire.mojito.routing.RouteTable;
 
 /**

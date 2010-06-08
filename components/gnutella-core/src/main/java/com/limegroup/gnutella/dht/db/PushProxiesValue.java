@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.ValueType;
 
 /**
  * A serializable value the represents a set Gnutella Push-Proxies.

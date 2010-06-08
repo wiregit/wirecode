@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.storage;
+package org.limewire.mojito.db.impl;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -37,6 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntHashMap;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.DatabaseSecurityConstraint;
+import org.limewire.mojito.db.DefaultDatabaseSecurityConstraint;
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.ContactUtils;
@@ -78,7 +82,7 @@ public class DatabaseImpl implements Database {
         = new HashMap<KUID, ValueTupleBag>();
     
     /**
-     * The DatabaseSecurityConstraint handle.
+     * The {@link DatabaseSecurityConstraint} handle.
      */
     private volatile DatabaseSecurityConstraint securityConstraint 
         = new DefaultDatabaseSecurityConstraint();
@@ -135,8 +139,8 @@ public class DatabaseImpl implements Database {
     }
     
     /**
-     * Adds the given <code>DHTValue</code> to the Database succeeded.
-     * @return true if adding the <code>DHTValueEntity</code> succeeded
+     * Adds the given {@link ValueTuple} to the Database succeeded.
+     * @return true if adding the {@link ValueTuple} succeeded
      */
     public synchronized boolean add(ValueTuple entity) {
         KUID primaryKey = entity.getPrimaryKey();
@@ -299,10 +303,7 @@ public class DatabaseImpl implements Database {
         return 0;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.Database#getRequestLoad(org.limewire.mojito.KUID, boolean)
-     */
+    @Override
     public synchronized float getRequestLoad(KUID primaryKey, boolean incrementLoad) {
         ValueTupleBag bag = database.get(primaryKey);
         if (bag != null) {

@@ -2,12 +2,12 @@ package org.limewire.mojito;
 
 import java.math.BigInteger;
 
+import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.HostFilter;
 
 /**

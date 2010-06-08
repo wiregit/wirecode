@@ -24,13 +24,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 
 
 /**

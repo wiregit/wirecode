@@ -22,13 +22,13 @@ import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFutureProcess;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.LookupSettings;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.mojito.util.EventUtils;
 import org.limewire.util.ExceptionUtils;
 

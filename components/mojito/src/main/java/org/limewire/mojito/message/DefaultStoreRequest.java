@@ -1,7 +1,7 @@
 package org.limewire.mojito.message;
 
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 
 /**

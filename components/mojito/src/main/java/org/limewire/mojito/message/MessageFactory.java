@@ -24,10 +24,10 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;

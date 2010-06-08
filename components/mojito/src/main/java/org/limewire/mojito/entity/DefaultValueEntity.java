@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.io.LookupResponseHandler.State;
-import org.limewire.mojito.storage.ValueTuple;
 
 /**
  * The default implementation of {@link ValueEntity}.

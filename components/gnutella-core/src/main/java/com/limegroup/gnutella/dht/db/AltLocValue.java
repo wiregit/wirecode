@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.ValueType;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 

@@ -20,11 +20,11 @@ import org.limewire.mojito.ValueKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -1,7 +1,7 @@
 package org.limewire.mojito.entity;
 
 import org.limewire.mojito.ValueKey;
-import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.db.ValueTuple;
 
 /**
  * A {@link ValueEntity} is the result of a DHT <tt>FIND_VALUE</tt> operation.

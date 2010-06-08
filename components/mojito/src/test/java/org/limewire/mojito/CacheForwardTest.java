@@ -36,6 +36,10 @@ import org.limewire.io.IOUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.StoreEntity;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
@@ -44,10 +48,6 @@ import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.util.StringUtils;
 
 @SuppressWarnings("null")

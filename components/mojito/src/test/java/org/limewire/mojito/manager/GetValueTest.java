@@ -12,13 +12,13 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.MojitoUtils;
 import org.limewire.mojito.ValueKey;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.exceptions.NoSuchValueException;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.util.ExceptionUtils;
 import org.limewire.util.StringUtils;
 

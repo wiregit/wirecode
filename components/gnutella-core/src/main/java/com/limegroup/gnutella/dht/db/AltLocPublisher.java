@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Value;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.Value;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

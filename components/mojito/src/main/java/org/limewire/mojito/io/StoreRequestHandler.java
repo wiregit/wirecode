@@ -28,6 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.Context;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.message.MessageFactory;
 import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.RequestMessage;
@@ -36,8 +38,6 @@ import org.limewire.mojito.message.StoreResponse;
 import org.limewire.mojito.message.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.security.SecurityTokenHelper;
-import org.limewire.mojito.storage.Database;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SecurityToken.TokenData;
 

@@ -11,12 +11,12 @@ import java.net.SocketAddress;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
+import org.limewire.mojito.db.Value;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.Value;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.StringUtils;

@@ -8,7 +8,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.db.Value;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

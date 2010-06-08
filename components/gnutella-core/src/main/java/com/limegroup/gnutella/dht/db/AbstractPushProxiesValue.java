@@ -13,9 +13,9 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.mojito.db.DefaultValue;
+import org.limewire.mojito.db.Value;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.storage.DefaultValue;
-import org.limewire.mojito.storage.Value;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.ByteUtils;
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.StatusCode;
-import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.db.ValueTuple;
 
 /**
  * A StoreStatusCode represents the result of a STORE operation

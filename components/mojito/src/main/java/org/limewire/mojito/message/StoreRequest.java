@@ -1,6 +1,6 @@
 package org.limewire.mojito.message;
 
-import org.limewire.mojito.storage.ValueTuple;
+import org.limewire.mojito.db.ValueTuple;
 
 /**
  * An interface for <tt>STORE</tt> request {@link Message}s.

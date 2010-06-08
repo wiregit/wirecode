@@ -13,6 +13,8 @@ import org.limewire.mojito.DefaultDHT;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTValueFuture;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.entity.DefaultPingEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.message.DefaultMessageFactory;
@@ -23,8 +25,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
-import org.limewire.mojito.storage.Database;
-import org.limewire.mojito.storage.DatabaseImpl;
 import org.limewire.mojito.util.NopTransport;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 

@@ -11,6 +11,8 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.ValueTuple;
 import org.limewire.mojito.message.Message;
 import org.limewire.mojito.message.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
@@ -19,8 +21,6 @@ import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
-import org.limewire.mojito.storage.Database;
-import org.limewire.mojito.storage.ValueTuple;
 import org.limewire.security.SecurityToken;
 
 /**

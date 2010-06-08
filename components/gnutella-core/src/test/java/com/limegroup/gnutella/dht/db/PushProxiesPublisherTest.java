@@ -14,7 +14,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.storage.Value;
+import org.limewire.mojito.db.Value;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;

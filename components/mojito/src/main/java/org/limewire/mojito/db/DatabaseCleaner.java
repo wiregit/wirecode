@@ -1,4 +1,4 @@
-package org.limewire.mojito.storage;
+package org.limewire.mojito.db;
 
 import java.io.Closeable;
 import java.util.concurrent.ScheduledFuture;

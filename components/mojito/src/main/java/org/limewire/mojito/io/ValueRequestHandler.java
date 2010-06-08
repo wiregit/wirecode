@@ -31,13 +31,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.message.MessageHelper;
 import org.limewire.mojito.message.RequestMessage;
 import org.limewire.mojito.message.ValueRequest;
 import org.limewire.mojito.message.ValueResponse;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
-import org.limewire.mojito.storage.Database;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 

@@ -9,12 +9,12 @@ import org.limewire.concurrent.FutureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureProcess;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.entity.BootstrapEntity;
 import org.limewire.mojito.entity.PingEntity;
 import org.limewire.mojito.entity.ValueEntity;
 import org.limewire.mojito.io.BootstrapConfig;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.ValueType;
 
 /**
  * An abstract implementation of {@link DHT}.

@@ -19,9 +19,9 @@
 
 package org.limewire.mojito;
 
+import org.limewire.mojito.db.ValueTuple;
+import org.limewire.mojito.db.ValueType;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.storage.ValueTuple;
-import org.limewire.mojito.storage.ValueType;
 
 /**
  * An {@link ValueKey} specifies the exact location of a {@link ValueTuple}.
