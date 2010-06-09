@@ -15,7 +15,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Inject;
@@ -48,9 +48,9 @@ public class IncompleteFileManagerTest extends LimeTestCase {
     /** @param urn a SHA1 urn, or null */
     public RemoteFileDesc newRFD(String name, int size, String urn) {
        try {
-           Set<URN> urns=new HashSet<URN>(1);
+           Set<URNImpl> urns=new HashSet<URNImpl>(1);
            if (urn!=null) 
-               urns.add(URN.createSHA1Urn(urn));
+               urns.add(URNImpl.createSHA1Urn(urn));
            return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("18.239.0.144", 6346, false), 13l, name, size, new byte[16],
                 56, 4, true, null, urns, false, "", -1);
        } catch (IOException e) {
@@ -186,7 +186,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         assertEquals(1, incompleteFileCollection.size()); // 1 added.
         
         // make sure it's associated with a URN.
-        URN urn = URN.createSHA1Urn(    
+        URNImpl urn = URNImpl.createSHA1Urn(    
             "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         FileDesc fd = incompleteFileCollection.getFileDesc(urn);
         assertNotNull(urn);
@@ -207,7 +207,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File tmp1=incompleteFileManager.getFile(rfd1);
         try {
-            URN urn=URN.createSHA1Urn( 
+            URNImpl urn=URNImpl.createSHA1Urn( 
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             assertEquals(urn, incompleteFileManager.getCompletedHash(tmp1));
         } catch (IOException e) {

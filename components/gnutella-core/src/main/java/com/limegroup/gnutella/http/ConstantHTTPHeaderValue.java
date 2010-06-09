@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.http;
 
-import org.limewire.common.HTTPHeaderValue;
+import org.limewire.io.HTTPHeaderValue;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 

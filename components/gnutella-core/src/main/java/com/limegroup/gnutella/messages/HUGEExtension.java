@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 
 
@@ -24,8 +24,8 @@ public class HUGEExtension {
     // (lazily constructed)
     // -----------------------------------------
     private GGEP _ggep = null;
-    private Set<URN> _urns = null;
-    private Set<URN.Type> _urnTypes = null;
+    private Set<URNImpl> _urns = null;
+    private Set<URNImpl.Type> _urnTypes = null;
     private Set<String> _miscBlocks = null;
     // -----------------------------------------
     
@@ -54,7 +54,7 @@ public class HUGEExtension {
     
     /** @return the set of URN Objects in this HUGE extension.
      */
-    public Set<URN> getURNS() {
+    public Set<URNImpl> getURNS() {
         if (_urns == null)
             return Collections.emptySet();
         else
@@ -62,7 +62,7 @@ public class HUGEExtension {
     }
     /** @return the set of URN Type Objects in this HUGE extension.
      */
-    public Set<URN.Type> getURNTypes() {
+    public Set<URNImpl.Type> getURNTypes() {
         if (_urnTypes == null)
             return Collections.emptySet();
         else
@@ -111,16 +111,16 @@ public class HUGEExtension {
                         String curExtStr = new String(extsBytes, currIndex,
                                                       delimIndex - currIndex,
                                                       "UTF-8");
-                        if (URN.isUrn(curExtStr)) {
+                        if (URNImpl.isUrn(curExtStr)) {
                             // it's an URN to match, of form "urn:namespace:etc"
-                            URN urn = URN.createSHA1Urn(curExtStr);
+                            URNImpl urn = URNImpl.createSHA1Urn(curExtStr);
                             if(_urns == null) 
                                 _urns = new UrnSet();
                             _urns.add(urn);
-                        } else if (URN.Type.isSupportedUrnType(curExtStr)) {
+                        } else if (URNImpl.Type.isSupportedUrnType(curExtStr)) {
                             if(_urnTypes == null)
-                                _urnTypes = EnumSet.noneOf(URN.Type.class);
-                            _urnTypes.add(URN.Type.createUrnType(curExtStr));
+                                _urnTypes = EnumSet.noneOf(URNImpl.Type.class);
+                            _urnTypes.add(URNImpl.Type.createUrnType(curExtStr));
                         } else {
                             // miscellaneous, but in the case of queries, xml
                             if (_miscBlocks == null)

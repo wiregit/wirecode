@@ -14,7 +14,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
@@ -54,7 +54,7 @@ class ResponseImpl implements Response {
      * as specified in HUGE v0.94.  This is guaranteed to be non-null, 
      * although it is often empty.
      */
-    private final Set<URN> urns;
+    private final Set<URNImpl> urns;
 
     /**
      * The bytes between the nulls for the <tt>Response</tt>, as specified
@@ -115,7 +115,7 @@ class ResponseImpl implements Response {
      * @param ranges Ranges of data to be represented by this response
      */
     public ResponseImpl(long index, long size, String name,
-                     int incomingNameByteArraySize, Set<? extends URN> urns, 
+                     int incomingNameByteArraySize, Set<? extends URNImpl> urns, 
                      LimeXMLDocument doc,
                      Set<? extends IpPort> alternateLocations,
                      long creationTime, byte[] extensions, IntervalSet ranges, 
@@ -214,7 +214,7 @@ class ResponseImpl implements Response {
         return document;
     }
 
-    public Set<URN> getUrns() {
+    public Set<URNImpl> getUrns() {
         return urns;
     }
     
@@ -254,7 +254,7 @@ class ResponseImpl implements Response {
         if (cachedRFD != null && cachedRFD.getAddress().equals(address)) {
             return cachedRFD;
         } else {
-            Set<URN> urns = getUrns();
+            Set<URNImpl> urns = getUrns();
             RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(
                     address, getIndex(), getName(), getSize(),
                     queryReply.getClientGUID(), queryReply.getSpeed(),

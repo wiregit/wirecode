@@ -20,7 +20,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.InspectableForSize;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -263,9 +263,9 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     /**
      * Find all files with matching full URNs
      */
-    private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
+    private IntSet urnSearch(Iterable<URNImpl> urnsIter, IntSet priors) {
         IntSet ret = priors;
-        for (URN urn : urnsIter) {
+        for (URNImpl urn : urnsIter) {
             List<FileDesc> fds = gnutellaFileView.getFileDescsMatching(urn);
             for(FileDesc fd : fds) {
                 if(ret == null) {
@@ -289,13 +289,13 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // about partial files because we don't add them to the cache.
         // NOTE: this doesn't return Store files. getNewestUrns only
         // returns the top 3 shared files
-        Collection<URN> urnList = creationTimeCache.get().getFiles(request, 3);
+        Collection<URNImpl> urnList = creationTimeCache.get().getFiles(request, 3);
         if (urnList.size() == 0)
             return Collections.emptySet();
 
         // get the appropriate responses
         Set<Response> resps = new HashSet<Response>(urnList.size());
-        for (URN urn : urnList) {
+        for (URNImpl urn : urnList) {
             FileDesc desc = gnutellaFileView.getFileDesc(urn);
 
             // should never happen since we don't add times for IFDs and

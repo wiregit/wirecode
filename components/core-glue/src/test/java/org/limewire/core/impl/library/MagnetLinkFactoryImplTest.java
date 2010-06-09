@@ -3,7 +3,7 @@ package org.limewire.core.impl.library;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.ApplicationServices;
@@ -32,7 +32,7 @@ public class MagnetLinkFactoryImplTest extends BaseTestCase {
         final CoreLocalFileItem coreLocalFileItem1 = context.mock(CoreLocalFileItem.class);
         final FileDetails fileDetails1 = context.mock(FileDetails.class);
         final String fileName1 = "filename1";
-        final URN urn1 = URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        final URNImpl urn1 = URNImpl.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         final long size1 = 1234567;
 
         context.checking(new Expectations() {

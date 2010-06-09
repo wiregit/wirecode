@@ -24,7 +24,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.TestUtils;
 
@@ -396,13 +396,13 @@ public class LeafRoutingTest extends LimeTestCase {
         File susheel = 
             TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
-        URN berkeleyURN = (URN) iter.next();
+        URNImpl berkeleyURN = (URNImpl) iter.next();
         while (!berkeleyURN.isSHA1())
-            berkeleyURN = (URN) iter.next();
+            berkeleyURN = (URNImpl) iter.next();
         iter = UrnHelper.calculateAndCacheURN(susheel, urnCache).iterator();
-        URN susheelURN = (URN) iter.next();
+        URNImpl susheelURN = (URNImpl) iter.next();
         while (!susheelURN.isSHA1())
-            susheelURN = (URN) iter.next();
+            susheelURN = (URNImpl) iter.next();
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQuery(berkeleyURN);

@@ -13,7 +13,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -64,7 +64,7 @@ public class SpamManagerTest extends LimeTestCase {
     "'http://www.limewire.com/schemas/video.xsd'>" +
     "<video title='mushroom'></video></videos>";
 
-    private static URN urn1, urn2, urn3, urn4, spamUrn;
+    private static URNImpl urn1, urn2, urn3, urn4, spamUrn;
     private static LimeXMLDocument doc1, doc2;
 
     private Injector injector;
@@ -87,14 +87,14 @@ public class SpamManagerTest extends LimeTestCase {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
         SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
 
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-        urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-        urn3 = URN.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
-        urn4 = URN.createSHA1Urn("urn:sha1:XLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+        urn1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        urn2 = URNImpl.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+        urn3 = URNImpl.createSHA1Urn("urn:sha1:YLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
+        urn4 = URNImpl.createSHA1Urn("urn:sha1:XLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
 
         // Blacklist a URN
         String spam = "WLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB";
-        spamUrn = URN.createSHA1Urn("urn:sha1:" + spam);
+        spamUrn = URNImpl.createSHA1Urn("urn:sha1:" + spam);
         FilterSettings.FILTERED_URNS_LOCAL.set(new String[] { spam });
 
         TestUtils.bind(ResponseVerifier.class).to(TestResponseVerifier.class);
@@ -524,15 +524,15 @@ public class SpamManagerTest extends LimeTestCase {
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
-            LimeXMLDocument doc, URN urn, int size) throws Exception {
+            LimeXMLDocument doc, URNImpl urn, int size) throws Exception {
         return createRFD(addr, port, name, doc, urn, size, GUID.makeGuid(), null);
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
-            LimeXMLDocument doc, URN urn, int size, byte[] clientGUID,
+            LimeXMLDocument doc, URNImpl urn, int size, byte[] clientGUID,
             byte[] queryGUID)
     throws Exception {
-        Set<URN> urns = new HashSet<URN>();
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         urns.add(urn);
         RemoteFileDesc rfd =
             remoteFileDescFactory.createRemoteFileDesc(

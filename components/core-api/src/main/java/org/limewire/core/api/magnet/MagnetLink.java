@@ -3,7 +3,7 @@ package org.limewire.core.api.magnet;
 import java.net.URI;
 import java.util.List;
 
-import org.limewire.common.URN;
+import org.limewire.io.URN;
 
 public interface MagnetLink {
 

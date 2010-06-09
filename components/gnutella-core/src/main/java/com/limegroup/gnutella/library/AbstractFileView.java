@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.IntSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -50,7 +50,7 @@ abstract class AbstractFileView implements FileView {
     }
 
     @Override
-    public FileDesc getFileDesc(URN urn) {
+    public FileDesc getFileDesc(URNImpl urn) {
         List<FileDesc> descs = getFileDescsMatching(urn);
         if(descs.isEmpty()) {
             return null;
@@ -80,7 +80,7 @@ abstract class AbstractFileView implements FileView {
     }
 
     @Override
-    public List<FileDesc> getFileDescsMatching(URN urn) {
+    public List<FileDesc> getFileDescsMatching(URNImpl urn) {
         List<FileDesc> fds = null;
         List<FileDesc> matching = library.getFileDescsMatching(urn);
         

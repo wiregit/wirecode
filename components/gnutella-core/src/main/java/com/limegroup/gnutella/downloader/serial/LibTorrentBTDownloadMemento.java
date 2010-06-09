@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 public interface LibTorrentBTDownloadMemento extends DownloadMemento {
@@ -13,7 +13,7 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public File getIncompleteFile();
     
-    public URN getSha1Urn();
+    public URNImpl getSha1Urn();
 
     public List<URI> getTrackers();
 
@@ -27,7 +27,7 @@ public interface LibTorrentBTDownloadMemento extends DownloadMemento {
 
     public void setIncompleteFile(File incompleteFile);
     
-    public void setSha1Urn(URN sha1Urn);
+    public void setSha1Urn(URNImpl sha1Urn);
 
     public void setTrackers(List<URI> trackers);
 

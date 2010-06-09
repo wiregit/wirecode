@@ -17,7 +17,6 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -27,6 +26,7 @@ import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;

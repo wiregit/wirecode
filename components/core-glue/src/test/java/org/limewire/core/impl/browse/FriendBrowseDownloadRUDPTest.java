@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.Icon;
 
-import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.download.DownloadException;
@@ -38,6 +37,7 @@ import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.GuiceUtils;
+import org.limewire.io.URN;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;

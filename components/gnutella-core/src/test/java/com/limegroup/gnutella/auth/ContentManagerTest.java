@@ -6,7 +6,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
@@ -17,9 +17,9 @@ public class ContentManagerTest extends LimeTestCase {
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";
     private static final String S_URN_3 = "urn:sha1:PABCDEFGAPOJTS5FJUPAKOZWUGZQYPFB";
     
-    private static URN URN_1;
-    private static URN URN_2;
-    private static URN URN_3;
+    private static URNImpl URN_1;
+    private static URNImpl URN_2;
+    private static URNImpl URN_3;
     
     private ContentManager mgr;
     private ContentResponse crOne;
@@ -44,9 +44,9 @@ public class ContentManagerTest extends LimeTestCase {
     
     @Override
     public void setUp() throws Exception {
-		URN_1 = URN.createSHA1Urn(S_URN_1);
-		URN_2 = URN.createSHA1Urn(S_URN_2);
-		URN_3 = URN.createSHA1Urn(S_URN_3);
+		URN_1 = URNImpl.createSHA1Urn(S_URN_1);
+		URN_2 = URNImpl.createSHA1Urn(S_URN_2);
+		URN_3 = URNImpl.createSHA1Urn(S_URN_3);
 
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
@@ -244,10 +244,10 @@ public class ContentManagerTest extends LimeTestCase {
     }
     
     private static class Observer implements ContentResponseObserver {
-        private URN urn;
+        private URNImpl urn;
         private ContentResponseData response;
         
-        public void handleResponse(URN urn, ContentResponseData response) {
+        public void handleResponse(URNImpl urn, ContentResponseData response) {
             this.urn = urn;
             this.response = response;
         }

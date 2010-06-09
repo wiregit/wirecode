@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.EncodingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.URIUtils;
@@ -82,11 +82,11 @@ public class MagnetOptions implements Serializable {
 
     private transient String localizedErrorMessage;
 
-    private transient URN urn;
+    private transient URNImpl urn;
     
     private transient String extractedFileName;
 
-    private transient Set<URN> guidUrns;
+    private transient Set<URNImpl> guidUrns;
 
     /**
      * Cached field of file size of magnet, values meant the following:
@@ -113,7 +113,7 @@ public class MagnetOptions implements Serializable {
             InetSocketAddress socketAddress, byte[] clientGuid) {
         Map<Option, List<String>> map = new EnumMap<Option, List<String>>(Option.class);
         map.put(Option.DN, Collections.singletonList(fileDetails.getFileName()));
-        URN urn = fileDetails.getSHA1Urn();
+        URNImpl urn = fileDetails.getSHA1Urn();
         if (urn != null) {
             addAppend(map, Option.XT, urn.httpStringValue());
         }
@@ -126,9 +126,9 @@ public class MagnetOptions implements Serializable {
             url = addr.toString();
             addAppend(map, Option.XS, url);
         }
-        URN guidUrn = null;
+        URNImpl guidUrn = null;
         if (clientGuid != null) {
-            guidUrn = URN.createGUIDUrn(new GUID(clientGuid));
+            guidUrn = URNImpl.createGUIDUrn(new GUID(clientGuid));
             addAppend(map, Option.XS, guidUrn.httpStringValue());
         }
         long fileSize = fileDetails.getSize();
@@ -158,13 +158,13 @@ public class MagnetOptions implements Serializable {
      * @param urn can be <code>null</code>
      * @param defaultURLs can be <code>null</code>
      */
-    public static MagnetOptions createMagnet(String keywordTopics, String fileName, URN urn,
+    public static MagnetOptions createMagnet(String keywordTopics, String fileName, URNImpl urn,
             String[] defaultURLs) {
         return createMagnet(keywordTopics, fileName, urn, defaultURLs, null);
     }
 
-    public static MagnetOptions createMagnet(String keywordTopics, String fileName, URN urn,
-            String[] defaultURLs, Set<? extends URN> guidUrns) {
+    public static MagnetOptions createMagnet(String keywordTopics, String fileName, URNImpl urn,
+            String[] defaultURLs, Set<? extends URNImpl> guidUrns) {
         Map<Option, List<String>> map = new HashMap<Option, List<String>>();
         List<String> kt = new ArrayList<String>(1);
         kt.add(keywordTopics);
@@ -181,7 +181,7 @@ public class MagnetOptions implements Serializable {
             }
         }
         if (guidUrns != null) {
-            for (URN guidUrn : guidUrns) {
+            for (URNImpl guidUrn : guidUrns) {
                 if (!guidUrn.isGUID()) {
                     throw new IllegalArgumentException("Not a GUID urn: " + guidUrn);
                 }
@@ -198,7 +198,7 @@ public class MagnetOptions implements Serializable {
             magnet.defaultURLs = new String[0];
         }
         if (guidUrns != null) {
-            magnet.guidUrns = Collections.unmodifiableSet(new HashSet<URN>(guidUrns));
+            magnet.guidUrns = Collections.unmodifiableSet(new HashSet<URNImpl>(guidUrns));
         }
         return magnet;
     }
@@ -354,7 +354,7 @@ public class MagnetOptions implements Serializable {
      * It looks in the exactly topics, the exact sources and then in the
      * alternate sources for it.
      */
-    public URN getSHA1Urn() {
+    public URNImpl getSHA1Urn() {
         if (urn == null) {
             urn = extractSHA1URNFromList(getExactTopics());
 
@@ -368,22 +368,22 @@ public class MagnetOptions implements Serializable {
                 urn = extractSHA1URNFromURLS(getDefaultURLs());
 
             if (urn == null)
-                urn = URN.INVALID;
+                urn = URNImpl.INVALID;
 
         }
-        if (urn == URN.INVALID)
+        if (urn == URNImpl.INVALID)
             return null;
 
         return urn;
     }
 
-    private URN extractSHA1URNFromURLS(String[] defaultURLs) {
+    private URNImpl extractSHA1URNFromURLS(String[] defaultURLs) {
         for (int i = 0; i < defaultURLs.length; i++) {
             try {
                 URI uri = URIUtils.toURI(defaultURLs[i]);
                 String query = uri.getQuery();
                 if (query != null) {
-                    return URN.createSHA1Urn(uri.getQuery());
+                    return URNImpl.createSHA1Urn(uri.getQuery());
                 }
             } catch (URISyntaxException e) {
             } catch (IOException e) {
@@ -455,10 +455,10 @@ public class MagnetOptions implements Serializable {
                 && getAS().isEmpty() && getXS().isEmpty() && getExactTopics().isEmpty();
     }
 
-    private URN extractSHA1URNFromList(List<String> strings) {
+    private URNImpl extractSHA1URNFromList(List<String> strings) {
         for (String str : strings) {
             try {
-                return URN.createSHA1Urn(str);
+                return URNImpl.createSHA1Urn(str);
             } catch (IOException ignored) {
             }
         }
@@ -484,7 +484,7 @@ public class MagnetOptions implements Serializable {
     private List<String> getPotentialURNs(List<String> strings) {
         List<String> ret = new ArrayList<String>();
         for (String str : strings) {
-            if (str.toLowerCase(Locale.US).startsWith(URN.Type.URN_NAMESPACE_ID))
+            if (str.toLowerCase(Locale.US).startsWith(URNImpl.Type.URN_NAMESPACE_ID))
                 ret.add(str);
         }
         return ret;
@@ -528,17 +528,17 @@ public class MagnetOptions implements Serializable {
      * GUID urns denote possibly firewalled hosts in the network that can be
      * looked up as possible download sources for this magnet link.
      */
-    public Set<URN> getGUIDUrns() {
+    public Set<URNImpl> getGUIDUrns() {
         if (guidUrns != null) {
             return guidUrns;
         }
-        Set<URN> urns = null;
+        Set<URNImpl> urns = null;
         List<String> potentialUrns = getPotentialURNs();
         for (String candidate : potentialUrns) {
             try {
-                URN urn = URN.createGUIDUrn(candidate);
+                URNImpl urn = URNImpl.createGUIDUrn(candidate);
                 if (urns == null) {
-                    urns = new HashSet<URN>(2);
+                    urns = new HashSet<URNImpl>(2);
                 }
                 urns.add(urn);
             } catch (IOException ie) {
@@ -597,7 +597,7 @@ public class MagnetOptions implements Serializable {
         if (tempFileName != null && tempFileName.length() > 0) {
             return tempFileName;
         }
-        URN urn = getSHA1Urn();
+        URNImpl urn = getSHA1Urn();
         if (urn != null) {
             tempFileName = urn.toString();
             return tempFileName;

@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Downloader;
@@ -160,7 +160,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
         assertEquals(1, testUploaders[0].getConnections());     
 
         // there should be an entry for the sha1 urn.
-        URN ttroot = tree.getTreeRootUrn();
+        URNImpl ttroot = tree.getTreeRootUrn();
         assertNotNull(gnutellaFileView.getFileDesc(TestFile.hash()));
         
         // and the filedesc should have both
@@ -190,7 +190,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
             while(vf.getHashTree() == null && sleeps++ < 20) 
                 Thread.sleep(500);
             assertNotNull(vf.getHashTree());
-            URN ttroot = vf.getHashTree().getTreeRootUrn();
+            URNImpl ttroot = vf.getHashTree().getTreeRootUrn();
             assertEquals(ttroot, tigerTreeCache.getHashTreeRootForSha1(TestFile.hash()));
             
             // the sha1 should point to the filedesc 
@@ -309,7 +309,7 @@ public class DownloadTHEXTest extends DownloadTestCase {
         testUploaders[0].setSendThexTree(getThex);
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0],badSha1, false);
         
-        URN badURN = URN.createSHA1Urn(badSha1);
+        URNImpl badURN = URNImpl.createSHA1Urn(badSha1);
         tigerTreeCache.purgeTree(TestFile.hash());
         tigerTreeCache.purgeTree(badURN);
         

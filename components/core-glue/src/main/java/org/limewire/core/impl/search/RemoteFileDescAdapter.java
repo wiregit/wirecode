@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.bittorrent.Torrent;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -18,6 +17,7 @@ import org.limewire.friend.api.feature.LimewireFeature;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.io.URN;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 

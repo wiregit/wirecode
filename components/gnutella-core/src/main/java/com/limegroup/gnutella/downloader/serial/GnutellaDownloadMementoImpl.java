@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.downloader.DownloaderType;
 
@@ -52,8 +52,8 @@ public class GnutellaDownloadMementoImpl implements GnutellaDownloadMemento, Ser
         return (File)serialObjects.get("saveFile");
     }
 
-    public URN getSha1Urn() {
-        return (URN)serialObjects.get("sha1Urn");
+    public URNImpl getSha1Urn() {
+        return (URNImpl)serialObjects.get("sha1Urn");
     }
 
     public void setAttributes(Map<String, Object> attributes) {
@@ -93,7 +93,7 @@ public class GnutellaDownloadMementoImpl implements GnutellaDownloadMemento, Ser
         serialObjects.put("saveFile", saveFile);
     }
 
-    public void setSha1Urn(URN sha1Urn) {
+    public void setSha1Urn(URNImpl sha1Urn) {
         serialObjects.put("sha1Urn", sha1Urn);
     }
 

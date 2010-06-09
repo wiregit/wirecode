@@ -13,7 +13,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.library.FileDescStub;
@@ -63,7 +63,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	
 
     	ping1 = new HeadPing(GnutellaFileCollectionStub.DEFAULT_URN);
-    	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
+    	ping2 = new HeadPing(URNImpl.createSHA1Urn(FileDescStub.DEFAULT_URN));
 
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
     	ping1.write(baos1);

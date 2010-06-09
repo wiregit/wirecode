@@ -7,7 +7,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.IntSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -43,7 +43,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     
     @SuppressWarnings("unchecked")
     public void testRenamedFilesEvent() throws Exception {
-        URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         final FileDesc originalFile = new FileDescStub("hello world", urn, 1);
         final FileDesc newFile = new FileDescStub("goodbye world", urn, 2);
         

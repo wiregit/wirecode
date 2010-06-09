@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.jmock.Mockery;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import ca.odell.glazedlists.BasicEventList;
 
@@ -33,9 +33,9 @@ public class LocalFileListImplTest extends LimeTestCase {
         LocalFileItem item2 = context.mock(LocalFileItem.class);
         
         BasicEventList<LocalFileItem> eventList = new BasicEventList<LocalFileItem>();
-        FileDesc fileDesc1 = new FileDescStub("hello", URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[0]), 1);
+        FileDesc fileDesc1 = new FileDescStub("hello", URNImpl.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[0]), 1);
         fileDesc1.putClientProperty(LocalFileListImpl.FILE_ITEM_PROPERTY, item1);
-        FileDesc fileDesc2 = new FileDescStub("world", URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[1]), 2);
+        FileDesc fileDesc2 = new FileDescStub("world", URNImpl.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[1]), 2);
         fileDesc2.putClientProperty(LocalFileListImpl.FILE_ITEM_PROPERTY, item2);
     
         LocalFileListImpl localFileList = new LocalFileListImpl(eventList, null) {

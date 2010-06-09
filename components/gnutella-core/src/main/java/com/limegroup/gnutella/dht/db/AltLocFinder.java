@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -19,6 +19,6 @@ public interface AltLocFinder {
      * 
      * @param urn for the alternate location, must not be null
      */
-    Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener);
+    Shutdownable findAltLocs(URNImpl urn, SearchListener<AlternateLocation> listener);
 
 }

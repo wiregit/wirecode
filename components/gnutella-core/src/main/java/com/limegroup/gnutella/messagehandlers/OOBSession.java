@@ -10,7 +10,7 @@ import java.util.Set;
 import org.limewire.collection.IntSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.Response;
@@ -52,7 +52,7 @@ class OOBSession implements Inspectable {
     int countAddedResponses(Response[] responses) {
         int added = 0;
         for (Response response : responses) {
-            Set<URN> urns = response.getUrns();
+            Set<URNImpl> urns = response.getUrns();
             if (!urns.isEmpty()) {
                 added += urnHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
             }

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.SourcedEventMulticaster;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -43,7 +43,7 @@ class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFileDesc 
     public IncompleteFileDescImpl(RareFileStrategy rareFileStrategy,
             LicenseFactory licenseFactory,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster, File file,
-            Set<? extends URN> urns, int index, String completedName, long completedSize,
+            Set<? extends URNImpl> urns, int index, String completedName, long completedSize,
             VerifyingFile vf) {
         super(rareFileStrategy, licenseFactory, fileDescMulticaster, file, urns, index);
         _name = completedName;

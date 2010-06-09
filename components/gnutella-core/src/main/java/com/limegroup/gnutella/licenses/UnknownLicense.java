@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -18,10 +18,10 @@ public class UnknownLicense implements MutableLicense {
     
     public boolean isVerified() { return false; }
     public boolean isVerifying() { return false; }
-    public boolean isValid(URN urn) { return false; }
-    public String getLicenseDescription(URN urn) { return null; }
+    public boolean isValid(URNImpl urn) { return false; }
+    public String getLicenseDescription(URNImpl urn) { return null; }
     public URI getLicenseURI() { return null; }
-    public URL getLicenseDeed(URN urn) { return null; }
+    public URL getLicenseDeed(URNImpl urn) { return null; }
     public String getLicense() { return null; }
     public void verify(LicenseCache licenseCache, LimeHttpClient httpClient) {}
     public long getLastVerifiedTime() { return 0; }

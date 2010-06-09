@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -17,7 +17,7 @@ public interface FileDetails {
 	 * Returns the sha1 urn or <code>null</code> if there is none.
 	 * @return
 	 */
-	URN getSHA1Urn();
+	URNImpl getSHA1Urn();
 	/**
 	 * Returns the size of the file.
 	 * @return
@@ -27,7 +27,7 @@ public interface FileDetails {
 	 * Returns the set of urns.
 	 * @return
 	 */
-	Set<URN> getUrns();
+	Set<URNImpl> getUrns();
 	/**
 	 * Returns the xml document or <code>null</code> if there is none for this
 	 * file.

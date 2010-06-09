@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -29,10 +29,10 @@ public class BadCCLicense implements MutableLicense {
     
     public boolean isVerified() { return true; }
     public boolean isVerifying() { return false; }
-    public boolean isValid(URN urn) { return false; }
-    public String getLicenseDescription(URN urn) { return "Permissions unknown."; }
+    public boolean isValid(URNImpl urn) { return false; }
+    public String getLicenseDescription(URNImpl urn) { return "Permissions unknown."; }
     public URI getLicenseURI() { return null; }
-    public URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
+    public URL getLicenseDeed(URNImpl urn) { return guessLicenseDeed(); }
     public String getLicense() { return license; }
     public void verify(LicenseCache licenseCache, LimeHttpClient httpClient) {}
     public long getLastVerifiedTime() { return 0; }

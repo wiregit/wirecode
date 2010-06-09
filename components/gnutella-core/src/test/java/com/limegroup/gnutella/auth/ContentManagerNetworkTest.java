@@ -11,7 +11,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Acceptor;
@@ -28,7 +28,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     
-    private static URN URN_1;
+    private static URNImpl URN_1;
     
     private ContentManager mgr;
     private ContentResponse crOne;
@@ -66,7 +66,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         acceptor.setListeningPort(LISTEN_PORT); 
         udpService.start();
         
-        URN_1 = URN.createSHA1Urn(S_URN_1);
+        URN_1 = URNImpl.createSHA1Urn(S_URN_1);
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
@@ -166,10 +166,10 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     
     
     private static class Observer implements ContentResponseObserver {
-        private URN urn;
+        private URNImpl urn;
         private ContentResponseData response;
         
-        public void handleResponse(URN urn, ContentResponseData response) {
+        public void handleResponse(URNImpl urn, ContentResponseData response) {
             this.urn = urn;
             this.response = response;
         }

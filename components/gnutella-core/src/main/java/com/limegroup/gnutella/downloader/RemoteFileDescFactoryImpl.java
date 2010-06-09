@@ -24,7 +24,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.URIUtils;
@@ -117,7 +117,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     public RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
             long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
+            LimeXMLDocument xmlDoc, Set<? extends URNImpl> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, boolean tlsCapable) {
         return createRemoteFileDesc(host, port, index, filename, size, clientGUID, speed, chat,
@@ -130,7 +130,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     public RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
             long size, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
+            LimeXMLDocument xmlDoc, Set<? extends URNImpl> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, long createTime, PushEndpoint pe) {
         return createRemoteFileDesc(host, port, index, filename, size, null, speed, chat, quality,
                 browseHost, xmlDoc, urns, replyToMulticast, firewalled, vendor, null, createTime,
@@ -141,7 +141,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     public RemoteFileDesc createRemoteFileDesc(Address address, long index,
             String filename, long size, byte[] clientGUID, int speed,
             int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime) {
         return createRemoteFileDesc(address, index, filename, size, clientGUID,
                 speed, quality, browseHost, xmlDoc, urns, replyToMulticast,
@@ -150,7 +150,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     private RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
             long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
+            LimeXMLDocument xmlDoc, Set<? extends URNImpl> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
         Address address = null;
@@ -189,20 +189,20 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(Address address, String filename,
-            long size, Set<? extends URN> urns, URL url) {
+            long size, Set<? extends URNImpl> urns, URL url) {
         RemoteFileDesc rfd = new UrlRemoteFileDescImpl(address, filename, size, urns, url, addressFactory);
         assert !rfd.isHTTP11();
         return rfd;
     }
 
-    public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
+    public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URNImpl urn, long size)
             throws IOException, URISyntaxException{
         // Use the URL class to do a little parsing for us.
         int port = url.getPort();
         if (port < 0)
             port = 80; // assume default for HTTP (not 6346)
 
-        Set<URN> urns = new UrnSet();
+        Set<URNImpl> urns = new UrnSet();
         if (urn != null)
             urns.add(urn);
 
@@ -299,7 +299,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     public RemoteFileDesc createRemoteFileDesc(Address address, long index,
             String filename, long size, byte[] clientGUID, int speed,
             int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1, byte[] queryGUID) {
         for (RemoteFileDescCreator creator : creators) {
             if (creator.canCreateFor(address)) {

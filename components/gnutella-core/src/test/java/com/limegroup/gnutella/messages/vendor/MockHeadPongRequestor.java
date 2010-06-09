@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 public class MockHeadPongRequestor implements HeadPongRequestor {
     
     private byte features;
     private byte[] guid;
-    private URN urn;
+    private URNImpl urn;
     private boolean pongGGEPCapable;
     private boolean requestsAltLocs;
     private boolean requestsFWTOnlyPushLocs;
@@ -21,7 +21,7 @@ public class MockHeadPongRequestor implements HeadPongRequestor {
         return guid;
     }
 
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return urn;
     }
 
@@ -77,7 +77,7 @@ public class MockHeadPongRequestor implements HeadPongRequestor {
         this.requestsRanges = requestsRanges;
     }
 
-    public void setUrn(URN urn) {
+    public void setUrn(URNImpl urn) {
         this.urn = urn;
     }
 

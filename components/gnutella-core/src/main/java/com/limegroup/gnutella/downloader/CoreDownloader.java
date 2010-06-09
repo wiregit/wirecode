@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.Downloader;
@@ -59,7 +59,7 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
      */
     public void finish();
 
-    public boolean conflicts(URN urn, long fileSize, File... files);
+    public boolean conflicts(URNImpl urn, long fileSize, File... files);
 
     public boolean conflictsWithIncompleteFile(File incomplete);
 

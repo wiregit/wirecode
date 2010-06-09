@@ -19,7 +19,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIOTestUtils;
 
@@ -49,7 +49,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     private HttpClient client;
 
-    private URN urn1;
+    private URNImpl urn1;
 
     @Inject private HTTPUploadManager uploadManager;
 
@@ -86,7 +86,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             } 
         }, new LibraryStubModule(), LimeTestUtils.createModule(this));        
 
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+        urn1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         fd1 = new FileDescStub("abc1.txt", urn1, 0);
         gnutellaFileCollection.add(fd1);
 

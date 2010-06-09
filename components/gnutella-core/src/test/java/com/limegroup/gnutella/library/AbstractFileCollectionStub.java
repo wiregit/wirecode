@@ -10,7 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -103,7 +103,7 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
     }
     
     @Override
-    public FileDesc getFileDesc(URN urn) {
+    public FileDesc getFileDesc(URNImpl urn) {
         for(FileDesc fd : fileDescList) {
             if(fd.getSHA1Urn().equals(urn)) {
                 return fd;
@@ -123,7 +123,7 @@ public abstract class AbstractFileCollectionStub implements FileCollection {
     }
     
     @Override
-    public List<FileDesc> getFileDescsMatching(URN urn) {
+    public List<FileDesc> getFileDescsMatching(URNImpl urn) {
         List<FileDesc> matchingFDs = new ArrayList<FileDesc>();
         for(FileDesc fd : fileDescList) {
             if(fd.getSHA1Urn().equals(urn)) {

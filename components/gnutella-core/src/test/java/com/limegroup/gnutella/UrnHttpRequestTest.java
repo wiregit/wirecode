@@ -20,7 +20,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -263,10 +263,10 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                 continue;
             } else if (HTTPHeaderName.GNUTELLA_CONTENT_URN
                     .matchesStartOfString(curString)) {
-                URN curUrn = null;
+                URNImpl curUrn = null;
                 try {
                     String tmpString = HttpTestUtils.extractHeaderValue(curString);
-                    curUrn = URN.createSHA1Urn(tmpString);
+                    curUrn = URNImpl.createSHA1Urn(tmpString);
                 } catch (IOException e) {
                     assertTrue("unexpected exception: " + e, false);
                 }

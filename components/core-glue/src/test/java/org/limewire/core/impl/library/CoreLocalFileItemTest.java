@@ -14,7 +14,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.impl.TorrentFactory;
 import org.limewire.friend.api.FileMetaData;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
@@ -69,8 +69,8 @@ public class CoreLocalFileItemTest extends TestCase {
         context.checking(new Expectations() {
             {
                 one(fileDesc).getSHA1Urn();
-                will(returnValue(URN.INVALID));
-                one(creationTimeCache).getCreationTimeAsLong(URN.INVALID);
+                will(returnValue(URNImpl.INVALID));
+                one(creationTimeCache).getCreationTimeAsLong(URNImpl.INVALID);
                 will(returnValue(creationTime));
             }
         });
@@ -163,7 +163,7 @@ public class CoreLocalFileItemTest extends TestCase {
         final String author = "Hello World";
         final String title = "Rock";
         final String comments = "woah!";
-        final URN urn1 = URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        final URNImpl urn1 = URNImpl.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
         context.checking(new Expectations() {{
                 allowing(fileDesc).getXMLDocument();
@@ -195,7 +195,7 @@ public class CoreLocalFileItemTest extends TestCase {
 
     public void testToMetadata() throws Exception {
         final String urn1String = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        final URN urn1 = URN.createSHA1Urn(urn1String);
+        final URNImpl urn1 = URNImpl.createSHA1Urn(urn1String);
         final long fileSize = 1234L;
         final long creationTime = 5678L;
         final int fileIndex = 5;
@@ -238,7 +238,7 @@ public class CoreLocalFileItemTest extends TestCase {
     }
 
     public void testIsShareable() throws Exception {
-        final URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        final URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         context.checking(new Expectations() {{
             one(fileDesc).isShareable();
             will(returnValue(false));
@@ -259,7 +259,7 @@ public class CoreLocalFileItemTest extends TestCase {
     }
     
     public void testIncompleteIsSharable() throws Exception {
-        final URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        final URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         final IncompleteFileDesc incompleteFileDesc = context.mock(IncompleteFileDesc.class);
         context.checking(new Expectations() {{
             one(incompleteFileDesc).getFile();
@@ -280,7 +280,7 @@ public class CoreLocalFileItemTest extends TestCase {
 
     public void testGetUrn() throws Exception {
         final String urn1String = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        final URN urn1 = URN.createSHA1Urn(urn1String);
+        final URNImpl urn1 = URNImpl.createSHA1Urn(urn1String);
         context.checking(new Expectations() {
             {
                 allowing(fileDesc).getSHA1Urn();

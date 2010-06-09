@@ -29,7 +29,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
@@ -104,13 +104,13 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         for(File file : testFiles) {
             FileDesc fileDesc = gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
             // add fake nms1 urn
-            fileDesc.addUrn(URN.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
+            fileDesc.addUrn(URNImpl.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
         }
         
         File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
         FileDesc fileDesc = gnutellaFileCollection.add(testMp3).get(1, TimeUnit.SECONDS);
         // add fake nms1 urn
-        fileDesc.addUrn(URN.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
+        fileDesc.addUrn(URNImpl.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
         
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         assertGreaterThan(0, gnutellaFileCollection.size());

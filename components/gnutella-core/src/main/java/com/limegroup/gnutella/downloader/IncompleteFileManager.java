@@ -19,7 +19,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -78,7 +78,7 @@ public class IncompleteFileManager  {
      * INVARIANT: the range (value set) of hashes contains no duplicates.  <p>
      * INVARIANT: for all keys k in hashes, k.isSHA1() 
      */
-    private final Map<URN, File> hashes = new HashMap<URN, File>();
+    private final Map<URNImpl, File> hashes = new HashMap<URNImpl, File>();
     
     private final Provider<Library> library;
     private final Provider<IncompleteFileCollection> incompleteFileCollection;
@@ -191,8 +191,8 @@ public class IncompleteFileManager  {
     }
     
     /** @see similar(RemoteFileDesc, RemoteFileDesc) */
-    static boolean same(String name1, long size1, URN hash1,
-                        String name2, long size2, URN hash2) {
+    static boolean same(String name1, long size1, URNImpl hash1,
+                        String name2, long size2, URNImpl hash2) {
         //Either they have the same hashes...
         if (hash1!=null && hash2!=null)
             return hash1.equals(hash2);
@@ -227,7 +227,7 @@ public class IncompleteFileManager  {
      * Stub for calling
      *  getFile(String, URN, int, SharingSettings.INCOMPLETE_DIRECTORY.getValue());
      */
-    public synchronized File getFile(String name, URN sha1, long size) throws IOException {
+    public synchronized File getFile(String name, URNImpl sha1, long size) throws IOException {
         return getFile(name, sha1, size, SharingSettings.INCOMPLETE_DIRECTORY.get());
     }
     
@@ -256,7 +256,7 @@ public class IncompleteFileManager  {
      * @throws IOException if there was an IOError while determining the
      * file's name.
      */
-    public synchronized File getFile(String name, URN sha1, long size, File incDir) throws IOException {
+    public synchronized File getFile(String name, URNImpl sha1, long size, File incDir) throws IOException {
         boolean dirsMade = false;
         File baseFile = null;
         File canonFile = null;
@@ -326,7 +326,7 @@ public class IncompleteFileManager  {
      *
      * @return the file associated with the URN, or null if none.
      */
-    public synchronized File getFileForUrn(URN urn) {
+    public synchronized File getFileForUrn(URNImpl urn) {
         if( urn == null )
             throw new NullPointerException("null urn");
         
@@ -364,8 +364,8 @@ public class IncompleteFileManager  {
         blocks.remove(incompleteFile);
         //Remove any key k from hashes for which hashes[k]=incompleteFile.
         //There should be at most one value of k.
-        for (Iterator<Map.Entry<URN, File>> iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry<URN, File> entry = iter.next();
+        for (Iterator<Map.Entry<URNImpl, File>> iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+            Map.Entry<URNImpl, File> entry = iter.next();
             if (incompleteFile.equals(entry.getValue()))
                 iter.remove();
         }
@@ -377,7 +377,7 @@ public class IncompleteFileManager  {
     /**
      * Initializes entries with URNs, Files & Ranges.
      */
-    public synchronized void initEntry(File incompleteFile, List<Range> ranges, URN sha1, boolean publish) throws InvalidDataException {
+    public synchronized void initEntry(File incompleteFile, List<Range> ranges, URNImpl sha1, boolean publish) throws InvalidDataException {
         try {
             incompleteFile = canonicalize(incompleteFile);
         } catch(IOException iox) {
@@ -453,7 +453,7 @@ public class IncompleteFileManager  {
      */
     private synchronized void registerIncompleteFile(File incompleteFile) {
         // Only register if it has a SHA1 -- otherwise we can't share.
-        Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
+        Set<URNImpl> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
         incompleteFileCollection.get().addIncompleteFile(
@@ -527,9 +527,9 @@ public class IncompleteFileManager  {
      * @param incompleteFile a file returned by getFile
      * @return a SHA1 hash, or null if unknown
      */
-    public synchronized URN getCompletedHash(File incompleteFile) {
+    public synchronized URNImpl getCompletedHash(File incompleteFile) {
         //Return a key k s.t., hashes.get(k)==incompleteFile...
-        for(Map.Entry<URN, File> entry : hashes.entrySet()) {
+        for(Map.Entry<URNImpl, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue()) && entry.getKey().isSHA1())
                 return entry.getKey();
         }
@@ -543,13 +543,13 @@ public class IncompleteFileManager  {
      * @param incompleteFile a file returned by getFile
      * @return a set of known hashes
      */
-    public synchronized Set<URN> getAllCompletedHashes(File incompleteFile) {
-        Set<URN> urns = new UrnSet();
+    public synchronized Set<URNImpl> getAllCompletedHashes(File incompleteFile) {
+        Set<URNImpl> urns = new UrnSet();
         //Return a set S s.t. for each K in S, hashes.get(k)==incpleteFile
-        for(Map.Entry<URN, File> entry : hashes.entrySet()) {
+        for(Map.Entry<URNImpl, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue())) {
                 urns.add(entry.getKey());
-                URN ttroot = tigerTreeCache.get().getHashTreeRootForSha1(entry.getKey());
+                URNImpl ttroot = tigerTreeCache.get().getHashTreeRootForSha1(entry.getKey());
                 if (ttroot != null)
                     urns.add(ttroot);
             }

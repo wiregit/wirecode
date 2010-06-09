@@ -27,7 +27,7 @@ import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.TestUtils;
 
@@ -85,7 +85,7 @@ public class FriendBrowseTest extends LimeTestCase {
         File testFile = TestUtils.getResourceInPackage(FILE_NAME, getClass());
         fileDesc = friendFileList.add(testFile).get();
         // add fake nms1 urn
-        fileDesc.addUrn(URN.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
+        fileDesc.addUrn(URNImpl.createNMS1FromBytes(fileDesc.getSHA1Urn().getBytes()));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class FriendBrowseTest extends LimeTestCase {
                  }
              }
              assertEquals(1, responses.size());
-             URN nms1Urn = UrnSet.getNMS1(responses.get(0).getUrns());
+             URNImpl nms1Urn = UrnSet.getNMS1(responses.get(0).getUrns());
              if (expectNMS1Urn) {
                  assertEquals(fileDesc.getNMS1Urn(), nms1Urn);
              } else {

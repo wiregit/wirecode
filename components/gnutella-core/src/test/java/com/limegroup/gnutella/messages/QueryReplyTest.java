@@ -45,7 +45,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.TLSManager;
 import org.limewire.security.AddressSecurityToken;
@@ -1516,7 +1516,7 @@ public final class QueryReplyTest extends org.limewire.gnutella.tests.LimeTestCa
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
         for(FileDesc fd : gnutellaFileView) {
-            URN urn = fd.getSHA1Urn();
+            URNImpl urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
             }

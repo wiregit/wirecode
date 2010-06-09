@@ -5,12 +5,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.KUID;
 
 
 /**
- * Utilities to convert between {@link GUID}, {@link URN} and {@link KUID}.
+ * Utilities to convert between {@link GUID}, {@link URNImpl} and {@link KUID}.
  */
 public class KUIDUtils {
 
@@ -19,7 +19,7 @@ public class KUIDUtils {
     /**
      * Converts the given SHA-1 URN into a KUID.
      */
-    public static KUID toKUID(URN urn) {
+    public static KUID toKUID(URNImpl urn) {
         if (!urn.isSHA1()) {
             throw new IllegalArgumentException("Expected a SHA-1 URN: " + urn);
         }
@@ -29,9 +29,9 @@ public class KUIDUtils {
     /**
      * Converts the given KUID into a SHA-1 URN.
      */
-    public static URN toURN(KUID kuid) {
+    public static URNImpl toURN(KUID kuid) {
         try {
-            return URN.createSHA1UrnFromBytes(kuid.getBytes());
+            return URNImpl.createSHA1UrnFromBytes(kuid.getBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

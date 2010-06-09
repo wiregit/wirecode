@@ -21,7 +21,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.TLSManager;
 import org.limewire.nio.NIOSocket;
@@ -114,13 +114,13 @@ public class UDPPushTest extends LimeTestCase {
         PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(guid, proxies, PushEndpoint.PPTLS_BINARY, 0, new ConnectableImpl("127.0.0.1", 20000, true));
 
         rfd1 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URN.NO_URN_SET, false, "LIME", now);
+                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URNImpl.NO_URN_SET, false, "LIME", now);
 
         rfd2 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 31l, "file2", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URN.NO_URN_SET, false, "LIME", now);
+                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URNImpl.NO_URN_SET, false, "LIME", now);
 
         rfdAlt = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URN.NO_URN_SET, false, "ALT", now);
+                SpeedConstants.CABLE_SPEED_INT, 1, false, null, URNImpl.NO_URN_SET, false, "ALT", now);
      
         injector.getInstance(LifecycleManager.class).start();
     }

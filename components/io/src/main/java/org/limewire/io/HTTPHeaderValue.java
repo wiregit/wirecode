@@ -1,4 +1,4 @@
-package org.limewire.common;
+package org.limewire.io;
 
 /**
  * This interface for classes that contain values that can be accessed

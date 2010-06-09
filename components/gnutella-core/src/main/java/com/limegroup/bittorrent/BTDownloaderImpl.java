@@ -39,7 +39,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -113,7 +113,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
      */
-    private volatile URN urn = null;
+    private volatile URNImpl urn = null;
 
     @Inject
     BTDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -720,12 +720,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public URN getSha1Urn() {
+    public URNImpl getSha1Urn() {
         if (urn == null) {
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSha1UrnFromHex(torrent.getSha1());
+                        urn = URNImpl.createSha1UrnFromHex(torrent.getSha1());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -918,9 +918,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
 
         byte[] infoHash = btmetainfo.getInfoHash();
 
-        URN sha1;
+        URNImpl sha1;
         try {
-            sha1 = URN.createSHA1UrnFromBytes(infoHash);
+            sha1 = URNImpl.createSHA1UrnFromBytes(infoHash);
         } catch (IOException e) {
             LOG.debug("Could not create URN", e);
             throw new InvalidDataException(
@@ -1035,7 +1035,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     }
 
     @Override
-    public boolean conflicts(URN urn, long fileSize, File... file) {
+    public boolean conflicts(URNImpl urn, long fileSize, File... file) {
         if (getSha1Urn().equals(urn)) {
             LOG.debug("Conflicts with URN");
             return true;

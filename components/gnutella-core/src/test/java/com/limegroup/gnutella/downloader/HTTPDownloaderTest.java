@@ -35,7 +35,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
@@ -382,7 +382,7 @@ public class HTTPDownloaderTest extends org.limewire.gnutella.tests.LimeTestCase
         setupInjector();
         int length = 1000;
         RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.2.3.4", 1, false), 1, "file", length, new byte[16], 1,
-                2, false, null, URN.NO_URN_SET, false, "LIME", -1);
+                2, false, null, URNImpl.NO_URN_SET, false, "LIME", -1);
         File f = new File("sam");
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(length);
         vf.open(f);

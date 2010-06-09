@@ -18,7 +18,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -43,7 +43,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
     private FileDesc fd = new FileDescStub("filename");
   
-    private URN urn1;
+    private URNImpl urn1;
 
     private MockHTTPUploadSessionManager sessionManager;
 
@@ -84,7 +84,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         connectionManager.setPushProxies(Collections.singleton(new ConnectableImpl("127.0.0.1",
                 9999, false)));
 
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+        urn1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
         gnutellaFileCollection.add(fd1);
         

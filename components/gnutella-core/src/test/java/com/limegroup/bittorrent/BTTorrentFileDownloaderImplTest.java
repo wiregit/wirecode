@@ -25,7 +25,7 @@ import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -158,7 +158,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public boolean conflicts(URN urn, long fileSize, File... fileName) {
+            public boolean conflicts(URNImpl urn, long fileSize, File... fileName) {
                 return false;
             }
 
@@ -206,7 +206,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public Downloader downloadTorrent(String name, URN sha1,
+            public Downloader downloadTorrent(String name, URNImpl sha1,
                     List<URI> trackerUrl) throws DownloadException {
                 return null;
             }
@@ -238,7 +238,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public Downloader getDownloaderForURN(URN sha1) {
+            public Downloader getDownloaderForURN(URNImpl sha1) {
                 return null;
             }
 
@@ -278,7 +278,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public boolean isActivelyDownloading(URN urn) {
+            public boolean isActivelyDownloading(URNImpl urn) {
                 return false;
             }
 
@@ -288,7 +288,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public boolean isIncomplete(URN urn) {
+            public boolean isIncomplete(URNImpl urn) {
                 return false;
             }
 

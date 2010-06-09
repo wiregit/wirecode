@@ -25,7 +25,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.CommonUtils;
 
@@ -129,7 +129,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         memento.setIncompleteFile(incompleteFile);
         memento.setRemoteHosts(convertToMementos(rfds));
         memento.setContentLength(properties.get("fileSize") == null ? -1 : ((Number)properties.get("fileSize")).longValue());
-        memento.setSha1Urn((URN)properties.get("sha1Urn"));
+        memento.setSha1Urn((URNImpl)properties.get("sha1Urn"));
         addCommonProperties(memento, properties);
     }
     
@@ -242,7 +242,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     }
     
     private File getIncompleteFile(SerialManagedDownloader download, SerialIncompleteFileManager sifm) {
-        URN sha1 = getSha1(download);        
+        URNImpl sha1 = getSha1(download);        
         File incompleteFile = null;
         
         if(download instanceof SerialResumeDownloader)
@@ -275,8 +275,8 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         return incompleteFile;
     }
     
-    private URN getSha1(SerialManagedDownloader download) {
-        URN sha1 = null;
+    private URNImpl getSha1(SerialManagedDownloader download) {
+        URNImpl sha1 = null;
         
         if(download instanceof SerialMagnetDownloader)
             sha1 = ((SerialMagnetDownloader)download).getUrn();
@@ -290,7 +290,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
             if(sha1 != null)
                 break;
             
-            for(URN urn : rfd.getUrns()) {
+            for(URNImpl urn : rfd.getUrns()) {
                if(urn.isSHA1()) {
                    sha1 = urn;
                    break;

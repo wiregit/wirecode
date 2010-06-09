@@ -22,7 +22,7 @@ import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.DownloadManager;
@@ -298,7 +298,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
-        URN urn = fd.getSHA1Urn();
+        URNImpl urn = fd.getSHA1Urn();
         if (uploader.isFirstReply()) {
             // write the creation time if this is the first reply.
             // if this is just a continuation, we don't need to send
@@ -458,7 +458,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         assert fd != null;
 
         // If it's the wrong URN, File Not Found it.
-        URN urn = uploader.getRequestedURN();
+        URNImpl urn = uploader.getRequestedURN();
         if (urn != null && !fd.containsUrn(urn)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid content urn: " + uploader);

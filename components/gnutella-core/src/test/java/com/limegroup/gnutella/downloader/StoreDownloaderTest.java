@@ -14,7 +14,7 @@ import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -85,7 +85,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      * Tests optimized overrides that return immediately since they're never used
      */
     public void testEmptyOverrides() throws Exception{
-        URN urn = UrnHelper.URNS[0];
+        URNImpl urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
@@ -106,7 +106,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      *  Tests creating a RemoteFileDesc from a url
      */
     public void testRFDCreation() throws Exception {
-        URN urn = UrnHelper.URNS[0];
+        URNImpl urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
         
         // test invalid rfd
@@ -138,7 +138,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testInvalidStoreDownloads() throws Exception {
 
-        URN urn = UrnHelper.URNS[0];
+        URNImpl urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
                 
@@ -160,7 +160,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testValidStoreDownloads() throws Exception {
         
-        URN urn = UrnHelper.URNS[0];
+        URNImpl urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         

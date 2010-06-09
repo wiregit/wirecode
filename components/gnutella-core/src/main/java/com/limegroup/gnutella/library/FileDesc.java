@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.RPNParser.StringLookup;
 
@@ -48,7 +48,7 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     /**
      * @return the TTROOT URN from the set of urns.
      */
-    public URN getTTROOTUrn();
+    public URNImpl getTTROOTUrn();
 
     /**
      * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
@@ -60,19 +60,19 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     /**
      * @return the SHA1 for the file.
      */
-    public URN getSHA1Urn();
+    public URNImpl getSHA1Urn();
     
     /**
      * @return the SHA1 not including metadata for an audio file. If the
      * NonMetaData hash cannot be calculated or the file is not an audio
      * file, returns null;
      */
-    public URN getNMS1Urn();
+    public URNImpl getNMS1Urn();
 
     /**
      * Adds a new URN to this filedesc.
      */
-    public void addUrn(URN urn);
+    public void addUrn(URNImpl urn);
 
     /**
      * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
@@ -82,7 +82,7 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      * @return a new <tt>Set</tt> of <tt>URN</tt>s for this 
      *  <tt>FileDesc</tt>
      */
-    public Set<URN> getUrns();
+    public Set<URNImpl> getUrns();
 
     /**
      * Returns the absolute path of the file represented wrapped by this
@@ -143,7 +143,7 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
      * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
      *  for this file, <tt>false</tt> otherwise
      */
-    public boolean containsUrn(URN urn);
+    public boolean containsUrn(URNImpl urn);
 
     /**
      * Increase & return the new hit count.

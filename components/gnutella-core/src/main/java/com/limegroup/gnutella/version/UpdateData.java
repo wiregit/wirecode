@@ -2,7 +2,7 @@ package com.limegroup.gnutella.version;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Version;
 
 
@@ -61,7 +61,7 @@ public class UpdateData implements Cloneable, UpdateInformation {
     private volatile String updateTitle;
     
     /** The URN of the version. */
-    private volatile URN urn;
+    private volatile URNImpl urn;
     
     /** The Tiger Tree Root of the version. */
     private volatile String ttRoot;
@@ -140,7 +140,7 @@ public class UpdateData implements Cloneable, UpdateInformation {
     void setUpdateTitle(String t) { updateTitle = t; }
     
     /** Sets the update URN. */
-    void setUpdateURN(URN urn) { this.urn = urn; }
+    void setUpdateURN(URNImpl urn) { this.urn = urn; }
     
     /** Sets the update TT root. */
     void setUpdateTTRoot(String root) { this.ttRoot = root; }
@@ -187,7 +187,7 @@ public class UpdateData implements Cloneable, UpdateInformation {
     public String getUpdateCommand() { return updateCommand; }
     
     /** Gets the update URN. */
-    public URN getUpdateURN() { return urn; }
+    public URNImpl getUpdateURN() { return urn; }
     
     /** Gets the TigerTreeRoot hash. */
     public String getTTRoot() { return ttRoot; }

@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.httpclient.HttpClientInstanceUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
@@ -270,8 +270,8 @@ public class UpdateCollectionImpl implements UpdateCollection {
         
         if(updateURN != null) {
             try {
-                URN urn = URN.createSHA1Urn(updateURN);
-                String tt = URN.getTigerTreeRoot(updateURN);
+                URNImpl urn = URNImpl.createSHA1Urn(updateURN);
+                String tt = URNImpl.getTigerTreeRoot(updateURN);
                 data.setUpdateURN(urn);
                 data.setUpdateTTRoot(tt);
             } catch(IOException ignored) {

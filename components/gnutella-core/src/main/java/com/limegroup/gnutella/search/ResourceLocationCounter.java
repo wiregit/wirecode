@@ -2,7 +2,7 @@ package com.limegroup.gnutella.search;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -55,7 +55,7 @@ public class ResourceLocationCounter {
      * @param urn The URN we are tracking
      * @param fileSize The size of the file represented by the URN
      */
-    public ResourceLocationCounter (URN urn, long fileSize) {
+    public ResourceLocationCounter (URNImpl urn, long fileSize) {
         if (fileSize < 0)
             throw new IllegalArgumentException("fileSize may not be negative: " + fileSize);
         

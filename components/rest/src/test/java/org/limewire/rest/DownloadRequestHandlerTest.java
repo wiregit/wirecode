@@ -14,12 +14,12 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.search.SearchManager;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -78,7 +78,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for all downloads. */
     public void testGetAllDownloads() throws Exception {
         final String testUri = "http://localhost/remote/download";
-        final URN testUrn = org.limewire.io.URN.createSHA1Urn(DOWNLOAD_URN);
+        final URN testUrn = org.limewire.io.URNImpl.createSHA1Urn(DOWNLOAD_URN);
         final Long testSize = Long.valueOf(32768L);
         final Long testBytes = Long.valueOf(16384L);
         final DownloadState testState = DownloadState.DOWNLOADING;
@@ -142,7 +142,7 @@ public class DownloadRequestHandlerTest extends BaseTestCase {
     /** Tests method to handle request for download progress. */
     public void testGetProgress() throws Exception {
         final String testUri = "http://localhost/remote/download/" + DOWNLOAD_URN;
-        final URN testUrn = org.limewire.io.URN.createSHA1Urn(DOWNLOAD_URN);
+        final URN testUrn = org.limewire.io.URNImpl.createSHA1Urn(DOWNLOAD_URN);
         final Long testSize = Long.valueOf(32768L);
         final Long testBytes = Long.valueOf(16384L);
         final DownloadState testState = DownloadState.DOWNLOADING;

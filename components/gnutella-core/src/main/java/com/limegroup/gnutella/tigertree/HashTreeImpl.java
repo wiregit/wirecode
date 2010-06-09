@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -223,9 +223,9 @@ class HashTreeImpl implements Serializable, HashTree {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.tigertree.TigerTree#getTTRootUrn()
      */
-    public URN getTreeRootUrn() {
+    public URNImpl getTreeRootUrn() {
         try  {
-            return URN.createTTRootFromBytes(ROOT_HASH);
+            return URNImpl.createTTRootFromBytes(ROOT_HASH);
         } catch (IOException notTiger){
         }
         return null;

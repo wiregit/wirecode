@@ -17,7 +17,7 @@ import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.friend.api.Friend;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.BTUploader;
@@ -607,7 +607,7 @@ public class CoreUploadItemTest extends BaseTestCase {
         final Uploader uploader2 = context.mock(Uploader.class);
         final FriendPresence presence = context.mock(FriendPresence.class);
         
-        final URN urn = URN.createUrnFromString("urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q");
+        final URNImpl urn = URNImpl.createUrnFromString("urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q");
         
         CoreUploadItem upload1 = new CoreUploadItem(uploader1, presence, null);
         CoreUploadItem upload2 = new CoreUploadItem(uploader2, presence, null);

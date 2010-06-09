@@ -13,7 +13,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.inject.AbstractModule;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.StubSpamServices;
@@ -133,7 +133,7 @@ public class BlacklistServerTest extends LimeTestCase {
                 @Override
                 public boolean visit(String value) {
                     try {
-                        URN.createSHA1Urn("urn:sha1:" + value);
+                        URNImpl.createSHA1Urn("urn:sha1:" + value);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

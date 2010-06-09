@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -69,14 +69,14 @@ abstract class LocalFileListImpl implements LocalFileList {
     
     @Override
     public boolean contains(URN urn) {
-        if(urn instanceof org.limewire.io.URN) {
-            return containsCoreUrn((org.limewire.io.URN)urn);
+        if(urn instanceof org.limewire.io.URNImpl) {
+            return containsCoreUrn((org.limewire.io.URNImpl)urn);
         } else {
             return false;
         }
     }
     
-    protected boolean containsCoreUrn(org.limewire.io.URN urn) {
+    protected boolean containsCoreUrn(org.limewire.io.URNImpl urn) {
         return !getCoreCollection().getFileDescsMatching(urn).isEmpty();
     }
 
@@ -247,8 +247,8 @@ abstract class LocalFileListImpl implements LocalFileList {
 
     @Override
     public LocalFileItem getFileItem(URN urn) {
-        if (urn instanceof org.limewire.io.URN) {
-            FileDesc fd = getCoreCollection().getFileDesc((org.limewire.io.URN)urn);
+        if (urn instanceof org.limewire.io.URNImpl) {
+            FileDesc fd = getCoreCollection().getFileDesc((org.limewire.io.URNImpl)urn);
 
             if (fd != null) {
                 return (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);

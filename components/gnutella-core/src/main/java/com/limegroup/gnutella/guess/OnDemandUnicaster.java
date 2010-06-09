@@ -18,7 +18,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.security.AddressSecurityToken;
 
@@ -129,7 +129,7 @@ public class OnDemandUnicaster {
      *  @param ep the location you want to query.
      *  @param queryURN the URN you are querying for.
      */
-    public void query(GUESSEndpoint ep, URN queryURN) 
+    public void query(GUESSEndpoint ep, URNImpl queryURN) 
         throws IllegalArgumentException {
 
         // validity checks
@@ -171,7 +171,7 @@ public class OnDemandUnicaster {
         }
     }
     
-    private void sendQuery(URN urn, AddressSecurityToken qk, IpPort ipp) {
+    private void sendQuery(URNImpl urn, AddressSecurityToken qk, IpPort ipp) {
         QueryRequest query = queryRequestFactory.createQueryKeyQuery(urn, qk);
         // store the query's GUID -> IPP so that when we get replies over
         // UDP we can allow them without requiring the whole ReplyNumber/ACK
@@ -198,10 +198,10 @@ public class OnDemandUnicaster {
 
         private static final int MAX_LIFETIME = 60 * 1000;
 
-        public final URN _queryURN;
+        public final URNImpl _queryURN;
         private final long _creationTime;
 
-        public SendLaterBundle(URN urn) {
+        public SendLaterBundle(URNImpl urn) {
             _queryURN = urn;
             _creationTime = System.currentTimeMillis();
         }

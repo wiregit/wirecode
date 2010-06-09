@@ -7,7 +7,7 @@ import java.util.HashSet;
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 import org.jmock.Mockery;
 import org.jmock.Expectations;
@@ -91,8 +91,8 @@ public class WhiteListUpdateUrnFilterTest extends BaseTestCase {
      */
     public void testUpdateHandlerDoesNotContainUpdateCollection() throws Exception {
         // response has at least 1 sha1, updatehandler.getUpdateCollection returns null
-        final Set<URN> urnSetWtihSha1 = new HashSet<URN>();
-        urnSetWtihSha1.add(URN.createSHA1Urn("urn:sha1:" + MATCHING_SHA1_HASH));
+        final Set<URNImpl> urnSetWtihSha1 = new HashSet<URNImpl>();
+        urnSetWtihSha1.add(URNImpl.createSHA1Urn("urn:sha1:" + MATCHING_SHA1_HASH));
 
         context.checking(new Expectations() {{
             one(updateHandler).getUpdateCollection();
@@ -118,9 +118,9 @@ public class WhiteListUpdateUrnFilterTest extends BaseTestCase {
         final UpdateCollection updateColl =
                 updateCollectionFactory.createUpdateCollection(UPDATE_DATA_XML);
 
-        final Set<URN> urnSetWtihSha1 = new HashSet<URN>();
+        final Set<URNImpl> urnSetWtihSha1 = new HashSet<URNImpl>();
         String matchingSha1HashUrnString = "urn:sha1:" + MATCHING_SHA1_HASH;
-        urnSetWtihSha1.add(URN.createSHA1Urn(matchingSha1HashUrnString));
+        urnSetWtihSha1.add(URNImpl.createSHA1Urn(matchingSha1HashUrnString));
 
         context.checking(new Expectations() {{
             one(updateHandler).getUpdateCollection();
@@ -145,8 +145,8 @@ public class WhiteListUpdateUrnFilterTest extends BaseTestCase {
         final UpdateCollection updateColl =
                 updateCollectionFactory.createUpdateCollection(UPDATE_DATA_XML);
 
-        final Set<URN> urnSetWtihSha1 = new HashSet<URN>();
-        urnSetWtihSha1.add(URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+        final Set<URNImpl> urnSetWtihSha1 = new HashSet<URNImpl>();
+        urnSetWtihSha1.add(URNImpl.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 
         context.checking(new Expectations() {{
                 one(updateHandler).getUpdateCollection();

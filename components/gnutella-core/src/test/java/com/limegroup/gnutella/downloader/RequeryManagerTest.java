@@ -8,7 +8,7 @@ import org.jmock.Sequence;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
@@ -49,7 +49,7 @@ public class RequeryManagerTest extends LimeTestCase {
     private Sequence sequence;
     private LegacyProActivationManager activationManager;
     
-    private URN sha1Urn;
+    private URNImpl sha1Urn;
     
     @Override
     public void setUp() throws Exception {
@@ -76,7 +76,7 @@ public class RequeryManagerTest extends LimeTestCase {
         altLocFinder = (MyAltLocFinder)injector.getInstance(AltLocFinder.class);
         requeryManagerFactory = injector.getInstance(RequeryManagerFactory.class);
         
-        sha1Urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        sha1Urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
         setPro(false);
     }
@@ -521,7 +521,7 @@ public class RequeryManagerTest extends LimeTestCase {
         
         volatile boolean cancelled;
         
-        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
+        public Shutdownable findAltLocs(URNImpl urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {

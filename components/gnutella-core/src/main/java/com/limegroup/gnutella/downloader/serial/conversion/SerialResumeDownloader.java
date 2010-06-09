@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 interface SerialResumeDownloader extends SerialManagedDownloader {
@@ -13,6 +13,6 @@ interface SerialResumeDownloader extends SerialManagedDownloader {
 
     public long getSize();
 
-    public URN getUrn();
+    public URNImpl getUrn();
 
 }

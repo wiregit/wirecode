@@ -21,7 +21,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Visitor;
 
 import com.google.inject.Inject;
@@ -69,7 +69,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     /**
      * The urn to use to create pings.
      */
-    private URN sha1;
+    private URNImpl sha1;
     
     /**
      * The guid to use for my headPings.

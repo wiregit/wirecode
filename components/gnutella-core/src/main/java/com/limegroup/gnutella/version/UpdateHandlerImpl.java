@@ -35,7 +35,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -734,7 +734,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
             _killingObsoleteNecessary = false;
             downloadManager.get().killDownloadersNotListed(toDownload);
             
-            Set<URN> urns = new HashSet<URN>(toDownload.size());
+            Set<URNImpl> urns = new HashSet<URNImpl>(toDownload.size());
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
@@ -765,7 +765,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * Constructs an RFD out of the given information & connection.
      */
     private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
-        Set<URN> urns = new UrnSet(info.getUpdateURN());
+        Set<URNImpl> urns = new UrnSet(info.getUpdateURN());
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(rh.getInetSocketAddress(), rh instanceof Connectable ? ((Connectable)rh).isTLSCapable() : false), Integer.MAX_VALUE,
                 info.getUpdateFileName(), info.getSize(), rh.getClientGUID(), 0, 2, false, null, urns, false,
                 "LIME", -1);
@@ -828,7 +828,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
      * If this was our update, we notify the GUI.  It's OK if the user restarts
      * as the rest of the updates will be downloaded the next session.
      */
-    public void inNetworkDownloadFinished(final URN urn, final boolean good) {
+    public void inNetworkDownloadFinished(final URNImpl urn, final boolean good) {
         
         Runnable r = new Runnable() {
             public void run() {
@@ -902,14 +902,14 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<LibrarySt
         if (!library.isLoadFinished())
             return false;
         
-        URN myUrn = myInfo.getUpdateURN();
+        URNImpl myUrn = myInfo.getUpdateURN();
         if (myUrn == null)
             return true;
         
         return hasCompleteFile(myUrn);
     }
     
-    private boolean hasCompleteFile(URN urn) {
+    private boolean hasCompleteFile(URNImpl urn) {
         List<FileDesc> fds = library.getFileDescsMatching(urn);
         for(FileDesc fd : fds) {
             if(!(fd instanceof IncompleteFileDesc)) {

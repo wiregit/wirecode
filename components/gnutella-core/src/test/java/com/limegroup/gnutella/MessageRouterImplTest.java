@@ -34,7 +34,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -969,7 +969,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	pushRt.routeReply(clientGUID.bytes(),pingee);
     	
     	// try a HeadPing 
-    	URN urn = FileDescStub.DEFAULT_SHA1;
+    	URNImpl urn = FileDescStub.DEFAULT_SHA1;
     	HeadPing ping = new HeadPing(new GUID(),urn, clientGUID, 0xFF);
     	
     	messageRouterImpl.handleUDPMessage(ping, new InetSocketAddress(InetAddress.getLocalHost(), 10));
@@ -999,7 +999,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	RouteTable headRt = messageRouterImpl.getHeadPongRouteTable();
     	
     	//try a headpong
-    	URN urn = FileDescStub.DEFAULT_SHA1;
+    	URNImpl urn = FileDescStub.DEFAULT_SHA1;
     	HeadPing ping = new HeadPing(new GUID(GUID.makeGuid()),urn, 0xFF);
     	headRt.routeReply(ping.getGUID(),pinger);
     	HeadPong pong = headPongFactory.create(ping);

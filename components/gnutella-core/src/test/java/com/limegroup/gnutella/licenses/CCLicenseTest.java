@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
@@ -74,8 +74,8 @@ public final class CCLicenseTest extends BaseTestCase {
 	}
 	
 	public void testBasicParsingRDF() throws Exception {
-	    URN good = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
-	    URN bad = URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+	    URNImpl good = URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+	    URNImpl bad = URNImpl.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
 	    
 	    License l = new StubCCLicense(RDF_GOOD);
 	    assertFalse(l.isVerified());
@@ -161,7 +161,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    l.verify(licenseCache, httpClient);
 	    assertEquals("good license text", l.getLicense());
 	    assertTrue(l.isVerified());
-	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
+	    assertTrue(l.isValid(URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
 	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(null).toString());
 	    // more stringent than necessary - asserting order too.
 	    assertEquals("Permitted: Reproduction, Distribution, DerivativeWorks\n" +
@@ -177,7 +177,7 @@ public final class CCLicenseTest extends BaseTestCase {
         l = (License)in.readObject();
         assertEquals(null, l.getLicense()); // CHANGE -- not serialized
 	    assertTrue(l.isVerified());
-	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
+	    assertTrue(l.isValid(URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
 	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(null).toString());
 	    // more stringent than necessary - asserting order too.
 	    assertEquals("Permitted: Reproduction, Distribution, DerivativeWorks\n" +
@@ -186,9 +186,9 @@ public final class CCLicenseTest extends BaseTestCase {
     }
     
     public void testAdvancedRDFParsing() throws Exception {
-        URN goodUrn = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN goodUrn2 = URN.createSHA1Urn("urn:sha1:GOODC5VEUDLTC26UT5W7GZBAKZHCY2MD");
-	    URN badUrn = URN.createSHA1Urn("urn:sha1:BADBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl goodUrn = URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl goodUrn2 = URNImpl.createSHA1Urn("urn:sha1:GOODC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+	    URNImpl badUrn = URNImpl.createSHA1Urn("urn:sha1:BADBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
         
         // GOOD: within HTML comments.
         AbstractLicense l = new StubCCLicense("<html><--" +
@@ -369,7 +369,7 @@ public final class CCLicenseTest extends BaseTestCase {
 
     
     public void testMultipleLicenseElementsInWork() throws Exception {
-        URN goodUrn = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
+        URNImpl goodUrn = URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
         
 	    AbstractLicense l = new StubCCLicense("http://creativecommons.org/licenses/mylicense verify at http://nowhere.com", 
 	    "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
@@ -399,8 +399,8 @@ public final class CCLicenseTest extends BaseTestCase {
     }        
     
     public void testHTTPRetrieval() throws Exception {
-        URN good = URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN bad = URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl good = URNImpl.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl bad = URNImpl.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD");
 
         TestBootstrapServer server = new TestBootstrapServer(20181);
         try {
@@ -431,11 +431,11 @@ public final class CCLicenseTest extends BaseTestCase {
     }
     
     public void testSeparateLicenseRetrieval() throws Exception {
-        URN goodUrn1 = URN.createSHA1Urn("urn:sha1:GOOD15VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN goodUrn2 = URN.createSHA1Urn("urn:sha1:GOOD25VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN goodUrn3 = URN.createSHA1Urn("urn:sha1:GOOD35VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN goodUrn4 = URN.createSHA1Urn("urn:sha1:GOOD45VEUDLTC26UT5W7GZBAKZHCY2MD");
-        URN badUrn   = URN.createSHA1Urn("urn:sha1:BADAC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
+        URNImpl goodUrn1 = URNImpl.createSHA1Urn("urn:sha1:GOOD15VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl goodUrn2 = URNImpl.createSHA1Urn("urn:sha1:GOOD25VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl goodUrn3 = URNImpl.createSHA1Urn("urn:sha1:GOOD35VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl goodUrn4 = URNImpl.createSHA1Urn("urn:sha1:GOOD45VEUDLTC26UT5W7GZBAKZHCY2MD");
+        URNImpl badUrn   = URNImpl.createSHA1Urn("urn:sha1:BADAC5VEUDLTC26UT5W7GZBAKZHCY2MD");        
 
         TestBootstrapServer  deed1  = new TestBootstrapServer(11111);
         deed1.setAllowConnectionReuse(true);

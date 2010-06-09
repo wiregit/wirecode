@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.util.Set;
 
 import org.limewire.io.Address;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -22,6 +22,6 @@ public interface RemoteFileDescCreator {
     
     RemoteFileDesc create(Address address, long index, String filename,
             long size, byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1);
 }

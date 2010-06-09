@@ -10,7 +10,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -247,7 +247,7 @@ public class VendorMessageTest extends BaseTestCase {
     }
     
     public void testHeadPingMessage() throws Exception {
-    	URN urn = FileDescStub.DEFAULT_SHA1;
+    	URNImpl urn = FileDescStub.DEFAULT_SHA1;
     	
     	HeadPing ping = new HeadPing(urn);
     	

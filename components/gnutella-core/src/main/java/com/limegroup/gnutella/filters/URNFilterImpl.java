@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.util.Visitor;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -112,7 +112,7 @@ class URNFilterImpl implements URNFilter {
     @Override
     public boolean allow(QueryReply q, Response r) {
         if(q.isBrowseHostReply()) {
-            for(URN u : r.getUrns()) {
+            for(URNImpl u : r.getUrns()) {
                 if(isBlacklisted(u))
                     return false;
             }
@@ -124,7 +124,7 @@ class URNFilterImpl implements URNFilter {
     @Override
     public boolean allow(SearchResult result, LimeXMLDocument document) {
         
-        if (isBlacklisted((URN)result.getUrn())) {
+        if (isBlacklisted((URNImpl)result.getUrn())) {
             return false;
         }
     
@@ -142,7 +142,7 @@ class URNFilterImpl implements URNFilter {
             return false;
         try {
             for(Response r : q.getResultsArray()) {
-                for(URN u : r.getUrns()) {
+                for(URNImpl u : r.getUrns()) {
                     if(isBlacklisted(u))
                         return true;
                 }
@@ -163,7 +163,7 @@ class URNFilterImpl implements URNFilter {
      * Returns true if the given URN matches the blacklist.
      */
     @Override
-    public boolean isBlacklisted(URN urn) {
+    public boolean isBlacklisted(URNImpl urn) {
         if(blacklist == null || urn == null)
             return false;
         return isBlacklisted(urn.getNamespaceSpecificString());

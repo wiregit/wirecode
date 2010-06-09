@@ -7,7 +7,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Address;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
@@ -192,7 +192,7 @@ public interface Downloader extends BandwidthTracker,
 	 * <code>null</code> if there is none.
 	 * @return
 	 */
-	public URN getSha1Urn();
+	public URNImpl getSha1Urn();
     
     /**
      * Sets a new attribute associated with the download.

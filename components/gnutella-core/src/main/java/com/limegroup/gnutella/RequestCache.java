@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -26,7 +26,7 @@ public class RequestCache {
     /**
      * The set of sha1 requests we've seen in the past WAIT_TIME.
      */
-    private final Set<URN> ACTIVE_TRANSFERS;
+    private final Set<URNImpl> ACTIVE_TRANSFERS;
 
     /**
      * The number of requests we've seen from this host so far.
@@ -47,7 +47,7 @@ public class RequestCache {
      * Constructs a new RequestCache.
      */
     public RequestCache() {
-        ACTIVE_TRANSFERS = new HashSet<URN>();
+        ACTIVE_TRANSFERS = new HashSet<URNImpl>();
         _numRequests = 0;
         _lastRequest = _firstRequest = System.currentTimeMillis();
     }
@@ -57,7 +57,7 @@ public class RequestCache {
      * 
      * @param sha1 the urn of the file being uploaded.
      */
-    void startedTransfer(URN sha1) {
+    void startedTransfer(URNImpl sha1) {
         ACTIVE_TRANSFERS.add(sha1);
     }
 
@@ -83,7 +83,7 @@ public class RequestCache {
     /**
      * Checks whether the given URN is a duplicate request
      */
-    boolean isDupe(URN sha1) {
+    boolean isDupe(URNImpl sha1) {
         return ACTIVE_TRANSFERS.contains(sha1);
     }
 
@@ -91,7 +91,7 @@ public class RequestCache {
      * Informs the request cache that the given URN is no longer actively
      * uploaded.
      */
-    void transferDone(URN sha1) {
+    void transferDone(URNImpl sha1) {
         ACTIVE_TRANSFERS.remove(sha1);
     }
 }

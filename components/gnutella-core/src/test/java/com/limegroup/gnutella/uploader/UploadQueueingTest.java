@@ -19,7 +19,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ByteReader;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.NIOTestUtils;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
@@ -71,7 +71,7 @@ public class UploadQueueingTest extends LimeTestCase {
 
     private RemoteFileDesc rfd1, rfd2, rfd3, rfd4, rfd5;
     
-    private URN urn1, urn2, urn3, urn4, urn5;
+    private URNImpl urn1, urn2, urn3, urn4, urn5;
 
     private int savedNIOWatchdogDelay;
 
@@ -115,11 +115,11 @@ public class UploadQueueingTest extends LimeTestCase {
     }
 
     private void initializeFileManager() throws Exception {
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
-        urn2 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
-        urn3 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-        urn4 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
-        urn5 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
+        urn1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+        urn2 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
+        urn3 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+        urn4 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
+        urn5 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
         
         FileDescStub descStub = new FileDescStub("abc1.txt", urn1, 0);
         rfd1 = remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.1.1.1", 1, false), 0, "abc1.txt", FileDescStub.DEFAULT_SIZE,

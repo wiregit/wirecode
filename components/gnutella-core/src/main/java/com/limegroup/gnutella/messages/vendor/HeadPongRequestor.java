@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 /** Controls how HeadPongs are constructed. */
 interface HeadPongRequestor {
 
     /** Returns the URN the request is for. */
-    public URN getUrn();
+    public URNImpl getUrn();
 
     /** True if this requests wants ranges. */
     public boolean requestsRanges();

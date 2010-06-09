@@ -25,7 +25,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -73,7 +73,7 @@ public class HeadTest extends LimeTestCase {
 	/**
 	 * URNs for the 3 files that will be requested
 	 */
-    private  URN _haveFull,_notHave,_havePartial, _tlsURN, _largeURN;
+    private  URNImpl _haveFull,_notHave,_havePartial, _tlsURN, _largeURN;
 	
 	/**
 	 * file descs for the partial and complete files
@@ -172,10 +172,10 @@ public class HeadTest extends LimeTestCase {
         _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
         _notHave =      GnutellaFileCollectionStub.DEFAULT_URN;
-		_haveFull =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_havePartial =  URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
-        _tlsURN =       URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
-        _largeURN =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
+		_haveFull =     URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+		_havePartial =  URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
+        _tlsURN =       URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
+        _largeURN =     URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
 		
 		_partial = new IncompleteFileDescStub("incomplete",_havePartial,3);
 		_partial.setRangesByte(_ranges.toBytes());
@@ -199,7 +199,7 @@ public class HeadTest extends LimeTestCase {
         
         
         blankRFD = new RemoteFileDescContext(remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.1.1.1", 1, false), 1, "file", 1, new byte[16], 1, -1,
-                false, null, URN.NO_URN_SET, false, null, -1));
+                false, null, URNImpl.NO_URN_SET, false, null, -1));
         assertFalse(blankRFD.isBusy());
         assertFalse(blankRFD.isPartialSource());
         assertFalse(blankRFD.isReplyToMulticast());
@@ -766,7 +766,7 @@ public class HeadTest extends LimeTestCase {
 		assertNotEmpty(pong.getPushLocs());
 		
 		RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.2.3.4", 1, false), 1, "filename", 1, null, 1, 1, false,
-                null, URN.NO_URN_SET, false, "", 1);
+                null, URNImpl.NO_URN_SET, false, "", 1);
 		
 		Set rfds = pong.getAllLocsRFD(rfd, remoteFileDescFactory);
 		

@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -45,7 +45,7 @@ public class ContentResponse extends AbstractVendorMessage {
     /**
      * Constructs a new ContentRequest for the given SHA1 URN.
      */
-    public ContentResponse(URN sha1, boolean okay) {
+    public ContentResponse(URNImpl sha1, boolean okay) {
         super(F_LIME_VENDOR_ID, F_CONTENT_RESP, VERSION, derivePayload(sha1, okay));
         
         try {
@@ -58,7 +58,7 @@ public class ContentResponse extends AbstractVendorMessage {
     /**
      * Constructs the payload from given SHA1 Urn & okay flag.
      */
-    private static byte[] derivePayload(URN sha1, boolean okay) {
+    private static byte[] derivePayload(URNImpl sha1, boolean okay) {
         if(sha1 == null)
             throw new NullPointerException("null sha1");
         
@@ -78,9 +78,9 @@ public class ContentResponse extends AbstractVendorMessage {
     /**
      * Gets the URN this msg is for.
      */
-    public URN getURN() {
+    public URNImpl getURN() {
         try {
-            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEPKeys.GGEP_HEADER_SHA1));
+            return URNImpl.createSHA1UrnFromBytes(ggep.getBytes(GGEPKeys.GGEP_HEADER_SHA1));
         } catch(IOException iox) {
             return null;
         } catch(BadGGEPPropertyException bgpe) {

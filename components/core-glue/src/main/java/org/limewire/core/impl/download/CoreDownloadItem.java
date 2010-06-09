@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -29,6 +28,7 @@ import org.limewire.friend.api.FriendManager;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.Address;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;

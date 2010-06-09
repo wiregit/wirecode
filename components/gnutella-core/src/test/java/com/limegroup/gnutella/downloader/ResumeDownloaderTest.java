@@ -12,7 +12,7 @@ import org.limewire.collection.Range;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -35,7 +35,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
     private static final int amountDownloaded = 500;
 
-    private URN hash;
+    private URNImpl hash;
 
     private RemoteFileDesc rfd;
 
@@ -81,8 +81,8 @@ public class ResumeDownloaderTest extends LimeTestCase {
         return downloader;
     }
 
-    private RemoteFileDesc newRFD(String name, int size, URN hash) throws Exception {
-        Set<URN> urns = new HashSet<URN>(1);
+    private RemoteFileDesc newRFD(String name, int size, URNImpl hash) throws Exception {
+        Set<URNImpl> urns = new HashSet<URNImpl>(1);
         if (hash != null)
             urns.add(hash);
         return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("1.2.3.4", 6346, false), 13l, name, size, new byte[16],

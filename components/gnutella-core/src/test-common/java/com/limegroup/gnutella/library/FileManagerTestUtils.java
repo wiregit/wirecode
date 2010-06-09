@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.collection.CollectionUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -40,7 +40,7 @@ public class FileManagerTestUtils {
         return createNewNamedTestFile(size, "FileManager_unit_test", ext, dir); 
     }
 
-    public static URN getUrn(File f) throws Exception {
+    public static URNImpl getUrn(File f) throws Exception {
         return URNFactory.createSHA1Urn(f);
     }
 

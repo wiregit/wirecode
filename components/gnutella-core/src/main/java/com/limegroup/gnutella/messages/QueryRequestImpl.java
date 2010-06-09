@@ -18,7 +18,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -98,7 +98,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     /** 
 	 * Specific URNs requested.
 	 */
-    private final Set<URN> QUERY_URNS;
+    private final Set<URNImpl> QUERY_URNS;
 
     /**
      * The Query Key associated with this query -- can be null.
@@ -150,7 +150,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     /** Constructs a query. */
     QueryRequestImpl(byte[] guid, byte ttl, int minSpeed,
                         String query, String richQuery, 
-                        Set<? extends URN> queryUrns,
+                        Set<? extends URNImpl> queryUrns,
                         AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         Network network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
@@ -253,11 +253,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             this.XML_DOC = doc;
         }
 
-        Set<URN> tempQueryUrns = null;
+        Set<URNImpl> tempQueryUrns = null;
         if (queryUrns != null) {
             tempQueryUrns = new UrnSet(queryUrns);
         } else {
-            tempQueryUrns = URN.NO_URN_SET;
+            tempQueryUrns = URNImpl.NO_URN_SET;
         }
 
         this.QUERY_KEY = addressSecurityToken;
@@ -529,7 +529,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, which
      * may be empty (not null) if no URNs were requested
      */
-    public Set<URN> getQueryUrns() {
+    public Set<URNImpl> getQueryUrns() {
         return QUERY_URNS;
     }
 
@@ -842,7 +842,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     protected boolean writeGemExtensions(OutputStream os, 
                                          boolean addPrefixDelimiter, 
-                                         Iterator<URN> iter) throws IOException {
+                                         Iterator<URNImpl> iter) throws IOException {
         while(iter.hasNext()) {
             addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
                     StringUtils.toAsciiBytes(iter.next().toString()));
@@ -986,8 +986,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         String query = "";
         String richQuery = "";
         int minSpeed = 0;
-        Set<URN> queryUrns = null;
-        Set<URN.Type> requestedUrnTypes = null;
+        Set<URNImpl> queryUrns = null;
+        Set<URNImpl.Type> requestedUrnTypes = null;
         AddressSecurityToken addressSecurityToken = null;
         
         HUGEExtension huge;

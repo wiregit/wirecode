@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 
 import com.limegroup.gnutella.ApplicationServices;
@@ -31,7 +31,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
      * 
      * @throws IOException
      */
-    protected PushAltLoc(final PushEndpoint address, final URN sha1,
+    protected PushAltLoc(final PushEndpoint address, final URNImpl sha1,
             ApplicationServices applicationServices) {
         super(sha1);
 
@@ -50,7 +50,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
     @Override
     public RemoteFileDesc createRemoteFileDesc(long size,
             RemoteFileDescFactory remoteFileDescFactory) {
-        Set<URN> urnSet = new UrnSet(getSHA1Urn());
+        Set<URNImpl> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
 
         RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_pushAddress, 0,

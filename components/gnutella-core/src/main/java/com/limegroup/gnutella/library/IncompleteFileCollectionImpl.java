@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.SourcedEventMulticaster;
 
 import com.google.inject.Inject;
@@ -33,7 +33,7 @@ class IncompleteFileCollectionImpl extends AbstractFileCollection implements Inc
         return "Incomplete Collection";
     }
 
-    public void addIncompleteFile(File incompleteFile, Set<? extends URN> urns, String name,
+    public void addIncompleteFile(File incompleteFile, Set<? extends URNImpl> urns, String name,
             long size, VerifyingFile vf) {
         managedList.addIncompleteFile(incompleteFile, urns, name, size, vf);
     }

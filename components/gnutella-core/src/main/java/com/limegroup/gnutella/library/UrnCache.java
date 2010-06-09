@@ -26,7 +26,7 @@ import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventBroadcaster;
@@ -47,7 +47,7 @@ import com.limegroup.gnutella.io.URNFactory;
  * Modified by Gordon Mohr (2002/02/19): Added URN storage, calculation, caching
  * Repackaged by Greg Bildson (2002/02/19): Moved to dedicated class.
  * 
- * @see URN
+ * @see URNImpl
  */
 @EagerSingleton
 public final class UrnCache {
@@ -77,7 +77,7 @@ public final class UrnCache {
     private volatile boolean dirty = false;
 
     /** The future that will contain the URN_MAP when it is done. */
-    private final Future<Map<UrnSetKey, Set<URN>>> deserializer;
+    private final Future<Map<UrnSetKey, Set<URNImpl>>> deserializer;
     
     private final EventBroadcaster<FileProcessingEvent> broadcaster;
 
@@ -88,9 +88,9 @@ public final class UrnCache {
     UrnCache(@DiskIo ListeningExecutorService diskIoExecutor, EventBroadcaster<FileProcessingEvent> broadcaster) {
         this.QUEUE = diskIoExecutor;
         this.broadcaster = broadcaster;
-        deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
+        deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URNImpl>>>() {
             @SuppressWarnings("unchecked")
-            public Map<UrnSetKey, Set<URN>> call() {
+            public Map<UrnSetKey, Set<URNImpl>> call() {
                 // This cannot be inside a synchronized block, otherwise other
                 // methods
                 // can block its construction.
@@ -118,8 +118,8 @@ public final class UrnCache {
      * notified immediately. Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public ListeningFuture<Set<URN>> calculateAndCacheSHA1(File file) {
-        Set<URN> urns;
+    public ListeningFuture<Set<URNImpl>> calculateAndCacheSHA1(File file) {
+        Set<URNImpl> urns;
         synchronized (this) {
             urns = getUrns(file);
             // check that a SHA1 doesn't yet exist for this file.
@@ -131,7 +131,7 @@ public final class UrnCache {
         }
 
         assert !urns.isEmpty();
-        return new SimpleFuture<Set<URN>>(urns);
+        return new SimpleFuture<Set<URNImpl>>(urns);
     }
     
     /**
@@ -140,8 +140,8 @@ public final class UrnCache {
      * notified immediately. Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public ListeningFuture<URN> calculateAndCacheNMS1(File file) {
-        URN nms1 = null;
+    public ListeningFuture<URNImpl> calculateAndCacheNMS1(File file) {
+        URNImpl nms1 = null;
         synchronized(this) {
             nms1 = UrnSet.getNMS1(getUrns(file));
             // calculate nms1 if it doesn't exist already
@@ -149,7 +149,7 @@ public final class UrnCache {
                 return QUEUE.submit(new NMS1Processor(file));
             }
         }
-        return new SimpleFuture<URN>(nms1);
+        return new SimpleFuture<URNImpl>(nms1);
     }
 
     /**
@@ -162,7 +162,7 @@ public final class UrnCache {
      *         <tt>File</tt> instance, guaranteed to be non-null and
      *         unmodifiable, but possibly empty
      */
-    public synchronized Set<URN> getUrns(File file) {
+    public synchronized Set<URNImpl> getUrns(File file) {
         long modified = file.lastModified();
         // don't trust failed mod times
         if (modified == 0L) {
@@ -173,7 +173,7 @@ public final class UrnCache {
         if (key._modTime != modified) {
             return Collections.emptySet();
         } else {
-            Set<URN> cachedUrns = getUrnMap().get(key);
+            Set<URNImpl> cachedUrns = getUrnMap().get(key);
             if (cachedUrns == null) {
                 return Collections.emptySet();
             } else {
@@ -196,7 +196,7 @@ public final class UrnCache {
      * 
      * @param file the <tt>File</tt> instance containing URNs to store
      */
-    public synchronized void addUrns(File file, Set<? extends URN> urns) {
+    public synchronized void addUrns(File file, Set<? extends URNImpl> urns) {
         UrnSetKey key = new UrnSetKey(file);
         getUrnMap().put(key, UrnSet.unmodifiableSet(urns));
         dirty = true;
@@ -231,7 +231,7 @@ public final class UrnCache {
             ois = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
             // Allow for refactoring from gnutella -> gnutella.library
             ois.addLookup("com.limegroup.gnutella.UrnCache$UrnSetKey", UrnSetKey.class.getName());
-            ois.addLookup("com.limegroup.gnutella.URN", URN.class.getName());
+            ois.addLookup("com.limegroup.gnutella.URN", URNImpl.class.getName());
             return (Map) ois.readObject();
         } catch (Throwable t) {
             LOG.error("Unable to read UrnCache", t);
@@ -272,7 +272,7 @@ public final class UrnCache {
                 continue;
             }
 
-            Set<URN> set = GenericsUtils.scanForSet(entry.getValue(), URN.class,
+            Set<URNImpl> set = GenericsUtils.scanForSet(entry.getValue(), URNImpl.class,
                     GenericsUtils.ScanMode.NEW_COPY_REMOVED, UrnSet.class);
             if (set.isEmpty()) {
                 i.remove();
@@ -305,7 +305,7 @@ public final class UrnCache {
         }
     }
 
-    private Map<UrnSetKey, Set<URN>> getUrnMap() {
+    private Map<UrnSetKey, Set<URNImpl>> getUrnMap() {
         boolean interrupted = Thread.interrupted();
         try {
             while (true) {
@@ -323,18 +323,18 @@ public final class UrnCache {
         }
     }
 
-    private class SHA1Processor implements Callable<Set<URN>> {
+    private class SHA1Processor implements Callable<Set<URNImpl>> {
         private final File file;
 
         SHA1Processor(File f) {
             file = f;
         }
 
-        public Set<URN> call() {
+        public Set<URNImpl> call() {
             if(broadcaster != null) {
                 broadcaster.broadcast(new FileProcessingEvent(FileProcessingEvent.Type.PROCESSING, file));
             }
-            Set<URN> urns;
+            Set<URNImpl> urns;
 
             synchronized (UrnCache.this) {
                 urns = getUrns(file); // already calculated?
@@ -369,16 +369,16 @@ public final class UrnCache {
      * SHA1 is successfully created, the URNSet is updated and saved
      * to disk.
      */
-    private class NMS1Processor implements Callable<URN> {
+    private class NMS1Processor implements Callable<URNImpl> {
         private final File file;
 
         NMS1Processor(File file) {
             this.file = file;
         }
 
-        public URN call() {
-            Set<URN> urns;
-            URN nms1 = null;
+        public URNImpl call() {
+            Set<URNImpl> urns;
+            URNImpl nms1 = null;
 
             synchronized (UrnCache.this) {
                 urns = getUrns(file); // already calculated?

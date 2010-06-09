@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -18,6 +17,7 @@ import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.feature.Feature;
 import org.limewire.friend.api.feature.FeatureTransport;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 /**

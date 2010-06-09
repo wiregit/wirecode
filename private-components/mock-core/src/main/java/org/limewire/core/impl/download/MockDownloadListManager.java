@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
@@ -20,6 +19,7 @@ import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.URN;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;

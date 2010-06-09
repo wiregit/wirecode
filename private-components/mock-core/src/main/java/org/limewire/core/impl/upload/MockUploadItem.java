@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -17,6 +16,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.friend.MockFriend;
 import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.URN;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 public class MockUploadItem implements UploadItem {

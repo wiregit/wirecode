@@ -24,7 +24,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
@@ -120,8 +120,8 @@ public class FriendDownloadTest extends LimeTestCase {
 
         FriendAddress xmppAddress = new FriendAddress(PRESENCE_ID);
 
-        URN sha1Urn = URN.createSHA1Urn(FILE_TO_DOWNLOAD_URN);
-        Set<URN> sha1UrnSet = new HashSet<URN>();
+        URNImpl sha1Urn = URNImpl.createSHA1Urn(FILE_TO_DOWNLOAD_URN);
+        Set<URNImpl> sha1UrnSet = new HashSet<URNImpl>();
         sha1UrnSet.add(sha1Urn);
 
         return new FriendRemoteFileDesc(xmppAddress, 1, FILE_NAME, SIZE_OF_DOWNLOAD,

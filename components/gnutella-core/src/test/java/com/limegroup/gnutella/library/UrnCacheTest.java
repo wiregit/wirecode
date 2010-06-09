@@ -17,7 +17,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.util.AssignParameterAction;
@@ -173,7 +173,7 @@ public final class UrnCacheTest extends LimeTestCase {
      */
     private void calculateSHA1s(List<FileAndUrns> faus) throws Exception {
 	    for(FileAndUrns files : faus) {
-	        Set<URN> urns = UrnHelper.calculateAndCacheURN(files.file, urnCache);
+	        Set<URNImpl> urns = UrnHelper.calculateAndCacheURN(files.file, urnCache);
 	        files.addAll(urns);
 	    }
 	}
@@ -183,7 +183,7 @@ public final class UrnCacheTest extends LimeTestCase {
      */
 	private void calculateNMS1s(List<FileAndUrns> faus) throws Exception {
 	    for(FileAndUrns files : faus) {
-	        URN nms1 = urnCache.calculateAndCacheNMS1(files.file).get();
+	        URNImpl nms1 = urnCache.calculateAndCacheNMS1(files.file).get();
             if(nms1 != null)
                 files.addURN(nms1);
 	    }
@@ -230,19 +230,19 @@ public final class UrnCacheTest extends LimeTestCase {
 	}	
 	
 	private class FileAndUrns {
-	    private final Set<URN> urns;
+	    private final Set<URNImpl> urns;
 	    private final File file;
 	    
 	    public FileAndUrns(File file) {
-            this.urns = new HashSet<URN>();
+            this.urns = new HashSet<URNImpl>();
             this.file = file;
         }
 	    
-	    public void addURN(URN urn) {
+	    public void addURN(URNImpl urn) {
 	        urns.add(urn);
 	    }
 	    
-	    public void addAll(Set<URN> urns) {
+	    public void addAll(Set<URNImpl> urns) {
 	        this.urns.addAll(urns);
 	    }
 	}

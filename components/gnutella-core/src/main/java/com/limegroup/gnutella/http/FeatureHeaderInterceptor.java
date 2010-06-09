@@ -14,7 +14,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.HeaderInterceptor;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
@@ -81,9 +81,9 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             return false;
 
         try {
-            uploader.setRequestedURN(URN.createSHA1Urn(header.getValue()));
+            uploader.setRequestedURN(URNImpl.createSHA1Urn(header.getValue()));
         } catch(IOException e) {
-            uploader.setRequestedURN(URN.INVALID);
+            uploader.setRequestedURN(URNImpl.INVALID);
         }       
         
         return true;

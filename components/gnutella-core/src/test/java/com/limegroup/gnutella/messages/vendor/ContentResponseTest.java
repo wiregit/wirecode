@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.messages.Message;
@@ -31,7 +31,7 @@ public class ContentResponseTest extends BaseTestCase {
     }
     
     public void testUrnIsEncodedAndDecodedProperly() throws Exception {
-        URN urn = URN.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         ContentResponse response = new ContentResponse(urn, false);
         response = writeAndRead(response);
         assertFalse(response.getOK());

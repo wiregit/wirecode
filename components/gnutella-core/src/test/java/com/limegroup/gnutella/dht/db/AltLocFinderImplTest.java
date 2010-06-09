@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.KUID;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -40,11 +40,11 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         testAltLocListenerNonFirewalledLocations(false);
     }
     
-    private URN publishDirectAltLoc(boolean publish) throws Exception {
+    private URNImpl publishDirectAltLoc(boolean publish) throws Exception {
         // set to non-firewalled, so created altloc value for self is not firewalled
         networkManager.setAcceptedIncomingConnection(true);
         // publish an alternate location in the DHT
-        URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         AltLocValue value = altLocValueFactory.createAltLocValueForSelf(5555, new byte[MerkleTree.HASHSIZE]);
         assertFalse(value.isFirewalled());
         KUID kuid = KUIDUtils.toKUID(urn);
@@ -57,7 +57,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
     }
     
     private void testAltLocListenerNonFirewalledLocations(boolean successful) throws Exception {
-        URN urn = publishDirectAltLoc(successful);
+        URNImpl urn = publishDirectAltLoc(successful);
         // expected alternate location
         final AlternateLocation expectedAltLoc = alternateLocationFactory.createDirectDHTAltLoc(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), urn, 5555, new byte[MerkleTree.HASHSIZE]);
         AltLocSearchHandler listener = new AltLocSearchHandler();
@@ -84,10 +84,10 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         testAltLocListenerFirewalledLocations(false);
     }
     
-    private URN publishPushAltLoc(boolean publish) throws Exception {
+    private URNImpl publishPushAltLoc(boolean publish) throws Exception {
         networkManager.setExternalAddress(new byte[] { 127, 0, 0, 1 });
         
-        URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         AltLocValue value = altLocValueFactory.createAltLocValueForSelf(5555, new byte[MerkleTree.HASHSIZE]);
         assertTrue(value.isFirewalled());
         KUID kuid = KUIDUtils.toKUID(urn);
@@ -103,7 +103,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
     }
     
     private void testAltLocListenerFirewalledLocations(boolean successful) throws Exception {
-        URN urn = publishPushAltLoc(successful);
+        URNImpl urn = publishPushAltLoc(successful);
         
         AltLocSearchHandler listener = new AltLocSearchHandler();
         // initialize with opposite value to see if it is actually set

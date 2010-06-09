@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.library.FileDesc;
@@ -33,7 +33,7 @@ public class FileViewStub implements FileView {
     }
 
     @Override
-    public FileDesc getFileDesc(URN urn) {
+    public FileDesc getFileDesc(URNImpl urn) {
 
         return null;
     }
@@ -51,7 +51,7 @@ public class FileViewStub implements FileView {
     }
 
     @Override
-    public List<FileDesc> getFileDescsMatching(URN urn) {
+    public List<FileDesc> getFileDescsMatching(URNImpl urn) {
 
         return null;
     }

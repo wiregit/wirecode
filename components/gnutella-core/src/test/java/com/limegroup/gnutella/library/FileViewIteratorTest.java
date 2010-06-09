@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.collection.IntSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import junit.framework.Test;
 
@@ -18,7 +18,7 @@ public class FileViewIteratorTest extends BaseTestCase {
     private LibraryStub managedList;
     private IntSet indices;
 
-    private URN hash1, hash2, hash3, hash4;
+    private URNImpl hash1, hash2, hash3, hash4;
     private FileDesc fd1, fd2, fd3, fd4;
 
     public FileViewIteratorTest(String name) {
@@ -32,10 +32,10 @@ public class FileViewIteratorTest extends BaseTestCase {
     protected void setUp() throws Exception {
 
         // create FileDescs which are used in every test
-        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
-        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
-        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
+        hash1 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        hash2 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
+        hash3 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
+        hash4 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
 
         fd1 = new FileDescStub("0", hash1, 0);
         fd2 = new FileDescStub("1", hash2, 1);

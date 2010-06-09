@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.SourcedEventMulticaster;
 
 import com.google.inject.Inject;
@@ -28,12 +28,12 @@ class FileDescFactoryImpl implements FileDescFactory {
     }
 
     @Override
-    public FileDesc createFileDesc(File file, Set<? extends URN> urns, int index) {
+    public FileDesc createFileDesc(File file, Set<? extends URNImpl> urns, int index) {
         return new FileDescImpl(rareFileStrategy, licenseFactory, multicaster, file, urns, index);
     }
     
     @Override
-    public IncompleteFileDesc createIncompleteFileDesc(File file, Set<? extends URN> urns,
+    public IncompleteFileDesc createIncompleteFileDesc(File file, Set<? extends URNImpl> urns,
             int index, String completedName, long completedSize, VerifyingFile vf) {
         return new IncompleteFileDescImpl(rareFileStrategy, licenseFactory, multicaster, file, urns,
                 index, completedName, completedSize, vf);

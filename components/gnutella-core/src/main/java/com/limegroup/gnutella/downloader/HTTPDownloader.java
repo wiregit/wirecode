@@ -28,17 +28,17 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.common.HTTPHeaderValue;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.HTTPHeaderValue;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -550,7 +550,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 addSuccessfulAltLoc(me);
         }
 
-        URN sha1 = _rfd.getSHA1Urn();
+        URNImpl sha1 = _rfd.getSHA1Urn();
         if (sha1 != null)
             headers.add(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(sha1));
 
@@ -739,7 +739,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * -- means to immediately assignAndRequest. Queued -- means to sleep while
      * queued. ThexResponse -- means the thex tree was received.
      */
-    public void requestHashTree(URN sha1, IOStateObserver observer) {
+    public void requestHashTree(URNImpl sha1, IOStateObserver observer) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + " from " + _rfd.getAddress());
         
@@ -786,7 +786,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     }
 
-    public void downloadThexBody(URN sha1, IOStateObserver observer) {
+    public void downloadThexBody(URNImpl sha1, IOStateObserver observer) {
         _thexReader = thexReaderFactory.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd
                 .getSize());
         observerHandler.setDelegate(observer);
@@ -986,7 +986,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @param sha1 the <tt>URN</tt> we expect
      * @throws ContentUrnMismatchException
      */
-    private void checkContentUrnHeader(String value, URN sha1) throws ContentUrnMismatchException {
+    private void checkContentUrnHeader(String value, URNImpl sha1) throws ContentUrnMismatchException {
         if (_root32 == null && value.indexOf("urn:bitprint:") > -1) {
             // If the root32 was not in the X-Thex-URI header
             // (the spec requires it be there), then steal it from
@@ -997,9 +997,9 @@ public class HTTPDownloader implements BandwidthTracker {
         if (sha1 == null)
             return;
 
-        URN contentUrn = null;
+        URNImpl contentUrn = null;
         try {
-            contentUrn = URN.createSHA1Urn(value);
+            contentUrn = URNImpl.createSHA1Urn(value);
         } catch (IOException ioe) {
             // could be an URN type we don't know. So ignore all
             return;
@@ -1674,7 +1674,7 @@ public class HTTPDownloader implements BandwidthTracker {
     void createAssertionReport(AssertFailure bad) {
         String currentWorker = "current worker " + System.identityHashCode(this);
         String allWorkers = null;
-        URN urn = _rfd.getSHA1Urn();
+        URNImpl urn = _rfd.getSHA1Urn();
         if (urn != null) {
             ManagedDownloaderImpl myDownloader = (ManagedDownloaderImpl) downloadManager
                     .getDownloaderForURN(urn);

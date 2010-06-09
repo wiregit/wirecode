@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.friend.api.Friend;
+import org.limewire.io.URN;
 import org.limewire.util.Objects;
 
 /**

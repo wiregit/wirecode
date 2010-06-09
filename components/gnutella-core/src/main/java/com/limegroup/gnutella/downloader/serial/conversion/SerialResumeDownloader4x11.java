@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 class SerialResumeDownloader4x11 extends SerialManagedDownloaderImpl implements SerialResumeDownloader {
@@ -14,7 +14,7 @@ class SerialResumeDownloader4x11 extends SerialManagedDownloaderImpl implements 
 
     private int _size;
 
-    private URN _hash;
+    private URNImpl _hash;
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialResumeDownloader#getIncompleteFile()
@@ -40,7 +40,7 @@ class SerialResumeDownloader4x11 extends SerialManagedDownloaderImpl implements 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialResumeDownloader#getUrn()
      */
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return _hash;
     }
 

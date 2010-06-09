@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 import org.limewire.core.settings.UploadSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -17,7 +17,7 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
      * Constant for the sha1 urn for this <tt>AlternateLocation</tt> -- can be
      * <tt>null</tt>.
      */
-    protected final URN SHA1_URN;
+    protected final URNImpl SHA1_URN;
 
     /**
      * Constant for the string to display as the httpStringValue.
@@ -47,7 +47,7 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
      */
     private final Average legacy, ping, response;
 
-    protected AbstractAlternateLocation(URN sha1) {
+    protected AbstractAlternateLocation(URNImpl sha1) {
         SHA1_URN = Objects.nonNull(sha1, "sha1");
         legacy = new Average();
         ping = new Average();
@@ -61,7 +61,7 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
      * 
      * @see com.limegroup.gnutella.altlocs.AlternateLocation#getSHA1Urn()
      */
-    public URN getSHA1Urn() {
+    public URNImpl getSHA1Urn() {
         return SHA1_URN;
     }
 

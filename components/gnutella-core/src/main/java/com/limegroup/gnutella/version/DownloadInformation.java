@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.version;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 public interface DownloadInformation {
     
-    public URN getUpdateURN();
+    public URNImpl getUpdateURN();
     public String getTTRoot();
     public String getUpdateCommand();
     public String getUpdateFileName();

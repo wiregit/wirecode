@@ -17,7 +17,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.PushEndpoint;
@@ -229,7 +229,7 @@ public final class AlternateLocationTest extends LimeTestCase {
 	 */
 	public void testStringUrnConstructor() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        URN urn = URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
 
         // Now try the new-style values
         for(int i = 1; i < 254; i++) {
@@ -342,8 +342,8 @@ public final class AlternateLocationTest extends LimeTestCase {
     }
 
     public void testDemotedEquals() throws Exception {
-        AlternateLocation loc1 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
-        AbstractAlternateLocation loc2 = (AbstractAlternateLocation)alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
+        AlternateLocation loc1 = alternateLocationFactory.create(equalLocs[0], URNImpl.createSHA1Urn(HASH));
+        AbstractAlternateLocation loc2 = (AbstractAlternateLocation)alternateLocationFactory.create(equalLocs[0], URNImpl.createSHA1Urn(HASH));
         assertEquals("locations should be equal", loc1, loc2);
         loc2.demote();
         assertEquals("locations should be equal", loc1, loc2);
@@ -353,8 +353,8 @@ public final class AlternateLocationTest extends LimeTestCase {
     public void testCompareTo() throws Exception {
         TreeSet<AlternateLocation> set = new TreeSet<AlternateLocation>();
         
-        AbstractAlternateLocation direct1 = (AbstractAlternateLocation) alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
-        AlternateLocation direct2 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
+        AbstractAlternateLocation direct1 = (AbstractAlternateLocation) alternateLocationFactory.create(equalLocs[0], URNImpl.createSHA1Urn(HASH));
+        AlternateLocation direct2 = alternateLocationFactory.create(equalLocs[0], URNImpl.createSHA1Urn(HASH));
         
         set.add(direct1);
         assertTrue(set.contains(direct2));
@@ -374,8 +374,8 @@ public final class AlternateLocationTest extends LimeTestCase {
         GUID clientGUID = new GUID(GUID.makeGuid());
         String httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
         
-        URN urn =
-	        URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
+        URNImpl urn =
+	        URNImpl.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
         
         AbstractAlternateLocation push1 = (AbstractAlternateLocation) alternateLocationFactory.create(httpString,urn);
         AlternateLocation push2 = alternateLocationFactory.create(httpString,urn);
@@ -405,9 +405,9 @@ public final class AlternateLocationTest extends LimeTestCase {
 	 */
 	public void testAlternateLocationEquals() throws Exception {
 		for(int i=0; i<equalLocs.length; i++) {
-			AlternateLocation curLoc = alternateLocationFactory.create(equalLocs[i], URN.createSHA1Urn(HASH));
+			AlternateLocation curLoc = alternateLocationFactory.create(equalLocs[i], URNImpl.createSHA1Urn(HASH));
 			for(int j=0; j<equalLocs.length; j++) {
-				AlternateLocation newLoc = alternateLocationFactory.create(equalLocs[j], URN.createSHA1Urn(HASH));
+				AlternateLocation newLoc = alternateLocationFactory.create(equalLocs[j], URNImpl.createSHA1Urn(HASH));
 				assertEquals("locations should be equal", curLoc, newLoc);
 			}
 		}
@@ -419,10 +419,10 @@ public final class AlternateLocationTest extends LimeTestCase {
 	public void testAlternateLocationCompareTo() throws Exception {
 		for(int i=0; i<equalLocs.length; i++) {
 			AlternateLocation curLoc = 
-			    alternateLocationFactory.create(equalLocs[i], URN.createSHA1Urn(HASH));
+			    alternateLocationFactory.create(equalLocs[i], URNImpl.createSHA1Urn(HASH));
 			for(int j=0; j<equalLocs.length; j++) {
 				AlternateLocation newLoc = 
-				    alternateLocationFactory.create(equalLocs[j], URN.createSHA1Urn(HASH));
+				    alternateLocationFactory.create(equalLocs[j], URNImpl.createSHA1Urn(HASH));
 				int z = curLoc.compareTo(newLoc);
 				assertEquals("locations should be equal", 0, z);
 			}

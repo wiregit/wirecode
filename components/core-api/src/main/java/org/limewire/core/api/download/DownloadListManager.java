@@ -5,8 +5,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.magnet.MagnetLink;
+import org.limewire.io.URN;
 
 import ca.odell.glazedlists.EventList;
 

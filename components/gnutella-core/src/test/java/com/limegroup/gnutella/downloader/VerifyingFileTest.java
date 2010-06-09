@@ -13,7 +13,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -59,7 +59,7 @@ public class VerifyingFileTest extends LimeTestCase {
 
         InputStream in = new FileInputStream(completeFile);
         try {
-            defaultHashTree = tigerTreeFactory.createHashTree(completeFile.length(), in, URN
+            defaultHashTree = tigerTreeFactory.createHashTree(completeFile.length(), in, URNImpl
                     .createSHA1Urn(sha1));
         } finally {
             in.close();
@@ -281,7 +281,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int)r.getLow(), chunk);
         vf.waitForPending(1000);
         assertEquals(leasedSize, vf.getVerifiedBlockSize());
-        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URNImpl.createSHA1Urn(sha1));
         String currentRoot = vf.getHashTree().getRootHash();
         vf.setHashTree(other);
         assertEquals(currentRoot,vf.getHashTree().getRootHash());
@@ -310,7 +310,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int)r.getLow(), chunk);
         vf.waitForPending(1000);
         assertEquals(leasedSize, vf.getVerifiedBlockSize());
-        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URNImpl.createSHA1Urn(sha1));
         String currentRoot = vf.getHashTree().getRootHash();
         
         // everything verified becomes partial

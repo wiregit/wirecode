@@ -6,7 +6,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
@@ -31,7 +31,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         this.licenseCache = licenseCache;
     }
     
-    public boolean isVerifiedAndValid(URN urn, String licenseString) {
+    public boolean isVerifiedAndValid(URNImpl urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
         return uri != null && licenseCache.get().isVerifiedAndValid(urn, uri);
     }

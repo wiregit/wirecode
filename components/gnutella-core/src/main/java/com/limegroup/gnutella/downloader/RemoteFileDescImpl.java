@@ -11,7 +11,7 @@ import org.apache.http.auth.Credentials;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
@@ -48,7 +48,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
 
     private final LimeXMLDocument _xmlDoc;
 
-    private final Set<URN> _urns;
+    private final Set<URNImpl> _urns;
     
     /**
      * Boolean indicating whether or not the remote host has browse host
@@ -104,7 +104,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
 
     public RemoteFileDescImpl(Address address, long index, String filename, long size,
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor, long createTime,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor, long createTime,
             boolean http11, AddressFactory addressFactory, byte[] queryGUID) {
         this.addressFactory = addressFactory;
         this.address = Objects.nonNull(address, "address");
@@ -271,7 +271,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      * 
      * @return the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>
      */
-    public final Set<URN> getUrns() {
+    public final Set<URNImpl> getUrns() {
         return _urns;
     }
 
@@ -281,7 +281,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      * @return the SHA1 <tt>URN</tt> for this <tt>RemoteFileDesc</tt>, or
      *         <tt>null</tt> if there is none
      */
-    public final URN getSHA1Urn() {
+    public final URNImpl getSHA1Urn() {
         return UrnSet.getSha1(_urns);
     }
 
@@ -291,7 +291,7 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#getUrl()
      */
     public String getUrlPath() {
-        URN urn = getSHA1Urn();
+        URNImpl urn = getSHA1Urn();
         if (urn == null) {
             return "/get/" + _index + "/" + _filename;
         } else {

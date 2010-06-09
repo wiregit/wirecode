@@ -40,7 +40,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -227,7 +227,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void connect(PushEndpoint pushEndpoint, ConnectObserver observer) {
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(pushEndpoint, SPECIAL_INDEX, "fake",
-                0, pushEndpoint.getClientGUID(), 0, 0, false, null, URN.NO_URN_SET, false, "", -1,
+                0, pushEndpoint.getClientGUID(), 0, 0, false, null, URNImpl.NO_URN_SET, false, "", -1,
                 true, null);
         connect(fakeRFD, observer);
     }
@@ -235,7 +235,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void connect(FirewalledAddress address, ConnectObserver observer) {
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(address, SPECIAL_INDEX, "fake",
-                0, address.getClientGuid().bytes(), 0, 0, false, null, URN.NO_URN_SET, false, "", -1,
+                0, address.getClientGuid().bytes(), 0, 0, false, null, URNImpl.NO_URN_SET, false, "", -1,
                 true, null);
         connect(fakeRFD, observer);
     }

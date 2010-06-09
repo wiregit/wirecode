@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.Address;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -29,7 +29,7 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * @param url the url
      */
     UrlRemoteFileDescImpl(Address address, String filename, long size,
-            Set<? extends URN> urns, URL url, AddressFactory addressFactory) {
+            Set<? extends URNImpl> urns, URL url, AddressFactory addressFactory) {
         super(address, 1, filename, size, DataUtils.EMPTY_GUID, SpeedConstants.T3_SPEED_INT, 3, false, null, 
                 urns, false, "", -1, false, addressFactory, null);
         this._url = url;

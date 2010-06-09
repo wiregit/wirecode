@@ -36,7 +36,7 @@ import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
@@ -113,7 +113,7 @@ class LibraryImpl implements Library, FileCollection {
      * files[i].containsUrn(k).  Likewise for all i, for all k in
      * files[i].getUrns(), rnMap.get(k) contains i.
      */
-    private final Map<URN, IntSet> urnMap;
+    private final Map<URNImpl, IntSet> urnMap;
     
     /** All the library data for this library -- loaded on-demand. */
     private final LibraryFileData fileData;  
@@ -179,7 +179,7 @@ class LibraryImpl implements Library, FileCollection {
         this.fileListListenerSupport = new EventMulticasterImpl<FileViewChangeEvent>();
         this.folderLoader = ExecutorsHelper.newProcessingQueue("Library Folder Loader"); 
         this.files = new ArrayList<FileDesc>();
-        this.urnMap = new HashMap<URN, IntSet>();
+        this.urnMap = new HashMap<URNImpl, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
         this.fileToFutures = new HashMap<File, Future>();
         this.urnValidator = urnValidator;
@@ -319,7 +319,7 @@ class LibraryImpl implements Library, FileCollection {
     
     /** Adds this incomplete file to the list of managed files */
     void addIncompleteFile(File incompleteFile,
-                           Set<? extends URN> urns,
+                           Set<? extends URNImpl> urns,
                            String name,
                            long size,
                            VerifyingFile vf) {
@@ -401,7 +401,7 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     @Override
-    public FileDesc getFileDesc(URN urn) {
+    public FileDesc getFileDesc(URNImpl urn) {
         List<FileDesc> matching = getFileDescsMatching(urn);
         if(matching.isEmpty()) {
             return null;
@@ -411,7 +411,7 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     @Override
-    public List<FileDesc> getFileDescsMatching(URN urn) {
+    public List<FileDesc> getFileDescsMatching(URNImpl urn) {
         rwLock.readLock().lock();
         try {
             IntSet urnsMatching = urnMap.get(urn);
@@ -576,7 +576,7 @@ class LibraryImpl implements Library, FileCollection {
      * 
      * Then proceed to either step 2 (calculate URNs if none exist) or step 3 (check if dangerous & load XML)
      */
-    private void startLoadingFileDesc(final File file, Set<URN> urns,
+    private void startLoadingFileDesc(final File file, Set<URNImpl> urns,
             final List<? extends LimeXMLDocument> metadata, final FileDesc oldFileDesc,
             final PendingFuture task) {
         final FileDesc fd = createAndAddFileDesc(file, metadata, urns, oldFileDesc, task);
@@ -584,13 +584,13 @@ class LibraryImpl implements Library, FileCollection {
         if(fd != null) {
             if(UrnSet.getSha1(urns) == null) {
                 // Create a FileDesc & add it before we have a set of URNs for it.
-                ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheSHA1(file);
+                ListeningFuture<Set<URNImpl>> urnFuture = urnCache.calculateAndCacheSHA1(file);
                 setFutureForFile(file, urnFuture);  
                 LOG.debugf("Submitting URN future for {0}", file);
                 broadcastQueued(file);
-                urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
+                urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URNImpl>>>() {
                     @Override
-                    public void handleEvent(FutureEvent<Set<URN>> event) {
+                    public void handleEvent(FutureEvent<Set<URNImpl>> event) {
                         LOG.debugf("Running URN future for {0}", file);
                         removeFutureForFile(file);
                         if(contains(fd)) {
@@ -656,8 +656,8 @@ class LibraryImpl implements Library, FileCollection {
     
     /** Step 2 of loading FDs. */
     private void addUrnsToFileDesc(FileDesc fd, List<? extends LimeXMLDocument> metadata,
-            FutureEvent<Set<URN>> urnEvent, PendingFuture task, FileDesc oldFileDesc) {
-        Set<URN> urns = urnEvent.getResult();
+            FutureEvent<Set<URNImpl>> urnEvent, PendingFuture task, FileDesc oldFileDesc) {
+        Set<URNImpl> urns = urnEvent.getResult();
         // If the URN couldn't be calculated
         if (urns == null || urns.isEmpty()) {
             remove(fd.getFile());
@@ -670,7 +670,7 @@ class LibraryImpl implements Library, FileCollection {
             task.setException(createFailureException(fd.getFile(), oldFileDesc, FileViewChangeFailedException.Reason.INVALID_URN));
         } else {
             // Add URNs.
-            for(URN urn : urns) {
+            for(URNImpl urn : urns) {
                 fd.addUrn(urn);
             }
             rwLock.writeLock().lock();
@@ -688,7 +688,7 @@ class LibraryImpl implements Library, FileCollection {
     }
     
     /** Returns the newly created FD & dispatches events about its creation. */
-    private FileDesc createAndAddFileDesc(File file, List<? extends LimeXMLDocument> metadata, Set<URN> urns,
+    private FileDesc createAndAddFileDesc(File file, List<? extends LimeXMLDocument> metadata, Set<URNImpl> urns,
             FileDesc oldFileDesc, PendingFuture task) {
         FileDesc fd = null;
         FileDesc newFD = null;
@@ -750,7 +750,7 @@ class LibraryImpl implements Library, FileCollection {
     private void finishLoadingFileDesc(FileDesc fd, List<? extends LimeXMLDocument> metadata,
             PendingFuture task, boolean alwaysSendMetaChange, FileDesc oldFileDesc) {
         // Note: Dangerous file checking may block for a period of time.
-        URN sha1 = fd.getSHA1Urn();
+        URNImpl sha1 = fd.getSHA1Urn();
         boolean dangerous = false;
         if(!getLibraryData().isFileSafe(sha1.toString())) {
             dangerous = dangerousFileChecker.isDangerous(fd.getFile());
@@ -775,7 +775,7 @@ class LibraryImpl implements Library, FileCollection {
      * Creates an FD for the file.  Returns null if the FD cannot be created
      * (because the URN validator says it's not valid, for example).
      */
-    private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
+    private FileDesc createFileDesc(File file, Set<? extends URNImpl> urns, int index){
         if(urnValidator.isInvalid(UrnSet.getSha1(urns)) ||
                 urnFilter.isBlacklisted(UrnSet.getSha1(urns))) {
             return null;
@@ -841,7 +841,7 @@ class LibraryImpl implements Library, FileCollection {
 
     /** Generic method for adding a fileDesc's URNS to a map */
     private void updateUrnIndex(FileDesc fileDesc) {
-        URN sha1 = fileDesc.getSHA1Urn();
+        URNImpl sha1 = fileDesc.getSHA1Urn();
         if(sha1 != null) {
             IntSet indices = urnMap.get(sha1);
             if (indices == null) {
@@ -856,7 +856,7 @@ class LibraryImpl implements Library, FileCollection {
      * Removes stored indices for a URN associated with a given FileDesc
      */
     private void removeUrnIndex(FileDesc fileDesc) {
-        URN sha1 = fileDesc.getSHA1Urn();
+        URNImpl sha1 = fileDesc.getSHA1Urn();
         if(sha1 != null) {
             // Lookup each of desc's URN's ind _urnMap.
             IntSet indices = urnMap.get(sha1);

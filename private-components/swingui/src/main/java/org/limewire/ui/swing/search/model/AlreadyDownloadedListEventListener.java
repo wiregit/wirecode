@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.search.model;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.io.URN;
 
 /**
  * A listener to handle updates to the list of visual search results.  As each

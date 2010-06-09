@@ -11,7 +11,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -26,7 +26,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
     
     private IncompleteFileDesc ifd;
     private String fileName = "ifd.txt";
-    private URN urn;
+    private URNImpl urn;
     private Set urns;
     private VerifyingFile vf;
     private VerifyingFileFactory verifyingFileFactory;
@@ -43,7 +43,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
        
-        urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         urns = new HashSet(1);
         urns.add(urn);
         

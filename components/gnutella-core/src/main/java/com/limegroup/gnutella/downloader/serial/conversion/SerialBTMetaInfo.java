@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.GenericsUtils;
 
 
@@ -24,7 +24,7 @@ public class SerialBTMetaInfo implements Serializable {
     private List<byte[]> hashes;
     private SerialTorrentFileSystem fileSystem;
     private byte[] infoHash;
-    private URN infoHashURN;
+    private URNImpl infoHashURN;
     private SerialOldURI[] trackers;
     private SerialDiskManagerData diskManagerData;
     private int pieceLength;
@@ -55,7 +55,7 @@ public class SerialBTMetaInfo implements Serializable {
 		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
 		fileSystem = (SerialTorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
 		infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
-		infoHashURN = URN.createSHA1UrnFromBytes(infoHash);
+		infoHashURN = URNImpl.createSHA1UrnFromBytes(infoHash);
 		trackers = (SerialOldURI[]) toRead.get(SerialKeys.TRACKERS);
 		Float ratio = (Float)toRead.get(SerialKeys.RATIO);
         diskManagerData = (SerialDiskManagerData)toRead.get(SerialKeys.FOLDER_DATA);         
@@ -77,7 +77,7 @@ public class SerialBTMetaInfo implements Serializable {
         return infoHash;
     }
 
-    public URN getInfoHashURN() {
+    public URNImpl getInfoHashURN() {
         return infoHashURN;
     }
 

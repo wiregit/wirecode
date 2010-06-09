@@ -16,7 +16,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
@@ -299,7 +299,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
     
     private RemoteFileDesc fakeRFD() throws Exception {
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), false), 13l, "badger", 1024, new byte[16],
-                56, 4, true, null, new UrnSet(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")), false, "", -1);
+                56, 4, true, null, new UrnSet(URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")), false, "", -1);
     }
         
     @Singleton
@@ -331,7 +331,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
 //        volatile boolean cancelled;
         
-        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
+        public Shutdownable findAltLocs(URNImpl urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {

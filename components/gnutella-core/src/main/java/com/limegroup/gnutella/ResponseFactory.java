@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -16,7 +16,7 @@ public interface ResponseFactory {
      * @requires index and size can fit in 4 unsigned bytes, i.e., 0 <= index,
      *           size < 2^32
      */
-    public Response createResponse(long index, long size, String name, URN urn);
+    public Response createResponse(long index, long size, String name, URNImpl urn);
 
     /**
      * Creates a new response with parsed metadata. Typically this is used to
@@ -24,7 +24,7 @@ public interface ResponseFactory {
      * @param doc the metadata to include
      */
     public Response createResponse(long index, long size, String name,
-            LimeXMLDocument doc, URN urn);
+            LimeXMLDocument doc, URNImpl urn);
     
     /**
      * Constructs a new <tt>Response</tt> instance from the data in the

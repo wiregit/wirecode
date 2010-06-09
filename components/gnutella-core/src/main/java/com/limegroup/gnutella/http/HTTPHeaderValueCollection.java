@@ -2,7 +2,7 @@ package com.limegroup.gnutella.http;
 
 import java.util.Collection;
 
-import org.limewire.common.HTTPHeaderValue;
+import org.limewire.io.HTTPHeaderValue;
 
 public class HTTPHeaderValueCollection implements HTTPHeaderValue {
     

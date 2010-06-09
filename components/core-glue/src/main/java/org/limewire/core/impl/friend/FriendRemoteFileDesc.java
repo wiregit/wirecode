@@ -15,7 +15,7 @@ import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
@@ -40,7 +40,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     private final int speed;
     private final int quality;
     private final LimeXMLDocument xmlDoc;
-    private final Set<URN> urns;
+    private final Set<URNImpl> urns;
     private final String vendor;
     private final long createTime;
     private final AddressFactory addressFactory; 
@@ -50,7 +50,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     private float spamRating = 0;
     
     public FriendRemoteFileDesc(FriendAddress address, long index, String filename,
-            long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
+            long size, byte[] clientGUID, int speed, int quality, LimeXMLDocument xmlDoc, Set<? extends URNImpl> urns,
             String vendor, long createTime, boolean http11,
             AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         this.address = address;
@@ -137,7 +137,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public String getUrlPath() {
-        URN sha1Urn = getSHA1Urn();
+        URNImpl sha1Urn = getSHA1Urn();
         FriendPresence presence = addressResolver.getPresence(address);
         if (presence == null) {
             // race condition, friend is already offline, just return a possibly invalid path
@@ -205,8 +205,8 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public URN getSHA1Urn() {
-        URN sha1Urn = UrnSet.getSha1(urns);
+    public URNImpl getSHA1Urn() {
+        URNImpl sha1Urn = UrnSet.getSha1(urns);
         if (sha1Urn == null) {
             throw new IllegalArgumentException(urns + " should have sha1");
         }
@@ -219,7 +219,7 @@ public class FriendRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public Set<URN> getUrns() {
+    public Set<URNImpl> getUrns() {
         return urns;
     }
 

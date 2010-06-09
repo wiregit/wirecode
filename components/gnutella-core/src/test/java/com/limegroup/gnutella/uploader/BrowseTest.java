@@ -25,7 +25,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 
 import com.google.inject.Inject;
@@ -90,9 +90,9 @@ public class BrowseTest extends LimeTestCase {
         for(File file : testFiles) {
             FileDesc fileDesc = gnutellaFileCollection.add(file).get(1, TimeUnit.SECONDS);
             assertNotNull(fileDesc);
-            URN sha1Urn = fileDesc.getSHA1Urn();
+            URNImpl sha1Urn = fileDesc.getSHA1Urn();
             // add sha1 as non-metadata hash
-            fileDesc.addUrn(URN.createNMS1FromBytes(sha1Urn.getBytes()));
+            fileDesc.addUrn(URNImpl.createNMS1FromBytes(sha1Urn.getBytes()));
         }
         
         host = protocol + "://localhost:" + PORT;
@@ -153,7 +153,7 @@ public class BrowseTest extends LimeTestCase {
                     files.add(result.getName());
                     assertTrue("Expected .tmp or LimeWire file, got: " + result.getName(),
                             result.getName().endsWith(".tmp") || result.getName().toLowerCase().startsWith("limewire"));
-                    URN nms1Urn = UrnSet.getNMS1(result.getUrns());
+                    URNImpl nms1Urn = UrnSet.getNMS1(result.getUrns());
                     if (includeNMS1Urn) {
                         assertNotNull(nms1Urn);
                     } else {

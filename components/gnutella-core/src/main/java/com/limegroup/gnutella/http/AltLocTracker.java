@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.limewire.collection.MultiRRIterator;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -48,11 +48,11 @@ public class AltLocTracker {
      */
     private int fwtVersion = 0;
 
-    private final URN urn;
+    private final URNImpl urn;
 
     private boolean wantsFAlts;
 
-    public AltLocTracker(URN urn) {
+    public AltLocTracker(URNImpl urn) {
         if (urn == null) {
             throw new IllegalArgumentException();
         }
@@ -160,7 +160,7 @@ public class AltLocTracker {
         this.wantsFAlts = wantsFAlts;
     }
 
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return urn;
     }
 

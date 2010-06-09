@@ -14,7 +14,7 @@ import org.limewire.core.impl.TorrentFactory;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FileMetaData;
 import org.limewire.friend.impl.FileMetaDataImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
@@ -47,7 +47,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     @Override
     public long getCreationTime() {
-        URN sha1 = fileDesc.getSHA1Urn();
+        URNImpl sha1 = fileDesc.getSHA1Urn();
         if(sha1 != null) {
             return creationTimeCache.getCreationTimeAsLong(sha1);
         } else {
@@ -135,7 +135,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         fileMetaData.setName(fileDesc.getFileName());
         fileMetaData.setSize(fileDesc.getFileSize());
         Set<String> urns = new HashSet<String>();
-        for(URN urn : fileDesc.getUrns()) {
+        for(URNImpl urn : fileDesc.getUrns()) {
             urns.add(urn.toString());
         }
         fileMetaData.setURNs(urns);
@@ -187,8 +187,8 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
     }
     
     @Override
-    public org.limewire.common.URN getUrn() {
-        URN urn = fileDesc.getSHA1Urn();
+    public org.limewire.io.URN getUrn() {
+        URNImpl urn = fileDesc.getSHA1Urn();
         if(urn != null) {
             return urn;
         } else {

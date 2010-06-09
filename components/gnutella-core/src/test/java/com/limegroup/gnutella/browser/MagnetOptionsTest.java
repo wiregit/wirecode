@@ -11,7 +11,7 @@ import java.util.Locale;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.EncodingUtils;
 
@@ -27,10 +27,10 @@ public class MagnetOptionsTest extends BaseTestCase {
     public void setUp() {
         validMagnets = MagnetOptions.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
         guidMagnets = new String[] {
-                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
-                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
-                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&as=" + URN.createGUIDUrn(new GUID()),
-                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URNImpl.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URNImpl.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&as=" + URNImpl.createGUIDUrn(new GUID()),
+                "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URNImpl.createGUIDUrn(new GUID()),
         };
         context = new Mockery();
     }
@@ -190,7 +190,7 @@ public class MagnetOptionsTest extends BaseTestCase {
 		magnet = MagnetOptions.createMagnet("keywords", "", null, null);
 		assertEquals("keywords", magnet.getFileNameForSaving());
 		
-		URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+		URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
 		
 		magnet = MagnetOptions.createMagnet(null, null, urn, null);
 		assertEquals(urn.toString(), magnet.getFileNameForSaving());
@@ -251,9 +251,9 @@ public class MagnetOptionsTest extends BaseTestCase {
         }
         for (String magnet : magnets) {
             MagnetOptions options = MagnetOptions.parseMagnet(magnet)[0];
-            Collection<URN> urns = options.getGUIDUrns();
+            Collection<URNImpl> urns = options.getGUIDUrns();
             assertFalse(urns.isEmpty());
-            for (URN urn : urns) {
+            for (URNImpl urn : urns) {
                 assertTrue(urn.isGUID());
             }
         }
@@ -266,7 +266,7 @@ public class MagnetOptionsTest extends BaseTestCase {
     
     public void testCreateMagnetWithGUIDUrn() throws Exception {
         final GUID guid = new GUID();
-        final URN urn = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB");
+        final URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB");
         final FileDetails fileDetails = context.mock(FileDetails.class);
         context.checking(new Expectations() {{
             allowing(fileDetails).getFileName();
@@ -282,14 +282,14 @@ public class MagnetOptionsTest extends BaseTestCase {
         MagnetOptions magnet = MagnetOptions.createMagnet(fileDetails, null, guid.bytes());
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
         assertEquals(urn, magnet.getSHA1Urn());
-        assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
+        assertEquals(URNImpl.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
         assertFalse(magnet.toExternalForm().contains("xl"));
         assertEquals(-1, magnet.getFileSize());
         
         magnet = MagnetOptions.createMagnet(fileDetails, new InetSocketAddress("127.0.0.1", 5555), guid.bytes());
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
         assertEquals(urn, magnet.getSHA1Urn());
-        assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
+        assertEquals(URNImpl.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
         assertEquals(2, magnet.getXS().size());
         assertTrue(magnet.toExternalForm().contains("127.0.0.1:5555"));
         assertEquals(1, magnet.getDefaultURLs().length);
@@ -299,8 +299,8 @@ public class MagnetOptionsTest extends BaseTestCase {
     
     public void testCreateMagnetOptionsWithGuidUrns() throws Exception {
         GUID guid = new GUID();
-        URN guidUrn = URN.createGUIDUrn(guid);
-        URN sha1Urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        URNImpl guidUrn = URNImpl.createGUIDUrn(guid);
+        URNImpl sha1Urn = URNImpl.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
         MagnetOptions magnet = MagnetOptions.createMagnet("hello", "fileName", sha1Urn, null, Collections.singleton(guidUrn));
         

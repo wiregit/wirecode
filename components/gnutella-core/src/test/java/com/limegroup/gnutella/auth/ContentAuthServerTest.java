@@ -4,7 +4,7 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
@@ -40,14 +40,14 @@ public class ContentAuthServerTest extends LimeTestCase {
     
     public void testRequestBlockedUrn() throws Exception {
         contentManager.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("fserv1.limewire.com", 10000), udpService));
-        ContentResponseData contentResponseData = contentManager.request(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 10 * 10000);
+        ContentResponseData contentResponseData = contentManager.request(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 10 * 10000);
         assertNotNull(contentResponseData);
         assertFalse(contentResponseData.isOK());
     }
     
     public void testRequestNonBlockedUrn() throws Exception {
         contentManager.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("fserv1.limewire.com", 10000), udpService));
-        ContentResponseData contentResponseData = contentManager.request(URN.createUrnFromString("urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"), 10 * 10000);
+        ContentResponseData contentResponseData = contentManager.request(URNImpl.createUrnFromString("urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"), 10 * 10000);
         assertNotNull(contentResponseData);
         assertTrue(contentResponseData.isOK());
     }

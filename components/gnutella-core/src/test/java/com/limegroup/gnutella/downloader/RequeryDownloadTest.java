@@ -25,7 +25,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
@@ -118,7 +118,7 @@ public class RequeryDownloadTest extends LimeTestCase {
     /** The incomplete file to resume from. */
     private File incompleteFile;    
     /** The hash of file when complete. */
-    private URN hash;
+    private URNImpl hash;
     /** The uploader */
     private TestUploader testUploader;
     /** The TestMessageRouter's queryRouteTable. */
@@ -181,7 +181,7 @@ public class RequeryDownloadTest extends LimeTestCase {
      *  info for that file. */
     private void initializeIncompleteFileManager() throws Exception {
        IncompleteFileManager ifm= injector.getInstance(IncompleteFileManager.class);
-       Set<URN> urns=new HashSet<URN>(1);
+       Set<URNImpl> urns=new HashSet<URNImpl>(1);
        urns.add(hash);
        RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("1.2.3.4", PORT, false), 13l, filename, TestFile.length(),
             new byte[16], 56, 4, true, null, urns, false, "", -1);
@@ -260,7 +260,7 @@ public class RequeryDownloadTest extends LimeTestCase {
      *  the download.  False if the response shouldn't satisfy it.
      */     
     private void doTest(String responseName, 
-                        URN responseURN,
+                        URNImpl responseURN,
                         boolean shouldDownload) throws Exception {        
         // we need to seed the MessageRouter with a GUID that it will recognize
         
@@ -301,9 +301,9 @@ public class RequeryDownloadTest extends LimeTestCase {
         // assertTrue("urns should contain the hash", urns.contains(_hash));
 
         //Send a response to the query.
-        Set<URN> responseURNs = null;
+        Set<URNImpl> responseURNs = null;
         if (responseURN != null) {
-            responseURNs = new HashSet<URN>(1);
+            responseURNs = new HashSet<URNImpl>(1);
             responseURNs.add(responseURN);
         }
         ResponseFactoryImpl responseFactory = (ResponseFactoryImpl)injector.getInstance(ResponseFactory.class);

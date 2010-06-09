@@ -9,11 +9,11 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.Friend;
+import org.limewire.io.URN;
 import org.limewire.util.Objects;
 
 /**

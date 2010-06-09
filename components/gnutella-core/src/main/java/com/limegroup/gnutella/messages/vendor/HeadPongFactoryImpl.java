@@ -18,7 +18,7 @@ import org.limewire.io.CountingOutputStream;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
@@ -107,7 +107,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     }
 
     /** Adds direct locations, if possible. */
-    private boolean addLocations(HeadPongRequestor ping, URN urn, OutputStream out,
+    private boolean addLocations(HeadPongRequestor ping, URNImpl urn, OutputStream out,
                                         AtomicReference<BitNumbers> tlsIndexes,
                                         int written, boolean includeSize) {
         //now add any non-firewalled altlocs in case they were requested. 
@@ -126,7 +126,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     }
 
     /** Adds push locations, if possible. */
-    private boolean addPushLocations(HeadPongRequestor ping, URN urn, OutputStream out, boolean includeTLS,
+    private boolean addPushLocations(HeadPongRequestor ping, URNImpl urn, OutputStream out, boolean includeTLS,
                                             int written, boolean includeSize) {
         if(!ping.requestsPushLocs())
             return true;
@@ -203,7 +203,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     private byte[] constructGGEPPayload(HeadPongRequestor ping) {
         GGEP ggep = new GGEP();
         
-        URN urn = ping.getUrn();
+        URNImpl urn = ping.getUrn();
         FileDesc desc = gnutellaFileView.getFileDesc(urn);
         if(desc == null) {
             desc = incompleteFileView.getFileDesc(urn);
@@ -294,7 +294,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	CountingOutputStream caos = new CountingOutputStream(baos);
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
-    	URN urn = ping.getUrn();
+    	URNImpl urn = ping.getUrn();
     	FileDesc desc = gnutellaFileView.getFileDesc(urn);
     	if(desc == null) {
     	    desc = incompleteFileView.getFileDesc(urn);

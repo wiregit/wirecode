@@ -11,11 +11,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.NFileEntity;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.common.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.http.handler.MimeTypeProvider;
+import org.limewire.io.URN;
 
 import com.google.inject.Inject;
 
@@ -55,7 +55,7 @@ class StreamRequestHandler extends AbstractRestRequestHandler {
     
     private URN getSha1UrnStringFromUri(String uri) throws IOException {
         String sha1 = uri.substring(1);  // remove "/..."  
-        return org.limewire.io.URN.createSHA1Urn(sha1);
+        return org.limewire.io.URNImpl.createSHA1Urn(sha1);
     }
     
     /**

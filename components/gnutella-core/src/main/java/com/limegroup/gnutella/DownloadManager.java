@@ -10,7 +10,7 @@ import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -82,12 +82,12 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     /**
      * Determines if the given URN has an incomplete file.
      */
-    public boolean isIncomplete(URN urn);
+    public boolean isIncomplete(URNImpl urn);
 
     /**
      * Returns whether or not we are actively downloading this file.
      */
-    public boolean isActivelyDownloading(URN urn);
+    public boolean isActivelyDownloading(URNImpl urn);
 
     /**
      * Returns the IncompleteFileManager used by this DownloadManager
@@ -107,7 +107,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
 
     public int getNumWaitingDownloads();
 
-    public Downloader getDownloaderForURN(URN sha1);
+    public Downloader getDownloaderForURN(URNImpl sha1);
 
     /**
      * Returns the active or waiting downloader that uses or will use 
@@ -223,7 +223,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     /**
      * Tries to start a torrent download without a torrent file.
      */
-    public Downloader downloadTorrent(String name, URN sha1, List<URI> trackers) throws DownloadException;
+    public Downloader downloadTorrent(String name, URNImpl sha1, List<URI> trackers) throws DownloadException;
     
     /**
      * Returns <code>true</code> if there already is a download with the same urn. 
@@ -231,7 +231,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      * and the fileSize is performed
      * @return true if there is a conflict
      */
-    public boolean conflicts(URN urn, long fileSize, File... fileName);
+    public boolean conflicts(URNImpl urn, long fileSize, File... fileName);
 
     /**
      * Returns <code>true</code> if there already is a download that is or

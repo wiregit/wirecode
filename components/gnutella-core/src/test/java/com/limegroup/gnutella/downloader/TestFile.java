@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.io.URNFactory;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -15,7 +15,7 @@ import com.limegroup.gnutella.tigertree.SimpleHashTreeNodeManager;
 
 public class TestFile {
     private static final int A_INT=0x4F1BBCDC;
-    private static URN myHash = null;
+    private static URNImpl myHash = null;
     private static HashTree myTree = null; 
     static {
         hash();
@@ -37,7 +37,7 @@ public class TestFile {
         //return 100000;    //100 KB;
     }
     
-    public static URN hashPartOfFile(int length) {
+    public static URNImpl hashPartOfFile(int length) {
         try {
             File tmpFile = File.createTempFile("testPart", "tmp");
             writeFile(tmpFile, length);
@@ -47,7 +47,7 @@ public class TestFile {
         }
     }       
 
-    public static synchronized URN hash() {
+    public static synchronized URNImpl hash() {
         if( myHash == null ) {
             try {
                 File tmpFile = File.createTempFile("tst", "tmp");
@@ -63,7 +63,7 @@ public class TestFile {
     public static synchronized HashTree tree() {
         if( myTree == null ) {
             try {
-                URN hash = hash();
+                URNImpl hash = hash();
                 File tmpFile = File.createTempFile("tst2", "tmp");
                 writeFile(tmpFile, length());
                 myTree = createHashTree(tmpFile, hash);
@@ -83,7 +83,7 @@ public class TestFile {
         os.close();
     }
     
-    private static HashTree createHashTree(File file, URN sha1) throws Throwable {
+    private static HashTree createHashTree(File file, URNImpl sha1) throws Throwable {
         HashTreeFactoryImpl hashTreeFactoryImpl = new HashTreeFactoryImpl(
                 new SimpleHashTreeNodeManager());
         return hashTreeFactoryImpl.createHashTree(file.length(), new FileInputStream(file), sha1);

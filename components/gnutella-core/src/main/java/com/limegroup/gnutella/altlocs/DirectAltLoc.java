@@ -9,7 +9,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.service.ErrorService;
 
@@ -46,7 +46,7 @@ public class DirectAltLoc extends AbstractAlternateLocation {
     
     private final NetworkInstanceUtils networkInstanceUtils;
     
-    protected DirectAltLoc(IpPort address, URN sha1, NetworkInstanceUtils networkInstanceUtils) throws IOException {
+    protected DirectAltLoc(IpPort address, URNImpl sha1, NetworkInstanceUtils networkInstanceUtils) throws IOException {
         super(sha1);
         this.networkInstanceUtils = networkInstanceUtils;
         if (!networkInstanceUtils.isValidExternalIpPort(address))
@@ -65,7 +65,7 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 	
 	@Override
     public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
-		Set<URN> urnSet = new UrnSet(getSHA1Urn());
+		Set<URNImpl> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_node instanceof Connectable ? (Connectable)_node : new ConnectableImpl(_node, false), 
 		        0, HTTPConstants.URI_RES_N2R + SHA1_URN, size, DataUtils.EMPTY_GUID,

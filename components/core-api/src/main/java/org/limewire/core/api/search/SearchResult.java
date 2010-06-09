@@ -1,9 +1,9 @@
 package org.limewire.core.api.search;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.io.URN;
 
 public interface SearchResult {
 

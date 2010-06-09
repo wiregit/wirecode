@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.library.UrnCache;
 
@@ -61,37 +61,37 @@ public class UrnHelper {
     /**
      * Array of URNs for use by tests.
      */
-    public static final URN[] URNS = new URN[VALID_URN_STRINGS.length];
+    public static final URNImpl[] URNS = new URNImpl[VALID_URN_STRINGS.length];
     
     /**
      * Array of URNType instances for use by tests.
      */
-    public static final URN.Type[] URN_TYPES = new URN.Type[VALID_URN_STRINGS.length];
+    public static final URNImpl.Type[] URN_TYPES = new URNImpl.Type[VALID_URN_STRINGS.length];
     
     @SuppressWarnings("unchecked")
-    public static final Set<URN>[] URN_SETS = new Set[VALID_URN_STRINGS.length];
+    public static final Set<URNImpl>[] URN_SETS = new Set[VALID_URN_STRINGS.length];
 
 
     /**
      * A "unique" SHA1 for convenience.
      */
-    public static final URN UNIQUE_SHA1;
+    public static final URNImpl UNIQUE_SHA1;
 
-    public static final URN SHA1;
+    public static final URNImpl SHA1;
     
-    public static final URN TTROOT;
+    public static final URNImpl TTROOT;
     
     static {        
         try {
-            UNIQUE_SHA1 = URN.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
-            SHA1 = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[3]);
-            TTROOT= URN.createTTRootUrn("urn:ttroot:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFBAAAAAAA");
+            UNIQUE_SHA1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
+            SHA1 = URNImpl.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[3]);
+            TTROOT= URNImpl.createTTRootUrn("urn:ttroot:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFBAAAAAAA");
         
             for(int i=0; i<UrnHelper.VALID_URN_STRINGS.length; i++) {
-                URN urn = URN.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[i]);
+                URNImpl urn = URNImpl.createSHA1Urn(UrnHelper.VALID_URN_STRINGS[i]);
                 UrnHelper.URNS[i] = urn;
                 UrnHelper.URN_TYPES[i] = urn.getUrnType();
-                Set<URN> urnSet = new HashSet<URN>();
+                Set<URNImpl> urnSet = new HashSet<URNImpl>();
                 urnSet.add(urn);
                 UrnHelper.URN_SETS[i] = urnSet;
             }
@@ -100,7 +100,7 @@ public class UrnHelper {
         }
     }
 
-    public static Set<URN> calculateAndCacheURN(File f, UrnCache urnCache) throws Exception {
+    public static Set<URNImpl> calculateAndCacheURN(File f, UrnCache urnCache) throws Exception {
         return urnCache.calculateAndCacheSHA1(f).get();
     }
 

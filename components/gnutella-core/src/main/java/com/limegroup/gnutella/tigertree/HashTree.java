@@ -4,8 +4,8 @@ import java.io.RandomAccessFile;
 import java.util.List;
 
 import org.limewire.collection.Range;
-import org.limewire.common.HTTPHeaderValue;
-import org.limewire.io.URN;
+import org.limewire.io.HTTPHeaderValue;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -35,7 +35,7 @@ public interface HashTree extends HTTPHeaderValue {
 
     /**
      * @return Thex URI for this HashTree
-     * @see org.limewire.common.HTTPHeaderValue#httpStringValue()
+     * @see org.limewire.io.HTTPHeaderValue#httpStringValue()
      */
     public String httpStringValue();
 
@@ -77,7 +77,7 @@ public interface HashTree extends HTTPHeaderValue {
     /**
      * @return an URN object with the root hash
      */
-    public URN getTreeRootUrn();
+    public URNImpl getTreeRootUrn();
 
     /**
      * @return String the THEX_URI.

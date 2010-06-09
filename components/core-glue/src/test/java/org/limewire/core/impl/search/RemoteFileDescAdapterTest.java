@@ -23,7 +23,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -49,7 +49,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final byte[] guid1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         final String fileName1 = "remote file name 1.txt";
         final long fileSize = 1234L;
-        final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        final URNImpl urn1 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
 
         context.checking(new Expectations() {{
             allowing(remoteFileDesc1).getAddress();
@@ -375,7 +375,7 @@ public class RemoteFileDescAdapterTest extends BaseTestCase {
         final TorrentFactory torrentFactory = context.mock(TorrentFactory.class);
         final Set<IpPort> locs = new HashSet<IpPort>();
 
-        final URN urn = URN.createSHA1Urn("urn:sha1:XXSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        final URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:XXSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
         context.checking(new Expectations() {{
             allowing(rfd).getClientGUID();

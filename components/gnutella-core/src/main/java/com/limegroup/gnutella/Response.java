@@ -8,7 +8,7 @@ import java.util.Set;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -80,7 +80,7 @@ public interface Response {
 	 * this <tt>Response</tt>, guaranteed to be non-null, although the
 	 * set could be empty
 	 */
-    public Set<URN> getUrns();
+    public Set<URNImpl> getUrns();
     
     /**
      * Returns an immutable <tt>Set</tt> of <tt>Endpoint</tt> that

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.GenericsUtils;
 
@@ -40,7 +40,7 @@ class SerialRemoteFileDesc4x16 implements Serializable, SerialRemoteFileDesc {
 
     private SerialXml[] _xmlDocs;
 
-    private Set<URN> _urns;
+    private Set<URNImpl> _urns;
 
     private boolean _browseHostEnabled;
 
@@ -60,7 +60,7 @@ class SerialRemoteFileDesc4x16 implements Serializable, SerialRemoteFileDesc {
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         if (_urns != null) {
-            Set<URN> newUrns = GenericsUtils.scanForSet(_urns, URN.class,
+            Set<URNImpl> newUrns = GenericsUtils.scanForSet(_urns, URNImpl.class,
                     GenericsUtils.ScanMode.NEW_COPY_REMOVED, UrnSet.class);
             if (_urns != newUrns)
                 _urns = Collections.unmodifiableSet(newUrns);
@@ -182,7 +182,7 @@ class SerialRemoteFileDesc4x16 implements Serializable, SerialRemoteFileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialRemoteFileDesc#getUrns()
      */
-    public Set<URN> getUrns() {
+    public Set<URNImpl> getUrns() {
         return _urns;
     }
 

@@ -12,7 +12,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Base32;
 import org.limewire.util.TestUtils;
 
@@ -228,7 +228,7 @@ public class RatingTableTest extends LimeTestCase {
             long size) throws UnknownHostException {
         RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
                 new ConnectableImpl(addr, port, false), 1, name, size,
-                GUID.makeGuid(), 3, 3, false, null, URN.NO_URN_SET, false,
+                GUID.makeGuid(), 3, 3, false, null, URNImpl.NO_URN_SET, false,
                 "ALT", 0L, false, null);
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);

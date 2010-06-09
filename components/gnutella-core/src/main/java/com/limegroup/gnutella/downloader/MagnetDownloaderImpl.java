@@ -15,7 +15,7 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
@@ -149,7 +149,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     public void initialize() {
         MagnetOptions magnet = getMagnet();
         assert (magnet != null);
-        URN sha1 = magnet.getSHA1Urn();
+        URNImpl sha1 = magnet.getSHA1Urn();
         if(sha1 != null)
             setSha1Urn(sha1);
         long size = magnet.getFileSize();
@@ -228,7 +228,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * </p>
      */
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn, long fileSize)
+        String filename, URNImpl urn, long fileSize)
             throws IOException, URISyntaxException {
         return remoteFileDescFactory.createUrlRemoteFileDesc(new URL(defaultURL), filename, urn, fileSize);
     } 
@@ -264,7 +264,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     @Override
     protected boolean allowAddition(RemoteFileDesc other) {        
         // Allow if we have a hash and other matches it.
-		URN otherSHA1 = other.getSHA1Urn();
+		URNImpl otherSHA1 = other.getSHA1Urn();
 		if (getSha1Urn() != null && otherSHA1 != null) {
 			return getSha1Urn().equals(otherSHA1);
         }

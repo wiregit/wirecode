@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 public class SerialIncompleteFileManager implements Serializable {
@@ -18,13 +18,13 @@ public class SerialIncompleteFileManager implements Serializable {
 
     private Map<File, List<Range>> blocks;
 
-    private Map<URN, File> hashes;
+    private Map<URNImpl, File> hashes;
 
     Map<File, List<Range>> getBlocks() {
         return blocks;
     }
 
-    Map<URN, File> getHashes() {
+    Map<URNImpl, File> getHashes() {
         return hashes;
     }
 
@@ -34,7 +34,7 @@ public class SerialIncompleteFileManager implements Serializable {
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         GetField gets = stream.readFields();
         blocks = (Map<File, List<Range>>) gets.get("blocks", null);
-        hashes = (Map<URN, File>) gets.get("hashes", null);
+        hashes = (Map<URNImpl, File>) gets.get("hashes", null);
     }
 
 }

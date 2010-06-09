@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
-import org.limewire.common.URN;
+import org.limewire.io.URN;
 
 /**
  * Mock URN for unit tests.

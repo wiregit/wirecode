@@ -2,8 +2,8 @@ package org.limewire.core.api.search;
 
 import java.util.Collection;
 
-import org.limewire.common.URN;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.listener.ListenerSupport;
 
 import ca.odell.glazedlists.EventList;

@@ -40,7 +40,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.libtorrent.LibTorrentParams;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
@@ -479,14 +479,14 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadManager#isIncomplete(com.limegroup.gnutella.URN)
      */
-    public boolean isIncomplete(URN urn) {
+    public boolean isIncomplete(URNImpl urn) {
         return incompleteFileManager.getFileForUrn(urn) != null;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadManager#isActivelyDownloading(com.limegroup.gnutella.URN)
      */
-    public boolean isActivelyDownloading(URN urn) {
+    public boolean isActivelyDownloading(URNImpl urn) {
         Downloader md = getDownloaderForURN(urn);
         
         if(md == null)
@@ -557,7 +557,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadManager#getDownloaderForURN(com.limegroup.gnutella.URN)
      */
-    public synchronized Downloader getDownloaderForURN(URN sha1) {
+    public synchronized Downloader getDownloaderForURN(URNImpl sha1) {
         for (CoreDownloader md : activeAndWaiting) {
             if (md.getSha1Urn() != null && sha1.equals(md.getSha1Urn()))
                 return md;
@@ -935,7 +935,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
     //TODO: this may overwrite files in the library after metadata is found
     @Override
-    public synchronized Downloader downloadTorrent(String name, URN sha1,
+    public synchronized Downloader downloadTorrent(String name, URNImpl sha1,
             List<URI> trackers) throws DownloadException {
         
         if(LOG.isInfoEnabled()) {
@@ -1012,9 +1012,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      */
     private void checkActiveAndWaiting(TorrentParams params, File saveDirectory) throws DownloadException {
         
-        URN urn = null;
+        URNImpl urn = null;
         try {
-            urn = URN.createSha1UrnFromHex(params.getSha1());
+            urn = URNImpl.createSha1UrnFromHex(params.getSha1());
         } catch (IOException e) {
            throw new DownloadException(ErrorCode.FILESYSTEM_ERROR, params.getTorrentFile());
         }
@@ -1099,7 +1099,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * Same file means: same urn, or as fallback same filename + same filesize
      */
     private boolean conflicts(RemoteFileDesc[] rfds, File... fileName) {
-        URN urn = null;
+        URNImpl urn = null;
         for (int i = 0; i < rfds.length && urn == null; i++) {
             urn = rfds[0].getSHA1Urn();
         }
@@ -1110,7 +1110,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadManager#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
      */
-    public boolean conflicts(URN urn, long fileSize, File... fileName) {
+    public boolean conflicts(URNImpl urn, long fileSize, File... fileName) {
         
         if (urn == null && fileSize == 0) {
             return false;

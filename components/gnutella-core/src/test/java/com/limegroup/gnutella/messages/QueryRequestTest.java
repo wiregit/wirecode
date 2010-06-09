@@ -20,7 +20,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -171,7 +171,7 @@ public final class QueryRequestTest extends LimeTestCase {
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
-			queryRequestFactory.createQuery((URN)null);
+			queryRequestFactory.createQuery((URNImpl)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
@@ -180,7 +180,7 @@ public final class QueryRequestTest extends LimeTestCase {
 		} catch(NullPointerException e) {}		
 
 		try {
-			queryRequestFactory.createRequery((URN)null);
+			queryRequestFactory.createRequery((URNImpl)null);
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}		
 		try {
@@ -1289,7 +1289,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         // oob not set
         request = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)1,
-                "query", "", URN.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP,
+                "query", "", URNImpl.NO_URN_SET, (AddressSecurityToken)null, true, Network.TCP,
                 false, 0);
         assertFalse(request.isSecurityTokenRequired());
         
@@ -1438,7 +1438,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)1, 5,
-                "query", "", URN.NO_URN_SET, new AddressSecurityToken(InetAddress.getLocalHost(), 1094, macManager), false, Network.MULTICAST,
+                "query", "", URNImpl.NO_URN_SET, new AddressSecurityToken(InetAddress.getLocalHost(), 1094, macManager), false, Network.MULTICAST,
                 false, 0, false, 0, false);
 
         try {

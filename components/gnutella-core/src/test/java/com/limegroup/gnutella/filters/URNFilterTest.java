@@ -16,7 +16,7 @@ import org.limewire.util.Base32;
 import org.limewire.util.Visitor;
 
 import com.limegroup.gnutella.Response;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -95,10 +95,10 @@ public class URNFilterTest extends LimeTestCase {
     }
 
     public void testAllow() throws Exception {
-        final Set<URN> badURNs = new HashSet<URN>();
-        badURNs.add(URN.createSHA1Urn("urn:sha1:" + badLocal));
-        final Set<URN> goodURNs = new HashSet<URN>();
-        goodURNs.add(URN.createSHA1Urn("urn:sha1:" + good));
+        final Set<URNImpl> badURNs = new HashSet<URNImpl>();
+        badURNs.add(URNImpl.createSHA1Urn("urn:sha1:" + badLocal));
+        final Set<URNImpl> goodURNs = new HashSet<URNImpl>();
+        goodURNs.add(URNImpl.createSHA1Urn("urn:sha1:" + good));
         final Response response = context.mock(Response.class);
         final QueryReply queryReply = context.mock(QueryReply.class);
         context.checking(new Expectations() {{
@@ -126,10 +126,10 @@ public class URNFilterTest extends LimeTestCase {
     }
 
     public void testIsBlacklistedQueryReply() throws Exception {
-        final Set<URN> badURNs = new HashSet<URN>();
-        badURNs.add(URN.createSHA1Urn("urn:sha1:" + badLocal));
-        final Set<URN> goodURNs = new HashSet<URN>();
-        goodURNs.add(URN.createSHA1Urn("urn:sha1:" + good));
+        final Set<URNImpl> badURNs = new HashSet<URNImpl>();
+        badURNs.add(URNImpl.createSHA1Urn("urn:sha1:" + badLocal));
+        final Set<URNImpl> goodURNs = new HashSet<URNImpl>();
+        goodURNs.add(URNImpl.createSHA1Urn("urn:sha1:" + good));
         final Response response = context.mock(Response.class);
         final QueryReply queryReply = context.mock(QueryReply.class);
         context.checking(new Expectations() {{
@@ -152,8 +152,8 @@ public class URNFilterTest extends LimeTestCase {
     }
 
     public void testInfohashesCanBeBlacklisted() throws Exception {
-        final Set<URN> goodURNs = new HashSet<URN>();
-        goodURNs.add(URN.createSHA1Urn("urn:sha1:" + good));
+        final Set<URNImpl> goodURNs = new HashSet<URNImpl>();
+        goodURNs.add(URNImpl.createSHA1Urn("urn:sha1:" + good));
         final Response response = context.mock(Response.class);
         final QueryReply queryReply = context.mock(QueryReply.class);
         final LimeXMLDocument doc = context.mock(LimeXMLDocument.class);
@@ -183,8 +183,8 @@ public class URNFilterTest extends LimeTestCase {
     }
         
     public void testIsBlacklistedURN() throws Exception {
-        URN badURN = URN.createSHA1Urn("urn:sha1:" + badLocal);
-        URN goodURN = URN.createSHA1Urn("urn:sha1:" + good);
+        URNImpl badURN = URNImpl.createSHA1Urn("urn:sha1:" + badLocal);
+        URNImpl goodURN = URNImpl.createSHA1Urn("urn:sha1:" + good);
         assertTrue(urnFilter.isBlacklisted(badURN));
         assertFalse(urnFilter.isBlacklisted(goodURN));
         context.assertIsSatisfied();

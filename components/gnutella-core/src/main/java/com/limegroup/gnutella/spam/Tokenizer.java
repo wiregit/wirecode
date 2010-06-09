@@ -11,7 +11,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 
@@ -126,7 +126,7 @@ public class Tokenizer {
             if(infohash != null)
                 set.add(new UrnToken("urn:sha1:" + infohash));
         }
-        URN urn = desc.getSHA1Urn();
+        URNImpl urn = desc.getSHA1Urn();
         if(urn != null)
             set.add(new UrnToken(urn.toString()));
         set.add(new SizeToken(desc.getSize()));
@@ -168,7 +168,7 @@ public class Tokenizer {
                         set.add(t);
                 }
                 // URNs
-                for(URN urn : r.getUrns())
+                for(URNImpl urn : r.getUrns())
                     set.add(new UrnToken(urn.toString()));
                 LimeXMLDocument doc = r.getDocument();
                 if(doc != null) {
@@ -207,8 +207,8 @@ public class Tokenizer {
         LimeXMLDocument xml = qr.getRichQuery();
         if(xml != null)
             getKeywordTokens(xml, set);
-        Set<URN> urns = qr.getQueryUrns();
-        for(URN urn : urns)
+        Set<URNImpl> urns = qr.getQueryUrns();
+        for(URNImpl urn : urns)
             set.add(new UrnToken(urn.toString()));
         return set;
     }

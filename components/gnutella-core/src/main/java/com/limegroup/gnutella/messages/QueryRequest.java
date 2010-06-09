@@ -2,7 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.Response;
@@ -120,7 +120,7 @@ public interface QueryRequest extends Message {
      * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, which
      * may be empty (not null) if no URNs were requested
      */
-    public Set<URN> getQueryUrns();
+    public Set<URNImpl> getQueryUrns();
 
     /**
      * Returns whether or not this query contains URNs.

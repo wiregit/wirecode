@@ -8,7 +8,7 @@ import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.Objects;
 
@@ -108,7 +108,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
     public void initIncompleteFile(File incompleteFile, long size) {
         setIncompleteFile(Objects.nonNull(incompleteFile, "incompleteFile"));
         setContentLength(size);
-        URN sha1 = incompleteFileManager.getCompletedHash(incompleteFile);
+        URNImpl sha1 = incompleteFileManager.getCompletedHash(incompleteFile);
         if(sha1 != null)
             setSha1Urn(sha1);
     }

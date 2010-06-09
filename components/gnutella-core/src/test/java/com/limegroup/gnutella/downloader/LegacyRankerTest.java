@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -104,7 +104,7 @@ public class LegacyRankerTest extends LimeTestCase {
     
     private RemoteFileDescContext newRFD(String host, int speed) throws Exception {
         return toContext(remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(host, 1, false), 0, "asdf", TestFile.length(), new byte[16],
-                speed, 4, false, null, URN.NO_URN_SET, false, "", -1));
+                speed, 4, false, null, URNImpl.NO_URN_SET, false, "", -1));
     }
 
     private RemoteFileDescContext newRFDWithURN(String host, int speed) throws Exception {

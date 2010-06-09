@@ -13,12 +13,12 @@ import java.util.StringTokenizer;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.BitNumbers;
-import org.limewire.common.HTTPHeaderValue;
 import org.limewire.io.Connectable;
+import org.limewire.io.HTTPHeaderValue;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -64,7 +64,7 @@ public class HTTPHeaderUtils {
     public void addRangeHeader(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         if (fd instanceof IncompleteFileDesc) {
-            URN sha1 = uploader.getFileDesc().getSHA1Urn();
+            URNImpl sha1 = uploader.getFileDesc().getSHA1Urn();
             if (sha1 != null) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                 response.addHeader(HTTPHeaderName.AVAILABLE_RANGES.create(ifd));

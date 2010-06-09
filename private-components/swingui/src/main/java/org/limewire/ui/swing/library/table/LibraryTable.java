@@ -16,12 +16,12 @@ import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.inject.LazySingleton;
+import org.limewire.io.URN;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.DefaultLimeTableCellRenderer;

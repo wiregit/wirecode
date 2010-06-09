@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.download.DownloadException;
@@ -18,6 +17,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Address;
+import org.limewire.io.URN;
 import org.limewire.util.BaseTestCase;
 
 /**

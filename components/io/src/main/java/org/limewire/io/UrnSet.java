@@ -20,15 +20,15 @@ import java.util.Set;
  * If the set already has a URN of the specified type added to it,
  * further additions of that type will be rejected.
  */
-public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable {
+public class UrnSet implements Set<URNImpl>, Iterable<URNImpl>, Cloneable, Serializable {
     
     private static final long serialVersionUID = -1065284624401321676L;
 
     /** The sole URNs this knows about. */
-    private URN sha1, ttroot, nms1;
+    private URNImpl sha1, ttroot, nms1;
     
     /** Returns a set of the UrnSet version of the set. */
-    public static UrnSet resolve(Set<? extends URN> set) {
+    public static UrnSet resolve(Set<? extends URNImpl> set) {
         if (set instanceof UnmodifiableUrnSet || set instanceof UrnSet) {
             return (UrnSet) set;
         }
@@ -38,7 +38,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
     
     /** Returns a set of the UrnSet version of the set. */
-    public static UrnSet modifiableSet(Set<? extends URN> set) {
+    public static UrnSet modifiableSet(Set<? extends URNImpl> set) {
         if (set instanceof UnmodifiableUrnSet) {
             UrnSet urnSet = (UrnSet) set;
             return new UrnSet(urnSet.getSHA1(), urnSet.getTTRoot(), urnSet.getNMS1());
@@ -51,7 +51,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
     
     /** Returns an unmodifiable set of the UrnSet version of the set. */
-    public static UrnSet unmodifiableSet(Set<? extends URN> set) {
+    public static UrnSet unmodifiableSet(Set<? extends URNImpl> set) {
         if(set instanceof UnmodifiableUrnSet) {
             return (UrnSet)set;
         } else {
@@ -63,16 +63,16 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     public UrnSet() {}
     
     /** Constructs a UrnSet with the given URN. */
-    public UrnSet(URN urn) {
+    public UrnSet(URNImpl urn) {
         add(urn);
     }
     
     /** Constructs a UrnSet with URNs from the given collection. */
-    public UrnSet(Collection<? extends URN> c) {
+    public UrnSet(Collection<? extends URNImpl> c) {
         addAll(c);
     }
     
-    private UrnSet(URN sha1, URN ttroot, URN nms1) {
+    private UrnSet(URNImpl sha1, URNImpl ttroot, URNImpl nms1) {
         this.sha1 = sha1;
         this.ttroot = ttroot;
         this.nms1 = nms1;
@@ -95,15 +95,15 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         return sha1 == null ? 0 : sha1.hashCode();
     }
     
-    public URN getSHA1() {
+    public URNImpl getSHA1() {
         return sha1;
     }
     
-    public URN getTTRoot() {
+    public URNImpl getTTRoot() {
         return ttroot;
     }
     
-    public URN getNMS1() {
+    public URNImpl getNMS1() {
         return nms1;
     }
     
@@ -143,11 +143,11 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
      * @param o
      * @return
      */
-    public boolean add(URN o) {
+    public boolean add(URNImpl o) {
         return addInternal(o);
     }
     
-    protected boolean addInternal(URN o) {
+    protected boolean addInternal(URNImpl o) {
         if(o.isSHA1() && sha1 == null) {
             sha1 = o;
             return true;
@@ -169,13 +169,13 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
      * @param c
      * @return
      */
-    public boolean addAll(Collection<? extends URN> c) {
+    public boolean addAll(Collection<? extends URNImpl> c) {
         return addAllInternal(c);
     }
     
-    protected boolean addAllInternal(Collection<? extends URN> c) {
+    protected boolean addAllInternal(Collection<? extends URNImpl> c) {
         boolean ret = false;
-        for(URN urn : c)
+        for(URNImpl urn : c)
             ret |= addInternal(urn);
         return ret;
     }
@@ -208,7 +208,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         return sha1 == null && ttroot == null && nms1 == null;
     }
 
-    public Iterator<URN> iterator() {
+    public Iterator<URNImpl> iterator() {
         return new UrnIterator();
     }
 
@@ -336,7 +336,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
     
     /** Iterator that returns each of the Urn Types in turn. */
-    private class UrnIterator implements Iterator<URN> {
+    private class UrnIterator implements Iterator<URNImpl> {
         private boolean givenSHA1, givenTTRoot, givenNMS1;
         
         public boolean hasNext() {
@@ -345,7 +345,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
                (!givenNMS1 && nms1 != null);
         }
 
-        public URN next() {
+        public URNImpl next() {
             if (!hasNext())
                 throw new NoSuchElementException();
             
@@ -379,11 +379,11 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
 
     }
 
-    public static URN getSha1(Set<? extends URN> urns) {
+    public static URNImpl getSha1(Set<? extends URNImpl> urns) {
         if(urns instanceof UrnSet) {
             return ((UrnSet)urns).sha1;
         } else {
-            for(URN urn : urns) {
+            for(URNImpl urn : urns) {
                 if(urn.isSHA1()) {
                     return urn;
                 }
@@ -392,11 +392,11 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         }
     }
     
-    public static URN getNMS1(Set<? extends URN> urns) {
+    public static URNImpl getNMS1(Set<? extends URNImpl> urns) {
         if(urns instanceof UrnSet) {
             return ((UrnSet)urns).nms1;
         } else {
-            for(URN urn : urns) {
+            for(URNImpl urn : urns) {
                 if(urn.isNMS1()) {
                     return urn;
                 }
@@ -407,21 +407,21 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     
     private static class UnmodifiableUrnSet extends UrnSet {
         
-        public UnmodifiableUrnSet(Set<? extends URN> set) {
+        public UnmodifiableUrnSet(Set<? extends URNImpl> set) {
             super.addAll(set);
         }
         
-        private UnmodifiableUrnSet(URN sha1, URN ttroot, URN nms1) {
+        private UnmodifiableUrnSet(URNImpl sha1, URNImpl ttroot, URNImpl nms1) {
             super(sha1, ttroot, nms1);
         }
         
         @Override
-        public boolean add(URN o) {
+        public boolean add(URNImpl o) {
             throw new UnsupportedOperationException("Can't modify an UnmodifiableUrnSet");        
         }
         
         @Override
-        public boolean addAll(Collection<? extends URN> c) {
+        public boolean addAll(Collection<? extends URNImpl> c) {
             throw new UnsupportedOperationException("Can't modify an UnmodifiableUrnSet");        
         }
         
@@ -446,16 +446,16 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         }
 
         @Override
-        public Iterator<URN> iterator() {
-            final Iterator<URN> oldIterator = super.iterator();
-            return new Iterator<URN> () {
+        public Iterator<URNImpl> iterator() {
+            final Iterator<URNImpl> oldIterator = super.iterator();
+            return new Iterator<URNImpl> () {
                 @Override
                 public boolean hasNext() {
                     return oldIterator.hasNext();
                 }
 
                 @Override
-                public URN next() {
+                public URNImpl next() {
                     return oldIterator.next();
                 }
 

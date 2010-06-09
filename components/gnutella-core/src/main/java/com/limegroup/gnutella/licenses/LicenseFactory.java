@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 public interface LicenseFactory {
 
@@ -15,7 +15,7 @@ public interface LicenseFactory {
      * The URI must have been retrieved via getLicenseURI.
      *
      */
-    public boolean isVerifiedAndValid(URN urn, String licenseString);
+    public boolean isVerifiedAndValid(URNImpl urn, String licenseString);
 
     /**
      * Gets the name associated with this license string.

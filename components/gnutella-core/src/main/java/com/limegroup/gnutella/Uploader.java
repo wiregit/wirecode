@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.io.Connectable;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;
@@ -161,7 +161,7 @@ public interface Uploader extends BandwidthTracker, Connectable {
     /**
      * Returns the URN for the file backing this uploader. 
      */
-    public URN getUrn();
+    public URNImpl getUrn();
     
     /**
      * Returns the number of connections we are currently uplaoding to. 

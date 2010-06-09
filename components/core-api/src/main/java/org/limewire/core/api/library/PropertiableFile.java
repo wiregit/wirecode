@@ -1,8 +1,8 @@
 package org.limewire.core.api.library;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.io.URN;
 
 public interface PropertiableFile {
     

@@ -24,7 +24,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Join;
 import org.limewire.lifecycle.Service;
@@ -97,7 +97,7 @@ public class DaapManager {
     private boolean enabled = false;
     private int maxPlaylistSize;
     
-    private Map<URN, Song> urnToSong;  
+    private Map<URNImpl, Song> urnToSong;  
     
     @Inject
     public DaapManager( @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -168,7 +168,7 @@ public class DaapManager {
                 InetAddress addr = NetworkUtils.getLocalAddress();
                 
                 bonjour = new BonjourService(addr);
-                urnToSong = new HashMap<URN, Song>();
+                urnToSong = new HashMap<URNImpl, Song>();
                 
                 maxPlaylistSize = DaapSettings.DAAP_MAX_LIBRARY_SIZE.getValue();
                 
@@ -393,7 +393,7 @@ public class DaapManager {
     
     /** Handles a change in metadata event. */
     private synchronized void handleMetaChangeEvent(FileViewChangeEvent evt) {
-        URN urn = evt.getFileDesc().getSHA1Urn();
+        URNImpl urn = evt.getFileDesc().getSHA1Urn();
         Song song = urnToSong.get(urn);
         if (song != null) {
             String name = evt.getFileDesc().getFileName().toLowerCase(Locale.US);                
@@ -490,7 +490,7 @@ public class DaapManager {
         if (!enabled || !isServerRunning())
             return;
         
-        Map<URN, Song> tmpUrnToSong = new HashMap<URN, Song>();
+        Map<URNImpl, Song> tmpUrnToSong = new HashMap<URNImpl, Song>();
         
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
@@ -505,7 +505,7 @@ public class DaapManager {
                     continue;
                 }
                 
-                URN urn = fd.getSHA1Urn();
+                URNImpl urn = fd.getSHA1Urn();
                 
                 // 1)
                 // _Remove_ URN from the current 'map'...

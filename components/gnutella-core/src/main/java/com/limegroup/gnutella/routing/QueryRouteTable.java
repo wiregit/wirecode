@@ -11,7 +11,7 @@ import java.util.zip.Inflater;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -215,8 +215,8 @@ public class QueryRouteTable {
             return false;
         }
         if (qr.hasQueryUrns()) {
-            Set<URN> urns = qr.getQueryUrns();
-            for (URN qurn : urns) {
+            Set<URNImpl> urns = qr.getQueryUrns();
+            for (URNImpl qurn : urns) {
                 int hash = HashFunction.hash(qurn.toString(), bits);
                 if (contains(hash)) {
                     // we note a match if any one of the hashes matches

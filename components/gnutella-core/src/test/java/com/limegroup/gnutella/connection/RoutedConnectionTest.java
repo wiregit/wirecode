@@ -18,7 +18,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
@@ -422,7 +422,7 @@ public class RoutedConnectionTest extends ServerSideTestCase {
     }
     
     public void testHashFiltering() throws Exception {
-        URN sha1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        URNImpl sha1 = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         QueryRequest urnFile = queryRequestFactory.createQuery(sha1,"java");
         
         GnutellaConnection mc = (GnutellaConnection)routedConnectionFactory.createRoutedConnection("", 1);

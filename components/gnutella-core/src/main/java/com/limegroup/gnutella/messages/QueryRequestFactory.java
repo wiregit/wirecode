@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.util.Set;
 
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.messages.Message.Network;
@@ -18,7 +18,7 @@ public interface QueryRequestFactory {
      * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
      *         is <tt>null</tt>
      */
-    public QueryRequest createRequery(URN sha1);
+    public QueryRequest createRequery(URNImpl sha1);
 
     /**
      * Creates a new query for the specified SHA1 value.
@@ -28,7 +28,7 @@ public interface QueryRequestFactory {
      * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
      *         is <tt>null</tt>
      */
-    public QueryRequest createQuery(URN sha1);
+    public QueryRequest createQuery(URNImpl sha1);
 
     /**
      * Creates a new query for the specified SHA1 value with file name thrown in
@@ -39,7 +39,7 @@ public interface QueryRequestFactory {
      * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
      *         is <tt>null</tt>
      */
-    public QueryRequest createQuery(URN sha1, String filename);
+    public QueryRequest createQuery(URNImpl sha1, String filename);
 
     /**
      * Creates a new requery for the specified SHA1 value and the specified
@@ -53,7 +53,7 @@ public interface QueryRequestFactory {
      * @throws <tt>IllegalArgumentException</tt> if the ttl value is negative
      *         or greater than the maximum allowed value
      */
-    public QueryRequest createRequery(URN sha1, byte ttl);
+    public QueryRequest createRequery(URNImpl sha1, byte ttl);
 
     /**
      * Creates a new query for the specified URN set.
@@ -62,7 +62,7 @@ public interface QueryRequestFactory {
      * @return a new <tt>QueryRequest</tt> for the specified UrnTypes and URNs
      * @throws <tt>NullPointerException</tt> if either sets are null.
      */
-    public QueryRequest createQuery(Set<? extends URN> urnSet);
+    public QueryRequest createQuery(Set<? extends URNImpl> urnSet);
 
     /**
      * Creates a requery for when we don't know the hash of the file -- we don't
@@ -316,7 +316,7 @@ public interface QueryRequestFactory {
      * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
      *         argument is zero-length (empty)
      */
-    public QueryRequest createQueryKeyQuery(URN sha1, AddressSecurityToken key);
+    public QueryRequest createQueryKeyQuery(URNImpl sha1, AddressSecurityToken key);
 
     /**
      * Creates a new <tt>QueryRequest</tt> instance for multicast queries.
@@ -381,7 +381,7 @@ public interface QueryRequestFactory {
      *         selector is bad
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, String query,
-            String richQuery, Set<? extends URN> queryUrns,
+            String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector);
@@ -400,7 +400,7 @@ public interface QueryRequestFactory {
      *         selector is bad
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, String query,
-            String richQuery, Set<? extends URN> queryUrns,
+            String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask);
@@ -419,7 +419,7 @@ public interface QueryRequestFactory {
      *         selector is bad
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, int minSpeed,
-            String query, String richQuery, Set<? extends URN> queryUrns,
+            String query, String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask);
@@ -438,7 +438,7 @@ public interface QueryRequestFactory {
      *         selector is bad
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, int minSpeed,
-            String query, String richQuery, Set<? extends URN> queryUrns,
+            String query, String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask,

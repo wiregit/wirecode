@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Singleton;
@@ -27,7 +27,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
      * Map of the alternate location collections for each URN.
      * LOCKING: itself for all map operations as well as operations on the contained arrays
      */
-    private final Map<URN, URNData> urnMap = Collections.synchronizedMap(new HashMap<URN, URNData>());
+    private final Map<URNImpl, URNData> urnMap = Collections.synchronizedMap(new HashMap<URNImpl, URNData>());
     
     /**
      * Adds a given altloc to the manager.
@@ -38,7 +38,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
             LOG.trace("alternate location added: " + al);
         }
         
-        URN sha1 = al.getSHA1Urn();
+        URNImpl sha1 = al.getSHA1Urn();
         AlternateLocationCollection<DirectAltLoc> dCol = null;
         AlternateLocationCollection<PushAltLoc>   pCol = null;
         
@@ -96,7 +96,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
      * Removes the given altloc (implementations may demote).
      */
     public boolean remove(AlternateLocation al, Object source) {
-        URN sha1 = al.getSHA1Urn();
+        URNImpl sha1 = al.getSHA1Urn();
         URNData data = urnMap.get(sha1);
         if (data == null)
             return false;
@@ -134,7 +134,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
         return ret;
     }
 
-    private void removeIfEmpty(URN sha1, URNData data) {
+    private void removeIfEmpty(URNImpl sha1, URNData data) {
         boolean empty = false;
         synchronized(data) {
             if (!data.direct.hasAlternateLocations() &&
@@ -151,7 +151,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
     /**
      * @param sha1 the URN for which to get altlocs
      */
-    public AlternateLocationCollection<DirectAltLoc> getDirect(URN sha1) {
+    public AlternateLocationCollection<DirectAltLoc> getDirect(URNImpl sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.getEmptyCollection();
@@ -165,7 +165,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
      * Returns push alternate locations that do not support FWT.
      * @param sha1 the URN for which to get altlocs
      */
-    public AlternateLocationCollection<PushAltLoc> getPushNoFWT(URN sha1) {
+    public AlternateLocationCollection<PushAltLoc> getPushNoFWT(URNImpl sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.getEmptyCollection();
@@ -179,7 +179,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
      * Returns push alternate locations that support FWT.
      * @param sha1 the URN for which to get altlocs
      */
-    public AlternateLocationCollection<PushAltLoc> getPushFWT(URN sha1) {
+    public AlternateLocationCollection<PushAltLoc> getPushFWT(URNImpl sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return AlternateLocationCollection.getEmptyCollection();
@@ -193,11 +193,11 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
         urnMap.clear();
     }
     
-    private void purge(URN sha1) {
+    private void purge(URNImpl sha1) {
         urnMap.remove(sha1);
     }
     
-    public boolean hasAltlocs(URN sha1) {
+    public boolean hasAltlocs(URNImpl sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return false;
@@ -205,14 +205,14 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
         return data.hasAltLocs();
     }
     
-    public int getNumLocs(URN sha1) {
+    public int getNumLocs(URNImpl sha1) {
         URNData data = urnMap.get(sha1);
         if (data == null)
             return 0;
         return data.getNumLocs();
     }
     
-    public void addListener(URN sha1, AltLocListener listener) {
+    public void addListener(URNImpl sha1, AltLocListener listener) {
         URNData data; 
         synchronized(urnMap){
             data = urnMap.get(sha1);
@@ -225,7 +225,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
         data.addListener(listener);
     }
     
-    public void removeListener(URN sha1, AltLocListener listener) {
+    public void removeListener(URNImpl sha1, AltLocListener listener) {
         URNData data =  urnMap.get(sha1);
         if (data == null)
             return;
@@ -242,7 +242,7 @@ public class AltLocManager implements EventListener<FileViewChangeEvent> {
             purge();
             break;
         case FILE_REMOVED:
-            URN urn = evt.getFileDesc().getSHA1Urn();
+            URNImpl urn = evt.getFileDesc().getSHA1Urn();
             // Purge if there's no more FDs for this URN.
             if(urn != null && evt.getFileView().getFileDescsMatching(urn).isEmpty()) {
                 purge(urn);

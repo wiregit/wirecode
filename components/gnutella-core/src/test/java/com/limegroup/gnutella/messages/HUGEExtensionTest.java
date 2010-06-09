@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
@@ -55,7 +55,7 @@ public class HUGEExtensionTest extends BaseTestCase {
             assertEquals(end[0], block.getEndPos());
         }
         
-        assertEquals(URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C"), 
+        assertEquals(URNImpl.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C"), 
                 huge.getURNS().iterator().next());
     }
 

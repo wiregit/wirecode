@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectInputStream.GetField;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 class SerialResumeDownloader4x16 extends SerialManagedDownloaderImpl implements SerialResumeDownloader {
@@ -20,11 +20,11 @@ class SerialResumeDownloader4x16 extends SerialManagedDownloaderImpl implements 
 
     private long _size64;
 
-    private URN _hash;
+    private URNImpl _hash;
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         GetField gets = stream.readFields();
-        _hash = (URN) gets.get("_hash", null);
+        _hash = (URNImpl) gets.get("_hash", null);
         _name = (String) gets.get("_name", null);
         _incompleteFile = (File) gets.get("_incompleteFile", null);
 
@@ -58,7 +58,7 @@ class SerialResumeDownloader4x16 extends SerialManagedDownloaderImpl implements 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialResumeDownloader#getUrn()
      */
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return _hash;
     }
 

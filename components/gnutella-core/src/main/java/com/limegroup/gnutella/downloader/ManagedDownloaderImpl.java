@@ -46,7 +46,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.listener.AsynchronousMulticasterImpl;
 import org.limewire.listener.EventListener;
@@ -328,7 +328,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
      */
-    private volatile URN downloadSHA1;
+    private volatile URNImpl downloadSHA1;
 
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -1064,7 +1064,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (incompleteFile != null)
             return;
 
-        URN sha1 = getSha1Urn();
+        URNImpl sha1 = getSha1Urn();
         if (sha1 != null) {
             incompleteFile = incompleteFileManager.getFileForUrn(sha1);
         }
@@ -1084,7 +1084,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * It can be overridden in subclasses.
      * </p>
      */
-    protected File getIncompleteFile(String name, URN urn,
+    protected File getIncompleteFile(String name, URNImpl urn,
                                      long length) throws IOException {
         return incompleteFileManager.getFile(name, urn, length);
     }
@@ -1098,7 +1098,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (iFile != null) {
             return iFile.equals(incFile);
         }
-        URN urn = getSha1Urn();
+        URNImpl urn = getSha1Urn();
         if (urn != null) {
             iFile = incompleteFileManager.getFileForUrn(urn);
         }
@@ -1128,7 +1128,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
     */
     @Override
-    public boolean conflicts(URN urn, long fileSize, File... fileName) {
+    public boolean conflicts(URNImpl urn, long fileSize, File... fileName) {
         if (urn != null && getSha1Urn() != null) {
             return urn.equals(getSha1Urn());
         }
@@ -1201,7 +1201,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return false;
 
         // get other info...
-        final URN otherUrn = other.getSHA1Urn();
+        final URNImpl otherUrn = other.getSHA1Urn();
         final String otherName = other.getFileName();
         final long otherLength = other.getSize();
 
@@ -1803,11 +1803,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getSHA1Urn()
     */
     @Override
-    public URN getSha1Urn() {
+    public URNImpl getSha1Urn() {
         return downloadSHA1;
     }
 
-    protected void setSha1Urn(URN sha1) {
+    protected void setSha1Urn(URNImpl sha1) {
         if (!sha1.isSHA1())
             throw new IllegalArgumentException("not sha1: " + sha1);
         if (downloadSHA1 != null && !sha1.equals(downloadSHA1))
@@ -2053,7 +2053,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Find out the hash of the file and verify that its the same
         // as our hash.
-        URN fileHash = scanForCorruption();
+        URNImpl fileHash = scanForCorruption();
         if(fileHash == null) {
             cleanupCorrupt(incompleteFile, getSaveFile().getName());
             return DownloadState.CORRUPT_FILE;
@@ -2112,7 +2112,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (getSha1Urn() != null) {
                 contentManager.request(getSha1Urn(), new ContentResponseObserver() {
                     @Override
-                    public void handleResponse(URN urn, ContentResponseData response) {
+                    public void handleResponse(URNImpl urn, ContentResponseData response) {
                         if (response != null && !response.isOK()) {
                             invalidated = true;
                             stop();
@@ -2137,8 +2137,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * matches the expected hash or if there is no expected hash, or null if
      * there is an error hashing the file or the hashes do not match.
      */
-    private URN scanForCorruption() throws InterruptedException {
-        URN fileHash = null;
+    private URNImpl scanForCorruption() throws InterruptedException {
+        URNImpl fileHash = null;
         try {
             // let the user know we're hashing the file
             setState(DownloadState.HASHING);
@@ -2179,7 +2179,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Saves the file to disk.
      */
-    protected DownloadState saveFile(URN fileHash) {
+    protected DownloadState saveFile(URNImpl fileHash) {
         // let the user know we're saving the file...
         setState(DownloadState.SAVING);
         File saveFile = getSaveFile();
@@ -2252,7 +2252,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * be hashed again when added to the library -- reduces
      * the time of the 'Saving File' state.
      */
-    private void addFileHash(URN fileHash, File saveFile) {
+    private void addFileHash(URNImpl fileHash, File saveFile) {
         if (fileHash != null) {
             UrnSet urns = new UrnSet(fileHash);
             File file = saveFile;
@@ -2262,7 +2262,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
             // Always cache the URN, so results can lookup to see
             // if the file exists.
-            URN ttroot = saveTreeHash(fileHash);
+            URNImpl ttroot = saveTreeHash(fileHash);
             if (ttroot != null)
                 urns.add(ttroot);
             urnCache.addUrns(file, urns);
@@ -2277,7 +2277,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @param fileHash urn to save the tree of
      * @return the root of the tree
      */
-    protected URN saveTreeHash(URN fileHash) {
+    protected URNImpl saveTreeHash(URNImpl fileHash) {
         // save the trees!
         if (getSha1Urn() != null && getSha1Urn().equals(fileHash) && commonOutFile.getHashTree() != null) {
             tigerTreeCache.get().addHashTree(getSha1Urn(), commonOutFile.getHashTree());
@@ -2808,7 +2808,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 if (incompleteFile == null)
                     return 0;
                 else
-                    return URN.getHashingProgress(incompleteFile);
+                    return URNImpl.getHashingProgress(incompleteFile);
             } else {
                 ourFile = commonOutFile;
             }
@@ -3040,8 +3040,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
 
         if (set && tree != null) { // warning?
-            URN sha1 = getSha1Urn();
-            URN ttroot = tree.getTreeRootUrn();
+            URNImpl sha1 = getSha1Urn();
+            URNImpl ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
             List<FileDesc> fds = library.getFileDescsMatching(sha1);
 			for(FileDesc fd : fds) {
@@ -3180,7 +3180,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
 
-        public URN getSHA1Urn() {
+        public URNImpl getSHA1Urn() {
             return ManagedDownloaderImpl.this.getSha1Urn();
         }
 

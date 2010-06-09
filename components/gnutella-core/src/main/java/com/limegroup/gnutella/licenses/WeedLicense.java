@@ -6,7 +6,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.limewire.util.URIUtils;
 import org.w3c.dom.Node;
@@ -64,7 +64,7 @@ class WeedLicense extends AbstractLicense {
     /**
      * Retrieves the license deed for the given URN.
      */
-    public URL getLicenseDeed(URN urn) {
+    public URL getLicenseDeed(URNImpl urn) {
         try {
             return new URL("http://weedshare.com/company/policies/summary_usage_rights.aspx");
         } catch(MalformedURLException murl) {
@@ -75,7 +75,7 @@ class WeedLicense extends AbstractLicense {
     /**
      * Determines if the Weed License is valid.
      */
-    public boolean isValid(URN urn) {
+    public boolean isValid(URNImpl urn) {
         return valid;
     }
     
@@ -97,7 +97,7 @@ class WeedLicense extends AbstractLicense {
      * Builds a description of this license based on what is permitted,
      * probibited, and required.
      */
-    public String getLicenseDescription(URN urn) {
+    public String getLicenseDescription(URNImpl urn) {
         if(artist == null && title == null && price == null) {
             return "Details unknown.";
         } else {

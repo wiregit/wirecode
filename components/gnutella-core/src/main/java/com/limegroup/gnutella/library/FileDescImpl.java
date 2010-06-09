@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
@@ -112,7 +112,7 @@ class FileDescImpl implements FileDesc {
     FileDescImpl(RareFileStrategy rareFileStrategy, LicenseFactory licenseFactory,
             SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
             File file,
-            Set<? extends URN> urns,
+            Set<? extends URNImpl> urns,
             int index) {
 		
         if(index < 0) {
@@ -185,7 +185,7 @@ class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#getTTROOTUrn()
      */
     @Override
-	public URN getTTROOTUrn() {
+	public URNImpl getTTROOTUrn() {
 	    return urns.getTTRoot();
 	}
     
@@ -193,19 +193,19 @@ class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#getSHA1Urn()
      */
 	@Override
-    public URN getSHA1Urn() {
+    public URNImpl getSHA1Urn() {
         return urns.getSHA1();
     }
     
     @Override
-    public URN getNMS1Urn() {
+    public URNImpl getNMS1Urn() {
         return urns.getNMS1();
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#addUrn(com.limegroup.gnutella.URN)
      */
-    public void addUrn(URN urn) {
+    public void addUrn(URNImpl urn) {
         boolean contained = urns.contains(urn);
         if(!contained) {
             UrnSet newSet = UrnSet.modifiableSet(urns);
@@ -223,7 +223,7 @@ class FileDescImpl implements FileDesc {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#getUrns()
      */
-	public Set<URN> getUrns() {
+	public Set<URNImpl> getUrns() {
 		return urns;
 	}   
 
@@ -342,7 +342,7 @@ class FileDescImpl implements FileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.library.FileDesc#containsUrn(com.limegroup.gnutella.URN)
      */
-    public boolean containsUrn(URN urn) {
+    public boolean containsUrn(URNImpl urn) {
         return urns.contains(urn);
     }
     

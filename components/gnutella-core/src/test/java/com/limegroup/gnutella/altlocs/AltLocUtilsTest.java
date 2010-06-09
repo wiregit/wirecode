@@ -8,7 +8,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
@@ -204,7 +204,7 @@ public class AltLocUtilsTest extends BaseTestCase {
         });
     }
     
-    private void checkDirect(AlternateLocation alt, URN sha1, String host, int port, boolean tls) {
+    private void checkDirect(AlternateLocation alt, URNImpl sha1, String host, int port, boolean tls) {
         assertInstanceof(DirectAltLoc.class, alt);
         DirectAltLoc d = (DirectAltLoc)alt;
         assertEquals(sha1, d.getSHA1Urn());

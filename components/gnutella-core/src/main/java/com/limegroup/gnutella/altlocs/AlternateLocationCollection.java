@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.limewire.collection.FixedSizeSortedSet;
-import org.limewire.common.HTTPHeaderValue;
-import org.limewire.io.URN;
+import org.limewire.io.HTTPHeaderValue;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 
 
@@ -57,7 +57,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
     /**
      * SHA1 <tt>URN</tt> for this collection.
      */
-    private final URN SHA1;
+    private final URNImpl SHA1;
 
     /**
      * Factory constructor for creating a new
@@ -66,7 +66,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
      * @param sha1 the SHA1 <tt>URN</tt> for this collection
      * @return a new <tt>AlternateLocationCollection</tt> instance for this SHA1
      */
-    public static <T extends AlternateLocation> AlternateLocationCollection<T> create(URN sha1) {
+    public static <T extends AlternateLocation> AlternateLocationCollection<T> create(URNImpl sha1) {
         return new AlternateLocationCollection<T>(sha1);
     }
 
@@ -76,7 +76,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
      * 
      * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
      */
-    private AlternateLocationCollection(URN sha1) {
+    private AlternateLocationCollection(URNImpl sha1) {
         if (sha1 == null)
             throw new NullPointerException("null URN");
         if (!sha1.isSHA1())
@@ -87,7 +87,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
     /**
      * Returns the SHA1 for this AlternateLocationCollection.
      */
-    public URN getSHA1Urn() {
+    public URNImpl getSHA1Urn() {
         return SHA1;
     }
 
@@ -107,7 +107,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
      * @return true if added, false otherwise.
      */
     public boolean add(T al) {
-        URN sha1 = al.getSHA1Urn();
+        URNImpl sha1 = al.getSHA1Urn();
         if (!sha1.equals(SHA1))
             throw new IllegalArgumentException("SHA1 does not match");
 
@@ -139,7 +139,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
      * adds it to the removed locations.
      */
     public boolean remove(T al) {
-        URN sha1 = al.getSHA1Urn();
+        URNImpl sha1 = al.getSHA1Urn();
         if (!sha1.equals(SHA1))
             return false; // it cannot be in this list if it has a different
                           // SHA1
@@ -263,7 +263,7 @@ public class AlternateLocationCollection<T extends AlternateLocation> implements
 
     private static class EmptyCollection extends AlternateLocationCollection<AlternateLocation> {
         EmptyCollection() throws IOException {
-            super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+            super(URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
         }
 
         @Override

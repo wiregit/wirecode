@@ -2,7 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.filters.response.SearchResultFilter;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -29,7 +29,7 @@ public interface URNFilter extends SpamFilter, ResponseFilter, SearchResultFilte
     /**
      * Returns true if the given URN matches the blacklist.
      */
-    boolean isBlacklisted(URN urn);
+    boolean isBlacklisted(URNImpl urn);
     
     /**
      * Returns the blacklisted URNs as base32-encoded strings. For testing.

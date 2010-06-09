@@ -27,7 +27,7 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.friend.api.FriendManager;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.EventListener;
 import org.limewire.util.AssignParameterAction;
@@ -108,10 +108,10 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final Downloader finishedItem1 = context.mock(Downloader.class);
         final Downloader finishedItem2 = context.mock(Downloader.class);
 
-        final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
-        final URN urn2 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2");
-        final URN urn3 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3");
-        final URN urn4 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4");
+        final URNImpl urn1 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        final URNImpl urn2 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2");
+        final URNImpl urn3 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3");
+        final URNImpl urn4 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4");
 
         final ItunesDownloadListener itunesDownloadListener = context
                 .mock(ItunesDownloadListener.class);
@@ -294,10 +294,10 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final Downloader finishedItem1 = context.mock(Downloader.class);
         final Downloader finishedItem2 = context.mock(Downloader.class);
 
-        final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
-        final URN urn2 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2");
-        final URN urn3 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3");
-        final URN urn4 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4");
+        final URNImpl urn1 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        final URNImpl urn2 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2");
+        final URNImpl urn3 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3");
+        final URNImpl urn4 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4");
 
         final ItunesDownloadListener itunesDownloadListener = context
                 .mock(ItunesDownloadListener.class);
@@ -714,7 +714,7 @@ public class CoreDownloadListManagerTest extends BaseTestCase {
         final RemoteFileDesc remoteFileDesc = context.mock(RemoteFileDesc.class);
         final RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[]{remoteFileDesc};
         final List<IpPort> alts = new ArrayList<IpPort>();
-        final URN urn1 = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        final URNImpl urn1 = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
         final Address address = context.mock(Address.class);
         final Category category = Category.AUDIO;
         

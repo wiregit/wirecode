@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.filters.response;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 
 import com.google.inject.Inject;
@@ -25,7 +25,7 @@ class WhiteListUpdateUrnFilter implements ResponseFilter {
     
     @Override
     public boolean allow(QueryReply qr, Response response) {
-        URN sha1 = UrnSet.getSha1(response.getUrns());
+        URNImpl sha1 = UrnSet.getSha1(response.getUrns());
         if (sha1 == null) {
             return false;
         }
@@ -34,7 +34,7 @@ class WhiteListUpdateUrnFilter implements ResponseFilter {
             return false;
         }
         for (UpdateData updateData : updateCollection.getUpdateData()) {
-            URN urn = updateData.getUpdateURN();
+            URNImpl urn = updateData.getUpdateURN();
             if (urn != null && urn.equals(sha1)) {
                 return true;
             }

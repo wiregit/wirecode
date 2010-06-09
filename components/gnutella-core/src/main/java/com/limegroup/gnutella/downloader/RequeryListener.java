@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -21,7 +21,7 @@ interface RequeryListener {
     //   requeryListener.setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, length)
 
     /** Returns the SHA1 URN this listener is listening for. */
-    URN getSHA1Urn();
+    URNImpl getSHA1Urn();
 
     /** Requests the listener to create a query that can be sent. */
     QueryRequest createQuery();

@@ -20,7 +20,7 @@ import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.core.api.transfer.SourceInfo;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -43,7 +43,7 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
 
     private final AtomicBoolean finished = new AtomicBoolean(false);
 
-    private volatile URN urn = null;
+    private volatile URNImpl urn = null;
 
     private final TorrentUploadManager torrentUploadManager;
 
@@ -300,12 +300,12 @@ public class BTUploader implements Uploader, EventListener<TorrentEvent> {
     }
 
     @Override
-    public URN getUrn() {
+    public URNImpl getUrn() {
         if (urn == null) {
             synchronized (this) {
                 if (urn == null) {
                     try {
-                        urn = URN.createSha1UrnFromHex(torrent.getSha1());
+                        urn = URNImpl.createSha1UrnFromHex(torrent.getSha1());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

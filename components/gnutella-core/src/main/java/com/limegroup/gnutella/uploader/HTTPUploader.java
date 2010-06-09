@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Range;
 import org.limewire.core.api.transfer.SourceInfo;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.Uploader;
@@ -25,7 +25,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
 	 */
-    private URN requestedURN;
+    private URNImpl requestedURN;
     
     private boolean supportsQueueing = false;
     
@@ -157,11 +157,11 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     /**
      * Returns the content URN that the client asked for.
      */
-    public URN getRequestedURN() {
+    public URNImpl getRequestedURN() {
         return requestedURN;
 		}
 		
-    public void setRequestedURN(URN requestedURN) {
+    public void setRequestedURN(URNImpl requestedURN) {
         this.requestedURN = requestedURN;
     }
     
@@ -262,7 +262,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
     
     @Override
-    public URN getUrn() {
+    public URNImpl getUrn() {
      return getFileDesc().getSHA1Urn();
     }
 

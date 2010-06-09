@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.downloader.DownloaderType;
@@ -56,12 +56,12 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     }
     
     @Override
-    public URN getSha1Urn() {
-        URN sha1URN = null;
+    public URNImpl getSha1Urn() {
+        URNImpl sha1URN = null;
         String sha1URNString = (String) serialObjects.get("sha1Urn");
         if (sha1URNString != null) {
             try {
-                sha1URN = URN.createSHA1Urn(sha1URNString);
+                sha1URN = URNImpl.createSHA1Urn(sha1URNString);
             } catch (IOException e) {
                 // invalid urn
             }
@@ -123,7 +123,7 @@ public class LibTorrentBTDownloadMementoImpl implements LibTorrentBTDownloadMeme
     }
     
     @Override
-    public void setSha1Urn(URN sha1Urn) {
+    public void setSha1Urn(URNImpl sha1Urn) {
         String sha1URNString = sha1Urn != null ? sha1Urn.toString() : null;
         serialObjects.put("sha1Urn", sha1URNString);
     }

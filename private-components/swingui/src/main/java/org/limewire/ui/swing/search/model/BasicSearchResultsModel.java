@@ -15,7 +15,6 @@ import java.util.Random;
 import javax.swing.SwingUtilities;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
@@ -30,6 +29,7 @@ import org.limewire.core.api.search.SearchDetails.SearchType;
 import org.limewire.inspection.DataCategory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;

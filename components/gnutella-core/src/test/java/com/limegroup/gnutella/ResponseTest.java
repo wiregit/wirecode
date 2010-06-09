@@ -26,7 +26,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -335,7 +335,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    Set urns = new HashSet();
-	    URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+	    URNImpl urn = URNImpl.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
 	    urns.add(urn);
 	    assertEquals("wrong urns", urns, r.getUrns());
     }
@@ -373,7 +373,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 	    assertEquals("leftover input", -1, in.read());
 	    
 	    Set urns = new HashSet();
-	    URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+	    URNImpl urn = URNImpl.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
 	    urns.add(urn);
 	    assertEquals("wrong urns", urns, r.getUrns());
     }
@@ -664,7 +664,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
 	    assertEquals("wrong alts", endpoints, r.getLocations());
 	    
 	    Set urns = new HashSet();
-	    URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+	    URNImpl urn = URNImpl.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
 	    urns.add(urn);
 	    assertEquals("wrong urns", urns, r.getUrns());
 	    
@@ -685,7 +685,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
     public void testOnly10AltsAreWritten() throws Exception {
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+	    URNImpl urn = URNImpl.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
         
         // First create a bunch of alts.
         AlternateLocationCollection alc =
@@ -728,7 +728,7 @@ public final class ResponseTest extends org.limewire.gnutella.tests.LimeTestCase
     public void testAltsAndTLSAreWritten() throws Exception {
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        URN urn = URN.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
+        URNImpl urn = URNImpl.createSHA1UrnFromUriRes("/uri-res/N2R?" + sha1);
         
         // First create a bunch of alts.
         AlternateLocationCollection alc = AlternateLocationCollection.create(urn);

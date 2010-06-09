@@ -18,7 +18,7 @@ import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.BaseTestCase;
 
@@ -68,7 +68,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue("this is identification"));
             allowing(presence);
             
-            URN sha1 = URN.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
+            URNImpl sha1 = URNImpl.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
             
             allowing(fileMetaData).getUrns();
             will(returnValue(Collections.singleton(sha1.toString())));
@@ -146,7 +146,7 @@ public class FileMetaDataConverterImplTest extends BaseTestCase {
             will(returnValue("this is identification"));
             allowing(presence);
             
-            URN sha1 = URN.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
+            URNImpl sha1 = URNImpl.createSHA1Urn("urn:sha1:GLSSGFSSDFSDF3DFSFDFSDSDUGYQYPFB");
             
             allowing(fileMetaData).getUrns();
             will(returnValue(Collections.singleton(sha1.toString())));

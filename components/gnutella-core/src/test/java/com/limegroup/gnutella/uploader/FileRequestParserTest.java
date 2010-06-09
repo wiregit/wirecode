@@ -7,7 +7,7 @@ import junit.framework.Test;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -18,7 +18,7 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileViewProvide
 
 public class FileRequestParserTest extends BaseTestCase {
 
-    private URN urn;
+    private URNImpl urn;
 
     private Mockery context;
 
@@ -28,7 +28,7 @@ public class FileRequestParserTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        urn = URN.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
+        urn = URNImpl.createSHA1Urn("urn:sha1:PLSTHIFQGSJZT45FJUPAKUZWUGYQYPFB");
         context = new Mockery();
     }
 

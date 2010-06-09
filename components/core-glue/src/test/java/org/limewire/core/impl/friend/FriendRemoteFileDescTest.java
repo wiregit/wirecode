@@ -11,7 +11,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.BaseTestCase;
@@ -301,21 +301,21 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
         String sha1C = "urn:sha1:NETZHKEJK345SDF7N6Q2312321321321";
         String sha1D = "urn:sha1:NETZHKEJKSNEAKYSHA1LWQHQJ7N4Q222";
         
-        Set<URN> urnsAllNonSHA1 = new HashSet<URN>();
-        urnsAllNonSHA1.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
-        urnsAllNonSHA1.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
-        urnsAllNonSHA1.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', 'x', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        Set<URNImpl> urnsAllNonSHA1 = new HashSet<URNImpl>();
+        urnsAllNonSHA1.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        urnsAllNonSHA1.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        urnsAllNonSHA1.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', 'x', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
                 
-        Set<URN> urnsB = new HashSet<URN>();
-        urnsB.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
-        urnsB.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        Set<URNImpl> urnsB = new HashSet<URNImpl>();
+        urnsB.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        urnsB.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
         try {
-            urnsB.add(URN.createSHA1Urn(sha1D));
+            urnsB.add(URNImpl.createSHA1Urn(sha1D));
         } 
         catch (IOException e) {
             fail("Could not create a sha1 urn for test");
         }
-        urnsB.add(URN.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', 'x', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
+        urnsB.add(URNImpl.createGUIDUrn(new GUID(new byte[] {'x', '1', '2', '3', 'x', 5, 6, 7, 8, 9,10, 11,12,13,14,15})));
         
         FriendRemoteFileDesc rfdNoSHA1 = createRFD(address, null, null);
         FriendRemoteFileDesc rfdSingle = createRFDwithSHA1Custom(address, null, null, sha1A);
@@ -385,24 +385,24 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
     
     public FriendRemoteFileDesc createRFD(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFD2(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, new byte[] {'y'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFD3(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, -1, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFD4(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         
-        HashSet<URN> urns = new HashSet<URN>();
+        HashSet<URNImpl> urns = new HashSet<URNImpl>();
         try {
-            urns.add(URN.createUrnFromString("urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q"));
+            urns.add(URNImpl.createUrnFromString("urn:sha1:NETZHKEJKTCM74ZQQALJWSLWQHQJ7N6Q"));
         } catch (IOException e) {
         }
         
@@ -412,30 +412,30 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
     
     public FriendRemoteFileDesc createRFD5(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, "huh", Long.MAX_VALUE, new byte[] {'x'}, Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFDwithGUID1(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'0', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFDwithGUID2(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFDwithSHA1Custom(FriendAddress address, AddressFactory addressFactory, 
             FriendAddressResolver addressResolver, String... sha1) {
         
-        HashSet<URN> urns = new HashSet<URN>();
+        HashSet<URNImpl> urns = new HashSet<URNImpl>();
         try {
             for (String s : sha1 ) {
-                urns.add(URN.createUrnFromString(s));
+                urns.add(URNImpl.createUrnFromString(s));
             }
         } catch (IOException e) {
             fail("Could not create a sha1 urn for test");
@@ -448,7 +448,7 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
     }
     
     public FriendRemoteFileDesc createRFDwithUrnsCustom(FriendAddress address, AddressFactory addressFactory, 
-            FriendAddressResolver addressResolver, Set<URN> urns) {
+            FriendAddressResolver addressResolver, Set<URNImpl> urns) {
      
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15}, 
@@ -460,14 +460,14 @@ public class FriendRemoteFileDescTest extends BaseTestCase{
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, null, Long.MAX_VALUE, 
                 guid, 
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
     public FriendRemoteFileDesc createRFDwithFilenameCustom(FriendAddress address, AddressFactory addressFactory, FriendAddressResolver addressResolver, String filename) {
         return new FriendRemoteFileDesc(address, Long.MAX_VALUE, filename, Long.MAX_VALUE, 
                 new byte[] {'x', '1', '2', '3', '4', 5, 6, 7, 8, 9,10, 11,12,13,14,15},  
                 Integer.MIN_VALUE, Integer.MAX_VALUE, null,
-                new HashSet<URN>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
+                new HashSet<URNImpl>(), null, Long.MIN_VALUE, false, addressFactory, addressResolver);
     }
     
 }

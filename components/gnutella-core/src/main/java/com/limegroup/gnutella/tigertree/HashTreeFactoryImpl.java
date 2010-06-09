@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -78,7 +78,7 @@ public class HashTreeFactoryImpl implements HashTreeFactory {
      * Exists as a hook for tests, to create a HashTree from a File when no
      * FileDesc exists.
      */
-    public HashTree createHashTree(long fileSize, InputStream is, URN sha1) throws IOException {
+    public HashTree createHashTree(long fileSize, InputStream is, URNImpl sha1) throws IOException {
         // do the actual hashing
         int nodeSize = HashTreeUtils.calculateNodeSize(fileSize, HashTreeUtils.calculateDepth(fileSize));
         List<byte[]> nodes = HashTreeUtils.createTreeNodes(nodeSize, fileSize, is, new Tiger());

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader.serial.conversion;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 @SuppressWarnings("unused")
 class SerialInNetworkDownloader extends SerialManagedDownloaderImpl {
@@ -10,7 +10,7 @@ class SerialInNetworkDownloader extends SerialManagedDownloaderImpl {
     private long size;
     
     /** The URN to persist throughout sessions, even if no RFDs are remembered. */
-    private URN urn;
+    private URNImpl urn;
     
     /** The TigerTree root for this download. */
     private String ttRoot;

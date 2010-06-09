@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
-import org.limewire.common.HTTPHeaderValue;
-import org.limewire.io.URN;
+import org.limewire.io.HTTPHeaderValue;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -36,7 +36,7 @@ public interface AlternateLocation extends HTTPHeaderValue, Comparable<Alternate
      * <p>
      * @return the SHA1 urn for the this <tt>AlternateLocation</tt>
      */
-    URN getSHA1Urn();
+    URNImpl getSHA1Urn();
 
     /**
      * Accessor to find if this has been demoted.

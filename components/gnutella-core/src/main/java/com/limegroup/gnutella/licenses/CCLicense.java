@@ -15,7 +15,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -35,7 +35,7 @@ class CCLicense extends AbstractLicense {
     private transient String license;
     
     /** The license information for each Work. */
-    private Map<URN, Details> allWorks;
+    private Map<URNImpl, Details> allWorks;
 
     /**
      * Constructs a new CCLicense.
@@ -53,7 +53,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Retrieves the license deed for the given URN.
      */
-    public URL getLicenseDeed(URN urn) {
+    public URL getLicenseDeed(URNImpl urn) {
         Details details = getDetails(urn);
         if(details == null || details.licenseURL == null)
             return guessLicenseDeed();
@@ -71,7 +71,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Determines if the CC License is valid with this URN.
      */
-    public boolean isValid(URN urn) {
+    public boolean isValid(URNImpl urn) {
         return getDetails(urn) != null;
     }
     
@@ -103,7 +103,7 @@ class CCLicense extends AbstractLicense {
      * Builds a description of this license based on what is permitted,
      * probibited, and required.
      */
-    public String getLicenseDescription(URN urn) {
+    public String getLicenseDescription(URNImpl urn) {
         List<String> permitted = Collections.emptyList();
         List<String> prohibited = Collections.emptyList();
         List<String> required = Collections.emptyList();
@@ -173,7 +173,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Adds the given a work with the appropriate details to allWorks.
      */
-    private void addWork(URN urn, String licenseURL) {
+    private void addWork(URNImpl urn, String licenseURL) {
         URL url = null;
         try {
             url = new URL(licenseURL);
@@ -207,14 +207,14 @@ class CCLicense extends AbstractLicense {
             LOG.debug("Adding new " + details + " for urn: " + urn);
 
         if(allWorks == null)
-            allWorks = new HashMap<URN, Details>(1); // assume it's small.
+            allWorks = new HashMap<URNImpl, Details>(1); // assume it's small.
         allWorks.put(urn, details); // it is fine if urn is null.
     }   
     
     /**
      * Locates a details for a given URN.
      */
-    private Details getDetails(URN urn) {
+    private Details getDetails(URNImpl urn) {
         if(allWorks == null)
             return null;
         
@@ -346,11 +346,11 @@ class CCLicense extends AbstractLicense {
         // Get the URN of this Work item.   
         NamedNodeMap attributes = work.getAttributes();
         Node about = attributes.getNamedItem("rdf:about");
-        URN expectedURN = null;
+        URNImpl expectedURN = null;
         if(about != null) {
             // attempt to create a SHA1 urn out of it.
             try {
-                expectedURN = URN.createSHA1Urn(about.getNodeValue());
+                expectedURN = URNImpl.createSHA1Urn(about.getNodeValue());
             } catch(IOException ioe) {}
         }
         

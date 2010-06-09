@@ -31,7 +31,7 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -86,10 +86,10 @@ public class LibraryTest extends LimeTestCase {
         f3 = createNewTestFile(11, _scratchDir);
         f4 = createNewTestFile(23, _scratchDir);
 
-        URN u1 = getUrn(f1);
-        URN u2 = getUrn(f2);
-        URN u3 = getUrn(f3);
-        URN u4 = getUrn(f4);
+        URNImpl u1 = getUrn(f1);
+        URNImpl u2 = getUrn(f2);
+        URNImpl u3 = getUrn(f3);
+        URNImpl u4 = getUrn(f4);
 
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
@@ -218,7 +218,7 @@ public class LibraryTest extends LimeTestCase {
         assertEquals(1, fileList.size());
         
         FileDesc fd = fileList.getFileDesc(f1);
-        URN urn = fd.getSHA1Urn();
+        URNImpl urn = fd.getSHA1Urn();
         assertSame(fd, fileList.getFileDescsMatching(urn).get(0));
         
         change(f1);

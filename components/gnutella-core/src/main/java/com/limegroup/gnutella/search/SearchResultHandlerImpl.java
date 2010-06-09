@@ -22,7 +22,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.ByteUtils;
 
@@ -85,8 +85,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
      * counter for class C networks per query per urn
      * remember the last 10 queries.
      */
-    private final Map<GUID, Map<URN,ClassCNetworks[]>> cncCounter = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URN,ClassCNetworks[]>>(10));
+    private final Map<GUID, Map<URNImpl,ClassCNetworks[]>> cncCounter = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URNImpl,ClassCNetworks[]>>(10));
     
     private final NetworkManager networkManager;
     private final Provider<ActivityCallback> activityCallback;
@@ -351,12 +351,12 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     private void countClassC(QueryReply qr, Response r) {
         synchronized(cncCounter) {
             GUID searchGuid = new GUID(qr.getGUID());
-            Map<URN, ClassCNetworks[]> m = cncCounter.get(searchGuid);
+            Map<URNImpl, ClassCNetworks[]> m = cncCounter.get(searchGuid);
             if (m == null) {
-                m = new HashMap<URN,ClassCNetworks[]>();
+                m = new HashMap<URNImpl,ClassCNetworks[]>();
                 cncCounter.put(searchGuid,m);
             }
-            for (URN u : r.getUrns()) {
+            for (URNImpl u : r.getUrns()) {
                 ClassCNetworks [] cnc = m.get(u);
                 if (cnc == null) {
                     cnc = new ClassCNetworks[]{new ClassCNetworks(), new ClassCNetworks()};
@@ -505,7 +505,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             ret.put("ver",1);
             synchronized(cncCounter) {
                 for (GUID g : cncCounter.keySet()) {
-                    Map<URN, ClassCNetworks[]> m = cncCounter.get(g);
+                    Map<URNImpl, ClassCNetworks[]> m = cncCounter.get(g);
                     List<Map<String,byte[]>> toPut = new ArrayList<Map<String,byte[]>>(2);
                     for (ClassCNetworks[] c : m.values()) {
                         Map<String,byte[]> cStats = new HashMap<String,byte[]>();

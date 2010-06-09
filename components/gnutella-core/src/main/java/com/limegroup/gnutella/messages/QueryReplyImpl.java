@@ -29,7 +29,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -711,7 +711,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             return;
 
         Response[] responses = new Response[left];
-        Set<URN> urns = new HashSet<URN>(responses.length); // set for the urns
+        Set<URNImpl> urns = new HashSet<URNImpl>(responses.length); // set for the urns
                                                             // carried in this
                                                             // reply
         short uniqueURNs = 0;

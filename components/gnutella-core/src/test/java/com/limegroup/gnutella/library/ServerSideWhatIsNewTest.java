@@ -21,7 +21,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -162,8 +162,8 @@ public class ServerSideWhatIsNewTest
         // we should be sharing two files - two text files.
         assertEquals(2, gnutellaFileView.size());
 
-        URN berkeleyURN = gnutellaFileView.getFileDesc(berkeley).getSHA1Urn();
-        URN susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
+        URNImpl berkeleyURN = gnutellaFileView.getFileDesc(berkeley).getSHA1Urn();
+        URNImpl susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
 
         Map urnToLong =  creationTimeCache.getUrnToTime();
         assertEquals(2, urnToLong.size());
@@ -289,8 +289,8 @@ public class ServerSideWhatIsNewTest
     // test that the creation time cache handles the additional sharing of files
     // fine
     public void testAddSharedFiles() throws Exception {
-        URN berkeleyURN = gnutellaFileView.getFileDesc(berkeley).getSHA1Urn();
-        URN susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
+        URNImpl berkeleyURN = gnutellaFileView.getFileDesc(berkeley).getSHA1Urn();
+        URNImpl susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
 
         // we start with one or two timestamps
         Map longToUrns = creationTimeCache.getTimeToUrn();
@@ -299,8 +299,8 @@ public class ServerSideWhatIsNewTest
         
         setupAndAddTempFiles();
 
-        URN tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
-        URN tempFile2URN = gnutellaFileView.getFileDesc(tempFile2).getSHA1Urn();
+        URNImpl tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
+        URNImpl tempFile2URN = gnutellaFileView.getFileDesc(tempFile2).getSHA1Urn();
 
         Map urnToLong = creationTimeCache.getUrnToTime();
         assertEquals(4, urnToLong.size());
@@ -359,7 +359,7 @@ public class ServerSideWhatIsNewTest
         setupAndAddTempFiles();
         
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
+        URNImpl tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
 //        Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter fw = new FileWriter(tempFile1, true);
@@ -439,7 +439,7 @@ public class ServerSideWhatIsNewTest
         setupAndAddTempFiles();
         
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
+        URNImpl tempFile1URN = gnutellaFileView.getFileDesc(tempFile1).getSHA1Urn();
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
         // cTime
@@ -573,7 +573,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(2000);
         assertEquals("num shared files", 1, gnutellaFileView.size());
 
-        URN susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
+        URNImpl susheelURN = gnutellaFileView.getFileDesc(susheel).getSHA1Urn();
         {
             Map urnToLong = creationTimeCache.getUrnToTime(); 
             assertEquals(""+urnToLong, 1, urnToLong.size());
@@ -601,7 +601,7 @@ public class ServerSideWhatIsNewTest
         uploader.start("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
-        Set<URN> urns = new HashSet<URN>();
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         urns.add(TestFile.hash());
         RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class)
                 .createRemoteFileDesc(new ConnectableImpl("127.0.0.1", UPLOADER_PORT, false), 1, "whatever.txt", TestFile.length(), guid, 1, 3, false,
@@ -632,7 +632,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
-        URN newFileURN = gnutellaFileView.getFileDesc(newFile).getSHA1Urn();
+        URNImpl newFileURN = gnutellaFileView.getFileDesc(newFile).getSHA1Urn();
         assertEquals(TestFile.hash(), newFileURN);
         assertEquals(newFileURN.toString(), cTime, ctCache.getCreationTime(newFileURN));
 
@@ -664,7 +664,7 @@ public class ServerSideWhatIsNewTest
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
-            Set<URN> urns = new HashSet<URN>();
+            Set<URNImpl> urns = new HashSet<URNImpl>();
             urns.add(TestFile.hash());
             rfds[i] = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", UPLOADER_PORT+i, false), 1, "anita.txt",
                     TestFile.length(), guid, 1, 3, false, null, urns, false, "LIME", -1);
@@ -725,7 +725,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "anita.txt");
         assertTrue(newFile.exists());
-        URN newFileURN = gnutellaFileView.getFileDesc(newFile).getSHA1Urn();
+        URNImpl newFileURN = gnutellaFileView.getFileDesc(newFile).getSHA1Urn();
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
     }
 

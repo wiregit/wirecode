@@ -12,7 +12,7 @@ import org.limewire.gnutella.tests.ActivityCallbackStub;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -355,7 +355,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
                 new ConnectableImpl("127.0.0.1", 6355, false),
                 1, query, size, DataUtils.EMPTY_GUID, 3, 3,
-                false, null, URN.NO_URN_SET, false, "ALT", 0l);
+                false, null, URNImpl.NO_URN_SET, false, "ALT", 0l);
         spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{rfd});
         assertTrue(rfd.isSpam());
 

@@ -15,7 +15,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.service.ErrorService;
@@ -33,17 +33,17 @@ public class ContentManager implements Service {
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
     
     /** Map of SHA1 to Observers listening for responses to the SHA1. */
-    private final Map<URN, Collection<Responder>> OBSERVERS =
-        Collections.synchronizedMap(new HashMap<URN, Collection<Responder>>());
+    private final Map<URNImpl, Collection<Responder>> OBSERVERS =
+        Collections.synchronizedMap(new HashMap<URNImpl, Collection<Responder>>());
     
     /** List of Responder's that are currently waiting, in order of timeout. */
     private final List<Responder> RESPONDERS = new ArrayList<Responder>();
     
     /** Set or URNs that we've already requested. */
-    private final Set<URN> REQUESTED = Collections.synchronizedSet(new HashSet<URN>());
+    private final Set<URNImpl> REQUESTED = Collections.synchronizedSet(new HashSet<URNImpl>());
     
     /** Set of URNs that have failed requesting. */
-    private final Set<URN> TIMEOUTS = Collections.synchronizedSet(new HashSet<URN>());
+    private final Set<URNImpl> TIMEOUTS = Collections.synchronizedSet(new HashSet<URNImpl>());
     
     /* 
      * LOCKING OF THE ABOVE:
@@ -121,7 +121,7 @@ public class ContentManager implements Service {
      *  Determines if we've already tried sending a request & waited the time
      *  for a response for the given URN.
      */
-    public boolean isVerified(URN urn) {
+    public boolean isVerified(URNImpl urn) {
         return !ContentSettings.isManagementActive() ||
                CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
@@ -129,7 +129,7 @@ public class ContentManager implements Service {
     /**
      * Determines if the given URN is valid.
      */
-    public void request(URN urn, ContentResponseObserver observer, long timeout) {
+    public void request(URNImpl urn, ContentResponseObserver observer, long timeout) {
         ContentResponseData response = CACHE.getResponse(urn);
         if(response != null || !ContentSettings.isManagementActive()) {
             if(LOG.isDebugEnabled())
@@ -145,7 +145,7 @@ public class ContentManager implements Service {
     /**
      * Does a request, blocking until a response is given or the request times out.
      */
-    public ContentResponseData request(URN urn, long timeout) {
+    public ContentResponseData request(URNImpl urn, long timeout) {
         Validator validator = new Validator();
         synchronized(validator) {
             request(urn, validator, timeout);
@@ -165,14 +165,14 @@ public class ContentManager implements Service {
     /**
      * Gets a response if one exists.
      */
-    public ContentResponseData getResponse(URN urn) {
+    public ContentResponseData getResponse(URNImpl urn) {
         return CACHE.getResponse(urn);
     }
     
     /**
      * Schedules a request for the given URN, timing out in the given timeout.
      */
-    protected void scheduleRequest(URN urn, ContentResponseObserver observer, long timeout) {
+    protected void scheduleRequest(URNImpl urn, ContentResponseObserver observer, long timeout) {
         long now = System.currentTimeMillis();
         addResponder(new Responder(now, timeout, observer, urn));
 
@@ -189,7 +189,7 @@ public class ContentManager implements Service {
      * Notification that a ContentResponse was given.
      */
     public void handleContentResponse(ContentResponse responseMsg) {
-        URN urn = responseMsg.getURN();
+        URNImpl urn = responseMsg.getURN();
         // Only process if we requested this msg.
         // (Don't allow arbitrary responses to be processed)
         if(urn != null && REQUESTED.remove(urn)) {
@@ -353,13 +353,13 @@ public class ContentManager implements Service {
             // set the authority (so newly requested ones will immediately send to it),
             // and then send off those requested.
             // note that the timeouts on processing older requests will be lagging slightly.
-            Set<URN> alreadyReq = new HashSet<URN>();
+            Set<URNImpl> alreadyReq = new HashSet<URNImpl>();
             synchronized(REQUESTED) {
                 alreadyReq.addAll(REQUESTED);
                 setContentAuthority(auth);
             }
             
-            for(URN urn : alreadyReq) {
+            for(URNImpl urn : alreadyReq) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
                 auth.send(new ContentRequest(urn));
@@ -373,9 +373,9 @@ public class ContentManager implements Service {
     private static class Responder implements Comparable<Responder> {
         private final long dead;
         private final ContentResponseObserver observer;
-        private final URN urn;
+        private final URNImpl urn;
         
-        Responder(long now, long timeout, ContentResponseObserver observer, URN urn) {
+        Responder(long now, long timeout, ContentResponseObserver observer, URNImpl urn) {
             if(timeout != 0)
                 this.dead = now + timeout;
             else
@@ -394,7 +394,7 @@ public class ContentManager implements Service {
         private boolean gotResponse = false;
         private ContentResponseData response = null;
         
-        public void handleResponse(URN urn, ContentResponseData response) {
+        public void handleResponse(URNImpl urn, ContentResponseData response) {
             synchronized(this) {
                 gotResponse = true;
                 this.response = response;

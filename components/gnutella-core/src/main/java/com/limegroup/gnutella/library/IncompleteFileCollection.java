@@ -3,7 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
@@ -21,7 +21,7 @@ public interface IncompleteFileCollection extends FileCollection {
      * @param vf the VerifyingFile containing the ranges for this inc. file
      */
     public void addIncompleteFile(File incompleteFile,
-            Set<? extends URN> urns,
+            Set<? extends URNImpl> urns,
             String name,
             long size,
             VerifyingFile vf);

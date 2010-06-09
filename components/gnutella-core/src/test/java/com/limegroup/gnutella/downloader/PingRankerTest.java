@@ -28,7 +28,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -531,7 +531,7 @@ public class PingRankerTest extends LimeTestCase {
     }
 
     private  RemoteFileDescContext newRFDWithURN(String host, int speed) throws Exception {
-        Set<URN> set = new HashSet<URN>();
+        Set<URNImpl> set = new HashSet<URNImpl>();
         try {
             // for convenience, don't require that they pass the urn.
             // assume a null one is the TestFile's hash.
@@ -624,7 +624,7 @@ public class PingRankerTest extends LimeTestCase {
                 boolean firewalled, boolean busy, boolean downloading,
                 IntervalSet ranges, Set<IpPort> altLocs, Set<PushEndpoint> pushLocs) 
         throws IOException{
-            super(new GUID(), HeadPong.VERSION, headPongFactory.create(new HeadPing(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE"))).getPayload());
+            super(new GUID(), HeadPong.VERSION, headPongFactory.create(new HeadPing(URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE"))).getPayload());
             this.altLocs = altLocs;
             this.pushLocs = pushLocs;
             this.queueStatus = queueStatus;

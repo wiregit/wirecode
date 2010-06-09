@@ -12,7 +12,7 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.auth.ServerAuthState;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
@@ -88,7 +88,7 @@ public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
 
         String errorMsg = ERROR_MESSAGE;
         if (fd != null) {
-            URN sha1 = fd.getSHA1Urn();
+            URNImpl sha1 = fd.getSHA1Urn();
             if (validating) {
                 errorMsg = VALIDATING_MSG;
                 response.addHeader(HTTPHeaderName.RETRY_AFTER

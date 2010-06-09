@@ -8,7 +8,7 @@ import java.util.Set;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -65,7 +65,7 @@ public interface RemoteFileDescFactory {
     public RemoteFileDesc createRemoteFileDesc(Address address, long index,
             String filename, long size, byte[] clientGUID, int speed,
             int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime);
     
     /** 
@@ -91,7 +91,7 @@ public interface RemoteFileDescFactory {
     public RemoteFileDesc createRemoteFileDesc(Address address, long index,
             String filename, long size, byte[] clientGUID, int speed,
             int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1, byte[] queryGUID);
 
     /**
@@ -99,7 +99,7 @@ public interface RemoteFileDescFactory {
      * 
      * <b>This method can block if the size is <= 0.</b>
      */
-    public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
+    public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URNImpl urn, long size)
             throws IOException, URISyntaxException;
 
     /**

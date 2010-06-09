@@ -13,7 +13,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -60,7 +60,7 @@ public final class RemoteFileDescTest extends org.limewire.gnutella.tests.LimeTe
 		for(int i=0; i<invalidPorts.length; i++) {
 			try {
 			    remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", invalidPorts[i], false), 10, "test", 10,
-			            TEST_GUID, 10, 3, false, null, URN.NO_URN_SET, false, "", -1);
+			            TEST_GUID, 10, 3, false, null, URNImpl.NO_URN_SET, false, "", -1);
 			    fail("rfd1 should have received an exception for invalid port");
 			} catch(IllegalArgumentException iae) {
 				// this is expected
@@ -78,7 +78,7 @@ public final class RemoteFileDescTest extends org.limewire.gnutella.tests.LimeTe
 		for(int i=0; i<validPorts.length; i++) {
 			try {
 			    remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", validPorts[i], false), 10, "test", 10,
-                        TEST_GUID, 10, 3, false, null, URN.NO_URN_SET, false, "", -1);
+                        TEST_GUID, 10, 3, false, null, URNImpl.NO_URN_SET, false, "", -1);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
 					 validPorts[i], e);

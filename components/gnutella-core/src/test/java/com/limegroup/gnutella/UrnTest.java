@@ -12,7 +12,7 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -71,8 +71,8 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	};
 
-	private static URN[] urns;
-	private static URN[] sha1Urns;
+	private static URNImpl[] urns;
+	private static URNImpl[] sha1Urns;
 
 	private final String [] VALID_URN_HTTP_STRINGS = {
 		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
@@ -100,9 +100,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 		"/uri-res/N2R?urn:sha1:ULSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 	};
 
-	private final URN[] VALID_URNS_HTTP = new URN[VALID_URN_HTTP_STRINGS.length];
+	private final URNImpl[] VALID_URNS_HTTP = new URNImpl[VALID_URN_HTTP_STRINGS.length];
 
-	private final URN[] VALID_URNS_URI_RES = new URN[VALID_URN_URI_RES_STRINGS.length];
+	private final URNImpl[] VALID_URNS_URI_RES = new URNImpl[VALID_URN_URI_RES_STRINGS.length];
 	
 	private final String [] invalidURNStrings = {
 		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
@@ -151,9 +151,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 
 	@Override
     protected void setUp() throws Exception {
-		urns = new URN[VALID_URNS.length];
+		urns = new URNImpl[VALID_URNS.length];
 		for(int i=0; i<urns.length; i++) {
-			urns[i] = URN.createSHA1Urn(VALID_URNS[i]);
+			urns[i] = URNImpl.createSHA1Urn(VALID_URNS[i]);
 			assertNotNull("urn should not be null",urns[i]);
 			assertTrue("should be SHA1: '"+urns[i]+"'\r\n"+
 					   urns[i].getUrnType(), urns[i].isSHA1());
@@ -161,9 +161,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 					   "", urns[i].toString());
 
 		}
-		sha1Urns = new URN[VALID_SHA1_URNS.length];
+		sha1Urns = new URNImpl[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
-			sha1Urns[i] = URN.createSHA1Urn(VALID_SHA1_URNS[i]);
+			sha1Urns[i] = URNImpl.createSHA1Urn(VALID_SHA1_URNS[i]);
 			assertNotNull("urn should not be null",sha1Urns[i]);
 			assertNotEquals("urn should not have the empty string", 
 					   "", sha1Urns[i].toString());
@@ -178,7 +178,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 
 		for(int i=0; i<VALID_URN_URI_RES_STRINGS.length; i++) {
 			try {
-				VALID_URNS_URI_RES[i] = URN.createSHA1UrnFromUriRes(VALID_URN_URI_RES_STRINGS[i]);
+				VALID_URNS_URI_RES[i] = URNImpl.createSHA1UrnFromUriRes(VALID_URN_URI_RES_STRINGS[i]);
 			} catch(IOException e) {
 				fail("could not create urns for URNTest setup", e);
 			}
@@ -197,7 +197,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	 */
 	public void testValidUrns() throws Exception {
 		for(int i=0; i<VALID_URNS.length; i++) {
-            URN.createSHA1Urn(VALID_URNS[i]);
+            URNImpl.createSHA1Urn(VALID_URNS[i]);
 		}
 	}
 
@@ -209,7 +209,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	public void testInvalidUrns() {
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
-				URN.createSHA1Urn(INVALID_URNS[i]);
+				URNImpl.createSHA1Urn(INVALID_URNS[i]);
 				fail("should have thrown an exception on: " + INVALID_URNS[i]);
 			} catch(IOException e) {
 			}
@@ -228,11 +228,11 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 			if(!curFile.isFile()) {
 				continue;
 			}
-			URN urn = URNFactory.createSHA1Urn(curFile);
+			URNImpl urn = URNFactory.createSHA1Urn(curFile);
 			assertTrue("should be a valid SHA1", urn.isSHA1());
-			assertTrue("should be considered a urn", URN.isUrn(urn.toString()));
-			assertEquals("should be == UrnTypes", urn.getUrnType(), URN.Type.SHA1);
-            URN newURN = URN.createSHA1Urn(urn.toString());
+			assertTrue("should be considered a urn", URNImpl.isUrn(urn.toString()));
+			assertEquals("should be == UrnTypes", urn.getUrnType(), URNImpl.Type.SHA1);
+            URNImpl newURN = URNImpl.createSHA1Urn(urn.toString());
             assertEquals("urns should be equal", urn, newURN);
 		}
 	}
@@ -262,17 +262,17 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         File aDifferentFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
         Assert.assertTrue(aDifferentFile.exists());
         
-        URN blankSHA1 = URNFactory.createSHA1Urn(blankFile);
-        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
-        URN id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1File);
-        URN id3V2SHA1 = URNFactory.createSHA1Urn(id3V2File);
-        URN id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V2File);
-        URN id3V1_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1_id3V2File);
-        URN image_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(imageTag_id3V2File);
-        URN lyricsV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2TagFile);
-        URN lyricsV2_id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2Tag_id3V1File);
-        URN apeV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(apeTagV2File);
-        URN differentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(aDifferentFile);
+        URNImpl blankSHA1 = URNFactory.createSHA1Urn(blankFile);
+        URNImpl blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URNImpl id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1File);
+        URNImpl id3V2SHA1 = URNFactory.createSHA1Urn(id3V2File);
+        URNImpl id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V2File);
+        URNImpl id3V1_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(id3V1_id3V2File);
+        URNImpl image_id3V2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(imageTag_id3V2File);
+        URNImpl lyricsV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2TagFile);
+        URNImpl lyricsV2_id3V1URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(lyricsV2Tag_id3V1File);
+        URNImpl apeV2URN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(apeTagV2File);
+        URNImpl differentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(aDifferentFile);
         
         assertEquals(blankURN.getBytes(), blankSHA1.getBytes());
         assertEquals(blankURN, id3V1URN);
@@ -291,9 +291,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         FileUtils.copy(id3V2File, copyId3V2File);
         copyId3V2File.deleteOnExit();
 
-        URN modifiedSHA1 = URNFactory.createSHA1Urn(copyId3V2File);
+        URNImpl modifiedSHA1 = URNFactory.createSHA1Urn(copyId3V2File);
         assertEquals(modifiedSHA1, id3V2SHA1);
-        URN modifiedId3V2URN = createURNModifiedMetaData(AudioHashingUtils.getHasher(copyId3V2File), copyId3V2File);
+        URNImpl modifiedId3V2URN = createURNModifiedMetaData(AudioHashingUtils.getHasher(copyId3V2File), copyId3V2File);
         assertEquals(modifiedId3V2URN, id3V2URN);
         
         // copies an id3v2 mp3 and modifies the audio portion of the file.
@@ -320,9 +320,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         File oggComment = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Flac_OggComment.flac");
         Assert.assertTrue(oggComment.exists());
         
-        URN blankSHA1 = URNFactory.createSHA1Urn(blankFile);
-        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
-        URN oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
+        URNImpl blankSHA1 = URNFactory.createSHA1Urn(blankFile);
+        URNImpl blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URNImpl oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
         
         assertNotEquals(blankURN.getBytes(), blankSHA1.getBytes());
         assertEquals(blankURN, oggCommentURN);
@@ -338,9 +338,9 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
         File oggComment = TestUtils.getResourceFile("com/limegroup/gnutella/resources/Ogg_OggComment.ogg");
         Assert.assertTrue(oggComment.exists());
         
-        URN blankSHA1 = URNFactory.createSHA1Urn(blankFile);
-        URN blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
-        URN oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
+        URNImpl blankSHA1 = URNFactory.createSHA1Urn(blankFile);
+        URNImpl blankURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(blankFile);
+        URNImpl oggCommentURN = AudioHashingUtils.generateNonMetaDataSHA1FromFile(oggComment);
         
         assertNotEquals(blankURN.getBytes(), blankSHA1.getBytes());
         assertEquals(blankURN, oggCommentURN);
@@ -351,7 +351,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	 * Non-MetaDataSHA1. This is done after the locations are calculated
 	 * to ensure the proper audio/non-audio portion of the file is located.
 	 */
-	private URN createURNModifiedMetaData(NonMetaDataHasher hasher, File file) throws Exception {
+	private URNImpl createURNModifiedMetaData(NonMetaDataHasher hasher, File file) throws Exception {
 	    
 	    long startPosition = hasher.getStartPosition();
 	    long endPosition = hasher.getEndPosition();
@@ -365,7 +365,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
      * Non-MetaDataSHA1. This is done after the locations are calculated
      * to ensure the proper audio/non-audio portion of the file is located.
 	 */
-	private URN createURNModifiedAudio(NonMetaDataHasher hasher, File file) throws Exception {
+	private URNImpl createURNModifiedAudio(NonMetaDataHasher hasher, File file) throws Exception {
         
         long startPosition = hasher.getStartPosition();
         long endPosition = hasher.getEndPosition();
@@ -456,11 +456,11 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 		};
 		
 		for(int i=0; i<validURNTypes.length; i++) {			
-			assertTrue("should be supported URNType", URN.Type.isSupportedUrnType(validURNTypes[i]));
+			assertTrue("should be supported URNType", URNImpl.Type.isSupportedUrnType(validURNTypes[i]));
 		}
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
-			assertTrue("should not be supported URNType", !URN.Type.isSupportedUrnType(invalidURNTypes[i]));
+			assertTrue("should not be supported URNType", !URNImpl.Type.isSupportedUrnType(invalidURNTypes[i]));
 		}
 	}
 
@@ -471,7 +471,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	public void testHashCode() throws Exception {
 		int[] hashCodes = new int[VALID_URNS.length];
 		for(int i=0; i<VALID_URNS.length; i++) {
-            hashCodes[i] = URN.createSHA1Urn(VALID_URNS[i]).hashCode();
+            hashCodes[i] = URNImpl.createSHA1Urn(VALID_URNS[i]).hashCode();
 		}
 
 		for(int i=0; i<hashCodes.length; i++) {
@@ -487,13 +487,13 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	 * Tests the equals method.
 	 */
 	public void testEquals()  throws Exception {
-		URN curUrn;
+		URNImpl curUrn;
 		for(int i=0; i<urns.length; i++) {
 			curUrn = urns[i];
 			assertNotNull("current urn is unexpectedly null", curUrn);
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
-					URN tempUrn = URN.createSHA1Urn(urns[j].toString());
+					URNImpl tempUrn = URNImpl.createSHA1Urn(urns[j].toString());
 					assertEquals("urns should be equal", curUrn, tempUrn);
 					continue;
 				}
@@ -520,7 +520,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	    // test valid urns, we can reuse sha1 urns and just replace sha1 with guid
 	    for (String sha1URN : VALID_URNS) {
 	        String guidURN = sha1URN.toLowerCase(Locale.US).replace("sha1", "guid");
-	        URN urn = URN.createGUIDUrn(guidURN);
+	        URNImpl urn = URNImpl.createGUIDUrn(guidURN);
 	        assertNotNull(urn);
 	        assertTrue(urn.isGUID());
 	    }
@@ -529,7 +529,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	    for (String sha1URN : INVALID_URNS) {
 	        String guidURN = sha1URN.toLowerCase(Locale.US).replace("sha1", "guid");
 	        try {
-	            URN urn = URN.createGUIDUrn(guidURN);
+	            URNImpl urn = URNImpl.createGUIDUrn(guidURN);
 	            fail("urn should not have been created for invalid input: " + urn + " original: " + sha1URN);
 	        } catch (IOException ie) {
 	        }
@@ -538,7 +538,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	    // valid sha1 urns should not be guid urns
 	    for (String sha1URN : VALID_SHA1_URNS) {
             try {
-                URN urn = URN.createGUIDUrn(sha1URN);
+                URNImpl urn = URNImpl.createGUIDUrn(sha1URN);
                 fail("urn should not have been created for invalid input: " + urn + " original: " + sha1URN);
             } catch (IOException ie) {
             }
@@ -547,7 +547,7 @@ public final class UrnTest extends org.limewire.gnutella.tests.LimeTestCase {
 	
 	public void testCreateGUIDUrnFromGUID() {
 	    GUID guid = new GUID();
-	    URN urn = URN.createGUIDUrn(guid);
+	    URNImpl urn = URNImpl.createGUIDUrn(guid);
 	    assertTrue(urn.isGUID());
 	    assertEquals(guid.toHexString(), urn.getNamespaceSpecificString());
 	    assertEquals("urn:guid:" + guid.toHexString(), urn.toString());

@@ -16,7 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadException;
 import org.limewire.core.api.download.DownloadItem;
@@ -39,6 +38,7 @@ import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.URN;
 import org.limewire.lifecycle.ServiceScheduler;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.setting.FileSetting;
@@ -374,7 +374,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addTorrentDownload(String name, URN sha1, List<URI> trackers) throws DownloadException {
         Downloader downloader = downloadManager.downloadTorrent(name, 
-                (org.limewire.io.URN)sha1,
+                (org.limewire.io.URNImpl)sha1,
                 trackers);
         
         return (DownloadItem)downloader.getAttribute(DownloadItem.DOWNLOAD_ITEM);

@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.auth;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 public class StubContentResponseObserver implements ContentResponseObserver {
 
-    private URN urn;
+    private URNImpl urn;
     private ContentResponseData response;
     
-    public void handleResponse(URN urn, ContentResponseData response) {
+    public void handleResponse(URNImpl urn, ContentResponseData response) {
         this.urn = urn;
         this.response = response;
     }
@@ -16,7 +16,7 @@ public class StubContentResponseObserver implements ContentResponseObserver {
         return response;
     }
 
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return urn;
     }
 

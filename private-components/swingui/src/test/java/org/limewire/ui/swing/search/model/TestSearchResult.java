@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.friend.api.FriendPresence;
+import org.limewire.io.URN;
 import org.limewire.ui.swing.friends.MockFriend;
 import org.limewire.ui.swing.friends.MockFriendPresence;
 import org.limewire.util.FileUtils;

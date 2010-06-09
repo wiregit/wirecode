@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.messages.Message;
@@ -94,7 +94,7 @@ public class QueryRequestStub implements QueryRequest {
         return null;
     }
 
-    public Set<URN> getQueryUrns() {
+    public Set<URNImpl> getQueryUrns() {
         return Collections.emptySet();
     }
 

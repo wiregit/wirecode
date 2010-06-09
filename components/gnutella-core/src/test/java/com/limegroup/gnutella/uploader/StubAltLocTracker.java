@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -23,7 +23,7 @@ class StubAltLocTracker extends AltLocTracker {
         super(UrnHelper.SHA1);
     }
     
-    public StubAltLocTracker(URN urn) {
+    public StubAltLocTracker(URNImpl urn) {
         super(urn);
     }
 

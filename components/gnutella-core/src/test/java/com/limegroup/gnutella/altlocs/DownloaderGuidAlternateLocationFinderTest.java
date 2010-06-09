@@ -10,7 +10,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManagerEvent;
@@ -69,9 +69,9 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         final DownloaderGuidAlternateLocationFinder endpointFinder = 
             new DownloaderGuidAlternateLocationFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
         
-        final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
+        final URNImpl sha1Urn = URNImpl.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
-        final URN guidUrn = URN.createGUIDUrn(guid);
+        final URNImpl guidUrn = URNImpl.createGUIDUrn(guid);
         
         context.checking(new Expectations() {{
             one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));
@@ -114,9 +114,9 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         final DownloaderGuidAlternateLocationFinder endpointFinder = 
             new DownloaderGuidAlternateLocationFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
         
-        final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
+        final URNImpl sha1Urn = URNImpl.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
-        final URN guidUrn = URN.createGUIDUrn(guid);
+        final URNImpl guidUrn = URNImpl.createGUIDUrn(guid);
         
         context.checking(new Expectations() {{
             one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));

@@ -27,7 +27,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.LimeWireIOTestModule;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lws.server.LWSCommandValidator;
 import org.limewire.lws.server.MockLWSCommandValidator;
 import org.limewire.net.SocketsManager;
@@ -363,7 +363,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
     }
     
     protected RemoteFileDesc newRFDPush(GUID guid, int port, int rfdSuffix, int proxySuffix) throws Exception {
-        Set<URN> urns = new HashSet<URN>();
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         urns.add(TestFile.hash());
         
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid.bytes(),
@@ -377,7 +377,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected RemoteFileDesc newRFD(int port, boolean useTLS) throws Exception {
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
-                GUID.makeGuid(), 100, 4, false, null, URN.NO_URN_SET, false, "", -1);
+                GUID.makeGuid(), 100, 4, false, null, URNImpl.NO_URN_SET, false, "", -1);
     }
 
     protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) throws Exception {
@@ -385,14 +385,14 @@ public abstract class DownloadTestCase extends LimeTestCase {
     }
 
     protected RemoteFileDesc newRFDWithURN(int port, String urn, boolean useTLS) throws Exception {
-        Set<URN> set = new HashSet<URN>();
+        Set<URNImpl> set = new HashSet<URNImpl>();
         try {
             // for convenience, don't require that they pass the urn.
             // assume a null one is the TestFile's hash.
             if (urn == null)
                 set.add(TestFile.hash());
             else
-                set.add(URN.createSHA1Urn(urn));
+                set.add(URNImpl.createSHA1Urn(urn));
         } catch (Exception e) {
             fail("SHA1 not created for: " + savedFile, e);
         }

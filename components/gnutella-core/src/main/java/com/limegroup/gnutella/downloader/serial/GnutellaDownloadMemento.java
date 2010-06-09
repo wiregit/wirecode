@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 public interface GnutellaDownloadMemento extends DownloadMemento {
 
     void setContentLength(long contentLength);
 
-    void setSha1Urn(URN sha1Urn);
+    void setSha1Urn(URNImpl sha1Urn);
 
     void setSavedBlocks(List<Range> serializableBlocks);
 
@@ -22,7 +22,7 @@ public interface GnutellaDownloadMemento extends DownloadMemento {
 
     long getContentLength();
 
-    URN getSha1Urn();
+    URNImpl getSha1Urn();
 
     File getIncompleteFile();
 

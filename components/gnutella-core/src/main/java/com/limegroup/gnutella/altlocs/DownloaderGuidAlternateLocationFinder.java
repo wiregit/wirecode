@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
@@ -95,7 +95,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
     
     private void searchForPushEndpoints(MagnetDownloader magnetDownloader) {
         MagnetOptions magnet = magnetDownloader.getMagnet();
-        URN sha1Urn = magnet.getSHA1Urn();
+        URNImpl sha1Urn = magnet.getSHA1Urn();
         if (sha1Urn == null) {
             LOG.debug("no sha1 urn");
             return;
@@ -121,11 +121,11 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
         }
     }
     
-    void searchForPushEndpoints(URN sha1Urn, Set<URN> guidUrns) {
+    void searchForPushEndpoints(URNImpl sha1Urn, Set<URNImpl> guidUrns) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Searching for guid urns: " + guidUrns);
         }
-        for (URN guidUrn : guidUrns) {
+        for (URNImpl guidUrn : guidUrns) {
             try {
                 GUID guid = new GUID(guidUrn.getNamespaceSpecificString());
                 pushEndpointManager.findPushEndpoint(guid, new PushendpointHandler(sha1Urn));
@@ -139,9 +139,9 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
 
     private class PushendpointHandler implements SearchListener<PushEndpoint> {
         
-        private final URN sha1;
+        private final URNImpl sha1;
 
-        public PushendpointHandler(URN sha1Urn) {
+        public PushendpointHandler(URNImpl sha1Urn) {
             this.sha1 = sha1Urn;
         }
 

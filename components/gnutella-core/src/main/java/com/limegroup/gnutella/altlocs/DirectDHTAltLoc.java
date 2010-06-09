@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -16,7 +16,7 @@ public class DirectDHTAltLoc extends DirectAltLoc {
     
     private final byte[] ttroot;
     
-    public DirectDHTAltLoc(IpPort address, URN sha1, long fileSize, byte[] ttroot,
+    public DirectDHTAltLoc(IpPort address, URNImpl sha1, long fileSize, byte[] ttroot,
             NetworkInstanceUtils networkInstanceUtils)
             throws IOException {
         super(address, sha1, networkInstanceUtils);

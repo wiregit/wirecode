@@ -23,7 +23,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
@@ -741,7 +741,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
         // Get the URN of the part of the file we're going to request
-        URN urn = TestFile.hashPartOfFile(10);
+        URNImpl urn = TestFile.hashPartOfFile(10);
         RemoteFileDesc rfd = makeRFD(urn);
 
         // wait for processing
@@ -926,7 +926,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         TestUploader uploader = new TestUploader(networkManagerStub);
         uploader.start("whatever", UPLOADER_PORT, false);
         uploader.setBusy(true);
-        URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         RemoteFileDesc rfd = makeRFD(urn);
 
         // wait for processing
@@ -1332,19 +1332,19 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     
     
-    private RemoteFileDesc makeRFD(URN urn, int port) throws Exception {
-        Set<URN> urns = new HashSet<URN>();
+    private RemoteFileDesc makeRFD(URNImpl urn, int port) throws Exception {
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         urns.add(urn);
         return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, false), 1, "whatever", 10, GUID.makeGuid(), 1,
                 3, false, null, urns, false, "LIME", -1);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {
-        URN urn = URN.createSHA1Urn("urn:sha1:" + sha1);
+        URNImpl urn = URNImpl.createSHA1Urn("urn:sha1:" + sha1);
         return makeRFD(urn);
     }
     
-    private RemoteFileDesc makeRFD(URN urn) throws Exception {
+    private RemoteFileDesc makeRFD(URNImpl urn) throws Exception {
         return makeRFD(urn, UPLOADER_PORT);
     }
 

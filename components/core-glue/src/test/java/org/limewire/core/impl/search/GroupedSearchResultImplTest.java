@@ -1,7 +1,7 @@
 package org.limewire.core.impl.search;
 
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 
@@ -12,7 +12,7 @@ public class GroupedSearchResultImplTest extends BaseTestCase {
     /** Instance of class being tested. */
     private GroupedSearchResultImpl groupedResult;
     
-    private URN urn;
+    private URNImpl urn;
 
     /**
      * Constructs a test case for the specified method name.
@@ -25,7 +25,7 @@ public class GroupedSearchResultImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         // Create a grouped result with a single source.
-        urn = URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
+        urn = URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1");
         groupedResult = new GroupedSearchResultImpl(new TestSearchResult(urn, "test0"), "test");
     }
     

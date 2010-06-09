@@ -23,7 +23,7 @@ import org.limewire.friend.api.PresenceEvent;
 import org.limewire.friend.api.feature.Feature;
 import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.friend.api.feature.ReferrerFeature;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.Base32;
 import org.limewire.util.StringUtils;
@@ -37,7 +37,7 @@ import com.limegroup.gnutella.io.URNFactory;
 public class TorrentWebSearchResult implements SearchResult {
     
     private final URI referrer;
-    private final URN urn;
+    private final URNImpl urn;
     private final BTData torrentData;
     private final File torrentFile;
     private final Torrent torrent;
@@ -49,11 +49,11 @@ public class TorrentWebSearchResult implements SearchResult {
         this.torrentFile = torrentFile;
         this.torrent = torrent;
         try {
-            URN topLevelURN = null;
+            URNImpl topLevelURN = null;
             try {
                 topLevelURN = URNFactory.createSHA1Urn(torrentFile);
             } catch (InterruptedException e) {
-                topLevelURN =  URN.createSHA1UrnFromBytes(torrentData.getInfoHash());
+                topLevelURN =  URNImpl.createSHA1UrnFromBytes(torrentData.getInfoHash());
             }
             urn = topLevelURN;
         } catch (IOException e) {
@@ -112,7 +112,7 @@ public class TorrentWebSearchResult implements SearchResult {
     }
 
     @Override
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return urn;
     }
 

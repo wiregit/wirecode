@@ -2,7 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.util.List;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.DefaultSourceTypeEvent;
 import org.limewire.util.StringUtils;
 
@@ -13,7 +13,7 @@ public class FileDescChangeEvent extends DefaultSourceTypeEvent<FileDesc, FileDe
     public static enum Type { TT_ROOT_ADDED, NMS1_ADDED }
     
     private final List<? extends LimeXMLDocument> xmlDocs;
-    private final URN urn;
+    private final URNImpl urn;
     
     public FileDescChangeEvent(FileDesc fileDesc, Type type) {
         super(fileDesc, type);
@@ -27,7 +27,7 @@ public class FileDescChangeEvent extends DefaultSourceTypeEvent<FileDesc, FileDe
         this.urn = null;
     }
     
-    public FileDescChangeEvent(FileDesc fileDesc, Type type, URN urn) {
+    public FileDescChangeEvent(FileDesc fileDesc, Type type, URNImpl urn) {
         super(fileDesc, type);
         this.xmlDocs = null;
         this.urn = urn;
@@ -37,7 +37,7 @@ public class FileDescChangeEvent extends DefaultSourceTypeEvent<FileDesc, FileDe
         return xmlDocs;
     }
     
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return urn;
     }
     

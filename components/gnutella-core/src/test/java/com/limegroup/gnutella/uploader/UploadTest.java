@@ -50,7 +50,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.LimeWireIOTestModule;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
@@ -178,8 +178,8 @@ public class UploadTest extends LimeTestCase {
         File incFile = new File(_incompleteDir, incName);
         library.remove(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
-        URN urn = URN.createSHA1Urn(incompleteHash);
-        Set<URN> urns = new HashSet<URN>();
+        URNImpl urn = URNImpl.createSHA1Urn(incompleteHash);
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
         incompleteFileCollection.addIncompleteFile(incFile, urns, incName, 1981, vf);
@@ -1258,7 +1258,7 @@ public class UploadTest extends LimeTestCase {
      */
     public void testCreationTimeHeaderReturned() throws Exception {
         // assert that creation time exists
-        URN urn = URN.createSHA1Urn(hash);
+        URNImpl urn = URNImpl.createSHA1Urn(hash);
         Long creationTime = injector.getInstance(CreationTimeCache.class).getCreationTime(urn);
         assertNotNull(creationTime);
         assertTrue(creationTime.longValue() > 0);
@@ -1283,7 +1283,7 @@ public class UploadTest extends LimeTestCase {
                 "verifiedBlocks");
         vb.add(iv);
 
-        URN urn = URN.createSHA1Urn(incompleteHash);
+        URNImpl urn = URNImpl.createSHA1Urn(incompleteHash);
         Long creationTime = new Long("10776");
         injector.getInstance(CreationTimeCache.class).addTime(urn, creationTime.longValue());
 
@@ -1489,7 +1489,7 @@ public class UploadTest extends LimeTestCase {
     public void testGetNonExistingTree() throws Exception {
         HashTreeCache tigerTreeCache = injector.getInstance(HashTreeCache.class);
         
-        URN urn = URN.createSHA1Urn(hash);
+        URNImpl urn = URNImpl.createSHA1Urn(hash);
         tigerTreeCache.purgeTree(urn);
         HttpGet method = new HttpGet("http://localhost:" + PORT + "/uri-res/N2X?" + hash);
         HttpResponse response = null;
@@ -1505,7 +1505,7 @@ public class UploadTest extends LimeTestCase {
         // modify shared file and make sure it gets new timestamp
         Thread.sleep(1000);
         
-        FileDesc fd = gnutellaFileView.getFileDesc(URN.createSHA1Urn(hash));
+        FileDesc fd = gnutellaFileView.getFileDesc(URNImpl.createSHA1Urn(hash));
         fd.getFile().setLastModified(System.currentTimeMillis());
         assertNotEquals(fd.getFile().lastModified(), fd.lastModified());
         final File file = fd.getFile();
@@ -1540,7 +1540,7 @@ public class UploadTest extends LimeTestCase {
 
             assertTrue("didn't get right changes, got: " + changes, latch.await(500, TimeUnit.MILLISECONDS));
 
-            fd = gnutellaFileView.getFileDesc(URN.createSHA1Urn(hash));
+            fd = gnutellaFileView.getFileDesc(URNImpl.createSHA1Urn(hash));
             assertNotNull(fd);
             method = new HttpGet(LimeTestUtils.getRequest("localhost", PORT, fd.getSHA1Urn()));
             try {
@@ -1571,7 +1571,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     private HashTree getThexTree(HashTreeCache tigerTreeCache) throws Exception {
-        FileDesc fd = gnutellaFileView.getFileDesc(URN.createSHA1Urn(hash));
+        FileDesc fd = gnutellaFileView.getFileDesc(URNImpl.createSHA1Urn(hash));
         return ((HashTreeCacheImpl)tigerTreeCache).getHashTreeAndWait(fd, 1000);
     }
 

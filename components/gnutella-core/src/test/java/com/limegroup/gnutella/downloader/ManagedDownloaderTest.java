@@ -36,7 +36,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressProviderStub;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
@@ -159,7 +159,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
     	//first make sure we are sharing an incomplete file
     	
-    	URN partialURN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+    	URNImpl partialURN = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         
     	IncompleteFileDescStub partialDesc = new IncompleteFileDescStub("incomplete",partialURN,3);
     	incompleteFileCollection.add(partialDesc);
@@ -596,11 +596,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
     }
 
     private RemoteFileDesc newRFD(String name, String hash) throws Exception {
-        Set<URN> urns = Collections.emptySet();
+        Set<URNImpl> urns = Collections.emptySet();
         if (hash!=null) {
-            urns=new HashSet<URN>(1);
+            urns=new HashSet<URNImpl>(1);
             try {
-                urns.add(URN.createSHA1Urn(hash));
+                urns.add(URNImpl.createSHA1Urn(hash));
             } catch (IOException e) {
                 fail("Couldn't create URN", e);
             }
@@ -674,7 +674,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         PrivilegedAccessor.setValue(managedDownloader,"_activeWorkers",l);
     }
     
-    private void setSHA1(ManagedDownloader managedDownloader, URN sha1) throws Exception{
+    private void setSHA1(ManagedDownloader managedDownloader, URNImpl sha1) throws Exception{
         PrivilegedAccessor.setValue(managedDownloader,"downloadSHA1",sha1);
     }
     

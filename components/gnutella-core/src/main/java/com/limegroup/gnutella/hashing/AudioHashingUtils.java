@@ -3,7 +3,7 @@ package com.limegroup.gnutella.hashing;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
@@ -24,7 +24,7 @@ public class AudioHashingUtils {
      * file. If they can be located, returns a URN with a SHA1 of the non-audio
      * portion of the file, otherwise returns null.
      */
-    public static URN generateNonMetaDataSHA1FromFile(File file) throws InterruptedException {
+    public static URNImpl generateNonMetaDataSHA1FromFile(File file) throws InterruptedException {
         if(!canCreateNonMetaDataSHA1(file))
             return null;
         try {

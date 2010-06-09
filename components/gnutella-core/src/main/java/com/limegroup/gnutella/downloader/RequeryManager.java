@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.activation.api.ActivationID;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
 
@@ -212,7 +212,7 @@ class RequeryManager implements DHTEventListener {
         requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
                 LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
       
-        URN sha1Urn = requeryListener.getSHA1Urn();
+        URNImpl sha1Urn = requeryListener.getSHA1Urn();
         if (sha1Urn != null) {
             dhtQuery = altLocFinder.findAltLocs(sha1Urn, searchHandler);
         }

@@ -14,12 +14,12 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.application.Application;
-import org.limewire.common.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.io.URN;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.downloads.table.AVInfoPanel;

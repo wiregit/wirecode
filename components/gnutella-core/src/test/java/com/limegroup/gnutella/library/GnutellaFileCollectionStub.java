@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 
 public class GnutellaFileCollectionStub extends AbstractFileCollectionStub implements SharedFileCollection {
     
-    public final static URN DEFAULT_URN;
+    public final static URNImpl DEFAULT_URN;
     static {
         try {
-            DEFAULT_URN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
+            DEFAULT_URN = URNImpl.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
         } catch(IOException ignored){
             throw new RuntimeException(ignored);    
         }

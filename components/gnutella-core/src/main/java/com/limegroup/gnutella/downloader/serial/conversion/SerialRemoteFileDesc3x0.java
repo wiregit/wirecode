@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.xml.SerialXml;
 
@@ -35,7 +35,7 @@ class SerialRemoteFileDesc3x0 implements Serializable, SerialRemoteFileDesc {
 
     private SerialXml[] _xmlDocs;
 
-    private Set<URN> _urns;
+    private Set<URNImpl> _urns;
 
     private boolean _browseHostEnabled;
     
@@ -133,7 +133,7 @@ class SerialRemoteFileDesc3x0 implements Serializable, SerialRemoteFileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialRemoteFileDesc#getUrns()
      */
-    public Set<URN> getUrns() {
+    public Set<URNImpl> getUrns() {
         return _urns;
     }
 

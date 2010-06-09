@@ -17,7 +17,7 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.gnutella.tests.LimeTestCase;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
-    private URN hash1, hash2, hash3, hash4;
+    private URNImpl hash1, hash2, hash3, hash4;
     private FileDesc fd1, fd2, fd3, fd4;
     
     private LibraryStub libraryStub;
@@ -53,10 +53,10 @@ public class CreationTimeCacheTest extends LimeTestCase {
     
     @Override
     public void setUp() throws Exception  {
-        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
-        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
-        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
+        hash1 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        hash2 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
+        hash3 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
+        hash4 = URNImpl.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
         
         libraryStub = new LibraryStub();
         gnutellaFileCollectionStub = new GnutellaFileCollectionStub();
@@ -75,17 +75,17 @@ public class CreationTimeCacheTest extends LimeTestCase {
     
     
     @SuppressWarnings("unchecked")
-    private Map<URN, Long> getUrnToTime(CreationTimeCache cache) throws Exception {
+    private Map<URNImpl, Long> getUrnToTime(CreationTimeCache cache) throws Exception {
         Future<?> future = (Future)PrivilegedAccessor.getValue(cache, "deserializer");
         Object o = future.get();
-        return (Map<URN, Long>)PrivilegedAccessor.invokeMethod(o, "getUrnToTime");
+        return (Map<URNImpl, Long>)PrivilegedAccessor.invokeMethod(o, "getUrnToTime");
     }
 
     /** Tests that the URN_MAP is derived correctly from the URN_TO_TIME_MAP
      */
     public void testMapCreation() throws Exception {
         // mock up our own createtimes.txt
-        Map<URN, Long> toSerialize = new HashMap<URN, Long>();
+        Map<URNImpl, Long> toSerialize = new HashMap<URNImpl, Long>();
         Long old = new Long(1);
         Long middle = new Long(2);
         Long young = new Long(3);
@@ -108,7 +108,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
     
     public void testMapCreationNoExistingMap() throws Exception {
         CreationTimeCache creationTimeCache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
-        Map<URN, Long> map = creationTimeCache.createMap();
+        Map<URNImpl, Long> map = creationTimeCache.createMap();
         assertTrue(map.isEmpty());
     }
 
@@ -117,7 +117,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
      */
     public void testGetFiles() throws Exception {
         // mock up our own createtimes.txt
-        Map<URN, Long> toSerialize = new HashMap<URN, Long>();
+        Map<URNImpl, Long> toSerialize = new HashMap<URNImpl, Long>();
         Long old = new Long(1);
         Long middle = new Long(2);
         Long young = new Long(3);
@@ -143,9 +143,9 @@ public class CreationTimeCacheTest extends LimeTestCase {
         {
             Iterator iter = ctCache.getFiles().iterator();
             assertEquals(hash2, iter.next());
-            URN urn = (URN) iter.next();
+            URNImpl urn = (URNImpl) iter.next();
             assertTrue("was: " + urn, urn.equals(hash1) || urn.equals(hash4));
-            urn = (URN) iter.next();
+            urn = (URNImpl) iter.next();
             assertTrue("was: " + urn, urn.equals(hash1) || urn.equals(hash4));
             assertEquals(hash3, iter.next());
             assertFalse(iter.hasNext());
@@ -154,9 +154,9 @@ public class CreationTimeCacheTest extends LimeTestCase {
         {
             Iterator iter = ctCache.getFiles(4).iterator();
             assertEquals(hash2, iter.next());
-            URN urn = (URN) iter.next();
+            URNImpl urn = (URNImpl) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
-            urn = (URN) iter.next();
+            urn = (URNImpl) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
             assertEquals(hash3, iter.next());
             assertFalse(iter.hasNext());
@@ -165,9 +165,9 @@ public class CreationTimeCacheTest extends LimeTestCase {
         {
             Iterator iter = ctCache.getFiles(3).iterator();
             assertEquals(hash2, iter.next());
-            URN urn = (URN) iter.next();
+            URNImpl urn = (URNImpl) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
-            urn = (URN) iter.next();
+            urn = (URNImpl) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
             assertFalse(iter.hasNext());
         }
@@ -175,7 +175,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         {
             Iterator iter = ctCache.getFiles(2).iterator();
             assertEquals(hash2, iter.next());
-            URN urn = (URN) iter.next();
+            URNImpl urn = (URNImpl) iter.next();
             assertTrue(urn.equals(hash1) || urn.equals(hash4));
             assertFalse(iter.hasNext());
         }
@@ -339,27 +339,27 @@ public class CreationTimeCacheTest extends LimeTestCase {
         assertTrue("cache should not be present", !cacheExists() );
         
         CreationTimeCache cache = new CreationTimeCache(libraryStub, gnutellaFileCollectionStub, new MediaTypeAggregatorStub());
-        Collection<URN> sha1s = createLotsOfSha1s(cache);
+        Collection<URNImpl> sha1s = createLotsOfSha1s(cache);
         assertNotNull("should have some file descs", sha1s);
         assertGreaterThan("should have some file descs", 0, sha1s.size());
         cache.persistCache();
         assertTrue("cache should now exist", cacheExists());
-        for(URN urn : sha1s) {
+        for(URNImpl urn : sha1s) {
             Long cTime = cache.getCreationTime(urn);
             assertNotNull("file should be present in cache", cTime);
         }
     }
 
-	private Collection<URN> createLotsOfSha1s(CreationTimeCache cache) throws Exception {
+	private Collection<URNImpl> createLotsOfSha1s(CreationTimeCache cache) throws Exception {
         File path = TestUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 return !file.isDirectory();
             }
         });
-		List<URN> sha1s = new ArrayList<URN>();
+		List<URNImpl> sha1s = new ArrayList<URNImpl>();
 		for(int i=0; i<files.length; i++) {
-			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache(ExecutorsHelper.newProcessingQueue("test"), null));            
+			Set<URNImpl> urns = UrnHelper.calculateAndCacheURN(files[i], new UrnCache(ExecutorsHelper.newProcessingQueue("test"), null));            
 			cache.addTime(UrnSet.getSha1(urns), files[i].lastModified());
 			sha1s.add(UrnSet.getSha1(urns));
 		}				

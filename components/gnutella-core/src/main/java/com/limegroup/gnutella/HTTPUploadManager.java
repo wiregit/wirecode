@@ -27,7 +27,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.auth.ServerAuthState;
 import org.limewire.inject.EagerSingleton;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileLocker;
@@ -489,7 +489,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
-        URN sha1 = fd.getSHA1Urn();
+        URNImpl sha1 = fd.getSHA1Urn();
         if (!urnValidator.isValid(sha1)) {
             urnValidator.validate(sha1);
         }

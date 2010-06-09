@@ -16,7 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
@@ -91,7 +91,7 @@ public class CollectionTest extends LimeTestCase {
         assertTrue("Necessary file test1.mp3 cannot be found!", test1.exists());
         assertTrue("Necessary file test2.mp3 cannot be found!", test2.exists());
         
-        Set<URN> urns;
+        Set<URNImpl> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
         files[MASON_IDX] = factory.createFileDesc(mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
@@ -409,7 +409,7 @@ public class CollectionTest extends LimeTestCase {
     
     private void createFiles() throws Exception {
         MetaDataReader reader = metaDataReader;
-        Map<URN, LimeXMLDocument> map = new HashMap<URN, LimeXMLDocument>();
+        Map<URNImpl, LimeXMLDocument> map = new HashMap<URNImpl, LimeXMLDocument>();
         LimeXMLDocument doc = null;
         // make audio.collection
         doc = reader.readDocument(test1);
@@ -422,7 +422,7 @@ public class CollectionTest extends LimeTestCase {
         
         // made video.collection
         List<NameValue<String>> nameVals = new ArrayList<NameValue<String>>();
-        map = new HashMap<URN, LimeXMLDocument>();
+        map = new HashMap<URNImpl, LimeXMLDocument>();
         nameVals.add(new NameValue<String>("videos__video__director__","daswani"));
         nameVals.add(new NameValue<String>("videos__video__title__","susheel"));
         doc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, videoSchemaURI);
@@ -439,9 +439,9 @@ public class CollectionTest extends LimeTestCase {
         write(map, new File(marker, "video.collection"));
     }
     
-    private void write(Map<URN, LimeXMLDocument> docs, File f) throws Exception {
-        Map<URN, String> strings = new HashMap<URN, String>(docs.size());
-        for(Map.Entry<URN, LimeXMLDocument> entry : docs.entrySet()) {
+    private void write(Map<URNImpl, LimeXMLDocument> docs, File f) throws Exception {
+        Map<URNImpl, String> strings = new HashMap<URNImpl, String>(docs.size());
+        for(Map.Entry<URNImpl, LimeXMLDocument> entry : docs.entrySet()) {
             strings.put(entry.getKey(), entry.getValue().getXMLString());
         }
         ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
@@ -464,7 +464,7 @@ public class CollectionTest extends LimeTestCase {
             fail("couldn't rename video file to: " + newVideo);
     }
     
-    private static URN getHash(File f) {
+    private static URNImpl getHash(File f) {
         try {
             return URNFactory.createSHA1Urn(f);
         } catch(IOException ioe) {

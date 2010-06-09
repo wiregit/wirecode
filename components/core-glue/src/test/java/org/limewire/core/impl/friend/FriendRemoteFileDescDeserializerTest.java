@@ -8,7 +8,7 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
@@ -74,7 +74,7 @@ public class FriendRemoteFileDescDeserializerTest extends BaseTestCase {
         final int speed = Integer.MAX_VALUE;
         final int quality = Integer.MIN_VALUE;
         final LimeXMLDocument xmlDoc = null;
-        final Set<URN> urns = new HashSet<URN>();
+        final Set<URNImpl> urns = new HashSet<URNImpl>();
         final String vendor = null;
         final long createTime = Long.MIN_VALUE;
         final boolean http11 = true;

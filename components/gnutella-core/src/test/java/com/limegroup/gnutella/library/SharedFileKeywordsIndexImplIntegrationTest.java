@@ -23,7 +23,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.TestUtils;
 
@@ -89,8 +89,8 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f1 = createNewExtensionTestFile(4096, "mp3", _scratchDir);
         assertAdds(fileList, f1);
         FileDesc fileDesc = fileList.getFileDesc(f1);
-        fileDesc.addUrn(URN.createNMS1FromBytes(new byte[20]));
-        URN nms1Urn = fileDesc.getNMS1Urn();
+        fileDesc.addUrn(URNImpl.createNMS1FromBytes(new byte[20]));
+        URNImpl nms1Urn = fileDesc.getNMS1Urn();
         assertNotNull(nms1Urn);
         responses = keywordIndex.query(queryRequestFactory.createQuery("unit"));
         assertEquals("Unexpected number of responses", 1, responses.length);
@@ -106,8 +106,8 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f1 = createNewExtensionTestFile(4096, "mp3", _scratchDir);
         assertAdds(fileList, f1);
         FileDesc fileDesc = fileList.getFileDesc(f1);
-        fileDesc.addUrn(URN.createNMS1FromBytes(new byte[20]));
-        URN nms1Urn = fileDesc.getNMS1Urn();
+        fileDesc.addUrn(URNImpl.createNMS1FromBytes(new byte[20]));
+        URNImpl nms1Urn = fileDesc.getNMS1Urn();
         assertNotNull(nms1Urn);
         QueryRequest request = queryRequestFactory.createQuery("unit");
         assertFalse(request.desiresNMS1Urn());

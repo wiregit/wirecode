@@ -12,7 +12,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.rudp.RUDPUtils;
@@ -158,11 +158,11 @@ public class DownloadMagnetTest extends DownloadTestCase {
                 return TestFile.length();
             }
 
-            public URN getSHA1Urn() {
+            public URNImpl getSHA1Urn() {
                 return TestFile.hash();
             }
 
-            public Set<URN> getUrns() {
+            public Set<URNImpl> getUrns() {
                 return null;
             }
 

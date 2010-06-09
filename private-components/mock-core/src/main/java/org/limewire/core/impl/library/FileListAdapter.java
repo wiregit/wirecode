@@ -6,7 +6,6 @@ import java.io.FileFilter;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
@@ -16,6 +15,7 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteLibraryState;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;

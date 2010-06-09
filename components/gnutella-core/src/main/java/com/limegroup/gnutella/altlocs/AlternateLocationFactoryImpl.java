@@ -11,7 +11,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
@@ -51,7 +51,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#create(com.limegroup.gnutella.URN)
      */
-    public AlternateLocation create(URN urn) {
+    public AlternateLocation create(URNImpl urn) {
     	if(urn == null) throw new NullPointerException("null sha1");
         
     	try {
@@ -96,7 +96,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	if(rfd == null)
     		throw new NullPointerException("cannot accept null RFD");
     
-    	URN urn = rfd.getSHA1Urn();
+    	URNImpl urn = rfd.getSHA1Urn();
     	if(urn == null)
     	    throw new NullPointerException("cannot accept null URN");
     
@@ -119,14 +119,14 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createPushAltLoc(com.limegroup.gnutella.PushEndpoint, com.limegroup.gnutella.URN)
      */
-    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) {
+    public AlternateLocation createPushAltLoc(PushEndpoint pe, URNImpl urn) {
         return new PushAltLoc(pe, urn, applicationServices);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createDirectDHTAltLoc(org.limewire.io.IpPort, com.limegroup.gnutella.URN, long, byte[])
      */
-    public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URN urn, 
+    public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URNImpl urn, 
             long fileSize, byte[] ttroot) throws IOException {
         return new DirectDHTAltLoc(ipp, urn, fileSize, ttroot, networkInstanceUtils);
     }
@@ -134,7 +134,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createDirectAltLoc(org.limewire.io.IpPort, com.limegroup.gnutella.URN)
      */
-    public AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
+    public AlternateLocation createDirectAltLoc(IpPort ipp, URNImpl urn) throws IOException {
         return new DirectAltLoc(ipp, urn, networkInstanceUtils);
     }
 
@@ -142,7 +142,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#create(java.lang.String, com.limegroup.gnutella.URN, boolean)
      */
     public AlternateLocation create(String location,
-                                           URN urn,
+                                           URNImpl urn,
                                            boolean tlsCapable) throws IOException {
         if(location == null || location.equals(""))
             throw new IOException("null or empty location");
@@ -164,7 +164,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#create(java.lang.String, com.limegroup.gnutella.URN)
      */
     public AlternateLocation create(final String location,
-                                           final URN urn) throws IOException {
+                                           final URNImpl urn) throws IOException {
         return create(location, urn, false);
     }
 
@@ -172,7 +172,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      * Creates a new <tt>URL</tt> based on the IP and port in the location
      * The location MUST be a dotted IP address.
      */
-    private IpPort createUrlFromMini(final String location, URN urn, boolean tlsCapable)
+    private IpPort createUrlFromMini(final String location, URNImpl urn, boolean tlsCapable)
             throws IOException {
         int port = location.indexOf(':');
         final String loc =

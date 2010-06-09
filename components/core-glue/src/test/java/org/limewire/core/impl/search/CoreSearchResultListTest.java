@@ -10,7 +10,7 @@ import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.BaseTestCase;
 
@@ -61,7 +61,7 @@ public class CoreSearchResultListTest extends BaseTestCase {
     
     /** Make a search that gets a result, and see it there. */
     public void testAddResult() throws Exception {
-        SearchResult result = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         resultList.addResult(result);
         
         // confirm the result is in there
@@ -71,8 +71,8 @@ public class CoreSearchResultListTest extends BaseTestCase {
     
     /** A search gets two different results. */
     public void testAddResultsTwoDifferent() throws Exception {
-        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
+        SearchResult result1 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result2 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
         
         List<SearchResult> list = new ArrayList<SearchResult>();
         list.add(result1);
@@ -86,9 +86,9 @@ public class CoreSearchResultListTest extends BaseTestCase {
     
     /** A search gets two results that share the same URN, and get grouped together. */
     public void testAddResultsWithSameUrn() throws Exception {
-        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
-        SearchResult result3 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
+        SearchResult result1 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result2 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
+        SearchResult result3 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")); // same hash
         
         List<SearchResult> list = new ArrayList<SearchResult>();
         list.add(result1);
@@ -106,8 +106,8 @@ public class CoreSearchResultListTest extends BaseTestCase {
     /** Test method to clear results. */
     public void testClear() throws Exception {
         // Add two results.
-        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
-        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
+        SearchResult result1 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result2 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2")); // different hash
         
         List<SearchResult> list = new ArrayList<SearchResult>();
         list.add(result1);
@@ -131,13 +131,13 @@ public class CoreSearchResultListTest extends BaseTestCase {
         resultList.addListener(listener);
         
         // Add result and check listener.
-        SearchResult result1 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result1 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         resultList.addResult(result1);
         assertEquals(1, listener.getCount());
         
         // Add result with same URN, and check listener.
         listener.reset();
-        SearchResult result2 = new TestSearchResult(URN.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
+        SearchResult result2 = new TestSearchResult(URNImpl.createUrnFromString("urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1"));
         resultList.addResult(result2);
         assertEquals(1, listener.getCount());
     }

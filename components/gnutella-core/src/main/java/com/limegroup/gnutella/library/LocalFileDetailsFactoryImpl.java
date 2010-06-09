@@ -2,7 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,11 +32,11 @@ class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
                 return fd.getFileSize();
             }
 
-            public URN getSHA1Urn() {
+            public URNImpl getSHA1Urn() {
                 return fd.getSHA1Urn();
             }
 
-            public Set<URN> getUrns() {
+            public Set<URNImpl> getUrns() {
                 return fd.getUrns();
             }
 

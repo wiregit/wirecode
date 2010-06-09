@@ -15,7 +15,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -35,7 +35,7 @@ class ContentCache {
         new File(CommonUtils.getUserSettingsDir(), "responses.cache");
     
     /** Map of SHA1 to Responses. */
-    private Map<URN, ContentResponseData> responses = new HashMap<URN, ContentResponseData>();    
+    private Map<URNImpl, ContentResponseData> responses = new HashMap<URNImpl, ContentResponseData>();    
     
     /** Whether or not data is dirty since the last time we wrote to disk. */
     private boolean dirty = false;
@@ -46,18 +46,18 @@ class ContentCache {
     }
     
     /** Determines if there is a response for the given URN. */
-    synchronized boolean hasResponseFor(URN urn) {
+    synchronized boolean hasResponseFor(URNImpl urn) {
         return responses.containsKey(urn);
     }
     
     /** Adds the given response for the given URN. */
-    synchronized void addResponse(URN urn, ContentResponseData response) {
+    synchronized void addResponse(URNImpl urn, ContentResponseData response) {
         responses.put(urn, response);
         dirty = true;
     }
     
     /** Gets the response for the given URN. */
-    synchronized ContentResponseData getResponse(URN urn) {
+    synchronized ContentResponseData getResponse(URNImpl urn) {
         return responses.get(urn);
     }
     
@@ -84,8 +84,8 @@ class ContentCache {
         try {
             ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(CACHE_FILE)));
             Map map = (Map)ois.readObject();
-            Map<URN, ContentResponseData> checked = 
-                GenericsUtils.scanForMap(map, URN.class, ContentResponseData.class, GenericsUtils.ScanMode.REMOVE);
+            Map<URNImpl, ContentResponseData> checked = 
+                GenericsUtils.scanForMap(map, URNImpl.class, ContentResponseData.class, GenericsUtils.ScanMode.REMOVE);
             if(checked.size() != map.size())
                 dirty = true;
             
@@ -106,7 +106,7 @@ class ContentCache {
         } finally {
             IOUtils.close(ois);
             if(responses == null)
-                responses = new HashMap<URN, ContentResponseData>();
+                responses = new HashMap<URNImpl, ContentResponseData>();
         }
     }
 

@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.GGEP;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
@@ -22,7 +22,7 @@ import com.limegroup.gnutella.messages.HUGEExtension;
 
 public class ResponseFactoryImplTest extends LimeTestCase {
 
-    private URN nms1Urn; 
+    private URNImpl nms1Urn; 
     
     private ResponseFactoryImpl factory;
 
@@ -30,7 +30,7 @@ public class ResponseFactoryImplTest extends LimeTestCase {
     protected void setUp() throws Exception {
         byte[] sha1 = new byte[20];
         Arrays.fill(sha1, (byte)1);
-        nms1Urn = URN.createNMS1FromBytes(sha1);
+        nms1Urn = URNImpl.createNMS1FromBytes(sha1);
         factory = (ResponseFactoryImpl) LimeTestUtils.createInjector().getInstance(ResponseFactory.class);
     }
     
@@ -39,20 +39,20 @@ public class ResponseFactoryImplTest extends LimeTestCase {
     }
 
     public void testUpdateUrnsLeavesUntouchedWhenNull() {
-        Set<URN> urns = Collections.emptySet();
-        Set<URN> result = ResponseFactoryImpl.updateUrns(urns, null);
+        Set<URNImpl> urns = Collections.emptySet();
+        Set<URNImpl> result = ResponseFactoryImpl.updateUrns(urns, null);
         assertSame(urns, result);
     }
 
     public void testUpdateUrnsLeavesUntouchedWhenUrnSetAlready() {
-        Set<URN> urns = new UrnSet();
-        Set<URN> result = ResponseFactoryImpl.updateUrns(urns, UrnHelper.SHA1);
+        Set<URNImpl> urns = new UrnSet();
+        Set<URNImpl> result = ResponseFactoryImpl.updateUrns(urns, UrnHelper.SHA1);
         assertSame(urns, result);
     }
     
     public void testUpdateUrnsChangesSetIfNecessary() {
-        Set<URN> urns = Collections.emptySet();
-        Set<URN> result = ResponseFactoryImpl.updateUrns(urns, UrnHelper.SHA1);
+        Set<URNImpl> urns = Collections.emptySet();
+        Set<URNImpl> result = ResponseFactoryImpl.updateUrns(urns, UrnHelper.SHA1);
         assertInstanceof(UrnSet.class, result);
     }
     

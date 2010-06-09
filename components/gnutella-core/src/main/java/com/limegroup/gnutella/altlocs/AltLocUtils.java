@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.http.HTTPUtils;
 
@@ -25,12 +25,12 @@ public class AltLocUtils {
      * @param allowTLS Whether or not a tls=# index is allowed.
      * @param function The closure-like function that each location is passed to.
      */
-    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS, AlternateLocationFactory alternateLocationFactory, 
+    public static void parseAlternateLocations(URNImpl sha1, String locations, boolean allowTLS, AlternateLocationFactory alternateLocationFactory, 
             Function<AlternateLocation, Void> function) {
         parseAlternateLocations(sha1, locations, allowTLS, alternateLocationFactory, function, false);
     }
     
-    public static void parseAlternateLocations(URN sha1, String locations, boolean allowTLS,  AlternateLocationFactory alternateLocationFactory, 
+    public static void parseAlternateLocations(URNImpl sha1, String locations, boolean allowTLS,  AlternateLocationFactory alternateLocationFactory, 
                                                Function<AlternateLocation, Void> function, boolean allowMe) {
         if(locations == null)
             return;

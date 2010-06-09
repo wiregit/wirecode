@@ -15,7 +15,7 @@ import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.lws.LWSConstants;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -357,7 +357,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
      * hash of them
      */
     @Override
-    protected URN saveTreeHash(URN fileHash) {
+    protected URNImpl saveTreeHash(URNImpl fileHash) {
         return null;
     }
 

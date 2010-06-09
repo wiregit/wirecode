@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.PropertiableFile;
@@ -22,6 +21,7 @@ import org.limewire.core.api.search.SearchManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.PropertiableHeadings;

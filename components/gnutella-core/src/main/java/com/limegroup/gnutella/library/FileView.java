@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 
 
@@ -37,7 +37,7 @@ public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewCh
      * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
      *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
-    FileDesc getFileDesc(URN urn);        
+    FileDesc getFileDesc(URNImpl urn);        
 
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
@@ -48,7 +48,7 @@ public interface FileView extends Iterable<FileDesc>, ListenerSupport<FileViewCh
     /**
      * Returns all FileDescs that match this URN.
      */
-    List<FileDesc> getFileDescsMatching(URN urn);
+    List<FileDesc> getFileDescsMatching(URNImpl urn);
 
     /**
      * Returns the FileDesc at the given index. This returns the FileDesc for

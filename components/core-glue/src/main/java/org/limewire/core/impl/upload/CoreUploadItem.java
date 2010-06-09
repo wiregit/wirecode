@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -18,6 +17,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.LimewireFeature;
+import org.limewire.io.URN;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 
@@ -316,7 +316,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public URN getUrn() {
-        org.limewire.io.URN urn = uploader.getUrn();
+        org.limewire.io.URNImpl urn = uploader.getUrn();
         if(urn != null) {
             return urn;
         }

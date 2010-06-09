@@ -12,7 +12,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.URNSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
@@ -129,7 +129,7 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
             // if no root, calculate one and propagate it.
             if(fileDesc.getTTROOTUrn() == null) {
                 // Schedule all additions for having a hash tree root.
-                URN root = treeCache.getOrScheduleHashTreeRoot(fileDesc);
+                URNImpl root = treeCache.getOrScheduleHashTreeRoot(fileDesc);
                 if(root != null) {
                 	for(FileDesc fd : library.getFileDescsMatching(fileDesc.getSHA1Urn())) {
                 	    fd.addUrn(root);
@@ -173,11 +173,11 @@ class SharedFileCollectionImpl extends AbstractFileCollection implements SharedF
         if(URNSettings.USE_NON_METADATA_HASH.get() && 
             fileDesc.getNMS1Urn() == null &&
             AudioHashingUtils.canCreateNonMetaDataSHA1(fileDesc.getFile())) {
-                ListeningFuture<URN> urnFuture = urnCache.calculateAndCacheNMS1(fileDesc.getFile());
-                urnFuture.addFutureListener(new EventListener<FutureEvent<URN>>(){
+                ListeningFuture<URNImpl> urnFuture = urnCache.calculateAndCacheNMS1(fileDesc.getFile());
+                urnFuture.addFutureListener(new EventListener<FutureEvent<URNImpl>>(){
                     @Override
-                    public void handleEvent(FutureEvent<URN> event) {
-                        URN urn = event.getResult();
+                    public void handleEvent(FutureEvent<URNImpl> event) {
+                        URNImpl urn = event.getResult();
                         if(urn != null && urn.isNMS1()) {
                             for(FileDesc fd : library.getFileDescsMatching(fileDesc.getSHA1Urn())) {
                                 fd.addUrn(urn);

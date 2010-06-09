@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -17,15 +17,15 @@ import org.limewire.io.URN;
  */
 public class IncompleteFileDescStub extends FileDescStub implements IncompleteFileDesc {
 	public static final String urnString = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
-	private static final URN urn;
+	private static final URNImpl urn;
     
     private IntervalSet.ByteIntervals _ranges;
     
     public static final int size = 1126400;
     static {
-        URN u;
+        URNImpl u;
         try {
-            u = URN.createSHA1Urn(urnString);
+            u = URNImpl.createSHA1Urn(urnString);
         } catch(IOException iox) {
             throw new RuntimeException(iox);
         }
@@ -36,12 +36,12 @@ public class IncompleteFileDescStub extends FileDescStub implements IncompleteFi
         this("abc.txt", urn, 0);
     }
     
-    public IncompleteFileDescStub(String name, URN urn, int index) {
+    public IncompleteFileDescStub(String name, URNImpl urn, int index) {
         super(name, urn, index);
     }
     
     @Override
-    public boolean containsUrn(URN urn) {
+    public boolean containsUrn(URNImpl urn) {
         if(urn.equals(IncompleteFileDescStub.urn)) {
             return true;
         } else {

@@ -7,7 +7,7 @@ import org.jmock.Mockery;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
@@ -41,10 +41,10 @@ public class RemoteFileDescFactoryImplTest extends BaseTestCase {
         context.checking(new Expectations() {{
             one(creator).canCreateFor(address);
             will(returnValue(true));
-            one(creator).create(address, 1, "hello", 2, clientGuid, 1, 1, true, null, URN.NO_URN_SET, false, "vendor", -1, false);
+            one(creator).create(address, 1, "hello", 2, clientGuid, 1, 1, true, null, URNImpl.NO_URN_SET, false, "vendor", -1, false);
             will(returnValue(null));
         }});
-        RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(address, 1, "hello", 2, clientGuid, 1, 1, true, null, URN.NO_URN_SET, false, "vendor", -1, false, null);
+        RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(address, 1, "hello", 2, clientGuid, 1, 1, true, null, URNImpl.NO_URN_SET, false, "vendor", -1, false, null);
         assertNull(rfd);
         context.assertIsSatisfied();
     }

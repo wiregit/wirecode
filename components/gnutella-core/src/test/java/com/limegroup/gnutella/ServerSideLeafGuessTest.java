@@ -16,7 +16,7 @@ import junit.framework.Test;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.TestUtils;
@@ -171,9 +171,9 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         // now send a URN query, make sure that works....
         File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
-        URN berkeleyURN = (URN) iter.next();
+        URNImpl berkeleyURN = (URNImpl) iter.next();
         while (!berkeleyURN.isSHA1())
-            berkeleyURN = (URN) iter.next();
+            berkeleyURN = (URNImpl) iter.next();
         
         // we should be able to send a URN query
         QueryRequest goodQuery = queryRequestFactory.createQueryKeyQuery(berkeleyURN, 

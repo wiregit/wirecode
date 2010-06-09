@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.listener.EventListener;
 
@@ -22,16 +22,16 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class FileDescStub implements FileDesc {
     public static final String DEFAULT_URN =
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
-    public static final URN DEFAULT_SHA1;
-    public static final Set<URN> DEFAULT_SET;
+    public static final URNImpl DEFAULT_SHA1;
+    public static final Set<URNImpl> DEFAULT_SET;
     public static final int DEFAULT_SIZE = 1126400;
     private final Map<String, Object> clientProperties = new HashMap<String, Object>();
     
     static {
-        DEFAULT_SET = new HashSet<URN>();
-        URN sha1 = null;
+        DEFAULT_SET = new HashSet<URNImpl>();
+        URNImpl sha1 = null;
         try {
-            sha1 = URN.createSHA1Urn(DEFAULT_URN);
+            sha1 = URNImpl.createSHA1Urn(DEFAULT_URN);
         } catch(IOException ioe) {
             throw new RuntimeException(ioe);
         }
@@ -48,7 +48,7 @@ public class FileDescStub implements FileDesc {
     }
     
     private final File file;
-    private final Set<URN> urns;
+    private final Set<URNImpl> urns;
     private final int index;
     private final String name;
     private final String path;
@@ -56,7 +56,7 @@ public class FileDescStub implements FileDesc {
     private final long size;
     
     
-    public FileDescStub(String name, URN urn, int index) {
+    public FileDescStub(String name, URNImpl urn, int index) {
         this.file = createStubFile(new File(name));
         this.urns = new UrnSet(urn);
         this.index = index;
@@ -99,7 +99,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public boolean containsUrn(URN urn) {
+    public boolean containsUrn(URNImpl urn) {
         return urns.contains(urn);
     }
 
@@ -159,21 +159,21 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public URN getSHA1Urn() {
+    public URNImpl getSHA1Urn() {
         return UrnSet.getSha1(urns);
     }
     @Override
-    public URN getTTROOTUrn() {
+    public URNImpl getTTROOTUrn() {
         // TODO Auto-generated method stub
         return null;
     }
     @Override
-    public URN getNMS1Urn() {
+    public URNImpl getNMS1Urn() {
         return UrnSet.getNMS1(urns);
     }
 
     @Override
-    public Set<URN> getUrns() {
+    public Set<URNImpl> getUrns() {
         return urns;
     }
 
@@ -248,7 +248,7 @@ public class FileDescStub implements FileDesc {
     }
 
     @Override
-    public void addUrn(URN urn) {
+    public void addUrn(URNImpl urn) {
         urns.add(urn);
     }
 

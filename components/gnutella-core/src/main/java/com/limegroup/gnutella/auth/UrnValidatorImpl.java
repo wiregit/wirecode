@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -17,13 +17,13 @@ class UrnValidatorImpl implements UrnValidator {
     
     private final ContentManager contentManager;
     private final EventMulticaster<ValidationEvent> validationMulticaster;    
-    private final Set<URN> requestingValidation;
+    private final Set<URNImpl> requestingValidation;
 
     @Inject
     public UrnValidatorImpl(ContentManager contentManager) {
         this.contentManager = contentManager;
         this.validationMulticaster = new EventMulticasterImpl<ValidationEvent>();
-        this.requestingValidation = Collections.synchronizedSet(new HashSet<URN>());
+        this.requestingValidation = Collections.synchronizedSet(new HashSet<URNImpl>());
     }
     
     
@@ -33,21 +33,21 @@ class UrnValidatorImpl implements UrnValidator {
     }
 
     @Override
-    public boolean isInvalid(URN urn) {
+    public boolean isInvalid(URNImpl urn) {
         ContentResponseData r = contentManager.getResponse(urn);
         return r != null && !r.isOK();
     }
 
     @Override
-    public boolean isValid(URN urn) {
+    public boolean isValid(URNImpl urn) {
         return contentManager.isVerified(urn);
     }
 
     @Override
-    public void validate(URN urn) {
+    public void validate(URNImpl urn) {
         if(requestingValidation.add(urn)) {
             contentManager.request(urn, new ContentResponseObserver() {
-               public void handleResponse(URN urn, ContentResponseData r) {
+               public void handleResponse(URNImpl urn, ContentResponseData r) {
                    requestingValidation.remove(urn);
                    ValidationEvent.Type type;
                    if(r == null) {

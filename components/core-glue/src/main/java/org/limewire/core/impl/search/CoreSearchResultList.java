@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.common.URN;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
@@ -16,6 +15,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResultList;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.io.GUID;
+import org.limewire.io.URN;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 

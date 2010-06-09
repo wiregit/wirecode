@@ -15,7 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.gnutella.tests.LimeTestUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -75,7 +75,7 @@ public class HashTreeTest extends BaseTestCase {
     }
     
     public void testLargeFile()  throws Exception {
-    	URN urn = URNFactory.createSHA1Urn(file);
+    	URNImpl urn = URNFactory.createSHA1Urn(file);
     	try {
     	    tigerTreeFactory.createHashTree(1780149344l, new ByteArrayInputStream(new byte[0]), urn);
     		fail("shouldn't have read whole file");
@@ -89,7 +89,7 @@ public class HashTreeTest extends BaseTestCase {
 
     public void testBasicTigerTree() throws Exception {
         assertTrue(file.exists());
-        URN urn = URNFactory.createSHA1Urn(file);
+        URNImpl urn = URNFactory.createSHA1Urn(file);
         assertEquals(sha1, urn.toString());
                 
         InputStream in = new BufferedInputStream(new FileInputStream(file));

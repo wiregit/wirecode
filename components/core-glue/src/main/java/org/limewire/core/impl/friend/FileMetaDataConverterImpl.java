@@ -14,7 +14,7 @@ import org.limewire.friend.api.feature.AddressFeature;
 import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,10 +50,10 @@ class FileMetaDataConverterImpl implements FileMetaDataConverter {
         byte[] clientGuid = DataUtils.EMPTY_GUID;
         
         Set<String> urnsAsString = fileMeta.getUrns();
-        Set<URN> urns = new HashSet<URN>();
+        Set<URNImpl> urns = new HashSet<URNImpl>();
         for (String urnStr : urnsAsString) {
             try {
-                urns.add(URN.createUrnFromString(urnStr));
+                urns.add(URNImpl.createUrnFromString(urnStr));
             } catch(IOException iox) {
                 throw new InvalidDataException(iox);
             }

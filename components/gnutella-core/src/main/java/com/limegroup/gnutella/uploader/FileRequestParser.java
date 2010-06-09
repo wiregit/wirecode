@@ -8,7 +8,7 @@ import java.util.Locale;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -50,7 +50,7 @@ class FileRequestParser {
         
         String uriRes = uri.substring(index);
         
-        URN urn = URNFactory.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
+        URNImpl urn = URNFactory.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy. URI scheme names are not case-sensitive.

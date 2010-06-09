@@ -16,7 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
@@ -101,7 +101,7 @@ public class LicenseCache {
     /**
      * Determines if the license is verified for the given URN and URI.
      */
-    synchronized boolean isVerifiedAndValid(URN urn, URI uri) {
+    synchronized boolean isVerifiedAndValid(URNImpl urn, URI uri) {
         License license = licenses.get(uri);
         return license != null && license.isValid(urn);
     }

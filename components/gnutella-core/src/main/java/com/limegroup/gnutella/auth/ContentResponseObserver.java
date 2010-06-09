@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.auth;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 /** An observer for URNs. */
 public interface ContentResponseObserver {
@@ -9,5 +9,5 @@ public interface ContentResponseObserver {
      * @param urn the urn that was requested
      * @param response can be null due to a timeout
      */
-    public void handleResponse(URN urn, ContentResponseData response);
+    public void handleResponse(URNImpl urn, ContentResponseData response);
 }

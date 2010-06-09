@@ -12,7 +12,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -59,7 +59,7 @@ class AltLocFinderImpl implements AltLocFinder {
         this.pushEndpointManager = pushEndpointManager;
     }
     
-    public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
+    public Shutdownable findAltLocs(URNImpl urn, SearchListener<AlternateLocation> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         
         KUID key = KUIDUtils.toKUID(urn);
@@ -82,7 +82,7 @@ class AltLocFinderImpl implements AltLocFinder {
     /**
      * Looks up the push endpoint for an alternate location based on the guid.
      */
-    private void findPushAltLocs(final GUID guid, final URN urn, 
+    private void findPushAltLocs(final GUID guid, final URNImpl urn, 
             final DHTValueEntity altLocEntity, final SearchListener<AlternateLocation> listener) {
         
         SearchListener<PushEndpoint> pushEndpointListener = new SearchListener<PushEndpoint>() {
@@ -122,9 +122,9 @@ class AltLocFinderImpl implements AltLocFinder {
     private class AltLocsHandler extends AbstractResultHandler {
         
         private final SearchListener<AlternateLocation> listener;
-        private final URN urn;
+        private final URNImpl urn;
 
-        private AltLocsHandler(DHTManager dhtManager, URN urn, KUID key, 
+        private AltLocsHandler(DHTManager dhtManager, URNImpl urn, KUID key, 
                 SearchListener<AlternateLocation> listener) {
             super(dhtManager, key, listener, AbstractAltLocValue.ALT_LOC);
             this.urn = urn;

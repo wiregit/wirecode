@@ -68,7 +68,7 @@ class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
     }
     
     @Override
-    protected boolean containsCoreUrn(org.limewire.io.URN urn) {
+    protected boolean containsCoreUrn(org.limewire.io.URNImpl urn) {
         List<FileDesc> fds = managedList.getFileDescsMatching(urn);
         for(FileDesc fd : fds) {
             if(!(fd instanceof IncompleteFileDesc)) {

@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectInputStream.GetField;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 class SerialMagnetDownloader extends SerialManagedDownloaderImpl {
     private static final long serialVersionUID = 9092913030585214105L;
     
     private transient String _textQuery;
-    private transient URN _urn;
+    private transient URNImpl _urn;
     private transient String _filename;
     private transient String[] _defaultURLs;
     
@@ -19,7 +19,7 @@ class SerialMagnetDownloader extends SerialManagedDownloaderImpl {
         return _textQuery;
     }
     
-    URN getUrn() {
+    URNImpl getUrn() {
         return _urn;
     }
     
@@ -36,7 +36,7 @@ class SerialMagnetDownloader extends SerialManagedDownloaderImpl {
             ClassNotFoundException {
         GetField gets = stream.readFields();
         try { _textQuery = (String)gets.get("_textQuery", null); } catch(IllegalArgumentException iae) {}
-        try {_urn = (URN) gets.get("_urn", null);} catch(IllegalArgumentException iae) {}
+        try {_urn = (URNImpl) gets.get("_urn", null);} catch(IllegalArgumentException iae) {}
         try { _filename = (String) gets.get("_filename", null);} catch(IllegalArgumentException iae) {}
         try { _defaultURLs = (String[]) gets.get("_defaultURLs", null);} catch(IllegalArgumentException iae) {}
     }

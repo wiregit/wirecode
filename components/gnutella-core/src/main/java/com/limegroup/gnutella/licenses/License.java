@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 /**
@@ -45,7 +45,7 @@ public interface License {
      * all works and a URN is given here, this will only return true if the
      * URNs match.
      */
-    public boolean isValid(URN urn);
+    public boolean isValid(URNImpl urn);
     
     /**
      * Returns a description of this license.
@@ -53,7 +53,7 @@ public interface License {
      * Retrieves the description for the particular URN.  If no URN is given,
      * a best-guess is used to extract the correct description.
      */
-    public String getLicenseDescription(URN urn);
+    public String getLicenseDescription(URNImpl urn);
     
     /**
      * Returns a URI that the user can visit to manually verify.
@@ -66,7 +66,7 @@ public interface License {
      * Retrieves the deed for the work with the given URN.  If no URN is given,
      * a best-guess is used to extract the correct license deed.
      */
-    public URL getLicenseDeed(URN urn);
+    public URL getLicenseDeed(URNImpl urn);
     
     /**
      * Returns the license, in human readable form.
@@ -75,7 +75,7 @@ public interface License {
     
     /**
      * Verifies the license. The results of the verification can be retrieved by
-     * invoking {@link #isValid(URN)}.
+     * invoking {@link #isValid(URNImpl)}.
      */
     public void verify(LicenseCache licenseCache, LimeHttpClient httpClient);
     

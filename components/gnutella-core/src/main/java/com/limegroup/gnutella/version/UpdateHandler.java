@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.version;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -51,7 +51,7 @@ public interface UpdateHandler {
      * If this was our update, we notify the GUI.  It's OK if the user restarts
      * as the rest of the updates will be downloaded the next session.
      */
-    public void inNetworkDownloadFinished(final URN urn, final boolean good);
+    public void inNetworkDownloadFinished(final URNImpl urn, final boolean good);
 
     /**
      * Returns the final bytes that the old key system used for update responses.

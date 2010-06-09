@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.common.URN;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
@@ -16,6 +15,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.SharedFileList;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.inject.LazySingleton;
+import org.limewire.io.URN;
 import org.limewire.ui.swing.library.navigator.LibraryNavItem;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;

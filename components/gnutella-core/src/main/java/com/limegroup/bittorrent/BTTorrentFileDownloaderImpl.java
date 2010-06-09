@@ -32,7 +32,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
@@ -269,7 +269,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public URN getSha1Urn() {
+    public URNImpl getSha1Urn() {
         return null;
     }
 
@@ -448,7 +448,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     @Override
-    public boolean conflicts(URN urn, long fileSize, File... files) {
+    public boolean conflicts(URNImpl urn, long fileSize, File... files) {
         return false;
     }
 

@@ -15,7 +15,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.util.BaseTestCase;
 
@@ -45,15 +45,15 @@ public final class UrnSetTest extends BaseTestCase {
     }
     
     public void testEmptyness() throws Exception {
-        Set<URN> s = new UrnSet();
+        Set<URNImpl> s = new UrnSet();
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         Object[] objects = s.toArray();
         assertEquals(0, objects.length);
-        URN[] type = new URN[0];
-        URN[] urns = s.toArray(type);
+        URNImpl[] type = new URNImpl[0];
+        URNImpl[] urns = s.toArray(type);
         assertSame(type, urns);
-        type = new URN[1];
+        type = new URNImpl[1];
         urns = s.toArray(type);
         assertSame(type, urns);
         type[0] = sha1();
@@ -62,12 +62,12 @@ public final class UrnSetTest extends BaseTestCase {
         assertSame(urns, type);
         assertNull(urns[0]);
         
-        Set<URN> clone = ((UrnSet)s).clone();
+        Set<URNImpl> clone = ((UrnSet)s).clone();
         assertNotSame(clone, s);
         assertEquals(clone, s);
         assertTrue(clone.isEmpty());
         
-        Set<URN> hash = new HashSet<URN>();
+        Set<URNImpl> hash = new HashSet<URNImpl>();
         assertEquals(s, hash);
         assertTrue(s.containsAll(hash));
         assertFalse(s.removeAll(hash));
@@ -83,7 +83,7 @@ public final class UrnSetTest extends BaseTestCase {
         assertFalse(s.remove(sha1()));
         assertFalse(s.retainAll(hash));        
         
-        Iterator<URN> i = s.iterator();
+        Iterator<URNImpl> i = s.iterator();
         assertFalse(i.hasNext());
         try {
             i.remove();
@@ -96,10 +96,10 @@ public final class UrnSetTest extends BaseTestCase {
     }
     
     public void testFullness() throws Exception {
-        Set<URN> s = new UrnSet();
-        URN a = sha1();
+        Set<URNImpl> s = new UrnSet();
+        URNImpl a = sha1();
         assertTrue(s.add(a));
-        URN b = sha1();
+        URNImpl b = sha1();
         assertFalse(s.add(b));
         assertEquals(1, s.size());
         assertFalse(s.isEmpty());
@@ -112,30 +112,30 @@ public final class UrnSetTest extends BaseTestCase {
         assertEquals(1, objects.length);
         assertEquals(a, objects[0]);
         
-        URN[] type = new URN[0];
-        URN[] urns = s.toArray(type);
+        URNImpl[] type = new URNImpl[0];
+        URNImpl[] urns = s.toArray(type);
         assertNotSame(type, urns);
         assertEquals(a, urns[0]);
         
-        type = new URN[1];
+        type = new URNImpl[1];
         urns = s.toArray(type);
         assertSame(type, urns);
         assertEquals(a, urns[0]);
         
-        type = new URN[2];
+        type = new URNImpl[2];
         type[1] = sha1();
         urns = s.toArray(type);
         assertSame(urns, type);
         assertEquals(a, urns[0]);
         assertNull(urns[1]);
         
-        Set<URN> clone = ((UrnSet)s).clone();
+        Set<URNImpl> clone = ((UrnSet)s).clone();
         assertNotSame(clone, s);
         assertEquals(clone, s);
         assertTrue(clone.contains(a));
         assertEquals(1, clone.size());
         
-        Set<URN> hash = new HashSet<URN>();
+        Set<URNImpl> hash = new HashSet<URNImpl>();
         assertNotEquals(s, hash);
         assertTrue(s.containsAll(hash));
         assertFalse(s.removeAll(hash));
@@ -179,7 +179,7 @@ public final class UrnSetTest extends BaseTestCase {
         assertTrue(s.isEmpty());
         s.add(a);
         
-        Iterator<URN> i = s.iterator();
+        Iterator<URNImpl> i = s.iterator();
         assertTrue(i.hasNext());
         try {
             i.remove();
@@ -200,9 +200,9 @@ public final class UrnSetTest extends BaseTestCase {
     
     public void testIteration() throws Exception {
         UrnSet s = new UrnSet();
-        URN sha1 = sha1();
-        URN ttroot = ttroot();
-        URN nms1 = nms1();
+        URNImpl sha1 = sha1();
+        URNImpl ttroot = ttroot();
+        URNImpl nms1 = nms1();
         
         // iterate, remove the ttroot
         s.clear();
@@ -211,7 +211,7 @@ public final class UrnSetTest extends BaseTestCase {
         s.add(nms1);
         assertEquals(3,s.size());
 
-        Iterator<URN> i = s.iterator();
+        Iterator<URNImpl> i = s.iterator();
         assertTrue(i.hasNext());
         assertEquals(sha1,i.next());
         assertTrue(i.hasNext());
@@ -252,9 +252,9 @@ public final class UrnSetTest extends BaseTestCase {
         UrnSet b = new UrnSet();
         UrnSet c = new UrnSet();
         
-        URN sha1 = sha1();
-        URN ttroot = ttroot();
-        URN nms1 = nms1();
+        URNImpl sha1 = sha1();
+        URNImpl ttroot = ttroot();
+        URNImpl nms1 = nms1();
         a.add(sha1);
         a.add(ttroot);
         b.add(sha1);
@@ -268,7 +268,7 @@ public final class UrnSetTest extends BaseTestCase {
         assertTrue(c.containsAll(b));
         assertFalse(a.containsAll(c));
         
-        Set<URN> regular = new HashSet<URN>();
+        Set<URNImpl> regular = new HashSet<URNImpl>();
         regular.add(sha1);
         
         assertTrue(a.containsAll(regular));
@@ -298,14 +298,14 @@ public final class UrnSetTest extends BaseTestCase {
     public void testRemoveAll() throws Exception {
         UrnSet a = new UrnSet();
         
-        URN sha1 = sha1();
-        URN ttroot = ttroot();
-        URN nms1 = nms1();
+        URNImpl sha1 = sha1();
+        URNImpl ttroot = ttroot();
+        URNImpl nms1 = nms1();
         a.add(sha1);
         a.add(ttroot);
         a.add(nms1);
         
-        List<URN> l = new ArrayList<URN>();
+        List<URNImpl> l = new ArrayList<URNImpl>();
         l.add(sha1);l.add(sha1);l.add(sha1());l.add(sha1());
         
         assertEquals(3,a.size());
@@ -324,14 +324,14 @@ public final class UrnSetTest extends BaseTestCase {
     public void testToArray() throws Exception {
         UrnSet a = new UrnSet();
         
-        URN sha1 = sha1();
-        URN ttroot = ttroot();
-        URN nms1 = nms1();
+        URNImpl sha1 = sha1();
+        URNImpl ttroot = ttroot();
+        URNImpl nms1 = nms1();
         a.add(sha1);
         a.add(ttroot);
         a.add(nms1);
         
-        URN [] u = new URN[0];
+        URNImpl [] u = new URNImpl[0];
         u = a.toArray(u);
         assertEquals(3,u.length);
         
@@ -356,7 +356,7 @@ public final class UrnSetTest extends BaseTestCase {
         assertSame(u[1], nms1);
         assertNull(u[2]);
         
-        u = new URN[10];
+        u = new URNImpl[10];
         Arrays.fill(u, ttroot);
         a.clear();
         a.add(sha1);
@@ -369,7 +369,7 @@ public final class UrnSetTest extends BaseTestCase {
     }
     
     public void testSerializing() throws Exception {
-        Set<URN> s = new UrnSet();
+        Set<URNImpl> s = new UrnSet();
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(out);
@@ -381,9 +381,9 @@ public final class UrnSetTest extends BaseTestCase {
         assertInstanceof(UrnSet.class, s);
         assertTrue(s.isEmpty());
         
-        URN a = sha1();
-        URN b = ttroot();
-        URN c = nms1();
+        URNImpl a = sha1();
+        URNImpl b = ttroot();
+        URNImpl c = nms1();
         s.add(a);
         s.add(b);
         s.add(c);
@@ -407,21 +407,21 @@ public final class UrnSetTest extends BaseTestCase {
     }
     
     /** Generates a random sha1. */
-    private URN sha1() throws Exception {
+    private URNImpl sha1() throws Exception {
         byte[] b = new byte[20];
         RND.nextBytes(b);
-        return URN.createSHA1UrnFromBytes(b);
+        return URNImpl.createSHA1UrnFromBytes(b);
     }
     
-    private URN ttroot() throws Exception {
+    private URNImpl ttroot() throws Exception {
         byte []b = new byte[24];
         RND.nextBytes(b);
-        return URN.createTTRootFromBytes(b);
+        return URNImpl.createTTRootFromBytes(b);
     }
     
-    private URN nms1() throws Exception {
+    private URNImpl nms1() throws Exception {
         byte[] b = new byte[20];
         RND.nextBytes(b);
-        return URN.createNMS1FromBytes(b);
+        return URNImpl.createNMS1FromBytes(b);
     }
 }

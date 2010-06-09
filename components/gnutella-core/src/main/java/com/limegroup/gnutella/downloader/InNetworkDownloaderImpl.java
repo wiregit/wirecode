@@ -11,7 +11,7 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
@@ -132,7 +132,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
      * Overriden to use a different incomplete directory.
      */
     @Override
-    protected File getIncompleteFile(String name, URN urn,
+    protected File getIncompleteFile(String name, URNImpl urn,
                                      long length) throws IOException {
         return incompleteFileManager.getFile(name, urn, length, new File(LibraryUtils.PREFERENCE_SHARE, "Incomplete"));
     }

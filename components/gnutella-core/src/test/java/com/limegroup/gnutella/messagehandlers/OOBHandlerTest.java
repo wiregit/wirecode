@@ -14,7 +14,7 @@ import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -835,7 +835,7 @@ public class OOBHandlerTest extends BaseTestCase {
         try {
             for(int i = 0; i < res.length; i++) {
                 random.nextBytes(randomBytes);
-                URN urn = URN.createSHA1UrnFromBytes(randomBytes);
+                URNImpl urn = URNImpl.createSHA1UrnFromBytes(randomBytes);
                 res[i] = responseFactory.createResponse(10, 10,
                         "susheel" + i + offset, urn);
             }

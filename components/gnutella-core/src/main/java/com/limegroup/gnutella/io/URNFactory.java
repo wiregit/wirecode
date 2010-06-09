@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
-import org.limewire.io.URN.Type;
+import org.limewire.io.URNImpl.Type;
 import org.limewire.security.SHA1;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -42,14 +42,14 @@ public class URNFactory {
     
    
     
-    public static URN createTTRootFile(File file) throws IOException, InterruptedException {
+    public static URNImpl createTTRootFile(File file) throws IOException, InterruptedException {
         MessageDigest tt = new MerkleTree(new Tiger());
-        return URN.generateURN(file, 0, file.length(), Type.TTROOT, tt, 
+        return URNImpl.generateURN(file, 0, file.length(), Type.TTROOT, tt, 
                 SharingSettings.MIN_IDLE_TIME_FOR_FULL_HASHING.getValue(),
                 SharingSettings.FRIENDLY_HASHING.getValue());
     }
     
-    public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
+    public static URNImpl createSHA1UrnFromHttpRequest(final String requestLine) 
     throws IOException {
     if(!isValidUrnHttpRequest(requestLine)) {
         throw new IOException("INVALID URN HTTP REQUEST");
@@ -58,7 +58,7 @@ public class URNFactory {
     if(urnString == null) {
         throw new IOException("COULD NOT CONSTRUCT URN");
     }      
-    return URN.createSHA1Urn(urnString);
+    return URNImpl.createSHA1Urn(urnString);
 }
     
     /**
@@ -195,7 +195,7 @@ public class URNFactory {
       throws IOException, InterruptedException {
         MessageDigest md = new SHA1();
 
-        URN sha1 = URN.generateURN(file, 0, file.length(), Type.SHA1, md,
+        URNImpl sha1 = URNImpl.generateURN(file, 0, file.length(), Type.SHA1, md,
                 SharingSettings.MIN_IDLE_TIME_FOR_FULL_HASHING.getValue(),
                 SharingSettings.FRIENDLY_HASHING.getValue());
 
@@ -213,10 +213,10 @@ public class URNFactory {
      *  
      *  If no SHA1 could be created or an input value is invalid, null is returned.
      */
-    public static URN generateNMS1FromFile(final File file, long offset, long length) throws IOException, InterruptedException {
+    public static URNImpl generateNMS1FromFile(final File file, long offset, long length) throws IOException, InterruptedException {
         MessageDigest md = new SHA1();
         
-        return URN.generateURN(file, offset, length, Type.NMSA1, md,
+        return URNImpl.generateURN(file, offset, length, Type.NMSA1, md,
                 SharingSettings.MIN_IDLE_TIME_FOR_FULL_HASHING.getValue(),
                 SharingSettings.FRIENDLY_HASHING.getValue());
     }
@@ -233,7 +233,7 @@ public class URNFactory {
      *  interrupted while hashing.  (This method can take a while to
      *  execute.)
      */
-    public static URN createSHA1Urn(File file) 
+    public static URNImpl createSHA1Urn(File file) 
         throws IOException, InterruptedException {
         return generateUrnsFromFile(file).getSHA1();
     }

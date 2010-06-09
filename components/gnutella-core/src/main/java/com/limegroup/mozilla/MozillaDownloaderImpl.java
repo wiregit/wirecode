@@ -13,7 +13,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 
@@ -172,7 +172,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     } 
 
     @Override
-    public URN getSha1Urn() {
+    public URNImpl getSha1Urn() {
         return null;
     }
 
@@ -236,7 +236,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public boolean conflicts(URN urn, long fileSize, File... files) {
+    public boolean conflicts(URNImpl urn, long fileSize, File... files) {
         return false;
     }
 

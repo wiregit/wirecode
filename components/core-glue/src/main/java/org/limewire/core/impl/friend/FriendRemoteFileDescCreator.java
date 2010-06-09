@@ -6,7 +6,7 @@ import org.limewire.friend.impl.address.FriendAddress;
 import org.limewire.friend.impl.address.FriendAddressResolver;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.io.Address;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 
 import com.google.inject.Inject;
@@ -46,7 +46,7 @@ class FriendRemoteFileDescCreator implements RemoteFileDescCreator {
     @Override
     public RemoteFileDesc create(Address address, long index, String filename, long size,
             byte[] clientGUID, int speed, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
-            Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            Set<? extends URNImpl> urns, boolean replyToMulticast, String vendor,
             long createTime, boolean http1) {
         return new FriendRemoteFileDesc((FriendAddress)address, index, filename, size, clientGUID, speed, quality, xmlDoc, urns, vendor, createTime, true, addressFactory, addressResolver);
     }

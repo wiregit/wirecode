@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.limewire.collection.MultiCollection;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Storable;
@@ -73,7 +73,7 @@ public class AltLocModel implements StorableModel {
             try {
                 // Step One: Add every new FileDesc to the Map
                 for(FileDesc fd : gnutellaFileView) {
-                    URN urn = fd.getSHA1Urn();
+                    URNImpl urn = fd.getSHA1Urn();
                     KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
                         long fileSize = fd.getFileSize();
@@ -98,7 +98,7 @@ public class AltLocModel implements StorableModel {
             for (Iterator<Storable> it = values.values().iterator(); it.hasNext(); ) {
                 Storable storable = it.next();
                 KUID primaryKey = storable.getPrimaryKey();
-                URN urn = KUIDUtils.toURN(primaryKey);
+                URNImpl urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
                 FileDesc fd = gnutellaFileView.getFileDesc(urn);

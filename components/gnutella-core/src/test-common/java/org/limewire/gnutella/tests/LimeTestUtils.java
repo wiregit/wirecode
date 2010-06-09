@@ -23,7 +23,7 @@ import org.hamcrest.Matcher;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
@@ -255,7 +255,7 @@ public class LimeTestUtils {
         }
     }
     
-    public static String getRelativeRequest(URN urn) {
+    public static String getRelativeRequest(URNImpl urn) {
         return getRelativeRequest(urn.httpStringValue());
     }
     
@@ -263,7 +263,7 @@ public class LimeTestUtils {
         return "/uri-res/N2R?" + urn;
     }
     
-    public static String getRequest(IpPort host, URN urn) {
+    public static String getRequest(IpPort host, URNImpl urn) {
         return getRequest(host.getAddress(), host.getPort(), urn);
     }
     
@@ -271,7 +271,7 @@ public class LimeTestUtils {
         return getRequest(host.getAddress(), host.getPort(), urn);
     }
     
-    public static String getRequest(String host, int port, URN urn) {
+    public static String getRequest(String host, int port, URNImpl urn) {
         return getRequest(host + ":" + port, urn);
     }
     
@@ -279,7 +279,7 @@ public class LimeTestUtils {
         return getRequest(host + ":" + port, urn);
     }
     
-    public static String getRequest(String hostAndPort, URN urn) {
+    public static String getRequest(String hostAndPort, URNImpl urn) {
         return getRequest(hostAndPort, urn.httpStringValue());
     }
     

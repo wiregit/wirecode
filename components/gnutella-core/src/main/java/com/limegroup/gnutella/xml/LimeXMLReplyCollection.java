@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IdentityHashSet;
 import org.limewire.collection.StringTrie;
 import org.limewire.io.IOUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -873,15 +873,15 @@ public class LimeXMLReplyCollection {
     }    
     
     /** Reads a file in the new format off disk. */
-    private Map<URN, LimeXMLDocument> readVersion2File(File input) {
+    private Map<URNImpl, LimeXMLDocument> readVersion2File(File input) {
         if(LOG.isDebugEnabled())
             LOG.debug("Reading new format from file: " + input);
         
         ObjectInputStream in = null;
-        Map<URN, String> read = null;
+        Map<URNImpl, String> read = null;
         try {
             in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(input)));
-            read = GenericsUtils.scanForMap(in.readObject(), URN.class, String.class, GenericsUtils.ScanMode.REMOVE);
+            read = GenericsUtils.scanForMap(in.readObject(), URNImpl.class, String.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Unable to read LimeXMLCollection", t);
         } finally {
@@ -891,8 +891,8 @@ public class LimeXMLReplyCollection {
         if(read == null)
             read = Collections.emptyMap();
         
-        Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
-        for(Map.Entry<URN, String> entry : read.entrySet()) {
+        Map<URNImpl, LimeXMLDocument> docMap = new HashMap<URNImpl, LimeXMLDocument>(read.size());
+        for(Map.Entry<URNImpl, String> entry : read.entrySet()) {
             try {
                 docMap.put(entry.getKey(), limeXMLDocumentFactory.get().createLimeXMLDocument(entry.getValue()));
             } catch(IOException ignored) {
@@ -908,15 +908,15 @@ public class LimeXMLReplyCollection {
     }
     
     /** Reads a file in the old format off disk. */
-    private Map<URN, LimeXMLDocument> readVersion1File(File input) {
+    private Map<URNImpl, LimeXMLDocument> readVersion1File(File input) {
         if(LOG.isDebugEnabled())
             LOG.debug("Reading old format from file: " + input);
         ConverterObjectInputStream in = null;
-        Map<URN, SerialXml> read = null;
+        Map<URNImpl, SerialXml> read = null;
         try {
             in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(input)));
             in.addLookup("com.limegroup.gnutella.xml.LimeXMLDocument", SerialXml.class.getName());
-            read = GenericsUtils.scanForMap(in.readObject(), URN.class, SerialXml.class, GenericsUtils.ScanMode.REMOVE);
+            read = GenericsUtils.scanForMap(in.readObject(), URNImpl.class, SerialXml.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Unable to read LimeXMLCollection", t);
         } finally {
@@ -926,8 +926,8 @@ public class LimeXMLReplyCollection {
         if(read == null)
             read = Collections.emptyMap();
         
-        Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
-        for(Map.Entry<URN, SerialXml> entry : read.entrySet()) {
+        Map<URNImpl, LimeXMLDocument> docMap = new HashMap<URNImpl, LimeXMLDocument>(read.size());
+        for(Map.Entry<URNImpl, SerialXml> entry : read.entrySet()) {
             try {
                 docMap.put(entry.getKey(), limeXMLDocumentFactory.get().createLimeXMLDocument(entry.getValue().getXml(true)));
             } catch(IOException ignored) {
@@ -951,7 +951,7 @@ public class LimeXMLReplyCollection {
         private static final long serialVersionUID = 6914168193085067395L;
         
         private final File file;
-        private final URN urn;
+        private final URNImpl urn;
         
         public FileAndUrn(FileDesc fd) {
             this.file = fd.getFile();

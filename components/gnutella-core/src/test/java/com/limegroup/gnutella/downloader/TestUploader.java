@@ -26,15 +26,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Function;
 import org.limewire.collection.RoundRobinQueue;
-import org.limewire.common.HTTPHeaderValue;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.gnutella.tests.NetworkManagerStub;
 import org.limewire.io.BandwidthThrottle;
 import org.limewire.io.GUID;
+import org.limewire.io.HTTPHeaderValue;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.DebugRunnable;
@@ -101,7 +101,7 @@ public class TestUploader {
 
 	private AlternateLocationCollection storedGoodLocs,storedBadLocs;
 	private  List<AlternateLocation> incomingGoodAltLocs, incomingBadAltLocs;
-	private URN                         _sha1;
+	private URNImpl                         _sha1;
     private boolean http11 = true;
     private ServerSocket server;
     private Socket socket;
@@ -566,7 +566,7 @@ public class TestUploader {
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
-    public URN getReportedSHA1() {
+    public URNImpl getReportedSHA1() {
         return _sha1;
     }
     
@@ -1088,13 +1088,13 @@ public class TestUploader {
 	 * @return a new <tt>URN</tt> instance for the request line, or 
 	 *  <tt>null</tt> if there was any problem creating it
 	 */
-	private static URN readContentUrn(final String contentUrnStr) {
+	private static URNImpl readContentUrn(final String contentUrnStr) {
 		String urnStr = HttpTestUtils.extractHeaderValue(contentUrnStr);
 		
 		// return null if the header value could not be extracted
 		if(urnStr == null) return null;
 		try {
-			return URN.createSHA1Urn(urnStr);
+			return URNImpl.createSHA1Urn(urnStr);
 		} catch(IOException e) {
 			// this will be thrown if the URN string was invalid for any
 			// reason -- just return null
@@ -1301,7 +1301,7 @@ public class TestUploader {
         }
 
         @Override
-        public AlternateLocation create(URN urn) {
+        public AlternateLocation create(URNImpl urn) {
             throw new IllegalStateException();
         }
 
@@ -1311,29 +1311,29 @@ public class TestUploader {
         }
 
         @Override
-        public AlternateLocation create(String location, URN urn, boolean tlsCapable)
+        public AlternateLocation create(String location, URNImpl urn, boolean tlsCapable)
                 throws IOException {
             return delegate.create(location, urn, tlsCapable);
         }
 
         @Override
-        public AlternateLocation create(String location, URN urn) throws IOException {
+        public AlternateLocation create(String location, URNImpl urn) throws IOException {
             throw new IllegalStateException();
         }
 
         @Override
-        public AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
+        public AlternateLocation createDirectAltLoc(IpPort ipp, URNImpl urn) throws IOException {
             throw new IllegalStateException();
         }
 
         @Override
-        public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URN urn, long fileSize, byte[] ttroot)
+        public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URNImpl urn, long fileSize, byte[] ttroot)
                 throws IOException {
             throw new IllegalStateException();
         }
 
         @Override
-        public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) {
+        public AlternateLocation createPushAltLoc(PushEndpoint pe, URNImpl urn) {
             throw new IllegalStateException();
         }
         

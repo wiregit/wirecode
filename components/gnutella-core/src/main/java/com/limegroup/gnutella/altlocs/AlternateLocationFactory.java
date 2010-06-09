@@ -3,7 +3,7 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 
 import org.limewire.io.IpPort;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -18,7 +18,7 @@ public interface AlternateLocationFactory {
      *
      * @param urn the <tt>URN</tt> of the locally stored file
      */
-    public AlternateLocation create(URN urn);
+    public AlternateLocation create(URNImpl urn);
 
     /**
      * Creates a new <tt>AlternateLocation</tt> for the data stored in
@@ -39,20 +39,20 @@ public interface AlternateLocationFactory {
     /**
      * Creates a new push AlternateLocation.
      */
-    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn);
+    public AlternateLocation createPushAltLoc(PushEndpoint pe, URNImpl urn);
             
 
     /**
      * Creates a new direct AlternateLocation from information that was
      * found in the DHT.
      */
-    public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URN urn,
+    public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URNImpl urn,
             long fileSize, byte[] ttroot) throws IOException;
 
     /**
      * Creates a new direct AlternateLocation.
      */
-    public AlternateLocation createDirectAltLoc(IpPort ipp, URN urn)
+    public AlternateLocation createDirectAltLoc(IpPort ipp, URNImpl urn)
             throws IOException;
 
     /**
@@ -68,7 +68,7 @@ public interface AlternateLocationFactory {
      * If the first is given, then the SHA1 in the string MUST match
      * the SHA1 given.
      * 
-     * @param URN the urn to use when the location doesn't contain a URN
+     * @param URNImpl the urn to use when the location doesn't contain a URN
      * @param tlsCapable if the alternate location is capable of receiving
      *                   TLS connections.  valid only if the location was
      *                   not a full URL.
@@ -76,7 +76,7 @@ public interface AlternateLocationFactory {
      * @throws <tt>IOException</tt> if there is any problem constructing
      *  the new instance.
      */
-    public AlternateLocation create(String location, URN urn, boolean tlsCapable)
+    public AlternateLocation create(String location, URNImpl urn, boolean tlsCapable)
             throws IOException;
 
     /**
@@ -92,12 +92,12 @@ public interface AlternateLocationFactory {
      * If the first is given, then the SHA1 in the string MUST match
      * the SHA1 given.
      * 
-     * @param URN the urn to use when the location doesn't contain a URN
+     * @param URNImpl the urn to use when the location doesn't contain a URN
      *
      * @throws <tt>IOException</tt> if there is any problem constructing
      *  the new instance.
      */
-    public AlternateLocation create(final String location, final URN urn)
+    public AlternateLocation create(final String location, final URNImpl urn)
             throws IOException;
 
 }

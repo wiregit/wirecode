@@ -48,7 +48,7 @@ import org.limewire.gnutella.tests.LimeTestCase;
 import org.limewire.gnutella.tests.LimeTestUtils;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -128,7 +128,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     @Inject private AltLocManager altLocManager;
 
-    private URN hashURN;
+    private URNImpl hashURN;
 
     @Inject private AlternateLocationFactory alternateLocationFactory;
 
@@ -153,7 +153,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        hashURN = URN.createSHA1Urn(hash);
+        hashURN = URNImpl.createSHA1Urn(hash);
         
         doSettings();
 
@@ -213,7 +213,7 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void testFALTNotRequested() throws Exception {
-        URN sha1 = URN.createSHA1Urn(hash);
+        URNImpl sha1 = URNImpl.createSHA1Urn(hash);
         GUID clientGUID = new GUID(GUID.makeGuid());
         GUID clientGUID2 = new GUID(GUID.makeGuid());
 
@@ -254,7 +254,7 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void testFALTWhenRequested() throws Exception {
-        URN sha1 = URN.createSHA1Urn(hash);
+        URNImpl sha1 = URNImpl.createSHA1Urn(hash);
         GUID clientGUID = new GUID(GUID.makeGuid());
         GUID clientGUID2 = new GUID(GUID.makeGuid());
 
@@ -299,7 +299,7 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void testFWALTWhenRequested() throws Exception {
-        URN sha1 = URN.createSHA1Urn(hash);
+        URNImpl sha1 = URNImpl.createSHA1Urn(hash);
         GUID clientGUID = new GUID(GUID.makeGuid());
         GUID clientGUID2 = new GUID(GUID.makeGuid());
 
@@ -342,7 +342,7 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void testUploaderStoresAllAlts() throws Exception {
-        URN sha1 = URN.createSHA1Urn(hash);
+        URNImpl sha1 = URNImpl.createSHA1Urn(hash);
         GUID clientGUID = new GUID(GUID.makeGuid());
 
         AlternateLocation direct = alternateLocationFactory.create("1.2.3.4:5", sha1);
@@ -667,7 +667,7 @@ public class AltLocUploadTest extends LimeTestCase {
     public void testRemovingNFAlt() throws Exception {
         GUID g = new GUID(GUID.makeGuid());
 
-        URN urn = URN.createSHA1Urn(hash);
+        URNImpl urn = URNImpl.createSHA1Urn(hash);
 
         PushAltLoc abc = (PushAltLoc) alternateLocationFactory.create(g.toHexString()
                 + ";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3", urn);
@@ -1041,7 +1041,7 @@ public class AltLocUploadTest extends LimeTestCase {
             final int iteration = i; // just for documentation
             
             final QueryRequest request = mockery.mock(QueryRequest.class);
-            final Set<URN> urns = new HashSet<URN>();
+            final Set<URNImpl> urns = new HashSet<URNImpl>();
             urns.add(fd.getSHA1Urn());
             final AtomicReference<QueryReply> replyRef = new AtomicReference<QueryReply>(null);
             final Action checkAlts = new Action() {

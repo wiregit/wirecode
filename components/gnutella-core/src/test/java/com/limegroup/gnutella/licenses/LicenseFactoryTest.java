@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.util.BaseTestCase;
 
 
@@ -190,10 +190,10 @@ public class LicenseFactoryTest extends BaseTestCase {
     }
     
     public void testIsVerifiedAndValidAndCachingWithCCLicenses() throws Exception {
-        URN urn1 = urn("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456");
-        URN urn2 = urn("654321ZYXWVUTSRQPONMLKJIHGFEDBCA");
-        URN urn3 = urn("ALPHABETSOUPMAKESGOODFOODYUMMMMY");
-        URN urn4 = urn("BYEBYEMISSAMERICANPIEFROMTHELEVY");
+        URNImpl urn1 = urn("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456");
+        URNImpl urn2 = urn("654321ZYXWVUTSRQPONMLKJIHGFEDBCA");
+        URNImpl urn3 = urn("ALPHABETSOUPMAKESGOODFOODYUMMMMY");
+        URNImpl urn4 = urn("BYEBYEMISSAMERICANPIEFROMTHELEVY");
         String rdf1 = rdf(urn1, true);
         String rdf2 = rdf(urn2, true);
         String rdf3 = rdf(urn3, false);
@@ -306,11 +306,11 @@ public class LicenseFactoryTest extends BaseTestCase {
         assertFalse(d2.isValid(null));
     }
     
-    private URN urn(String string) throws Exception {
-        return URN.createSHA1Urn("urn:sha1:" + string);
+    private URNImpl urn(String string) throws Exception {
+        return URNImpl.createSHA1Urn("urn:sha1:" + string);
     }
     
-    private String rdf(URN urn, boolean valid) {
+    private String rdf(URNImpl urn, boolean valid) {
         if(valid) {
             return "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
                    "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +

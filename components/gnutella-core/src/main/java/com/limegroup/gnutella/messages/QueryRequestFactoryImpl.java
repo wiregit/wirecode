@@ -7,7 +7,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -39,11 +39,11 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createRequery(com.limegroup.gnutella.URN)
      */
-    public QueryRequest createRequery(URN sha1) {
+    public QueryRequest createRequery(URNImpl sha1) {
         if (sha1 == null) {
             throw new NullPointerException("null sha1");
         }
-        Set<URN> sha1Set = new UrnSet(sha1);
+        Set<URNImpl> sha1Set = new UrnSet(sha1);
         return createQueryRequest(QueryRequestImpl.newQueryGUID(true),
                 QueryRequest.DEFAULT_TTL, QueryRequest.DEFAULT_URN_QUERY, "",
                 sha1Set, null, !networkManager.acceptedIncomingConnection(),
@@ -54,11 +54,11 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQuery(com.limegroup.gnutella.URN)
      */
-    public QueryRequest createQuery(URN sha1) {
+    public QueryRequest createQuery(URNImpl sha1) {
         if (sha1 == null) {
             throw new NullPointerException("null sha1");
         }
-        Set<URN> sha1Set = new UrnSet(sha1);
+        Set<URNImpl> sha1Set = new UrnSet(sha1);
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
                 QueryRequest.DEFAULT_TTL, QueryRequest.DEFAULT_URN_QUERY, "",
                 sha1Set, null, !networkManager.acceptedIncomingConnection(),
@@ -69,7 +69,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQuery(com.limegroup.gnutella.URN, java.lang.String)
      */
-    public QueryRequest createQuery(URN sha1, String filename) {
+    public QueryRequest createQuery(URNImpl sha1, String filename) {
         if (sha1 == null) {
             throw new NullPointerException("null sha1");
         }
@@ -79,7 +79,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
         if (filename.length() == 0) {
             filename = QueryRequest.DEFAULT_URN_QUERY;
         }
-        Set<URN> sha1Set = new UrnSet(sha1);
+        Set<URNImpl> sha1Set = new UrnSet(sha1);
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
                 QueryRequest.DEFAULT_TTL, filename, "", sha1Set, null,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
@@ -90,14 +90,14 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createRequery(com.limegroup.gnutella.URN, byte)
      */
-    public QueryRequest createRequery(URN sha1, byte ttl) {
+    public QueryRequest createRequery(URNImpl sha1, byte ttl) {
         if (sha1 == null) {
             throw new NullPointerException("null sha1");
         }
         if (ttl <= 0 || ttl > 6) {
             throw new IllegalArgumentException("invalid TTL: " + ttl);
         }
-        Set<URN> sha1Set = new UrnSet(sha1);
+        Set<URNImpl> sha1Set = new UrnSet(sha1);
         return createQueryRequest(QueryRequestImpl.newQueryGUID(true), ttl,
                 QueryRequest.DEFAULT_URN_QUERY, "", sha1Set, null,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
@@ -107,7 +107,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQuery(java.util.Set)
      */
-    public QueryRequest createQuery(Set<? extends URN> urnSet) {
+    public QueryRequest createQuery(Set<? extends URNImpl> urnSet) {
         if (urnSet == null)
             throw new NullPointerException("null urnSet");
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false),
@@ -397,7 +397,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             throw new NullPointerException("null query key");
         }
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
-                query, "", URN.NO_URN_SET, key, !networkManager
+                query, "", URNImpl.NO_URN_SET, key, !networkManager
                         .acceptedIncomingConnection(), Network.UNKNOWN, false,
                 0, false, 0);
     }
@@ -405,14 +405,14 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQueryKeyQuery(com.limegroup.gnutella.URN, org.limewire.security.AddressSecurityToken)
      */
-    public QueryRequest createQueryKeyQuery(URN sha1, AddressSecurityToken key) {
+    public QueryRequest createQueryKeyQuery(URNImpl sha1, AddressSecurityToken key) {
         if (sha1 == null) {
             throw new NullPointerException("null sha1");
         }
         if (key == null) {
             throw new NullPointerException("null query key");
         }
-        Set<URN> sha1Set = new UrnSet(sha1);
+        Set<URNImpl> sha1Set = new UrnSet(sha1);
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
                 QueryRequest.DEFAULT_URN_QUERY, "", sha1Set, key,
                 !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
@@ -461,7 +461,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createNonFirewalledQuery(String query, byte ttl) {
         return createQueryRequest(QueryRequestImpl.newQueryGUID(false), ttl, query,
-                "", URN.NO_URN_SET, null, false, Network.UNKNOWN, false, 0,
+                "", URNImpl.NO_URN_SET, null, false, Network.UNKNOWN, false, 0,
                 false, 0);
     }
 
@@ -510,7 +510,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery) {
-        return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, query, richQuery, URNImpl.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, 0);
     }
@@ -525,7 +525,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery, SearchCategory type) {
-        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URNImpl.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, false, 0, false, getMetaFlag(type));
     }
@@ -540,7 +540,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery, boolean canReceiveOutOfBandReplies) {
-        return createQueryRequest(guid, ttl, query, richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, query, richQuery, URNImpl.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, canReceiveOutOfBandReplies, 0, false, 0);
     }
@@ -555,7 +555,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     private QueryRequest create(byte[] guid, byte ttl, String query,
             String richQuery, boolean canReceiveOutOfBandReplies, SearchCategory type) {
-        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URN.NO_URN_SET,
+        return createQueryRequest(guid, ttl, getQuery(query, type), richQuery, URNImpl.NO_URN_SET,
                 null, !networkManager.acceptedIncomingConnection(),
                 Network.UNKNOWN, canReceiveOutOfBandReplies, 0, false,
                 getMetaFlag(type));
@@ -600,7 +600,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQueryRequest(byte[], byte, java.lang.String, java.lang.String, java.util.Set, org.limewire.security.AddressSecurityToken, boolean, com.limegroup.gnutella.messages.Message.Network, boolean, int)
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, String query,
-            String richQuery, Set<? extends URN> queryUrns,
+            String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector) {
@@ -613,7 +613,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQueryRequest(byte[], byte, java.lang.String, java.lang.String, java.util.Set, org.limewire.security.AddressSecurityToken, boolean, com.limegroup.gnutella.messages.Message.Network, boolean, int, boolean, int)
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, String query,
-            String richQuery, Set<? extends URN> queryUrns,
+            String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask) {
@@ -627,7 +627,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQueryRequest(byte[], byte, int, java.lang.String, java.lang.String, java.util.Set, org.limewire.security.AddressSecurityToken, boolean, com.limegroup.gnutella.messages.Message.Network, boolean, int, boolean, int)
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, int minSpeed,
-            String query, String richQuery, Set<? extends URN> queryUrns,
+            String query, String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask) {
@@ -641,7 +641,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQueryRequest(byte[], byte, int, java.lang.String, java.lang.String, java.util.Set, org.limewire.security.AddressSecurityToken, boolean, com.limegroup.gnutella.messages.Message.Network, boolean, int, boolean, int, boolean)
      */
     public QueryRequest createQueryRequest(byte[] guid, byte ttl, int minSpeed,
-            String query, String richQuery, Set<? extends URN> queryUrns,
+            String query, String richQuery, Set<? extends URNImpl> queryUrns,
             AddressSecurityToken addressSecurityToken, boolean isFirewalled,
             Network network, boolean canReceiveOutOfBandReplies,
             int featureSelector, boolean doNotProxy, int metaFlagMask,

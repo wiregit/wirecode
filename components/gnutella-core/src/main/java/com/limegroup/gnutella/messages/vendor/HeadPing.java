@@ -8,7 +8,7 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
@@ -75,7 +75,7 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
     public static final int FEATURE_MASK = 0x1F;
 
     /** The URN of the file being requested */
-    private final URN _urn;
+    private final URNImpl _urn;
 
     /** The format of the response that we desire */
     private final byte _features;
@@ -104,10 +104,10 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
 
         // parse the urn string.
         String urnStr = StringUtils.getASCIIString(payload, 1, 41);
-        if (!URN.isUrn(urnStr))
+        if (!URNImpl.isUrn(urnStr))
             throw new BadPacketException("udp head request did not contain an urn");
         try {
-            _urn = URN.createSHA1Urn(urnStr);
+            _urn = URNImpl.createSHA1Urn(urnStr);
         } catch (IOException oops) {
             throw new BadPacketException("failed to parse an urn");
         }
@@ -145,11 +145,11 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
      * @param features which features to include in the response
      */
 
-    public HeadPing(GUID g, URN sha1, int features) {
+    public HeadPing(GUID g, URNImpl sha1, int features) {
         this(g, sha1, null, features);
     }
 
-    public HeadPing(GUID g, URN sha1, GUID clientGUID, int features) {
+    public HeadPing(GUID g, URNImpl sha1, GUID clientGUID, int features) {
         super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION, derivePayload(sha1, clientGUID, features));
         _features = (byte) (features & FEATURE_MASK);
         _urn = sha1;
@@ -160,7 +160,7 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
     /**
      * Creates a plain udp head request.
      */
-    public HeadPing(URN urn) {
+    public HeadPing(URNImpl urn) {
         this(new GUID(GUID.makeGuid()), urn, PLAIN);
     }
 
@@ -176,7 +176,7 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
         setGUID(new GUID(original.getGUID()));
     }
 
-    private static byte[] derivePayload(URN urn, GUID clientGUID, int features) {
+    private static byte[] derivePayload(URNImpl urn, GUID clientGUID, int features) {
 
         features = features & FEATURE_MASK;
 
@@ -209,7 +209,7 @@ public class HeadPing extends AbstractVendorMessage implements HeadPongRequestor
      * 
      * @see com.limegroup.gnutella.messages.vendor.HeadPongRequestor#getUrn()
      */
-    public URN getUrn() {
+    public URNImpl getUrn() {
         return _urn;
     }
 

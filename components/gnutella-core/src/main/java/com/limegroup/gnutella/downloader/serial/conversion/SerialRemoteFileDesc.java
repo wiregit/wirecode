@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 
 interface SerialRemoteFileDesc {
@@ -35,7 +35,7 @@ interface SerialRemoteFileDesc {
 
     public String getXml();
 
-    public Set<URN> getUrns();
+    public Set<URNImpl> getUrns();
 
     public boolean isBrowseHostEnabled();
 

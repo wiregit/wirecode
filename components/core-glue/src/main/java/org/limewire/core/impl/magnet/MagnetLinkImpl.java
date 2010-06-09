@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.limewire.core.api.magnet.MagnetLink;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
 
@@ -41,7 +41,7 @@ public class MagnetLinkImpl implements MagnetLink {
     }
     
     @Override
-    public URN getURN() {
+    public URNImpl getURN() {
         return magnetOptions.getSHA1Urn();
     }
     

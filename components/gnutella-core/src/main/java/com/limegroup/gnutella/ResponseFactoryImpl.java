@@ -26,7 +26,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.io.UrnSet;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -90,7 +90,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(long, long, java.lang.String)
      */
-    public Response createResponse(long index, long size, String name, URN urn) {
+    public Response createResponse(long index, long size, String name, URNImpl urn) {
         return createResponse(index, size, name, -1, new UrnSet(urn), null, null, null);
     }
   
@@ -98,7 +98,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @see com.limegroup.gnutella.ResponseFactory#createResponse(long, long, java.lang.String, com.limegroup.gnutella.xml.LimeXMLDocument)
      */
     public Response createResponse(long index, long size, String name,
-            LimeXMLDocument doc, URN urn) {
+            LimeXMLDocument doc, URNImpl urn) {
         return createResponse(index, size, name, -1, new UrnSet(urn), doc, null, null);
     }
     
@@ -202,7 +202,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             // \u001c is the HUGE v0.93 GEM delimiter
             HUGEExtension huge = new HUGEExtension(rawMeta);
 
-            Set<URN> urns = huge.getURNS();
+            Set<URNImpl> urns = huge.getURNS();
 
             LimeXMLDocument doc = null;
             for (String next : huge.getMiscBlocks()) {
@@ -227,7 +227,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * Updates <code>urns</code> of urns adding <code>nms1Urn</code> if
      * if is not null. 
      */
-    static Set<URN> updateUrns(Set<URN> urns, URN nms1Urn) {
+    static Set<URNImpl> updateUrns(Set<URNImpl> urns, URNImpl nms1Urn) {
         if (nms1Urn == null) {
             return urns;
         }
@@ -258,7 +258,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      */
     // NOTE: not in the interface, but public so tests not in this package can use.
     public Response createResponse(long index, long size, String name, int incomingNameByteArraySize,
-            Set<? extends URN> urns, LimeXMLDocument doc,
+            Set<? extends URNImpl> urns, LimeXMLDocument doc,
             GGEPContainer ggepData, byte[] extensions) {
         
         // make sure ggepData is correct.
@@ -368,7 +368,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      * @param urns the <tt>Set</tt> of <tt>URN</tt> instances to use in
      *        constructing the byte array
      */
-    private byte[] createExtBytes(Set<? extends URN> urns, GGEPContainer ggep, long size) {
+    private byte[] createExtBytes(Set<? extends URNImpl> urns, GGEPContainer ggep, long size) {
         try {
             if (isEmpty(urns) && ggep.isEmpty())
                 return DataUtils.EMPTY_BYTE_ARRAY;
@@ -376,9 +376,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (!isEmpty(urns)) {
                 // Add the extension for URNs, if any.
-                for (Iterator<? extends URN> iter = urns.iterator(); iter
+                for (Iterator<? extends URNImpl> iter = urns.iterator(); iter
                         .hasNext();) {
-                    URN urn = iter.next();
+                    URNImpl urn = iter.next();
                     assert urn != null : "Null URN";
                     
                     if (!urn.isSHA1() && MessageSettings.TTROOT_IN_GGEP.getValue()) 
@@ -520,8 +520,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         Set<? extends IpPort> locations = null;
         long createTime = -1;
         long size64 = size;
-        URN ttroot = null;
-        URN nms1Urn = null;
+        URNImpl ttroot = null;
+        URNImpl nms1Urn = null;
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
@@ -558,14 +558,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
         if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_TTROOT)) {
             try {
                 byte []tt = ggep.get(GGEPKeys.GGEP_HEADER_TTROOT);
-                ttroot = URN.createTTRootFromBytes(tt);
+                ttroot = URNImpl.createTTRootFromBytes(tt);
             } catch (IOException bad){}
         }
         
         if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_NMS1)) {
             try {
                 byte[] nms1 = ggep.get(GGEPKeys.GGEP_HEADER_NMS1);
-                nms1Urn = URN.createNMS1FromBytes(nms1);
+                nms1Urn = URNImpl.createNMS1FromBytes(nms1);
             } catch (IOException ie) {
                 LOG.debug("invalid non-metadata urn", ie);
             }
@@ -638,8 +638,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         static final GGEPContainer EMPTY = new GGEPContainer();
         final IntervalSet ranges;
         final boolean verified;
-        final URN ttroot;
-        private final URN nms1Urn;
+        final URNImpl ttroot;
+        private final URNImpl nms1Urn;
 
         private GGEPContainer() {
             this(null, -1, 0, null, false, null, null);
@@ -648,8 +648,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         /**
          * @param nms1Urn can be null
          */
-        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified, URN ttroot,
-                URN nms1Urn) {
+        GGEPContainer(Set<? extends IpPort> locs, long create, long size64, IntervalSet ranges, boolean verified, URNImpl ttroot,
+                URNImpl nms1Urn) {
             this.nms1Urn = nms1Urn;
             if (locs == null)
                 locations = Collections.emptySet();

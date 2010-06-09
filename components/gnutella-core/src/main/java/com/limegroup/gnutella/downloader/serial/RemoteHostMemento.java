@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.URN;
+import org.limewire.io.URNImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.UnboxUtils;
@@ -42,7 +42,7 @@ public class RemoteHostMemento implements Serializable {
     private final Map<Keys, Serializable> propertiesMap;
     
     public RemoteHostMemento(Address address, String filename, long index, byte[] clientGuid,
-            int speed, long size, int quality, boolean replyToMulticast, String xml, Set<URN> urns,
+            int speed, long size, int quality, boolean replyToMulticast, String xml, Set<URNImpl> urns,
             boolean browseHost, String vendor, boolean http1, String type, AddressFactory addressFactory) {
 
         this.propertiesMap = new HashMap<Keys, Serializable>(Keys.values().length);
@@ -117,7 +117,7 @@ public class RemoteHostMemento implements Serializable {
     public boolean isReplyToMulticast() { return UnboxUtils.toBoolean((Boolean)propertiesMap.get(Keys.REPLY_TO_MULTICAST)); }
     public String getXml() { return (String)propertiesMap.get(Keys.XML); }
     @SuppressWarnings("unchecked")
-    public Set<URN> getUrns() { return (Set<URN>)propertiesMap.get(Keys.URNS); }
+    public Set<URNImpl> getUrns() { return (Set<URNImpl>)propertiesMap.get(Keys.URNS); }
     public boolean isBrowseHost() { return UnboxUtils.toBoolean((Boolean)propertiesMap.get(Keys.BH)); }
     public String getVendor() { return (String)propertiesMap.get(Keys.VENDOR); }
     public boolean isHttp11() { return UnboxUtils.toBoolean((Boolean)propertiesMap.get(Keys.HTTP11)); }
