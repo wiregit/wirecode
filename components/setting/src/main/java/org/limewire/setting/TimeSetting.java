@@ -28,8 +28,8 @@ public class TimeSetting extends LongSetting {
      * Creates a {@link TimeSetting} with the given arguments.
      */
     public TimeSetting(Properties defaultProps, Properties props, 
-            String key, long defaultLong, TimeUnit unit) {
-        super(defaultProps, props, key, unit.toMillis(defaultLong));
+            String key, long defaultValue, TimeUnit unit) {
+        super(defaultProps, props, key, unit.toMillis(defaultValue));
     }
     
     /**
