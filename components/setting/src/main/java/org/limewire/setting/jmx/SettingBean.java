@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.management.MXBean;
 
+import org.limewire.setting.AbstractNumberSetting;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
 import org.limewire.setting.FileSetting;
@@ -33,6 +34,18 @@ public interface SettingBean {
      * Sets the value of the {@link Setting}
      */
     public void setValue(String value);
+    
+    /**
+     * Returns the minimum value of the {@link Setting} or {@code null} 
+     * if it doesn't have a minimum value.
+     */
+    public String getMinValue();
+    
+    /**
+     * Returns the maximum value of the {@link Setting} or {@code null} 
+     * if it doesn't have a maximum value.
+     */
+    public String getMaxValue();
     
     /**
      * Reverts the current value to default
@@ -120,7 +133,17 @@ public interface SettingBean {
                 ((StringSetting)setting).set(value);
             }
         }
-
+        
+        @Override
+        public String getMinValue() {
+            return getMinMaxValue(setting, true);
+        }
+        
+        @Override
+        public String getMaxValue() {
+            return getMinMaxValue(setting, false);
+        }
+        
         @Override
         public void revertToDefault() {
             setting.revertToDefault();
@@ -159,6 +182,23 @@ public interface SettingBean {
         @Override
         public void reload() {
             setting.reload();
+        }
+        
+        /**
+         * Returns the minimum or maximum value of the given {@link Setting}
+         * if it's an instance of {@link AbstractNumberSetting}.
+         */
+        private static String getMinMaxValue(Setting setting, boolean min) {
+            Number value = null;
+            if (setting instanceof AbstractNumberSetting<?>) {
+                if (min) {
+                    value = ((AbstractNumberSetting<?>)setting).getMinValue();
+                } else {
+                    value = ((AbstractNumberSetting<?>)setting).getMaxValue();
+                }
+            }
+            
+            return value != null ? value.toString() : null;
         }
     }
 }
