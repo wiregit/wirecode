@@ -134,46 +134,38 @@ class AboutWindow {
         sb.append("<br>");
 
         sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
-         " <tr> " + 
-         "   <td>Felix Berger</td>" + 
-         "   <td>Wynne Chan</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>David Chen</td>" + 
-         "   <td>Mike Everett</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Tim Julien</td>" + 
-         "   <td>Greg Kellum</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Emily Lawrence</td>" + 
-         "   <td>Marc London</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Greg Maggioncalda</td>" + 
-         "   <td>Jorge Mancheno</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Michael Rogers</td>" + 
-         "   <td>Varnali Shah</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Mike Sorvillo</td>" + 
-         "   <td>Michael Tiraborrelli</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Matt Turkel</td>" + 
-         "   <td>Peter Vertenten</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Peng Wang</td>" + 
-         "   <td>Kurt Wasserman</td>" + 
-         " </tr>" + 
-         " <tr>" + 
-         "   <td>Ernie Yu</td>" + 
-         " </tr>" + 
-        " </table>");
+                " <tr> " + 
+                "   <td>Felix Berger</td>" + 
+                "   <td>David Chen</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Mike Everett</td>" + 
+                "   <td>Greg Kellum</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Marc London</td>" + 
+                "   <td>Greg Maggioncalda</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Jorge Mancheno</td>" + 
+                "   <td>Michael Rogers</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Roger Kapsi</td>" +
+                "   <td>Mike Sorvillo</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Michael Tiraborrelli</td>" + 
+                "   <td>Matt Turkel</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Peter Vertenten</td>" + 
+                "   <td>Peng Wang</td>" + 
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Ernie Yu</td>" + 
+                " </tr>" + 
+                " </table>");
         
         //  business developers
         sb.append(I18n.tr("Behind the scenes business strategy and day-to-day affairs are handled by LimeWire\'s business developers:"));
@@ -201,66 +193,73 @@ class AboutWindow {
                 " </tr>" +
                 " <tr>" +
                 "   <td>Katie Catillaz</td>" +
+                "   <td>Wynne Chan</td>" + 
+                " </tr>" +
+                " <tr>" +
                 "   <td>Susheel Daswani</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Luck Dookchitra</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Kevin Faaborg</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Adam Fisk</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Bobby Fonacier</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Meghan Formel</td>" +
-                "   <td>Jay Jeyaratnam</td>" +
                 " </tr>" +
                 " <tr>" +
+                "   <td>Jay Jeyaratnam</td>" +
                 "   <td>Curtis Jones</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Tim Julien</td>" + 
                 "   <td>Tarun Kapoor</td>" +
                 " </tr>" +
                 " <tr>" +
-                "   <td>Roger Kapsi</td>" +
                 "   <td>Mark Kornfilt</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Akshay Kumar</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Angel Leon</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Karl Magdsick</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Yusuke Naito</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Dave Nicponski</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Christine Nicponski</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Tim Olsen</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Jeff Palm</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Jason Pelzer</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Steffen Pingel</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Christopher Rohrs</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Justin Schmidt</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Arthur Shim</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Anurag Singla</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Francesca Slade</td>" +
-                "   <td>Robert Soule</td>" +
                 " </tr>" +
                 " <tr>" +
+                "   <td>Robert Soule</td>" +
                 "   <td>Rachel Sterne</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Sumeet Thadani</td>" +
+                "   <td>Varnali Shah</td>" + 
                 " </tr>" +
                 " <tr>" +
                 "   <td>Ron Vogl</td>" +
+                "   <td>Kurt Wasserman</td>" + 
+                " </tr>" +
+                " <tr>" +
                 "   <td>E.J. Wolborsky</td>" +
                 " </tr>" +
                 " </table>");
