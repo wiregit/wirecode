@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search.browse;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -149,6 +150,10 @@ class MultipleBrowseSearch extends AbstractBrowseSearch {
                     listener.searchStopped(MultipleBrowseSearch.this);
                 }
             }
+        }
+
+        @Override
+        public void handleSpoonResult(URL url) {
         }        
     }
     

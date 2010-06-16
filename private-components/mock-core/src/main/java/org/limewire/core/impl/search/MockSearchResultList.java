@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -176,6 +177,10 @@ class MockSearchResultList implements SearchResultList {
 
         @Override
         public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
+        }
+
+        @Override
+        public void handleSpoonResult(URL url) {
         }
 
         @Override

@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -19,9 +21,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import javax.swing.text.Document;
+import javax.swing.text.Style;
+import javax.swing.text.html.CSS;
+import javax.swing.text.html.HTMLDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -36,6 +44,7 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.HeaderBar;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.filter.AdvancedFilterPanel;
@@ -45,12 +54,12 @@ import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
 import org.limewire.ui.swing.search.SearchResultsMessagePanel.MessageType;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SpoonUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -95,6 +104,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
      * This is the subpanel that displays the actual search results.
      */
     private final ResultsContainer resultsContainer;
+    private final SpoonPane spoonPane;
        
     /**
      * This is the subpanel that appears in the upper-right corner
@@ -134,6 +144,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
     private boolean fullyConnected = true;
 
     private boolean receivedSponsoredResults = false;
+    private boolean receivedSpoonResult = false;
 
     private boolean receivedSearchResults = false;
     
@@ -187,6 +198,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         sortAndFilterPanel = sortAndFilterFactory.create(searchResultsModel);
         
         filterPanel = filterPanelFactory.create(searchResultsModel, searchResultsModel.getSearchType());
+        
+        spoonPane = new SpoonPane();
         
         scrollPane = new JScrollPane();
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -376,6 +389,15 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         updateMessages();      
     }
     
+    @Override
+    public void addSpoonResult(URL url) {
+        spoonPane.setURL(url);
+        
+        receivedSpoonResult = true;
+        updateMessages();      
+        syncScrollPieces();
+    }
+    
     /**
      * Sets the browse title in the container.  When not null, the browse title
      * is displayed at the top of the panel.  When null, the container displays 
@@ -562,6 +584,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         scrollablePanel.setScrollableTracksViewportHeight(false);
 
         scrollablePanel.setLayout(new BorderLayout());
+        scrollablePanel.add(spoonPane.getComponent(), BorderLayout.NORTH);
         scrollablePanel.add(resultsContainer, BorderLayout.CENTER);
         scrollablePanel.add(sponsoredResultsPanel, BorderLayout.EAST);
         scrollPane.setViewportView(scrollablePanel);
@@ -588,6 +611,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
 
         public void setScrollable(Scrollable scrollable) {
             this.scrollable = scrollable;
+            scrollablePanel.revalidate();
         }
         
         @Override
@@ -600,26 +624,21 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                 
                 // the list view has some weird rendering sometimes (double space after last result)
                 // so don't fill full screen on list view
-                if( (scrollable instanceof ListViewTable)) {
-                    // old check, if sponsored results aren't showing properlly revert to just using this
-                    if(sponsoredResultsPanel.isVisible()) {
-                        height = Math.max(height, sponsoredResultsPanel.getPreferredSize().height);
-                    }
-                } else { // classic view
-                    int headerHeight = 0;
-                    
-                    //the table headers aren't being set on the scrollpane, so if its visible check its
-                    // height and subtract it from the viewport size
-                    JTableHeader header = ((JTable)scrollable).getTableHeader();
-                    if(header != null && header.isShowing()) {
-                        headerHeight = header.getHeight();
-                    }
-                    
-                    // if the height of table is less than the scrollPane height, set preferred height
-                    // to same size as scrollPane
-                    if(height < scrollPane.getSize().height - headerHeight) {
-                        height = scrollPane.getSize().height - headerHeight;
-                    }
+                // NOTE: removed the specific list sorting, not needed as far as i can tell, think it may
+                // have been an unneeded work around for layout issues that were solved aferwards elsewhere
+                int headerHeight = 0;
+                
+                //the table headers aren't being set on the scrollpane, so if its visible check its
+                // height and subtract it from the viewport size
+                JTableHeader header = ((JTable)scrollable).getTableHeader();
+                if(header != null && header.isShowing()) {
+                    headerHeight = header.getHeight();
+                }
+                
+                // if the height of table is less than the scrollPane height, set preferred height
+                // to same size as scrollPane
+                if(height < scrollPane.getSize().height - headerHeight) {
+                    height = scrollPane.getSize().height - headerHeight;
                 }
                 return new Dimension(width, height);
             }
@@ -679,7 +698,7 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         browseStatusPanel.setBrowseStatus(browseStatus);
 
         // let's check whether we need to show the user any messages
-        if (!fullyConnected && (receivedSearchResults || receivedSponsoredResults)) {
+        if (!fullyConnected && (receivedSearchResults || receivedSponsoredResults || receivedSpoonResult)) {
             messagePanel.setMessageType(MessageType.CONNECTING_TO_ULTRAPEERS);
             messagePanelsGap.setVisible(true);
         } else if (fullyConnected && receivedSearchResults && messagePanel.isShowClassicSearchResultsHint()) {
@@ -691,13 +710,91 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
         }
        
         // let's check whether we need to put an overlay over the search results panel
-        if ( (!lifeCycleComplete || !fullyConnected ) && (!receivedSearchResults && !receivedSponsoredResults) ) {
+        if ( (!lifeCycleComplete || !fullyConnected ) && (!receivedSearchResults && !receivedSponsoredResults && !receivedSpoonResult) ) {
             setOverlayType(OverlayType.AWAITING_CONNECTIONS);
         } else if (browseStatus != null && !browseStatus.getState().isOK()) {
             browseFailedPanel.update(browseStatus.getState(), browseStatus.getBrowseSearch(), browseStatus.getFailedFriends());
             setOverlayType(OverlayType.NO_FRIENDS_ON_LIMEWIRE);           
         } else {
             setOverlayType(OverlayType.NONE);            
+        }
+    }
+    
+    /**
+     * Pane for handling ads above the Search List. This gets displayed between
+     * any header and the first search result. This is part of the scroll window 
+     * and will scroll out of the way.
+     */
+    private class SpoonPane {
+        
+        private final HTMLPane editorPane;
+        
+        public SpoonPane() {
+            editorPane = new HTMLPane();
+            editorPane.setEditable(false);
+            editorPane.setContentType("text/html");
+            editorPane.setMargin(new Insets(0, 0, 0, 0));
+            editorPane.setVisible(false);
+            editorPane.setPreferredSize(new Dimension(300,376));
+            editorPane.addHyperlinkListener(new HyperlinkListener(){
+                @Override
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        if(e.getURL() != null) {
+                            SpoonUtils.handleSpoonURL(e.getURL().toString());
+                        }
+                    }
+                }
+            });
+        }
+        
+        private int getHeight() {
+            Document document = editorPane.getDocument();
+            if(document instanceof HTMLDocument) {
+                HTMLDocument html = (HTMLDocument) document;
+
+                // search for the height tag and parse it
+                Style style = html.getStyle("#ilsr-wrapper");
+                if(style != null) {
+                    Object o = style.getAttribute(CSS.Attribute.HEIGHT);
+                    String height = parseHeight(o);
+                    if(height != null) {
+                        return Integer.valueOf(height);
+                    }
+                }
+            }
+            // not we return 0 if the marker can't be found. This is in case
+            // blank html is returned, we won't end up with a large white 
+            // rectangle above the results.
+            return 0;
+        }
+        
+        private String parseHeight(Object o) {
+            if(o == null)
+                return null;
+            String objectString = o.toString();
+            if(objectString.endsWith("px")) {
+                return objectString.substring(0, objectString.length() - 2);
+            } else {
+                return null;
+            }
+        }
+        
+        public void setURL(URL url) {
+            try {
+                editorPane.setPage(url);
+                int height = getHeight();
+                if(height >= 0) {
+                    editorPane.setPreferredSize(new Dimension(300, height));
+                }
+                editorPane.setVisible(true);
+                editorPane.revalidate();
+            } catch (IOException e) {
+            }
+        }
+        
+        public JComponent getComponent() {
+            return editorPane;
         }
     }
 }

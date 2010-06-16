@@ -1,5 +1,6 @@
 package org.limewire.core.impl.search;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -231,6 +232,10 @@ class CoreSearchResultList implements SearchResultList {
 
         @Override
         public void searchStopped(Search search) {
+        }
+
+        @Override
+        public void handleSpoonResult(URL url) {
         }
     }
     

@@ -1,5 +1,7 @@
 package org.limewire.core.impl.search;
 
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
 import org.limewire.core.settings.PromotionSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SpoonSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -31,6 +34,7 @@ import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.Clock;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -39,6 +43,8 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.spoon.SpoonSearcher;
+import com.limegroup.gnutella.spoon.SpoonSearcher.SpoonSearchCallback;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 public class CoreSearch implements Search, SearchListener {
@@ -47,6 +53,7 @@ public class CoreSearch implements Search, SearchListener {
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
+    private final SpoonSearcher spoonSearcher;
     private final FriendSearcher friendSearcher;
     private final Provider<GeocodeInformation> geoLocation;
     private final RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory;
@@ -82,6 +89,7 @@ public class CoreSearch implements Search, SearchListener {
             SearchServices searchServices,
             QueryReplyListenerList listenerList,
             PromotionSearcher promotionSearcher,
+            SpoonSearcher spoonSearcher,
             FriendSearcher friendSearcher,
             Provider<GeocodeInformation> geoLocation,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -95,6 +103,7 @@ public class CoreSearch implements Search, SearchListener {
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
+        this.spoonSearcher = spoonSearcher;
         this.friendSearcher = friendSearcher;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
@@ -186,6 +195,17 @@ public class CoreSearch implements Search, SearchListener {
             torrentWebSearch.start();
         }
         
+        if(initial && SpoonSettings.SPOON_SEARCH_IS_ENABLED.getValue()) {
+            final String spoonQuery = getSpoonQueryString(searchDetails.getSearchQuery(), advancedSearch);
+            spoonSearcher.search(spoonQuery, new SpoonSearchCallback() {
+                @Override
+                public void handle(URL url) {
+                    if(url != null)
+                        handleSpoonResult(url);
+                }
+            });
+        }
+        
         if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
@@ -222,6 +242,55 @@ public class CoreSearch implements Search, SearchListener {
                 }
             });            
         }
+    }
+        
+    /**
+     * Parses the query into a format suitable for sending to the Spoon
+     * ad search. A spoon query takes the following form:
+     *  - a search begins with: =/search
+     *  - basic search terms are / seperated
+     *  - basic and advance search is ? seperated
+     *  - advanced search terms are grouped in key=value
+     *  - advanced search terms are & seperated
+     *  - example search query: =/search/foo/bar?title=foo&year=foobar
+     *  - a search can contain either a basic search, advanced search or a combination
+     *    of the two
+     */
+    private String getSpoonQueryString(String basicQuery, Map<FilePropertyKey, String> advanced) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("=/search");
+        ArrayList<String> advancedStrings = new ArrayList<String>();
+        if(!StringUtils.isEmpty(basicQuery)) {
+            String[] parsedQuery = basicQuery.split(" ");
+            for(String string : parsedQuery) {
+                if(string.contains(":"))
+                    advancedStrings.add(string);
+                else
+                    builder.append("/").append(string);
+            }
+        }
+        if(advanced.size() > 0 || advancedStrings.size() > 0) {
+            boolean isFirst = true;
+            builder.append("?");
+            for(FilePropertyKey key : advanced.keySet()) {
+                if(isFirst) {
+                    isFirst = false;
+                } else {
+                    builder.append("&");
+                }
+                builder.append(key.toString().toLowerCase()).append("=").append(advanced.get(key));
+            }
+            for(String string : advancedStrings) { System.out.println("here");
+                if(isFirst) {
+                    isFirst = false;
+                } else {
+                    builder.append("&");
+                }
+                string = string.replace(':', '=');
+                builder.append(string);
+            }
+        }
+        return builder.toString();
     }
     
     /**
@@ -280,6 +349,13 @@ public class CoreSearch implements Search, SearchListener {
             listener.handleSearchResults(this, searchResults);
         }
     }
+    
+    @Override
+    public void handleSpoonResult(URL url) {
+        for (SearchListener listener : searchListeners) {
+            listener.handleSpoonResult(url);
+        }
+    }
 
     @Override
     public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
@@ -313,5 +389,4 @@ public class CoreSearch implements Search, SearchListener {
             handleSearchResults(CoreSearch.this, results);
         }
     }
-
 }

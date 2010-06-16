@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -225,7 +226,8 @@ class TextSearchHandlerImpl implements SearchHandler {
 
             @Override public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {}
             @Override public void searchStarted(Search search) {}
-            @Override public void searchStopped(Search search) {}                
+            @Override public void searchStopped(Search search) {}
+            @Override public void handleSpoonResult(URL url) {}                
         });
         
         // Initialize search panel indicator, and install connection listener.

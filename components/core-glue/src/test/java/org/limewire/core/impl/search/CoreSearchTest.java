@@ -76,7 +76,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, null, friendSearcher, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, null, null, rfdaFactory, null);
 
         context.checking(new Expectations() {{
@@ -181,7 +181,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<FriendSearchListener> friendSearchListener = new AtomicReference<FriendSearchListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, null, friendSearcher, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, clock, null, null, null);
 
         context.checking(new Expectations() {{
@@ -258,7 +258,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener searchListener = context.mock(SearchListener.class);
         final AtomicReference<QueryReplyListener> queryReplyListener = new AtomicReference<QueryReplyListener>();
         final CoreSearch coreSearch = new CoreSearch(searchDetails, searchServices, listenerList,
-                promotionSearcher, friendSearcher, geoLocation, backgroundExecutor,
+                promotionSearcher, null, friendSearcher, geoLocation, backgroundExecutor,
                 searchEventBroadcaster, null, clock, null, null, null);
 
         final GeocodeInformation geocodeInformation = null;
@@ -427,7 +427,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchServices searchServices = context.mock(SearchServices.class);
         final SearchListener listener = context.mock(SearchListener.class);
         
-        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, searchEventBroadcaster, null, null, null, null, null);
+        final CoreSearch search = new CoreSearch(null, searchServices, listenerList, null, null, null, null, null, searchEventBroadcaster, null, null, null, null, null);
         
         context.checking(new Expectations() {
             {
@@ -461,7 +461,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchListener listener = context.mock(SearchListener.class);
         final SearchDetails details = context.mock(SearchDetails.class);
         
-        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null,
+        final CoreSearch search = new CoreSearch(details, searchServices, listenerList, null, null, null,
                 null, null, searchEventBroadcaster, null, null, null, null, null);
         
         context.checking(new Expectations() {
@@ -509,7 +509,7 @@ public class CoreSearchTest extends BaseTestCase {
         final SearchDetails searchDetails = context.mock(SearchDetails.class);
         
         final CoreSearch coreSearch = new CoreSearch(searchDetails, null, null, null, null, null, 
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         
         context.checking(new Expectations() {{
             one(searchDetails).getSearchCategory();
@@ -526,7 +526,7 @@ public class CoreSearchTest extends BaseTestCase {
     
     public void testGetQueryGuid() {
         final CoreSearch coreSearch = new CoreSearch(null, null, null, null, null, null, 
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         
         coreSearch.searchGuid = new byte[] {4,3,2,1,'q','x','x','x','x','x','x','x','x','x','x','x'};
         

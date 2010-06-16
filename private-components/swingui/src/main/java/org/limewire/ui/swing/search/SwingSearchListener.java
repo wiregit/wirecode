@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,6 +59,16 @@ class SwingSearchListener implements SearchListener {
             @Override
             public void run() {
                 sponsoredView.addSponsoredResults(sponsoredResults);
+            }
+        });
+    }
+    
+    @Override
+    public void handleSpoonResult(final URL url) {
+        SwingUtils.invokeNowOrLater(new Runnable() {
+            @Override
+            public void run() {
+                sponsoredView.addSpoonResult(url);
             }
         });
     }

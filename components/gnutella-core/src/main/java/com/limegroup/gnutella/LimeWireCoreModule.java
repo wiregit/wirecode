@@ -168,6 +168,7 @@ import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 import com.limegroup.gnutella.simpp.LimeWireSimppModule;
 import com.limegroup.gnutella.spam.LimeWireSpamModule;
+import com.limegroup.gnutella.spoon.LimeWireSpoonModule;
 import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
@@ -239,6 +240,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireContentAuthModule());
         binder().install(new LimeWireFiltersModule());
         binder().install(new LimeWireSpamModule());
+        binder().install(new LimeWireSpoonModule());
         binder().install(new LimeWireCoreConnectionModule());
         binder().install(new LimeWireBootstrapModule());
         binder().install(new LimeWireMalwareModule());

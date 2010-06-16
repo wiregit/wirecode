@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -441,7 +442,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         @Override
         public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {
-            // do nothing
+        }
+        
+        @Override
+        public void handleSpoonResult(URL url) {
         }
         
         void killBusy() {
@@ -498,12 +502,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
             return this;
         }
         
-        @Override
-        public void handleSearchResult(Search search, SearchResult searchResult) {}
-        @Override
-        public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
-        @Override
-        public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {}
+        @Override public void handleSearchResult(Search search, SearchResult searchResult) {}
+        @Override public void handleSearchResults(Search search, Collection<? extends SearchResult> searchResults) {}
+        @Override public void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults) {}
+        @Override public void handleSpoonResult(URL url) {}
     }
 
     /**
@@ -528,7 +530,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             setEnabled(true);
         }
 
-        @Override public void searchStopped(Search search) { }
+        @Override public void searchStopped(Search search) {}
     }
     
     /**

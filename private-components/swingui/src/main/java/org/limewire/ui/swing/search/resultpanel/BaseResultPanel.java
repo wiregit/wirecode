@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -185,14 +184,7 @@ public class BaseResultPanel extends JXPanel {
      * Creates a new List view table.
      */
     private ListViewTable createList() {
-        ListViewTable listTable = new ListViewTable();
-        
-        // Set list table fields that do not change with search category.
-        listTable.setShowGrid(true, false);
-        listTable.setRowHeightEnabled(true);
-        listTable.setEmptyRowsPainted(false);
-        
-        return listTable;
+        return new ListViewTable();
     }
     
     /**
@@ -600,13 +592,17 @@ public class BaseResultPanel extends JXPanel {
     /**
      * Table component to display search results in a vertical list.
      */
-    public static class ListViewTable extends ResultsTable<VisualSearchResult> {
+    public class ListViewTable extends ResultsTable<VisualSearchResult> {
         @Resource private Color similarResultParentBackgroundColor;        
         private boolean ignoreRepaints;
         
         public ListViewTable() {
             super();
-            
+                        
+            setShowGrid(true, false);
+            setRowHeightEnabled(true);
+            setEmptyRowsPainted(false);
+
             GuiUtils.assignResources(this);
             
             setGridColor(Color.decode("#EBEBEB"));
@@ -618,12 +614,7 @@ public class BaseResultPanel extends JXPanel {
                             return vsr != null && vsr.isChildrenVisible();
                         }}, similarResultParentBackgroundColor, null, getTableColors().selectionColor, null));
         }
-        
-        @Override
-        protected void paintEmptyRows(Graphics g) {
-            // do nothing.
-        }
-        
+
         private void setIgnoreRepaints(boolean ignore) {
             this.ignoreRepaints = ignore;
         }

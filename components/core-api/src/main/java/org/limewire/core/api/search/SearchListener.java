@@ -1,5 +1,6 @@
 package org.limewire.core.api.search;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface SearchListener {
     /** Notification that sponsored results have been received for the search. */
     void handleSponsoredResults(Search search, List<? extends SponsoredResult> sponsoredResults);
 
+    /** Notification that a spoon result has been received for the search. */
+    void handleSpoonResult(URL url);
 }
