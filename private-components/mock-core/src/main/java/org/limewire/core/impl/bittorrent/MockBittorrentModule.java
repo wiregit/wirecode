@@ -2,6 +2,7 @@ package org.limewire.core.impl.bittorrent;
 
 import org.limewire.bittorrent.TorrentManager;
 import org.limewire.bittorrent.TorrentManagerSettings;
+import org.limewire.bittorrent.TorrentScrapeScheduler;
 import org.limewire.bittorrent.TorrentSettingsAnnotation;
 
 import com.google.inject.AbstractModule;
@@ -13,6 +14,7 @@ public class MockBittorrentModule extends AbstractModule {
     protected void configure() {
         bind(TorrentManager.class).to(MockTorrentManager.class);
         bind(TorrentManagerSettings.class).annotatedWith(TorrentSettingsAnnotation.class).to(MockTorrentManagerSettings.class);
+        bind(TorrentScrapeScheduler.class).to(MockTorrentScrapeScheduler.class);
     }
 
 }
