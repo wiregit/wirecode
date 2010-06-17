@@ -1,5 +1,7 @@
 package org.limewire.core.settings;
 
+import org.limewire.inspection.DataCategory;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringArraySetting;
 
@@ -19,6 +21,7 @@ public class ContentSettings extends LimeProps {
      * Whether or not the user is enabling management.
      * Both this & the above must be on for management to be active.
      */
+    @InspectionPoint(value = "user wants filter management", category = DataCategory.USAGE)
     public static final BooleanSetting USER_WANTS_MANAGEMENTS =
         FACTORY.createBooleanSetting("USER_WANTS_MANAGEMENTS", true);
     
