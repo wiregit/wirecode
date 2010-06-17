@@ -18,6 +18,8 @@ import org.limewire.inject.EagerSingleton;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.URN;
@@ -72,6 +74,9 @@ public class ContentManager implements Service {
     
     /** Whether or not we're shutting down. */
     private volatile boolean shutdown = false;
+    
+    /** Whether to try reloading the content authority. */
+    private volatile boolean reload = false;
 
     private final IpPortContentAuthorityFactory ipPortContentAuthorityFactory;
 
@@ -83,6 +88,16 @@ public class ContentManager implements Service {
     @Inject
     void register(ServiceRegistry registry) {
         registry.register(this);
+        
+        ContentSettings.AUTHORITIES.addSettingListener(new SettingListener(){
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                // only update the authority if its already been created
+                if(authority != null) {
+                    reload = true;
+                }
+            }
+        });
     }
     
     public void initialize() {}
@@ -322,6 +337,10 @@ public class ContentManager implements Service {
                 while(true) {
                     if(shutdown)
                         return;
+                    if(reload) {
+                        setDefaultContentAuthority();
+                        reload = false;
+                    }
                     try {
                         try {
                             Thread.sleep(1000);
