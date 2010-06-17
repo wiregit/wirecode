@@ -14,6 +14,7 @@ public class ContentSettings extends LimeProps {
         FACTORY.createRemoteStringArraySetting("CONTENT_AUTHORITIES", new String[0], "content.authorities");
     
     /** Whether or not we want to use content management. */
+    @InspectionPoint(value = "content management active", category = DataCategory.USAGE)
     public static final BooleanSetting CONTENT_MANAGEMENT_ACTIVE =
         FACTORY.createRemoteBooleanSetting("CONTENT_MANAGEMENT_ACTIVE", true, "content.managementActive");
     
