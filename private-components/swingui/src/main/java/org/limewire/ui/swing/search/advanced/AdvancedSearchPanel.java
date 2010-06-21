@@ -34,6 +34,7 @@ import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.components.decorators.HeaderBarDecorator;
 import org.limewire.ui.swing.search.KeywordAssistedSearchBuilder;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.SearchInspectionUtils;
 import org.limewire.ui.swing.search.UiSearchListener;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -75,6 +76,8 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
         this.advancedSearchBuilder = advancedSearchBuilder;
         
         GuiUtils.assignResources(this);
+        
+        SearchInspectionUtils.advancedSearchOpened();
         
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
         
@@ -199,6 +202,8 @@ public class AdvancedSearchPanel extends JXPanel implements Disposable {
                 Map<FilePropertyKey,String> searchData = visibleComponent.getSearchData();
                 
                 if(searchData != null) {
+                    
+                    SearchInspectionUtils.advancedSearchStarted();
                     
                     SearchInfo info = advancedSearchBuilder.get().createAdvancedSearch(searchData,
                             visibleComponent.getSearchCategory());
