@@ -1075,9 +1075,14 @@ public class DownloadWorker {
      */
     private Range pickAvailableInterval() throws NoSuchRangeException {
         Range interval;
+        
+        // If store download, take the first available chunk
+        if(_manager instanceof StoreDownloader){
+            interval = _commonOutFile.leaseWhite();
+        }
         // If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if (!rfdContext.isPartialSource()) {
+        else if (!rfdContext.isPartialSource()) {          
             if (_currentState.isHttp11()) {
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
