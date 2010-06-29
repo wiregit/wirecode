@@ -26,7 +26,13 @@ public class CoreSearchManagerTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        searchManager = new CoreSearchManager();
+        
+        final SearchMonitor searchMonitor = context.mock(SearchMonitor.class);
+        context.checking(new Expectations() {{
+            allowing(searchMonitor);
+        }});
+        
+        searchManager = new CoreSearchManager(searchMonitor);
     }    
 
     @Override

@@ -11,6 +11,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.GroupedSearchResult;
 import org.limewire.core.api.search.Search;
@@ -819,8 +820,18 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     private static class TestSearchManager implements SearchManager {
 
         @Override
+        public SearchResultList addMonitoredSearch(Search search, SearchDetails searchDetails) {
+            return addSearch(search, searchDetails);
+        }
+        
+        @Override
         public SearchResultList addSearch(Search search, SearchDetails searchDetails) {
             return new TestSearchResultList();
+        }
+        
+        @Override
+        public SearchResultList getSearchResultList(GUID guid) {
+            return null;
         }
 
         @Override
@@ -829,12 +840,16 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public List<Search> getActiveSearches() {
+        public List<SearchResultList> getActiveSearchLists() {
             return null;
         }
 
         @Override
         public void removeSearch(Search search) {
+        }
+        
+        @Override
+        public void stopSearch(SearchResultList resultList) {
         }
     }
     
@@ -858,7 +873,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         @Override
         public void dispose() {
         }
-
+        
+        @Override
+        public GroupedSearchResult getGroupedResult(URN urn) {
+            return null;
+        }
+        
         @Override
         public EventList<GroupedSearchResult> getGroupedResults() {
             return groupedUrnResultList;
@@ -876,6 +896,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public Search getSearch() {
+            return null;
+        }
+        
+        @Override
+        public String getSearchQuery() {
             return null;
         }
     }

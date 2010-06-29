@@ -47,6 +47,13 @@ public interface LocalFileList extends FileList<LocalFileItem> {
      */
     LocalFileItem getFileItem(File file);
     
+    /**
+     * Returns the of FileItem for the given urn, or null if it is not in this list.
+     * This may return null if the library has not finished loading or if URN
+     * cannot be cast to a com.limegroup.gnutella.URN.
+      */
+     LocalFileItem getFileItem(URN urn);
+    
     /** Returns true if the file is addable to the list.  Always false for a directory. */
     boolean isFileAllowed(File file);
     

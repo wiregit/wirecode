@@ -445,6 +445,7 @@
             	<link href="http://www.limewire.org/nightly/modules/player/api/"/>
             	<link href="http://www.limewire.org/nightly/modules/player-api/api/"/>
     	    	<link href="http://www.limewire.org/nightly/modules/promotion/api/"/>
+    	    	<link href="http://www.limewire.org/nightly/modules/rest/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/rudp/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/security/api/"/>
         		<link href="http://www.limewire.org/nightly/modules/setting/api/"/>

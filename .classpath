@@ -57,6 +57,8 @@
 	<classpathentry kind="src" output="components/player-api/build/classes" path="components/player-api/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/classes" path="components/promotion/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/tests" path="components/promotion/src/test/java"/>
+	<classpathentry kind="src" output="components/rest/build/classes" path="components/rest/src/main/java"/>
+	<classpathentry kind="src" output="components/rest/build/tests" path="components/rest/src/test/java"/>
 	<classpathentry kind="src" output="components/rudp/build/classes" path="components/rudp/src/main/java"/>
 	<classpathentry kind="src" output="components/rudp/build/tests" path="components/rudp/src/test/java"/>
 	<classpathentry kind="src" output="components/security/build/classes" path="components/security/src/main/java"/>
