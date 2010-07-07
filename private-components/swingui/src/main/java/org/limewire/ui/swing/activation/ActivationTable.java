@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.Date;
+
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -13,17 +15,15 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.activation.api.ActivationItem;
-import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.activation.api.ActivationSettingsController;
+import org.limewire.activation.api.ActivationItem.Status;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.UrlAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
@@ -38,12 +38,18 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
+
 /**
  * Displays information about the Modules that are associated with the 
  * given License Key.
  */
 class ActivationTable extends MouseableTable {
 
+    private static Date NO_EXPIRATION_DATE = new Date(2145934800000L);
+    
     @Resource
     private Icon infoIcon;
     @Resource
@@ -58,7 +64,7 @@ class ActivationTable extends MouseableTable {
 
     public ActivationTable(EventList<ActivationItem> eventList, CalendarRenderer calendarRenderer, Application application) {
         GuiUtils.assignResources(this);
-
+        
         model = new DefaultEventTableModel<ActivationItem>(new SortedList<ActivationItem>(eventList, new ActivationItemComparator()), new ActivationTableFormat());
         setModel(model);
 
@@ -304,7 +310,11 @@ class ActivationTable extends MouseableTable {
                 boolean isSelected, int row, int column) {
             if(value instanceof ActivationItem && ((ActivationItem) value).getDateExpired() != null) {
                 ActivationItem item = (ActivationItem) value;
-                dateLabel.setText(GuiUtils.date2String(item.getDateExpired())); 
+                if(item.getDateExpired().before(NO_EXPIRATION_DATE)) {
+                    dateLabel.setText(GuiUtils.date2String(item.getDateExpired()));
+                } else {
+                    dateLabel.setText(I18n.tr("N/A"));
+                }
                 iconButton.setVisible(item.getStatus() == Status.UNAVAILABLE || item.getStatus() == Status.UNUSEABLE_LW || item.getStatus() == Status.UNUSEABLE_OS);
                 expiredLabel.setVisible(item.getStatus() == Status.EXPIRED);
             } else {

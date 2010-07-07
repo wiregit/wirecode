@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -44,6 +45,8 @@ import org.limewire.ui.swing.util.I18n;
 
 class SetupActivationTable extends BasicJXTable {
 
+    private static Date NO_EXPIRATION_DATE = new Date(2145934800000L);
+    
     private final String[] columnNames = new String[] {I18n.tr("Feature Type"), I18n.tr("Expires")};
     
     @Resource private Color columnNameColor;
@@ -59,7 +62,7 @@ class SetupActivationTable extends BasicJXTable {
         super();
         
         this.application = application;
-        
+
         GuiUtils.assignResources(this);
 
         setModel(new ActivationTableModel(activationItems));
@@ -281,7 +284,11 @@ class SetupActivationTable extends BasicJXTable {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if(value instanceof ActivationItem) {
                 ActivationItem item = (ActivationItem) value;
-                setText(GuiUtils.date2String(item.getDateExpired()));
+                if(item.getDateExpired().before(NO_EXPIRATION_DATE)) {
+                    setText(GuiUtils.date2String(item.getDateExpired()));
+                } else {
+                    setText(I18n.tr("N/A"));
+                }
             } else {
                 setText("");
             }
