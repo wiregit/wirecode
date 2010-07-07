@@ -2,6 +2,7 @@ package org.limewire.http.httpclient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.Credentials;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.params.HttpParams;
 
@@ -27,4 +28,9 @@ public interface LimeHttpClient extends HttpClient {
      * @param response the response to cleanup
      */
     public void releaseConnection(HttpResponse response);
+    
+    /**
+     * Set cookie store.
+     */
+    public void setCookieStore(CookieStore cookieStore);
 }

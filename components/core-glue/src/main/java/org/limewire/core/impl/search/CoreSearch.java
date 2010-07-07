@@ -1,7 +1,6 @@
 package org.limewire.core.impl.search;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.limewire.core.settings.PromotionSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SpoonSettings;
 import org.limewire.geocode.GeocodeInformation;
+import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventBroadcaster;
@@ -34,7 +34,6 @@ import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.Clock;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -195,9 +194,10 @@ public class CoreSearch implements Search, SearchListener {
             torrentWebSearch.start();
         }
         
-        if(initial && SpoonSettings.SPOON_SEARCH_IS_ENABLED.getValue()) {
-            final String spoonQuery = getSpoonQueryString(searchDetails.getSearchQuery(), advancedSearch);
-            spoonSearcher.search(spoonQuery, new SpoonSearchCallback() {
+        if(initial && SpoonSettings.SPOON_SEARCH_IS_ENABLED.getValue() && spoonEnabledForGeoLocation()
+                && (searchDetails.getSearchCategory() == SearchCategory.ALL
+                        || searchDetails.getSearchCategory() == SearchCategory.AUDIO)) {
+            spoonSearcher.search(searchDetails, new SpoonSearchCallback() {
                 @Override
                 public void handle(URL url) {
                     if(url != null)
@@ -244,55 +244,20 @@ public class CoreSearch implements Search, SearchListener {
         }
     }
         
-    /**
-     * Parses the query into a format suitable for sending to the Spoon
-     * ad search. A spoon query takes the following form:
-     *  - a search begins with: =/search
-     *  - basic search terms are / seperated
-     *  - basic and advance search is ? seperated
-     *  - advanced search terms are grouped in key=value
-     *  - advanced search terms are & seperated
-     *  - example search query: =/search/foo/bar?title=foo&year=foobar
-     *  - a search can contain either a basic search, advanced search or a combination
-     *    of the two
-     */
-    private String getSpoonQueryString(String basicQuery, Map<FilePropertyKey, String> advanced) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("=/search");
-        ArrayList<String> advancedStrings = new ArrayList<String>();
-        if(!StringUtils.isEmpty(basicQuery)) {
-            String[] parsedQuery = basicQuery.split(" ");
-            for(String string : parsedQuery) {
-                if(string.contains(":"))
-                    advancedStrings.add(string);
-                else
-                    builder.append("/").append(string);
+    private boolean spoonEnabledForGeoLocation() {
+        GeocodeInformation info = geoLocation.get();
+        if (info.isEmpty()) {
+            return false;
+        }
+        String country = info.getProperty(Property.CountryCode);
+        for (String countryCode : SpoonSettings.VALID_COUNTRY_CODES.get()) {
+            if (countryCode.equals(country)) {
+                return true;
             }
         }
-        if(advanced.size() > 0 || advancedStrings.size() > 0) {
-            boolean isFirst = true;
-            builder.append("?");
-            for(FilePropertyKey key : advanced.keySet()) {
-                if(isFirst) {
-                    isFirst = false;
-                } else {
-                    builder.append("&");
-                }
-                builder.append(key.toString().toLowerCase()).append("=").append(advanced.get(key));
-            }
-            for(String string : advancedStrings) { System.out.println("here");
-                if(isFirst) {
-                    isFirst = false;
-                } else {
-                    builder.append("&");
-                }
-                string = string.replace(':', '=');
-                builder.append(string);
-            }
-        }
-        return builder.toString();
+        return false;
     }
-    
+
     /**
      * Stops current search and repeats search.
      * 

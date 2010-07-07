@@ -742,6 +742,8 @@ public class SearchResultsPanel extends JXPanel implements SponsoredResultsView,
                     if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                         if(e.getURL() != null) {
                             SpoonUtils.handleSpoonURL(e.getURL().toString());
+                        } else if (e.getDescription() != null) {
+                            SpoonUtils.handleSpoonURL(e.getDescription());
                         }
                     }
                 }
