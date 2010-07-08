@@ -35,4 +35,9 @@ public class SpoonSettings extends LimeProps {
      */
     public static final StringArraySetting VALID_COUNTRY_CODES = FACTORY.createRemoteStringArraySetting(
             "SPOON_VALID_COUNTRY_CODES", new String[]{"US"}, "Spoon.validCountryCodes");
+    
+    /**
+     * The cookies for spoon ad server requests, default value is empty json array.
+     */
+    public static final StringSetting SPOON_COOKIES = FACTORY.createStringSetting("SPOON_COOKIES", "[]");
 }

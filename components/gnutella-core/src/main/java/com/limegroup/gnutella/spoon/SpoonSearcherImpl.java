@@ -8,6 +8,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -17,12 +20,23 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.cookie.CookieIdentityComparator;
+import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie2;
+import org.apache.http.impl.cookie.DateParseException;
+import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchDetails;
@@ -49,10 +63,9 @@ class SpoonSearcherImpl implements SpoonSearcher {
     private final Provider<LimeHttpClient> httpClientProvider;
     private final ExecutorService executor;
     
-    // TODO serialize cookies to disk
     private final CookieStore cookieStore = new BasicCookieStore();
     
-    private final AtomicReference<Properties> spoonProperties = new AtomicReference<Properties>(null);
+    private final AtomicReference<String> spoonQueryPart = new AtomicReference<String>(null);
 
     private final HttpClientInstanceUtils httpClientInstanceUtils;
     
@@ -93,9 +106,9 @@ class SpoonSearcherImpl implements SpoonSearcher {
         return builder.toString();
     }
     
-    private void readSpoonProps() {
-        Properties properties = new Properties();
-        if (spoonProperties.compareAndSet(null, properties)) {
+    private void readSpoonProperties() {
+        if (spoonQueryPart.compareAndSet(null, "")) {
+            readCookies();
             File parent = CommonUtils.getUserSettingsDir().getParentFile();
             if (parent != null) {
                 File spoonPropsFile = new File(new File(parent, ".spoon"), "spoon.props");
@@ -104,29 +117,52 @@ class SpoonSearcherImpl implements SpoonSearcher {
                 }
                 try {
                     Properties props = FileUtils.readProperties(spoonPropsFile);
-                    spoonProperties.set(props);
+                    spoonQueryPart.set(createSpoonQueryPart(props));
                 } catch (IOException e) {
                     LOG.debug("couldn't read props file", e);
+                } catch (URISyntaxException e) {
+                    LOG.debug("couldn't create query part", e);
                 }
             }
         }
     }
     
-    private String addSpoonProps(String url) throws URISyntaxException {
-        Properties props = spoonProperties.get();
+    private void readCookies() {
+        List<Cookie> cookies = CookieSerializer.toCookies(SpoonSettings.SPOON_COOKIES.get());
+        for (Cookie cookie : cookies) {
+            cookieStore.addCookie(cookie);
+        }
+        cookieStore.clearExpired(new Date());
+    }
+
+    private void updateCookies() {
+        cookieStore.clearExpired(new Date());
+        SpoonSettings.SPOON_COOKIES.set(CookieSerializer.toString(cookieStore.getCookies()));
+    }
+    
+    private String createSpoonQueryPart(Properties props) throws URISyntaxException {
         if (props.isEmpty()) {
-            return url;
+            return "";
         }
-        StringBuilder builder = new StringBuilder(url);
-        if (!url.contains("?")) {
-            builder.append("?");
-        }
+        StringBuilder builder = new StringBuilder();
         for (String key : props.stringPropertyNames()) {
-            //if (key.startsWith("lw")) {
-            builder.append("&").append(URIUtils.encodeUriComponent(key)).append("=").append(URIUtils.encodeUriComponent(props.getProperty(key)));
-            //}
+            if (key.startsWith("client.")) {
+                builder.append("&").append(URIUtils.encodeUriComponent(key)).append("=").append(URIUtils.encodeUriComponent(props.getProperty(key)));
+            }
         }
         return builder.toString();
+    }
+    
+    private String addSpoonQueryPart(String url) {
+        String queryPart = spoonQueryPart.get();
+        if (queryPart.isEmpty()) {
+            return url;
+        }
+        if (url.contains("?")) {
+            return url + queryPart;
+        } else {
+            return url + "?" + queryPart;
+        }
     }
     
     private class Searcher implements Runnable {
@@ -141,25 +177,25 @@ class SpoonSearcherImpl implements SpoonSearcher {
         
         @Override
         public void run() {
-            readSpoonProps();
+            readSpoonProperties();
             try {
                 URL url = sendToServer(query);
                 if(url != null)
                     callback.handle(url);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.debug("error sending query", e);
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                LOG.error("error building query", e);
             }
         }
         
         private URL sendToServer(SearchDetails query) throws IOException, URISyntaxException {
             String uri = SpoonSettings.SPOON_SEARCH_SERVER.get() + getSpoonQueryString(query);
-            uri = addSpoonProps(httpClientInstanceUtils.addClientInfoToUrl(uri));
+            uri = addSpoonQueryPart(httpClientInstanceUtils.addClientInfoToUrl(uri));
             LOG.debugf("ilsr uri {0}", uri);
             HttpGet get = new HttpGet(uri);
             LimeHttpClient httpClient = httpClientProvider.get();
-            httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.RFC_2965);
+            httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BEST_MATCH);
             httpClient.setCookieStore(cookieStore);
             HttpResponse response = null;
             try {
@@ -181,9 +217,11 @@ class SpoonSearcherImpl implements SpoonSearcher {
                 }
             } finally {
                 HttpClientUtils.releaseConnection(response);
+                updateCookies();
             }
             return null;
         }
+
         
     }
     
@@ -226,4 +264,5 @@ class SpoonSearcherImpl implements SpoonSearcher {
             }
         }
     }
+
 }
