@@ -5,15 +5,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-05 11:30-0400\n"
-"PO-Revision-Date: 2010-06-19 18:36+0000\n"
-"Last-Translator: alex <Unknown>\n"
+"POT-Creation-Date: 2010-07-12 11:30-0400\n"
+"PO-Revision-Date: 2010-07-09 14:32+0000\n"
+"Last-Translator: Gabriel Retik <Machunga@gmail.com>\n"
 "Language-Team: ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-06 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-07-13 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 # Es posible
@@ -158,6 +158,7 @@ msgstr "El archivo está dañado"
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
 msgid "The copyright holder has not authorized this for sharing"
 msgstr ""
+"El titular de los derechos de autor no ha autorizado para el intercambio"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "Trouble connecting to people"
@@ -1587,11 +1588,11 @@ msgstr "Advertencia: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:143
 msgid "The torrent file download could not be virus scanned."
-msgstr ""
+msgstr "El archivo torrent no pudo ser escaneado por el antivirus"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
 msgid "Do you want to continue and download the torrent?"
-msgstr ""
+msgstr "¿Desea continuar y descargar el torrent?"
 
 #. lower case since hyperlink
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:56
@@ -2957,7 +2958,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
 msgid "&Cancel"
-msgstr ""
+msgstr "&Cancelar"
 
 #  eliminar
 #  eliminarlos
@@ -2987,7 +2988,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:66
 msgid "&Move to Recycle Bin"
-msgstr ""
+msgstr "&Mover a la papelera de reciclaje"
 
 # papelera
 # eliminarlo
@@ -3018,7 +3019,7 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:73
 msgid "&Move to Trash"
-msgstr ""
+msgstr "&Mover a la papelera"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:76
 msgid "Delete File or Remove from Library"
@@ -4198,6 +4199,7 @@ msgstr "Agrupar resultados de búsqueda similares"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:78
 msgid "Use web search to find additional torrent sources"
 msgstr ""
+"Usar búsqueda en la web para encontrar fuentes de torrent adicionales"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:142
 msgid "Search Bar"
