@@ -83,8 +83,8 @@ public class AutoUpdateMessageLayer{
             setBackground(backgroundColor);
             setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                     
-            add(createTopLabel("<b>YOUR LIMEWIRE SOFTWARE IS NOT UP TO DATE</b>"), "alignx 50%, gapbottom 7, wrap");
-            add(createContentArea("For best possible performance, make sure you always use the latest version of LimeWire, We no longer support the version on your computer, and <b>you're missing out on some great new features.</b> <br/><br/> Updating to latest version is <b>FREE quick and easy</b>, and your LimeWire library will stay completely intact."), "grow, wrap, gapbottom 10");
+            add(createTopLabel(I18n.tr("<b>YOUR LIMEWIRE SOFTWARE IS NOT UP TO DATE</b>")), "alignx 50%, gapbottom 7, wrap");
+            add(createContentArea(I18n.tr("For best possible performance, make sure you always use the latest version of LimeWire. We no longer support the version on your computer, and <b>you're missing out on some great new features.</b> <br/><br/> Updating to latest version is <b>FREE quick and easy</b>, and your LimeWire library will stay completely intact.")), "grow, wrap, gapbottom 10");
             
             JButton downloadButton = new JButton();
             downloadButton.requestFocusInWindow();
@@ -141,7 +141,7 @@ public class AutoUpdateMessageLayer{
             setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                     
             add(createTopLabel("LimeWire " + application.getVersion()), "alignx 50%, gapbottom 7, wrap");
-            add(createContentArea("<br/><br/><br/>The new version is ready for you. <br/><br/> Restart LimeWire to use it."), "grow, wrap, gapbottom 10");
+            add(createContentArea(I18n.tr("<br/><br/><br/>The new version is ready for you. <br/><br/> Restart LimeWire to use it.")), "grow, wrap, gapbottom 10");
             
             JButton installButton = new JButton();
             installButton.requestFocusInWindow();
@@ -199,8 +199,6 @@ public class AutoUpdateMessageLayer{
         
         setNativeFontRenderering(pane);
         
-        int htmlHeight = pane.getPreferredSize().height;        
-        int padding = Math.max(15, (backgroundIcon.getIconHeight() - htmlHeight)/2);
         //must be false to view the background image
         pane.setOpaque(false);
         //shift the text so as to not paint over the image
