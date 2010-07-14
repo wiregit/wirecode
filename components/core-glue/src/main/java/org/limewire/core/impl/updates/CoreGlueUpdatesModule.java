@@ -1,5 +1,6 @@
 package org.limewire.core.impl.updates;
 
+import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
@@ -18,5 +19,7 @@ public class CoreGlueUpdatesModule extends AbstractModule {
         EventMulticaster<UpdateEvent> uiListeners = new EventMulticasterImpl<UpdateEvent>();
         bind(new TypeLiteral<ListenerSupport<UpdateEvent>>(){}).toInstance(uiListeners);
         bind(new TypeLiteral<EventBroadcaster<UpdateEvent>>(){}).toInstance(uiListeners);
+        
+        bind(AutoUpdateHelper.class).toInstance(new AutoUpdateHelperImpl());
     }
 }

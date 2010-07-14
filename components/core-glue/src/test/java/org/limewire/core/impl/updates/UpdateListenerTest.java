@@ -31,7 +31,7 @@ public class UpdateListenerTest extends BaseTestCase {
                 one(updateHandler).addListener(with(any(EventListener.class)));
             }
         });
-        UpdateListener updateListener = new UpdateListener(updateHandler, broadcaster);
+        UpdateListener updateListener = new UpdateListener(updateHandler, null, broadcaster);
 
         final UpdateInformation updateInformation = context.mock(UpdateInformation.class);
         final String button1Text = "1";
