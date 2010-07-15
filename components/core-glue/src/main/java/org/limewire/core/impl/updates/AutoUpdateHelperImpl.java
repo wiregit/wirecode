@@ -44,9 +44,6 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
                 if (StringUtils.isEmpty(updatePrefix) || guid.startsWith(updatePrefix)) { // new version is applicable.
                     updateAvailable = true;
                 }
-            } else if (LimeWireUtils.isBetaRelease()
-                    && updateVersion.compareTo(limewireVersion) == 0) {
-                updateAvailable = true;
             }
         } catch (VersionFormatException ex) {
             LOG.warnf("Error parsing version info. CurrentVersion: {0}, UpdateVersion: {1}",
@@ -62,11 +59,8 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     }
     
     @Override
-    public File getTemporaryWorkingDirectory(){
+    public File getTemporaryWorkingDirectory() {
         File tempDirectory = new File(CommonUtils.getUserSettingsDir(), "updates");
-        if(! tempDirectory.exists()){
-            tempDirectory.mkdirs();
-        }
         return tempDirectory;
     }
     
@@ -84,8 +78,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         try {
             // initialize temporary directory
             FileUtils.forceDeleteRecursive(temporaryDirectory);
-            temporaryDirectory.mkdirs();
-            temporaryDirectory.mkdir();
+            FileUtils.makeFolder(temporaryDirectory);
 
             // get auto-update download executable file
             String downloadCommand = getDownloadCommand();

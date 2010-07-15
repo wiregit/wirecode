@@ -56,6 +56,7 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.ui.swing.wizard.IntentDialog;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
@@ -298,11 +299,12 @@ final class Initializer {
      */
     private void installUpdates(final Frame awtSplash) {
 
-        AutoUpdateHelper updateHandler = autoUpdateHandler.get();
-        if (!updateHandler.isUpdateAvailable()) {
+        AutoUpdateHelper updateHelper = autoUpdateHandler.get();
+        if (!updateHelper.isUpdateAvailable()) {
             UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+            FileUtils.forceDeleteRecursive(updateHelper.getTemporaryWorkingDirectory());
         } else {
-            if (updateHandler.isUpdateReadyForInstall()) {
+            if (updateHelper.isUpdateReadyForInstall()) {
                 final String updateScript = UpdateSettings.AUTO_UPDATE_COMMAND.get();
                 File file = new File(updateScript);
                 if (file.exists() && file.canExecute()) {
