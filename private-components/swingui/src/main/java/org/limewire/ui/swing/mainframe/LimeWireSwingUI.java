@@ -22,6 +22,7 @@ import javax.swing.event.AncestorListener;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
@@ -38,6 +39,7 @@ import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
+import org.limewire.ui.swing.update.AutoUpdateMessageLayer;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -68,6 +70,7 @@ public class LimeWireSwingUI extends JPanel {
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
+    private final AutoUpdateHelper autoUpdateHelper;
     private final BottomHeaderPanel bottomHeaderPanel;
     private boolean isPro = false;
     
@@ -80,6 +83,7 @@ public class LimeWireSwingUI extends JPanel {
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
             Provider<SignOnMessageLayer> signOnMessageProvider,
+            AutoUpdateHelper autoUpdateHelper,
             MainDownloadPanel mainDownloadPanel,
             @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
             BottomPanel bottomPanel,
@@ -90,6 +94,7 @@ public class LimeWireSwingUI extends JPanel {
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
     	this.signOnMessageProvider = signOnMessageProvider;
+    	this.autoUpdateHelper = autoUpdateHelper;
         this.centerPanel = new JPanel(new GridBagLayout());   
         this.bottomHeaderPanel = bottomHeaderPanel;
     	
@@ -108,7 +113,7 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = 1;
         centerPanel.add(topPanel, gbc);
-        
+
         // The main panel
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -341,13 +346,18 @@ public class LimeWireSwingUI extends JPanel {
             @Override
             @SwingEDTEvent
             public void handleEvent(UpdateEvent event) {
-                UpdatePanel updatePanel = new UpdatePanel(event.getData(), application);
-                JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
-                dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
-                dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
-                dialog.setModal(false);
-                dialog.pack();
-                dialog.setVisible(true);
+                if(event.getType() == UpdateEvent.Type.UPDATE){
+                    UpdatePanel updatePanel = new UpdatePanel(event.getData(), application);
+                    JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
+                    dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+                    dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
+                    dialog.setModal(false);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                }else if(event.getType() == UpdateEvent.Type.AUTO_UPDATE){
+                    AutoUpdateMessageLayer  updatePanel = new AutoUpdateMessageLayer(event.getData(), application, autoUpdateHelper);
+                    updatePanel.showMessage();
+                }
             }
         });
         

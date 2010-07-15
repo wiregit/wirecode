@@ -3,6 +3,7 @@ package org.limewire.core.settings;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringSetSetting;
+import org.limewire.setting.StringSetting;
 
 /**
  * Settings for messages.
@@ -72,4 +73,35 @@ public class UpdateSettings extends LimeProps {
     
     public static final LongSetting LAST_SIMPP_FAILOVER =
         FACTORY.createLongSetting("LAST_SIMPP_FAILOVER", -1);
+    
+    /**
+     * command to execute to install the updates.
+     */
+    public static final StringSetting AUTO_UPDATE_COMMAND = 
+        FACTORY.createStringSetting("AUTO_UPDATE_COMMAND", "");
+    
+    /**
+     * latest limewire version available.
+     */
+    public static final StringSetting AUTO_UPDATE_VERSION = 
+        FACTORY.createRemoteStringSetting("AUTO_UPDATE_VERSION", "1.0.0", "AUTO_UPDATE_VERSION");
+    
+    /**
+     * guid prefix for which updates are available.
+     */
+    public static final StringSetting AUTO_UPDATE_PREFIX =
+        FACTORY.createRemoteStringSetting("AUTO_UPDATE_PREFIX", "", "AUTO_UPDATE_PREFIX");
+    
+    /**
+     * max retry attempts for auto-update after which limewire will close and force 
+     * upload on next launch
+     */
+    public static final IntSetting AUTO_UPDATE_MAX_ATTEMPTS = 
+        FACTORY.createRemoteIntSetting("AUTO_UPDATE_MAX_ATTEMPTS", 5, "AUTO_UPDATE_MAX_ATTEMPTS", 1, 10);
+    
+    /**
+     * URL location for update xml
+     */
+    public static final StringSetting AUTO_UPDATE_XML_URL =
+        FACTORY.createRemoteStringSetting("AUTO_UPDATE_XML_URL", "http://127.0.0.1/update.xml", "AUTO_UPDATE_XML_URL");
 }

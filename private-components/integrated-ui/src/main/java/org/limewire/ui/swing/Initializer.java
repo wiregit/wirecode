@@ -14,19 +14,25 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.plaf.basic.BasicHTML;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.malware.VirusEngine;
+import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ActivationSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.io.IOUtils;
 import org.limewire.net.FirewallService;
@@ -102,6 +108,7 @@ final class Initializer {
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionInspections> connectionReporter;
     @Inject private Provider<VirusEngine> virusEngine;
+    @Inject private Provider<AutoUpdateHelper> autoUpdateHandler;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
@@ -156,6 +163,9 @@ final class Initializer {
         
         //must agree not to use LW for copyright infringement on first running
         confirmIntent(awtSplash);
+        
+        
+        installUpdates(awtSplash);
         
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
@@ -277,6 +287,62 @@ final class Initializer {
             } catch (IOException ignored) {
             } finally {
                 IOUtils.close(outputStream);
+            }
+        }
+    }
+    
+    /**
+     * check if we have some pending updates to install. If yes invoke the script 
+     * file containing the install commands and exit limewire.
+     * Note: This method blocks the initialization process if updates are available for installation.
+     */
+    private void installUpdates(final Frame awtSplash) {
+
+        AutoUpdateHelper updateHandler = autoUpdateHandler.get();
+        if (!updateHandler.isUpdateAvailable()) {
+            UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+        } else {
+            if (updateHandler.isUpdateReadyForInstall()) {
+                final String updateScript = UpdateSettings.AUTO_UPDATE_COMMAND.get();
+                File file = new File(updateScript);
+                if (file.exists() && file.canExecute()) {
+                    SwingUtils.invokeNowOrWait(new Runnable() {
+                        public void run() {
+
+                            if (awtSplash != null) {
+                                awtSplash.setVisible(false);
+                            }
+                            JFrame frame = new JFrame();
+                            frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                            URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
+                            Icon limeIcon = new ImageIcon(limeLogo);
+                            int restartNow = JOptionPane.showConfirmDialog(frame, 
+                                    I18n.tr("An update is ready for install. Would you like to update now? \nChoosing cancel will exit LimeWire."),
+                                    I18n.tr("Update Ready"), JOptionPane.OK_CANCEL_OPTION, 
+                                    JOptionPane.QUESTION_MESSAGE, limeIcon);
+                            try {
+                                if (restartNow == JOptionPane.OK_OPTION) {
+                                    // This method returns immediately so can be invoked from EDT.
+                                    Runtime.getRuntime().exec(updateScript);
+                                }
+                                System.exit(0);
+                            } catch (IOException bad) {
+                                // clear the update command settings and let it
+                                // start this time.
+                                LOG.error("Error installing updates.", bad);
+                                UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+                                // TODO: send report of this error to limewire.
+                            }
+
+                            if (awtSplash != null) {
+                                awtSplash.setVisible(true);
+                            }
+                        }
+                    });
+                } else {
+                    file.delete();
+                    UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+                }
             }
         }
     }
