@@ -84,7 +84,7 @@ public class UpdateSettings extends LimeProps {
      * latest limewire version available.
      */
     public static final StringSetting AUTO_UPDATE_VERSION = 
-        FACTORY.createRemoteStringSetting("AUTO_UPDATE_VERSION", "1.0.0", "AUTO_UPDATE_VERSION");
+        FACTORY.createRemoteStringSetting("AUTO_UPDATE_VERSION", "none", "AUTO_UPDATE_VERSION");
     
     /**
      * guid prefix for which updates are available.
