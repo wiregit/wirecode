@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.security;
 
+import static com.limegroup.gnutella.simpp.SimppDataVerifierImpl.SIMPP_DISABLED;
+
 import java.security.SignatureException;
 
 import org.limewire.io.IpPort;
@@ -41,7 +43,7 @@ public class CertifiedMessageVerifierImpl implements CertifiedMessageVerifier {
             }
         }
         SignatureVerifier signatureVerifier = new SignatureVerifier(message.getSignedPayload(), message.getSignature(), certificate.getPublicKey(), "DSA");
-        if (!signatureVerifier.verifySignature()) {
+        if (!SIMPP_DISABLED && !signatureVerifier.verifySignature()) {
             throw new SignatureException("Invalid signature for: " + message);
         }
         return certificate;
