@@ -63,16 +63,16 @@ public class SetupActivationPanel extends JPanel {
 
         add(Box.createVerticalStrut(18), "spanx 1, growx, cell 2 1"); //wrap
 
-        add(wizardPage.createAndDecorateHeader(I18n.tr("Activate your LimeWire PRO.")), "cell 2 2");
+        add(wizardPage.createAndDecorateHeader(I18n.tr("Did you purchase LimeWire PRO?")), "cell 2 2");
         
         HyperlinkButton goProButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.UPSELL_URL),
-                                                                 I18n.tr("Want to go PRO?"));
+                                                                 I18n.tr("Go PRO"));
         goProButton.setToolTipText("");
         add(goProButton, "spanx 1, growx, cell 2 2"); //wrap
 
         add(Box.createVerticalStrut(15), "spanx 1, growx, cell 2 3"); //wrap
 
-        add(wizardPage.createAndDecorateMultiLine(I18n.tr("Enter your activation key below. This was sent to the email address you used when purchasing. You can always do this later on from the File menu.")), 
+        add(wizardPage.createAndDecorateMultiLine(I18n.tr("If you did, please enter your license key - we provided it online and via email when you signed up. If you don't want to activate PRO now, you can always do it later by clicking on the \"File\" tab in LimeWire and then clicking \"Licenses.\"")), 
                        "spanx 1, growx, cell 2 4, gapafter 20px"); //wrap
 
         errorMessageLabel = wizardPage.createAndDecorateMultiLine("");
@@ -85,7 +85,7 @@ public class SetupActivationPanel extends JPanel {
         add(iconPanel.getComponent(), "cell 1 6, aligny 50%");
         add(Box.createHorizontalStrut(3), "cell 1 6, aligny 50%");
 
-        add(wizardPage.createAndDecorateHeader(I18n.tr("License Key:")), "aligny 50%");
+        add(wizardPage.createAndDecorateHeader(I18n.tr("Your License Key:")), "aligny 50%");
         licenseField = wizardPage.createAndDecorateLicenseKeyField();
         if (!ActivationSettings.ACTIVATION_KEY.isDefault()) {
             licenseField.setText(ActivationSettings.ACTIVATION_KEY.getValueAsString());
@@ -93,7 +93,7 @@ public class SetupActivationPanel extends JPanel {
         licenseField.addActionListener(new EnterActionListener());
         add(licenseField, "cell 2 6, aligny 50%");
 
-        okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate") );
+        okButton = wizardPage.createAndDecorateButton(I18n.tr("Activate LimeWire PRO"));
         okButton.setBackgroundPainter(new GreenButtonBackgroundPainter());
         okButton.setForeground(greenButtonForeground);
         okButton.addActionListener(new EnterActionListener());
@@ -114,9 +114,9 @@ public class SetupActivationPanel extends JPanel {
         add(Box.createVerticalStrut(10), "spanx 1, growx, cell 2 7"); //wrap
 
         // TODO Change this link to point to the correct get key page.
-        add(Box.createHorizontalStrut(88), "cell 2 8, aligny 50%");
+        add(Box.createHorizontalStrut(126), "cell 2 8, aligny 50%");
         HyperlinkButton unknownKeyButton = wizardPage.createAndDecorateHyperlink(application.addClientInfoToUrl(ActivationSettingsController.ACCOUNT_SETTINGS_URL),
-                                                                                 I18n.tr("I don't know my license key"));
+                                                                                 I18n.tr("I don't know my activation key"));
         unknownKeyButton.setToolTipText("");
         add(unknownKeyButton, "spanx 1, growx, cell 2 8"); //wrap
         
