@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -20,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.text.html.HTMLDocument;
 
@@ -48,6 +48,10 @@ public class AutoUpdateMessageLayer{
     private Color backgroundColor;
     @Resource
     private Color foregroundColor;
+    @Resource
+    private Font topFont; 
+    @Resource
+    private Font contentFont; 
     
     private final org.limewire.core.api.Application application;
     
@@ -56,6 +60,8 @@ public class AutoUpdateMessageLayer{
     private AutoUpdateHelper autoUpdateHelper;
     
     private volatile int updateAttemptCount = 0;
+    
+    private AtomicBoolean updateInProgress = new AtomicBoolean(false);
     
     public AutoUpdateMessageLayer(UpdateInformation updateInformation, 
             org.limewire.core.api.Application application, AutoUpdateHelper autoUpdateHelper) {
@@ -68,14 +74,15 @@ public class AutoUpdateMessageLayer{
     }
     
     public void showMessage(){
-        updateAttemptCount++;
-        JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, messagePanel);
-        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
-        dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
-        dialog.setModal(true);
-        dialog.pack();
-        dialog.setVisible(true);
-        
+        if(updateInProgress.getAndSet(true)){ //if update is in progress ignore the message.
+            updateAttemptCount++;
+            JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, messagePanel);
+            dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
+            dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+            dialog.setModal(true);
+            dialog.pack();
+            dialog.setVisible(true);
+        }
     }
        
     private class DownloadUpdatePanel extends JXPanel{
@@ -83,8 +90,8 @@ public class AutoUpdateMessageLayer{
             setBackground(backgroundColor);
             setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                     
-            add(createTopLabel(I18n.tr("<b>YOUR LIMEWIRE SOFTWARE IS NOT UP TO DATE</b>")), "alignx 50%, gapbottom 7, wrap");
-            add(createContentArea(I18n.tr("For best possible performance, make sure you always use the latest version of LimeWire, We no longer support the version on your computer, and <b>you're missing out on some great new features.</b> <br/><br/> Updating to latest version is <b>FREE quick and easy</b>, and your LimeWire library will stay completely intact.")), "grow, wrap, gapbottom 10");
+            add(createTopLabel(I18n.tr("<b>Your LimeWire Software is Not Up to Date</b>")), "alignx 50%, gapbottom 7, wrap");
+            add(createContentArea(I18n.tr("For best possible performance, make sure you always use the latest version of LimeWire. We no longer support the version on your computer.<br/><br/>Updating to latest version is <b>FREE, quick and easy</b>, and your LimeWire library will stay completely intact."), contentFont), "grow, wrap, gapbottom 10");
             
             JButton downloadButton = new JButton();
             downloadButton.requestFocusInWindow();
@@ -92,11 +99,10 @@ public class AutoUpdateMessageLayer{
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    Thread autoUpdateThread = 
-                        new ManagedThread(new Runnable() {                                                  
+                    Thread autoUpdateThread = new ManagedThread(new Runnable() {                       
                             @Override
                             public void run() {
-                                final boolean downloadSuccess = autoUpdateHelper.downloadUpdates();
+                                final boolean downloadSuccess = true;//TODO autoUpdateHelper.downloadUpdates();
                                 SwingUtilities.invokeLater(new Runnable(){
 
                                     @Override
@@ -107,7 +113,7 @@ public class AutoUpdateMessageLayer{
                                             showMessage();                                              
                                         }else if(updateAttemptCount < UpdateSettings.AUTO_UPDATE_MAX_ATTEMPTS.getValue()){
                                             JFrame frame = GuiUtils.getMainFrame();
-                                            FocusJOptionPane.showMessageDialog(frame, I18n.tr("Update Download was interrupted. Limewire will try again."), 
+                                            FocusJOptionPane.showMessageDialog(frame, I18n.tr("Update download was interrupted. Limewire will try again."), 
                                                     I18n.tr("Error Downloading Updates"), JOptionPane.ERROR_MESSAGE );
                                             showMessage();
                                         }else{
@@ -117,6 +123,7 @@ public class AutoUpdateMessageLayer{
 
                                             File updateOnNextLaunchCommand = autoUpdateHelper.getAutoUpdateCommandScript();
                                             UpdateSettings.AUTO_UPDATE_COMMAND.set(updateOnNextLaunchCommand.getAbsolutePath());
+                                            UpdateSettings.DOWNLOADED_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
                                             exitApplication();
                                         }
                                         
@@ -141,7 +148,7 @@ public class AutoUpdateMessageLayer{
             setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
                     
             add(createTopLabel("LimeWire " + application.getVersion()), "alignx 50%, gapbottom 7, wrap");
-            add(createContentArea(I18n.tr("<br/><br/><br/>The new version is ready for you. <br/><br/> Restart LimeWire to use it.")), "grow, wrap, gapbottom 10");
+            add(createContentArea(I18n.tr("<br/><br/><b>The new version is ready for you.</b><br/>Restart LimeWire to use it."), topFont), "grow, wrap, gapbottom 10");
             
             JButton installButton = new JButton();
             installButton.requestFocusInWindow();
@@ -149,6 +156,7 @@ public class AutoUpdateMessageLayer{
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    updateInProgress.getAndSet(false);
                     close(); 
                     application.setShutdownFlag(UpdateSettings.AUTO_UPDATE_COMMAND.get());
                     exitApplication();       
@@ -182,12 +190,12 @@ public class AutoUpdateMessageLayer{
         text = updateForeground(foregroundColor, text);
         pane.setText(text);
         pane.setCaretPosition(0);
-        setNativeFontRenderering(pane);
+        setNativeFontRenderering(pane, topFont);
         
         return pane;
     }
     
-    private JComponent createContentArea(String text) {
+    private JComponent createContentArea(String text, Font font) {
         JEditorPane pane = new JEditorPane();
         pane.setContentType("text/html");
         pane.setEditable(false);
@@ -197,12 +205,12 @@ public class AutoUpdateMessageLayer{
         pane.setText(text);
         pane.setCaretPosition(0);
         
-        setNativeFontRenderering(pane);
+        setNativeFontRenderering(pane, font);
         
         //must be false to view the background image
         pane.setOpaque(false);
         //shift the text so as to not paint over the image
-        pane.setMargin( new Insets(5,140, 0,0));
+        pane.setMargin(new Insets(36, 162, 0, 30));
         ImageViewPort imageViewPort = new ImageViewPort(((ImageIcon)backgroundIcon).getImage());
         imageViewPort.setView(pane);
         
@@ -214,12 +222,11 @@ public class AutoUpdateMessageLayer{
         return scroller;
     }
     
-    private void setNativeFontRenderering(JEditorPane pane) {
-        // add a CSS rule to force body tags to use the default label font
+    private void setNativeFontRenderering(JEditorPane pane, Font font) {
+        // Add a CSS rule to force body tags to use the specified font
         // instead of the value in javax.swing.text.html.default.csss
-        Font font = UIManager.getFont("Label.font");
         String bodyRule = "body { font-family: " + font.getFamily() + "; " +
-                "font-size: " + 14 + "pt; }";
+                "font-size: " + font.getSize() + "pt; }";
         ((HTMLDocument)pane.getDocument()).getStyleSheet().addRule(bodyRule);
     }
     
