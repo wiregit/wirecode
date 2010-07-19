@@ -298,54 +298,53 @@ final class Initializer {
      * Note: This method blocks the initialization process if updates are available for installation.
      */
     private void installUpdates(final Frame awtSplash) {
-
         AutoUpdateHelper updateHelper = autoUpdateHandler.get();
-        if (!updateHelper.isUpdateAvailable()) {
-            UpdateSettings.AUTO_UPDATE_COMMAND.set("");
-            FileUtils.forceDeleteRecursive(updateHelper.getTemporaryWorkingDirectory());
-        } else {
-            if (updateHelper.isUpdateReadyForInstall()) {
-                final String updateScript = UpdateSettings.AUTO_UPDATE_COMMAND.get();
-                File file = new File(updateScript);
-                if (file.exists() && file.canExecute()) {
-                    SwingUtils.invokeNowOrWait(new Runnable() {
-                        public void run() {
+        if (updateHelper.isUpdateReadyForInstall()) {
+            final String updateScript = UpdateSettings.AUTO_UPDATE_COMMAND.get();
+            File file = new File(updateScript);
+            if (file.exists() && file.canExecute()) {
+                SwingUtils.invokeNowOrWait(new Runnable() {
+                    public void run() {
 
-                            if (awtSplash != null) {
-                                awtSplash.setVisible(false);
-                            }
-                            JFrame frame = new JFrame();
-                            frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                            URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
-                            Icon limeIcon = new ImageIcon(limeLogo);
-                            int restartNow = JOptionPane.showConfirmDialog(frame, 
-                                    I18n.tr("An update is ready for install. Would you like to update now? \nChoosing cancel will exit LimeWire."),
-                                    I18n.tr("Update Ready"), JOptionPane.OK_CANCEL_OPTION, 
-                                    JOptionPane.QUESTION_MESSAGE, limeIcon);
-                            try {
-                                if (restartNow == JOptionPane.OK_OPTION) {
-                                    // This method returns immediately so can be invoked from EDT.
-                                    Runtime.getRuntime().exec(updateScript);
-                                }
-                                System.exit(0);
-                            } catch (IOException bad) {
-                                // clear the update command settings and let it
-                                // start this time.
-                                LOG.error("Error installing updates.", bad);
-                                UpdateSettings.AUTO_UPDATE_COMMAND.set("");
-                                // TODO: send report of this error to limewire.
-                            }
-
-                            if (awtSplash != null) {
-                                awtSplash.setVisible(true);
-                            }
+                        if (awtSplash != null) {
+                            awtSplash.setVisible(false);
                         }
-                    });
-                } else {
-                    file.delete();
-                    UpdateSettings.AUTO_UPDATE_COMMAND.set("");
-                }
+                        JFrame frame = new JFrame();
+                        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                        URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
+                        Icon limeIcon = new ImageIcon(limeLogo);
+                        int restartNow = JOptionPane.showConfirmDialog(frame, 
+                                I18n.tr("An update is ready for install. Would you like to update now? \nChoosing cancel will exit LimeWire."),
+                                I18n.tr("Update Ready"), JOptionPane.OK_CANCEL_OPTION, 
+                                JOptionPane.QUESTION_MESSAGE, limeIcon);
+                        try {
+                            if (restartNow == JOptionPane.OK_OPTION) {
+                                // This method returns immediately so can be invoked from EDT.
+                                Runtime.getRuntime().exec(updateScript);
+                            }
+                            System.exit(0);
+                        } catch (IOException bad) {
+                            // clear the update command settings and let it
+                            // start this time.
+                            LOG.error("Error installing updates.", bad);
+                            UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+                            // TODO: send report of this error to limewire.
+                        }
+
+                        if (awtSplash != null) {
+                            awtSplash.setVisible(true);
+                        }
+                    }
+                });
+            } else {
+                file.delete();
+                UpdateSettings.AUTO_UPDATE_COMMAND.revertToDefault();
+                UpdateSettings.DOWNLOADED_UPDATE_VERSION.revertToDefault();
             }
+        }else{
+            UpdateSettings.AUTO_UPDATE_COMMAND.revertToDefault();
+            UpdateSettings.DOWNLOADED_UPDATE_VERSION.revertToDefault();
+            FileUtils.forceDeleteRecursive(updateHelper.getTemporaryWorkingDirectory());
         }
     }
 

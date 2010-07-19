@@ -123,7 +123,7 @@ public class AutoUpdateMessageLayer{
 
                                             File updateOnNextLaunchCommand = autoUpdateHelper.getAutoUpdateCommandScript();
                                             UpdateSettings.AUTO_UPDATE_COMMAND.set(updateOnNextLaunchCommand.getAbsolutePath());
-                                            UpdateSettings.DOWNLOADED_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
+                                            UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
                                             exitApplication();
                                         }
                                         

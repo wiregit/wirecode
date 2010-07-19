@@ -75,6 +75,12 @@ public class UpdateSettings extends LimeProps {
         FACTORY.createLongSetting("LAST_SIMPP_FAILOVER", -1);
     
     /**
+     * Local copy of AUTO_UPDATE_VERSION for later use (subsequent launch)
+     */
+    public static final StringSetting DOWNLOADED_UPDATE_VERSION = 
+        FACTORY.createStringSetting("DOWNLOADED_UPDATE_VERSION", "none");
+    
+    /**
      * command to execute to install the updates.
      */
     public static final StringSetting AUTO_UPDATE_COMMAND = 

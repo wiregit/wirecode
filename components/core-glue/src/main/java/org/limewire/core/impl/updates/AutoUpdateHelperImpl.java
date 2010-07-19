@@ -29,7 +29,6 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     /**
      * return true if new version is available for download thru auto-update route
      * and client's guid starts with auto-update prefix.
-     * Also if current version is beta release and prod version is now available.
      */  
     @Override
     public boolean isUpdateAvailable() {
@@ -55,7 +54,18 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     
     @Override
     public boolean isUpdateReadyForInstall(){
-        return (isUpdateAvailable() && !StringUtils.isEmpty(UpdateSettings.AUTO_UPDATE_COMMAND.get()));
+        boolean updateReadyForInstall = false;
+        try{
+            Version limewireVersion = new Version(LimeWireUtils.getLimeWireVersion());
+            Version downloadedLimewireVersion = new Version(UpdateSettings.DOWNLOADED_UPDATE_VERSION.get());
+            updateReadyForInstall = (downloadedLimewireVersion.compareTo(limewireVersion) > 0 && 
+                                     !StringUtils.isEmpty(UpdateSettings.AUTO_UPDATE_COMMAND.get())
+                                    );
+        }catch(VersionFormatException ex){
+            LOG.warnf("Error parsing version info. CurrentVersion: {0}, DownloadedVersion: {1}",
+                    LimeWireUtils.getLimeWireVersion(), UpdateSettings.DOWNLOADED_UPDATE_VERSION.get());
+        }
+        return updateReadyForInstall;
     }
     
     @Override
@@ -102,6 +112,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
                 File installScript = createExecutableScriptFile(temporaryDirectory, "install",
                         installCommand);
                 UpdateSettings.AUTO_UPDATE_COMMAND.set(installScript.getCanonicalPath());
+                UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
                 downloadSuccess = true;
             } else {
                 LOG.error(errorMessage);
@@ -213,14 +224,16 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
      */
     private String getAutoupdateExecutablePath(){
         String executablePath = null; 
-        String limewireDirectory = System.getProperty("jna.library.path");
-        //String limewireDirectory = CommonUtils.getCurrentDirectory().getAbsolutePath();
+        String nativeLibDirectory = System.getProperty("jna.library.path", 
+                CommonUtils.getCurrentDirectory().getAbsolutePath());       
+        String absPath = new File(nativeLibDirectory).getAbsolutePath();       
+        
         if(OSUtils.isLinux())
-            executablePath = limewireDirectory + File.separator + "autoupdate-linux.bin";
+            executablePath = absPath + File.separator + "autoupdate-linux.bin";
         else if(OSUtils.isMacOSX())
-            executablePath = limewireDirectory + File.separator + "autoupdate-osx.app";
+            executablePath = absPath + File.separator + "autoupdate-osx.app";
         else if(OSUtils.isWindows())
-            executablePath = limewireDirectory + File.separator + "autoupdate-windows.exe";
+            executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
         return escapeSpecialPathCharacters(executablePath);
     }
