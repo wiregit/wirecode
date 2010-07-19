@@ -110,9 +110,9 @@ public class SetupPage3 extends WizardPage {
     }
     
     private void showLicenseEntryPage() {
-        footerText = I18n.tr("You can activate LimeWire PRO later from File > License"); 
-        forwardText = I18n.tr("No thanks");
-        hasBackButton = true;
+        footerText = ""; 
+        forwardText = I18n.tr("I didn't purchase LimeWire PRO");
+        hasBackButton = false;
         activationPanel = new SetupActivationPanel(this, activationManager, application); 
         add(activationPanel);
     }
