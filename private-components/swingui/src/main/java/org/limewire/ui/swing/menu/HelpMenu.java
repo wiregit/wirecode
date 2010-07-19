@@ -45,7 +45,7 @@ class HelpMenu extends MnemonicMenu implements DelayedMenuItemCreator  {
     public void createMenuItems() {       
                 
         if(!activationManager.isProActive()) {
-            add(new UrlAction(I18n.tr("Get Personalized &Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
+            add(new UrlAction(I18n.tr("&Tech Support"),"http://www.limewire.com/client_redirect/?page=gopro", application));
         } else {
             add(new UrlAction(I18n.tr("&Tech Support"), "http://www.limewire.com/client_redirect/?page=prosupport", application));
         }
