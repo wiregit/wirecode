@@ -102,7 +102,7 @@ public class AutoUpdateMessageLayer{
                     Thread autoUpdateThread = new ManagedThread(new Runnable() {                       
                             @Override
                             public void run() {
-                                final boolean downloadSuccess = true;//TODO autoUpdateHelper.downloadUpdates();
+                                final boolean downloadSuccess = autoUpdateHelper.downloadUpdates();
                                 SwingUtilities.invokeLater(new Runnable(){
 
                                     @Override
@@ -125,11 +125,9 @@ public class AutoUpdateMessageLayer{
                                             UpdateSettings.AUTO_UPDATE_COMMAND.set(updateOnNextLaunchCommand.getAbsolutePath());
                                             UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
                                             exitApplication();
-                                        }
-                                        
+                                        }                                      
                                     }
-                                    }
-                                );
+                                });
                             }
                         }, "Auto-Update-Thread");
                     autoUpdateThread.start();
