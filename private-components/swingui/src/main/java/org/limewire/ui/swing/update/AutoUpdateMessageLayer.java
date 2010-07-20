@@ -39,6 +39,7 @@ import org.limewire.ui.swing.components.ImageViewPort;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 public class AutoUpdateMessageLayer{
     
@@ -102,8 +103,9 @@ public class AutoUpdateMessageLayer{
                     Thread autoUpdateThread = new ManagedThread(new Runnable() {                       
                             @Override
                             public void run() {
+                                try{
                                 final boolean downloadSuccess = autoUpdateHelper.downloadUpdates();
-                                SwingUtilities.invokeLater(new Runnable(){
+                                SwingUtils.invokeNowOrLater(new Runnable(){
 
                                     @Override
                                     public void run() {
@@ -112,9 +114,6 @@ public class AutoUpdateMessageLayer{
                                             updateAttemptCount = 0;
                                             showMessage();                                              
                                         }else if(updateAttemptCount < UpdateSettings.AUTO_UPDATE_MAX_ATTEMPTS.getValue()){
-                                            JFrame frame = GuiUtils.getMainFrame();
-                                            FocusJOptionPane.showMessageDialog(frame, I18n.tr("Update download was interrupted. Limewire will try again."), 
-                                                    I18n.tr("Error Downloading Updates"), JOptionPane.ERROR_MESSAGE );
                                             showMessage();
                                         }else{
                                             JFrame frame = GuiUtils.getMainFrame();
@@ -128,12 +127,23 @@ public class AutoUpdateMessageLayer{
                                         }                                      
                                     }
                                 });
+                                }catch(InterruptedException ex){
+                                    SwingUtils.invokeNowOrLater(new Runnable(){
+                                        @Override
+                                        public void run() {
+                                            JFrame frame = GuiUtils.getMainFrame();
+                                            FocusJOptionPane.showMessageDialog(frame, I18n.tr("An important download is in progress. If you quit LimeWire now, this download will be lost and will restart when you next launch LimeWire."), 
+                                                    I18n.tr("Error Downloading Updates"), JOptionPane.ERROR_MESSAGE );
+                                        }
+                                    });
+                                }
                             }
                         }, "Auto-Update-Thread");
                     autoUpdateThread.start();
                     close();                 
                 }
             });
+            downloadButton.requestFocusInWindow();
             
             add(downloadButton, "alignx 50%");
         }
@@ -160,6 +170,7 @@ public class AutoUpdateMessageLayer{
                     exitApplication();       
                 }
             });
+            installButton.requestFocusInWindow();
             
             add(installButton, "alignx 50%");
         }

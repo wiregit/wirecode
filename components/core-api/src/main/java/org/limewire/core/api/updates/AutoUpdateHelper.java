@@ -27,8 +27,10 @@ public interface AutoUpdateHelper {
     
     /**
      * performs the download task. This method blocks till the download process 
-     * is complete and returns the success as boolean.
+     * is complete and returns the success as boolean. Throws InterruptedException
+     * if download process was terminated abnormally.
+     * @throws InterruptedException
      */
-    public boolean downloadUpdates();
+    public boolean downloadUpdates() throws InterruptedException;
 
 }

@@ -82,8 +82,9 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
      * </ul>
      */
     @Override
-    public boolean downloadUpdates() {
+    public boolean downloadUpdates() throws InterruptedException{
         boolean downloadSuccess = false;
+        Process downloadProcess = null;
         File temporaryDirectory = getTemporaryWorkingDirectory();
         try {
             // initialize temporary directory
@@ -97,14 +98,14 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
             File downloadScript = createExecutableScriptFile(temporaryDirectory, "download",
                     downloadCommand);
 
-            Process process = Runtime.getRuntime().exec(downloadScript.getAbsolutePath());
+            downloadProcess = Runtime.getRuntime().exec(downloadScript.getAbsolutePath());
             String errorMessage = "Error: \n";
-            InputStream is = process.getErrorStream();
+            InputStream is = downloadProcess.getErrorStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 errorMessage += line;
             }
-            if (process.waitFor() == 0) {
+            if (downloadProcess.waitFor() == 0) {
                 downloadScript.delete();
                 assert temporaryDirectory.listFiles().length == 1;
                 File installerFile = temporaryDirectory.listFiles()[0];
@@ -118,6 +119,10 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
                 LOG.error(errorMessage);
             }
         } catch (InterruptedException ex) {
+            if(downloadProcess != null){
+                downloadProcess.destroy();
+                throw ex;
+            }
             LOG.error("error downloading update.", ex);
         } catch (IOException io) {
             LOG.error("error downloading update.", io);
