@@ -75,7 +75,7 @@ public class AutoUpdateMessageLayer{
     }
     
     public void showMessage(){
-        if(updateInProgress.getAndSet(true)){ //if update is in progress ignore the message.
+        if(updateInProgress.compareAndSet(false, true)){ //if update is in progress ignore the message.
             updateAttemptCount++;
             JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, messagePanel);
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
@@ -164,7 +164,7 @@ public class AutoUpdateMessageLayer{
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    updateInProgress.getAndSet(false);
+                    updateInProgress.set(false);
                     close(); 
                     application.setShutdownFlag(UpdateSettings.AUTO_UPDATE_COMMAND.get());
                     exitApplication();       
