@@ -62,7 +62,7 @@ public class AutoUpdateMessageLayer{
     
     private volatile int updateAttemptCount = 0;
     
-    private AtomicBoolean updateInProgress = new AtomicBoolean(false);
+    private volatile AtomicBoolean updateInProgress = new AtomicBoolean(false);
     
     public AutoUpdateMessageLayer(UpdateInformation updateInformation, 
             org.limewire.core.api.Application application, AutoUpdateHelper autoUpdateHelper) {
@@ -105,6 +105,7 @@ public class AutoUpdateMessageLayer{
                             public void run() {
                                 try{
                                 final boolean downloadSuccess = autoUpdateHelper.downloadUpdates();
+                                updateInProgress.set(false);
                                 SwingUtils.invokeNowOrLater(new Runnable(){
 
                                     @Override
@@ -164,7 +165,6 @@ public class AutoUpdateMessageLayer{
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    updateInProgress.set(false);
                     close(); 
                     application.setShutdownFlag(UpdateSettings.AUTO_UPDATE_COMMAND.get());
                     exitApplication();       
