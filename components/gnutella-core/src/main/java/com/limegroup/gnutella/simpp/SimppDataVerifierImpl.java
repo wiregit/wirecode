@@ -9,7 +9,7 @@ import org.limewire.util.StringUtils;
 
 public class SimppDataVerifierImpl implements SimppDataVerifier {
     /** Debugging indicator to disable SIMPP verification; always false. */
-    public static final boolean SIMPP_DISABLED = false;
+    public static final boolean SIMPP_DISABLED = true;
     
     //private static final Log LOG = LogFactory.getLog(SimppDataVerifierImpl.class);
 
