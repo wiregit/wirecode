@@ -236,7 +236,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         if(OSUtils.isLinux())
             executablePath = absPath + File.separator + "autoupdate-linux.bin";
         else if(OSUtils.isMacOSX())
-            executablePath = absPath + File.separator + "autoupdate-osx.app";
+            executablePath = absPath + File.separator + "autoupdate-osx.app/Contents/MacOS/installbuilder.sh";
         else if(OSUtils.isWindows())
             executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
