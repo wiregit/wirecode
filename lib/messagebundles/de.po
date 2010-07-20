@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-12 11:30-0400\n"
+"POT-Creation-Date: 2010-07-19 11:30-0400\n"
 "PO-Revision-Date: 2010-04-01 22:26+0000\n"
 "Last-Translator: Jan-Christoph Borchardt <inquata@gmail.com>\n"
 "Language-Team: DE\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-13 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-07-20 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -3342,9 +3342,6 @@ msgid "&Help"
 msgstr "&Hilfe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
-msgid "Get Personalized &Tech Support"
-msgstr "Persönlichen &TechSupport anfordern"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
 msgid "&Tech Support"
 msgstr ""

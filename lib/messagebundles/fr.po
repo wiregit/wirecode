@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: LimeWire 5\n"
 "Report-Msgid-Bugs-To: LimeWire Issue Tracker "
 "<https://www.limewire.org/jira/secure/Dashboard.jspa>\n"
-"POT-Creation-Date: 2010-07-12 11:30-0400\n"
-"PO-Revision-Date: 2010-07-08 19:20+0000\n"
-"Last-Translator: Ptitphysik <amalpeyre@gmail.com>\n"
+"POT-Creation-Date: 2010-07-19 11:30-0400\n"
+"PO-Revision-Date: 2010-07-14 17:26+0000\n"
+"Last-Translator: computerhelp <Unknown>\n"
 "Language-Team: LimeWire translators <https://launchpad.net/~limewire-"
 "translators>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2010-07-13 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-07-20 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:528
@@ -319,10 +319,6 @@ msgstr "Ajouter à la Médiathèque"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ExitAction.java:21
 msgid "E&xit"
 msgstr "&Quitter"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
-msgid "Get Personalized &Tech Support"
-msgstr "Obtenez une assistance &technique personnalisée"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
 msgid "&Using LimeWire"
@@ -4317,6 +4313,7 @@ msgstr "A&mis"
 msgid "&Help"
 msgstr "&Aide"
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
 msgid "&Tech Support"
 msgstr "&Support Technique"
@@ -4580,7 +4577,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:336
 msgid "Service"
-msgstr ""
+msgstr "Service"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:62
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:41
@@ -4601,7 +4598,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:165
 msgid "Suggest smart searches"
-msgstr ""
+msgstr "Suggérer des recherches intelligentes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:242
 msgid "Do you want to reset the Spam Filter?"
@@ -4901,7 +4898,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoLimitsPanel.java:38
 msgid "Torrent Settings"
-msgstr ""
+msgstr "Paramètres Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
@@ -5010,7 +5007,7 @@ msgstr "Niveau"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:97
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTransfersPanel.java:102
 msgid "Total Completed:"
@@ -5050,11 +5047,11 @@ msgstr "Téléchargement de Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:210
 msgid "Use default torrent options"
-msgstr ""
+msgstr "Utiliser les options Torrent par défauts"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:211
 msgid "Upload this torrent forever"
-msgstr ""
+msgstr "Rendre disponible ce Torrent indéfiniement"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:212
 msgid "Upload this torrent until either of the following:"
@@ -5062,11 +5059,11 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:237
 msgid "Limit this torrent's download bandwidth"
-msgstr ""
+msgstr "Limiter la bande passante descendante pour ce Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:247
 msgid "Limit this torrent's upload bandwidth"
-msgstr ""
+msgstr "Limiter la bande passante montante pour ce Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:56
 msgid "Choose files to download"
@@ -5102,15 +5099,15 @@ msgstr "Un problème est survenu en visualisant ces personnes."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:44
 msgid "New torrents"
-msgstr ""
+msgstr "Nouveaux torrents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:349
 msgid "History"
-msgstr ""
+msgstr "Historique"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/HistoryAndFriendAutoCompleter.java:351
 msgid "Smart Search"
-msgstr ""
+msgstr "Recherche intelligente"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
 msgid ""
@@ -5150,11 +5147,11 @@ msgstr "&Documents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:52
 msgid "&Torrents"
-msgstr ""
+msgstr "&Torrents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:68
 msgid "Only torrents"
-msgstr ""
+msgstr "Torrents uniquement"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsMessagePanel.java:89
 msgid "You might not receive many results until LimeWire is fully connected"

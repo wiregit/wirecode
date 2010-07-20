@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-12 11:30-0400\n"
-"PO-Revision-Date: 2010-06-02 18:57+0000\n"
+"POT-Creation-Date: 2010-07-19 11:30-0400\n"
+"PO-Revision-Date: 2010-07-16 12:21+0000\n"
 "Last-Translator: nanker <Unknown>\n"
 "Language-Team: DA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-13 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-20 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Bookmarks: -1,378,659,884,481,-1,-1,-1,-1,-1\n"
 
@@ -112,7 +112,7 @@ msgstr "Torrent"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:98
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:36
 msgid "Torrents"
-msgstr ""
+msgstr "Torrents"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:38
 msgid "There is a disk problem"
@@ -1652,7 +1652,7 @@ msgstr[1] "P2P brugere"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:280
 msgid "Locate"
-msgstr ""
+msgstr "Find"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:116
 msgid "Loading LimeWire..."
@@ -2857,7 +2857,7 @@ msgstr[1] "Slet disse filer fra disken?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:58
 msgid "&Remove from Library"
-msgstr ""
+msgstr "&Fjern fra bibliotek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DeletionKeyListener.java:59
 msgid "&Cancel"
@@ -3310,9 +3310,6 @@ msgid "&Help"
 msgstr "&Hjælp"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:48
-msgid "Get Personalized &Tech Support"
-msgstr "Få personlig &teknisk support"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:50
 msgid "&Tech Support"
 msgstr ""
@@ -3922,7 +3919,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:336
 msgid "Service"
-msgstr ""
+msgstr "Tjeneste"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:82
 msgid "Let LimeWire choose my network interface (Recommended)"
@@ -4865,7 +4862,7 @@ msgstr "Nye videoer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:44
 msgid "New torrents"
-msgstr ""
+msgstr "Nye torrents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:47
 msgid "New files"
@@ -4953,7 +4950,7 @@ msgstr "&Videoer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:52
 msgid "&Torrents"
-msgstr ""
+msgstr "&Torrents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:55
 msgid "&Other"
@@ -4985,7 +4982,7 @@ msgstr "Kun videoer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:68
 msgid "Only torrents"
-msgstr ""
+msgstr "Kun torrents"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsMessagePanel.java:89
 msgid "You might not receive many results until LimeWire is fully connected"
@@ -5119,7 +5116,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:69
 #, java-format
 msgid "{0} \"{1}\" - {2} \"{3}\""
-msgstr ""
+msgstr "{0} \"{1}\" - {2} \"{3}\""
 
 #. {0}: property key, {1}: property value
 #. {2}: property key, {3}: property value
@@ -5127,7 +5124,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:82
 #, java-format
 msgid "{0} \"{1}\" - {2} \"{3}\" - {4} \"{5}\""
-msgstr ""
+msgstr "{0} \"{1}\" - {2} \"{3}\" - {4} \"{5}\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:69
 msgid "Sort by:"
@@ -5237,7 +5234,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/TorrentTableFormat.java:49
 msgid "Downloaded"
-msgstr ""
+msgstr "Downloadet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:314
 #, java-format
@@ -5439,7 +5436,7 @@ msgstr "Log på for at dele med venner"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/MultilineTooltipRenderer.java:16
 msgid "...and more..."
-msgstr ""
+msgstr "...og mere..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/QualityRenderer.java:38
 msgid "Spam"
@@ -6580,6 +6577,9 @@ msgstr "Opsætning"
 #~ "der er lavet en 'loopback' forbindelse på den lokale maskine. Venligst "
 #~ "tilføj LimeWire som en undtagelse til sikkerhedsprogrammet og genstart "
 #~ "Limewire."
+
+#~ msgid "Get Personalized &Tech Support"
+#~ msgstr "Få personlig &teknisk support"
 
 #~ msgid "Playlists not supported in video"
 #~ msgstr "Spillelister understøttes ikke i video"
