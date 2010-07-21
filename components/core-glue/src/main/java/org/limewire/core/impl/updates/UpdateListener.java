@@ -2,6 +2,7 @@ package org.limewire.core.impl.updates;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateInformation;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
@@ -44,9 +45,17 @@ public class UpdateListener implements EventListener<UpdateEvent>, SimppListener
 
     @Override
     public void simppUpdated() {
-        if( autoUpdateHelper.isUpdateAvailable() ){
-            UpdateInformation autoUpdateInfo = new UpdateInformationImpl(null, null, null, null, null, null);
+        if( autoUpdateHelper.isUpdateAvailable() ){             
+            String command = autoUpdateHelper.getAutoUpdateCommandScript().getAbsolutePath();
+            String button1Text = I18nMarker.marktr("Update Now");
+            String button2Text = I18nMarker.marktr("Later");
+            String title = I18nMarker.marktr("<b>Your LimeWire Software is Not Up to Date</b>");
+            String text = I18nMarker.marktr("For best possible performance, make sure you always use the latest version of LimeWire. We no longer support the version on your computer.<br/><br/>Updating to latest version is <b>FREE, quick and easy</b>, and your LimeWire library will stay completely intact.");
+            String url = "http://www.limewire.com";
+            
+            UpdateInformation autoUpdateInfo = new UpdateInformationImpl(button1Text, button2Text, command, text, title, url);
             uiListeners.broadcast(new org.limewire.core.api.updates.UpdateEvent(autoUpdateInfo, org.limewire.core.api.updates.UpdateEvent.Type.AUTO_UPDATE));
+            
         }
     }
 }

@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -16,13 +18,13 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
-import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
@@ -39,7 +41,7 @@ import org.limewire.ui.swing.pro.ProNagController;
 import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.statusbar.SharedFileCountPopupPanel;
 import org.limewire.ui.swing.statusbar.StatusPanel;
-import org.limewire.ui.swing.update.AutoUpdateMessageLayer;
+import org.limewire.ui.swing.update.AutoUpdatePanel;
 import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -70,7 +72,6 @@ public class LimeWireSwingUI extends JPanel {
     private final ProNagController proNagController;
     private final LimeSplitPane splitPane;
     private final Provider<SignOnMessageLayer> signOnMessageProvider;
-    private final AutoUpdateHelper autoUpdateHelper;
     private final BottomHeaderPanel bottomHeaderPanel;
     private boolean isPro = false;
     
@@ -83,7 +84,6 @@ public class LimeWireSwingUI extends JPanel {
             SharedFileCountPopupPanel sharedFileCountPopup,
             LoginPopupPanel loginPopup,
             Provider<SignOnMessageLayer> signOnMessageProvider,
-            AutoUpdateHelper autoUpdateHelper,
             MainDownloadPanel mainDownloadPanel,
             @GlobalLayeredPane JLayeredPane limeWireLayeredPane,
             BottomPanel bottomPanel,
@@ -94,7 +94,6 @@ public class LimeWireSwingUI extends JPanel {
     	this.layeredPane = limeWireLayeredPane;
     	this.proNagController = proNagController;
     	this.signOnMessageProvider = signOnMessageProvider;
-    	this.autoUpdateHelper = autoUpdateHelper;
         this.centerPanel = new JPanel(new GridBagLayout());   
         this.bottomHeaderPanel = bottomHeaderPanel;
     	
@@ -355,8 +354,26 @@ public class LimeWireSwingUI extends JPanel {
                     dialog.pack();
                     dialog.setVisible(true);
                 }else if(event.getType() == UpdateEvent.Type.AUTO_UPDATE){
-                    AutoUpdateMessageLayer  updatePanel = new AutoUpdateMessageLayer(event.getData(), application, autoUpdateHelper);
-                    updatePanel.showMessage();
+                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData(), application);
+                    JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
+                    dialog.addWindowFocusListener(new WindowFocusListener() {
+                        
+                        @Override
+                        public void windowLostFocus(WindowEvent e) {
+ 
+                        }
+                        
+                        @Override
+                        public void windowGainedFocus(WindowEvent e) {
+                            updatePanel.getDefaultButton().requestFocusInWindow();                           
+                        }
+                    });
+                    dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+                    //dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
+                    dialog.setModal(true);
+                    dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                    dialog.pack();
+                    dialog.setVisible(true);
                 }
             }
         });

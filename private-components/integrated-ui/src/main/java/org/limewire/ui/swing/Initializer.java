@@ -14,13 +14,9 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.WindowConstants;
 import javax.swing.plaf.basic.BasicHTML;
 
 import org.apache.commons.logging.Log;
@@ -309,19 +305,9 @@ final class Initializer {
                         if (awtSplash != null) {
                             awtSplash.setVisible(false);
                         }
-                        JFrame frame = new JFrame();
-                        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                        URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
-                        Icon limeIcon = new ImageIcon(limeLogo);
-                        int restartNow = JOptionPane.showConfirmDialog(frame, 
-                                I18n.tr("An update is ready for install. Would you like to update now? \nChoosing cancel will exit LimeWire."),
-                                I18n.tr("Update Ready"), JOptionPane.OK_CANCEL_OPTION, 
-                                JOptionPane.QUESTION_MESSAGE, limeIcon);
                         try {
-                            if (restartNow == JOptionPane.OK_OPTION) {
-                                // This method returns immediately so can be invoked from EDT.
-                                Runtime.getRuntime().exec(updateScript);
-                            }
+                            // This method returns immediately so can be invoked from EDT.
+                            Runtime.getRuntime().exec(updateScript);
                             System.exit(0);
                         } catch (IOException bad) {
                             // clear the update command settings and let it

@@ -1,12 +1,9 @@
 package org.limewire.core.impl.updates;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.settings.ApplicationSettings;
@@ -73,70 +70,22 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         File tempDirectory = new File(CommonUtils.getUserSettingsDir(), "updates");
         return tempDirectory;
     }
-    
-    /**
-     * <ul>
-     *   <li>downloads the updates using bitrock executable</li>
-     *   <li>writes the install command in an executable file</li>
-     *   <li>set the install command as the newly created file.</li>
-     * </ul>
-     */
-    @Override
-    public boolean downloadUpdates() throws InterruptedException{
-        boolean downloadSuccess = false;
-        Process downloadProcess = null;
-        File temporaryDirectory = getTemporaryWorkingDirectory();
-        try {
-            // initialize temporary directory
-            FileUtils.forceDeleteRecursive(temporaryDirectory);
-            FileUtils.makeFolder(temporaryDirectory);
-
-            // get auto-update download executable file
-            String downloadCommand = getDownloadCommand();
-            downloadCommand = downloadCommand.replace("${system_temp_directory}",
-                    temporaryDirectory.getAbsolutePath());
-            File downloadScript = createExecutableScriptFile(temporaryDirectory, "download",
-                    downloadCommand);
-
-            downloadProcess = Runtime.getRuntime().exec(downloadScript.getAbsolutePath());
-            String errorMessage = "Error: \n";
-            InputStream is = downloadProcess.getErrorStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                errorMessage += line;
-            }
-            if (downloadProcess.waitFor() == 0) {
-                downloadScript.delete();
-                assert temporaryDirectory.listFiles().length == 1;
-                File installerFile = temporaryDirectory.listFiles()[0];
-                String installCommand = getInstallCommands(installerFile.getAbsolutePath());
-                File installScript = createExecutableScriptFile(temporaryDirectory, "install",
-                        installCommand);
-                UpdateSettings.AUTO_UPDATE_COMMAND.set(installScript.getCanonicalPath());
-                UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
-                downloadSuccess = true;
-            } else {
-                LOG.error(errorMessage);
-            }
-        } catch (InterruptedException ex) {
-            if(downloadProcess != null){
-                downloadProcess.destroy();
-                throw ex;
-            }
-            LOG.error("error downloading update.", ex);
-        } catch (IOException io) {
-            LOG.error("error downloading update.", io);
-        } catch (AssertionError err) {
-            LOG.error("Temporary working directory corrupt.", err);
-        }
-        return downloadSuccess;
-    }
 
     @Override
     public File getAutoUpdateCommandScript() {
+        
+        File tempDirectory = null;
+        try{
+            tempDirectory = getTemporaryWorkingDirectory();
+            FileUtils.forceDeleteRecursive(tempDirectory);
+            FileUtils.makeFolder(tempDirectory);
+        }catch(IOException io){
+            LOG.warn("Error creating temporary directory in limewire settings folder", io);
+            tempDirectory = new File(System.getProperty("java.io.tmpdir"));
+        }
+        
         String downloadCommand = getDownloadCommand();
-        File downloadScript = createExecutableScriptFile(getTemporaryWorkingDirectory(),
-                "download", downloadCommand);
+        File downloadScript = createExecutableScriptFile(tempDirectory, "download", downloadCommand);
         return downloadScript;
     }
     
@@ -145,43 +94,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
      */
     private String getDownloadCommand(){
         String cmd = getAutoupdateExecutablePath() + 
-                    " --mode unattended" +
-                    " --unattendedmodebehavior download" +
-                    " --unattendedmodeui  minimal" +
-                    " --version_id 0" +
-                    " --check_for_updates 1" +
-                    " --url " + UpdateSettings.AUTO_UPDATE_XML_URL.get() +
-                    " --update_download_location \"${system_temp_directory}\""; 
-        return cmd;
-    }
-    
-    /**
-     * returns platform specific install commands to run the downloaded executables.
-     */
-    private String getInstallCommands(String installerPath){
-        installerPath = escapeSpecialPathCharacters(installerPath);
-        String cmd = null;
-        if(OSUtils.isLinux()){
-            /* Invokes gdebi-gtk, a GUI tool to install debian packages. 
-             * This tool does not start limewire post install/update, so we need
-             * to start limewire from this script
-             */
-            cmd = "gdebi-gtk " + installerPath + "; limewire";
-        }else if(OSUtils.isMacOSX()){
-            /*
-             * Mounts the downloaded dpkg installer. After user completes the 
-             * installation steps start the limewire application.
-             */
-            cmd = "hdiutil attach " + installerPath + "; limewire.app";
-        }else if(OSUtils.isWindows()){
-            /*
-             * Invoke the downloaded NSIS installer in silent mode. The installer
-             * starts the limewire client at the end of the installation process.
-             */
-            cmd = installerPath + " /S ";
-        }else{
-            cmd = installerPath;
-        }
+                     " --downloadurl " + UpdateSettings.AUTO_UPDATE_XML_URL.get() ;
         return cmd;
     }
     
@@ -189,11 +102,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
      * creates a new executable file with the contents in the specified directory.
      */
     private File createExecutableScriptFile(File directory, String fileName, String commands){
-        /*
-        if(directory.exists() && !directory.isDirectory() && directory.canWrite()){
-            throw new IllegalArgumentException("");
-        }
-        */
+
         File execFile = new File(directory, fileName+getExecutableScriptFileExtension()); 
         FileWriter fStream = null;
         BufferedWriter out = null;
