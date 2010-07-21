@@ -2,9 +2,9 @@ package org.limewire.core.impl.updates;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateEvent;
-import org.limewire.listener.CachingEventMulticaster;
-import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.AbstractModule;
@@ -16,7 +16,7 @@ public class CoreGlueUpdatesModule extends AbstractModule {
     protected void configure() {
         bind(UpdateListener.class);
         
-        CachingEventMulticaster<UpdateEvent> uiListeners = new CachingEventMulticasterImpl<UpdateEvent>();
+        EventMulticaster<UpdateEvent> uiListeners = new EventMulticasterImpl<UpdateEvent>();
         bind(new TypeLiteral<ListenerSupport<UpdateEvent>>(){}).toInstance(uiListeners);
         bind(new TypeLiteral<EventBroadcaster<UpdateEvent>>(){}).toInstance(uiListeners);
         
