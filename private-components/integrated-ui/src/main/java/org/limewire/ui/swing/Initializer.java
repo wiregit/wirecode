@@ -318,7 +318,7 @@ final class Initializer {
                             URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
                             Icon limeIcon = new ImageIcon(limeLogo);
                             JOptionPane.showMessageDialog(frame, 
-                                    I18n.tr("LimeWire was not able to download an important update. Relaunch limewire to fix this problem."),
+                                    I18n.tr("There was a problem downloading the new version. Restart LimeWire to try again."),
                                     I18n.tr("New Version Available!"), JOptionPane.OK_OPTION, limeIcon);
                             // TODO: send report of this error to limewire.
                         }
