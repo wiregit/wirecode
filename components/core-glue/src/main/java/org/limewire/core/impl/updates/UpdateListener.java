@@ -49,8 +49,8 @@ public class UpdateListener implements EventListener<UpdateEvent>, SimppListener
             String command = autoUpdateHelper.getAutoUpdateCommand();
             String button1Text = I18nMarker.marktr("Update Now");
             String button2Text = I18nMarker.marktr("Later");
-            String title = I18nMarker.marktr("<b>Your LimeWire Software is Not Up to Date</b>");
-            String text = I18nMarker.marktr("For best possible performance, make sure you always use the latest version of LimeWire. We no longer support the version on your computer.<br/><br/>Updating to latest version is <b>FREE, quick and easy</b>, and your LimeWire library will stay completely intact.");
+            String title = I18nMarker.marktr("<b>A new version of LimeWire is now available!</b>");
+            String text = I18nMarker.marktr("With this latest release, we no longer support the version of LimeWire on your computer, and your software will not run properly without a required software update.<br/><br/>Please perform the required update to continue using LimeWire - it's <b>quick, easy, and FREE</b>.");
             String url = "http://www.limewire.com";
             
             UpdateInformation autoUpdateInfo = new UpdateInformationImpl(button1Text, button2Text, command, text, title, url);
