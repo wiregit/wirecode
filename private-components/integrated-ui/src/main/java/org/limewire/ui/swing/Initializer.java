@@ -59,6 +59,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
+import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -292,16 +293,14 @@ final class Initializer {
     }
     
     /**
-     * check if we have some pending updates to install. If yes invoke the script 
-     * file containing the install commands and exit limewire.
-     * Note: This method blocks the initialization process if updates are available for installation.
+     * check if we have some pending updates to install. if yes invoke the update
+     * process and exit
      */
     private void installUpdates(final Frame awtSplash) {
         AutoUpdateHelper updateHelper = autoUpdateHandler.get();
         if (updateHelper.isUpdateReadyForInstall()) {
-            final String updateScript = UpdateSettings.AUTO_UPDATE_COMMAND.get();
-            File file = new File(updateScript);
-            if (file.exists() && file.canExecute()) {
+            final String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
+            if (! StringUtils.isEmpty(updateCommand)) {
                 SwingUtils.invokeNowOrWait(new Runnable() {
                     public void run() {
 
@@ -310,17 +309,17 @@ final class Initializer {
                         }
                         try {
                             // This method returns immediately so can be invoked from EDT.
-                            Runtime.getRuntime().exec(updateScript);
+                            String[] cmdArray = updateCommand.split(AutoUpdateHelper.SEPARATOR);
+                            Runtime.getRuntime().exec(cmdArray);
                         } catch (IOException bad) {
                             LOG.error("Error installing updates.", bad);
                             JFrame frame = new JFrame();
                             frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                             URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
                             Icon limeIcon = new ImageIcon(limeLogo);
-                            JOptionPane.showConfirmDialog(frame, 
+                            JOptionPane.showMessageDialog(frame, 
                                     I18n.tr("LimeWire was not able to download an important update. Relaunch limewire to fix this problem."),
-                                    I18n.tr("New Version Available!"), JOptionPane.OK_OPTION, 
-                                    JOptionPane.INFORMATION_MESSAGE, limeIcon);
+                                    I18n.tr("New Version Available!"), JOptionPane.OK_OPTION, limeIcon);
                             // TODO: send report of this error to limewire.
                         }
 
@@ -328,7 +327,6 @@ final class Initializer {
                     }
                 });
             } else {
-                file.delete();
                 UpdateSettings.AUTO_UPDATE_COMMAND.revertToDefault();
                 UpdateSettings.DOWNLOADED_UPDATE_VERSION.revertToDefault();
             }

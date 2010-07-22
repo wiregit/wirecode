@@ -66,9 +66,10 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
      */
     @Override
     public String getAutoUpdateCommand(){
-        String cmd = getAutoupdateExecutablePath() + 
-                     " --downloadurl " + UpdateSettings.AUTO_UPDATE_XML_URL.get() ;
-        return cmd;
+        StringBuilder updateCommand = new StringBuilder(getAutoupdateExecutablePath());
+        updateCommand.append(SEPARATOR).append("--downloadurl");
+        updateCommand.append(SEPARATOR).append(UpdateSettings.AUTO_UPDATE_XML_URL.get());
+        return updateCommand.toString();
     }
     
     /**
@@ -87,20 +88,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         else if(OSUtils.isWindows())
             executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
-        return escapeSpecialPathCharacters(executablePath);
-    }
-    
-    /**
-     * encloses the file path in quotes so that special character like
-     * <space>, $, etc do not interfere during command execution.
-     */
-    private String escapeSpecialPathCharacters(String pathStr){
-        if(OSUtils.isLinux() || OSUtils.isMacOSX()){
-            return "'" + pathStr + "'";
-        }else if(OSUtils.isWindows()){
-            return "\"" + pathStr + "\"";
-        }
-        return pathStr;
+        return  executablePath;
     }
 
 }

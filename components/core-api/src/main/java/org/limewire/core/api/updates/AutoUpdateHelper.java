@@ -3,6 +3,8 @@ package org.limewire.core.api.updates;
 
 public interface AutoUpdateHelper {
     
+    public String SEPARATOR = "#";
+    
     /**
      * returns true if updates are available for download
      */

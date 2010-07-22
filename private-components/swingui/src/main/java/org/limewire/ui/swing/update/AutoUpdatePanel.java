@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -23,13 +24,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateInformation;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.ImageViewPort;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 /**
@@ -49,16 +50,14 @@ public class AutoUpdatePanel extends JPanel {
     @Resource
     private Font contentFont; 
     
-    private final org.limewire.core.api.Application application;
     private final UpdateInformation updateInformation;
     
     private JButton leftButton;
     
-    public AutoUpdatePanel(UpdateInformation updateInformation, org.limewire.core.api.Application application) {
+    public AutoUpdatePanel(UpdateInformation updateInformation) {
         GuiUtils.assignResources(this);
         
         this.updateInformation = updateInformation;
-        this.application = application;
         
         setBackground(backgroundColor);
         
@@ -67,6 +66,10 @@ public class AutoUpdatePanel extends JPanel {
         add(createTopLabel(I18n.tr(updateInformation.getUpdateTitle()), topFont), "alignx 50%, gapbottom 7, wrap");
         add(createContentArea(I18n.tr(updateInformation.getUpdateText()), contentFont), "grow, wrap, gapbottom 10");
         add(createLeftButton(new FirstButtonAction()), "alignx 50%");
+        
+        String updateCommand = updateInformation.getUpdateCommand();
+        UpdateSettings.AUTO_UPDATE_COMMAND.set(updateCommand);
+        UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
     }
     
     public JButton getDefaultButton() {
@@ -138,16 +141,6 @@ public class AutoUpdatePanel extends JPanel {
     }
     
     private void close() {
-        
-        String updateCommand = updateInformation.getUpdateCommand();
-        UpdateSettings.AUTO_UPDATE_COMMAND.set(updateCommand);
-        UpdateSettings.DOWNLOADED_UPDATE_VERSION.set(UpdateSettings.AUTO_UPDATE_VERSION.get());
-        if (updateCommand != null) {
-            application.setShutdownFlag(updateCommand);
-        } else {
-            NativeLaunchUtils.openURL(updateInformation.getUpdateURL());
-        }
-        
         Window window = SwingUtilities.getWindowAncestor(AutoUpdatePanel.this);
         window.setVisible(false);
         window.dispose();
@@ -166,12 +159,18 @@ public class AutoUpdatePanel extends JPanel {
                 text = I18n.tr("Update Now");
             
             putValue(Action.NAME, text);
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Visit http://www.limewire.com to update!"));
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
             close();
+            try{
+                String updateCommand = updateInformation.getUpdateCommand();
+                String[] cmdArray = updateCommand.split(AutoUpdateHelper.SEPARATOR);
+                Runtime.getRuntime().exec(cmdArray);
+            }catch(IOException io){
+                // TODO: report this error to limewire.
+            }
             ActionMap actionMap = Application.getInstance().getContext().getActionMap();
             Action exitApplication = actionMap.get("exitApplication");
             exitApplication.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown"));

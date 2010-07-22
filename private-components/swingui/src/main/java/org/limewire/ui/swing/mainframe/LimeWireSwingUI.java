@@ -354,7 +354,7 @@ public class LimeWireSwingUI extends JPanel {
                     dialog.pack();
                     dialog.setVisible(true);
                 }else if(event.getType() == UpdateEvent.Type.AUTO_UPDATE){
-                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData(), application);
+                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData());
                     JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
                     dialog.addWindowFocusListener(new WindowFocusListener() {
                         
