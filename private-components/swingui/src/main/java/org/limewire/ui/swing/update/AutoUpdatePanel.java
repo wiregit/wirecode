@@ -14,7 +14,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -27,7 +26,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.updates.UpdateInformation;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.ImageViewPort;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -55,7 +53,6 @@ public class AutoUpdatePanel extends JPanel {
     private final UpdateInformation updateInformation;
     
     private JButton leftButton;
-    private JButton rightButton;
     
     public AutoUpdatePanel(UpdateInformation updateInformation, org.limewire.core.api.Application application) {
         GuiUtils.assignResources(this);
@@ -69,8 +66,7 @@ public class AutoUpdatePanel extends JPanel {
                 
         add(createTopLabel(I18n.tr(updateInformation.getUpdateTitle()), topFont), "alignx 50%, gapbottom 7, wrap");
         add(createContentArea(I18n.tr(updateInformation.getUpdateText()), contentFont), "grow, wrap, gapbottom 10");
-        add(createLeftButton(new FirstButtonAction()), "alignx 50%, split, gapright 10");
-        add(createRightButton(new SecondButtonAction()), "alignx 50%");
+        add(createLeftButton(new FirstButtonAction()), "alignx 50%");
     }
     
     public JButton getDefaultButton() {
@@ -133,12 +129,6 @@ public class AutoUpdatePanel extends JPanel {
         return leftButton;
     }
     
-    private JComponent createRightButton(Action action) {
-        rightButton = new JButton(action);
-        rightButton.setEnabled(false);
-        return rightButton;
-    }
-    
     private String updateForeground(Color color, String html) {
         int r = color.getRed();
         int g = color.getGreen();
@@ -188,26 +178,4 @@ public class AutoUpdatePanel extends JPanel {
         }
     }
     
-    /**
-     * Action for the button on the right.
-     */
-    private class SecondButtonAction extends AbstractAction {
-        public SecondButtonAction() {
-            String text;
-            if(updateInformation.getButton2Text() != null && updateInformation.getButton2Text().length() > 0)
-                text = I18n.tr(updateInformation.getButton2Text());
-            else
-                text = I18n.tr("Update Later");
-            
-            putValue(Action.NAME, text);
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Visit http://www.limewire.com to update!"));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            FocusJOptionPane.showMessageDialog(AutoUpdatePanel.this, I18n.tr("LimeWire will update automatically when you close."),
-                    I18n.tr("Update Ready"), JOptionPane.INFORMATION_MESSAGE );
-            close();
-        }
-    }
 }
