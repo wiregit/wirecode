@@ -1,9 +1,6 @@
 package org.limewire.core.impl.updates;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.settings.ApplicationSettings;
@@ -11,7 +8,6 @@ import org.limewire.core.settings.UpdateSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
@@ -65,72 +61,14 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         return updateReadyForInstall;
     }
     
-    @Override
-    public File getTemporaryWorkingDirectory() {
-        File tempDirectory = new File(CommonUtils.getUserSettingsDir(), "updates");
-        return tempDirectory;
-    }
-
-    @Override
-    public File getAutoUpdateCommandScript() {
-        
-        File tempDirectory = null;
-        try{
-            tempDirectory = getTemporaryWorkingDirectory();
-            FileUtils.forceDeleteRecursive(tempDirectory);
-            FileUtils.makeFolder(tempDirectory);
-        }catch(IOException io){
-            LOG.warn("Error creating temporary directory in limewire settings folder", io);
-            tempDirectory = new File(System.getProperty("java.io.tmpdir"));
-        }
-        
-        String downloadCommand = getDownloadCommand();
-        File downloadScript = createExecutableScriptFile(tempDirectory, "download", downloadCommand);
-        return downloadScript;
-    }
-    
     /**
      * bitrock autoupdate options for update download.
      */
-    private String getDownloadCommand(){
+    @Override
+    public String getAutoUpdateCommand(){
         String cmd = getAutoupdateExecutablePath() + 
                      " --downloadurl " + UpdateSettings.AUTO_UPDATE_XML_URL.get() ;
         return cmd;
-    }
-    
-    /**
-     * creates a new executable file with the contents in the specified directory.
-     */
-    private File createExecutableScriptFile(File directory, String fileName, String commands){
-
-        File execFile = new File(directory, fileName+getExecutableScriptFileExtension()); 
-        FileWriter fStream = null;
-        BufferedWriter out = null;
-        try{
-            execFile.createNewFile();
-            fStream = new FileWriter(execFile);
-            out = new BufferedWriter(fStream);
-            out.write(commands);
-            execFile.setExecutable(true, false);
-        }catch(IOException ex){
-            LOG.error("Error creating executable file.", ex);
-        }finally{
-            FileUtils.close(out);
-            FileUtils.close(fStream);
-        }
-        return execFile;
-    }
-    
-    /**
-     * returns platform specific executable script file extension.
-     */
-    private String getExecutableScriptFileExtension(){
-        if(OSUtils.isLinux() || OSUtils.isMacOSX())
-            return ".sh";
-        else if(OSUtils.isWindows())
-            return ".bat";
-        else
-            return "";
     }
     
     /**

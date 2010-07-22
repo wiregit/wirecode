@@ -1,6 +1,5 @@
 package org.limewire.core.api.updates;
 
-import java.io.File;
 
 public interface AutoUpdateHelper {
     
@@ -15,13 +14,8 @@ public interface AutoUpdateHelper {
     public boolean isUpdateReadyForInstall();
     
     /**
-     * returns temporary working directory for auto update.
-     */
-    public File getTemporaryWorkingDirectory();
-    
-    /**
      * returns executable script file containing command(s) to update limewire.
      */
-    public File getAutoUpdateCommandScript();
+    public String getAutoUpdateCommand();
 
 }

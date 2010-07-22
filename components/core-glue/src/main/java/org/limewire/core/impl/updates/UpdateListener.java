@@ -46,7 +46,7 @@ public class UpdateListener implements EventListener<UpdateEvent>, SimppListener
     @Override
     public void simppUpdated() {
         if( autoUpdateHelper.isUpdateAvailable() ){             
-            String command = autoUpdateHelper.getAutoUpdateCommandScript().getAbsolutePath();
+            String command = autoUpdateHelper.getAutoUpdateCommand();
             String button1Text = I18nMarker.marktr("Update Now");
             String button2Text = I18nMarker.marktr("Later");
             String title = I18nMarker.marktr("<b>Your LimeWire Software is Not Up to Date</b>");

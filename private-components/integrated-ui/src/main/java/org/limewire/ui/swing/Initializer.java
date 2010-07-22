@@ -14,9 +14,13 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.plaf.basic.BasicHTML;
 
 import org.apache.commons.logging.Log;
@@ -52,7 +56,6 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.ui.swing.wizard.IntentDialog;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
@@ -308,18 +311,20 @@ final class Initializer {
                         try {
                             // This method returns immediately so can be invoked from EDT.
                             Runtime.getRuntime().exec(updateScript);
-                            System.exit(0);
                         } catch (IOException bad) {
-                            // clear the update command settings and let it
-                            // start this time.
                             LOG.error("Error installing updates.", bad);
-                            UpdateSettings.AUTO_UPDATE_COMMAND.set("");
+                            JFrame frame = new JFrame();
+                            frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                            URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
+                            Icon limeIcon = new ImageIcon(limeLogo);
+                            JOptionPane.showConfirmDialog(frame, 
+                                    I18n.tr("LimeWire was not able to download an important update. Relaunch limewire to fix this problem."),
+                                    I18n.tr("New Version Available!"), JOptionPane.OK_OPTION, 
+                                    JOptionPane.INFORMATION_MESSAGE, limeIcon);
                             // TODO: send report of this error to limewire.
                         }
 
-                        if (awtSplash != null) {
-                            awtSplash.setVisible(true);
-                        }
+                        System.exit(0);
                     }
                 });
             } else {
@@ -330,7 +335,6 @@ final class Initializer {
         }else{
             UpdateSettings.AUTO_UPDATE_COMMAND.revertToDefault();
             UpdateSettings.DOWNLOADED_UPDATE_VERSION.revertToDefault();
-            FileUtils.forceDeleteRecursive(updateHelper.getTemporaryWorkingDirectory());
         }
     }
 
