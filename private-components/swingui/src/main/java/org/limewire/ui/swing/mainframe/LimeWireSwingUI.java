@@ -25,6 +25,7 @@ import javax.swing.event.AncestorListener;
 import org.limewire.activation.api.ActivationManager;
 import org.limewire.activation.api.ActivationModuleEvent;
 import org.limewire.core.api.Application;
+import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.friend.api.FriendConnectionEvent;
 import org.limewire.listener.EventListener;
@@ -340,11 +341,11 @@ public class LimeWireSwingUI extends JPanel {
      */
     @Inject void register(ListenerSupport<UpdateEvent> updateEvent,
             ListenerSupport<FriendConnectionEvent> connectionSupport,
-            final Application application) {
+            final Application application, final AutoUpdateHelper autoUpdateHelper) {
         updateEvent.addListener(new EventListener<UpdateEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(UpdateEvent event) {
+            public void handleEvent(final UpdateEvent event) {
                 if(event.getType() == UpdateEvent.Type.UPDATE){
                     UpdatePanel updatePanel = new UpdatePanel(event.getData(), application);
                     JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
@@ -354,7 +355,8 @@ public class LimeWireSwingUI extends JPanel {
                     dialog.pack();
                     dialog.setVisible(true);
                 }else if(event.getType() == UpdateEvent.Type.AUTO_UPDATE){
-                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData());
+               
+                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData(), autoUpdateHelper);
                     JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
                     dialog.addWindowFocusListener(new WindowFocusListener() {
                         

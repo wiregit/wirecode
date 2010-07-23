@@ -6,7 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
+import java.awt.event.ActionListener;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTMLDocument;
+import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -50,20 +51,31 @@ public class AutoUpdatePanel extends JPanel {
     @Resource
     private Font contentFont; 
     
+    private final AutoUpdateHelper updateHelper;
+    
     private final UpdateInformation updateInformation;
     
     private JButton leftButton;
+    private JEditorPane pane;
+    private int count = 0;
+    private int upperLimit = 60;
+    private String title = null;
+    private Timer timer = null;
     
-    public AutoUpdatePanel(UpdateInformation updateInformation) {
+    
+    public AutoUpdatePanel(UpdateInformation updateInformation, AutoUpdateHelper autoUpdateHelper) {
         GuiUtils.assignResources(this);
-        
         this.updateInformation = updateInformation;
-        
+        this.updateHelper = autoUpdateHelper;
         setBackground(backgroundColor);
         
-        setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6"));
-                
-        add(createTopLabel(I18n.tr(updateInformation.getUpdateTitle()), topFont), "alignx 50%, gapbottom 7, wrap");
+        setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
+        timer = new Timer(1000, new TimerListener());
+        timer.setRepeats(true);
+        //timer.start();
+        title = updateInformation.getUpdateTitle();
+        pane =createTopLabel(I18n.tr( title + " " + (upperLimit - count)), topFont);
+        add(pane, "alignx 50%, gapbottom 7, wrap");
         add(createContentArea(I18n.tr(updateInformation.getUpdateText()), contentFont), "grow, wrap, gapbottom 10");
         add(createLeftButton(new FirstButtonAction()), "alignx 50%");
         
@@ -76,7 +88,7 @@ public class AutoUpdatePanel extends JPanel {
         return leftButton;
     }
     
-    private JComponent createTopLabel(String text, Font font) {
+    private JEditorPane createTopLabel(String text, Font font) {
         JEditorPane pane = new JEditorPane();
         pane.setContentType("text/html");
         pane.setEditable(false);
@@ -128,7 +140,6 @@ public class AutoUpdatePanel extends JPanel {
     
     private JComponent createLeftButton(Action action) {
         leftButton = new JButton(action);
-        leftButton.requestFocusInWindow();
         return leftButton;
     }
     
@@ -163,7 +174,10 @@ public class AutoUpdatePanel extends JPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            count = 0;
+            timer.stop();
             close();
+            /*
             try{
                 String updateCommand = updateInformation.getUpdateCommand();
                 String[] cmdArray = updateCommand.split(AutoUpdateHelper.SEPARATOR);
@@ -171,10 +185,28 @@ public class AutoUpdatePanel extends JPanel {
             }catch(IOException io){
                 // TODO: report this error to limewire.
             }
+            */
+           // AutoUpdateHelper updateHelper = autoUpdateHelper.get();
+            updateHelper.initiateUpdateProcess();
             ActionMap actionMap = Application.getInstance().getContext().getActionMap();
             Action exitApplication = actionMap.get("exitApplication");
             exitApplication.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown"));
         }
     }
+    
+    private class TimerListener implements ActionListener{
+        public void actionPerformed(ActionEvent e)
+        {
+            count++;
+            if(count == upperLimit)
+            {
+              leftButton.doClick();
+            }
+            else
+            {
+              pane.setText(I18n.tr( title + " " + (upperLimit - count)));
+            }
+        }
+    } 
     
 }

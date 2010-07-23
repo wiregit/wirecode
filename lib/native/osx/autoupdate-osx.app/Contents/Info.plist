@@ -11,7 +11,7 @@
         <key>CFBundleIconFile</key>
         <string>installbuilder.icns</string>
         <key>CFBundleIdentifier</key>
-        <string>com.bitrock.installbuilder</string>
+        <string>www.limewire.com</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundleName</key>
@@ -21,7 +21,7 @@
         <key>CFBundleShortVersionString</key>
         <string>3.0</string>
         <key>CFBundleSignature</key>
-        <string>BitRock InstallBuilder</string>
+        <string>LimeWire Updater</string>
         <key>CFBundleVersion</key>
         <string>3.0</string>
 	</dict>

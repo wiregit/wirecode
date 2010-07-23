@@ -14,13 +14,9 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.WindowConstants;
 import javax.swing.plaf.basic.BasicHTML;
 
 import org.apache.commons.logging.Log;
@@ -109,7 +105,7 @@ final class Initializer {
     @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
     @Inject private Provider<ConnectionInspections> connectionReporter;
     @Inject private Provider<VirusEngine> virusEngine;
-    @Inject private Provider<AutoUpdateHelper> autoUpdateHandler;
+    @Inject private Provider<AutoUpdateHelper> autoUpdateHelper;
     
     Initializer() {
         // If Log4J is available then remove the NoOpLog
@@ -297,7 +293,7 @@ final class Initializer {
      * process and exit
      */
     private void installUpdates(final Frame awtSplash) {
-        AutoUpdateHelper updateHelper = autoUpdateHandler.get();
+        final AutoUpdateHelper updateHelper = autoUpdateHelper.get();
         if (updateHelper.isUpdateReadyForInstall()) {
             final String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
             if (! StringUtils.isEmpty(updateCommand)) {
@@ -307,6 +303,7 @@ final class Initializer {
                         if (awtSplash != null) {
                             awtSplash.setVisible(false);
                         }
+                        /*
                         try {
                             // This method returns immediately so can be invoked from EDT.
                             String[] cmdArray = updateCommand.split(AutoUpdateHelper.SEPARATOR);
@@ -322,7 +319,8 @@ final class Initializer {
                                     I18n.tr("New Version Available!"), JOptionPane.OK_OPTION, limeIcon);
                             // TODO: send report of this error to limewire.
                         }
-
+                        */
+                        updateHelper.initiateUpdateProcess();
                         System.exit(0);
                     }
                 });

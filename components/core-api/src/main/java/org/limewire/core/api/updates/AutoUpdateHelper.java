@@ -19,5 +19,10 @@ public interface AutoUpdateHelper {
      * returns executable script file containing command(s) to update limewire.
      */
     public String getAutoUpdateCommand();
+    
+    /**
+     * 
+     */
+    public void initiateUpdateProcess();
 
 }

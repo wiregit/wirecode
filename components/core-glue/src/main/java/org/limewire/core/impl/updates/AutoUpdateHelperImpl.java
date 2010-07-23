@@ -1,6 +1,7 @@
 package org.limewire.core.impl.updates;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.settings.ApplicationSettings;
@@ -67,9 +68,37 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     @Override
     public String getAutoUpdateCommand(){
         StringBuilder updateCommand = new StringBuilder(getAutoupdateExecutablePath());
-        updateCommand.append(SEPARATOR).append("--downloadurl");
+        updateCommand.append(SEPARATOR).append("--url");
         updateCommand.append(SEPARATOR).append(UpdateSettings.AUTO_UPDATE_XML_URL.get());
         return updateCommand.toString();
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public void initiateUpdateProcess(){
+        
+        String javaExecutable =  getAbsoultePathToJavaExecutable();
+        String classpath = System.getProperty("java.class.path");
+        String main = "org.limewire.ui.swing.update.AutoUpdateExecutableInvoker";
+        
+        String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
+        String[] args = updateCommand.split(AutoUpdateHelper.SEPARATOR);
+        
+        String[] cmdArray = new String[4 + args.length];
+        
+        cmdArray[0] = javaExecutable;
+        cmdArray[1] = "-cp";
+        cmdArray[2] = classpath;
+        cmdArray[3] = main;
+        System.arraycopy(args, 0, cmdArray, 4, args.length);       
+        
+        try{
+            Runtime.getRuntime().exec(cmdArray);
+        }catch(IOException io){
+            LOG.error("Error starting the download process", io);
+        }
     }
     
     /**
@@ -89,6 +118,17 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
             executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
         return  executablePath;
+    }
+    
+    private String getAbsoultePathToJavaExecutable(){
+        StringBuilder sb = new StringBuilder(System.getProperty("java.home"));
+        sb.append(File.separator).append("bin").append(File.separator).append("java");
+        
+        if(OSUtils.isWindows()){
+            sb.append(".exe");
+        }
+        
+        return sb.toString();
     }
 
 }
