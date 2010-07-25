@@ -139,28 +139,36 @@ class AboutWindow {
                 "   <td>David Chen</td>" + 
                 " </tr>" + 
                 " <tr>" + 
+                "   <td>Priyank Dhillon</td>" + 
                 "   <td>Mike Everett</td>" + 
-                "   <td>Greg Kellum</td>" + 
                 " </tr>" + 
                 " <tr>" + 
+                "   <td>Karundeep Gill</td>" + 
+                "   <td>Roger Kapsi</td>" +
+                " </tr>" + 
+                " <tr>" + 
+                "   <td>Greg Kellum</td>" + 
                 "   <td>Marc London</td>" + 
+                " </tr>" + 
+                " <tr>" + 
                 "   <td>Greg Maggioncalda</td>" + 
+                "   <td>Aditya Malpani</td>" + 
                 " </tr>" + 
                 " <tr>" + 
                 "   <td>Jorge Mancheno</td>" + 
                 "   <td>Michael Rogers</td>" + 
                 " </tr>" + 
                 " <tr>" + 
-                "   <td>Roger Kapsi</td>" +
+                "   <td>Anthony Roscoe</td>" + 
+                "   <td>Neha Sharma</td>" + 
+                " </tr>" + 
+                " <tr>" + 
                 "   <td>Mike Sorvillo</td>" + 
-                " </tr>" + 
-                " <tr>" + 
                 "   <td>Michael Tiraborrelli</td>" + 
-                "   <td>Matt Turkel</td>" + 
                 " </tr>" + 
                 " <tr>" + 
+                "   <td>Matt Turkel</td>" + 
                 "   <td>Peter Vertenten</td>" + 
-                "   <td>Peng Wang</td>" + 
                 " </tr>" + 
                 " <tr>" + 
                 "   <td>Ernie Yu</td>" + 
@@ -171,7 +179,7 @@ class AboutWindow {
         sb.append(I18n.tr("Behind the scenes business strategy and day-to-day affairs are handled by LimeWire\'s business developers:"));
         sb.append("<br>");
         sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
-                "  <tr><td>Nathan Lovejoy</td></tr>" + 
+                "  <tr><td>Jason Herskowitz</td></tr>" + 
                 "  <tr><td>George Searle</td></tr>" + 
                 "</table>");        
 
@@ -221,26 +229,30 @@ class AboutWindow {
                 " </tr>" +
                 " <tr>" +
                 "   <td>Angel Leon</td>" +
+                "   <td>Nathan Lovejoy</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Karl Magdsick</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Yusuke Naito</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Dave Nicponski</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Christine Nicponski</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Tim Olsen</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Jeff Palm</td>" +
+                " </tr>" +
+                " <tr>" +
                 "   <td>Jason Pelzer</td>" +
-                " </tr>" +
-                " <tr>" +
                 "   <td>Steffen Pingel</td>" +
-                "   <td>Christopher Rohrs</td>" +
                 " </tr>" +
                 " <tr>" +
+                "   <td>Christopher Rohrs</td>" +
                 "   <td>Justin Schmidt</td>" +
+                " </tr>" +
+                " <tr>" +
+                "   <td>Varnali Shah</td>" + 
                 "   <td>Arthur Shim</td>" +
                 " </tr>" +
                 " <tr>" +
@@ -253,10 +265,10 @@ class AboutWindow {
                 " </tr>" +
                 " <tr>" +
                 "   <td>Sumeet Thadani</td>" +
-                "   <td>Varnali Shah</td>" + 
+                "   <td>Ron Vogl</td>" +
                 " </tr>" +
                 " <tr>" +
-                "   <td>Ron Vogl</td>" +
+                "   <td>Peng Wang</td>" + 
                 "   <td>Kurt Wasserman</td>" + 
                 " </tr>" +
                 " <tr>" +
