@@ -71,8 +71,8 @@ public class AutoUpdatePanel extends JPanel {
         setBackground(backgroundColor);
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
-        upperLimit = (int)(Math.random() * max);
         
+        upperLimit = (int)(Math.random() * max);
         timer = new Timer(1000, new TimerListener());
         timer.setRepeats(true);
         timer.start();
@@ -222,7 +222,7 @@ public class AutoUpdatePanel extends JPanel {
             }
             else
             {
-              pane.setText(getTitle(upperLimit - count) + "</b>");
+              pane.setText(getTitle(upperLimit - count));
             }
         }
     } 
