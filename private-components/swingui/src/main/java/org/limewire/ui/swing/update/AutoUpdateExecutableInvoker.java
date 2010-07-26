@@ -64,7 +64,7 @@ public class AutoUpdateExecutableInvoker {
         System.arraycopy(args, 0, newargs, 0, args.length);
         System.arraycopy(BITROCK_SILENT_DOWNLOAD_ARGS, 0, newargs, args.length, BITROCK_SILENT_DOWNLOAD_ARGS.length);
         try{
-            if(OSUtils.isWindowsVista()){
+            if(OSUtils.isWindowsVista() || OSUtils.isWindows7()){
                 StringBuilder sb = new StringBuilder();
                 for(int i=1;i<newargs.length;i++){
                     sb.append(newargs[i]).append(" ");
