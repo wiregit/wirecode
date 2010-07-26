@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.update;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -12,17 +15,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
 public class AutoUpdateExecutableInvoker {
-    
-    private static final String[] BITROCK_SILENT_DOWNLOAD_ARGS = new String[]{"--mode", "unattended", 
-                                                                              "--unattendedmodebehavior", "download",
-                                                                              "--unattendedmodeui", "minimal",
-                                                                              "--check_for_updates", "1",
-                                                                              "--version_id", "0"
-                                                                             };
     
     private static final String TITLE = I18n.tr("LimeWire Update Process");
 
@@ -60,10 +57,21 @@ public class AutoUpdateExecutableInvoker {
     }
     
     private static void invokeDownloadProcess(String[] args){
-        String[] newargs = new String[args.length + BITROCK_SILENT_DOWNLOAD_ARGS.length];
-        System.arraycopy(args, 0, newargs, 0, args.length);
-        System.arraycopy(BITROCK_SILENT_DOWNLOAD_ARGS, 0, newargs, args.length, BITROCK_SILENT_DOWNLOAD_ARGS.length);
-        try{
+        
+        try{          
+            String[] silentDownloadArgs = new String[]{"--mode", "unattended", 
+                                                       "--unattendedmodebehavior", "download",
+                                                       "--unattendedmodeui", "minimal",
+                                                       "--check_for_updates", "1",
+                                                       "--version_id", "0",
+                                                       "--update_download_location", "${system_temp_directory}",
+                                                       "--settings_file", createEmptyUpdateINIFile().getAbsolutePath()
+                                                       };
+
+            String[] newargs = new String[args.length + silentDownloadArgs.length];
+            System.arraycopy(args, 0, newargs, 0, args.length);
+            System.arraycopy(silentDownloadArgs, 0, newargs, args.length, silentDownloadArgs.length);
+            
             if(OSUtils.isWindowsVista() || OSUtils.isWindows7()){
                 StringBuilder sb = new StringBuilder();
                 for(int i=1;i<newargs.length;i++){
@@ -90,6 +98,17 @@ public class AutoUpdateExecutableInvoker {
                 JOptionPane.ERROR_MESSAGE, AutoUpdateExecutableInvoker.LIME_ICON);
     }
     
+    private static File createEmptyUpdateINIFile() throws IOException{
+        File update = FileUtils.createTempFile("LimeWireUpdate", "ini");
+        update.deleteOnExit();
+        
+        FileWriter fstream = new FileWriter(update);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write("[Update]");
+        
+        return update;
+    }
+    
     
     //@SuppressWarnings("unused")
     private static String interpretBitRockExitCode(int exitCode){
@@ -99,7 +118,7 @@ public class AutoUpdateExecutableInvoker {
                 message = "Successfully downloaded and executed the installer.";
                 break;
             case 1:
-                message = "No updates available or update download was aborted";
+                message = "An error occurred downloading the file"; //"No updates available";  // Not an appropriate message in our case.
                 break;
             case 2:
                 message = "Error connecting to remote server or invalid XML file";
