@@ -119,7 +119,7 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         else if(OSUtils.isWindows())
             executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
-        return  escapePathCharacters(executablePath);
+        return   executablePath;
     }
     
     private String getAbsoultePathToJavaExecutable(){
@@ -131,14 +131,6 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
         }
         
         return sb.toString();
-    }
-    
-    private String escapePathCharacters(String path){
-        if(OSUtils.isWindows()){
-            return "\"" + path + "\"";
-        }else{
-            return "'" + path + "'";
-        }
     }
 
 }
