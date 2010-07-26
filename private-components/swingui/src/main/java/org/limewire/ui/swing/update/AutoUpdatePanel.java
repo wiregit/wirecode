@@ -72,7 +72,7 @@ public class AutoUpdatePanel extends JPanel {
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
         timer = new Timer(1000, new TimerListener());
         timer.setRepeats(true);
-        //timer.start();
+        timer.start();
         title = updateInformation.getUpdateTitle();
         pane =createTopLabel(I18n.tr( title + " " + (upperLimit - count)), topFont);
         add(pane, "alignx 50%, gapbottom 7, wrap");

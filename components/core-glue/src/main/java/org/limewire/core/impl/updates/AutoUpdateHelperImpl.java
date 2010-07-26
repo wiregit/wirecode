@@ -80,22 +80,24 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     public void initiateUpdateProcess(){
         
         String javaExecutable =  getAbsoultePathToJavaExecutable();
-        String classpath = System.getProperty("java.class.path");
+        String javaClasspath = System.getProperty("java.class.path");
+        String javaLibraryPath = System.getProperty("java.library.path");
         String main = "org.limewire.ui.swing.update.AutoUpdateExecutableInvoker";
         
         String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
         String[] args = updateCommand.split(AutoUpdateHelper.SEPARATOR);
         
-        String[] cmdArray = new String[4 + args.length];
+        String[] cmdArray = new String[5 + args.length];
         
         cmdArray[0] = javaExecutable;
         cmdArray[1] = "-cp";
-        cmdArray[2] = classpath;
-        cmdArray[3] = main;
-        System.arraycopy(args, 0, cmdArray, 4, args.length);       
+        cmdArray[2] = javaClasspath;
+        cmdArray[3] = "-Djava.library.path="+javaLibraryPath;    
+        cmdArray[4] = main;
+        System.arraycopy(args, 0, cmdArray, 5, args.length);       
         
         try{
-            Runtime.getRuntime().exec(cmdArray);
+            Runtime.getRuntime().exec(cmdArray);        
         }catch(IOException io){
             LOG.error("Error starting the download process", io);
         }
