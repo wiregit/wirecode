@@ -66,7 +66,7 @@ public class AutoUpdateExecutableInvoker {
         try{
             if(OSUtils.isWindowsVista()){
                 StringBuilder sb = new StringBuilder();
-                for(int i=0;i<newargs.length;i++){
+                for(int i=1;i<newargs.length;i++){
                     sb.append(newargs[i]).append(" ");
                 }
                 SystemUtils.openFile(args[0], sb.toString());
