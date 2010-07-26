@@ -13,7 +13,6 @@ import javax.swing.WindowConstants;
 
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 
 public class AutoUpdateExecutableInvoker {
@@ -61,15 +60,18 @@ public class AutoUpdateExecutableInvoker {
     }
     
     private static void invokeDownloadProcess(String[] args){
-        String[] newargs = new String[args.length + BITROCK_SILENT_DOWNLOAD_ARGS.length-1];
-        System.arraycopy(args, 1, newargs, 0, args.length);
-        System.arraycopy(BITROCK_SILENT_DOWNLOAD_ARGS, 0, newargs, args.length-1, BITROCK_SILENT_DOWNLOAD_ARGS.length);
+        String[] newargs = new String[args.length + BITROCK_SILENT_DOWNLOAD_ARGS.length];
+        System.arraycopy(args, 0, newargs, 0, args.length);
+        System.arraycopy(BITROCK_SILENT_DOWNLOAD_ARGS, 0, newargs, args.length, BITROCK_SILENT_DOWNLOAD_ARGS.length);
         try{
             if(OSUtils.isWindowsVista()){
-                String concatenatedArgs = StringUtils.explode(newargs, " ");
-                SystemUtils.openFile(args[0], concatenatedArgs);
+                StringBuilder sb = new StringBuilder();
+                for(int i=0;i<newargs.length;i++){
+                    sb.append(newargs[i]).append(" ");
+                }
+                SystemUtils.openFile(args[0], sb.toString());
             }else{
-                Process p = Runtime.getRuntime().exec(args[0], newargs);
+                Process p = Runtime.getRuntime().exec(newargs);
                 int exitCode = p.waitFor();
                 if(exitCode > 0){
                     displayErrorMessage(interpretBitRockExitCode(exitCode));
