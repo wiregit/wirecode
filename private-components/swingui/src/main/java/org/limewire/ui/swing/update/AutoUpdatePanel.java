@@ -159,18 +159,14 @@ public class AutoUpdatePanel extends JPanel {
         window.dispose();
     }
     
-    private String getTitle(int count)
-    {
+    private String getTitle(int count) {
         String title = null;
         int min = 0;
         min = count / 60;
-        if(min >= 1)
-        {
-            title = I18n.tr("<b>LimeWire update will start in {0} {1}</b>", min + 1, "minutes.");
-        }
-        else
-        {
-            title = I18n.tr("<b>LimeWire update will start in {0} {1}</b>", count % 60, "seconds.");
+        if (min >= 1) {
+            title = I18n.trn("<b>LimeWire update will start in {0} minute</b>", "<b>LimeWire update will start in {0} minutes</b>", min + 1);
+        } else {
+            title = I18n.trn("<b>LimeWire update will start in {0} second</b>", "<b>LimeWire update will start in {0} seconds</b>", count % 60);
         }
         return title; 
     }
