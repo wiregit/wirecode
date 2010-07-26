@@ -58,8 +58,9 @@ public class AutoUpdatePanel extends JPanel {
     private JButton leftButton;
     private JEditorPane pane;
     private int count = 0;
-    private int upperLimit = 60;
-    private String title = null;
+    // max limit is 5 minutes
+    private final int max = 5 * 60;
+    private int upperLimit = 0;
     private Timer timer = null;
     
     
@@ -70,11 +71,12 @@ public class AutoUpdatePanel extends JPanel {
         setBackground(backgroundColor);
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
+        upperLimit = (int)(Math.random() * max);
+        
         timer = new Timer(1000, new TimerListener());
         timer.setRepeats(true);
         timer.start();
-        title = updateInformation.getUpdateTitle();
-        pane =createTopLabel(I18n.tr( title + " " + (upperLimit - count)), topFont);
+        pane = createTopLabel(getTitle(upperLimit - count), topFont);
         add(pane, "alignx 50%, gapbottom 7, wrap");
         add(createContentArea(I18n.tr(updateInformation.getUpdateText()), contentFont), "grow, wrap, gapbottom 10");
         add(createLeftButton(new FirstButtonAction()), "alignx 50%");
@@ -157,6 +159,22 @@ public class AutoUpdatePanel extends JPanel {
         window.dispose();
     }
     
+    private String getTitle(int count)
+    {
+        String title = null;
+        int min = 0;
+        min = count / 60;
+        if(min >= 1)
+        {
+            title = I18n.tr("<b>LimeWire update will start in {0} {1}</b>", min + 1, "minutes.");
+        }
+        else
+        {
+            title = I18n.tr("<b>LimeWire update will start in {0} {1}</b>", count % 60, "seconds.");
+        }
+        return title; 
+    }
+    
     /**
      * The action for the button on the left. 
      */
@@ -204,7 +222,7 @@ public class AutoUpdatePanel extends JPanel {
             }
             else
             {
-              pane.setText(I18n.tr( title + " " + (upperLimit - count)));
+              pane.setText(getTitle(upperLimit - count) + "</b>");
             }
         }
     } 
