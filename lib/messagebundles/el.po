@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-19 11:30-0400\n"
+"POT-Creation-Date: 2010-07-26 11:30-0400\n"
 "PO-Revision-Date: 2010-03-08 03:02+0000\n"
 "Last-Translator: George Kontis <giormatsis@gmail.com>\n"
 "Language-Team: EL\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-20 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-07-27 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Language: Greek\n"
 
@@ -993,7 +993,6 @@ msgid "{0} is expired."
 msgstr "Το {0} έχει λήξει."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:135
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "License Key:"
 msgstr "Κλειδί Άδειας:"
 
@@ -1012,6 +1011,7 @@ msgid "Invalid License Key."
 msgstr "Άκυρο Κλειδί Άδειας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:456
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:69
 msgid "Go PRO"
 msgstr "Γίνετε PRO"
 
@@ -1020,7 +1020,6 @@ msgid "Upgrade to PRO"
 msgstr "Αναβαθμίστε στο PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:458
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate"
 msgstr "Ενεργοποίηση"
 
@@ -3108,7 +3107,7 @@ msgstr ""
 "προγραμματιστών του LimeWire:"
 
 #. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -3117,7 +3116,7 @@ msgstr ""
 "LimeWire διευθετούνται από το προσωπικό επιχειρηματικής ανάπτυξης:"
 
 #. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:187
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -3126,7 +3125,7 @@ msgstr ""
 "παρελθόν, αλλά τώρα ασχολούνται με άλλα εγχειρήματα:"
 
 #. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:268
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:280
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -3139,7 +3138,7 @@ msgstr ""
 "εντόπισαν σοβαρά σφάλματα στον κώδικα, ή και τα δύο:"
 
 #. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:341
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:353
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -3150,7 +3149,7 @@ msgstr ""
 "ιστοτόπου του LimeWire."
 
 #. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:345
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:357
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -3159,7 +3158,7 @@ msgstr ""
 "Μεταξύ άλλων:"
 
 #. conclusion
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:367
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:379
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
@@ -3169,7 +3168,7 @@ msgstr ""
 "προγραμματιστές, χρήστες και λοιπούς που συνέβαλαν με τις ιδέες τους στο "
 "πρότζεκτ. Χωρίς τους χρήστες του LimeWire, το Δίκτυο P2P δεν θα υπήρχε."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:372
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:384
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc. Gmail is a trademark of Google&nbsp;Inc., Jabber and LiveJournal are "
@@ -6064,27 +6063,30 @@ msgstr "Συμφωνώ"
 
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
-msgid "Activate your LimeWire PRO."
-msgstr "Ενεργοποιήστε το LimeWire PRO."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:69
-msgid "Want to go PRO?"
-msgstr "Θέλετε να γίνετε PRO;"
+msgid "Did you purchase LimeWire PRO?"
+msgstr ""
 
 #. wrap
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:75
 msgid ""
-"Enter your activation key below. This was sent to the email address you used "
-"when purchasing. You can always do this later on from the File menu."
+"If you did, please enter your license key - we provided it online and via "
+"email when you signed up. If you don't want to activate PRO now, you can "
+"always do it later by clicking on the \"File\" tab in LimeWire and then "
+"clicking \"Licenses.\""
 msgstr ""
-"Γράψτε το κλειδί ενεργοποίησής σας παρακάτω. Το κλειδί αυτό στάλθηκε στη "
-"διεύθυνση email που χρησιμοποιήσατε κατά την αγορά. Μπορείτε να "
-"ενεργοποιήσετε αργότερα από το μενού Αρχείο."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
+msgid "Your License Key:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
+msgid "Activate LimeWire PRO"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
-msgid "I don't know my license key"
-msgstr "Δεν γνωρίζω το κλειδί άδειάς μου"
+msgid "I don't know my activation key"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6255,14 +6257,9 @@ msgstr ""
 msgid "LimeWire PRO"
 msgstr "LimeWire PRO"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:113
-msgid "You can activate LimeWire PRO later from File > License"
-msgstr ""
-"Μπορείτε να ενεργοποιήσετε το LimeWire PRO αργότερα από το Αρχείο > Άδεια"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
-msgid "No thanks"
-msgstr "Όχι, ευχαριστώ"
+msgid "I didn't purchase LimeWire PRO"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-19 11:30-0400\n"
+"POT-Creation-Date: 2010-07-26 11:30-0400\n"
 "PO-Revision-Date: 2010-04-01 22:26+0000\n"
 "Last-Translator: Jan-Christoph Borchardt <inquata@gmail.com>\n"
 "Language-Team: DE\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-20 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-07-27 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -996,7 +996,6 @@ msgid "{0} is expired."
 msgstr "{0} ist abgelaufen."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:135
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "License Key:"
 msgstr "Lizenzschlüssel:"
 
@@ -1014,6 +1013,7 @@ msgid "Invalid License Key."
 msgstr "Ungültiger Lizenzschlüssel."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:456
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:69
 msgid "Go PRO"
 msgstr "Jetzt PRO"
 
@@ -1022,7 +1022,6 @@ msgid "Upgrade to PRO"
 msgstr "Aktualisieren auf PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationPanel.java:458
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate"
 msgstr "Aktivieren"
 
@@ -3127,7 +3126,7 @@ msgstr ""
 "Arbeitsstunden unserer Entwickler:"
 
 #. business developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:171
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -3136,7 +3135,7 @@ msgstr ""
 "von den Geschäftsentwicklern von LimeWire abgewickelt:"
 
 #. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:187
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -3145,7 +3144,7 @@ msgstr ""
 "Teams, sind aber mittlerweile mit anderen Projekten beschäftigt:"
 
 #. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:268
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:280
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -3159,7 +3158,7 @@ msgstr ""
 "LimeWire weitergegeben wird, Programmfehler entdeckt oder beides:"
 
 #. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:341
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:353
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -3170,7 +3169,7 @@ msgstr ""
 "LimeWire."
 
 #. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:345
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:357
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -3179,7 +3178,7 @@ msgstr ""
 "sind unter anderem:"
 
 #. conclusion
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:367
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:379
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
@@ -3189,7 +3188,7 @@ msgstr ""
 "allen anderen bedanken, die ihre Ideen zum Projekt beigesteuert haben. Ohne "
 "die Nutzer von LimeWire würde es das P2P-Netzwerk nicht geben."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:372
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:384
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc. Gmail is a trademark of Google&nbsp;Inc., Jabber and LiveJournal are "
@@ -6082,27 +6081,30 @@ msgstr "Ich stimme zu"
 
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
-msgid "Activate your LimeWire PRO."
-msgstr "Aktivieren Sie Ihre LimeWire PRO-Version!"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:69
-msgid "Want to go PRO?"
-msgstr "Sie wollen zu PRO wechseln?"
+msgid "Did you purchase LimeWire PRO?"
+msgstr ""
 
 #. wrap
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:75
 msgid ""
-"Enter your activation key below. This was sent to the email address you used "
-"when purchasing. You can always do this later on from the File menu."
+"If you did, please enter your license key - we provided it online and via "
+"email when you signed up. If you don't want to activate PRO now, you can "
+"always do it later by clicking on the \"File\" tab in LimeWire and then "
+"clicking \"Licenses.\""
 msgstr ""
-"Geben Sie unten Ihren Aktivierungsschlüssel ein. Dieser wurde an die von "
-"Ihnen beim Kauf angegebene E-Mailadresse versendet. Sie können dies auch "
-"später im Datei-Menü nachholen."
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
+msgid "Your License Key:"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
+msgid "Activate LimeWire PRO"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
-msgid "I don't know my license key"
-msgstr "Ich kenne meinen Lizenzschlüssel nicht"
+msgid "I don't know my activation key"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6262,13 +6264,9 @@ msgstr ""
 msgid "LimeWire PRO"
 msgstr "LimeWire PRO"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:113
-msgid "You can activate LimeWire PRO later from File > License"
-msgstr "Sie können LimeWire PRO auch später aktivieren über Datei > Lizenz."
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
-msgid "No thanks"
-msgstr "Nein Danke"
+msgid "I didn't purchase LimeWire PRO"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"
