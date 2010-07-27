@@ -79,16 +79,10 @@ public class AutoUpdateExecutableInvoker {
                 }
                 SystemUtils.openFile(args[0], sb.toString());
             }else{
-                Process p = Runtime.getRuntime().exec(newargs);
-                int exitCode = p.waitFor();
-                if(exitCode > 0){
-                    displayErrorMessage(interpretBitRockExitCode(exitCode));
-                }
+                 Runtime.getRuntime().exec(newargs);
             }
         }catch(IOException ex){
             displayErrorMessage(I18n.tr("There was a problem downloading the new version. Restart LimeWire to try again."));
-        }catch(InterruptedException interupt){
-            
         }
     }
     
@@ -110,7 +104,7 @@ public class AutoUpdateExecutableInvoker {
     }
     
     
-    //@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private static String interpretBitRockExitCode(int exitCode){
         String message;
         switch(exitCode){
