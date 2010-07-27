@@ -60,6 +60,7 @@ public class AutoUpdatePanel extends JPanel {
     private int count = 0;
     // max limit is 5 minutes
     private final int max = 5 * 60;
+    private final int min = 60;
     private int upperLimit = 0;
     private Timer timer = null;
     
@@ -72,7 +73,7 @@ public class AutoUpdatePanel extends JPanel {
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
         
-        upperLimit = (int)(Math.random() * max);
+        upperLimit = (int)(Math.random() * (max - min)) + min;
         timer = new Timer(1000, new TimerListener());
         timer.setRepeats(true);
         timer.start();
