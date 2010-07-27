@@ -15,7 +15,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
@@ -93,9 +92,15 @@ public class AutoUpdateExecutableInvoker {
     }
     
     private static File createEmptyUpdateINIFile() throws IOException{
-        File update = FileUtils.createTempFile("LimeWireUpdate", "ini");
-        update.deleteOnExit();
         
+        File update = new File(System.getProperty("java.io.tmpdir"), "LimeWireUpdate.ini");
+        
+        if(update.exists()){
+            update.delete();
+        }
+        
+        update.createNewFile();
+        update.setWritable(true);
         FileWriter fstream = new FileWriter(update);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("[Update]");
