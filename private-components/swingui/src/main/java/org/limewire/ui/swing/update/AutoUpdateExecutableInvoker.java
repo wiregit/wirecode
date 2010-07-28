@@ -4,17 +4,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.limewire.core.api.updates.AutoUpdateHelper;
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
@@ -26,16 +29,30 @@ public class AutoUpdateExecutableInvoker {
     
     private static Icon LIME_ICON = null;
     
-
-    public static void main(final String[] args) throws InvocationTargetException, InterruptedException{
+    /**
+     * Initiates auto-update process.  If the <code>promptAndExit</code> indicator
+     * is true, a user prompt is displayed, the process is started, and the 
+     * application shuts down.  If the indicator is false, the process is started
+     * and the method returns.
+     */
+    public static void initiateUpdateProcess(final boolean promptAndExit) {
+        String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
+        final String[] args = updateCommand.split(AutoUpdateHelper.SEPARATOR);
         
         MAIN_FRAME = new JFrame();
        MAIN_FRAME.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
         LIME_ICON = new ImageIcon(limeLogo);
+        
+        if (!promptAndExit) {
+            if (args.length > 0) {
+                invokeDownloadProcess(args);
+            }
+            return;
+        }
                
-        SwingUtilities.invokeAndWait(new Runnable() {           
+        SwingUtils.invokeNowOrWait(new Runnable() {           
             @Override
             public void run(){
                 if(args.length > 0){
@@ -47,8 +64,6 @@ public class AutoUpdateExecutableInvoker {
                     if(beginDownload == JOptionPane.YES_OPTION){
                         invokeDownloadProcess(args);
                     }
-                }else{
-                    displayErrorMessage(I18n.tr("Help Text"));
                 }
                 System.exit(0);
             }
@@ -93,50 +108,17 @@ public class AutoUpdateExecutableInvoker {
     
     private static File createEmptyUpdateINIFile() throws IOException{
         
-        File update = new File(System.getProperty("java.io.tmpdir"), "LimeWireUpdate.ini");
+        File update = new File(CommonUtils.getUserSettingsDir(), "LimeWireUpdate.ini");
         
-        if(update.exists()){
-            update.delete();
+        if( !update.exists() ){
+            update.createNewFile();
+            update.setWritable(true, false);
+            FileWriter fstream = new FileWriter(update);
+            BufferedWriter out = new BufferedWriter(fstream);
+            out.write("[Update]");
         }
-        
-        update.createNewFile();
-        update.setWritable(true);
-        FileWriter fstream = new FileWriter(update);
-        BufferedWriter out = new BufferedWriter(fstream);
-        out.write("[Update]");
         
         return update;
     }
-    
-    
-    @SuppressWarnings("unused")
-    private static String interpretBitRockExitCode(int exitCode){
-        String message;
-        switch(exitCode){
-            case 0:
-                message = "Successfully downloaded and executed the installer.";
-                break;
-            case 1:
-                message = "An error occurred downloading the file"; //"No updates available";  // Not an appropriate message in our case.
-                break;
-            case 2:
-                message = "Error connecting to remote server or invalid XML file";
-                break;
-            case 3:
-                message = "An error occurred downloading the file";
-                break;
-            case 4:
-                message = "An error occurred executing the downloaded update or its <postUpdateDownloadActionList>";
-                break;
-            case 5:
-                message = "Update check disabled through check_for_updates setting";
-                break;               
-            default:
-                message = "undefined.";
-                break;
-        }
-        return message;
-    }
- 
 
 }

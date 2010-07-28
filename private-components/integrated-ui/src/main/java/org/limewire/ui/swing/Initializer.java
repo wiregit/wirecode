@@ -44,6 +44,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.settings.StartupSettings;
+import org.limewire.ui.swing.update.AutoUpdateExecutableInvoker;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
@@ -320,8 +321,7 @@ final class Initializer {
                             // TODO: send report of this error to limewire.
                         }
                         */
-                        updateHelper.initiateUpdateProcess();
-                        System.exit(0);
+                        AutoUpdateExecutableInvoker.initiateUpdateProcess(true);
                     }
                 });
             } else {

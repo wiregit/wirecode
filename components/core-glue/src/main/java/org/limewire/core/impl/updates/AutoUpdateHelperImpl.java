@@ -1,7 +1,6 @@
 package org.limewire.core.impl.updates;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.limewire.core.api.updates.AutoUpdateHelper;
 import org.limewire.core.settings.ApplicationSettings;
@@ -74,36 +73,6 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
     }
     
     /**
-     * 
-     */
-    @Override
-    public void initiateUpdateProcess(){
-        
-        String javaExecutable =  getAbsoultePathToJavaExecutable();
-        String javaClasspath = System.getProperty("java.class.path");
-        String javaLibraryPath = System.getProperty("java.library.path");
-        String main = "org.limewire.ui.swing.update.AutoUpdateExecutableInvoker";
-        
-        String updateCommand = UpdateSettings.AUTO_UPDATE_COMMAND.get();
-        String[] args = updateCommand.split(AutoUpdateHelper.SEPARATOR);
-        
-        String[] cmdArray = new String[5 + args.length];
-        
-        cmdArray[0] = javaExecutable;
-        cmdArray[1] = "-cp";
-        cmdArray[2] = javaClasspath;
-        cmdArray[3] = "-Djava.library.path="+javaLibraryPath;    
-        cmdArray[4] = main;
-        System.arraycopy(args, 0, cmdArray, 5, args.length);       
-        
-        try{
-            Runtime.getRuntime().exec(cmdArray);        
-        }catch(IOException io){
-            LOG.error("Error starting the download process", io);
-        }
-    }
-    
-    /**
      * returns the path of bit-rock auto-update executable
      */
     private String getAutoupdateExecutablePath(){
@@ -120,17 +89,6 @@ public final class AutoUpdateHelperImpl implements AutoUpdateHelper{
             executablePath = absPath + File.separator + "autoupdate-windows.exe";
 
         return   executablePath;
-    }
-    
-    private String getAbsoultePathToJavaExecutable(){
-        StringBuilder sb = new StringBuilder(System.getProperty("java.home"));
-        sb.append(File.separator).append("bin").append(File.separator).append("java");
-        
-        if(OSUtils.isWindows()){
-            sb.append(".exe");
-        }
-        
-        return sb.toString();
     }
 
 }

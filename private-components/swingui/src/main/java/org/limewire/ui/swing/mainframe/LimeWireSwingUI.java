@@ -355,27 +355,35 @@ public class LimeWireSwingUI extends JPanel {
                     dialog.pack();
                     dialog.setVisible(true);
                 }else if(event.getType() == UpdateEvent.Type.AUTO_UPDATE){
-               
-                    final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData(), autoUpdateHelper);
-                    JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
-                    dialog.addWindowFocusListener(new WindowFocusListener() {
-                        
-                        @Override
-                        public void windowLostFocus(WindowEvent e) {
- 
-                        }
-                        
-                        @Override
-                        public void windowGainedFocus(WindowEvent e) {
-                            updatePanel.getDefaultButton().requestFocusInWindow();                           
-                        }
-                    });
-                    dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
-                    //dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
-                    dialog.setModal(true);
-                    dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                    dialog.pack();
-                    dialog.setVisible(true);
+                    
+                    if(GuiUtils.getMainFrame() == null){
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                handleEvent(event);
+                            }
+                        });
+                    }else{                
+                        final AutoUpdatePanel updatePanel = new AutoUpdatePanel(event.getData(), autoUpdateHelper);
+                        JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
+                        dialog.addWindowFocusListener(new WindowFocusListener() {
+                            
+                            @Override
+                            public void windowLostFocus(WindowEvent e) {
+     
+                            }
+                            
+                            @Override
+                            public void windowGainedFocus(WindowEvent e) {
+                                updatePanel.getDefaultButton().requestFocusInWindow();                           
+                            }
+                        });
+                        dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+                        //dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
+                        dialog.setModal(true);
+                        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                        dialog.pack();
+                        dialog.setVisible(true);
+                    }
                 }
             }
         });

@@ -51,8 +51,6 @@ public class AutoUpdatePanel extends JPanel {
     @Resource
     private Font contentFont; 
     
-    private final AutoUpdateHelper updateHelper;
-    
     private final UpdateInformation updateInformation;
     
     private JButton leftButton;
@@ -68,7 +66,7 @@ public class AutoUpdatePanel extends JPanel {
     public AutoUpdatePanel(UpdateInformation updateInformation, AutoUpdateHelper autoUpdateHelper) {
         GuiUtils.assignResources(this);
         this.updateInformation = updateInformation;
-        this.updateHelper = autoUpdateHelper;
+        
         setBackground(backgroundColor);
         
         setLayout(new MigLayout("fill, insets 10 10 10 10, gap 6")); 
@@ -201,8 +199,7 @@ public class AutoUpdatePanel extends JPanel {
                 // TODO: report this error to limewire.
             }
             */
-           // AutoUpdateHelper updateHelper = autoUpdateHelper.get();
-            updateHelper.initiateUpdateProcess();
+            AutoUpdateExecutableInvoker.initiateUpdateProcess(false);
             ActionMap actionMap = Application.getInstance().getContext().getActionMap();
             Action exitApplication = actionMap.get("exitApplication");
             exitApplication.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown"));
