@@ -207,6 +207,7 @@ public class AutoUpdatePanel extends JPanel {
     }
     
     private class TimerListener implements ActionListener{
+        @Override
         public void actionPerformed(ActionEvent e)
         {
             count++;
