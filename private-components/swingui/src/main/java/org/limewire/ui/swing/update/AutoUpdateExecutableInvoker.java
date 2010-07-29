@@ -18,7 +18,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
-import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 
 public class AutoUpdateExecutableInvoker {
@@ -40,7 +39,7 @@ public class AutoUpdateExecutableInvoker {
         final String[] args = updateCommand.split(AutoUpdateHelper.SEPARATOR);
         
         MAIN_FRAME = new JFrame();
-       MAIN_FRAME.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        MAIN_FRAME.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         URL limeLogo = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/icons/lime_32.png");
         LIME_ICON = new ImageIcon(limeLogo);
@@ -87,9 +86,11 @@ public class AutoUpdateExecutableInvoker {
             System.arraycopy(silentDownloadArgs, 0, newargs, args.length, silentDownloadArgs.length);
             
             if(OSUtils.isWindowsVista() || OSUtils.isWindows7()){
-                newargs[0] = "\"" + newargs[0] + "\"";
-                String updateCommand = StringUtils.explode(newargs, " ");
-                SystemUtils.openFile("CMD", " /C START \"LimeWire Update\" " + updateCommand);
+                StringBuilder sb = new StringBuilder();
+                for(int i=1;i<newargs.length;i++){
+                    sb.append(newargs[i]).append(" ");
+                }
+                SystemUtils.openFile(args[0], sb.toString());
             }else{
                  Runtime.getRuntime().exec(newargs);
             }
