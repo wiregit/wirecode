@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-26 11:30-0400\n"
-"PO-Revision-Date: 2010-07-16 12:21+0000\n"
-"Last-Translator: nanker <Unknown>\n"
+"POT-Creation-Date: 2010-08-02 11:30-0400\n"
+"PO-Revision-Date: 2010-07-30 18:45+0000\n"
+"Last-Translator: Jarret <jbattisti@limewire.com>\n"
 "Language-Team: DA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-27 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-08-03 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Bookmarks: -1,378,659,884,481,-1,-1,-1,-1,-1\n"
 
@@ -6011,7 +6011,7 @@ msgstr "Jeg er enig"
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
 msgid "Did you purchase LimeWire PRO?"
-msgstr ""
+msgstr "Har du købt LimeWire PRO?"
 
 #. wrap
 #. wrap
@@ -6022,10 +6022,14 @@ msgid ""
 "always do it later by clicking on the \"File\" tab in LimeWire and then "
 "clicking \"Licenses.\""
 msgstr ""
+"Hvis du har, så indtast venligst din licensnøgle – vi leverede denne online "
+"og via e-mail da du tilmeldte dig. Hvis du ikke ønsker at aktivere PRO nu, "
+"kan du altid gøre det senere ved at klikke på fanen ”Filer” i LimeWire og "
+"derefter klikke på ”Licenser.”"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "Your License Key:"
-msgstr ""
+msgstr "Din licensnøgle:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate LimeWire PRO"
@@ -6033,7 +6037,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
 msgid "I don't know my activation key"
-msgstr ""
+msgstr "Jeg kender ikke min aktiveringsnøgle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6186,7 +6190,7 @@ msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "I didn't purchase LimeWire PRO"
-msgstr ""
+msgstr "Jeg har ikke købt LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"

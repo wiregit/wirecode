@@ -5,27 +5,25 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-26 11:30-0400\n"
-"PO-Revision-Date: 2010-07-09 14:32+0000\n"
-"Last-Translator: Gabriel Retik <Machunga@gmail.com>\n"
+"POT-Creation-Date: 2010-08-02 11:30-0400\n"
+"PO-Revision-Date: 2010-07-30 20:36+0000\n"
+"Last-Translator: Jarret <jbattisti@limewire.com>\n"
 "Language-Team: ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-27 03:33+0000\n"
+"X-Launchpad-Export-Date: 2010-08-03 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-# Es posible
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:307
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"LimeWire no pudo configurar un puerto para escuchar las conexiones "
-"entrantes. Es posible que algunas funciones de LimeWire no funcionen como "
-"deberian."
+"LimeWire no logró configurar un puerto escucha para conexiones entrantes. Es "
+"posible que algunas funciones de LimeWire no funcionen correctamente."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionAcceptorGlue.java:55
 msgid "Connection Dispatching"
@@ -90,7 +88,7 @@ msgstr "Video"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:94
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 msgid "Videos"
-msgstr "Vídeos"
+msgstr "Videos"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:137
@@ -169,11 +167,8 @@ msgstr "Problema para conectarse con usuarios"
 #. 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:46
 msgid "No problems."
-msgstr "Sin problemas"
+msgstr "Sin Problemas."
 
-# Su
-# entre a
-# descargue
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
 "<html><b>Your LimeWire may have been corrupted by a virus or "
@@ -181,15 +176,16 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>Su LimeWire puede haber sido dañado por un virus o un "
-"troyano!</b><br><br>Por favor entre a <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> y descargue "
-"la última versión oficial de LimeWire.</html>"
+"<html><b>¡Es posible que su versión de LimeWire haya sido dañada por algún "
+"virus o troyano!</b><br><br>Por favor visite <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> para "
+"descargar la última versión (y oficial) de LimeWire.</html>"
 
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
 msgid "The file could not be scanned for viruses. Preview anyway?"
-msgstr "No se pudo escanear el archivo. ¿Desea abrirlo de todas formas?"
+msgstr ""
+"No se ha podido escanear el archivo. ¿Desea revisarlo de todas maneras?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -238,19 +234,17 @@ msgstr "Descargas antiguas"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:241
 msgid "Download Management"
-msgstr "Configuración de descargas"
+msgstr "Administración de descargas"
 
-# sus descargas
-# Puede reiniciarlas
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:291
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"Lo sentimos, LimeWire no puede leer sus descargas antiguas. Puede "
-"reiniciarlas haciendo click en \"Reintentar\" sobre ellas. Cuando LimeWire "
-"encuentre una fuente para la descarga, ésta continuará desde el punto en que "
+"Lamentablemente LimeWire no ha podido leer sus descargas antiguas. Puede "
+"reiniciarlas haciendo clic en \"Reintentar\" sobre ellas. Cuando LimeWire "
+"encuentre una fuente para el archivo, ésta continuará desde el punto en que "
 "se detuvo."
 
 # sus descargas
@@ -272,7 +266,7 @@ msgstr "Recibiendo peticiones HTTP"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:232
 msgid "Upload Management"
-msgstr "Configuración de cargas"
+msgstr "Administracion de descargas"
 
 # pares
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HostCatcher.java:375
@@ -290,7 +284,7 @@ msgstr "Enrutamiento de mensaje"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NetworkManagerImpl.java:190
 msgid "Network Management"
-msgstr "Gestión de red"
+msgstr "Administración de red"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/NodeAssignerImpl.java:160
 msgid "Ultrapeer/DHT Management"
@@ -298,7 +292,7 @@ msgstr "Administración de Ultra-par/DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/Pinger.java:57
 msgid "Peer Listener"
-msgstr "Oyente de pares"
+msgstr "Escucha de pares"
 
 # promoción
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/PromotionServicesImpl.java:35
@@ -311,12 +305,11 @@ msgstr "Buscador dirigido"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/auth/ContentManager.java:91
 msgid "Content Management"
-msgstr "Configuración de contenidos"
+msgstr "Administración de contenidos"
 
-# socket local
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
-msgstr "Oyente de socket local"
+msgstr "Escucha de socket local"
 
 # magnético
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
@@ -350,10 +343,9 @@ msgstr "Mojito DHT"
 msgid "LimeWire Store Integration"
 msgstr "Integración con la Tienda LimeWire"
 
-# descarga de actualización
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
-msgstr "Tarea de descarga de actualización"
+msgstr "Tarea de actualización de descarga"
 
 #  compartidos
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/library/FileManagerImpl.java:60
@@ -373,10 +365,9 @@ msgstr "Actualizador QRP"
 msgid "RUDP Message Routing"
 msgstr "Enrutamiento de mensajes RUDP"
 
-# configuraciones
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/settings/SettingsSaverService.java:37
 msgid "Settings Saver"
-msgstr "Guardado de configuraciones"
+msgstr "Guardador de configuraciones"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/spam/RatingTable.java:131
 msgid "Spam Management"
@@ -389,7 +380,7 @@ msgstr "Estadísticas de tiempo de actividad"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:74
 msgid "Browse"
-msgstr "Explorar"
+msgstr "Examinar"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1074
 msgid "Update Checks"
@@ -6245,7 +6236,7 @@ msgstr "Estoy de acuerdo"
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
 msgid "Did you purchase LimeWire PRO?"
-msgstr ""
+msgstr "¿Adquirió LimeWire PRO?"
 
 #. wrap
 #. wrap
@@ -6256,18 +6247,22 @@ msgid ""
 "always do it later by clicking on the \"File\" tab in LimeWire and then "
 "clicking \"Licenses.\""
 msgstr ""
+"Si lo hizo, ingrese la clave de licencia que obtuvo en línea y que le fue "
+"enviada por correo electrónico cuando se registró. Si no desea activar PRO "
+"ahora, puede hacerlo en cualquier momento que desee haciendo clic en la "
+"pestaña \"Archivo\" de LimeWire y luego haciendo clic en \"Licencias\"."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "Your License Key:"
-msgstr ""
+msgstr "Su clave de licencia:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate LimeWire PRO"
-msgstr ""
+msgstr "Activar LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
 msgid "I don't know my activation key"
-msgstr ""
+msgstr "No sé cuál es mi clave de activación"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6436,7 +6431,7 @@ msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "I didn't purchase LimeWire PRO"
-msgstr ""
+msgstr "No adquirí LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"

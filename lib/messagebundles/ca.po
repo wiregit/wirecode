@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-26 11:30-0400\n"
-"PO-Revision-Date: 2010-07-06 10:07+0000\n"
-"Last-Translator: ezkor <marcdabad@yahoo.ca>\n"
+"POT-Creation-Date: 2010-08-02 11:30-0400\n"
+"PO-Revision-Date: 2010-07-27 18:22+0000\n"
+"Last-Translator: Ferran Foz <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2010-07-27 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-08-03 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -126,6 +126,10 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
+"<html> <b> El seu LimeWire pot haver estat corromput per un virus o un "
+"troià! </ b> <br> <br> Si us plau, visiti <a "
+"href=\"http://www.limewire.com/corrupted\"> www. limewire.com </ a> i "
+"descarregui la darrera versió oficial de LimeWire. </ html>"
 
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
@@ -139,7 +143,7 @@ msgstr "Servei XMPP"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr ""
+msgstr "Servei REST"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -216,6 +220,10 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
+"Ho sentim, el LimeWire no ha pogut llegir les seves descàrregues antigues. "
+"Pot reactivar-les prement \"Tornar a Provar\" en les descàrregues. Quan el "
+"LimeWire trobi una font per a l'arxiu, la descàrrega continuarà on s'havia "
+"quedat."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:293
 msgid ""
@@ -274,7 +282,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
-msgstr ""
+msgstr "Processador Magnètic"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:127
 msgid ""
@@ -282,6 +290,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
+"El LimeWire no ha pogut engegar el Digital Audio Access Protocol Service "
+"(per compartir arxius a l'iTunes). Aquesta característica serà desactivada. "
+"Pot tornar-la a activar a opcions, al subapartat Avançat->Arxius->iTunes."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:181
 msgid "What's New"
@@ -685,11 +696,11 @@ msgstr "Gestió d'estadístiques"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:375
 msgid "Oops!"
-msgstr ""
+msgstr "Ups!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:375
 msgid "A problem occurred..."
-msgstr ""
+msgstr "Hi ha hagut un problema..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
 msgid ""
@@ -698,6 +709,10 @@ msgid ""
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
+"Ups! Has fet quelcom que no encara no teniem escrit. Disculpa. LimeWire "
+"continuará funcionant, peró si et plau fes click a 'Enviar Bug' per a que no "
+"ens oblidem d'escriure-ho. Si vols, pots fer click a 'Visualitzar Bug' per a "
+"revisar la informació que s'enviará. Gràcies!."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
@@ -705,12 +720,17 @@ msgid ""
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
+"Ups! Has fet quelcom que no encara no teniem escrit. Disculpa. LimeWire "
+"continuará funcionant, peró si et plau fes click a 'Enviar Bug' per a que no "
+"ens oblidem d'escriure-ho."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
 "Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
+"Ho sento. LimeWire ha tingut un problema. El programa continuará funcionant. "
+"Si vols ens pots enviar l'error per a que el poguem arreglar."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LimeWire Client\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-07-26 11:30-0400\n"
-"PO-Revision-Date: 2010-07-15 21:23+0000\n"
-"Last-Translator: Yiğit Ateş <yigitates52@gmail.com>\n"
+"POT-Creation-Date: 2010-08-02 11:30-0400\n"
+"PO-Revision-Date: 2010-07-30 19:08+0000\n"
+"Last-Translator: Jarret <jbattisti@limewire.com>\n"
 "Language-Team: TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2010-07-27 03:32+0000\n"
+"X-Launchpad-Export-Date: 2010-08-03 03:33+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -5113,6 +5113,9 @@ msgstr "{0} için torrent sonuçları - {2} tanenin {1} tanesi gösteriliyor"
 #, java-format
 msgid "{0} is \"{1}\""
 msgstr ""
+"{0} içeriği \"{1}\"\r\n"
+"\r\n"
+"{0}: özelliğinin, {1}: değeri"
 
 #. {0}: property key, {1}: property value, {2}: property key, {3}: property value
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:69
@@ -6010,7 +6013,7 @@ msgstr "Kabul Ediyorum"
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
 msgid "Did you purchase LimeWire PRO?"
-msgstr ""
+msgstr "LimeWire PRO’yu satın aldınız mı?"
 
 #. wrap
 #. wrap
@@ -6021,18 +6024,22 @@ msgid ""
 "always do it later by clicking on the \"File\" tab in LimeWire and then "
 "clicking \"Licenses.\""
 msgstr ""
+"Satın aldıysanız, lütfen lisans anahtarını girin — oturum açtığınızda "
+"çevrimiçi olarak ve e-posta aracılığıyla sağladık. PRO’yu şimdi "
+"etkinleştirmek istemiyorsanız, daha sonra LimeWire’de “Dosya” sekmesini "
+"ardından da “Lisans” öğesini tıklatarak her zaman yapabilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "Your License Key:"
-msgstr ""
+msgstr "Lisans anahtarınız:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate LimeWire PRO"
-msgstr ""
+msgstr "LimeWire PRO’yu etkinleştirin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
 msgid "I don't know my activation key"
-msgstr ""
+msgstr "Etkinleştirme anahtarımı bilmiyorum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6195,7 +6202,7 @@ msgstr "LimeWire PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "I didn't purchase LimeWire PRO"
-msgstr ""
+msgstr "LimeWire PRO’yu satın almadım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"
